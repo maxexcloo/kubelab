@@ -47,18 +47,28 @@ spec:
           resources:
             requests:
               cpu: 100m
+              ephemeral-storage: 64Mi
               memory: 64Mi
             limits:
+              ephemeral-storage: 1Gi
               memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault
+          volumeMounts:
+            - name: temporary
+              mountPath: /tmp
       securityContext:
         runAsGroup: 101
         runAsUser: 101
       terminationGracePeriodSeconds: 30
+      volumes:
+        - name: temporary
+          emptyDir:
+            sizeLimit: 1Gi
