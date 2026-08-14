@@ -8,7 +8,7 @@ homelab to Kubernetes. It replaces the disposable local-cluster plan.
 The first implementation target is a single-node Talos cluster in a TrueNAS
 virtual machine. That trial must prove installation, GitOps, networking,
 storage, secrets, recovery, and one disposable workload before the existing
-Sydney OCI host (`oci`) is reset. No valued workload is removed until its
+Sydney OCI host (`hsp`) is reset. No valued workload is removed until its
 replacement passes the applicable migration gate.
 
 Git history is the implementation log. Changes use small, imperative commits
@@ -404,8 +404,9 @@ has a demonstrated restore procedure.
 
 1. Add a Talos OCI custom image for `arm64` and validate it in a non-destructive
    OpenTofu plan.
-2. Replace the empty `au-oci` Ubuntu instance only after the home success gate and a
-   final confirmation that no valued state remains.
+2. Replace the empty HSP Ubuntu instance only after the home success gate and a
+   final confirmation that no valued state remains; the Kubernetes cluster on
+   that host is named `au-oci`.
 3. Provision the OCI network, NSG, boot volume, and Talos instance from the `au-oci`
    state. Keep resource identities stable with keyed `for_each` values.
 4. Bootstrap Talos, Flux, Tailscale, Cloudflare Tunnel, read-only 1Password,
