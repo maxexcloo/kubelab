@@ -16,7 +16,7 @@ and bootstrap resources documented in `plan.md`.
 - Keep cluster differences in overlays; do not copy an entire application.
 - Pin every tool, chart, image, provider, and remote manifest to an exact stable
   version. Renovate proposes upgrades for manual review.
-- Keep credentials, Talos secrets, kubeconfigs, OpenTofu plans, and generated
+- Keep credentials, Talos secrets, kubeconfigs, OpenTofu plans, and rendered
   Secret values out of Git.
 - Use stable semantic keys for OpenTofu `for_each`; never use list indexes for
   resource identity.
@@ -26,14 +26,15 @@ and bootstrap resources documented in `plan.md`.
 
 ## File Organisation
 
-- `catalogue/`: application metadata and schema.
 - `clusters/`: Flux entry points for each cluster.
 - `apps/`: workload bases and cluster overlays.
 - `platform/`: cluster controllers and shared configuration.
 - `talos/`: non-secret machine configuration patches and operator guidance.
 - `tofu/`: independently initialised substrate stacks.
-- `generated/`: deterministic artefacts derived from the catalogue.
-- `scripts/`: small validation and generation programs.
+
+Use standard Kubernetes configuration directly. Do not add a custom application
+schema, generator, or operator when supported labels, annotations, Kustomize,
+Helm values, or a direct resource can express the same configuration.
 
 Keep root Markdown limited to `AGENTS.md`, `README.md`, and `plan.md`. Put later
 operational documentation under `docs/`.
@@ -42,7 +43,8 @@ operational documentation under `docs/`.
 
 - Run `mise run check` before handoff.
 - Run `mise run prek` after changing hooks or workflows.
-- Run `mise run plan` only immediately before a requested infrastructure review.
+- Run `tofu plan` in one explicit stack only immediately before a requested
+  infrastructure review.
 - Apply exactly a saved and reviewed OpenTofu plan; never apply an unreviewed
   refresh.
 

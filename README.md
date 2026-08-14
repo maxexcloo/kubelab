@@ -4,9 +4,9 @@ Kubelab is the GitOps source of truth for a two-cluster Talos Kubernetes
 homelab. It is both a real migration and a practical Kubernetes learning
 environment.
 
-The first cluster is `au-home`, a single Talos VM on TrueNAS. Once it proves
+The first cluster is `au`, a single Talos VM on TrueNAS. Once it proves
 rebuilds, Flux, networking, HTTP, secrets, storage, and recovery, the empty OCI
-Sydney host becomes the independent `au-hsp` cluster. Hotdog remains a small
+Sydney host becomes the independent `au-oci` cluster. Hotdog remains a small
 ZFS backup appliance and Bazzite remains an optional Podman/GPU worker.
 
 Read [plan.md](plan.md) for architecture, ownership, migration gates, and
@@ -26,8 +26,8 @@ mise run check
 - `mise run check`: fast formatting and configuration checks.
 - `mise run prek`: the complete local equivalent of CI.
 - `mise run fmt`: apply project formatting.
-- `mise run plan`: create reviewed, non-destructive OpenTofu plans for
-  initialised stacks; it never applies them.
+- `tofu plan`: run directly in one explicit stack when preparing an
+  infrastructure review; never apply an unreviewed plan.
 
 ## Learning sequence
 
