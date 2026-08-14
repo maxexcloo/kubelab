@@ -13,6 +13,10 @@ Read [plan.md](plan.md) for architecture, ownership, migration gates, and
 recovery. Nothing in CI deploys a cluster: validation runs in GitHub Actions,
 while Flux pulls approved state from Git.
 
+The guided implementation starts in [docs/bootstrap.md](docs/bootstrap.md).
+It explains the Talos, Cilium, and Flux bootstrap boundary and the checks to
+perform before adding another controller.
+
 ## First setup
 
 ```shell
