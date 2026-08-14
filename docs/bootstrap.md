@@ -61,6 +61,9 @@ command for that Git provider and set its path to the relevant cluster:
 
 Commit the generated `flux-system` manifests. Flux will then adopt Cilium and
 reconcile the remaining platform and workload resources from the cluster path.
+The committed Flux dependencies install Gateway API CRDs first, wait for the
+platform controllers including Traefik second, and apply applications last.
+This prevents custom resources from racing the controllers that define them.
 
 ## 4. Observe reconciliation
 
