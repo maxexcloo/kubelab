@@ -1,0 +1,10 @@
+.DS_Store
+.mise.local.toml
+.terraform/
+*.tfplan
+*.tfstate
+*.tfstate.*
+__pycache__/
+talosconfig
+kubeconfig
+secrets.yaml
