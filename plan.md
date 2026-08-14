@@ -8,7 +8,7 @@ homelab to Kubernetes. It replaces the disposable local-cluster plan.
 The first implementation target is a single-node Talos cluster in a TrueNAS
 virtual machine. That trial must prove installation, GitOps, networking,
 storage, secrets, recovery, and one disposable workload before the existing
-Sydney OCI host (`hsp`) is reset. No valued workload is removed until its
+Sydney OCI host (`oci`) is reset. No valued workload is removed until its
 replacement passes the applicable migration gate.
 
 Git history is the implementation log. Changes use small, imperative commits
@@ -51,8 +51,8 @@ contains no implementation files.
 
 | Name | Location | Shape | Role | Storage |
 | --- | --- | --- | --- | --- |
-| `au-home` | TrueNAS VM at home | 12 vCPU, 32 GB RAM, about 160 GB boot disk | Single-node Talos control plane and primary workloads | TrueNAS NFS/iSCSI plus local scratch |
-| `au-hsp` | OCI Sydney | Ampere A1, 2 OCPU, 12 GB RAM, 160 GB boot disk | Single-node Talos control plane and independent secondary workloads | Local-path, replaceable data only |
+| `au` | TrueNAS VM at home | 12 vCPU, 32 GB RAM, about 160 GB boot disk | Single-node Talos control plane and primary workloads | TrueNAS NFS/iSCSI plus local scratch |
+| `au-oci` | OCI Sydney | Ampere A1, 2 OCPU, 12 GB RAM, 160 GB boot disk | Single-node Talos control plane and independent secondary workloads | Local-path, replaceable data only |
 | `hotdog` | United States | Existing Linux host, 2 GB RAM | ZFS replication receiver and host-monitored appliance | Existing ZFS |
 | `bazzite` | Home | Existing Bazzite workstation with AMD RX 6000 GPU | Opportunistic rootless Podman worker | Existing local storage |
 
@@ -70,10 +70,10 @@ must not change the Bazzite kernel or host GPU driver.
 
 | Network | CIDR |
 | --- | --- |
-| `au-home` Pods | `10.100.0.0/22` |
-| `au-home` Services | `10.100.4.0/22` |
-| `au-hsp` Pods | `10.100.8.0/22` |
-| `au-hsp` Services | `10.100.12.0/22` |
+| `au` Pods | `10.100.0.0/22` |
+| `au` Services | `10.100.4.0/22` |
+| `au-oci` Pods | `10.100.8.0/22` |
+| `au-oci` Services | `10.100.12.0/22` |
 
 Before bootstrap, verify that `10.100.0.0/20` does not overlap the LAN, OCI,
 Tailscale routes, Docker/Podman networks, TrueNAS networks, or VPN client
@@ -105,11 +105,10 @@ Install Gateway API CRDs independently because the Traefik chart does not own
 their lifecycle.
 
 Private services are the default. Public exposure requires an explicit
-application catalogue field, a Cloudflare Tunnel route, TLS, monitoring, and
-an owner. Cloudflare Access, WAF, and rate limiting are attached per
-application where appropriate.
+HTTPRoute and Cloudflare Tunnel route, TLS, monitoring, and an owner. Cloudflare
+Access, WAF, and rate limiting are attached per application where appropriate.
 
-Pocket ID remains the OIDC provider and ultimately runs in `au-home`. One
+Pocket ID remains the OIDC provider and ultimately runs in `au`. One
 Headlamp instance runs in each cluster and authenticates through the
 Kubernetes API server's Pocket ID OIDC configuration. Do not give Headlamp a
 broad static service-account token. Store a tested cluster-admin break-glass
@@ -138,7 +137,7 @@ extensions, snapshot behaviour, retained-volume recovery, and upgrade health.
 The experimental API-only drivers are not production defaults. Record that
 decision before migrating a database.
 
-HSP uses local-path storage only for replaceable state, caches, and replicas of
+`au-oci` uses local-path storage only for replaceable state, caches, and replicas of
 data whose authority is elsewhere. It must not become the only copy of valued
 data.
 
@@ -148,7 +147,7 @@ data.
 
 | Concern | Authoritative owner | Notes |
 | --- | --- | --- |
-| OCI VCN, subnet, NSG, Talos image, and HSP VM | OpenTofu | Separate state from app-facing resources; reviewed plan before apply |
+| OCI VCN, subnet, NSG, Talos image, and `au-oci` VM | OpenTofu | Separate state from app-facing resources; reviewed plan before apply |
 | TrueNAS trial VM | Manual, then OpenTofu if import is drift-free | Protect imported VM from destruction |
 | GCS state foundations | OpenTofu bootstrap state | Versioning, retention, least-privilege credentials |
 | Tailscale ACLs, grants, tags, OAuth clients, bootstrap keys | OpenTofu | Cluster/node identity is substrate access |
@@ -157,7 +156,7 @@ data.
 | Talos machine configuration and client configuration | This repository | Generated from committed non-secret patches; secrets stay outside Git |
 | Kubernetes platform and workloads | Flux | No second Kubernetes deployer |
 | Per-app DNS, tunnel routes, Access, WAF, and rate limits | Crossplane HTTP resources | Home-hosted control plane; orphan on delete by default |
-| Per-app Control D DNS rules | Crossplane HTTP resources | Generated from application catalogue |
+| Per-app Control D DNS rules | Crossplane HTTP resources | Direct managed resources |
 | Pocket ID clients and groups | Crossplane HTTP resources | Credentials pushed to 1Password where supported |
 | B2 buckets and keys | Crossplane HTTP resources | Never expose key material in Git or logs |
 | Resend application keys | Crossplane HTTP resources | Application scoped |
@@ -167,7 +166,7 @@ data.
 OpenTofu owns substrate infrastructure. Crossplane owns only app-facing
 external APIs whose failure cannot prevent rebuilding the Kubernetes substrate.
 Do not add provider-opentofu during the initial migration. Crossplane starts on
-`au-home` only, with raw provider-http resources so API behaviour remains
+`au` only, with raw provider-http resources so API behaviour remains
 visible while learning. Introduce compositions only after at least three
 resources share a stable schema and lifecycle.
 
@@ -182,7 +181,7 @@ status codes.
 
 | Repository | End state |
 | --- | --- |
-| `kubelab` | Talos configuration, Flux sources, platform controllers, application catalogue, workloads, validation, and migration documentation |
+| `kubelab` | Talos configuration, Flux sources, platform controllers, workloads, validation, and migration documentation |
 | `homelab` | Reduced OpenTofu substrate, access foundations, appliances, and the Fly Gatus exception |
 | `homelab-truenas` | Retired after all application ownership leaves TrueNAS Apps; retains only unavoidable NAS-local configuration if required |
 | `homelab-docker` | Retired after Docker services migrate or receive an explicit appliance exception |
@@ -197,9 +196,9 @@ switch consumers, and only then remove the old owner.
 
 Create a dedicated Kubernetes vault in 1Password as a manual root of trust:
 
-- `au-home` receives a read/write service account because it must consume and
+- `au` receives a read/write service account because it must consume and
   create selected app credentials.
-- `au-hsp` receives a read-only service account.
+- `au-oci` receives a read-only service account.
 - External Secrets Operator uses the 1Password SDK provider.
 - Normal secret creation uses `PushSecret` with `IfNotExists` and
   `deletionPolicy: None`.
@@ -211,40 +210,23 @@ Secret rotation must allow an overlap period where the provider permits it.
 Changes that can replace or reveal credentials require a saved, reviewed
 OpenTofu plan or an equivalent Crossplane dry-run/reconciliation review.
 
-### Application catalogue
+### Application metadata
 
-Each workload has one small catalogue document. Labels and annotations on the
-resulting Kubernetes objects are generated from it rather than treated as the
-database. Required fields are:
+Do not create a custom application catalogue, schema, generator, or operator.
+Use ordinary Kubernetes objects as the source of truth. Apply the recommended
+`app.kubernetes.io/*` labels to every workload and use each controller's
+supported annotations where integration is required.
 
-```yaml
-name: example
-cluster: au-home
-namespace: example
-owner: max
-visibility: private
-url: https://example.excloo.com
-category: media
-icon: example
-monitor:
-  enabled: true
-  path: /health
-  expectedStatus: 200
-homepage:
-  enabled: true
-  description: Example service
-dependencies:
-  - pocket-id
-storage:
-  class: truenas-nfs
-  backupTier: critical
-```
+Homepage discovers local Services through its native Kubernetes integration
+and `gethomepage.dev/*` annotations. Cross-cluster services and appliances are
+plain, directly maintained Homepage configuration. Fly Gatus uses a plain,
+directly maintained configuration in Git because it deliberately sits outside
+both clusters. This small amount of duplication is preferable to maintaining a
+custom metadata and generation layer while learning Kubernetes.
 
-A repository-local generator produces deterministic Homepage entries, the
-Git-pulled Gatus configuration, and cross-cluster/appliance inventory from this
-catalogue. Generation is validated in Prek and CI; generated output must have
-no diff. Homepage also uses Kubernetes discovery for local live status, while
-catalogue output supplies HSP and non-Kubernetes appliances.
+Crossplane resources are also direct provider-http managed resources. Do not
+introduce custom XRDs or Compositions until repeated real resources demonstrate
+a stable need for them.
 
 ## Supported Initial Version Set
 
@@ -253,7 +235,7 @@ updates. The initial baseline is:
 
 | Component | Initial version | Policy |
 | --- | --- | --- |
-| Talos Linux | `v1.13.8` | Latest stable; patch updates after HSP canary |
+| Talos Linux | `v1.13.8` | Latest stable; patch updates after `au-oci` canary |
 | Kubernetes | `v1.36.3` | Latest stable; upgrade separately from Talos |
 | Flux | `v2.9.4` | Pin bootstrap manifests |
 | Gateway API CRDs | `v1.5.1` | Standard channel only |
@@ -292,14 +274,14 @@ Keep the tree shallow and make cluster differences explicit:
 ├── talos/
 │   ├── patches/
 │   │   ├── common.yaml
-│   │   ├── au-home.yaml
-│   │   └── au-hsp.yaml
+│   │   ├── au-oci.yaml
+│   │   └── au.yaml
 │   └── README.md
 ├── clusters/
-│   ├── au-home/
+│   ├── au-oci/
 │   │   ├── flux-system/
 │   │   └── kustomization.yaml
-│   └── au-hsp/
+│   └── au/
 │       ├── flux-system/
 │       └── kustomization.yaml
 ├── platform/
@@ -314,14 +296,11 @@ Keep the tree shallow and make cluster differences explicit:
 ├── apps/
 │   ├── base/
 │   └── overlays/
-│       ├── au-home/
-│       └── au-hsp/
-├── catalogue/
-├── generated/
-├── scripts/
+│       ├── au-oci/
+│       └── au/
 └── tofu/
     ├── bootstrap/
-    ├── hsp/
+    ├── au-oci/
     └── truenas/
 ```
 
@@ -332,12 +311,12 @@ behaviour. All YAML files use `.yaml`.
 
 Local tools are managed by Mise and include version-pinned `kubectl`,
 `talosctl`, `flux`, `helm`, `kustomize`, `cilium`, `tofu`, `tflint`, `trivy`,
-`kubeconform`, `yamllint`, and `pre-commit`/Prek-compatible hooks. Prefer a
-small script with a clear interface to a task runner hierarchy.
+`kubeconform`, `yamllint`, and `pre-commit`/Prek-compatible hooks. Prefer direct
+tool commands and standard configuration over repository-specific scripts.
 
-Prek runs formatting, YAML validation, Kustomize renders, schema validation,
-secret scanning, catalogue generation checks, shell linting, and OpenTofu
-format/validate. GitHub Actions runs the same validation on pull requests. It
+Prek runs formatting, YAML validation, Kustomize renders, Kubernetes schema
+validation, secret scanning, and OpenTofu format/validate. GitHub Actions runs
+the same validation on pull requests. It
 does not hold kubeconfigs or run Flux/Talos/OpenTofu apply. Rare custom image
 builds may use Actions, but normal deployment always occurs by Flux pulling
 Git.
@@ -349,13 +328,12 @@ Git.
 1. Commit this plan alone.
 2. Add the lean repository structure, Australian English conventions,
    AGPL-3.0 licence, README, Mise, Prek, Renovate, and validation workflow.
-3. Add catalogue schema/generation tests before any application manifests.
-4. Inventory all current services and external resources from the existing
+3. Inventory all current services and external resources from the existing
    repositories. Give each one an owner, target, dependencies, storage class,
    backup tier, visibility, and rollback path.
-5. Verify CIDRs, DNS zones, TrueNAS version, OCI quota, ARM64 image support,
+4. Verify CIDRs, DNS zones, TrueNAS version, OCI quota, ARM64 image support,
    container architecture support, and provider API access.
-6. Split new OpenTofu state by blast radius. Enable GCS object versioning and
+5. Split new OpenTofu state by blast radius. Enable GCS object versioning and
    retention. Never migrate existing state with an unreviewed backend change.
 
 Exit gate: validation is reproducible locally, the inventory has no unknown
@@ -404,7 +382,8 @@ survive a reboot.
 
 ### Phase 3: Prove dynamic automation
 
-1. Add one disposable catalogue application and generate Homepage/Gatus data.
+1. Add Homepage discovery annotations and a direct Gatus endpoint for the
+   disposable OpenSpeedTest workload.
 2. Reconcile one low-risk external HTTP resource through Crossplane, starting
    with a DNS record or Pocket ID test client.
 3. Verify orphan-on-delete by removing its claim without deleting the external
@@ -417,23 +396,23 @@ survive a reboot.
 6. Adopt dynamic storage only if those tests pass. Otherwise keep static NFS
    and document iSCSI as deferred.
 
-Exit gate: catalogue output is deterministic, Crossplane cannot accidentally
-delete the test resource, and the selected storage path has a demonstrated
-restore procedure.
+Exit gate: Homepage discovery and the direct Gatus probe work, Crossplane
+cannot accidentally delete the test resource, and the selected storage path
+has a demonstrated restore procedure.
 
-### Phase 4: Build HSP as the canary cluster
+### Phase 4: Build `au-oci` as the canary cluster
 
 1. Add a Talos OCI custom image for `arm64` and validate it in a non-destructive
    OpenTofu plan.
-2. Replace the empty HSP Ubuntu instance only after the home success gate and a
+2. Replace the empty `au-oci` Ubuntu instance only after the home success gate and a
    final confirmation that no valued state remains.
-3. Provision the OCI network, NSG, boot volume, and Talos instance from the HSP
+3. Provision the OCI network, NSG, boot volume, and Talos instance from the `au-oci`
    state. Keep resource identities stable with keyed `for_each` values.
 4. Bootstrap Talos, Flux, Tailscale, Cloudflare Tunnel, read-only 1Password,
    local-path storage, Headlamp, and the smaller observability footprint.
-5. Use HSP as the first canary for Talos, Kubernetes, and platform upgrades.
+5. Use `au-oci` as the first canary for Talos, Kubernetes, and platform upgrades.
 
-Exit gate: HSP is independently rebuildable and a private/public disposable
+Exit gate: `au-oci` is independently rebuildable and a private/public disposable
 workload is reachable without home connectivity.
 
 ### Phase 5: Migrate workloads in dependency order
@@ -442,7 +421,7 @@ Use one migration pull request and one cutover record per workload group:
 
 1. Stateless utilities: OpenSpeedTest and other low-risk HTTP tools.
 2. Platform consumers: Homepage, Headlamp integrations, Beszel agents, and
-   generated Gatus probes.
+   directly maintained Gatus probes.
 3. Identity-dependent applications after Pocket ID clients are dual-owned and
    tested.
 4. Small stateful applications using application-native export/import or
@@ -505,7 +484,7 @@ does not depend on CI.
 
 ## Workload Accounting
 
-The inventory generated in Phase 0 must include, at minimum, every service in
+The inventory maintained in Phase 0 must include, at minimum, every service in
 the current OpenTofu, Docker, TrueNAS, Fly, and workflow repositories. The
 following categories are explicit sanity checks:
 
@@ -529,7 +508,7 @@ and rollback procedure must all be present.
 ## OpenTofu Safety Rules
 
 - Use remote GCS state with versioning, retention, encryption, and separate
-  prefixes for bootstrap, HSP, TrueNAS, and unrelated existing infrastructure.
+  prefixes for bootstrap, `au-oci`, TrueNAS, and unrelated existing infrastructure.
 - Pin OpenTofu and every provider. Commit dependency lock files for every
   platform on which plans run.
 - Use maps with durable semantic keys for `for_each`; never use list indexes as
@@ -558,14 +537,14 @@ Backup tiers are deliberately small:
 | --- | --- | --- | --- |
 | Critical | Daily TrueNAS snapshots for 7 days | Weekly ZFS replication to Hotdog for 4 weeks and selected weekly B2 export | identity, application databases, unique configuration |
 | Important | Daily TrueNAS snapshots for 7 days | Weekly Hotdog replication for 4 weeks | media metadata and costly-to-rebuild state |
-| Replaceable | None or short local snapshots | None | caches, HSP local-path, downloaded artefacts |
+| Replaceable | None or short local snapshots | None | caches, `au-oci` local-path, downloaded artefacts |
 
 Back up data, not ephemeral cluster state. Git contains desired state; 1Password
 contains bootstrap secrets; TrueNAS/Hotdog/B2 contain valued data. Document and
 exercise:
 
-- complete `au-home` rebuild while retaining TrueNAS datasets;
-- complete `au-hsp` replacement;
+- complete `au` rebuild while retaining TrueNAS datasets;
+- complete `au-oci` replacement;
 - CloudNativePG restore to a new namespace;
 - static/dynamic retained volume reattachment;
 - Pocket ID restore plus break-glass authentication;
@@ -585,15 +564,14 @@ Every pull request must pass local-equivalent validation:
 - Kubernetes schema validation against the pinned version and installed CRDs;
 - Helm template rendering;
 - Flux reconciliation graph checks;
-- catalogue schema and clean-generation check;
 - secret and credential scanning;
 - OpenTofu format, validate, lint, security scan, and speculative plan where
   credentials are intentionally available;
-- ARM64 image availability for HSP workloads;
+- ARM64 image availability for `au-oci` workloads;
 - resource requests, limits, probes, Pod security context, and NetworkPolicy
   policy checks.
 
-Renovate opens version updates for manual merge. Platform upgrades go to HSP
+Renovate opens version updates for manual merge. Platform upgrades go to `au-oci`
 first, soak for at least 48 hours with Gatus green, then proceed to home.
 Talos, Kubernetes, Cilium, Gateway API, storage drivers, and CRDs are upgraded
 in separate changes unless upstream requires a coupled version.
@@ -607,14 +585,15 @@ provisioning, backup freshness, Gatus status, and unexpected Crossplane drift.
 After this plan-only commit:
 
 1. Scaffold and validate the repository foundation.
-2. Build the complete current-estate inventory and application catalogue.
-3. Add safe OpenTofu state and HSP plans without applying them.
+2. Build the current-estate migration inventory in documentation and direct
+   Kubernetes manifests.
+3. Add safe OpenTofu state and `au-oci` plans without applying them.
 4. Add Talos patches and generate a reviewed home Image Factory schematic.
 5. Create and bootstrap the manual TrueNAS trial VM.
 6. Bootstrap Flux and the home platform in dependency order.
-7. Prove OpenSpeedTest, HTTP routes, secrets, static NFS, Homepage/Gatus
-   generation, and one Crossplane HTTP resource.
-8. Stop for a home success review before any HSP reset.
+7. Prove OpenSpeedTest, HTTP routes, secrets, static NFS, Homepage discovery,
+   a direct Gatus probe, and one Crossplane HTTP resource.
+8. Stop for a home success review before any `au-oci` reset.
 
 No step may silently cross an ownership, deletion, credential, or destructive
 boundary. When a better-supported component or materially simpler design is
