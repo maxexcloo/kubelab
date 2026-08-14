@@ -1,0 +1,11 @@
+machine:
+  nodeLabels:
+    topology.kubernetes.io/region: au
+    topology.kubernetes.io/zone: oci-sydney
+cluster:
+  clusterName: au-oci
+  network:
+    podSubnets:
+      - 10.100.8.0/22
+    serviceSubnets:
+      - 10.100.12.0/22
