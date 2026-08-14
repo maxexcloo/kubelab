@@ -1,7 +1,7 @@
 machine:
   nodeLabels:
     topology.kubernetes.io/region: au
-    topology.kubernetes.io/zone: oci-sydney
+    topology.kubernetes.io/zone: oci
 cluster:
   clusterName: au-oci
   network:
