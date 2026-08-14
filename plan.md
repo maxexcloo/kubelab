@@ -253,9 +253,9 @@ updates. The initial baseline is:
 
 | Component | Initial version | Policy |
 | --- | --- | --- |
-| Talos Linux | `v1.13.3` | Patch updates after HSP canary |
+| Talos Linux | `v1.13.8` | Latest stable; patch updates after HSP canary |
 | Kubernetes | `v1.36.3` | Latest stable; upgrade separately from Talos |
-| Flux | `v2.9.3` | Pin bootstrap manifests |
+| Flux | `v2.9.4` | Pin bootstrap manifests |
 | Gateway API CRDs | `v1.5.1` | Standard channel only |
 | Cilium | `v1.19.6` | Keep kube-proxy initially; tested through Kubernetes 1.34 |
 | Traefik | chart `40.2.0`, app `v3.7.1` | Gateway API provider only |
@@ -366,7 +366,7 @@ unexplained changes to existing infrastructure.
 
 1. Create the TrueNAS VM manually with 12 vCPU, 32 GB RAM, about 160 GB boot
    disk, UEFI, and a stable UniFi DHCP reservation.
-2. Build a Talos 1.13.3 Image Factory image with only required extensions:
+2. Build a Talos 1.13.8 Image Factory image with only required extensions:
    Tailscale plus storage modules proven necessary for NFS/iSCSI.
 3. Generate Talos secrets outside Git. Commit only non-secret machine patches.
 4. Confirm the install disk from maintenance mode; never assume `/dev/sda` or
