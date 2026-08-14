@@ -14,7 +14,43 @@ spec:
         namespace: flux-system
       version: 40.2.0
   releaseName: traefik
-  valuesFrom:
-    - kind: ConfigMap
-      name: traefik-values
-      valuesKey: values.yaml
+  values:
+    deployment:
+      replicas: 1
+    ingressClass:
+      enabled: false
+    providers:
+      kubernetesCRD:
+        enabled: false
+      kubernetesIngress:
+        enabled: false
+      kubernetesGateway:
+        enabled: true
+    gatewayClass:
+      enabled: true
+      name: traefik
+    gateway:
+      enabled: true
+      name: private
+      listeners:
+        web:
+          port: 8000
+          protocol: HTTP
+          namespacePolicy:
+            from: All
+    service:
+      spec:
+        type: ClusterIP
+    logs:
+      general:
+        format: json
+        level: INFO
+      access:
+        enabled: true
+        format: json
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64Mi
+      limits:
+        memory: 256Mi

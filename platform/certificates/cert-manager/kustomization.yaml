@@ -3,9 +3,3 @@ kind: Kustomization
 namespace: cert-manager
 resources:
   - helm-release.yaml
-configMapGenerator:
-  - name: cert-manager-values
-    files:
-      - values.yaml
-generatorOptions:
-  disableNameSuffixHash: true

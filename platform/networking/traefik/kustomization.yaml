@@ -3,9 +3,3 @@ kind: Kustomization
 namespace: networking
 resources:
   - helm-release.yaml
-configMapGenerator:
-  - name: traefik-values
-    files:
-      - values.yaml
-generatorOptions:
-  disableNameSuffixHash: true

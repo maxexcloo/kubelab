@@ -14,7 +14,47 @@ spec:
         namespace: flux-system
       version: 1.19.6
   releaseName: cilium
-  valuesFrom:
-    - kind: ConfigMap
-      name: cilium-values
-      valuesKey: values.yaml
+  values:
+    ipam:
+      mode: kubernetes
+    kubeProxyReplacement: false
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+    bpf:
+      hostLegacyRouting: true
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+    operator:
+      replicas: 1
+    hubble:
+      relay:
+        enabled: true
+      ui:
+        enabled: true
+      metrics:
+        enabled:
+          - dns
+          - drop
+          - flow
+          - httpV2
+          - icmp
+          - port-distribution
+          - tcp

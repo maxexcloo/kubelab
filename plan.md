@@ -217,6 +217,13 @@ Use ordinary Kubernetes objects as the source of truth. Apply the recommended
 `app.kubernetes.io/*` labels to every workload and use each controller's
 supported annotations where integration is required.
 
+Commit explicit, readable resources. Do not use Kustomize `configMapGenerator`
+or `secretGenerator`, generated manifests, templating scripts, or repository-
+defined resource types. Kustomize may only compose upstream resources and
+small cluster-specific patches. Helm values live directly in the upstream
+Flux `HelmRelease` that consumes them; the Cilium bootstrap keeps one ordinary
+Helm values file because networking must exist before Flux can run.
+
 Homepage discovers local Services through its native Kubernetes integration
 and `gethomepage.dev/*` annotations. Cross-cluster services and appliances are
 plain, directly maintained Homepage configuration. Fly Gatus uses a plain,

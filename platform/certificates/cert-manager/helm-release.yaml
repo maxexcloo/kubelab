@@ -14,7 +14,32 @@ spec:
         namespace: flux-system
       version: v1.21.0
   releaseName: cert-manager
-  valuesFrom:
-    - kind: ConfigMap
-      name: cert-manager-values
-      valuesKey: values.yaml
+  values:
+    crds:
+      enabled: true
+      keep: true
+    config:
+      apiVersion: controller.config.cert-manager.io/v1alpha1
+      kind: ControllerConfiguration
+      gatewayAPI:
+        enable: true
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+    webhook:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 128Mi
+    cainjector:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 256Mi

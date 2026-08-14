@@ -33,8 +33,10 @@ and bootstrap resources documented in `plan.md`.
 - `tofu/`: independently initialised substrate stacks.
 
 Use standard Kubernetes configuration directly. Do not add a custom application
-schema, generator, or operator when supported labels, annotations, Kustomize,
-Helm values, or a direct resource can express the same configuration.
+schema, generator, operator, generated manifest, or repository-defined resource
+type. Use Kustomize only for composition and small patches; do not use
+`configMapGenerator` or `secretGenerator`. Keep chart values directly in the
+upstream Flux `HelmRelease` that consumes them.
 
 Keep root Markdown limited to `AGENTS.md`, `README.md`, and `plan.md`. Put later
 operational documentation under `docs/`.
