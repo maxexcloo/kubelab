@@ -61,6 +61,43 @@ are deliberately independent; a WAN failure cannot break etcd quorum. The
 home cluster shares a failure domain with TrueNAS compute and storage. This is
 accepted for the initial design and is not described as high availability.
 
+### Verified home trial substrate
+
+The 2026-08-14 read-only inventory established the following facts before any
+VM or network change:
+
+- TrueNAS is a WTR PRO with 16 CPU cores and about 64 GiB RAM, running
+  `26.0.0-BETA.2`. The existing beta installation is not changed as part of
+  the Kubernetes trial.
+- Pools `truenas` and `truenas-nvme` are online. The NVMe pool has about
+  4.9 TB free and is the preferred location for the trial VM boot zvol.
+- `eno1` serves `10.0.0.3/22` on the untagged UniFi `Default` network.
+  `enp3s0` serves `10.4.0.3/22` on the separate UniFi `Services` network,
+  VLAN 4, reserved for hosts' second interfaces.
+- No VMs or Linux bridges exist. TrueNAS reports hardware virtualisation and
+  UEFI support.
+- The workstation route inventory confirms that the proposed
+  `10.100.0.0/20` cluster range does not overlap the home LAN, either TrueNAS
+  network, Tailscale, or local container networks. The independent OCI VCN is
+  `10.0.0.0/16`; do not advertise that overlapping site range through
+  Tailscale.
+
+A TrueNAS bridge is a prerequisite for the trial. Do not attach the VM through
+MACVLAN because Linux host-to-guest communication is restricted and the node
+must mount storage from its TrueNAS host. Create `br4` with `enp3s0` as its
+only member and move `10.4.0.3/22` from `enp3s0` to `br4` using TrueNAS staged
+network changes. Keep `eno1` and `10.0.0.3/22` unchanged as the management and
+rollback path. Attach the VM NIC to `br4`, let Talos maintenance mode obtain
+its first address through DHCP, then reserve the currently unused `10.4.0.4`
+for that NIC in UniFi before generating endpoint-specific Talos configuration.
+`au` is the Kubernetes cluster name only; the TrueNAS VM and Talos node use a
+separate user-selected hostname that is not `au`, `talos`, or a Kubernetes
+role name.
+
+Bazzite also has a second physical NIC. It may later join the `Services`
+network for direct storage and opt-in workload traffic, but that is independent
+of the Talos trial and does not make Bazzite a Kubernetes node.
+
 The Bazzite host uses rootless Podman Quadlets for opt-in jobs such as ComfyUI.
 It communicates over Tailscale and is advertised to Homepage and monitoring,
 but it is not joined to Kubernetes. The first ROCm trial is container-only and
@@ -132,7 +169,7 @@ not counted as high availability.
 
 There is no official TrueNAS Kubernetes CSI driver to assume. Start the trial
 with a static NFS persistent volume. Evaluate `democratic-csi` for NFS and
-iSCSI only after confirming TrueNAS 25.10 API compatibility, Talos system
+iSCSI only after confirming TrueNAS 26.0 API compatibility, Talos system
 extensions, snapshot behaviour, retained-volume recovery, and upgrade health.
 The experimental API-only drivers are not production defaults. Record that
 decision before migrating a database.
@@ -349,16 +386,19 @@ unexplained changes to existing infrastructure.
 
 ### Phase 1: Home Talos trial
 
-1. Create the TrueNAS VM manually with 12 vCPU, 32 GB RAM, about 160 GB boot
-   disk, UEFI, and a stable UniFi DHCP reservation.
-2. Build a Talos 1.13.8 Image Factory image with only required extensions:
+1. Review and apply a staged TrueNAS bridge change with console-safe rollback;
+   verify both TrueNAS management and storage access after commit.
+2. Create the TrueNAS VM manually with 12 vCPU, 32 GB RAM, a 160 GiB boot zvol
+   on `truenas-nvme`, UEFI, a virtio NIC on the reviewed bridge, and a stable
+   UniFi DHCP reservation.
+3. Build a Talos 1.13.8 Image Factory image with only required extensions:
    Tailscale plus storage modules proven necessary for NFS/iSCSI.
-3. Generate Talos secrets outside Git. Commit only non-secret machine patches.
-4. Confirm the install disk from maintenance mode; never assume `/dev/sda` or
+4. Generate Talos secrets outside Git. Commit only non-secret machine patches.
+5. Confirm the install disk from maintenance mode; never assume `/dev/sda` or
    `/dev/vda`.
-5. Install the single node, bootstrap etcd once, retrieve kubeconfig, and store
+6. Install the single node, bootstrap etcd once, retrieve kubeconfig, and store
    recovery material in 1Password.
-6. Verify reboot, API access by LAN and Tailscale, clock, DNS, node health,
+7. Verify reboot, API access by LAN and Tailscale, clock, DNS, node health,
    Kubernetes scheduling, and a Talos patch/upgrade dry run.
 
 Exit gate: the VM can be rebooted and reconstructed from documented inputs;
@@ -597,7 +637,8 @@ After this plan-only commit:
    Kubernetes manifests.
 3. Add safe OpenTofu state and `au-oci` plans without applying them.
 4. Add Talos patches and generate a reviewed home Image Factory schematic.
-5. Create and bootstrap the manual TrueNAS trial VM.
+5. Review and create the TrueNAS bridge, DHCP reservation, and trial VM; then
+   bootstrap Talos after confirming the discovered install disk.
 6. Bootstrap Flux and the home platform in dependency order.
 7. Prove OpenSpeedTest, HTTP routes, secrets, static NFS, Homepage discovery,
    a direct Gatus probe, and one Crossplane HTTP resource.
