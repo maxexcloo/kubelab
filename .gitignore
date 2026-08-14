@@ -1,11 +1,5 @@
 .DS_Store
 .mise.local.toml
-.terraform/
 .venv/
-*.tfplan
-*.tfstate
-*.tfstate.*
 __pycache__/
-talosconfig
 kubeconfig
-secrets.yaml

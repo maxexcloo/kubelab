@@ -2,18 +2,7 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   dependencyDashboard: false,
   extends: ["config:recommended", ":enablePreCommit"],
-  ignoreDeps: ["hashicorp/terraform"],
   kubernetes: {
     managerFilePatterns: ["/(^|/).+\\.yaml$/"],
   },
-  lockFileMaintenance: {
-    enabled: true,
-  },
-  packageRules: [
-    {
-      description: "Resolve OpenTofu dependencies from the OpenTofu registry",
-      matchDatasources: ["terraform-module", "terraform-provider"],
-      registryUrls: ["https://registry.opentofu.org"],
-    },
-  ],
 }

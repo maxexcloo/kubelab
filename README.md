@@ -1,8 +1,9 @@
 # Kubelab
 
-Kubelab is the GitOps source of truth for a two-cluster Talos Kubernetes
+Kubelab is the Kubernetes and Flux GitOps source of truth for a two-cluster
 homelab. It is both a real migration and a practical Kubernetes learning
-environment.
+environment. The separate `homelab` repository owns infrastructure and Talos
+node lifecycle.
 
 The first cluster is `au`, a single Talos VM on TrueNAS. Once it proves
 rebuilds, Flux, networking, HTTP, secrets, storage, and recovery, the empty OCI
@@ -30,14 +31,12 @@ mise run check
 - `mise run check`: fast formatting and configuration checks.
 - `mise run prek`: the complete local equivalent of CI.
 - `mise run fmt`: apply project formatting.
-- `tofu plan`: run directly in one explicit stack when preparing an
-  infrastructure review; never apply an unreviewed plan.
 
 ## Learning sequence
 
 Each stage is intentionally observable before the next abstraction is added:
 
-1. Talos teaches immutable node configuration and Kubernetes bootstrap.
+1. The `homelab` handoff provides a healthy Kubernetes API and kubeconfig.
 2. A direct OpenSpeedTest Deployment and Service teach Pods, reconciliation,
    stable service discovery, probes, and resource requests.
 3. Flux teaches pull-based reconciliation and dependency ordering.
@@ -48,5 +47,6 @@ Each stage is intentionally observable before the next abstraction is added:
 8. Crossplane HTTP resources teach external API reconciliation only after the
    cluster itself is understood.
 
-The repository will stop at the review gates in `plan.md` before destructive
-host resets, live routes, or infrastructure applies.
+The repository will stop at the review gates in `plan.md` before live routes or
+workload cutovers. Destructive host and infrastructure gates live in
+`homelab`.

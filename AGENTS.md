@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-This repository is the source of truth for the Talos Kubernetes homelab. Flux
-owns Kubernetes reconciliation. OpenTofu under `tofu/` owns only the substrate
-and bootstrap resources documented in `plan.md`.
+This repository is the source of truth for Kubernetes resources reconciled by
+Flux. Infrastructure and Talos node lifecycle belong to the separate
+`homelab` repository.
 
 ## Conventions
 
@@ -14,23 +14,17 @@ and bootstrap resources documented in `plan.md`.
 - Use `.yaml`, not `.yml`, for project-owned YAML.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
-- Pin every tool, chart, image, provider, and remote manifest to an exact stable
+- Pin every tool, chart, image, and remote manifest to an exact stable
   version. Renovate proposes upgrades for manual review.
-- Keep credentials, Talos secrets, kubeconfigs, OpenTofu plans, and rendered
-  Secret values out of Git.
-- Use stable semantic keys for OpenTofu `for_each`; never use list indexes for
-  resource identity.
+- Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Default Crossplane external resources to orphan-on-delete.
-- Do not run `tofu apply`, reset a host, bootstrap etcd, or change a live route
-  without explicit approval and a reviewed plan.
+- Do not change a live route without explicit approval and a reviewed plan.
 
 ## File Organisation
 
 - `clusters/`: Flux entry points for each cluster.
 - `apps/`: workload bases and cluster overlays.
 - `platform/`: cluster controllers and shared configuration.
-- `talos/`: non-secret machine configuration patches and operator guidance.
-- `tofu/`: independently initialised substrate stacks.
 
 Use standard Kubernetes configuration directly. Do not add a custom application
 schema, generator, operator, generated manifest, or repository-defined resource
@@ -45,10 +39,6 @@ operational documentation under `docs/`.
 
 - Run `mise run check` before handoff.
 - Run `mise run prek` after changing hooks or workflows.
-- Run `tofu plan` in one explicit stack only immediately before a requested
-  infrastructure review.
-- Apply exactly a saved and reviewed OpenTofu plan; never apply an unreviewed
-  refresh.
 
 ## Git History
 

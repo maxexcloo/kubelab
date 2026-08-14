@@ -3,23 +3,29 @@
 Bootstrap `au` first. Do not reset `hsp` for `au-oci` until the home-cluster
 gate in [plan.md](../plan.md) passes.
 
-## Inputs kept outside Git
+## Substrate handoff
 
-Before starting, have these in 1Password or another encrypted working store:
+The `homelab` OpenTofu stack owns the Talos image, system extensions, machine
+secrets, machine configuration, installation, bootstrap, and recovery
+material. Before starting here, verify its exit checks and have the generated
+administrator `kubeconfig` in an encrypted working store outside this
+repository.
 
-- Talos machine secrets and `talosconfig`;
-- the generated administrator `kubeconfig`;
-- a Tailscale auth key for the Talos system extension; and
-- the Git repository URL and Flux authentication material.
+Also have the Git repository URL and Flux authentication material available.
 
 Also confirm that the committed Pod and Service CIDRs do not overlap any LAN,
 OCI, Tailscale, container, TrueNAS, or client VPN network.
 
-## 1. Install Talos
+## 1. Verify the Kubernetes handoff
 
-Follow [the Talos instructions](../talos/README.md) to build the official image,
-generate configuration, validate it, apply it to the VM, and bootstrap etcd.
-Keep all generated secrets outside this repository.
+The node must be Ready and the control-plane system Pods must be healthy enough
+to install the CNI. Stop here and fix the `homelab` substrate if either command
+cannot reach the intended cluster:
+
+```shell
+kubectl get nodes
+kubectl get pods --all-namespaces
+```
 
 ## 2. Bootstrap Cilium
 
@@ -52,9 +58,8 @@ kubectl --namespace kube-system exec daemonset/cilium -- cilium-dbg status
 
 ## 3. Bootstrap Flux
 
-This repository does not yet have a Git remote, so do not invent a repository
-URL or credentials. Once the remote exists, use Flux's standard bootstrap
-command for that Git provider and set its path to the relevant cluster:
+The public Git remote is `https://github.com/maxexcloo/kubelab`. Use Flux's
+standard GitHub bootstrap command and set its path to the relevant cluster:
 
 - `clusters/au` for the TrueNAS VM; or
 - `clusters/au-oci` for the OCI host after its migration gate passes.

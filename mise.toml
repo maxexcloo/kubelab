@@ -8,11 +8,8 @@ helm = "4.2.3"
 kubeconform = "0.8.0"
 kubectl = "1.36.3"
 kustomize = "5.8.1"
-opentofu = "1.12.5"
 prek = "0.4.13"
 prettier = "3.9.6"
-talosctl = "1.13.8"
-tflint = "0.64.0"
 trivy = "0.73.0"
 yamllint = "1.38.0"
 
@@ -56,21 +53,13 @@ kustomize build apps/overlays/au-oci | kubeconform \
   -kubernetes-version 1.36.3 \
   -strict \
   -summary
-tofu fmt -check -recursive tofu
-tofu -chdir=tofu/bootstrap init -backend=false -lockfile=readonly
-tofu -chdir=tofu/bootstrap validate
-tofu -chdir=tofu/au-oci init -backend=false -lockfile=readonly
-tofu -chdir=tofu/au-oci validate
-tflint --chdir=tofu/bootstrap --no-color
-tflint --chdir=tofu/au-oci --no-color
-trivy config --exit-code 1 --severity HIGH,CRITICAL tofu
+trivy config --exit-code 1 --severity HIGH,CRITICAL .
 """
 
 [tasks.fmt]
 description = "Format project files"
 run = """
 prettier --write .
-tofu fmt -recursive tofu
 """
 
 [tasks.prek]
