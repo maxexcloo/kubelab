@@ -254,14 +254,14 @@ updates. The initial baseline is:
 | Component | Initial version | Policy |
 | --- | --- | --- |
 | Talos Linux | `v1.13.3` | Patch updates after HSP canary |
-| Kubernetes | `v1.34.10` | Current Cilium-tested minor; upgrade separately from Talos |
+| Kubernetes | `v1.36.3` | Latest stable; upgrade separately from Talos |
 | Flux | `v2.9.3` | Pin bootstrap manifests |
 | Gateway API CRDs | `v1.5.1` | Standard channel only |
 | Cilium | `v1.19.6` | Keep kube-proxy initially; tested through Kubernetes 1.34 |
 | Traefik | chart `40.2.0`, app `v3.7.1` | Gateway API provider only |
 | cert-manager | `v1.21.0` | Do not use the known-problematic disabled renewal policy |
-| External Secrets Operator | `v2.5.0` | 1Password SDK provider and PushSecret |
-| Crossplane | `v2.3.4` | Keep v2.3 until v2.4 has a soak period |
+| External Secrets Operator | `v2.6.0` | 1Password SDK provider and PushSecret |
+| Crossplane | `v2.3.4` | Latest stable |
 | provider-http | `v1.0.14` | Pin package digest where supported |
 | Headlamp | chart/app `0.44.0` | One instance per cluster |
 | CloudNativePG | operator `1.30.0` | Single instance by default |
@@ -269,8 +269,10 @@ updates. The initial baseline is:
 
 Before the first cluster bootstrap, resolve every chart, container, provider,
 and tool to an immutable version in the repository. Do not silently substitute
-a newer major/minor version. If upstream compatibility contradicts this table,
-update this plan in a dedicated decision commit before deployment.
+a different version. Track the latest stable release of every component rather
+than deliberately lagging a minor release for soak time. If the latest stable
+components are not an upstream-tested combination, prove the combination in
+the home trial or stop and update this plan before deployment.
 
 ## Repository Design
 
