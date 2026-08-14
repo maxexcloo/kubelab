@@ -6,10 +6,13 @@ This document is the authoritative implementation plan for migrating the
 homelab to Kubernetes. It replaces the disposable local-cluster plan.
 
 The first implementation target is a single-node Talos cluster in a TrueNAS
-virtual machine. That trial must prove installation, GitOps, networking,
-storage, secrets, recovery, and one disposable workload before the existing
-Sydney OCI host (`hsp`) is reset. No valued workload is removed until its
-replacement passes the applicable migration gate.
+virtual machine. The `homelab` repository owns the VM, network, Talos image,
+machine configuration, bootstrap, and recovery credentials. This repository
+starts at the Kubernetes API boundary: Flux, platform controllers, and
+workloads. The trial must prove GitOps, networking, storage, secrets, recovery,
+and one disposable workload before the existing Sydney OCI host (`hsp`) is
+reset. No valued workload is removed until its replacement passes the
+applicable migration gate.
 
 Git history is the implementation log. Changes use small, imperative commits
 that record one coherent outcome. This complete plan is the first commit and
@@ -19,7 +22,8 @@ contains no implementation files.
 
 - Learn Kubernetes, Talos, Flux, Helm, Gateway API, storage, policy, and
   day-two operations through the real homelab migration.
-- Keep the clusters reproducible from Git plus documented bootstrap material.
+- Keep Kubernetes reproducible from this Git repository and cluster substrate
+  reproducible from the separate `homelab` repository.
 - Prefer stock upstream components, official charts, and small configuration
   surfaces.
 - Keep GitHub Actions optional: CI validates changes and may build uncommon
@@ -190,7 +194,7 @@ data.
 | Tailscale ACLs, grants, tags, OAuth clients, bootstrap keys | OpenTofu | Cluster/node identity is substrate access |
 | Cluster Cloudflare Tunnel and bootstrap credential | OpenTofu | Required before in-cluster app reconciliation |
 | GitHub repository and Flux deploy key bootstrap | OpenTofu/manual bootstrap | Flux pulls; Actions do not deploy |
-| Talos machine configuration and client configuration | This repository | Generated from committed non-secret patches; secrets stay outside Git |
+| Talos image, machine configuration, bootstrap, and client configuration | `homelab` OpenTofu | Latest stable Sidero Labs provider; use write-only or ephemeral arguments where supported |
 | Kubernetes platform and workloads | Flux | No second Kubernetes deployer |
 | Per-app DNS, tunnel routes, Access, WAF, and rate limits | Crossplane HTTP resources | Home-hosted control plane; orphan on delete by default |
 | Per-app Control D DNS rules | Crossplane HTTP resources | Direct managed resources |
@@ -218,8 +222,8 @@ status codes.
 
 | Repository | End state |
 | --- | --- |
-| `kubelab` | Talos configuration, Flux sources, platform controllers, workloads, validation, and migration documentation |
-| `homelab` | Reduced OpenTofu substrate, access foundations, appliances, and the Fly Gatus exception |
+| `kubelab` | Flux sources, Kubernetes platform controllers, workloads, validation, and migration documentation |
+| `homelab` | OpenTofu substrate, Talos lifecycle, access foundations, appliances, and the Fly Gatus exception |
 | `homelab-truenas` | Retired after all application ownership leaves TrueNAS Apps; retains only unavoidable NAS-local configuration if required |
 | `homelab-docker` | Retired after Docker services migrate or receive an explicit appliance exception |
 | `homelab-workflows` | Replaced by storage-local Kubernetes Jobs after RoMM workflows are proven |
@@ -241,7 +245,7 @@ Create a dedicated Kubernetes vault in 1Password as a manual root of trust:
   `deletionPolicy: None`.
 - Provider credentials, Talos secrets, Flux deploy keys, break-glass material,
   database recovery credentials, and Cloudflare Tunnel tokens never enter Git,
-  OpenTofu outputs, CI logs, or unencrypted plan artefacts.
+  ordinary OpenTofu outputs, CI logs, or unencrypted plan artefacts.
 
 Secret rotation must allow an overlap period where the provider permits it.
 Changes that can replace or reveal credentials require a saved, reviewed
@@ -280,6 +284,7 @@ updates. The initial baseline is:
 | Component | Initial version | Policy |
 | --- | --- | --- |
 | Talos Linux | `v1.13.8` | Latest stable; patch updates after `au-oci` canary |
+| Sidero Labs Talos provider | `0.11.0` | Latest stable; implemented in `homelab`, not this repository |
 | Kubernetes | `v1.36.3` | Latest stable; upgrade separately from Talos |
 | Flux | `v2.9.4` | Pin bootstrap manifests |
 | Gateway API CRDs | `v1.5.1` | Standard channel only |
@@ -294,11 +299,11 @@ updates. The initial baseline is:
 | Tailscale | `v1.98.10` | Keep node extension and operator compatible |
 
 Before the first cluster bootstrap, resolve every chart, container, provider,
-and tool to an immutable version in the repository. Do not silently substitute
-a different version. Track the latest stable release of every component rather
-than deliberately lagging a minor release for soak time. If the latest stable
-components are not an upstream-tested combination, prove the combination in
-the home trial or stop and update this plan before deployment.
+and tool to an immutable version in its owning repository. Do not silently
+substitute a different version. Track the latest stable release of every
+component rather than deliberately lagging a minor release for soak time. If
+the latest stable components are not an upstream-tested combination, prove the
+combination in the home trial or stop and update this plan before deployment.
 
 ## Repository Design
 
@@ -315,12 +320,6 @@ Keep the tree shallow and make cluster differences explicit:
 ├── .github/
 │   ├── renovate.json5
 │   └── workflows/validate.yaml
-├── talos/
-│   ├── patches/
-│   │   ├── common.yaml
-│   │   ├── au-oci.yaml
-│   │   └── au.yaml
-│   └── README.md
 ├── clusters/
 │   ├── au-oci/
 │   │   ├── flux-system/
@@ -342,10 +341,7 @@ Keep the tree shallow and make cluster differences explicit:
 │   └── overlays/
 │       ├── au-oci/
 │       └── au/
-└── tofu/
-    ├── bootstrap/
-    ├── au-oci/
-    └── truenas/
+└── docs/
 ```
 
 Use upstream Helm charts first. Use `bjw-s/app-template` for simple workloads
@@ -353,17 +349,16 @@ without a maintained chart. Use raw manifests for learning exercises,
 operators, and cases where the abstraction would hide important Kubernetes
 behaviour. All YAML files use `.yaml`.
 
-Local tools are managed by Mise and include version-pinned `kubectl`,
-`talosctl`, `flux`, `helm`, `kustomize`, `cilium`, `tofu`, `tflint`, `trivy`,
-`kubeconform`, `yamllint`, and `pre-commit`/Prek-compatible hooks. Prefer direct
-tool commands and standard configuration over repository-specific scripts.
+Local tools are managed by Mise and include version-pinned `kubectl`, `flux`,
+`helm`, `kustomize`, `cilium`, `trivy`, `kubeconform`, `yamllint`, and
+`pre-commit`/Prek-compatible hooks. Prefer direct tool commands and standard
+configuration over repository-specific scripts.
 
 Prek runs formatting, YAML validation, Kustomize renders, Kubernetes schema
-validation, secret scanning, and OpenTofu format/validate. GitHub Actions runs
-the same validation on pull requests. It
-does not hold kubeconfigs or run Flux/Talos/OpenTofu apply. Rare custom image
-builds may use Actions, but normal deployment always occurs by Flux pulling
-Git.
+validation, and secret scanning. GitHub Actions runs the same validation on
+pull requests. It does not hold kubeconfigs or deploy to a cluster. Rare custom
+image builds may use Actions, but normal deployment always occurs by Flux
+pulling Git.
 
 ## Implementation Sequence
 
@@ -376,24 +371,39 @@ Git.
    repositories. Give each one an owner, target, dependencies, storage class,
    backup tier, visibility, and rollback path.
 4. Verify CIDRs, DNS zones, TrueNAS version, OCI quota, ARM64 image support,
-   container architecture support, and provider API access.
-5. Split new OpenTofu state by blast radius. Enable GCS object versioning and
-   retention. Never migrate existing state with an unreviewed backend change.
+   container architecture support, and provider API access in `homelab`.
+5. Archive the existing `homelab` implementation on a protected branch, then
+   simplify its main branch to explicit OpenTofu stacks without changing live
+   ownership or state during the repository cleanup. Use new
+   `states/homelab-kubernetes/<stack>` GCS prefixes and leave the existing
+   `states/core` objects untouched throughout the transition.
 
 Exit gate: validation is reproducible locally, the inventory has no unknown
-service, state and secret boundaries are documented, and `tofu plan` shows no
-unexplained changes to existing infrastructure.
+service, state and secret boundaries are documented, and the independently
+reviewed `homelab` plans show no unexplained infrastructure changes.
 
-### Phase 1: Home Talos trial
+### Phase 1: Home Talos trial (`homelab` repository)
+
+This phase is implemented and logged in `homelab`; this repository holds no
+Talos machine configuration, secrets, Image Factory schematic, or lifecycle
+commands.
 
 1. Review and apply a staged TrueNAS bridge change with console-safe rollback;
    verify both TrueNAS management and storage access after commit.
-2. Create the TrueNAS VM manually with 12 vCPU, 32 GB RAM, a 160 GiB boot zvol
-   on `truenas-nvme`, UEFI, a virtio NIC on the reviewed bridge, and a stable
-   UniFi DHCP reservation.
-3. Build a Talos 1.13.8 Image Factory image with only required extensions:
-   Tailscale plus storage modules proven necessary for NFS/iSCSI.
-4. Generate Talos secrets outside Git. Commit only non-secret machine patches.
+2. Create the TrueNAS VM with 12 vCPU, 32 GB RAM, a 160 GiB boot zvol on
+   `truenas-nvme`, UEFI, a virtio NIC on the reviewed bridge, and a stable
+   UniFi DHCP reservation. Use OpenTofu only if the TrueNAS provider produces
+   an exact, non-destructive plan against version 26.0; otherwise keep this
+   resource manual and documented.
+3. Use the stable `siderolabs/talos` OpenTofu provider `0.11.0` to resolve the
+   Talos 1.13.8 Image Factory schematic. Include only
+   `siderolabs/tailscale` for host-level recovery access and
+   `siderolabs/qemu-guest-agent` for the TrueNAS/KVM guest lifecycle. Add
+   `siderolabs/iscsi-tools` later only if the iSCSI evaluation begins.
+4. Generate Talos secrets and machine configuration in the isolated `au`
+   OpenTofu state. Use write-only or ephemeral provider arguments where the
+   stable provider supports them, push recovery material to 1Password, and
+   never emit secret-bearing values as ordinary outputs or plan artefacts.
 5. Confirm the install disk from maintenance mode; never assume `/dev/sda` or
    `/dev/vda`.
 6. Install the single node, bootstrap etcd once, retrieve kubeconfig, and store
@@ -449,8 +459,8 @@ has a demonstrated restore procedure.
 
 ### Phase 4: Build `au-oci` as the canary cluster
 
-1. Add a Talos OCI custom image for `arm64` and validate it in a non-destructive
-   OpenTofu plan.
+1. Add a Talos OCI custom image for `arm64` to `homelab` and validate it in a
+   non-destructive OpenTofu plan.
 2. Replace the empty HSP Ubuntu instance only after the home success gate and a
    final confirmation that no valued state remains; the Kubernetes cluster on
    that host is named `au-oci`.
@@ -513,8 +523,8 @@ cutover.
 
 ### Phase 7: Automate and retire old delivery paths
 
-1. Evaluate the pinned `PjSalty/truenas` OpenTofu provider 2.x against the
-   running TrueNAS version.
+1. Evaluate the pinned `PjSalty/truenas` OpenTofu provider 2.x in `homelab`
+   against the running TrueNAS version.
 2. Import the trial VM only when plan output is drift-free. Add
    `prevent_destroy` and document replacement explicitly. If the provider
    cannot model the VM safely, keep the manual VM definition authoritative
@@ -553,10 +563,17 @@ exists. Its route, identity, secrets, data, backups, mail, object storage,
 monitor, dashboard entry, resource limits, architecture support, old owner,
 and rollback procedure must all be present.
 
-## OpenTofu Safety Rules
+## External OpenTofu Safety Contract
 
-- Use remote GCS state with versioning, retention, encryption, and separate
-  prefixes for bootstrap, `au-oci`, TrueNAS, and unrelated existing infrastructure.
+These rules apply to the separate `homelab` repository. This repository must
+not contain OpenTofu configuration, provider locks, plans, state, or IaC helper
+tooling.
+
+- Use remote GCS state with versioning, retention, encryption, and new
+  `states/homelab-kubernetes/<stack>` prefixes for bootstrap, `au`, `au-oci`,
+  and TrueNAS. Leave the legacy `states/core` prefix untouched until every
+  ownership transfer and rollback window is complete; do not migrate it into
+  the new prefixes.
 - Pin OpenTofu and every provider. Commit dependency lock files for every
   platform on which plans run.
 - Use maps with durable semantic keys for `for_each`; never use list indexes as
@@ -613,8 +630,6 @@ Every pull request must pass local-equivalent validation:
 - Helm template rendering;
 - Flux reconciliation graph checks;
 - secret and credential scanning;
-- OpenTofu format, validate, lint, security scan, and speculative plan where
-  credentials are intentionally available;
 - ARM64 image availability for `au-oci` workloads;
 - resource requests, limits, probes, Pod security context, and NetworkPolicy
   policy checks.
@@ -635,14 +650,15 @@ After this plan-only commit:
 1. Scaffold and validate the repository foundation.
 2. Build the current-estate migration inventory in documentation and direct
    Kubernetes manifests.
-3. Add safe OpenTofu state and `au-oci` plans without applying them.
-4. Add Talos patches and generate a reviewed home Image Factory schematic.
-5. Review and create the TrueNAS bridge, DHCP reservation, and trial VM; then
-   bootstrap Talos after confirming the discovered install disk.
-6. Bootstrap Flux and the home platform in dependency order.
-7. Prove OpenSpeedTest, HTTP routes, secrets, static NFS, Homepage discovery,
+3. Archive and simplify `homelab`, then move all OpenTofu and Talos lifecycle
+   configuration there without changing live infrastructure ownership.
+4. In `homelab`, review and create the TrueNAS bridge, DHCP reservation, trial
+   VM, and Talos cluster after confirming the discovered install disk.
+5. Bootstrap Flux and the home platform from this repository in dependency
+   order.
+6. Prove OpenSpeedTest, HTTP routes, secrets, static NFS, Homepage discovery,
    a direct Gatus probe, and one Crossplane HTTP resource.
-8. Stop for a home success review before any `au-oci` reset.
+7. Stop for a home success review before any `au-oci` reset.
 
 No step may silently cross an ownership, deletion, credential, or destructive
 boundary. When a better-supported component or materially simpler design is
