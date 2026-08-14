@@ -56,12 +56,21 @@ kustomize build apps/overlays/au-oci | kubeconform \
   -kubernetes-version 1.36.3 \
   -strict \
   -summary
+tofu fmt -check -recursive tofu
+tofu -chdir=tofu/bootstrap init -backend=false -lockfile=readonly
+tofu -chdir=tofu/bootstrap validate
+tofu -chdir=tofu/au-oci init -backend=false -lockfile=readonly
+tofu -chdir=tofu/au-oci validate
+tflint --chdir=tofu/bootstrap --no-color
+tflint --chdir=tofu/au-oci --no-color
+trivy config --exit-code 1 --severity HIGH,CRITICAL tofu
 """
 
 [tasks.fmt]
 description = "Format project files"
 run = """
 prettier --write .
+tofu fmt -recursive tofu
 """
 
 [tasks.prek]
