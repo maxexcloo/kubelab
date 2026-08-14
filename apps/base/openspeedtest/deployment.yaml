@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openspeedtest
+  namespace: openspeedtest
+  labels:
+    app.kubernetes.io/component: application
+    app.kubernetes.io/name: openspeedtest
+    app.kubernetes.io/version: 2.0.6
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openspeedtest
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: application
+        app.kubernetes.io/name: openspeedtest
+        app.kubernetes.io/version: 2.0.6
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: openspeedtest
+          image: docker.io/openspeedtest/latest:v2.0.6@sha256:1745e913f596fe98882b286a67751efdae74774e9caa742a4934bb056e8748d2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+      securityContext:
+        runAsGroup: 101
+        runAsUser: 101
+      terminationGracePeriodSeconds: 30

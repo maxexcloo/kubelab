@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: openspeedtest
+  namespace: openspeedtest
+  labels:
+    app.kubernetes.io/component: application
+    app.kubernetes.io/name: openspeedtest
+  annotations:
+    gethomepage.dev/description: Network Speed Test
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Infrastructure
+    gethomepage.dev/icon: openspeedtest
+    gethomepage.dev/name: OpenSpeedTest
+spec:
+  selector:
+    app.kubernetes.io/name: openspeedtest
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+  type: ClusterIP
