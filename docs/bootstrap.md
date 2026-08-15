@@ -62,14 +62,33 @@ kubectl --namespace kube-system exec daemonset/cilium -- cilium-dbg status
 
 ## 3. Bootstrap Flux
 
-The public Git remote is `https://github.com/maxexcloo/kubelab`. Use Flux's
-standard GitHub bootstrap command and set its path to the relevant cluster:
+The public Git remote is `https://github.com/maxexcloo/kubelab`. Generate the
+pinned controllers and unauthenticated HTTPS source with Flux, commit and push
+them, then apply the committed bootstrap directory:
 
-- `clusters/mbk` for Taco on TrueNAS; or
-- `clusters/syd` for HSP on OCI after its migration gate passes.
+```shell
+flux install --version v2.9.4 --export
+flux create source git flux-system \
+  --url https://github.com/maxexcloo/kubelab \
+  --branch main \
+  --interval 1m \
+  --export
+flux create kustomization flux-system \
+  --source GitRepository/flux-system \
+  --path ./clusters/mbk \
+  --prune \
+  --interval 10m \
+  --retry-interval 2m \
+  --wait \
+  --export
+kubectl apply --server-side --kustomize clusters/mbk/flux-system
+```
 
-Commit the generated `flux-system` manifests. Flux will then adopt Cilium and
-reconcile the remaining platform and workload resources from the cluster path.
+The generated output is committed under `clusters/mbk/flux-system`; never put
+a GitHub token in those files. Do not use `flux bootstrap github` here because
+it creates a deploy key or persists token authentication that a public source
+does not need. Flux will adopt Cilium and reconcile the remaining platform and
+workload resources from the cluster path.
 The committed Flux dependencies install Gateway API CRDs first, wait for the
 platform controllers including Traefik second, and apply applications last.
 This prevents custom resources from racing the controllers that define them.

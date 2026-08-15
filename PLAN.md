@@ -208,7 +208,7 @@ data.
 | Tailscale Kubernetes operator | Flux in `kubelab` | In-cluster application and Kubernetes API access |
 | Retained appliance Tailscale clients | Appliance owner | Do not couple appliance access to Kubernetes or legacy service retirement |
 | Cluster Cloudflare Tunnel and bootstrap credential | OpenTofu | Required before in-cluster app reconciliation |
-| Public GitHub repository and Flux bootstrap | Manual bootstrap | Flux pulls over public HTTPS without a deploy key; Actions do not deploy |
+| Public GitHub repository and Flux bootstrap | Manual bootstrap | Commit exported Flux manifests and an unauthenticated HTTPS Git source; do not create a deploy key; Actions do not deploy |
 | Talos image, machine configuration, bootstrap, and client configuration | `homelab` OpenTofu | Latest stable Sidero Labs provider; use write-only or ephemeral arguments where supported |
 | Kubernetes platform and workloads | Flux | No second Kubernetes deployer |
 | Per-app DNS, tunnel routes, Access, WAF, and rate limits | Crossplane HTTP resources | Home-hosted control plane; orphan on delete by default |
@@ -435,8 +435,9 @@ available, use health checks between the remaining layers:
 
 1. Cilium/Hubble manually with Helm while retaining kube-proxy; verify Pod and
    Service networking.
-2. Flux controllers and the public HTTPS Git source; let Flux adopt the existing
-   Cilium release without replacing it. Do not create an unnecessary deploy key.
+2. Flux controllers and the public HTTPS Git source from committed, pinned
+   bootstrap manifests; let Flux adopt the existing Cilium release without
+   replacing it. Do not create a deploy key or persist a GitHub token.
 3. Gateway API CRDs and other separately managed CRDs.
 4. cert-manager and Traefik.
 5. Tailscale operator and Cloudflare Tunnel.
