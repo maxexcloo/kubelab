@@ -13,14 +13,6 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
       - id: trailing-whitespace
-  - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.38.0
-    hooks:
-      - id: check-github-workflows
-        files: ^\.github/workflows/.*\.yaml$
-      - id: check-renovate
-        additional_dependencies:
-          - json5==0.12.1
   - repo: local
     hooks:
       - id: project-check

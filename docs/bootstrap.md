@@ -1,7 +1,7 @@
 # Cluster Bootstrap
 
-Bootstrap `au` first. Do not reset `hsp` for `au-oci` until the home-cluster
-gate in [plan.md](../plan.md) passes.
+Bootstrap `mbk` first. Do not reset `hsp` for `syd` until the home-cluster
+gate in [PLAN.md](../PLAN.md) passes.
 
 ## Substrate handoff
 
@@ -11,15 +11,18 @@ material. Before starting here, verify its exit checks and have the generated
 administrator `kubeconfig` in an encrypted working store outside this
 repository.
 
-Also have the Git repository URL and Flux authentication material available.
+The Git source is public and requires no deploy key for reconciliation. Keep any
+workstation GitHub credential used to push the generated bootstrap manifests in
+the operator's normal 1Password-backed Git tooling, not in the cluster.
 
 Also confirm that the committed Pod and Service CIDRs do not overlap any LAN,
 OCI, Tailscale, container, TrueNAS, or client VPN network.
 
 ## 1. Verify the Kubernetes handoff
 
-The node must be Ready and the control-plane system Pods must be healthy enough
-to install the CNI. Stop here and fix the `homelab` substrate if either command
+The node is expected to remain NotReady until its CNI is installed. The
+Kubernetes API and control-plane system Pods must still be reachable enough to
+install Cilium. Stop here and fix the `homelab` substrate if either command
 cannot reach the intended cluster:
 
 ```shell
@@ -38,7 +41,7 @@ helm repo add cilium https://helm.cilium.io
 helm repo update cilium
 helm upgrade --install cilium cilium/cilium \
   --namespace kube-system \
-  --version 1.19.6 \
+  --version 1.20.0 \
   --values platform/networking/cilium/values.yaml
 kubectl --namespace kube-system rollout status daemonset/cilium
 kubectl --namespace kube-system rollout status deployment/cilium-operator
@@ -46,7 +49,8 @@ kubectl --namespace kube-system rollout status deployment/cilium-operator
 
 The values are the same values committed for the Flux `HelmRelease`. The
 release name and namespace also match, so Flux adopts the existing Helm release
-instead of installing a second copy.
+instead of installing a second copy. Run `mise run check` before bootstrap; it
+fails when the bootstrap values and `HelmRelease` values differ.
 
 Check node and system health before continuing:
 
@@ -61,8 +65,8 @@ kubectl --namespace kube-system exec daemonset/cilium -- cilium-dbg status
 The public Git remote is `https://github.com/maxexcloo/kubelab`. Use Flux's
 standard GitHub bootstrap command and set its path to the relevant cluster:
 
-- `clusters/au` for the TrueNAS VM; or
-- `clusters/au-oci` for the OCI host after its migration gate passes.
+- `clusters/mbk` for Taco on TrueNAS; or
+- `clusters/syd` for HSP on OCI after its migration gate passes.
 
 Commit the generated `flux-system` manifests. Flux will then adopt Cilium and
 reconcile the remaining platform and workload resources from the cluster path.

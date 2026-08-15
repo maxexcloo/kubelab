@@ -7,7 +7,7 @@ spec:
   dependsOn:
     - name: platform
   interval: 30m
-  path: ./apps/overlays/au
+  path: ./apps/overlays/syd
   prune: true
   retryInterval: 2m
   sourceRef:

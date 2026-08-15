@@ -1,5 +1,3 @@
 .DS_Store
 .mise.local.toml
-.venv/
-__pycache__/
 kubeconfig

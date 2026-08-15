@@ -9,57 +9,77 @@ No row marked `migrate`, `replace`, or `retire` is complete until its route,
 identity, secrets, storage, backups, monitoring, dashboard entry, rollback, and
 old owner have been checked.
 
+## Cutover controls
+
+- `Public` uses an explicitly approved Cloudflare Tunnel route. `Internal` uses
+  Tailscale and split DNS. `Private` has no application route. `None` has no
+  network endpoint.
+- Critical state uses retained NFS or CloudNativePG, daily snapshots, off-site
+  backup, and an application-native export where available. Important state
+  uses retained NFS and the Important backup tier. Unclassified state is
+  replaceable from Git, 1Password, or upstream data.
+- Every routed user interface gets a Homepage entry and a direct Gatus probe.
+  Agents and backends are checked through their owning service. Retired
+  services lose checks only after their final consumer is gone.
+- A migration or replacement keeps the old deployment stopped but recoverable
+  for the rollback window. Rollback restores its route and, for stateful
+  services, the final snapshot or export. Retirement restores the archived old
+  owner only if a missed consumer is found. Retained systems do not transfer
+  ownership.
+
 ## Kubernetes and application services
 
-| Service                      | Current owner                          | Destination                  | Strategy      | Data and integrations                                              |
-| ---------------------------- | -------------------------------------- | ---------------------------- | ------------- | ------------------------------------------------------------------ |
-| Actual Budget                | `homelab-truenas`                      | `au`                         | Migrate       | Critical NFS data, Pocket ID                                       |
-| AIO Metadata                 | `homelab-truenas`                      | `au`                         | Migrate       | Important NFS configuration                                        |
-| AIOStreams                   | `homelab-truenas`                      | `au`                         | Migrate       | Important NFS configuration                                        |
-| Anisette                     | `homelab-truenas`                      | `au`                         | Migrate       | Stateless, public route                                            |
-| Beszel                       | `homelab-truenas`                      | `au`                         | Migrate       | Critical data, B2, Pocket ID, Resend                               |
-| Beszel agents                | `homelab` target repositories          | Both clusters and appliances | Replace       | Native host agents; no Kubernetes control-plane dependency         |
-| Bichon                       | `homelab-truenas`                      | `au`                         | Migrate       | Critical mail archive                                              |
-| Bifrost                      | `homelab-truenas`                      | `au`                         | Migrate       | Important configuration, CLIPROXYAPI and Comfy Control             |
-| BookOrbit                    | `homelab-truenas`                      | `au`                         | Migrate       | Critical library, Pocket ID, Resend                                |
-| Byparr                       | `homelab-truenas`                      | `au`                         | Migrate       | Stateless internal dependency                                      |
-| CLIPROXYAPI                  | `homelab-truenas`                      | `au`                         | Migrate       | Replaceable credentials/configuration                              |
-| Cloudflared                  | `homelab-truenas`                      | Both clusters                | Replace       | Cluster-specific platform deployment                               |
-| Comfy Control                | `homelab-truenas`                      | `au` plus Bazzite            | Replace       | Controller in Kubernetes; optional GPU worker on Bazzite           |
-| Dozzle                       | `homelab-truenas`                      | None                         | Retire        | Replaced by VictoriaLogs, Grafana, and Headlamp                    |
-| Dozzle agents                | `homelab-docker`                       | None                         | Retire        | Remove after the last Docker workload leaves                       |
-| Gatus                        | `homelab-fly`                          | Fly                          | Retain        | External failure domain, Tailscale, Resend, direct Git config      |
-| GitHub runner                | `homelab-truenas`                      | None                         | Retire        | CI validates only; Flux deploys                                    |
-| Grafana                      | `homelab-truenas`                      | `au`                         | Replace       | Platform observability, Pocket ID                                  |
-| Homepage                     | `homelab-truenas`                      | `au`                         | Migrate       | Native Kubernetes discovery plus direct appliance entries          |
-| Immich                       | `homelab-truenas`                      | `au`                         | Migrate       | Critical photos/database, Pocket ID, Resend                        |
-| Larapaper                    | `homelab-truenas`                      | `au`                         | Migrate       | Important NFS data                                                 |
-| Linkwarden                   | `homelab-truenas`                      | `au`                         | Migrate       | Critical database/archive, Pocket ID, Resend                       |
-| Miniflux                     | `homelab-truenas`                      | `au`                         | Migrate       | Critical database, Pocket ID                                       |
-| OAuth2 Proxy                 | `homelab-docker` and `homelab-truenas` | Both clusters if required    | Review        | Retain only for apps without direct OIDC/Access support            |
-| Open WebUI                   | `homelab-truenas`                      | `au`                         | Migrate       | Critical app data, Pocket ID                                       |
-| OpenSpeedTest                | `homelab-docker` and `homelab-truenas` | Both clusters                | Replace first | Disposable learning workload                                       |
-| Papra                        | `homelab-truenas`                      | `au`                         | Migrate       | Critical documents, Pocket ID                                      |
-| Pocket ID                    | `homelab-truenas`                      | `au`                         | Migrate last  | Critical identity data, Resend, break-glass required               |
-| Redlib                       | `homelab-truenas`                      | `au`                         | Migrate       | Stateless public route with Cloudflare policy                      |
-| RoMM                         | `homelab-truenas`                      | `au`                         | Migrate       | Critical database and retained NFS library, Pocket ID              |
-| RoMM workflows               | `homelab-workflows`                    | `au` Jobs                    | Replace       | Guarded storage-local Jobs; no Actions runner                      |
-| Shelfmark                    | `homelab-truenas`                      | `au`                         | Migrate       | Important data, BookOrbit and Byparr dependencies, Pocket ID       |
-| Tailscale operator/extension | `homelab` and target repositories      | Both clusters                | Replace       | OpenTofu access foundations; standard operator and Talos extension |
-| Traefik                      | `homelab-docker` and `homelab-truenas` | Both clusters                | Replace       | One Gateway API implementation per cluster                         |
-| VictoriaMetrics              | `homelab-truenas`                      | Both clusters                | Replace       | Platform metrics; home is primary                                  |
+| Service                       | Current owner                          | Destination                  | Strategy      | Access   | Data and integrations                                                                                              |
+| ----------------------------- | -------------------------------------- | ---------------------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| Actual Budget                 | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical NFS data, Pocket ID                                                                                       |
+| AIO Metadata                  | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Important NFS configuration                                                                                        |
+| AIOStreams                    | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Important NFS configuration                                                                                        |
+| Anisette                      | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Stateless                                                                                                          |
+| Beszel                        | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical data, B2, Pocket ID, Resend                                                                               |
+| Beszel agents                 | `homelab` target repositories          | Cluster and appliance owners | Replace       | Private  | Flux owns cluster agents; retained appliances need a documented native service, upgrade path, and credential owner |
+| Bichon                        | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical mail archive                                                                                              |
+| Bifrost                       | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Important configuration, CLIPROXYAPI and Comfy Control                                                             |
+| BookOrbit                     | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Critical library, Pocket ID, Resend                                                                                |
+| Byparr                        | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Stateless backend for Shelfmark                                                                                    |
+| CLIPROXYAPI                   | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Replaceable credentials and configuration, Bifrost                                                                 |
+| Cloudflared                   | `homelab-truenas`                      | Both clusters                | Replace       | Private  | Cluster-specific public ingress connector                                                                          |
+| Comfy Control                 | `homelab-truenas`                      | `mbk` plus Mandu             | Replace       | Internal | Controller in Kubernetes; optional GPU worker on Mandu                                                             |
+| Dozzle                        | `homelab-truenas`                      | None                         | Retire        | Internal | Replaced by VictoriaLogs, Grafana, and Headlamp                                                                    |
+| Dozzle agents                 | `homelab-docker`                       | None                         | Retire        | Private  | Remove after the last Docker workload leaves                                                                       |
+| Gatus                         | `homelab-fly`                          | Fly                          | Retain        | Internal | External failure domain, Tailscale, Resend, direct Git config                                                      |
+| GitHub runner                 | `homelab-truenas`                      | None                         | Retire        | None     | CI validates only; Flux deploys                                                                                    |
+| Grafana                       | `homelab-truenas`                      | `mbk`                        | Replace       | Internal | Platform observability, Pocket ID                                                                                  |
+| Homepage                      | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Native Kubernetes discovery plus direct appliance entries                                                          |
+| Immich                        | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Critical photos and database, Pocket ID, Resend                                                                    |
+| Larapaper                     | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Important NFS data                                                                                                 |
+| Linkwarden                    | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Critical database and archive, Pocket ID, Resend                                                                   |
+| Miniflux                      | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical database, Pocket ID                                                                                       |
+| OAuth2 Proxy                  | `homelab-docker` and `homelab-truenas` | Both clusters if required    | Review        | Internal | Retain only for apps without direct OIDC or Access support                                                         |
+| Open WebUI                    | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Critical application data, Pocket ID                                                                               |
+| OpenSpeedTest                 | `homelab-docker` and `homelab-truenas` | Both clusters                | Replace first | Internal | Disposable learning workload                                                                                       |
+| Papra                         | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical documents, Pocket ID                                                                                      |
+| Pocket ID                     | `homelab-truenas`                      | `mbk`                        | Migrate last  | Public   | Critical identity data, Resend, break-glass required                                                               |
+| Redlib                        | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Stateless, Cloudflare policy                                                                                       |
+| RoMM                          | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Critical database and retained NFS library, Pocket ID                                                              |
+| RoMM workflows                | `homelab-workflows`                    | `mbk` Jobs                   | Replace       | None     | Guarded storage-local Jobs; no Actions runner                                                                      |
+| Shelfmark                     | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Important data, BookOrbit and Byparr dependencies, Pocket ID                                                       |
+| Tailscale Kubernetes operator | `homelab` and target repositories      | Both clusters                | Replace       | Private  | Flux-owned operator; OAuth client, tags, and policy stay in OpenTofu                                               |
+| Traefik                       | `homelab-docker` and `homelab-truenas` | Both clusters                | Replace       | Private  | Gateway API implementation for internal and public routes                                                          |
+| VictoriaMetrics               | `homelab-truenas`                      | Both clusters                | Replace       | Internal | Replaceable platform metrics; home is primary                                                                      |
 
 ## Retained appliances and substrate
 
-| System    | Current owner     | Destination       | Strategy | Notes                                                                         |
-| --------- | ----------------- | ----------------- | -------- | ----------------------------------------------------------------------------- |
-| Bazzite   | `homelab`         | Bazzite           | Retain   | Rootless Podman Quadlets; optional AMD GPU worker over Tailscale              |
-| HAOS      | `homelab`         | HAOS appliance    | Retain   | Includes ESPHome, ESPresense, Matter Hub, Studio Code Server, and Zigbee2MQTT |
-| Hotdog    | `homelab`         | Hotdog            | Retain   | Linux/ZFS receiver on 2 GB RAM; do not install Talos                          |
-| Netboot   | `homelab-truenas` | TrueNAS appliance | Retain   | Keep storage-local unless migration solves a concrete problem                 |
-| Syncthing | `homelab-truenas` | TrueNAS appliance | Retain   | Keep storage-local; expose status to Homepage/Gatus directly                  |
-| TrueNAS   | `homelab`         | TrueNAS           | Retain   | Storage, snapshots, replication, and the `au` Talos VM                        |
-| UniFi     | `homelab`         | UniFi appliance   | Retain   | DHCP reservation, routing, and network policy remain substrate                |
+| System                      | Current owner     | Destination         | Strategy | Notes                                                                                            |
+| --------------------------- | ----------------- | ------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| Mandu                       | `homelab`         | Bazzite             | Retain   | Rootless Podman Quadlets; optional AMD GPU worker over Tailscale                                 |
+| HAOS                        | `homelab`         | HAOS appliance      | Retain   | Includes ESPHome, ESPresense, Matter Hub, Studio Code Server, and Zigbee2MQTT                    |
+| Hotdog                      | `homelab`         | Hotdog              | Retain   | Linux/ZFS receiver on 2 GB RAM; do not install Talos                                             |
+| Talos Tailscale extension   | `homelab`         | Both Talos nodes    | Replace  | Host-level recovery path baked into each cluster image; identity stays in cluster OpenTofu state |
+| Appliance Tailscale clients | Appliance owners  | Retained appliances | Retain   | Preserve independently of Kubernetes operator and legacy service retirement                      |
+| Netboot                     | `homelab-truenas` | TrueNAS appliance   | Retain   | Keep storage-local unless migration solves a concrete problem                                    |
+| Syncthing                   | `homelab-truenas` | TrueNAS appliance   | Retain   | Keep storage-local; expose status to Homepage/Gatus directly                                     |
+| TrueNAS                     | `homelab`         | TrueNAS             | Retain   | Storage, snapshots, replication, and the Taco Talos VM                                           |
+| UniFi                       | `homelab`         | UniFi appliance     | Retain   | DHCP reservation, routing, and network policy remain substrate                                   |
 
 ## External ownership
 
@@ -70,7 +90,10 @@ old owner have been checked.
 | Cluster Cloudflare tunnels and credentials                      | OpenTofu                                  | Prevent accidental replacement |
 | Control D app rules                                             | Direct Crossplane provider-http resources | Orphan                         |
 | Fly Gatus app, Machine, and secrets                             | OpenTofu exception                        | Reviewed replacement only      |
-| OCI network, image, NSG, and `au-oci` VM                        | OpenTofu                                  | Reviewed saved plan only       |
+| OCI network, image, NSG, and `hsp` VM                           | OpenTofu                                  | Reviewed saved plan only       |
 | Pocket ID app clients and groups                                | Direct Crossplane provider-http resources | Orphan                         |
 | Resend app keys                                                 | Direct Crossplane provider-http resources | Orphan                         |
-| Tailscale grants, tags, OAuth, and bootstrap keys               | OpenTofu                                  | Reviewed saved plan only       |
+| Global Tailscale ACLs/grants and tag owners                     | Foundations OpenTofu                      | Reviewed saved plan only       |
+| Tailscale operator OAuth clients                                | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
+| Talos-node Tailscale bootstrap identities                       | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
+| Retained appliance Tailscale identities                         | Appliance owner                           | Explicit appliance procedure   |

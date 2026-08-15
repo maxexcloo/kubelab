@@ -7,7 +7,7 @@ spec:
   dependsOn:
     - name: platform
   interval: 30m
-  path: ./apps/overlays/au-oci
+  path: ./apps/overlays/mbk
   prune: true
   retryInterval: 2m
   sourceRef:

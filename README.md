@@ -2,15 +2,16 @@
 
 Kubelab is the Kubernetes and Flux GitOps source of truth for a two-cluster
 homelab. It is both a real migration and a practical Kubernetes learning
-environment. The separate `homelab` repository owns infrastructure and Talos
-node lifecycle.
+environment. It owns workloads and app-scoped integrations; the separate
+`homelab` repository owns everything required to rebuild or reach a cluster
+while Kubernetes is unavailable.
 
-The first cluster is `au`, a single Talos VM on TrueNAS. Once it proves
+The first cluster is `mbk`, with the single Taco Talos VM on TrueNAS. Once it proves
 rebuilds, Flux, networking, HTTP, secrets, storage, and recovery, the empty OCI
-Sydney host becomes the independent `au-oci` cluster. Hotdog remains a small
-ZFS backup appliance and Bazzite remains an optional Podman/GPU worker.
+Sydney HSP host becomes the independent `syd` cluster. Hotdog remains a small
+ZFS backup appliance and Mandu remains an optional Bazzite Podman/GPU worker.
 
-Read [plan.md](plan.md) for architecture, ownership, migration gates, and
+Read [PLAN.md](PLAN.md) for architecture, ownership, migration gates, and
 recovery. Nothing in CI deploys a cluster: validation runs in GitHub Actions,
 while Flux pulls approved state from Git.
 
@@ -47,6 +48,6 @@ Each stage is intentionally observable before the next abstraction is added:
 8. Crossplane HTTP resources teach external API reconciliation only after the
    cluster itself is understood.
 
-The repository will stop at the review gates in `plan.md` before live routes or
+The repository will stop at the review gates in `PLAN.md` before live routes or
 workload cutovers. Destructive host and infrastructure gates live in
 `homelab`.

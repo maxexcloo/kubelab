@@ -10,7 +10,7 @@ spec:
     - name: private
       namespace: networking
   hostnames:
-    - speed.au.excloo.com
+    - speed.mbk.excloo.dev
   rules:
     - backendRefs:
         - name: openspeedtest

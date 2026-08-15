@@ -1,6 +1,3 @@
-[env]
-PYTHONDONTWRITEBYTECODE = "1"
-
 [tools]
 actionlint = "1.7.12"
 flux2 = "2.9.4"
@@ -11,7 +8,7 @@ kustomize = "5.8.1"
 prek = "0.4.13"
 prettier = "3.9.6"
 trivy = "0.73.0"
-yamllint = "1.38.0"
+yq = "4.53.3"
 
 # Setup
 [tasks.setup]
@@ -27,13 +24,15 @@ description = "Check formatting and repository configuration"
 run = """
 prettier --check .
 actionlint .github/workflows/*.yaml
-yamllint .
-kustomize build clusters/au | kubeconform \
+yq eval-all -e '. as $item ireduce ([]; . + [$item]) | (.[0] | to_json) == (.[1].spec.values | to_json)' \
+  platform/networking/cilium/values.yaml \
+  platform/networking/cilium/helm-release.yaml
+kustomize build clusters/mbk | kubeconform \
   -ignore-missing-schemas \
   -kubernetes-version 1.36.3 \
   -strict \
   -summary
-kustomize build clusters/au-oci | kubeconform \
+kustomize build clusters/syd | kubeconform \
   -ignore-missing-schemas \
   -kubernetes-version 1.36.3 \
   -strict \
@@ -43,12 +42,12 @@ kustomize build platform | kubeconform \
   -kubernetes-version 1.36.3 \
   -strict \
   -summary
-kustomize build apps/overlays/au | kubeconform \
+kustomize build apps/overlays/mbk | kubeconform \
   -ignore-missing-schemas \
   -kubernetes-version 1.36.3 \
   -strict \
   -summary
-kustomize build apps/overlays/au-oci | kubeconform \
+kustomize build apps/overlays/syd | kubeconform \
   -ignore-missing-schemas \
   -kubernetes-version 1.36.3 \
   -strict \

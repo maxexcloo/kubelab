@@ -2,14 +2,17 @@
 
 ## Project Overview
 
-This repository is the source of truth for Kubernetes resources reconciled by
-Flux. Infrastructure and Talos node lifecycle belong to the separate
-`homelab` repository.
+This repository owns Kubernetes resources reconciled by Flux and app-scoped
+integrations. The separate `homelab` repository owns everything required to
+rebuild or reach a cluster while Kubernetes is unavailable.
 
 ## Conventions
 
-- Read `plan.md` before changing architecture, ownership, deletion behaviour,
+- Read `PLAN.md` before changing architecture, ownership, deletion behaviour,
   networking, storage, secrets, or migration order.
+- Treat `PLAN.md` as authoritative for cross-repository ordering and workload
+  ownership, and `homelab/PLAN.md` as authoritative for that repository's
+  substrate implementation details.
 - Use Australian English in project-owned prose and identifiers.
 - Use `.yaml`, not `.yml`, for project-owned YAML.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
@@ -32,7 +35,7 @@ type. Use Kustomize only for composition and small patches; do not use
 `configMapGenerator` or `secretGenerator`. Keep chart values directly in the
 upstream Flux `HelmRelease` that consumes them.
 
-Keep root Markdown limited to `AGENTS.md`, `README.md`, and `plan.md`. Put later
+Keep root Markdown limited to `AGENTS.md`, `README.md`, and `PLAN.md`. Put later
 operational documentation under `docs/`.
 
 ## Verification

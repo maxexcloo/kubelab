@@ -2,17 +2,22 @@
 
 ## Status
 
-This document is the authoritative implementation plan for migrating the
-homelab to Kubernetes. It replaces the disposable local-cluster plan.
+This document is authoritative for cross-repository migration ordering,
+workload ownership, and cutover gates. It replaces the disposable local-cluster
+plan. The separate `homelab/PLAN.md` is authoritative for implementation inside
+that repository, including state layout, providers, cluster compute, Talos, and
+recovery access. A repository-scoped plan may add detail but must not redefine
+the ordering or ownership recorded here.
 
 The first implementation target is a single-node Talos cluster in a TrueNAS
-virtual machine. The `homelab` repository owns the VM, network, Talos image,
-machine configuration, bootstrap, and recovery credentials. This repository
-starts at the Kubernetes API boundary: Flux, platform controllers, and
-workloads. The trial must prove GitOps, networking, storage, secrets, recovery,
-and one disposable workload before the existing Sydney OCI host (`hsp`) is
-reset. No valued workload is removed until its replacement passes the
-applicable migration gate.
+virtual machine. This repository owns Kubernetes workloads and their app-scoped
+integrations. The `homelab` repository owns everything required to rebuild or
+reach a cluster while Kubernetes is unavailable, including the VM, network,
+Talos lifecycle, bootstrap, recovery credentials, and access foundations. The
+trial must prove GitOps, networking, storage, secrets, recovery, and one
+disposable workload before the existing Sydney OCI host (`hsp`) is reset. No
+valued workload is removed until its replacement passes the applicable
+migration gate.
 
 Git history is the implementation log. Changes use small, imperative commits
 that record one coherent outcome. This complete plan is the first commit and
@@ -32,8 +37,8 @@ contains no implementation files.
   Cloudflare Tunnel.
 - Preserve 1Password secrets, Pocket ID OIDC, Resend mail, Backblaze B2 object
   storage, Fly-hosted monitoring, Homepage, backups, and existing appliances.
-- Generate Homepage entries and Gatus probes from the same application
-  metadata rather than maintaining independent lists.
+- Maintain and validate aligned Homepage entries and Gatus probes using direct
+  configuration and native Kubernetes discovery.
 - Make ownership, deletion behaviour, recovery, and cutover explicit for every
   external resource and stateful service.
 
@@ -55,10 +60,10 @@ contains no implementation files.
 
 | Name | Location | Shape | Role | Storage |
 | --- | --- | --- | --- | --- |
-| `au` | TrueNAS VM at home | 12 vCPU, 32 GB RAM, about 160 GB boot disk | Single-node Talos control plane and primary workloads | TrueNAS NFS/iSCSI plus local scratch |
-| `au-oci` | OCI Sydney | Ampere A1, 2 OCPU, 12 GB RAM, 160 GB boot disk | Single-node Talos control plane and independent secondary workloads | Local-path, replaceable data only |
+| `mbk` | Taco VM on TrueNAS at home | 12 vCPU, 32 GiB RAM, 64 GiB boot disk | Single-node Talos control plane and primary workloads | TrueNAS NFS plus local scratch |
+| `syd` | HSP VM on OCI Sydney | Ampere A1, 2 OCPU, 12 GiB RAM, 64 GiB boot disk | Single-node Talos control plane and independent secondary workloads | Local-path, replaceable data only |
 | `hotdog` | United States | Existing Linux host, 2 GB RAM | ZFS replication receiver and host-monitored appliance | Existing ZFS |
-| `bazzite` | Home | Existing Bazzite workstation with AMD RX 6000 GPU | Opportunistic rootless Podman worker | Existing local storage |
+| `mandu` | Home | Existing Bazzite workstation with AMD RX 6000 GPU | Opportunistic rootless Podman worker | Existing local storage |
 
 Both Kubernetes clusters schedule workloads on their control-plane node. They
 are deliberately independent; a WAN failure cannot break etcd quorum. The
@@ -83,8 +88,7 @@ VM or network change:
 - The workstation route inventory confirms that the proposed
   `10.100.0.0/20` cluster range does not overlap the home LAN, either TrueNAS
   network, Tailscale, or local container networks. The independent OCI VCN is
-  `10.0.0.0/16`; do not advertise that overlapping site range through
-  Tailscale.
+  `10.20.0.0/16` and its initial subnet is `10.20.0.0/24`.
 
 A TrueNAS bridge is a prerequisite for the trial. Do not attach the VM through
 MACVLAN because Linux host-to-guest communication is restricted and the node
@@ -94,9 +98,8 @@ network changes. Keep `eno1` and `10.0.0.3/22` unchanged as the management and
 rollback path. Attach the VM NIC to `br4`, let Talos maintenance mode obtain
 its first address through DHCP, then reserve the currently unused `10.4.0.4`
 for that NIC in UniFi before generating endpoint-specific Talos configuration.
-`au` is the Kubernetes cluster name only; the TrueNAS VM and Talos node use a
-separate user-selected hostname that is not `au`, `talos`, or a Kubernetes
-role name.
+`mbk` is the Kubernetes cluster identifier. Its TrueNAS VM and Talos node are
+named `taco`, with canonical FQDN `taco.mbk.excloo.net`.
 
 Bazzite also has a second physical NIC. It may later join the `Services`
 network for direct storage and opt-in workload traffic, but that is independent
@@ -111,10 +114,10 @@ must not change the Bazzite kernel or host GPU driver.
 
 | Network | CIDR |
 | --- | --- |
-| `au` Pods | `10.100.0.0/22` |
-| `au` Services | `10.100.4.0/22` |
-| `au-oci` Pods | `10.100.8.0/22` |
-| `au-oci` Services | `10.100.12.0/22` |
+| `mbk` Pods | `10.100.0.0/22` |
+| `mbk` Services | `10.100.4.0/22` |
+| `syd` Pods | `10.100.8.0/22` |
+| `syd` Services | `10.100.12.0/22` |
 
 Before bootstrap, verify that `10.100.0.0/20` does not overlap the LAN, OCI,
 Tailscale routes, Docker/Podman networks, TrueNAS networks, or VPN client
@@ -129,7 +132,7 @@ There is no MetalLB initially. Each cluster has two ingress paths:
 
 - Private: Traefik implementing Kubernetes Gateway API, exposed through the
   Tailscale Kubernetes operator. Control D provides split DNS for private
-  `*.excloo.com` names.
+  `*.excloo.dev` service names.
 - Public: a cluster-specific `cloudflared` deployment and Cloudflare Tunnel.
   Only explicitly labelled HTTPRoutes are published.
 
@@ -149,7 +152,14 @@ Private services are the default. Public exposure requires an explicit
 HTTPRoute and Cloudflare Tunnel route, TLS, monitoring, and an owner. Cloudflare
 Access, WAF, and rate limiting are attached per application where appropriate.
 
-Pocket ID remains the OIDC provider and ultimately runs in `au`. One
+Use `excloo.net` for infrastructure names and `excloo.dev` for APIs and
+services. Kubernetes services use cluster-qualified names such as
+`<service>.mbk.excloo.dev` and `<service>.syd.excloo.dev`. Exposure policy and
+split DNS determine whether a service is public or private; the TLD does not.
+Each legacy hostname migrates individually and remains available until the new
+route is healthy and its rollback window expires.
+
+Pocket ID remains the OIDC provider and ultimately runs in `mbk`. One
 Headlamp instance runs in each cluster and authenticates through the
 Kubernetes API server's Pocket ID OIDC configuration. Do not give Headlamp a
 broad static service-account token. Store a tested cluster-admin break-glass
@@ -178,7 +188,7 @@ extensions, snapshot behaviour, retained-volume recovery, and upgrade health.
 The experimental API-only drivers are not production defaults. Record that
 decision before migrating a database.
 
-`au-oci` uses local-path storage only for replaceable state, caches, and replicas of
+`syd` uses local-path storage only for replaceable state, caches, and replicas of
 data whose authority is elsewhere. It must not become the only copy of valued
 data.
 
@@ -188,12 +198,17 @@ data.
 
 | Concern | Authoritative owner | Notes |
 | --- | --- | --- |
-| OCI VCN, subnet, NSG, Talos image, and `au-oci` VM | OpenTofu | Separate state from app-facing resources; reviewed plan before apply |
+| OCI VCN, subnet, NSG, Talos image, and `hsp` VM | OpenTofu | Root `homelab` state; reviewed saved plan before apply |
 | TrueNAS trial VM | Manual, then OpenTofu if import is drift-free | Protect imported VM from destruction |
-| GCS state foundations | OpenTofu bootstrap state | Versioning, retention, least-privilege credentials |
-| Tailscale ACLs, grants, tags, OAuth clients, bootstrap keys | OpenTofu | Cluster/node identity is substrate access |
+| Existing GCS state bucket | External bootstrap prerequisite | No root backed by the bucket may manage it |
+| Shared state IAM and access foundations | `homelab` foundations OpenTofu | Versioning, retention, and least privilege verified before use |
+| Global Tailscale ACLs/grants and tag owners | `homelab` foundations OpenTofu | Shared access policy must survive either cluster |
+| Tailscale operator OAuth client | Cluster-specific `homelab` OpenTofu | Separate least-privilege credential for each cluster |
+| Talos node Tailscale extension and bootstrap identity | Cluster-specific `homelab` OpenTofu | Host-level recovery path; extension is baked into each Talos image |
+| Tailscale Kubernetes operator | Flux in `kubelab` | In-cluster application and Kubernetes API access |
+| Retained appliance Tailscale clients | Appliance owner | Do not couple appliance access to Kubernetes or legacy service retirement |
 | Cluster Cloudflare Tunnel and bootstrap credential | OpenTofu | Required before in-cluster app reconciliation |
-| GitHub repository and Flux deploy key bootstrap | OpenTofu/manual bootstrap | Flux pulls; Actions do not deploy |
+| Public GitHub repository and Flux bootstrap | Manual bootstrap | Flux pulls over public HTTPS without a deploy key; Actions do not deploy |
 | Talos image, machine configuration, bootstrap, and client configuration | `homelab` OpenTofu | Latest stable Sidero Labs provider; use write-only or ephemeral arguments where supported |
 | Kubernetes platform and workloads | Flux | No second Kubernetes deployer |
 | Per-app DNS, tunnel routes, Access, WAF, and rate limits | Crossplane HTTP resources | Home-hosted control plane; orphan on delete by default |
@@ -204,12 +219,14 @@ data.
 | Fly Gatus app, Machine, and secrets | OpenTofu exception | Monitoring must remain outside the home failure domain |
 | 1Password vault and service-account roots | Manual bootstrap | Prevent circular secret dependency |
 
-OpenTofu owns substrate infrastructure. Crossplane owns only app-facing
-external APIs whose failure cannot prevent rebuilding the Kubernetes substrate.
-Do not add provider-opentofu during the initial migration. Crossplane starts on
-`au` only, with raw provider-http resources so API behaviour remains
-visible while learning. Introduce compositions only after at least three
-resources share a stable schema and lifecycle.
+`homelab` owns anything required to rebuild or reach a cluster while Kubernetes
+is unavailable. OpenTofu owns that substrate and access infrastructure.
+Crossplane owns only app-facing external APIs whose failure cannot prevent
+cluster rebuild or recovery access. Do not add provider-opentofu during the
+initial migration. Crossplane starts on `mbk` only, with raw provider-http
+resources so API behaviour remains visible while learning. Introduce
+compositions only after at least three resources share a stable schema and
+lifecycle.
 
 Every Crossplane managed resource defaults to orphan-on-delete. A resource may
 be configured for external deletion only after its data classification,
@@ -222,8 +239,8 @@ status codes.
 
 | Repository | End state |
 | --- | --- |
-| `kubelab` | Flux sources, Kubernetes platform controllers, workloads, validation, and migration documentation |
-| `homelab` | OpenTofu substrate, Talos lifecycle, access foundations, appliances, and the Fly Gatus exception |
+| `kubelab` | Flux sources, Kubernetes platform controllers, workloads, app-scoped integrations, validation, and migration documentation |
+| `homelab` | Cluster rebuild and recovery access, OpenTofu substrate, Talos lifecycle, appliances, and the Fly Gatus exception |
 | `homelab-truenas` | Retired after all application ownership leaves TrueNAS Apps; retains only unavoidable NAS-local configuration if required |
 | `homelab-docker` | Retired after Docker services migrate or receive an explicit appliance exception |
 | `homelab-workflows` | Replaced by storage-local Kubernetes Jobs after RoMM workflows are proven |
@@ -237,15 +254,25 @@ switch consumers, and only then remove the old owner.
 
 Create a dedicated Kubernetes vault in 1Password as a manual root of trust:
 
-- `au` receives a read/write service account because it must consume and
+- `mbk` receives a read/write service account because it must consume and
   create selected app credentials.
-- `au-oci` receives a read-only service account.
+- `syd` receives a read-only service account.
 - External Secrets Operator uses the 1Password SDK provider.
 - Normal secret creation uses `PushSecret` with `IfNotExists` and
   `deletionPolicy: None`.
-- Provider credentials, Talos secrets, Flux deploy keys, break-glass material,
+- Provider credentials, Talos secrets, break-glass material,
   database recovery credentials, and Cloudflare Tunnel tokens never enter Git,
   ordinary OpenTofu outputs, CI logs, or unencrypted plan artefacts.
+
+The first secret delivery is deliberately manual. From a trusted workstation,
+retrieve the cluster's 1Password service-account token and inject only the
+bootstrap Kubernetes Secret after the API and CNI are healthy. ESO then owns
+normal secret consumption. OpenTofu creates the Tailscale OAuth client and
+Cloudflare Tunnel and stores their credentials in 1Password; ESO materialises
+the Kubernetes Secrets; Flux reconciles the Tailscale operator and
+`cloudflared`; and Crossplane may manage app routes only after the cluster
+tunnel is healthy. Document the exact re-injection and rotation commands in
+`homelab` recovery documentation before the first cutover.
 
 Secret rotation must allow an overlap period where the provider permits it.
 Changes that can replace or reveal credentials require a saved, reviewed
@@ -263,7 +290,9 @@ or `secretGenerator`, generated manifests, templating scripts, or repository-
 defined resource types. Kustomize may only compose upstream resources and
 small cluster-specific patches. Helm values live directly in the upstream
 Flux `HelmRelease` that consumes them; the Cilium bootstrap keeps one ordinary
-Helm values file because networking must exist before Flux can run.
+Helm values file because networking must exist before Flux can run. Validation
+must compare the bootstrap file with `.spec.values` in the Cilium
+`HelmRelease`; a difference blocks bootstrap.
 
 Homepage discovers local Services through its native Kubernetes integration
 and `gethomepage.dev/*` annotations. Cross-cluster services and appliances are
@@ -283,12 +312,12 @@ updates. The initial baseline is:
 
 | Component | Initial version | Policy |
 | --- | --- | --- |
-| Talos Linux | `v1.13.8` | Latest stable; patch updates after `au-oci` canary |
+| Talos Linux | `v1.13.8` | Latest stable; patch updates after the `syd` canary |
 | Sidero Labs Talos provider | `0.11.0` | Latest stable; implemented in `homelab`, not this repository |
-| Kubernetes | `v1.36.3` | Latest stable; upgrade separately from Talos |
+| Kubernetes | `v1.36.3` | Latest stable version in the approved Cilium pairing |
 | Flux | `v2.9.4` | Pin bootstrap manifests |
-| Gateway API CRDs | `v1.5.1` | Standard channel only |
-| Cilium | `v1.19.6` | Keep kube-proxy initially; tested through Kubernetes 1.34 |
+| Gateway API CRDs | `v1.6.1` | Standard channel only; aligned with Cilium `v1.20.0` |
+| Cilium | `v1.20.0` | Latest stable; lists Kubernetes 1.36 as e2e-tested |
 | Traefik | chart `40.2.0`, app `v3.7.1` | Gateway API provider only |
 | cert-manager | `v1.21.0` | Do not use the known-problematic disabled renewal policy |
 | External Secrets Operator | `v2.6.0` | 1Password SDK provider and PushSecret |
@@ -298,12 +327,13 @@ updates. The initial baseline is:
 | CloudNativePG | operator `1.30.0` | Single instance by default |
 | Tailscale | `v1.98.10` | Keep node extension and operator compatible |
 
-Before the first cluster bootstrap, resolve every chart, container, provider,
-and tool to an immutable version in its owning repository. Do not silently
-substitute a different version. Track the latest stable release of every
-component rather than deliberately lagging a minor release for soak time. If
-the latest stable components are not an upstream-tested combination, prove the
-combination in the home trial or stop and update this plan before deployment.
+Kubernetes `v1.36.3` and Cilium `v1.20.0` were approved together on 2026-08-15.
+Cilium's stable compatibility matrix lists Kubernetes 1.36 as e2e-tested. Use
+the newest stable upstream-tested combination rather than deliberately lagging
+a minor release. Resolve every chart, container, provider, and tool to an exact
+immutable version in its owning repository, and let Renovate propose the next
+compatible update for review. Do not treat a successful installation of an
+unlisted combination as compatibility proof.
 
 ## Repository Design
 
@@ -314,17 +344,17 @@ Keep the tree shallow and make cluster differences explicit:
 ├── AGENTS.md
 ├── README.md
 ├── LICENSE
-├── plan.md
+├── PLAN.md
 ├── mise.toml
+├── renovate.json
 ├── .pre-commit-config.yaml
 ├── .github/
-│   ├── renovate.json5
 │   └── workflows/validate.yaml
 ├── clusters/
-│   ├── au-oci/
+│   ├── mbk/
 │   │   ├── flux-system/
 │   │   └── kustomization.yaml
-│   └── au/
+│   └── syd/
 │       ├── flux-system/
 │       └── kustomization.yaml
 ├── platform/
@@ -339,8 +369,8 @@ Keep the tree shallow and make cluster differences explicit:
 ├── apps/
 │   ├── base/
 │   └── overlays/
-│       ├── au-oci/
-│       └── au/
+│       ├── mbk/
+│       └── syd/
 └── docs/
 ```
 
@@ -350,9 +380,8 @@ operators, and cases where the abstraction would hide important Kubernetes
 behaviour. All YAML files use `.yaml`.
 
 Local tools are managed by Mise and include version-pinned `kubectl`, `flux`,
-`helm`, `kustomize`, `cilium`, `trivy`, `kubeconform`, `yamllint`, and
-`pre-commit`/Prek-compatible hooks. Prefer direct tool commands and standard
-configuration over repository-specific scripts.
+`helm`, `kustomize`, `trivy`, `kubeconform`, and Prek. Prefer direct tool
+commands and standard configuration over repository-specific scripts.
 
 Prek runs formatting, YAML validation, Kustomize renders, Kubernetes schema
 validation, and secret scanning. GitHub Actions runs the same validation on
@@ -374,8 +403,8 @@ pulling Git.
    container architecture support, and provider API access in `homelab`.
 5. Archive the existing `homelab` implementation on a protected branch, then
    simplify its main branch to explicit OpenTofu stacks without changing live
-   ownership or state during the repository cleanup. Use new
-   `states/homelab-kubernetes/<stack>` GCS prefixes and leave the existing
+   ownership or state during the repository cleanup. Use the reviewed
+   `homelab` GCS prefix for the single substrate root and leave the existing
    `states/core` objects untouched throughout the transition.
 
 Exit gate: validation is reproducible locally, the inventory has no unknown
@@ -384,46 +413,35 @@ reviewed `homelab` plans show no unexplained infrastructure changes.
 
 ### Phase 1: Home Talos trial (`homelab` repository)
 
-This phase is implemented and logged in `homelab`; this repository holds no
-Talos machine configuration, secrets, Image Factory schematic, or lifecycle
-commands.
+This phase is implemented and logged in `homelab`; its `PLAN.md` owns the exact
+provider resources, VM procedure, Talos configuration, state layout, and
+recovery operations. This repository holds no Talos machine configuration,
+secrets, Image Factory schematic, or lifecycle commands.
 
-1. Review and apply a staged TrueNAS bridge change with console-safe rollback;
-   verify both TrueNAS management and storage access after commit.
-2. Create the TrueNAS VM with 12 vCPU, 32 GB RAM, a 160 GiB boot zvol on
-   `truenas-nvme`, UEFI, a virtio NIC on the reviewed bridge, and a stable
-   UniFi DHCP reservation. Use OpenTofu only if the TrueNAS provider produces
-   an exact, non-destructive plan against version 26.0; otherwise keep this
-   resource manual and documented.
-3. Use the stable `siderolabs/talos` OpenTofu provider `0.11.0` to resolve the
-   Talos 1.13.8 Image Factory schematic. Include only
-   `siderolabs/tailscale` for host-level recovery access and
-   `siderolabs/qemu-guest-agent` for the TrueNAS/KVM guest lifecycle. Add
-   `siderolabs/iscsi-tools` later only if the iSCSI evaluation begins.
-4. Generate Talos secrets and machine configuration in the isolated `au`
-   OpenTofu state. Use write-only or ephemeral provider arguments where the
-   stable provider supports them, push recovery material to 1Password, and
-   never emit secret-bearing values as ordinary outputs or plan artefacts.
-5. Confirm the install disk from maintenance mode; never assume `/dev/sda` or
-   `/dev/vda`.
-6. Install the single node, bootstrap etcd once, retrieve kubeconfig, and store
-   recovery material in 1Password.
-7. Verify reboot, API access by LAN and Tailscale, clock, DNS, node health,
-   Kubernetes scheduling, and a Talos patch/upgrade dry run.
+The substrate hand-off must provide a healthy Kubernetes API, reviewed Pod and
+Service CIDRs, kubeconfig and Talos recovery material in 1Password, LAN and
+host-level Tailscale access, the stable node identity, confirmed install disk,
+and a tested reboot path. It must also confirm that the selected Kubernetes and
+Cilium versions satisfy the compatibility gate before machine configuration is
+applied.
 
 Exit gate: the VM can be rebooted and reconstructed from documented inputs;
 `talosctl health`, node readiness, and a disposable Pod all succeed.
 
-### Phase 2: Flux and platform bootstrap
+### Phase 2: Cilium, Flux, and platform bootstrap
 
-Bootstrap in dependency order with Flux health checks between layers:
+Install the CNI before Flux because Talos uses `cni.name: none`. After Flux is
+available, use health checks between the remaining layers:
 
-1. Flux controllers and Git deploy key.
-2. Gateway API CRDs and other separately managed CRDs.
-3. Cilium/Hubble while retaining kube-proxy.
+1. Cilium/Hubble manually with Helm while retaining kube-proxy; verify Pod and
+   Service networking.
+2. Flux controllers and the public HTTPS Git source; let Flux adopt the existing
+   Cilium release without replacing it. Do not create an unnecessary deploy key.
+3. Gateway API CRDs and other separately managed CRDs.
 4. cert-manager and Traefik.
 5. Tailscale operator and Cloudflare Tunnel.
-6. External Secrets Operator and the home 1Password service account.
+6. External Secrets Operator and the manually injected home 1Password bootstrap
+   Secret.
 7. Static TrueNAS NFS test storage; CSI evaluation follows separately.
 8. Headlamp with OIDC and least-privilege access.
 9. VictoriaMetrics/VictoriaLogs and Grafana, sized for a single-node homelab.
@@ -457,20 +475,21 @@ Exit gate: Homepage discovery and the direct Gatus probe work, Crossplane
 cannot accidentally delete the test resource, and the selected storage path
 has a demonstrated restore procedure.
 
-### Phase 4: Build `au-oci` as the canary cluster
+### Phase 4: Build `syd` as the canary cluster
 
 1. Add a Talos OCI custom image for `arm64` to `homelab` and validate it in a
    non-destructive OpenTofu plan.
 2. Replace the empty HSP Ubuntu instance only after the home success gate and a
    final confirmation that no valued state remains; the Kubernetes cluster on
-   that host is named `au-oci`.
-3. Provision the OCI network, NSG, boot volume, and Talos instance from the `au-oci`
-   state. Keep resource identities stable with keyed `for_each` values.
+   that host is named `syd` and its Talos node is named `hsp`.
+3. Provision the OCI network, NSG, 64 GiB boot volume, and Talos instance from
+   the root `homelab` state. Keep resource identities stable with keyed
+   `for_each` values.
 4. Bootstrap Talos, Flux, Tailscale, Cloudflare Tunnel, read-only 1Password,
    local-path storage, Headlamp, and the smaller observability footprint.
-5. Use `au-oci` as the first canary for Talos, Kubernetes, and platform upgrades.
+5. Use `syd` as the first canary for Talos, Kubernetes, and platform upgrades.
 
-Exit gate: `au-oci` is independently rebuildable and a private/public disposable
+Exit gate: `syd` is independently rebuildable and a private/public disposable
 workload is reachable without home connectivity.
 
 ### Phase 5: Migrate workloads in dependency order
@@ -489,8 +508,9 @@ Use one migration pull request and one cutover record per workload group:
 6. Pocket ID itself only after break-glass access, export/restore, and all OIDC
    clients have been exercised.
 7. RoMM and its guarded library workflows; replace workflow runners with
-   Kubernetes Jobs that mount storage locally and enforce the same safety
-   checks.
+   Kubernetes Jobs only after NFS-mounted execution proves equivalent
+   atomicity, permissions, locking, performance, and safety checks against a
+   disposable copy of the library.
 
 For every workload:
 
@@ -563,17 +583,22 @@ exists. Its route, identity, secrets, data, backups, mail, object storage,
 monitor, dashboard entry, resource limits, architecture support, old owner,
 and rollback procedure must all be present.
 
+Before a stateful workload enters its cutover pull request, extend its inventory
+record with the source dataset and path, size, UID/GID, database and application
+versions, snapshot policy, export method, target PVC and storage class, expected
+downtime, and dated restore evidence. Keep this detail in workload-specific
+cutover documentation rather than widening the summary table.
+
 ## External OpenTofu Safety Contract
 
 These rules apply to the separate `homelab` repository. This repository must
 not contain OpenTofu configuration, provider locks, plans, state, or IaC helper
 tooling.
 
-- Use remote GCS state with versioning, retention, encryption, and new
-  `states/homelab-kubernetes/<stack>` prefixes for bootstrap, `au`, `au-oci`,
-  and TrueNAS. Leave the legacy `states/core` prefix untouched until every
+- Use remote GCS state with versioning and the `homelab` prefix for the single
+  substrate root. Leave the legacy `states/core` prefix untouched until every
   ownership transfer and rollback window is complete; do not migrate it into
-  the new prefixes.
+  the new prefix.
 - Pin OpenTofu and every provider. Commit dependency lock files for every
   platform on which plans run.
 - Use maps with durable semantic keys for `for_each`; never use list indexes as
@@ -602,14 +627,14 @@ Backup tiers are deliberately small:
 | --- | --- | --- | --- |
 | Critical | Daily TrueNAS snapshots for 7 days | Weekly ZFS replication to Hotdog for 4 weeks and selected weekly B2 export | identity, application databases, unique configuration |
 | Important | Daily TrueNAS snapshots for 7 days | Weekly Hotdog replication for 4 weeks | media metadata and costly-to-rebuild state |
-| Replaceable | None or short local snapshots | None | caches, `au-oci` local-path, downloaded artefacts |
+| Replaceable | None or short local snapshots | None | caches, `syd` local-path, downloaded artefacts |
 
 Back up data, not ephemeral cluster state. Git contains desired state; 1Password
 contains bootstrap secrets; TrueNAS/Hotdog/B2 contain valued data. Document and
 exercise:
 
-- complete `au` rebuild while retaining TrueNAS datasets;
-- complete `au-oci` replacement;
+- complete `mbk` rebuild while retaining TrueNAS datasets;
+- complete `syd` replacement;
 - CloudNativePG restore to a new namespace;
 - static/dynamic retained volume reattachment;
 - Pocket ID restore plus break-glass authentication;
@@ -630,11 +655,11 @@ Every pull request must pass local-equivalent validation:
 - Helm template rendering;
 - Flux reconciliation graph checks;
 - secret and credential scanning;
-- ARM64 image availability for `au-oci` workloads;
+- ARM64 image availability for `syd` workloads;
 - resource requests, limits, probes, Pod security context, and NetworkPolicy
   policy checks.
 
-Renovate opens version updates for manual merge. Platform upgrades go to `au-oci`
+Renovate opens version updates for manual merge. Platform upgrades go to `syd`
 first, soak for at least 48 hours with Gatus green, then proceed to home.
 Talos, Kubernetes, Cilium, Gateway API, storage drivers, and CRDs are upgraded
 in separate changes unless upstream requires a coupled version.
@@ -658,7 +683,7 @@ After this plan-only commit:
    order.
 6. Prove OpenSpeedTest, HTTP routes, secrets, static NFS, Homepage discovery,
    a direct Gatus probe, and one Crossplane HTTP resource.
-7. Stop for a home success review before any `au-oci` reset.
+7. Stop for a home success review before any `syd` reset.
 
 No step may silently cross an ownership, deletion, credential, or destructive
 boundary. When a better-supported component or materially simpler design is
