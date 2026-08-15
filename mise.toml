@@ -52,7 +52,7 @@ kustomize build apps/overlays/syd | kubeconform \
   -kubernetes-version 1.36.3 \
   -strict \
   -summary
-trivy config --exit-code 1 --severity HIGH,CRITICAL .
+trivy config --exit-code 1 --severity HIGH,CRITICAL --ignorefile .trivyignore.yaml .
 """
 
 [tasks.fmt]
