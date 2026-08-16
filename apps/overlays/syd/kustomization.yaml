@@ -4,4 +4,4 @@ resources:
   - ../../base/openspeedtest
   - route.yaml
 patches:
-  - path: service-homepage.yaml
+  - path: helm-release-homepage.yaml

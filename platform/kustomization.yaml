@@ -9,4 +9,5 @@ resources:
   - sources/cert-manager
   - sources/cilium
   - sources/external-secrets
+  - sources/openspeedtest
   - sources/traefik
