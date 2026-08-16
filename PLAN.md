@@ -318,14 +318,14 @@ updates. The initial baseline is:
 | Flux | `v2.9.4` | Pin bootstrap manifests |
 | Gateway API CRDs | `v1.6.1` | Standard channel only; aligned with Cilium `v1.20.0` |
 | Cilium | `v1.20.0` | Latest stable; lists Kubernetes 1.36 as e2e-tested |
-| Traefik | chart `40.2.0`, app `v3.7.1` | Gateway API provider only |
-| cert-manager | `v1.21.0` | Do not use the known-problematic disabled renewal policy |
-| External Secrets Operator | `v2.6.0` | 1Password SDK provider and PushSecret |
+| Traefik | chart `41.2.0`, app `v3.7.10` | Gateway API provider only |
+| cert-manager | `v1.21.1` | Do not use the known-problematic disabled renewal policy |
+| External Secrets Operator | `v2.9.0` | 1Password SDK provider and PushSecret |
 | Crossplane | `v2.3.4` | Latest stable |
 | provider-http | `v1.0.14` | Pin package digest where supported |
 | Headlamp | chart/app `0.44.0` | One instance per cluster |
 | CloudNativePG | operator `1.30.0` | Single instance by default |
-| Tailscale | `v1.98.10` | Keep node extension and operator compatible |
+| Tailscale | `v1.102.2` | Keep node extension and operator compatible |
 
 Kubernetes `v1.36.3` and Cilium `v1.20.0` were approved together on 2026-08-15.
 Cilium's stable compatibility matrix lists Kubernetes 1.36 as e2e-tested. Use
