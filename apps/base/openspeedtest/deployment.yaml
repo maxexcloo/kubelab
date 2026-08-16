@@ -22,6 +22,26 @@ spec:
         app.kubernetes.io/version: 2.0.6
     spec:
       automountServiceAccountToken: false
+      initContainers:
+        - name: copy-nginx-config
+          image: docker.io/openspeedtest/latest:v2.0.6@sha256:1745e913f596fe98882b286a67751efdae74774e9caa742a4934bb056e8748d2
+          imagePullPolicy: IfNotPresent
+          command:
+            - cp
+            - /etc/nginx/conf.d/OpenSpeedTest-Server.conf
+            - /config/OpenSpeedTest-Server.conf
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /config
       containers:
         - name: openspeedtest
           image: docker.io/openspeedtest/latest:v2.0.6@sha256:1745e913f596fe98882b286a67751efdae74774e9caa742a4934bb056e8748d2
@@ -64,6 +84,10 @@ spec:
           volumeMounts:
             - name: temporary
               mountPath: /tmp
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
       securityContext:
         runAsGroup: 101
         runAsUser: 101
@@ -72,3 +96,9 @@ spec:
         - name: temporary
           emptyDir:
             sizeLimit: 1Gi
+        - name: nginx-cache
+          emptyDir:
+            sizeLimit: 256Mi
+        - name: nginx-config
+          emptyDir:
+            sizeLimit: 8Mi
