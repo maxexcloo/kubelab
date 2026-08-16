@@ -22,7 +22,7 @@ spec:
       apiVersion: controller.config.cert-manager.io/v1alpha1
       kind: ControllerConfiguration
       gatewayAPI:
-        enable: true
+        enabled: true
     resources:
       requests:
         cpu: 20m
