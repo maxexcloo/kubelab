@@ -21,7 +21,7 @@ spec:
       enabled: false
     providers:
       kubernetesCRD:
-        enabled: false
+        enabled: true
       kubernetesIngress:
         enabled: false
       kubernetesGateway:

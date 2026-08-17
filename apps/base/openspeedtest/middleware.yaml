@@ -1,0 +1,10 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: openspeedtest-buffering
+  namespace: openspeedtest
+  labels:
+    app.kubernetes.io/name: openspeedtest
+spec:
+  buffering:
+    maxRequestBodyBytes: 36700160
