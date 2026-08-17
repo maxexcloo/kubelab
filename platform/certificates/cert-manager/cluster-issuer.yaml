@@ -10,8 +10,8 @@ spec:
       name: letsencrypt-dns01-account
     solvers:
       - dns01:
+          cnameStrategy: Follow
           cloudflare:
             apiTokenSecretRef:
               key: api-token
               name: cloudflare-api-token
-            cnameStrategy: Follow
