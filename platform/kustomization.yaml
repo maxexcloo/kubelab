@@ -4,10 +4,14 @@ resources:
   - certificates/cert-manager
   - namespaces
   - networking/cilium
+  - networking/cloudflared
+  - networking/tailscale
   - networking/traefik
   - secrets/external-secrets
+  - sources/bjw-s
   - sources/cert-manager
   - sources/cilium
   - sources/external-secrets
   - sources/openspeedtest
+  - sources/tailscale
   - sources/traefik
