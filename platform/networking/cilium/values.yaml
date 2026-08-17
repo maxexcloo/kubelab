@@ -1,6 +1,9 @@
 ipam:
   mode: kubernetes
 
+# Override the auto-detected MTU; the node's Tailscale interface reports 1280.
+MTU: 1500
+
 # Keep kube-proxy while learning and migrating. Replacing it is a later,
 # separately observed networking change.
 kubeProxyReplacement: false
