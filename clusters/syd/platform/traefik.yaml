@@ -1,0 +1,11 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: networking
+spec:
+  values:
+    service:
+      annotations:
+        tailscale.com/expose: "true"
+        tailscale.com/hostname: syd

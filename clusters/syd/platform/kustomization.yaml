@@ -6,3 +6,4 @@ resources:
 patches:
   - path: secret-store.yaml
   - path: tailscale.yaml
+  - path: traefik.yaml
