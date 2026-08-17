@@ -56,5 +56,3 @@ spec:
               readOnlyRootFilesystem: true
         strategy: Recreate
         type: deployment
-    serviceAccount:
-      create: true
