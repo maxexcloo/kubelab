@@ -14,3 +14,4 @@ spec:
             apiTokenSecretRef:
               key: api-token
               name: cloudflare-api-token
+            cnameStrategy: Follow
