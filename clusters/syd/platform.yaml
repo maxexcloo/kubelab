@@ -7,7 +7,7 @@ spec:
   dependsOn:
     - name: gateway-api
   interval: 30m
-  path: ./platform
+  path: ./clusters/syd/platform
   prune: true
   retryInterval: 2m
   sourceRef:

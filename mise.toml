@@ -32,7 +32,17 @@ kustomize build clusters/mbk | kubeconform \
   -kubernetes-version 1.36.3 \
   -strict \
   -summary
+kustomize build clusters/mbk/platform | kubeconform \
+  -ignore-missing-schemas \
+  -kubernetes-version 1.36.3 \
+  -strict \
+  -summary
 kustomize build clusters/syd | kubeconform \
+  -ignore-missing-schemas \
+  -kubernetes-version 1.36.3 \
+  -strict \
+  -summary
+kustomize build clusters/syd/platform | kubeconform \
   -ignore-missing-schemas \
   -kubernetes-version 1.36.3 \
   -strict \
