@@ -5,3 +5,4 @@ resources:
   - certificate.yaml
 patches:
   - path: secret-store.yaml
+  - path: tailscale.yaml

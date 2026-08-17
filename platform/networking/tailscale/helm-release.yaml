@@ -18,9 +18,6 @@ spec:
   values:
     installCRDs: true
     operatorConfig:
-      defaultTags:
-        - tag:k8s-operator
-      hostname: mbk-operator
       image:
         pullPolicy: IfNotPresent
       logging: info

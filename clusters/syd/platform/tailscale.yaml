@@ -1,0 +1,13 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tailscale-operator
+  namespace: tailscale
+spec:
+  values:
+    operatorConfig:
+      defaultTags:
+        - tag:syd-operator
+      hostname: syd-operator
+    proxyConfig:
+      defaultTags: tag:syd
