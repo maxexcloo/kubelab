@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mbk-wildcard
+  namespace: networking
+spec:
+  secretName: mbk-wildcard
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-dns01
+  dnsNames:
+    - '*.mbk.excloo.dev'
