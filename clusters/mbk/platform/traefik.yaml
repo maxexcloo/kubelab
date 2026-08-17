@@ -9,3 +9,4 @@ spec:
       annotations:
         tailscale.com/expose: "true"
         tailscale.com/hostname: mbk
+        tailscale.com/tailnet-ip: 100.109.10.13
