@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../../../platform
   - certificate.yaml
+  - headlamp.yaml
   - storage.yaml
 patches:
   - path: secret-store.yaml

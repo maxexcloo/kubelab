@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - certificates/cert-manager
   - crds/traefik
+  - identity
   - namespaces
   - networking/cilium
   - networking/cloudflared
@@ -14,6 +15,7 @@ resources:
   - sources/cert-manager
   - sources/cilium
   - sources/external-secrets
+  - sources/headlamp
   - sources/openspeedtest
   - sources/tailscale
   - sources/traefik
