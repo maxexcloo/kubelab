@@ -5,4 +5,5 @@ resources:
   - cloudflared.yaml
   - external-secrets.yaml
   - networking.yaml
+  - storage.yaml
   - tailscale.yaml
