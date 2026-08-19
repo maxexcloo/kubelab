@@ -6,6 +6,7 @@ metadata:
 spec:
   interval: 30m
   releaseName: tailscale-operator
+
   chart:
     spec:
       chart: tailscale-operator
@@ -15,6 +16,7 @@ spec:
         name: tailscale
         namespace: flux-system
       version: 1.102.2
+
   values:
     installCRDs: true
     apiServerProxyConfig:

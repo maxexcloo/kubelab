@@ -4,6 +4,8 @@ metadata:
   name: cert-manager
 spec:
   interval: 30m
+  releaseName: cert-manager
+
   chart:
     spec:
       chart: cert-manager
@@ -13,7 +15,7 @@ spec:
         name: jetstack
         namespace: flux-system
       version: v1.21.1
-  releaseName: cert-manager
+
   values:
     crds:
       enabled: false

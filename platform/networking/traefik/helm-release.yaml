@@ -5,6 +5,7 @@ metadata:
 spec:
   interval: 30m
   releaseName: traefik
+
   chart:
     spec:
       chart: traefik
@@ -14,6 +15,7 @@ spec:
         name: traefik
         namespace: flux-system
       version: 41.2.0
+
   values:
     accessLog:
       enabled: true

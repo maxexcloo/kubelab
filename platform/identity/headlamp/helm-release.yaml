@@ -5,6 +5,7 @@ metadata:
 spec:
   interval: 30m
   releaseName: headlamp
+
   chart:
     spec:
       chart: headlamp
@@ -14,6 +15,7 @@ spec:
         name: headlamp
         namespace: flux-system
       version: 0.44.0
+
   values:
     automountServiceAccountToken: false
     clusterRoleBinding:
