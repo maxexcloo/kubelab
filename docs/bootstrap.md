@@ -1,7 +1,7 @@
 # Cluster Bootstrap
 
-Bootstrap `mbk` first. Do not reset `hsp` for `syd` until the home-cluster
-gate in [PLAN.md](../PLAN.md) passes.
+This guide covers bootstrapping a cluster (`mbk` or `syd`) after substrate
+provisioning in `homelab`.
 
 ## Substrate handoff
 
@@ -73,7 +73,7 @@ authenticate to 1Password and synchronise cluster secrets:
 kubectl --context <cluster> create namespace external-secrets --dry-run=client -o yaml | kubectl --context <cluster> apply -f -
 
 kubectl --context <cluster> -n external-secrets create secret generic onepassword-sdk \
-  --from-literal=token="$(op item get --vault "Homelab" "Service Account Auth Token: <cluster>-eso" --fields credential)" \
+  --from-literal=token="$(op item get --vault "Homelab" "Service Account Auth Token: <cluster>-eso" --format json | jq -re '.fields[] | select(.id == "credential" or .label == "credential" or .type == "CONCEALED") | .value // empty')" \
   --dry-run=client -o yaml | kubectl --context <cluster> apply -f -
 ```
 

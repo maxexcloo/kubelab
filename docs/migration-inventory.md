@@ -71,13 +71,13 @@ old owner have been checked.
 
 | System                      | Current owner     | Destination         | Strategy | Notes                                                                                            |
 | --------------------------- | ----------------- | ------------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| Mandu                       | `homelab`         | Bazzite             | Retain   | Rootless Podman Quadlets; optional AMD GPU worker over Tailscale                                 |
+| Appliance Tailscale clients | Appliance owners  | Retained appliances | Retain   | Preserve independently of Kubernetes operator and legacy service retirement                      |
 | HAOS                        | `homelab`         | HAOS appliance      | Retain   | Includes ESPHome, ESPresense, Matter Hub, Studio Code Server, and Zigbee2MQTT                    |
 | Hotdog                      | `homelab`         | Hotdog              | Retain   | Linux/ZFS receiver on 2 GB RAM; do not install Talos                                             |
-| Talos Tailscale extension   | `homelab`         | Both Talos nodes    | Replace  | Host-level recovery path baked into each cluster image; identity stays in cluster OpenTofu state |
-| Appliance Tailscale clients | Appliance owners  | Retained appliances | Retain   | Preserve independently of Kubernetes operator and legacy service retirement                      |
+| Mandu                       | `homelab`         | Bazzite             | Retain   | Rootless Podman Quadlets; optional AMD GPU worker over Tailscale                                 |
 | Netboot                     | `homelab-truenas` | TrueNAS appliance   | Retain   | Keep storage-local unless migration solves a concrete problem                                    |
 | Syncthing                   | `homelab-truenas` | TrueNAS appliance   | Retain   | Keep storage-local; expose status to Homepage/Gatus directly                                     |
+| Talos Tailscale extension   | `homelab`         | Both Talos nodes    | Replace  | Host-level recovery path baked into each cluster image; identity stays in cluster OpenTofu state |
 | TrueNAS                     | `homelab`         | TrueNAS             | Retain   | Storage, snapshots, replication, and the Taco Talos VM                                           |
 | UniFi                       | `homelab`         | UniFi appliance     | Retain   | DHCP reservation, routing, and network policy remain substrate                                   |
 
@@ -90,10 +90,10 @@ old owner have been checked.
 | Cluster Cloudflare tunnels and credentials                      | OpenTofu                                  | Prevent accidental replacement |
 | Control D app rules                                             | Direct Crossplane provider-http resources | Orphan                         |
 | Fly Gatus app, Machine, and secrets                             | OpenTofu exception                        | Reviewed replacement only      |
+| Global Tailscale ACLs/grants and tag owners                     | Foundations OpenTofu                      | Reviewed saved plan only       |
 | OCI network, image, NSG, and `hsp` VM                           | OpenTofu                                  | Reviewed saved plan only       |
 | Pocket ID app clients and groups                                | Direct Crossplane provider-http resources | Orphan                         |
 | Resend app keys                                                 | Direct Crossplane provider-http resources | Orphan                         |
-| Global Tailscale ACLs/grants and tag owners                     | Foundations OpenTofu                      | Reviewed saved plan only       |
+| Retained appliance Tailscale identities                         | Appliance owner                           | Explicit appliance procedure   |
 | Tailscale operator OAuth clients                                | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
 | Talos-node Tailscale bootstrap identities                       | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
-| Retained appliance Tailscale identities                         | Appliance owner                           | Explicit appliance procedure   |

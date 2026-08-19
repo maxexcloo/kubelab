@@ -38,6 +38,42 @@ upstream Flux `HelmRelease` that consumes them.
 Keep root Markdown limited to `AGENTS.md`, `README.md`, and `PLAN.md`. Put later
 operational documentation under `docs/`.
 
+## Sorting Convention
+
+Sort object assignments in this order:
+
+1. Single-line values, alphabetically by key.
+2. Multi-line values, alphabetically by key.
+
+Underscore-prefixed names sort before other names. Apply this recursively to
+YAML mappings, environment blocks, and template argument objects. A non-empty
+object is multi-line. A scalar-only array is a single-line value even when
+formatting wraps it; an array containing an object or array is multi-line.
+Separate every multi-line assignment from adjacent assignments with a blank line,
+except where the formatter removes the separator. Keep assignments contiguous
+inside YAML list-item mappings.
+
+List-item identifiers come first in `type`, `name`, `id` order. Prek hook items
+use `id`, then `name`; sort remaining fields normally.
+
+Sort Mise tools alphabetically and tasks alphabetically within each lifecycle
+section. Sort Renovate package rules by description and Prek hooks by `id`.
+GitHub workflows use top-level `name`, `on`, `permissions`, `concurrency`, then
+global configuration and `jobs`. Preserve dependency order within workflow
+steps.
+
+Sort unordered peer headings, lists, and table rows alphabetically. Preserve
+procedural, dependency, routing, interface, priority, chronological, and other
+meaningful order.
+
+## Style
+
+- Prefer plain, direct Kubernetes manifests and upstream charts over abstractions
+  and generic pipelines.
+- Keep comments local and specific; put operational explanations in `docs/`.
+- Keep check orchestration single-layered so the same validator is not run both
+  directly and through a nested task in one path.
+
 ## Verification
 
 - Run `mise run check` before handoff.

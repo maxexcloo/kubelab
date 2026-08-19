@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "dependencyDashboard": false,
-  "extends": ["config:recommended"],
+  "extends": ["config:recommended", ":enablePreCommit"],
   "kubernetes": {
     "managerFilePatterns": ["/(^|/).+\\.yaml$/"]
   }
