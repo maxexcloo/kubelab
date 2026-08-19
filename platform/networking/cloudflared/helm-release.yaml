@@ -4,6 +4,8 @@ metadata:
   name: cloudflared
   namespace: cloudflared
 spec:
+  interval: 30m
+  releaseName: cloudflared
   chart:
     spec:
       chart: app-template
@@ -13,25 +15,17 @@ spec:
         name: bjw-s
         namespace: flux-system
       version: 5.1.0
-  interval: 30m
-  releaseName: cloudflared
   values:
-    defaultPodOptions:
-      automountServiceAccountToken: false
-      securityContext:
-        runAsGroup: 65532
-        runAsNonRoot: true
-        runAsUser: 65532
-        seccompProfile:
-          type: RuntimeDefault
     controllers:
       cloudflared:
+        strategy: Recreate
+        type: deployment
         containers:
           cloudflared:
             image:
+              pullPolicy: IfNotPresent
               repository: cloudflare/cloudflared
               tag: 2026.8.0@sha256:2535e54b16adf1d50630f99d0886471926c5ef3f6b328100ec6589f731c48969
-              pullPolicy: IfNotPresent
             args:
               - tunnel
               - --no-autoupdate
@@ -40,8 +34,8 @@ spec:
               - name: TUNNEL_TOKEN
                 valueFrom:
                   secretKeyRef:
-                    name: tunnel-token
                     key: token
+                    name: tunnel-token
             resources:
               requests:
                 cpu: 20m
@@ -50,9 +44,15 @@ spec:
                 memory: 128Mi
             securityContext:
               allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
               capabilities:
                 drop:
                   - ALL
-              readOnlyRootFilesystem: true
-        strategy: Recreate
-        type: deployment
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsGroup: 65532
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault

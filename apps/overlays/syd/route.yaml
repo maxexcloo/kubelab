@@ -6,11 +6,11 @@ metadata:
   labels:
     app.kubernetes.io/name: openspeedtest
 spec:
+  hostnames:
+    - speed.syd.excloo.dev
   parentRefs:
     - name: private
       namespace: networking
-  hostnames:
-    - speed.syd.excloo.dev
   rules:
     - backendRefs:
         - name: openspeedtest

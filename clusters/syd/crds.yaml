@@ -4,16 +4,16 @@ metadata:
   name: crds
   namespace: flux-system
 spec:
+  interval: 30m
+  path: ./platform/crds
+  prune: true
+  retryInterval: 2m
+  timeout: 10m
   healthChecks:
     - apiVersion: kustomize.toolkit.fluxcd.io/v1
       kind: Kustomization
       name: gateway-api-crds
       namespace: flux-system
-  interval: 30m
-  path: ./platform/crds
-  prune: true
-  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
-  timeout: 10m

@@ -5,11 +5,6 @@ metadata:
   labels:
     app.kubernetes.io/name: headlamp
 spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: headlamp
-  policyTypes:
-    - Ingress
   ingress:
     - from:
         - namespaceSelector:
@@ -21,3 +16,8 @@ spec:
       ports:
         - port: 80
           protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: headlamp
+  policyTypes:
+    - Ingress

@@ -6,11 +6,11 @@ metadata:
   labels:
     app.kubernetes.io/name: headlamp
 spec:
+  hostnames:
+    - headlamp.syd.excloo.dev
   parentRefs:
     - name: private
       namespace: networking
-  hostnames:
-    - headlamp.syd.excloo.dev
   rules:
     - backendRefs:
         - name: headlamp

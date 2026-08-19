@@ -4,6 +4,7 @@ metadata:
   name: traefik
 spec:
   interval: 30m
+  releaseName: traefik
   chart:
     spec:
       chart: traefik
@@ -13,22 +14,12 @@ spec:
         name: traefik
         namespace: flux-system
       version: 41.2.0
-  releaseName: traefik
   values:
+    accessLog:
+      enabled: true
+      format: json
     deployment:
       replicas: 1
-    ingressClass:
-      enabled: false
-    providers:
-      kubernetesCRD:
-        enabled: true
-      kubernetesIngress:
-        enabled: false
-      kubernetesGateway:
-        enabled: true
-    gatewayClass:
-      enabled: true
-      name: traefik
     gateway:
       enabled: true
       name: private
@@ -41,22 +32,31 @@ spec:
         websecure:
           port: 8443
           protocol: HTTPS
-          namespacePolicy:
-            from: All
           certificateRefs:
             - name: wildcard
-    service:
-      spec:
-        type: ClusterIP
+          namespacePolicy:
+            from: All
+    gatewayClass:
+      enabled: true
+      name: traefik
+    ingressClass:
+      enabled: false
     log:
       format: json
       level: INFO
-    accessLog:
-      enabled: true
-      format: json
+    providers:
+      kubernetesCRD:
+        enabled: true
+      kubernetesGateway:
+        enabled: true
+      kubernetesIngress:
+        enabled: false
     resources:
       requests:
         cpu: 100m
         memory: 64Mi
       limits:
         memory: 256Mi
+    service:
+      spec:
+        type: ClusterIP

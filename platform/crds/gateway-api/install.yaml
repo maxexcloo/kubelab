@@ -7,8 +7,8 @@ spec:
   interval: 1h
   path: ./config/crd
   prune: true
+  timeout: 5m
+  wait: true
   sourceRef:
     kind: GitRepository
     name: gateway-api
-  timeout: 5m
-  wait: true

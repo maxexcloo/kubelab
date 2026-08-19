@@ -4,6 +4,7 @@ metadata:
   name: headlamp
 spec:
   interval: 30m
+  releaseName: headlamp
   chart:
     spec:
       chart: headlamp
@@ -13,27 +14,26 @@ spec:
         name: headlamp
         namespace: flux-system
       version: 0.44.0
-  releaseName: headlamp
   values:
-    config:
-      inCluster: true
+    automountServiceAccountToken: false
     clusterRoleBinding:
       create: false
-    automountServiceAccountToken: false
-    securityContext:
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 100
-      runAsGroup: 101
-      seccompProfile:
-        type: RuntimeDefault
+    config:
+      inCluster: true
     resources:
       requests:
         cpu: 50m
         memory: 64Mi
       limits:
         memory: 256Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsGroup: 101
+      runAsNonRoot: true
+      runAsUser: 100
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault

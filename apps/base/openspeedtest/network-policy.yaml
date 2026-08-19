@@ -6,12 +6,6 @@ metadata:
   labels:
     app.kubernetes.io/name: openspeedtest
 spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: openspeedtest
-  policyTypes:
-    - Egress
-    - Ingress
   ingress:
     - from:
         - namespaceSelector:
@@ -23,3 +17,9 @@ spec:
       ports:
         - port: 3000
           protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: openspeedtest
+  policyTypes:
+    - Egress
+    - Ingress

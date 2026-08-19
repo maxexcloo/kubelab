@@ -5,6 +5,7 @@ metadata:
   namespace: openspeedtest
 spec:
   interval: 30m
+  releaseName: openspeedtest
   chart:
     spec:
       chart: openspeedtest
@@ -14,37 +15,36 @@ spec:
         name: openspeedtest
         namespace: flux-system
       version: 0.1.2
-  releaseName: openspeedtest
   values:
     image:
-      repository: openspeedtest/latest
       pullPolicy: IfNotPresent
+      repository: openspeedtest/latest
       tag: v2.0.6
-    serviceAccount:
-      create: false
-    service:
-      type: ClusterIP
-      port: 80
-      annotations:
-        gethomepage.dev/description: Network Speed Test
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Infrastructure
-        gethomepage.dev/icon: openspeedtest
-        gethomepage.dev/name: OpenSpeedTest
     podSecurityContext:
       runAsGroup: 101
       runAsUser: 101
-    securityContext:
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-          - ALL
-      runAsNonRoot: true
-      seccompProfile:
-        type: RuntimeDefault
     resources:
       requests:
         cpu: 100m
         memory: 64Mi
       limits:
         memory: 512Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+    service:
+      port: 80
+      type: ClusterIP
+      annotations:
+        gethomepage.dev/description: Network Speed Test
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Infrastructure
+        gethomepage.dev/icon: openspeedtest
+        gethomepage.dev/name: OpenSpeedTest
+    serviceAccount:
+      create: false

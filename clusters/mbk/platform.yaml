@@ -4,14 +4,14 @@ metadata:
   name: platform
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: crds
   interval: 30m
   path: ./clusters/mbk/platform
   prune: true
   retryInterval: 2m
+  timeout: 10m
+  wait: true
+  dependsOn:
+    - name: crds
   sourceRef:
     kind: GitRepository
     name: flux-system
-  timeout: 10m
-  wait: true

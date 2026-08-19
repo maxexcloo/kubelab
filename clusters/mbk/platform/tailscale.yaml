@@ -6,8 +6,8 @@ metadata:
 spec:
   values:
     operatorConfig:
+      hostname: mbk-operator
       defaultTags:
         - tag:mbk-operator
-      hostname: mbk-operator
     proxyConfig:
       defaultTags: tag:mbk

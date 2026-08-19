@@ -4,14 +4,14 @@ metadata:
   name: apps
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: platform
   interval: 30m
   path: ./apps/overlays/mbk
   prune: true
   retryInterval: 2m
+  timeout: 10m
+  wait: true
+  dependsOn:
+    - name: platform
   sourceRef:
     kind: GitRepository
     name: flux-system
-  timeout: 10m
-  wait: true

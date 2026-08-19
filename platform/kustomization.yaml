@@ -9,7 +9,6 @@ resources:
   - networking/tailscale
   - networking/traefik
   - secrets/external-secrets
-  - storage/truenas-nfs
   - sources/bjw-s
   - sources/cert-manager
   - sources/cilium
@@ -18,3 +17,4 @@ resources:
   - sources/openspeedtest
   - sources/tailscale
   - sources/traefik
+  - storage/truenas-nfs

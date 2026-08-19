@@ -5,8 +5,8 @@ metadata:
   namespace: networking
 spec:
   secretName: wildcard
+  dnsNames:
+    - "*.syd.excloo.dev"
   issuerRef:
     kind: ClusterIssuer
     name: letsencrypt-dns01
-  dnsNames:
-    - "*.syd.excloo.dev"

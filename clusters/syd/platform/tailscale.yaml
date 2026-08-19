@@ -6,8 +6,8 @@ metadata:
 spec:
   values:
     operatorConfig:
+      hostname: syd-operator
       defaultTags:
         - tag:syd-operator
-      hostname: syd-operator
     proxyConfig:
       defaultTags: tag:syd
