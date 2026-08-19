@@ -29,6 +29,32 @@ mise run check
 | `mise run prek`  | Run all Git pre-commit hooks across the repository                   |
 | `mise run setup` | Install tools and Git hooks                                          |
 
+## Bootstrap
+
+After substrate provisioning in `homelab`:
+
+1. **Verify API Access**:
+   ```shell
+   kubectl --context <cluster> get nodes
+   ```
+2. **Bootstrap Cilium CNI**:
+   ```shell
+   helm repo add cilium https://helm.cilium.io
+   helm upgrade --install cilium cilium/cilium \
+     --kube-context <cluster> \
+     --namespace kube-system \
+     --version 1.20.0 \
+     --values platform/networking/cilium/values.yaml
+   ```
+3. **Inject 1Password Bootstrap Secret**:
+   ```shell
+   mise -C ../homelab run bootstrap-secrets
+   ```
+4. **Bootstrap Flux**:
+   ```shell
+   kubectl --context <cluster> apply --server-side --kustomize clusters/<cluster>/flux-system
+   ```
+
 ## Platform
 
 - **GitOps & Reconciliation**: Flux controllers pull and reconcile manifests declaratively from Git.
