@@ -23,21 +23,7 @@ spec:
     deployment:
       replicas: 1
     gateway:
-      enabled: true
-      name: private
-      listeners:
-        web:
-          port: 8000
-          protocol: HTTP
-          namespacePolicy:
-            from: All
-        websecure:
-          port: 8443
-          protocol: HTTPS
-          certificateRefs:
-            - name: wildcard
-          namespacePolicy:
-            from: All
+      enabled: false
     gatewayClass:
       enabled: true
       name: traefik
