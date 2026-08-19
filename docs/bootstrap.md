@@ -7,9 +7,12 @@ gate in [PLAN.md](../PLAN.md) passes.
 
 The `homelab` OpenTofu stack owns the Talos image, system extensions, machine
 secrets, machine configuration, installation, bootstrap, and recovery
-material. Before starting here, verify its exit checks and have the generated
-administrator `kubeconfig` in an encrypted working store outside this
-repository.
+material. Before starting here, verify its exit checks and synchronise your
+workstation `kubeconfig` and `talosconfig` from 1Password:
+
+```shell
+mise run client-configs # in the homelab repository
+```
 
 The Git source is public and requires no deploy key for reconciliation. Keep any
 workstation GitHub credential used to push the generated bootstrap manifests in
@@ -26,8 +29,8 @@ install Cilium. Stop here and fix the `homelab` substrate if either command
 cannot reach the intended cluster:
 
 ```shell
-kubectl get nodes
-kubectl get pods --all-namespaces
+kubectl --context <cluster> get nodes
+kubectl --context <cluster> get pods --all-namespaces
 ```
 
 ## 2. Bootstrap Cilium
@@ -40,11 +43,12 @@ must be installed before Flux:
 helm repo add cilium https://helm.cilium.io
 helm repo update cilium
 helm upgrade --install cilium cilium/cilium \
+  --kube-context <cluster> \
   --namespace kube-system \
   --version 1.20.0 \
   --values platform/networking/cilium/values.yaml
-kubectl --namespace kube-system rollout status daemonset/cilium
-kubectl --namespace kube-system rollout status deployment/cilium-operator
+kubectl --context <cluster> --namespace kube-system rollout status daemonset/cilium
+kubectl --context <cluster> --namespace kube-system rollout status deployment/cilium-operator
 ```
 
 The values are the same values committed for the Flux `HelmRelease`. The
@@ -55,12 +59,25 @@ fails when the bootstrap values and `HelmRelease` values differ.
 Check node and system health before continuing:
 
 ```shell
-kubectl get nodes
-kubectl get pods --all-namespaces
-kubectl --namespace kube-system exec daemonset/cilium -- cilium-dbg status
+kubectl --context <cluster> get nodes
+kubectl --context <cluster> get pods --all-namespaces
+kubectl --context <cluster> --namespace kube-system exec daemonset/cilium -- cilium-dbg status
 ```
 
-## 3. Bootstrap Flux
+## 3. Inject the 1Password SDK bootstrap secret
+
+External Secrets Operator requires a bootstrap service-account token to
+authenticate to 1Password and synchronise cluster secrets:
+
+```shell
+kubectl --context <cluster> create namespace external-secrets --dry-run=client -o yaml | kubectl --context <cluster> apply -f -
+
+kubectl --context <cluster> -n external-secrets create secret generic onepassword-sdk \
+  --from-literal=token="$(op item get --vault "Homelab" "Service Account Auth Token: <cluster>-eso" --fields credential)" \
+  --dry-run=client -o yaml | kubectl --context <cluster> apply -f -
+```
+
+## 4. Bootstrap Flux
 
 The public Git remote is `https://github.com/maxexcloo/kubelab`. Generate the
 pinned controllers and unauthenticated HTTPS source with Flux, commit and push
@@ -75,31 +92,34 @@ flux create source git flux-system \
   --export
 flux create kustomization flux-system \
   --source GitRepository/flux-system \
-  --path ./clusters/mbk \
+  --path ./clusters/<cluster> \
   --prune \
   --interval 10m \
   --retry-interval 2m \
   --wait \
   --export
-kubectl apply --server-side --kustomize clusters/mbk/flux-system
+kubectl --context <cluster> apply --server-side --kustomize clusters/<cluster>/flux-system
 ```
 
-The generated output is committed under `clusters/mbk/flux-system`; never put
+The generated output is committed under `clusters/<cluster>/flux-system`; never put
 a GitHub token in those files. Do not use `flux bootstrap github` here because
 it creates a deploy key or persists token authentication that a public source
-does not need. Flux will adopt Cilium and reconcile the remaining platform and
-workload resources from the cluster path.
-The committed Flux dependencies install Gateway API CRDs first, wait for the
-platform controllers including Traefik second, and apply applications last.
-This prevents custom resources from racing the controllers that define them.
+does not need.
 
-## 4. Observe reconciliation
+Flux will adopt Cilium and reconcile the remaining platform and workload
+resources from the cluster path. The committed Flux dependencies install
+CRDs first (`platform/crds`), wait for platform controllers and integrations
+second, and apply applications last. This prevents custom resources from racing
+the controllers and CRDs that define them.
+
+## 5. Observe reconciliation
 
 ```shell
-flux check
-flux get sources all --all-namespaces
-flux get helmreleases --all-namespaces
-kubectl get events --all-namespaces --sort-by=.lastTimestamp
+flux --context <cluster> check
+flux --context <cluster> get sources all --all-namespaces
+flux --context <cluster> get kustomizations
+flux --context <cluster> get helmreleases --all-namespaces
+kubectl --context <cluster> get events --all-namespaces --sort-by=.lastTimestamp
 ```
 
 Stop and diagnose any unhealthy resource before adding the next platform

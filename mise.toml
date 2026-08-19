@@ -52,6 +52,11 @@ kustomize build platform | kubeconform \
   -kubernetes-version 1.36.3 \
   -strict \
   -summary
+kustomize build platform/crds | kubeconform \
+  -ignore-missing-schemas \
+  -kubernetes-version 1.36.3 \
+  -strict \
+  -summary
 kustomize build apps/overlays/mbk | kubeconform \
   -ignore-missing-schemas \
   -kubernetes-version 1.36.3 \

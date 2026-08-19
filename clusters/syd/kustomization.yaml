@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
   - flux-system
   - apps.yaml
-  - gateway-api.yaml
+  - crds.yaml
   - platform.yaml
