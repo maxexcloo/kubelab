@@ -185,8 +185,10 @@ There is no official TrueNAS Kubernetes CSI driver to assume. Start the trial
 with a static NFS persistent volume. Evaluate `democratic-csi` for NFS and
 iSCSI only after confirming TrueNAS 26.0 API compatibility, Talos system
 extensions, snapshot behaviour, retained-volume recovery, and upgrade health.
-The experimental API-only drivers are not production defaults. Record that
-decision before migrating a database.
+Inherit existing TrueNAS app datasets by defining dataset properties and NFS
+exports in `homelab`, then consuming them in `kubelab` via retained static
+`PersistentVolume` manifests. The experimental API-only drivers are not
+production defaults. Record that decision before migrating a database.
 
 `syd` uses local-path storage only for replaceable state, caches, and replicas of
 data whose authority is elsewhere. It must not become the only copy of valued

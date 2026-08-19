@@ -7,7 +7,7 @@ kubectl = "1.36.3"
 kustomize = "5.8.1"
 prek = "0.4.13"
 prettier = "3.9.6"
-trivy = "0.73.0"
+trivy = "0.74.0"
 yq = "4.53.3"
 
 # Setup
@@ -22,11 +22,17 @@ prek install
 [tasks.check]
 description = "Check formatting and repository configuration"
 run = """
-prettier --check .
 actionlint .github/workflows/*.yaml
-yq eval-all -e '. as $item ireduce ([]; . + [$item]) | (.[0] | to_json) == (.[1].spec.values | to_json)' \
-  platform/networking/cilium/values.yaml \
-  platform/networking/cilium/helm-release.yaml
+kustomize build apps/overlays/mbk | kubeconform \
+  -ignore-missing-schemas \
+  -kubernetes-version 1.36.3 \
+  -strict \
+  -summary
+kustomize build apps/overlays/syd | kubeconform \
+  -ignore-missing-schemas \
+  -kubernetes-version 1.36.3 \
+  -strict \
+  -summary
 kustomize build clusters/mbk | kubeconform \
   -ignore-missing-schemas \
   -kubernetes-version 1.36.3 \
@@ -57,17 +63,11 @@ kustomize build platform/crds | kubeconform \
   -kubernetes-version 1.36.3 \
   -strict \
   -summary
-kustomize build apps/overlays/mbk | kubeconform \
-  -ignore-missing-schemas \
-  -kubernetes-version 1.36.3 \
-  -strict \
-  -summary
-kustomize build apps/overlays/syd | kubeconform \
-  -ignore-missing-schemas \
-  -kubernetes-version 1.36.3 \
-  -strict \
-  -summary
+prettier --check .
 trivy config --exit-code 1 --severity HIGH,CRITICAL --ignorefile .trivyignore.yaml .
+yq eval-all -e '. as $item ireduce ([]; . + [$item]) | (.[0] | to_json) == (.[1].spec.values | to_json)' \
+  platform/networking/cilium/values.yaml \
+  platform/networking/cilium/helm-release.yaml
 """
 
 [tasks.fmt]
