@@ -1,0 +1,49 @@
+[tools]
+actionlint = "1.7.12"
+flux2 = "2.9.4"
+helm = "4.2.3"
+kubeconform = "0.8.0"
+kubectl = "1.36.3"
+kustomize = "5.8.1"
+prek = "0.4.13"
+prettier = "3.9.6"
+trivy = "0.74.0"
+yq = "4.53.3"
+
+# Setup
+[tasks.setup]
+description = "Install tools and Git hooks"
+run = """
+mise install
+prek install
+"""
+
+# Development
+[tasks.check]
+description = "Check formatting and repository configuration"
+run = """
+actionlint .github/workflows/*.yaml
+kustomize build apps/overlays/mbk | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
+kustomize build apps/overlays/syd | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
+kustomize build clusters/mbk | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
+kustomize build clusters/mbk/platform | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
+kustomize build clusters/syd | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
+kustomize build clusters/syd/platform | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
+kustomize build platform | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
+kustomize build platform/crds | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
+prettier --check .
+trivy config --exit-code 1 --severity HIGH,CRITICAL --ignorefile .trivyignore.yaml .
+yq eval-all -e '. as $item ireduce ([]; . + [$item]) | (.[0] | to_json) == (.[1].spec.values | to_json)' \
+  platform/networking/cilium/values.yaml \
+  platform/networking/cilium/helm-release.yaml
+"""
+
+[tasks.fmt]
+description = "Format project files"
+run = """
+prettier --write .
+"""
+
+[tasks.prek]
+description = "Run all repository hooks"
+run = "prek run --all-files"

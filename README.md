@@ -29,25 +29,19 @@ mise run check
 | `mise run prek`  | Run all Git pre-commit hooks across the repository                   |
 | `mise run setup` | Install tools and Git hooks                                          |
 
-## Architecture & Governance
+## Platform
 
-- Read [PLAN.md](PLAN.md) for cross-repository ordering, workload ownership, and cutover gates.
-- Follow [docs/bootstrap.md](docs/bootstrap.md) for initial cluster bootstrap and verification.
-- Inventory and cutover status is tracked in [docs/migration-inventory.md](docs/migration-inventory.md).
-- GitHub Actions validates syntax and policies on pull requests; reconciliation occurs entirely via Flux pulling Git.
+- **GitOps & Reconciliation**: Flux controllers pull and reconcile manifests declaratively from Git.
+- **Networking & Ingress**: Cilium CNI, Hubble observability, Traefik Gateway API controller, and Cloudflared tunnels.
+- **Security & Certificates**: cert-manager DNS-01 ACME certificates and External Secrets Operator backed by 1Password SDK.
+- **Identity & Management**: Headlamp web UI with least-privilege access.
+- **Storage**: Retained TrueNAS NVMe NFS persistent volumes and storage classes.
 
-## Learning Sequence
+## Operations & Safety
 
-Each layer is intentionally observable before adding the next:
-
-1. **Substrate**: The `homelab` handoff provides a healthy Kubernetes API and kubeconfig.
-2. **Workload**: A direct OpenSpeedTest Deployment and Service teach Pods, reconciliation, stable service discovery, probes, and resource requests.
-3. **GitOps**: Flux teaches pull-based reconciliation and dependency ordering.
-4. **Networking**: Cilium and Hubble teach Pod networking, policy, and flow visibility.
-5. **Ingress & HTTP**: Gateway API and Traefik teach HTTP routing independently of the proxy.
-6. **Secrets**: External Secrets Operator teaches secret references without committing values.
-7. **Storage**: Static NFS teaches persistent volumes before a CSI driver automates them.
-8. **Platform APIs**: Crossplane HTTP resources teach external API reconciliation only after the cluster itself is understood.
+- **Declarative GitOps**: CI validates syntax and security; Flux pulls and reconciles state without CI write credentials.
+- **Dependency Ordering**: CRDs install first, platform controllers second, and workloads last.
+- **Secret Hygiene**: Zero secret values in Git; all credentials resolve via ExternalSecrets from 1Password vaults.
 
 ## Licence
 
