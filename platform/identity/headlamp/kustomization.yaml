@@ -3,5 +3,4 @@ kind: Kustomization
 namespace: headlamp
 resources:
   - helm-release.yaml
-  - namespace.yaml
   - network-policy.yaml

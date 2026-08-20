@@ -4,6 +4,7 @@ resources:
   - cert-manager.yaml
   - cloudflared.yaml
   - external-secrets.yaml
+  - headlamp.yaml
   - networking.yaml
   - observability.yaml
   - storage.yaml

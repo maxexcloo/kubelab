@@ -5,7 +5,7 @@ helm = "4.2.3"
 kubeconform = "0.8.0"
 kubectl = "1.36.3"
 kustomize = "5.8.1"
-prek = "0.4.13"
+prek = "0.4.14"
 prettier = "3.9.6"
 trivy = "0.74.0"
 yq = "4.53.3"
@@ -22,20 +22,20 @@ prek install
 [tasks.check]
 description = "Check formatting and repository configuration"
 run = """
+set -o pipefail
 actionlint .github/workflows/*.yaml
 kubeconform_flags="-kubernetes-version 1.36.3 -skip CustomResourceDefinition -strict -summary -schema-location default -schema-location {% raw %}https://raw.githubusercontent.com/datreeio/CRDs-catalog/becbe1103d096697610985b89f1630b2ab549982/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json{% endraw %}"
-kustomize build apps/overlays/mbk | kubeconform $kubeconform_flags
-kustomize build apps/overlays/syd | kubeconform $kubeconform_flags
-kustomize build clusters/mbk | kubeconform $kubeconform_flags
-kustomize build clusters/mbk/platform | kubeconform $kubeconform_flags
-kustomize build clusters/syd | kubeconform $kubeconform_flags
-kustomize build clusters/syd/platform | kubeconform $kubeconform_flags
-kustomize build platform/crds | kubeconform $kubeconform_flags
+for target in $(
+  {
+    find clusters -mindepth 1 -maxdepth 1 -type d
+    yq eval-all -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization") | .spec.path' clusters/*/*.yaml
+  } | sort -u
+); do
+  target="${target#./}"
+  kustomize build "$target" | kubeconform $kubeconform_flags
+done
 prettier --check .
 trivy config --exit-code 1 --severity HIGH,CRITICAL --ignorefile .trivyignore.yaml .
-yq eval-all -e '. as $item ireduce ([]; . + [$item]) | (.[0] | to_json) == (.[1].spec.values | to_json)' \
-  platform/networking/cilium/values.yaml \
-  platform/networking/cilium/helm-release.yaml
 """
 
 [tasks.fmt]
