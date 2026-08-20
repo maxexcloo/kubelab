@@ -81,17 +81,23 @@ spec:
       initChownData:
         enabled: false
 
-      resources:
-        limits:
-          memory: 512Mi
-
-        requests:
-          cpu: 50m
-          memory: 128Mi
+      persistence:
+        accessModes: [ReadWriteOnce]
+        enabled: true
+        size: 1Gi
+        storageClassName: local-path
+        type: pvc
 
       rbac:
         create: false
         namespaced: true
+
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 512Mi
 
       sidecar:
         dashboards:
@@ -132,12 +138,11 @@ spec:
       enabled: true
 
       resources:
-        limits:
-          memory: 128Mi
-
         requests:
           cpu: 20m
           memory: 32Mi
+        limits:
+          memory: 128Mi
 
     kubeApiServer:
       enabled: true
@@ -172,12 +177,11 @@ spec:
         disable_prometheus_converter: true
 
       resources:
-        limits:
-          memory: 256Mi
-
         requests:
           cpu: 50m
           memory: 64Mi
+        limits:
+          memory: 256Mi
 
     vlagent:
       enabled: true
@@ -189,31 +193,33 @@ spec:
           enabled: true
 
         resources:
-          limits:
-            memory: 256Mi
-
           requests:
             cpu: 50m
             memory: 64Mi
+          limits:
+            memory: 256Mi
 
     vlsingle:
       enabled: true
 
       spec:
         retentionPeriod: 7d
-        storage: null
         useStrictSecurity: true
 
         resources:
-          limits:
-            memory: 512Mi
-
           requests:
             cpu: 50m
             memory: 128Mi
+          limits:
+            memory: 512Mi
 
-    vmalert:
-      enabled: false
+        storage:
+          accessModes: [ReadWriteOnce]
+          storageClassName: local-path
+
+          resources:
+            requests:
+              storage: 10Gi
 
     vmagent:
       enabled: true
@@ -225,25 +231,33 @@ spec:
           cluster: _
 
         resources:
-          limits:
-            memory: 256Mi
-
           requests:
             cpu: 50m
             memory: 64Mi
+          limits:
+            memory: 256Mi
+
+    vmalert:
+      enabled: false
 
     vmsingle:
       enabled: true
 
       spec:
         retentionPeriod: 7d
-        storage: null
         useStrictSecurity: true
 
         resources:
-          limits:
-            memory: 1Gi
-
           requests:
             cpu: 100m
             memory: 256Mi
+          limits:
+            memory: 1Gi
+
+        storage:
+          accessModes: [ReadWriteOnce]
+          storageClassName: local-path
+
+          resources:
+            requests:
+              storage: 10Gi

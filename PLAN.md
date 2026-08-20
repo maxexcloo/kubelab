@@ -5,10 +5,10 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 ## Architecture & Failure Domains
 
-| Cluster | Location               | Node   | Role                                       | Storage                                            |
-| ------- | ---------------------- | ------ | ------------------------------------------ | -------------------------------------------------- |
-| `mbk`   | Home (TrueNAS VM)      | `taco` | Primary workloads and control plane        | TrueNAS NVMe NFS (`truenas-nfs`) and local scratch |
-| `syd`   | OCI Sydney (Ampere A1) | `hsp`  | Independent canary and secondary workloads | Local-path, replaceable state only                 |
+| Cluster | Location               | Node   | Role                                       | Storage                                 |
+| ------- | ---------------------- | ------ | ------------------------------------------ | --------------------------------------- |
+| `mbk`   | Home (TrueNAS VM)      | `taco` | Primary workloads and control plane        | Local-path scratch and TrueNAS NVMe NFS |
+| `syd`   | OCI Sydney (Ampere A1) | `hsp`  | Independent canary and secondary workloads | Local-path, replaceable state only      |
 
 ### Retained Appliances
 
@@ -23,7 +23,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 - **Substrate vs Workloads**: `homelab` (OpenTofu) owns everything required to reach or rebuild a cluster (VM, compute, OCI, Tailscale host extension, Cloudflare Tunnel credentials). `kubelab` (Flux) owns all in-cluster workloads and app-scoped integrations.
 - **Secret Contract**: 1Password is the root of trust. `mbk` uses a read/write service account; `syd` uses read-only. External Secrets Operator (1Password SDK) materialises cluster Secrets. Zero secrets in Git.
 - **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns app-scoped external APIs (Cloudflare DNS/routes, Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
-- **Storage Contract**: TrueNAS persistent volumes use `Retain`. Databases run on CloudNativePG unless an official chart provides a simpler supported model.
+- **Storage Contract**: Both clusters use node-local `local-path` volumes only for replaceable state. `mbk` additionally uses retained TrueNAS NFS for large or durable data. Databases run on CloudNativePG unless an official chart provides a simpler supported model; durable high-performance block storage requires a separately reviewed CSI evaluation.
 
 ## Cutover Controls
 
@@ -148,8 +148,8 @@ For every stateful service:
 
 ## Backup Tiers
 
-| Tier            | Local Snapshot         | Off-site Retention                                     | Workloads                                       |
-| --------------- | ---------------------- | ------------------------------------------------------ | ----------------------------------------------- |
-| **Critical**    | Daily TrueNAS (7 days) | Weekly Hotdog replication (4 weeks) + weekly B2 export | Pocket ID, PostgreSQL databases, unique configs |
-| **Important**   | Daily TrueNAS (7 days) | Weekly Hotdog replication (4 weeks)                    | Media metadata, document archives               |
-| **Replaceable** | None or short local    | None                                                   | Caches, `syd` local-path, build artefacts       |
+| Tier            | Local Snapshot         | Off-site Retention                                     | Workloads                                         |
+| --------------- | ---------------------- | ------------------------------------------------------ | ------------------------------------------------- |
+| **Critical**    | Daily TrueNAS (7 days) | Weekly Hotdog replication (4 weeks) + weekly B2 export | Pocket ID, PostgreSQL databases, unique configs   |
+| **Important**   | Daily TrueNAS (7 days) | Weekly Hotdog replication (4 weeks)                    | Media metadata, document archives                 |
+| **Replaceable** | None or short local    | None                                                   | Build artefacts, caches, cluster metrics and logs |
