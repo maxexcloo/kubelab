@@ -27,7 +27,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 ## Cutover Controls
 
-- **Access Policy**: `Public` uses an explicitly approved Cloudflare Tunnel route. `Internal` uses Tailscale and split DNS. `Private` has no application route. `None` has no network endpoint.
+- **Access Policy**: Cluster wildcard DNS always resolves to the corresponding Tailscale service IP. `Public` uses an explicitly approved Cloudflare Tunnel route or dedicated direct-public DNS record; never repoint a cluster wildcard at a public IP. `Internal` uses Tailscale through the wildcard DNS. `Private` has no application route. `None` has no network endpoint.
 - **State Protection**: Critical state uses retained NFS or CloudNativePG, daily snapshots, off-site backup, and application-native export where available. Important state uses retained NFS and the Important backup tier. Replaceable state is reproducible from Git, 1Password, or upstream sources.
 - **Observability**: Every routed user interface receives a Homepage entry and direct Gatus probe. Agents and backends are checked via their owning service.
 - **Rollback Window**: Old deployments remain stopped but recoverable for 7 days. Rollback restores previous routing and the final pre-migration snapshot/export. Legacy configuration is removed only after new deployments are proven.

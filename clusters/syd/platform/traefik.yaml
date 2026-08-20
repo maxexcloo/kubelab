@@ -9,3 +9,7 @@ spec:
       annotations:
         tailscale.com/expose: "true"
         tailscale.com/hostname: syd
+      spec:
+        externalIPs:
+          - 10.20.0.4
+        type: ClusterIP
