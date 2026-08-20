@@ -6,7 +6,6 @@ metadata:
 spec:
   interval: 30m
   releaseName: cloudflared
-
   chart:
     spec:
       chart: app-template
@@ -16,7 +15,6 @@ spec:
         name: bjw-s
         namespace: flux-system
       version: 5.1.0
-
   values:
     controllers:
       cloudflared:

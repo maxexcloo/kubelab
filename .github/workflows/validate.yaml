@@ -1,19 +1,15 @@
 name: Validate
-
 on:
   pull_request:
   workflow_dispatch:
   push:
     branches:
       - main
-
 permissions:
   contents: read
-
 concurrency:
   cancel-in-progress: true
   group: validate-${{ github.workflow }}-${{ github.ref }}
-
 jobs:
   validate:
     name: Validate

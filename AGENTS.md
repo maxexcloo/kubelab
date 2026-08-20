@@ -49,7 +49,8 @@ Underscore-prefixed names sort before other names. Apply this recursively to
 unordered project-owned YAML mappings, environment blocks, and template argument
 objects. A non-empty object is multi-line. A scalar-only array is a single-line
 value even when formatting wraps it; an array containing an object or array is
-multi-line. Do not add blank lines based only on value shape.
+multi-line. Do not use blank separator lines in project-owned YAML. Preserve
+blank lines in pinned upstream and generated manifests.
 
 List-item identifiers come first in `type`, `name`, `id` order. Prek hook items
 use `id`, then `name`; sort remaining fields normally.
