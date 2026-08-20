@@ -17,8 +17,9 @@ rebuild or reach a cluster while Kubernetes is unavailable.
 - Use `.yaml`, not `.yml`, for project-owned YAML.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
-- Pin every tool, chart, image, and remote manifest to an exact stable
-  version. Renovate proposes upgrades for manual review.
+- Pin tools, charts, images, and remote manifests to stable release versions.
+  Use readable major tags such as `v7` for GitHub Actions, not commit SHAs.
+  Renovate proposes upgrades for manual review.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Default Crossplane external resources to orphan-on-delete.
 - Do not change a live route without explicit approval and a reviewed plan.
