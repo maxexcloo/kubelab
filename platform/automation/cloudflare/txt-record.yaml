@@ -1,0 +1,66 @@
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: cloudflare-dns-test
+  namespace: crossplane-system
+spec:
+  managementPolicies: [Create, Observe, Update]
+  forProvider:
+    waitTimeout: 1m
+    expectedResponseCheck:
+      logic: |
+        .response.body.success == true
+          and .response.body.result.comment == .payload.body.comment
+          and .response.body.result.content == .payload.body.content
+          and .response.body.result.name == .payload.body.name
+          and .response.body.result.proxied == .payload.body.proxied
+          and .response.body.result.ttl == .payload.body.ttl
+          and .response.body.result.type == .payload.body.type
+      type: CUSTOM
+    headers:
+      Authorization:
+        - "Bearer {{ cloudflare-crossplane:crossplane-system:token }}"
+      Content-Type: [application/json]
+    mappings:
+      - action: CREATE
+        method: POST
+        url: .payload.baseUrl + "/" + .payload.body.zoneId + "/dns_records"
+        body: |
+          {
+            comment: .payload.body.comment,
+            content: .payload.body.content,
+            name: .payload.body.name,
+            proxied: .payload.body.proxied,
+            ttl: .payload.body.ttl,
+            type: .payload.body.type
+          }
+      - action: OBSERVE
+        method: GET
+        url: .payload.baseUrl + "/" + .payload.body.zoneId + "/dns_records/" + .response.body.result.id
+      - action: UPDATE
+        method: PUT
+        url: .payload.baseUrl + "/" + .payload.body.zoneId + "/dns_records/" + .response.body.result.id
+        body: |
+          {
+            comment: .payload.body.comment,
+            content: .payload.body.content,
+            name: .payload.body.name,
+            proxied: .payload.body.proxied,
+            ttl: .payload.body.ttl,
+            type: .payload.body.type
+          }
+    payload:
+      baseUrl: https://api.cloudflare.com/client/v4/zones
+      body: |
+        {
+          "comment": "Managed by Crossplane",
+          "content": "managed-by=crossplane",
+          "name": "_crossplane.mbk.excloo.dev",
+          "proxied": false,
+          "ttl": 300,
+          "type": "TXT",
+          "zoneId": "{{ cloudflare-crossplane:crossplane-system:zone-id }}"
+        }
+  providerConfigRef:
+    kind: ProviderConfig
+    name: cloudflare

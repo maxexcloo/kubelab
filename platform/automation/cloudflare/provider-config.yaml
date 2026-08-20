@@ -1,0 +1,8 @@
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: ProviderConfig
+metadata:
+  name: cloudflare
+  namespace: crossplane-system
+spec:
+  credentials:
+    source: None
