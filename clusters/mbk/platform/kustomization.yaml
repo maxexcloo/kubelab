@@ -4,6 +4,7 @@ resources:
   - ../../../platform
   - ../../../platform/storage/truenas-nfs
   - certificate.yaml
+  - grafana.yaml
   - headlamp.yaml
 patches:
   - path: observability.yaml

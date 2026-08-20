@@ -3,5 +3,6 @@ kind: Kustomization
 namespace: observability
 resources:
   - helm-release.yaml
+  - network-policy.yaml
   - vlagent-cluster-role.yaml
   - vlagent-cluster-role-binding.yaml

@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../../../platform
   - certificate.yaml
+  - grafana.yaml
   - headlamp.yaml
 patches:
   - path: observability.yaml
