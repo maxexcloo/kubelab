@@ -24,7 +24,7 @@ spec:
     mappings:
       - action: CREATE
         method: POST
-        url: .payload.baseUrl + "/" + .payload.body.zoneId + "/dns_records"
+        url: .payload.baseUrl
         body: |
           {
             comment: .payload.body.comment,
@@ -36,10 +36,10 @@ spec:
           }
       - action: OBSERVE
         method: GET
-        url: .payload.baseUrl + "/" + .payload.body.zoneId + "/dns_records/" + .response.body.result.id
+        url: .payload.baseUrl + "/" + .response.body.result.id
       - action: UPDATE
         method: PUT
-        url: .payload.baseUrl + "/" + .payload.body.zoneId + "/dns_records/" + .response.body.result.id
+        url: .payload.baseUrl + "/" + .response.body.result.id
         body: |
           {
             comment: .payload.body.comment,
@@ -50,7 +50,7 @@ spec:
             type: .payload.body.type
           }
     payload:
-      baseUrl: https://api.cloudflare.com/client/v4/zones
+      baseUrl: https://api.cloudflare.com/client/v4/zones/ac51f43cfb0c2835c8dff2c9580edd5f/dns_records
       body: |
         {
           "comment": "Managed by Crossplane",
@@ -58,8 +58,7 @@ spec:
           "name": "_crossplane.mbk.excloo.dev",
           "proxied": false,
           "ttl": 300,
-          "type": "TXT",
-          "zoneId": "{{ cloudflare-crossplane:crossplane-system:zone-id }}"
+          "type": "TXT"
         }
   providerConfigRef:
     kind: ProviderConfig
