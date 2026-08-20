@@ -6,6 +6,7 @@ resources:
   - headlamp.yaml
   - storage.yaml
 patches:
+  - path: observability.yaml
   - path: secret-store.yaml
   - path: tailscale.yaml
   - path: traefik.yaml

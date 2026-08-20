@@ -25,6 +25,7 @@ resources:
   - networking/cloudflared
   - networking/tailscale
   - networking/traefik
+  - observability
   - secrets/external-secrets
   - sources/bjw-s
   - sources/cert-manager
@@ -34,4 +35,5 @@ resources:
   - sources/openspeedtest
   - sources/tailscale
   - sources/traefik
+  - sources/victoria-metrics
   - storage/truenas-nfs

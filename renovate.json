@@ -11,6 +11,18 @@
       "managerFilePatterns": ["/^\\.mise\\.toml$/"],
       "matchStrings": ["CRDs-catalog/(?<currentDigest>[a-f0-9]{40})/"],
       "packageNameTemplate": "https://github.com/datreeio/CRDs-catalog"
+    },
+    {
+      "customType": "regex",
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "VictoriaMetrics/victorialogs-datasource",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "managerFilePatterns": [
+        "/platform/observability/victoria-metrics-k8s-stack/helm-release\\.yaml$/"
+      ],
+      "matchStrings": [
+        "victoriametrics-logs-datasource@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ]
     }
   ],
 
