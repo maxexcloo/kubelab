@@ -167,6 +167,8 @@ spec:
       spec:
         retentionPeriod: 7d
         useStrictSecurity: true
+        extraArgs:
+          memory.allowedPercent: "40"
         resources:
           requests:
             cpu: 50m
