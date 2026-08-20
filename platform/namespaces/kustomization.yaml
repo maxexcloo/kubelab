@@ -7,5 +7,6 @@ resources:
   - headlamp.yaml
   - networking.yaml
   - observability.yaml
+  - observability-node.yaml
   - storage.yaml
   - tailscale.yaml
