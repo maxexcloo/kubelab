@@ -2,6 +2,18 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "dependencyDashboard": false,
   "extends": ["config:recommended", ":enablePreCommit"],
+
+  "customManagers": [
+    {
+      "currentValueTemplate": "main",
+      "customType": "regex",
+      "datasourceTemplate": "git-refs",
+      "managerFilePatterns": ["/^\\.mise\\.toml$/"],
+      "matchStrings": ["CRDs-catalog/(?<currentDigest>[a-f0-9]{40})/"],
+      "packageNameTemplate": "https://github.com/datreeio/CRDs-catalog"
+    }
+  ],
+
   "kubernetes": {
     "managerFilePatterns": ["/(^|/).+\\.yaml$/"]
   }

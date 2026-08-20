@@ -23,14 +23,14 @@ prek install
 description = "Check formatting and repository configuration"
 run = """
 actionlint .github/workflows/*.yaml
-kustomize build apps/overlays/mbk | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
-kustomize build apps/overlays/syd | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
-kustomize build clusters/mbk | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
-kustomize build clusters/mbk/platform | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
-kustomize build clusters/syd | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
-kustomize build clusters/syd/platform | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
-kustomize build platform | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
-kustomize build platform/crds | kubeconform -ignore-missing-schemas -kubernetes-version 1.36.3 -strict -summary
+kubeconform_flags="-kubernetes-version 1.36.3 -skip CustomResourceDefinition -strict -summary -schema-location default -schema-location {% raw %}https://raw.githubusercontent.com/datreeio/CRDs-catalog/becbe1103d096697610985b89f1630b2ab549982/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json{% endraw %}"
+kustomize build apps/overlays/mbk | kubeconform $kubeconform_flags
+kustomize build apps/overlays/syd | kubeconform $kubeconform_flags
+kustomize build clusters/mbk | kubeconform $kubeconform_flags
+kustomize build clusters/mbk/platform | kubeconform $kubeconform_flags
+kustomize build clusters/syd | kubeconform $kubeconform_flags
+kustomize build clusters/syd/platform | kubeconform $kubeconform_flags
+kustomize build platform/crds | kubeconform $kubeconform_flags
 prettier --check .
 trivy config --exit-code 1 --severity HIGH,CRITICAL --ignorefile .trivyignore.yaml .
 yq eval-all -e '. as $item ireduce ([]; . + [$item]) | (.[0] | to_json) == (.[1].spec.values | to_json)' \

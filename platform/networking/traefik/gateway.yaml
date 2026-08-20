@@ -11,13 +11,19 @@ spec:
       protocol: HTTP
       allowedRoutes:
         namespaces:
-          from: All
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.excloo.dev/private-access: "true"
     - name: websecure
       port: 8443
       protocol: HTTPS
       allowedRoutes:
         namespaces:
-          from: All
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.excloo.dev/private-access: "true"
       tls:
         certificateRefs:
           - name: wildcard
