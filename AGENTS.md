@@ -17,8 +17,9 @@ rebuild or reach a cluster while Kubernetes is unavailable.
 - Use `.yaml`, not `.yml`, for project-owned YAML.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
-- Pin every tool, chart, image, and remote manifest to an exact stable
-  version. Renovate proposes upgrades for manual review.
+- Pin tools, charts, images, and remote manifests to stable release versions.
+  Use readable major tags such as `v7` for GitHub Actions, not commit SHAs.
+  Renovate proposes upgrades for manual review.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Default Crossplane external resources to orphan-on-delete.
 - Do not change a live route without explicit approval and a reviewed plan.
@@ -49,7 +50,8 @@ Underscore-prefixed names sort before other names. Apply this recursively to
 unordered project-owned YAML mappings, environment blocks, and template argument
 objects. A non-empty object is multi-line. A scalar-only array is a single-line
 value even when formatting wraps it; an array containing an object or array is
-multi-line. Do not add blank lines based only on value shape.
+multi-line. Do not use blank separator lines in project-owned YAML. Preserve
+blank lines in pinned upstream and generated manifests.
 
 List-item identifiers come first in `type`, `name`, `id` order. Prek hook items
 use `id`, then `name`; sort remaining fields normally.

@@ -5,7 +5,6 @@ metadata:
 spec:
   interval: 30m
   releaseName: victoria-metrics-k8s-stack
-
   chart:
     spec:
       chart: victoria-metrics-k8s-stack
@@ -15,7 +14,6 @@ spec:
         name: victoria-metrics
         namespace: flux-system
       version: 0.91.0
-
   install:
     crds: CreateReplace
   upgrade:
@@ -51,6 +49,9 @@ spec:
               type: prometheus
               uid: VictoriaMetrics
               url: http://vmsingle-victoria-metrics-k8s-stack.observability.svc:8428
+      extraEmptyDirMounts:
+        - name: tmp
+          mountPath: /tmp
       grafana.ini:
         analytics:
           check_for_updates: false
@@ -130,7 +131,7 @@ spec:
     syncJob:
       enabled: false
     victoria-metrics-operator:
-      watchNamespaces: [observability]
+      watchNamespaces: [observability, observability-node]
       crds:
         cleanup:
           enabled: false
@@ -150,21 +151,24 @@ spec:
           memory: 256Mi
     vlagent:
       enabled: true
+      namespaceOverride: observability-node
       spec:
         useStrictSecurity: true
         k8sCollector:
           enabled: true
         resources:
+          limits:
+            memory: 256Mi
           requests:
             cpu: 50m
             memory: 64Mi
-          limits:
-            memory: 256Mi
     vlsingle:
       enabled: true
       spec:
         retentionPeriod: 7d
         useStrictSecurity: true
+        extraArgs:
+          memory.allowedPercent: "40"
         resources:
           requests:
             cpu: 50m
