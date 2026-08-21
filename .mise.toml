@@ -24,7 +24,7 @@ description = "Check formatting and repository configuration"
 run = """
 set -o pipefail
 actionlint .github/workflows/*.yaml
-kubeconform_flags="-ignore-missing-schemas -kubernetes-version 1.36.3 -skip CustomResourceDefinition -strict -summary -schema-location default -schema-location {% raw %}https://raw.githubusercontent.com/datreeio/CRDs-catalog/becbe1103d096697610985b89f1630b2ab549982/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json{% endraw %}"
+kubeconform_flags="-kubernetes-version 1.36.3 -skip CustomResourceDefinition -strict -summary -schema-location default -schema-location {% raw %}https://raw.githubusercontent.com/datreeio/CRDs-catalog/becbe1103d096697610985b89f1630b2ab549982/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json{% endraw %}"
 for target in $(
   {
     find clusters -mindepth 1 -maxdepth 1 -type d
