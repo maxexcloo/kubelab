@@ -1,0 +1,91 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: anisette
+  namespace: anisette
+spec:
+  interval: 30m
+  releaseName: anisette
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      anisette:
+        strategy: Recreate
+        containers:
+          anisette:
+            env:
+              XDG_RUNTIME_DIR: /tmp
+            image:
+              pullPolicy: IfNotPresent
+              repository: dadoum/anisette-v3-server
+              tag: latest@sha256:1e20384985d3c49965f444bef39d627768dacc39ea0dca91f2a535edb7591ba3
+            probes:
+              liveness:
+                enabled: true
+                path: /v3/client_info
+                port: 6969
+                type: HTTP
+              readiness:
+                enabled: true
+                path: /v3/client_info
+                port: 6969
+                type: HTTP
+              startup:
+                enabled: true
+                path: /v3/client_info
+                port: 6969
+                type: HTTP
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 20m
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: anisette
+    persistence:
+      data:
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: local-path
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /home/Alcoholic/.config/anisette-v3
+      runtime:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      anisette:
+        controller: anisette
+        ports:
+          http:
+            port: 6969
+            protocol: HTTP

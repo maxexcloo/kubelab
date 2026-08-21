@@ -13,9 +13,8 @@ bootstrapped by `homelab`.
 | Tunnel public | `public-tunnel` | `tunnel.<cluster>.excloo.dev` | Required         |
 
 Only `syd` currently has a direct-public Gateway. Both clusters have a tunnel
-Gateway. Direct-public HTTPS hostnames must be covered by the cluster's
-certificate; the current `syd` certificate covers `*.syd.excloo.dev`. Private
-routes are never read by ExternalDNS.
+Gateway. The `syd` public certificate covers `*.excloo.com` and
+`*.syd.excloo.dev`. Private routes are never read by ExternalDNS.
 
 ## Public Route Contract
 
@@ -29,6 +28,6 @@ A public application namespace must carry
 - list only the application hostnames in `spec.hostnames`.
 
 ExternalDNS creates or updates `A`, `AAAA`, and `CNAME` records within
-`excloo.dev`. Each cluster has a distinct TXT owner ID. Its `upsert-only` policy
-leaves DNS records in place when a route is removed; delete them only as part of
-an explicitly reviewed cutover or retirement.
+`excloo.com` and `excloo.dev`. Each cluster has a distinct TXT owner ID. Its
+`upsert-only` policy leaves DNS records in place when a route is removed; delete
+them only as part of an explicitly reviewed cutover or retirement.
