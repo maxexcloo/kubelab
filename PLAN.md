@@ -5,10 +5,10 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 ## Architecture & Failure Domains
 
-| Cluster | Location               | Node   | Role                                       | Storage                                            |
-| ------- | ---------------------- | ------ | ------------------------------------------ | -------------------------------------------------- |
-| `mbk`   | Home (TrueNAS VM)      | `taco` | Primary workloads and control plane        | TrueNAS NVMe NFS (`truenas-nfs`) and local scratch |
-| `syd`   | OCI Sydney (Ampere A1) | `hsp`  | Independent canary and secondary workloads | Local-path, replaceable state only                 |
+| Cluster | Location               | Node   | Role                                       | Storage                                 |
+| ------- | ---------------------- | ------ | ------------------------------------------ | --------------------------------------- |
+| `mbk`   | Home (TrueNAS VM)      | `taco` | Primary workloads and control plane        | Local-path scratch and TrueNAS NVMe NFS |
+| `syd`   | OCI Sydney (Ampere A1) | `hsp`  | Independent canary and secondary workloads | Local-path, replaceable state only      |
 
 ### Retained Appliances
 
@@ -22,12 +22,13 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 - **Substrate vs Workloads**: `homelab` (OpenTofu) owns everything required to reach or rebuild a cluster (VM, compute, OCI, Tailscale host extension, Cloudflare Tunnel credentials). `kubelab` (Flux) owns all in-cluster workloads and app-scoped integrations.
 - **Secret Contract**: 1Password is the root of trust. `mbk` uses a read/write service account; `syd` uses read-only. External Secrets Operator (1Password SDK) materialises cluster Secrets. Zero secrets in Git.
-- **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns app-scoped external APIs (Cloudflare DNS/routes, Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
-- **Storage Contract**: TrueNAS persistent volumes use `Retain`. Databases run on CloudNativePG unless an official chart provides a simpler supported model.
+- **Application DNS**: ExternalDNS owns explicitly labelled application records from Gateway API routes. OpenTofu owns cluster tunnel and direct-public targets. ExternalDNS uses unique cluster ownership and upsert-only reconciliation.
+- **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns compatible app-scoped external APIs (Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
+- **Storage Contract**: Both clusters use node-local `local-path` volumes only for replaceable state. `mbk` additionally uses retained TrueNAS NFS for large or durable data. Databases run on CloudNativePG unless an official chart provides a simpler supported model; durable high-performance block storage requires a separately reviewed CSI evaluation.
 
 ## Cutover Controls
 
-- **Access Policy**: `Public` uses an explicitly approved Cloudflare Tunnel route. `Internal` uses Tailscale and split DNS. `Private` has no application route. `None` has no network endpoint.
+- **Access Policy**: Cluster wildcard DNS always resolves to the corresponding Tailscale service IP. `Public` attaches to the dedicated tunnel or direct-public Gateway and opts into ExternalDNS; never repoint a cluster wildcard at a public target. `Internal` uses Tailscale through the private Gateway and wildcard DNS. `Private` has no application route. `None` has no network endpoint.
 - **State Protection**: Critical state uses retained NFS or CloudNativePG, daily snapshots, off-site backup, and application-native export where available. Important state uses retained NFS and the Important backup tier. Replaceable state is reproducible from Git, 1Password, or upstream sources.
 - **Observability**: Every routed user interface receives a Homepage entry and direct Gatus probe. Agents and backends are checked via their owning service.
 - **Rollback Window**: Old deployments remain stopped but recoverable for 7 days. Rollback restores previous routing and the final pre-migration snapshot/export. Legacy configuration is removed only after new deployments are proven.
@@ -37,8 +38,9 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 ### Phase 1: Observability & Dynamic Automation
 
 1. **Observability**: Deploy VictoriaMetrics, VictoriaLogs, and Grafana on `mbk` and `syd` for cluster metrics and logs (replacing Dozzle).
-2. **Crossplane Automation**: Deploy Crossplane with `provider-http` on `mbk`. Reconcile one low-risk DNS or Pocket ID test resource with orphan-on-delete.
-3. **Storage Evaluation**: Evaluate `democratic-csi` against TrueNAS 26.0 for dynamic NFS/iSCSI. If unproven or brittle, retain static NFS for dataset PersistentVolumes.
+2. **ExternalDNS Automation**: Deploy ExternalDNS on both clusters. Keep application records opt-in, Cloudflare-scoped, cluster-owned, and upsert-only.
+3. **Crossplane Automation**: Deploy Crossplane with `provider-http` on `mbk`. Reconcile one compatible low-risk test resource with orphan-on-delete.
+4. **Storage Evaluation**: Evaluate `democratic-csi` against TrueNAS 26.0 for dynamic NFS/iSCSI. If unproven or brittle, retain static NFS for dataset PersistentVolumes.
 
 ### Phase 2: Workload Migration (Dependency Order)
 
@@ -114,6 +116,7 @@ For every stateful service:
 | Tailscale Kubernetes operator | `homelab` and target repositories      | Both clusters                | Replace       | Private  | Flux-owned operator; OAuth client, tags, and policy stay in OpenTofu |
 | Traefik                       | `homelab-docker` and `homelab-truenas` | Both clusters                | Replace       | Private  | Gateway API implementation for internal and public routes            |
 | VictoriaMetrics               | `homelab-truenas`                      | Both clusters                | Replace       | Internal | Replaceable platform metrics; home is primary                        |
+| Windmill                      | None                                   | `mbk`                        | Deploy        | Internal | Critical PostgreSQL data on retained NFS                             |
 
 ### Retained Appliances and Substrate
 
@@ -131,25 +134,26 @@ For every stateful service:
 
 ### External Ownership
 
-| Resource Family                                                 | Owner After Migration                     | Deletion Default               |
-| --------------------------------------------------------------- | ----------------------------------------- | ------------------------------ |
-| B2 app buckets and keys                                         | Direct Crossplane provider-http resources | Orphan                         |
-| Cloudflare app DNS, tunnel routes, Access, WAF, and rate limits | Direct Crossplane provider-http resources | Orphan                         |
-| Cluster Cloudflare tunnels and credentials                      | OpenTofu                                  | Prevent accidental replacement |
-| Control D app rules                                             | Direct Crossplane provider-http resources | Orphan                         |
-| Fly Gatus app, Machine, and secrets                             | OpenTofu exception                        | Reviewed replacement only      |
-| Global Tailscale ACLs/grants and tag owners                     | Foundations OpenTofu                      | Reviewed saved plan only       |
-| OCI network, image, NSG, and `hsp` VM                           | OpenTofu                                  | Reviewed saved plan only       |
-| Pocket ID app clients and groups                                | Direct Crossplane provider-http resources | Orphan                         |
-| Resend app keys                                                 | Direct Crossplane provider-http resources | Orphan                         |
-| Retained appliance Tailscale identities                         | Appliance owner                           | Explicit appliance procedure   |
-| Tailscale operator OAuth clients                                | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
-| Talos-node Tailscale bootstrap identities                       | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
+| Resource Family                                 | Owner After Migration                     | Deletion Default               |
+| ----------------------------------------------- | ----------------------------------------- | ------------------------------ |
+| B2 app buckets and keys                         | Direct Crossplane provider-http resources | Orphan                         |
+| Cloudflare app Access, WAF, and rate limits     | `kubelab` workload integration            | Orphan                         |
+| Cloudflare application DNS                      | ExternalDNS from labelled Gateway routes  | Upsert only                    |
+| Cluster Cloudflare tunnels, targets, and tokens | OpenTofu                                  | Prevent accidental replacement |
+| Control D app rules                             | Direct Crossplane provider-http resources | Orphan                         |
+| Fly Gatus app, Machine, and secrets             | OpenTofu exception                        | Reviewed replacement only      |
+| Global Tailscale ACLs/grants and tag owners     | Foundations OpenTofu                      | Reviewed saved plan only       |
+| OCI network, image, NSG, and `hsp` VM           | OpenTofu                                  | Reviewed saved plan only       |
+| Pocket ID app clients and groups                | Direct Crossplane provider-http resources | Orphan                         |
+| Resend app keys                                 | Direct Crossplane provider-http resources | Orphan                         |
+| Retained appliance Tailscale identities         | Appliance owner                           | Explicit appliance procedure   |
+| Tailscale operator OAuth clients                | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
+| Talos-node Tailscale bootstrap identities       | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
 
 ## Backup Tiers
 
-| Tier            | Local Snapshot         | Off-site Retention                                     | Workloads                                       |
-| --------------- | ---------------------- | ------------------------------------------------------ | ----------------------------------------------- |
-| **Critical**    | Daily TrueNAS (7 days) | Weekly Hotdog replication (4 weeks) + weekly B2 export | Pocket ID, PostgreSQL databases, unique configs |
-| **Important**   | Daily TrueNAS (7 days) | Weekly Hotdog replication (4 weeks)                    | Media metadata, document archives               |
-| **Replaceable** | None or short local    | None                                                   | Caches, `syd` local-path, build artefacts       |
+| Tier            | Local Snapshot         | Off-site Retention                                     | Workloads                                         |
+| --------------- | ---------------------- | ------------------------------------------------------ | ------------------------------------------------- |
+| **Critical**    | Daily TrueNAS (7 days) | Weekly Hotdog replication (4 weeks) + weekly B2 export | Pocket ID, PostgreSQL databases, unique configs   |
+| **Important**   | Daily TrueNAS (7 days) | Weekly Hotdog replication (4 weeks)                    | Media metadata, document archives                 |
+| **Replaceable** | None or short local    | None                                                   | Build artefacts, caches, cluster metrics and logs |

@@ -40,11 +40,12 @@ After substrate provisioning in `homelab`:
 2. **Bootstrap Cilium CNI**:
    ```shell
    helm repo add cilium https://helm.cilium.io
-   helm upgrade --install cilium cilium/cilium \
-     --kube-context <cluster> \
-     --namespace kube-system \
-     --version 1.20.0 \
-     --values platform/networking/cilium/values.yaml
+   yq eval '.spec.values' platform/networking/cilium/helm-release.yaml | \
+     helm upgrade --install cilium cilium/cilium \
+       --kube-context <cluster> \
+       --namespace kube-system \
+       --version 1.20.0 \
+       --values -
    ```
 3. **Inject 1Password Bootstrap Secret**:
    ```shell
@@ -58,10 +59,11 @@ After substrate provisioning in `homelab`:
 ## Platform
 
 - **GitOps & Reconciliation**: Flux controllers pull and reconcile manifests declaratively from Git.
-- **Networking & Ingress**: Cilium CNI, Hubble observability, Traefik Gateway API controller, and Cloudflared tunnels.
+- **Networking & Ingress**: Cilium CNI, ExternalDNS, Hubble network observability, isolated Traefik Gateway API entrypoints, and Cloudflared tunnels.
+- **Observability**: VictoriaMetrics, VictoriaLogs, and Grafana for replaceable cluster metrics and logs.
 - **Security & Certificates**: cert-manager DNS-01 ACME certificates and External Secrets Operator backed by 1Password SDK.
 - **Identity & Management**: Headlamp web UI with least-privilege access.
-- **Storage**: Retained TrueNAS NVMe NFS persistent volumes and storage classes.
+- **Storage**: Replaceable node-local volumes on both clusters and retained TrueNAS NVMe NFS volumes on `mbk`.
 
 ## Operations & Safety
 

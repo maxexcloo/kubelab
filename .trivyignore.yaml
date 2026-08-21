@@ -1,13 +1,18 @@
 misconfigurations:
   - id: KSV-0041
-    paths:
-      - clusters/mbk/flux-system/gotk-components.yaml
-      - clusters/syd/flux-system/gotk-components.yaml
     expired_at: 2027-08-15
     statement: Flux source and Kustomize controllers require cluster-scoped Secret access for reconciliation; this is the pinned upstream v2.9.4 manifest.
-  - id: KSV-0046
     paths:
       - clusters/mbk/flux-system/gotk-components.yaml
       - clusters/syd/flux-system/gotk-components.yaml
+  - id: KSV-0046
     expired_at: 2027-08-15
     statement: Flux controller and aggregate roles intentionally manage their CRDs; this is the pinned upstream v2.9.4 manifest.
+    paths:
+      - clusters/mbk/flux-system/gotk-components.yaml
+      - clusters/syd/flux-system/gotk-components.yaml
+  - id: KSV-0118
+    expired_at: 2027-08-21
+    statement: The constrained root init container creates and assigns Windmill's directory on the retained shared NFS export before PostgreSQL starts as a non-root user.
+    paths:
+      - apps/base/windmill/postgresql.yaml

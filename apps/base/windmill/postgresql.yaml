@@ -1,0 +1,136 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: windmill-postgresql
+  namespace: windmill
+  labels:
+    app.kubernetes.io/component: database
+    app.kubernetes.io/name: windmill
+spec:
+  clusterIP: None
+  ports:
+    - name: postgresql
+      port: 5432
+      protocol: TCP
+      targetPort: postgresql
+  selector:
+    app.kubernetes.io/component: database
+    app.kubernetes.io/name: windmill
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: windmill-postgresql
+  namespace: windmill
+  labels:
+    app.kubernetes.io/component: database
+    app.kubernetes.io/name: windmill
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: database
+      app.kubernetes.io/name: windmill
+  serviceName: windmill-postgresql
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: database
+        app.kubernetes.io/name: windmill
+    spec:
+      automountServiceAccountToken: false
+      initContainers:
+        - name: initialise-storage
+          image: postgres:18.4-bookworm
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -ec
+            - install -d -m 0700 -o 999 -g 999 /mnt/kubernetes/windmill/postgresql
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - CHOWN
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 0
+            runAsUser: 0
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: data
+              mountPath: /mnt/kubernetes
+      containers:
+        - name: postgresql
+          image: postgres:18.4-bookworm
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data
+            - name: POSTGRES_DB
+              value: windmill
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: windmill-database
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: windmill-database
+          ports:
+            - name: postgresql
+              containerPort: 5432
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - --dbname=windmill
+                - --username=windmill
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 999
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+              subPath: windmill/postgresql
+            - name: runtime
+              mountPath: /var/run/postgresql
+            - name: temporary
+              mountPath: /tmp
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: data
+          nfs:
+            path: /mnt/truenas-nvme/kubernetes
+            server: 10.4.0.3
+        - name: runtime
+          emptyDir: {}
+        - name: temporary
+          emptyDir: {}

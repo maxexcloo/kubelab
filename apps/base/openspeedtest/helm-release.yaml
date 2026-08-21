@@ -6,7 +6,6 @@ metadata:
 spec:
   interval: 30m
   releaseName: openspeedtest
-
   chart:
     spec:
       chart: openspeedtest
@@ -16,7 +15,6 @@ spec:
         name: openspeedtest
         namespace: flux-system
       version: 0.1.2
-
   values:
     image:
       pullPolicy: IfNotPresent

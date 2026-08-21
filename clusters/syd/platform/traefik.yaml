@@ -5,7 +5,29 @@ metadata:
   namespace: networking
 spec:
   values:
+    ports:
+      webdirect:
+        exposedPort: 80
+        port: 8082
+        protocol: TCP
+        expose:
+          default: false
+          direct: true
+      websecuredirect:
+        exposedPort: 443
+        port: 8444
+        protocol: TCP
+        expose:
+          default: false
+          direct: true
     service:
+      additionalServices:
+        direct:
+          spec:
+            externalIPs: [10.20.0.4]
+            type: ClusterIP
       annotations:
         tailscale.com/expose: "true"
         tailscale.com/hostname: syd
+      spec:
+        type: ClusterIP

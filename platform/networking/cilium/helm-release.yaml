@@ -5,7 +5,6 @@ metadata:
 spec:
   interval: 30m
   releaseName: cilium
-
   chart:
     spec:
       chart: cilium
@@ -15,7 +14,6 @@ spec:
         name: cilium
         namespace: flux-system
       version: 1.20.0
-
   values:
     ipam:
       mode: kubernetes

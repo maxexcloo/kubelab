@@ -1,0 +1,31 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: public-direct
+  namespace: networking
+  annotations:
+    external-dns.alpha.kubernetes.io/target: public.syd.excloo.dev
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: webdirect
+      port: 8082
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.excloo.dev/public-access: "true"
+    - name: websecuredirect
+      port: 8444
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.excloo.dev/public-access: "true"
+      tls:
+        certificateRefs:
+          - name: wildcard

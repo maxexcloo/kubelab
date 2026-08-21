@@ -11,14 +11,15 @@ rebuild or reach a cluster while Kubernetes is unavailable.
 - Read `PLAN.md` before changing architecture, ownership, deletion behaviour,
   networking, storage, secrets, or migration order.
 - Treat `PLAN.md` as authoritative for cross-repository ordering and workload
-  ownership, and `homelab/PLAN.md` as authoritative for that repository's
-  substrate implementation details.
+  ownership, and `homelab` configuration as authoritative for substrate
+  implementation details.
 - Use Australian English in project-owned prose and identifiers.
 - Use `.yaml`, not `.yml`, for project-owned YAML.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
-- Pin every tool, chart, image, and remote manifest to an exact stable
-  version. Renovate proposes upgrades for manual review.
+- Pin tools, charts, images, and remote manifests to stable release versions.
+  Use readable major tags such as `v7` for GitHub Actions, not commit SHAs.
+  Renovate proposes upgrades for manual review.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Default Crossplane external resources to orphan-on-delete.
 - Do not change a live route without explicit approval and a reviewed plan.
@@ -40,18 +41,17 @@ operational documentation under `docs/`.
 
 ## Sorting Convention
 
-Sort object assignments in this order:
+Sort unordered assignments in this order:
 
 1. Single-line values, alphabetically by key.
 2. Multi-line values, alphabetically by key.
 
 Underscore-prefixed names sort before other names. Apply this recursively to
-YAML mappings, environment blocks, and template argument objects. A non-empty
-object is multi-line. A scalar-only array is a single-line value even when
-formatting wraps it; an array containing an object or array is multi-line.
-Separate every multi-line assignment from adjacent assignments with a blank line,
-except where the formatter removes the separator. Keep assignments contiguous
-inside YAML list-item mappings.
+unordered project-owned YAML mappings, environment blocks, and template argument
+objects. A non-empty object is multi-line. A scalar-only array is a single-line
+value even when formatting wraps it; an array containing an object or array is
+multi-line. Do not use blank separator lines in project-owned YAML. Preserve
+blank lines in pinned upstream and generated manifests.
 
 List-item identifiers come first in `type`, `name`, `id` order. Prek hook items
 use `id`, then `name`; sort remaining fields normally.
@@ -63,8 +63,9 @@ global configuration and `jobs`. Preserve dependency order within workflow
 steps.
 
 Sort unordered peer headings, lists, and table rows alphabetically. Preserve
-procedural, dependency, routing, interface, priority, chronological, and other
-meaningful order.
+API, schema, interface, procedural, dependency, routing, priority,
+chronological, and other meaningful order. In particular, keep conventional
+Kubernetes field and resource ordering instead of alphabetising it.
 
 ## Style
 
