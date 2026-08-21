@@ -33,20 +33,24 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 - **Observability**: Every routed user interface receives a Homepage entry and direct Gatus probe. Agents and backends are checked via their owning service.
 - **Rollback Window**: Old deployments remain stopped but recoverable for 7 days. Rollback restores previous routing and the final pre-migration snapshot/export. Legacy configuration is removed only after new deployments are proven.
 
-## Remaining Migration Phases
+## Migration Phases
+
+Phase 1 foundations are complete. Crossplane remains installed without a
+managed resource until a compatible app-scoped API is required. Phase 2 has
+started with Anisette on `syd`.
 
 ### Phase 1: Observability & Dynamic Automation
 
-1. **Observability**: Deploy VictoriaMetrics, VictoriaLogs, and Grafana on `mbk` and `syd` for cluster metrics and logs (replacing Dozzle).
-2. **ExternalDNS Automation**: Deploy ExternalDNS on both clusters. Keep application records opt-in, Cloudflare-scoped, cluster-owned, and upsert-only.
-3. **Crossplane Automation**: Deploy Crossplane with `provider-http` on `mbk`. Reconcile one compatible low-risk test resource with orphan-on-delete.
-4. **Storage Evaluation**: Evaluate `democratic-csi` against TrueNAS 26.0 for dynamic NFS/iSCSI. If unproven or brittle, retain static NFS for dataset PersistentVolumes.
+1. **Observability — Complete**: VictoriaMetrics, VictoriaLogs, and Grafana run on `mbk` and `syd` for cluster metrics and logs (replacing Dozzle).
+2. **ExternalDNS Automation — Complete**: ExternalDNS runs on both clusters. Application records are opt-in, Cloudflare-scoped, cluster-owned, and upsert-only.
+3. **Crossplane Automation — Foundation Complete**: Crossplane and `provider-http` run on `mbk`. Keep the provider idle until a compatible low-risk app-scoped resource is required; default every future resource to orphan-on-delete.
+4. **Storage Evaluation — Trial Ready**: `democratic-csi` is unsuitable for TrueNAS 26 because its TrueNAS integration depends on the removed REST API or privileged SSH. Trial the official WebSocket-based TrueNAS CSI driver on `mbk`; retain static NFS as the production default until provisioning, retention, snapshots, recovery, and upgrades pass. See [`docs/storage.md`](docs/storage.md).
 
 ### Phase 2: Workload Migration (Dependency Order)
 
 Execute migrations with one pull request and cutover record per workload group:
 
-1. **Stateless Utilities**: `anisette`, `byparr`, `redlib`.
+1. **Stateless Utilities — In Progress**: `anisette` on `syd`, then `byparr` and `redlib`.
 2. **Platform Consumers**: `homepage` (using native `gethomepage.dev/*` discovery), `beszel` hub on `mbk` and cluster agents.
 3. **Identity-Dependent & Small Stateful**: `bifrost`, `cliproxyapi`, `comfy-control`, `bichon`, `actual-budget`, `papra`, `larapaper`.
 4. **Databases & Media Libraries**:
@@ -84,7 +88,7 @@ For every stateful service:
 | Actual Budget                 | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical NFS data, Pocket ID                                         |
 | AIO Metadata                  | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Important NFS configuration                                          |
 | AIOStreams                    | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Important NFS configuration                                          |
-| Anisette                      | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Stateless                                                            |
+| Anisette                      | `homelab-truenas`                      | `syd`                        | Migrate       | Public   | Replaceable local library data                                       |
 | Beszel                        | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical data, B2, Pocket ID, Resend                                 |
 | Beszel agents                 | `homelab` target repositories          | Cluster and appliance owners | Replace       | Private  | Flux owns cluster agents; retained appliances use native service     |
 | Bichon                        | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical mail archive                                                |
