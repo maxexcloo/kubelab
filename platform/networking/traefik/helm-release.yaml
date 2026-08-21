@@ -30,6 +30,14 @@ spec:
     log:
       format: json
       level: INFO
+    ports:
+      webtunnel:
+        exposedPort: 80
+        port: 8081
+        protocol: TCP
+        expose:
+          default: false
+          tunnel: true
     providers:
       kubernetesCRD:
         enabled: true
@@ -44,5 +52,9 @@ spec:
       limits:
         memory: 256Mi
     service:
+      additionalServices:
+        tunnel:
+          spec:
+            type: ClusterIP
       spec:
         type: ClusterIP
