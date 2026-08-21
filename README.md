@@ -59,7 +59,7 @@ After substrate provisioning in `homelab`:
 ## Platform
 
 - **GitOps & Reconciliation**: Flux controllers pull and reconcile manifests declaratively from Git.
-- **Networking & Ingress**: Cilium CNI, Hubble network observability, Traefik Gateway API controller, and Cloudflared tunnels.
+- **Networking & Ingress**: Cilium CNI, ExternalDNS, Hubble network observability, isolated Traefik Gateway API entrypoints, and Cloudflared tunnels.
 - **Observability**: VictoriaMetrics, VictoriaLogs, and Grafana for replaceable cluster metrics and logs.
 - **Security & Certificates**: cert-manager DNS-01 ACME certificates and External Secrets Operator backed by 1Password SDK.
 - **Identity & Management**: Headlamp web UI with least-privilege access.

@@ -6,6 +6,7 @@ resources:
   - namespaces
   - networking/cilium
   - networking/cloudflared
+  - networking/external-dns
   - networking/tailscale
   - networking/traefik
   - observability
@@ -13,6 +14,7 @@ resources:
   - sources/bjw-s
   - sources/cert-manager
   - sources/cilium
+  - sources/external-dns
   - sources/external-secrets
   - sources/headlamp
   - sources/local-path-provisioner
@@ -20,6 +22,7 @@ resources:
   - sources/tailscale
   - sources/traefik
   - sources/victoria-metrics
+  - sources/windmill
   - storage/local-path-provisioner
 patches:
   - patch: |-

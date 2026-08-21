@@ -11,3 +11,8 @@ misconfigurations:
     paths:
       - clusters/mbk/flux-system/gotk-components.yaml
       - clusters/syd/flux-system/gotk-components.yaml
+  - id: KSV-0118
+    expired_at: 2027-08-21
+    statement: The constrained root init container creates and assigns Windmill's directory on the retained shared NFS export before PostgreSQL starts as a non-root user.
+    paths:
+      - apps/base/windmill/postgresql.yaml
