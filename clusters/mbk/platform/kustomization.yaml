@@ -2,11 +2,16 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../../platform
+  - ../../../platform/automation/crossplane
+  - ../../../platform/sources/crossplane
   - ../../../platform/storage/truenas-nfs
   - certificate.yaml
+  - grafana.yaml
   - headlamp.yaml
 patches:
+  - path: external-dns.yaml
   - path: observability.yaml
   - path: secret-store.yaml
   - path: tailscale.yaml
+  - path: traefik-gateway.yaml
   - path: traefik.yaml

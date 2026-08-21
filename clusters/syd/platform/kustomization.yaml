@@ -3,9 +3,13 @@ kind: Kustomization
 resources:
   - ../../../platform
   - certificate.yaml
+  - gateway-public-direct.yaml
+  - grafana.yaml
   - headlamp.yaml
 patches:
+  - path: external-dns.yaml
   - path: observability.yaml
   - path: secret-store.yaml
   - path: tailscale.yaml
+  - path: traefik-gateway.yaml
   - path: traefik.yaml
