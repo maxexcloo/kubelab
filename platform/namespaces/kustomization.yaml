@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - cert-manager.yaml
   - cloudflared.yaml
+  - external-dns.yaml
   - external-secrets.yaml
   - headlamp.yaml
   - networking.yaml

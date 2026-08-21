@@ -9,7 +9,9 @@ resources:
   - grafana.yaml
   - headlamp.yaml
 patches:
+  - path: external-dns.yaml
   - path: observability.yaml
   - path: secret-store.yaml
   - path: tailscale.yaml
+  - path: traefik-gateway.yaml
   - path: traefik.yaml
