@@ -41,7 +41,7 @@ spec:
       automountServiceAccountToken: false
       initContainers:
         - name: initialise-storage
-          image: postgres:18.4-bookworm
+          image: postgres:18.6-bookworm
           imagePullPolicy: IfNotPresent
           command:
             - sh
@@ -70,7 +70,7 @@ spec:
               mountPath: /mnt/kubernetes
       containers:
         - name: postgresql
-          image: postgres:18.4-bookworm
+          image: postgres:18.6-bookworm
           imagePullPolicy: IfNotPresent
           env:
             - name: PGDATA
