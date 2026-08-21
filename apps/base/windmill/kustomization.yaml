@@ -5,5 +5,4 @@ resources:
   - helm-release.yaml
   - namespace.yaml
   - network-policy.yaml
-  - password-bootstrap.yaml
   - postgresql.yaml
