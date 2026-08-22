@@ -37,7 +37,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 Phase 1 foundations are complete. Crossplane remains installed without a
 managed resource until a compatible app-scoped API is required. Phase 2 has
-started with Anisette on `syd`.
+started with Anisette on `syd`; Byparr and Redlib are staged together on `mbk`.
 
 ### Phase 1: Observability & Dynamic Automation
 
@@ -50,7 +50,7 @@ started with Anisette on `syd`.
 
 Execute migrations with one pull request and cutover record per workload group:
 
-1. **Stateless Utilities — In Progress**: `anisette` on `syd`, then `byparr` and `redlib`.
+1. **Stateless Utilities — In Progress**: `anisette` runs on `syd`; `byparr` and `redlib` are staged together on `mbk`.
 2. **Platform Consumers**: `homepage` (using native `gethomepage.dev/*` discovery), `beszel` hub on `mbk` and cluster agents.
 3. **Identity-Dependent & Small Stateful**: `bifrost`, `cliproxyapi`, `comfy-control`, `bichon`, `actual-budget`, `papra`, `larapaper`.
 4. **Databases & Media Libraries**:
