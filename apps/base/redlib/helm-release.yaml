@@ -1,0 +1,86 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: redlib
+  namespace: redlib
+spec:
+  interval: 30m
+  releaseName: redlib
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      redlib:
+        containers:
+          redlib:
+            env:
+              REDLIB_DEFAULT_REMOVE_DEFAULT_FEEDS: "on"
+              REDLIB_DEFAULT_SUBSCRIPTIONS: anime_titties+apple+askanaustralian+askhistorians+askscience+auscorp+ausfinance+auspropertychat+aussiefrugal+australia+australiannostalgia+bazzite+boxoffice+budgetaudiophile+cars+carsaustralia+catastrophicfailure+chatgptcoding+crackwatch+cscareerquestionsoce+datahoarder+deepseek+docker+eink+electricvehicles+emulation+emulationonandroid+esphome+flashlight+flipperzero+games+handhelds+hardware+homeassistant+homelab+homenetworking+homeserver+immich+internetisbeautiful+korea+linux+linux_gaming+linuxhardware+living_in_korea+llmdevs+localllama+localllm+meshcore+minilab+minimalism+minipcs+moonlightstreaming+movies+nbn+netsec+networking+nixos+odinhandheld+onebag+opencode+opensource+openwrt+organizationporn+outoftheloop+pikvm+piratedgames+praisethecameraman+privacy+programming+proxmox+raspberry_pi+retroarch+retroid+roms+sbcgaming+sbcs+selfhosted+sffpc+sideloaded+sideproject+singularity+solotravel+space+steamdeck+sydney+sydneyscene+sydneytrains+sysadmin+tailscale+television+thatlookedexpensive+trance+travel+travelhacks+trimui+truenas+ubiquiti+usbchardware+wallstreetbets+wled+zfs+zigbee
+              REDLIB_DEFAULT_USE_HLS: "on"
+              REDLIB_FULL_URL: https://reddit.excloo.com
+              REDLIB_ROBOTS_DISABLE_INDEXING: "on"
+            image:
+              pullPolicy: IfNotPresent
+              repository: quay.io/redlib/redlib
+              tag: latest@sha256:e6647a94d553bf3f7c95c53fc6d9da5785e6c278d9002e99ea32abdb5e3c513a
+            probes:
+              liveness:
+                enabled: true
+                path: /settings
+                port: 8080
+                type: HTTP
+              readiness:
+                enabled: true
+                path: /settings
+                port: 8080
+                type: HTTP
+              startup:
+                enabled: true
+                path: /settings
+                port: 8080
+                type: HTTP
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 20m
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              runAsGroup: 1000
+              runAsNonRoot: true
+              runAsUser: 1000
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: redlib
+    service:
+      redlib:
+        controller: redlib
+        annotations:
+          gethomepage.dev/description: Reddit Frontend
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/icon: redlib
+          gethomepage.dev/name: Redlib
+        ports:
+          http:
+            port: 8080
+            protocol: HTTP

@@ -1,0 +1,12 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: redlib
+  namespace: redlib
+spec:
+  values:
+    service:
+      redlib:
+        annotations:
+          gethomepage.dev/href: https://reddit.excloo.com
+          gethomepage.dev/siteMonitor: https://reddit.excloo.com
