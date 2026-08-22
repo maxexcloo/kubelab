@@ -22,6 +22,9 @@ spec:
           ctrld:
             args:
               - --cd=$(CTRLD_ENDPOINT)
+            command:
+              - /ctrld
+              - run
             workingDir: /etc/controld
             env:
               CTRLD_ENDPOINT:
