@@ -30,17 +30,17 @@ spec:
             probes:
               liveness:
                 enabled: true
-                path: /health
+                path: /docs
                 port: 8191
                 type: HTTP
               readiness:
                 enabled: true
-                path: /health
+                path: /docs
                 port: 8191
                 type: HTTP
               startup:
                 enabled: true
-                path: /health
+                path: /docs
                 port: 8191
                 type: HTTP
                 spec:
