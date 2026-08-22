@@ -61,6 +61,8 @@ spec:
                   - ALL
     defaultPodOptions:
       automountServiceAccountToken: false
+      annotations:
+        kubectl.kubernetes.io/default-container: byparr
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
