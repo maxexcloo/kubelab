@@ -3,6 +3,15 @@ kind: HTTPRoute
 metadata:
   name: windmill
   namespace: windmill
+  annotations:
+    gethomepage.dev/description: Developer Platform and Workflow Engine
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Applications
+    gethomepage.dev/href: https://windmill.mbk.excloo.dev
+    gethomepage.dev/icon: windmill
+    gethomepage.dev/name: Windmill
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=windmill-app
+    gethomepage.dev/siteMonitor: https://windmill.mbk.excloo.dev
   labels:
     app.kubernetes.io/name: windmill
 spec:

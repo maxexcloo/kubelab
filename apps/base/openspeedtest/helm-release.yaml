@@ -40,11 +40,5 @@ spec:
     service:
       port: 80
       type: ClusterIP
-      annotations:
-        gethomepage.dev/description: Network Speed Test
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Infrastructure
-        gethomepage.dev/icon: openspeedtest
-        gethomepage.dev/name: OpenSpeedTest
     serviceAccount:
       create: false

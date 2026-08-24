@@ -48,13 +48,6 @@ spec:
             memory: 256Mi
           limits:
             memory: 1Gi
-        service:
-          annotations:
-            gethomepage.dev/description: Developer Platform and Workflow Engine
-            gethomepage.dev/enabled: "true"
-            gethomepage.dev/group: Applications
-            gethomepage.dev/icon: windmill
-            gethomepage.dev/name: Windmill
       windmillExtra:
         containerSecurityContext:
           allowPrivilegeEscalation: false

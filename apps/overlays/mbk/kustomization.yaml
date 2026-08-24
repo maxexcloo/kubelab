@@ -2,12 +2,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base/byparr
+  - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/windmill
   - byparr-route.yaml
+  - homepage-route.yaml
   - route.yaml
   - windmill-route.yaml
 patches:
-  - path: byparr-homepage.yaml
-  - path: helm-release-homepage.yaml
-  - path: windmill-homepage.yaml
+  - path: windmill-domain.yaml

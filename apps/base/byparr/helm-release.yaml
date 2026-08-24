@@ -113,12 +113,6 @@ spec:
     service:
       byparr:
         controller: byparr
-        annotations:
-          gethomepage.dev/description: Anti-Bot Challenge Solver
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Infrastructure
-          gethomepage.dev/icon: byparr
-          gethomepage.dev/name: Byparr
         ports:
           http:
             port: 8191

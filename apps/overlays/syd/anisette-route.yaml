@@ -5,6 +5,13 @@ metadata:
   namespace: anisette
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+    gethomepage.dev/description: Apple Anisette Data Service
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Infrastructure
+    gethomepage.dev/href: https://anisette.excloo.com
+    gethomepage.dev/icon: apple
+    gethomepage.dev/name: Anisette
+    gethomepage.dev/siteMonitor: https://anisette.excloo.com
   labels:
     app.kubernetes.io/name: anisette
     gateway.excloo.dev/public-access: "true"

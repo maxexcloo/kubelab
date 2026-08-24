@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  bookmarks.yaml: |
+    []
+  docker.yaml: |
+    {}
+  kubernetes.yaml: |
+    gateway: true
+    ingress: false
+    mode: cluster
+    traefik: false
+  services.yaml: |
+    []
+  settings.yaml: |
+    disableIndexing: true
+    headerStyle: boxed
+    statusStyle: dot
+    title: Home
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          cpu: true
+          label: mbk
+          memory: true
+          show: true
+          showLabel: true
+        nodes:
+          cpu: true
+          memory: true
+          show: true
+          showLabel: true
+    - search:
+        provider: duckduckgo
+        target: _blank

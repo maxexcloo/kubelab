@@ -1,0 +1,9 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: windmill
+  namespace: windmill
+spec:
+  values:
+    windmill:
+      baseDomain: windmill.mbk.excloo.dev

@@ -5,6 +5,13 @@ metadata:
   namespace: redlib
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    gethomepage.dev/description: Reddit Frontend
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Applications
+    gethomepage.dev/href: https://reddit.excloo.com
+    gethomepage.dev/icon: redlib
+    gethomepage.dev/name: Redlib
+    gethomepage.dev/siteMonitor: https://reddit.excloo.com
   labels:
     app.kubernetes.io/name: redlib
     gateway.excloo.dev/public-access: "true"

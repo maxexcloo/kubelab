@@ -125,12 +125,6 @@ spec:
     service:
       redlib:
         controller: redlib
-        annotations:
-          gethomepage.dev/description: Reddit Frontend
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
-          gethomepage.dev/icon: redlib
-          gethomepage.dev/name: Redlib
         ports:
           http:
             port: 8080

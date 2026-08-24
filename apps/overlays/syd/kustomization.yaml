@@ -7,6 +7,3 @@ resources:
   - anisette-route.yaml
   - redlib-route.yaml
   - route.yaml
-patches:
-  - path: helm-release-homepage.yaml
-  - path: redlib-homepage.yaml
