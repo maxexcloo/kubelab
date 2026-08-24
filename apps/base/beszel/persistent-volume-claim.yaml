@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: beszel
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "568"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "568"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: truenas-nfs
