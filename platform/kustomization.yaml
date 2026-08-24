@@ -11,6 +11,7 @@ resources:
   - networking/traefik
   - observability
   - secrets/external-secrets
+  - secrets/onepassword-connect
   - sources/bifrost
   - sources/bjw-s
   - sources/cert-manager
@@ -19,6 +20,7 @@ resources:
   - sources/external-secrets
   - sources/headlamp
   - sources/local-path-provisioner
+  - sources/onepassword
   - sources/openspeedtest
   - sources/tailscale
   - sources/traefik
