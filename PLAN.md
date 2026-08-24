@@ -32,16 +32,16 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 - **Access Policy**: Cluster wildcard DNS always resolves to the corresponding Tailscale service IP. `Public` attaches to the dedicated tunnel or direct-public Gateway and opts into ExternalDNS; never repoint a cluster wildcard at a public target. `Internal` uses Tailscale through the private Gateway and wildcard DNS. `Private` has no application route. `None` has no network endpoint.
 - **State Protection**: Critical state uses retained NFS or CloudNativePG, daily snapshots, off-site backup, and application-native export where available. Important state uses retained NFS and the Important backup tier. Replaceable state is reproducible from Git, 1Password, or upstream sources.
 - **Observability**: Every routed user interface receives a Homepage entry. Gatus remains an independent external monitor and is not a per-workload migration gate. Agents and backends are checked through their owning service.
-- **Rollback Window**: Old deployments remain stopped but recoverable for 7 days. Rollback restores previous routing and the final pre-migration snapshot/export. Legacy configuration is removed only after new deployments are proven.
+- **Rollback Window**: Old deployments remain stopped but recoverable for 7 days. Rollback restores previous routing and the final pre-migration snapshot/export. Previous configuration is removed only after new deployments are proven.
 
 ## Migration Phases
 
 Phase 1 foundations are complete. Crossplane remains installed without a
 managed resource until a compatible app-scoped API is required. Phase 2 has
 started with Anisette and Redlib on `syd`; Byparr runs on `mbk`. OpenSpeedTest
-is implemented on both clusters. Beszel and Homepage are reconciled on `mbk`,
-Beszel agents are reconciled on both clusters, and Windmill is implemented on
-`mbk`.
+is implemented on both clusters. Beszel and Bifrost are cut over on `mbk`,
+Homepage is reconciled on `mbk`, Beszel agents are reconciled on both clusters,
+and Windmill is implemented on `mbk`.
 
 ### Progress States
 
@@ -58,18 +58,19 @@ mistaken for a completed migration:
    been observed through application or gateway logs.
 5. **Verified**: the 7-day rollback window has completed without an unresolved
    regression.
-6. **Legacy removed**: the old deployment and obsolete delivery configuration
+6. **Previous removed**: the old deployment and obsolete delivery configuration
    have been removed.
 
 | Workload      | Current State | Next Gate                                                            |
 | ------------- | ------------- | -------------------------------------------------------------------- |
-| Anisette      | Reconciled    | Record cutover evidence and the legacy rollback window               |
+| Anisette      | Reconciled    | Record cutover evidence and the rollback window                      |
 | Beszel        | Cut over      | Complete the rollback window                                         |
-| Byparr        | Reconciled    | Record cutover evidence and the legacy rollback window               |
-| Homepage      | Reconciled    | Add external monitoring and record cutover evidence                  |
-| OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and record legacy retirement |
-| Redlib        | Reconciled    | Record cutover evidence and the legacy rollback window               |
-| Windmill      | Implemented   | Confirm reconciliation, backup coverage, and external monitoring     |
+| Bifrost       | Cut over      | Complete the rollback window and migrate its provider dependencies   |
+| Byparr        | Reconciled    | Record cutover evidence and the rollback window                      |
+| Homepage      | Reconciled    | Record cutover evidence                                              |
+| OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
+| Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
+| Windmill      | Implemented   | Confirm reconciliation and backup coverage                           |
 
 ### Phase 1: Observability & Dynamic Automation
 
@@ -89,7 +90,9 @@ Execute migrations with one pull request and cutover record per workload group:
    discovery. The Beszel hub runs privately on `mbk` with retained NFS data,
    and agents on both clusters connect through an agent-only public WebSocket
    route. Both interfaces have live cutover evidence.
-3. **Identity-Dependent & Small Stateful**: `bifrost`, `cliproxyapi`, `comfy-control`, `bichon`, `actual-budget`, `papra`, `larapaper`.
+3. **Identity-Dependent & Small Stateful — In Progress**: Bifrost is cut over
+   on `mbk`. Migrate `cliproxyapi` and `comfy-control` next, followed by
+   `bichon`, `actual-budget`, `papra`, and `larapaper`.
 4. **Databases & Media Libraries**:
    - CloudNativePG operator for PostgreSQL instances.
    - `miniflux` (Postgres).
@@ -97,22 +100,22 @@ Execute migrations with one pull request and cutover record per workload group:
    - `bookorbit` & `shelfmark` (retained NFS libraries).
    - `immich` (Postgres + Redis/Valkey + ML + NFS photos).
    - `romm` (Postgres + Redis/Valkey + NFS library).
-5. **RoMM Workflows**: Storage-local Kubernetes Jobs mounting NFS (replacing legacy GitHub Actions runners).
+5. **RoMM Workflows**: Storage-local Kubernetes Jobs mounting NFS (replacing previous GitHub Actions runners).
 6. **Identity Authority (Pocket ID)**: Migrate last. Validate break-glass cluster-admin credentials and full export/restore before DNS cutover.
 
 ### Workload Cutover Checklist
 
 For every stateful service:
 
-1. Inspect the legacy TrueNAS application and data through
+1. Inspect the previous TrueNAS application and data through
    `ssh root@kimbap`; export application data and take a final TrueNAS ZFS
    snapshot.
 2. Deploy workload in Kubernetes; verify database, OIDC, mail, and storage connectivity before changing routing.
 3. Switch DNS / Cloudflare Tunnel route and observe live traffic in application or gateway logs.
-4. Keep legacy container stopped for the rollback window (7 days).
-5. Remove legacy definition from old repositories only after verification.
+4. Keep the previous container stopped for the rollback window (7 days).
+5. Remove the previous definition from old repositories only after verification.
 
-### Phase 3: Retirement of Legacy Repositories
+### Phase 3: Retirement of Previous Repositories
 
 1. Retire obsolete GitHub Actions deployment workflows and Doco-CD configs.
 2. Retire `homelab-truenas`, `homelab-docker`, and `homelab-workflows`.
@@ -165,7 +168,7 @@ For every stateful service:
 
 | System                      | Current Owner     | Destination         | Strategy | Notes                                                                                            |
 | --------------------------- | ----------------- | ------------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| Appliance Tailscale clients | Appliance owners  | Retained appliances | Retain   | Preserve independently of Kubernetes operator and legacy service retirement                      |
+| Appliance Tailscale clients | Appliance owners  | Retained appliances | Retain   | Preserve independently of Kubernetes operator and previous service retirement                    |
 | HAOS                        | `homelab`         | HAOS appliance      | Retain   | Includes ESPHome, ESPresense, Matter Hub, Studio Code Server, and Zigbee2MQTT                    |
 | Hotdog                      | `homelab`         | Hotdog              | Retain   | Linux/ZFS receiver on 2 GB RAM; do not install Talos                                             |
 | Mandu                       | `homelab`         | Bazzite             | Retain   | Rootless Podman Quadlets; optional AMD GPU worker over Tailscale                                 |
