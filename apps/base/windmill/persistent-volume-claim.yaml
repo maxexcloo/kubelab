@@ -3,6 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: postgresql
   namespace: windmill
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "999"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "999"
 spec:
   accessModes:
     - ReadWriteMany
