@@ -30,23 +30,37 @@ spec:
               tag: v2.0.0
             probes:
               liveness:
+                custom: true
                 enabled: true
-                path: /api/healthcheck
-                port: 3000
-                type: HTTP
+                spec:
+                  httpGet:
+                    path: /api/healthcheck
+                    port: 3000
+                    httpHeaders:
+                      - name: Host
+                        value: homepage.mbk.excloo.dev
               readiness:
+                custom: true
                 enabled: true
-                path: /api/healthcheck
-                port: 3000
-                type: HTTP
+                spec:
+                  httpGet:
+                    path: /api/healthcheck
+                    port: 3000
+                    httpHeaders:
+                      - name: Host
+                        value: homepage.mbk.excloo.dev
               startup:
+                custom: true
                 enabled: true
-                path: /api/healthcheck
-                port: 3000
-                type: HTTP
                 spec:
                   failureThreshold: 30
                   periodSeconds: 5
+                  httpGet:
+                    path: /api/healthcheck
+                    port: 3000
+                    httpHeaders:
+                      - name: Host
+                        value: homepage.mbk.excloo.dev
             resources:
               limits:
                 memory: 512Mi
