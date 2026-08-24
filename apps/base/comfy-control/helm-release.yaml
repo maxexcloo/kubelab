@@ -1,0 +1,106 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: comfy-control
+  namespace: comfy-control
+spec:
+  interval: 30m
+  releaseName: comfy-control
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      comfy-control:
+        strategy: Recreate
+        containers:
+          comfy-control:
+            env:
+              CLIPROXY_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+              CONTROL_DATABASE: /data/comfy-control.db
+              HOME: /tmp
+              PYTHONDONTWRITEBYTECODE: "1"
+              TZ: Australia/Sydney
+              WORKER_IMAGE: ghcr.io/maxexcloo/comfy-control:sha-2809207-worker@sha256:1580e7e5cbf3f0766212f21ae7a7a1dede7bdc028297cd53a10fe170a892c469
+            envFrom:
+              - secretRef:
+                  name: comfy-control
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/maxexcloo/comfy-control
+              tag: sha-2809207-control@sha256:68f011a2bfe560cfc19c50446db1d727ef8ae25c3d4ed4a3f3820dd586c21841
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health/live
+                    port: 8000
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health/ready
+                    port: 8000
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  httpGet:
+                    path: /health/ready
+                    port: 8000
+                  periodSeconds: 2
+            resources:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 20m
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: comfy-control
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /data
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      comfy-control:
+        controller: comfy-control
+        ports:
+          http:
+            port: 8000
+            protocol: HTTP

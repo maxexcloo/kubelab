@@ -1,10 +1,10 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: cliproxyapi
-  namespace: cliproxyapi
+  name: comfy-control
+  namespace: comfy-control
   labels:
-    app.kubernetes.io/name: cliproxyapi
+    app.kubernetes.io/name: comfy-control
 spec:
   ingress:
     - from:
@@ -20,17 +20,11 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: bifrost
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: comfy-control
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: comfy-control
       ports:
-        - port: 8317
+        - port: 8000
           protocol: TCP
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: cliproxyapi
+      app.kubernetes.io/name: comfy-control
   policyTypes:
     - Ingress

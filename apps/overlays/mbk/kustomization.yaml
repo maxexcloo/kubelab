@@ -6,6 +6,7 @@ resources:
   - ../../base/bifrost
   - ../../base/byparr
   - ../../base/cliproxyapi
+  - ../../base/comfy-control
   - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/windmill
@@ -14,6 +15,7 @@ resources:
   - bifrost-route.yaml
   - byparr-route.yaml
   - cliproxyapi-route.yaml
+  - comfy-control-route.yaml
   - homepage-route.yaml
   - route.yaml
   - windmill-route.yaml
