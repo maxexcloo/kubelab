@@ -39,9 +39,9 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 Phase 1 foundations are complete. Crossplane remains installed without a
 managed resource until a compatible app-scoped API is required. Phase 2 has
 started with Anisette and Redlib on `syd`; Byparr runs on `mbk`. OpenSpeedTest
-is implemented on both clusters. Beszel and Bifrost are cut over on `mbk`,
-Homepage is reconciled on `mbk`, Beszel agents are reconciled on both clusters,
-and Windmill is implemented on `mbk`.
+is implemented on both clusters. Beszel, Bifrost, and CLIProxyAPI are cut over
+on `mbk`, Homepage is reconciled on `mbk`, Beszel agents are reconciled on both
+clusters, and Windmill is implemented on `mbk`.
 
 ### Progress States
 
@@ -67,6 +67,7 @@ mistaken for a completed migration:
 | Beszel        | Cut over      | Complete the rollback window                                         |
 | Bifrost       | Cut over      | Complete the rollback window and migrate its provider dependencies   |
 | Byparr        | Reconciled    | Record cutover evidence and the rollback window                      |
+| CLIProxyAPI   | Cut over      | Complete the rollback window                                         |
 | Homepage      | Reconciled    | Record cutover evidence                                              |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
 | Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
@@ -90,8 +91,8 @@ Execute migrations with one pull request and cutover record per workload group:
    discovery. The Beszel hub runs privately on `mbk` with retained NFS data,
    and agents on both clusters connect through an agent-only public WebSocket
    route. Both interfaces have live cutover evidence.
-3. **Identity-Dependent & Small Stateful — In Progress**: Bifrost is cut over
-   on `mbk`. Migrate `cliproxyapi` and `comfy-control` next, followed by
+3. **Identity-Dependent & Small Stateful — In Progress**: Bifrost and
+   CLIProxyAPI are cut over on `mbk`. Migrate `comfy-control` next, followed by
    `bichon`, `actual-budget`, `papra`, and `larapaper`.
 4. **Databases & Media Libraries**:
    - CloudNativePG operator for PostgreSQL instances.
