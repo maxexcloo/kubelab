@@ -11,6 +11,7 @@ resources:
   - networking/traefik
   - observability
   - secrets/external-secrets
+  - sources/bifrost
   - sources/bjw-s
   - sources/cert-manager
   - sources/cilium

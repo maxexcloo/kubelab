@@ -3,12 +3,14 @@ kind: Kustomization
 resources:
   - ../../base/beszel
   - ../../base/beszel-agent
+  - ../../base/bifrost
   - ../../base/byparr
   - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/windmill
   - beszel-agent-route.yaml
   - beszel-route.yaml
+  - bifrost-route.yaml
   - byparr-route.yaml
   - homepage-route.yaml
   - route.yaml
