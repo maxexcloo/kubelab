@@ -31,7 +31,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 - **Access Policy**: Cluster wildcard DNS always resolves to the corresponding Tailscale service IP. `Public` attaches to the dedicated tunnel or direct-public Gateway and opts into ExternalDNS; never repoint a cluster wildcard at a public target. `Internal` uses Tailscale through the private Gateway and wildcard DNS. `Private` has no application route. `None` has no network endpoint.
 - **State Protection**: Critical state uses retained NFS or CloudNativePG, daily snapshots, off-site backup, and application-native export where available. Important state uses retained NFS and the Important backup tier. Replaceable state is reproducible from Git, 1Password, or upstream sources.
-- **Observability**: Every routed user interface receives a Homepage entry and direct Gatus probe. Agents and backends are checked via their owning service.
+- **Observability**: Every routed user interface receives a Homepage entry. Gatus remains an independent external monitor and is not a per-workload migration gate. Agents and backends are checked through their owning service.
 - **Rollback Window**: Old deployments remain stopped but recoverable for 7 days. Rollback restores previous routing and the final pre-migration snapshot/export. Legacy configuration is removed only after new deployments are proven.
 
 ## Migration Phases
@@ -55,7 +55,7 @@ mistaken for a completed migration:
 3. **Reconciled**: Flux and the workload report healthy on the destination
    cluster.
 4. **Cut over**: production routing points to Kubernetes and live traffic has
-   been observed through Gatus and logs.
+   been observed through application or gateway logs.
 5. **Verified**: the 7-day rollback window has completed without an unresolved
    regression.
 6. **Legacy removed**: the old deployment and obsolete delivery configuration
@@ -64,7 +64,7 @@ mistaken for a completed migration:
 | Workload      | Current State | Next Gate                                                            |
 | ------------- | ------------- | -------------------------------------------------------------------- |
 | Anisette      | Reconciled    | Record cutover evidence and the legacy rollback window               |
-| Beszel        | Reconciled    | Add external monitoring and record cutover evidence                  |
+| Beszel        | Cut over      | Complete the rollback window                                         |
 | Byparr        | Reconciled    | Record cutover evidence and the legacy rollback window               |
 | Homepage      | Reconciled    | Add external monitoring and record cutover evidence                  |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and record legacy retirement |
@@ -88,7 +88,7 @@ Execute migrations with one pull request and cutover record per workload group:
    workload `HTTPRoute` objects until Homepage gains native multi-cluster
    discovery. The Beszel hub runs privately on `mbk` with retained NFS data,
    and agents on both clusters connect through an agent-only public WebSocket
-   route. Add direct Gatus probes before recording cutover.
+   route. Both interfaces have live cutover evidence.
 3. **Identity-Dependent & Small Stateful**: `bifrost`, `cliproxyapi`, `comfy-control`, `bichon`, `actual-budget`, `papra`, `larapaper`.
 4. **Databases & Media Libraries**:
    - CloudNativePG operator for PostgreSQL instances.
@@ -108,7 +108,7 @@ For every stateful service:
    `ssh root@kimbap`; export application data and take a final TrueNAS ZFS
    snapshot.
 2. Deploy workload in Kubernetes; verify database, OIDC, mail, and storage connectivity before changing routing.
-3. Switch DNS / Cloudflare Tunnel route and monitor live traffic via Gatus and logs.
+3. Switch DNS / Cloudflare Tunnel route and observe live traffic in application or gateway logs.
 4. Keep legacy container stopped for the rollback window (7 days).
 5. Remove legacy definition from old repositories only after verification.
 
