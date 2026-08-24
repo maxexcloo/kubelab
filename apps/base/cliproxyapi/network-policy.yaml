@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cliproxyapi
+  namespace: cliproxyapi
+  labels:
+    app.kubernetes.io/name: cliproxyapi
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: bifrost
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: bifrost
+      ports:
+        - port: 8317
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cliproxyapi
+  policyTypes:
+    - Ingress

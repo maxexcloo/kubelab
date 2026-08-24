@@ -5,6 +5,7 @@ resources:
   - ../../base/beszel-agent
   - ../../base/bifrost
   - ../../base/byparr
+  - ../../base/cliproxyapi
   - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/windmill
@@ -12,6 +13,7 @@ resources:
   - beszel-route.yaml
   - bifrost-route.yaml
   - byparr-route.yaml
+  - cliproxyapi-route.yaml
   - homepage-route.yaml
   - route.yaml
   - windmill-route.yaml
