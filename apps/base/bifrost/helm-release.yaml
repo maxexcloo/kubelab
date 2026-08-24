@@ -28,7 +28,7 @@ spec:
                   spec:
                     hostAliases:
                       - ip: 10.4.0.3
-                        hostnames: [cliproxy.excloo.com, comfy-control.excloo.com]
+                        hostnames: [comfy-control.excloo.com]
             target:
               kind: Deployment
               name: bifrost
