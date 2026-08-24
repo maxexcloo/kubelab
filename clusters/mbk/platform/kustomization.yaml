@@ -4,6 +4,7 @@ resources:
   - ../../../platform
   - ../../../platform/automation/crossplane
   - ../../../platform/sources/crossplane
+  - ../../../platform/sources/nfs-subdir-external-provisioner
   - ../../../platform/storage/truenas-nfs
   - certificate.yaml
   - grafana.yaml
