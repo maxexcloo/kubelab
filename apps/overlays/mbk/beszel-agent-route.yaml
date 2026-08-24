@@ -10,7 +10,7 @@ metadata:
     gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:
-    - beszel-agent.mbk.excloo.dev
+    - beszel-agent.excloo.com
   parentRefs:
     - name: public-tunnel
       namespace: networking
