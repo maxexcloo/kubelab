@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: papra
+  namespace: papra
+  labels:
+    app.kubernetes.io/name: papra
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 21221
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: papra
+  policyTypes:
+    - Ingress

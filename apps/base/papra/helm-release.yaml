@@ -1,0 +1,127 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: papra
+  namespace: papra
+spec:
+  interval: 30m
+  releaseName: papra
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      papra:
+        strategy: Recreate
+        containers:
+          papra:
+            env:
+              AI_DEFAULT_MODEL: openrouter://openrouter/auto
+              AI_IS_ENABLED: "true"
+              APP_BASE_URL: https://papra.excloo.com
+              AUTO_TAGGING_ENABLED: "true"
+              AUTO_TAGGING_MODEL: openrouter://openrouter/auto
+              BETTER_AUTH_TELEMETRY: "0"
+              CLIENT_BASE_URL: http://localhost:1221
+              DATABASE_URL: file:/app/app-data/db/db.sqlite
+              DOCUMENT_STORAGE_DRIVER: filesystem
+              DOCUMENT_STORAGE_FILESYSTEM_ROOT: /app/app-data/documents
+              EMAILS_DRY_RUN: "true"
+              HOME: /tmp
+              INGESTION_FOLDER_ERROR_FOLDER_PATH: /app/ingestion/ingestion-error
+              INGESTION_FOLDER_IS_ENABLED: "true"
+              INGESTION_FOLDER_POST_PROCESSING_MOVE_FOLDER_PATH: /app/ingestion/ingestion-done
+              INGESTION_FOLDER_ROOT: ./ingestion
+              INGESTION_FOLDER_ROOT_PATH: /app/ingestion
+              IS_FREE_PLAN_UNLIMITED: "true"
+              PAPRA_CONFIG_DIR: ./app-data
+              PORT: "21221"
+              PROCESS_MODE: all
+              SERVER_SERVE_PUBLIC_DIR: "true"
+              TZ: Australia/Sydney
+            envFrom:
+              - secretRef:
+                  name: papra
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/papra-hq/papra
+              tag: 26.6.1-rootless@sha256:a7a42e228f73f229d1e2dcd53de7b67503f1756d1aa3a894ab175dba8030c0e8
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: 21221
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: 21221
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  httpGet:
+                    path: /api/health
+                    port: 21221
+                  periodSeconds: 2
+            resources:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 20m
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: papra
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        advancedMounts:
+          papra:
+            papra:
+              - path: /app/app-data
+              - path: /app/ingestion
+                subPath: ingestion
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      papra:
+        controller: papra
+        ports:
+          http:
+            port: 21221
+            protocol: HTTP
