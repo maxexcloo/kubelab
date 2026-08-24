@@ -2,10 +2,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base/beszel
+  - ../../base/beszel-agent
   - ../../base/byparr
   - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/windmill
+  - beszel-route.yaml
   - byparr-route.yaml
   - homepage-route.yaml
   - route.yaml

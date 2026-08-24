@@ -1,0 +1,109 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: beszel
+  namespace: beszel
+spec:
+  interval: 30m
+  releaseName: beszel
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      beszel:
+        strategy: Recreate
+        containers:
+          beszel:
+            env:
+              APP_URL: https://beszel.mbk.excloo.dev
+              TZ: Australia/Sydney
+              USER_CREATION: "true"
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/henrygd/beszel/beszel
+              tag: 0.18.8
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  exec:
+                    command:
+                      - /beszel
+                      - health
+                      - --url
+                      - http://127.0.0.1:8090
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  exec:
+                    command:
+                      - /beszel
+                      - health
+                      - --url
+                      - http://127.0.0.1:8090
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 2
+                  exec:
+                    command:
+                      - /beszel
+                      - health
+                      - --url
+                      - http://127.0.0.1:8090
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 20m
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: beszel
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /beszel_data
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      beszel:
+        controller: beszel
+        ports:
+          http:
+            port: 8090
+            protocol: HTTP

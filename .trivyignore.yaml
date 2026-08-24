@@ -1,4 +1,9 @@
 misconfigurations:
+  - id: KSV-0009
+    expired_at: 2027-08-24
+    statement: Beszel agents require host networking to collect node interface statistics and expose their SSH listener on each monitored node.
+    paths:
+      - apps/base/beszel-agent/daemon-set.yaml
   - id: KSV-0041
     expired_at: 2027-08-15
     statement: Flux source and Kustomize controllers require cluster-scoped Secret access for reconciliation; this is the pinned upstream v2.9.4 manifest.
