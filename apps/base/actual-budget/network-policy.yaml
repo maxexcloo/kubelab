@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+  labels:
+    app.kubernetes.io/name: actual-budget
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 5006
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: actual-budget
+  policyTypes:
+    - Ingress

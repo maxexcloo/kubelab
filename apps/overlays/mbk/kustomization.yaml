@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - ../../base/actual-budget
   - ../../base/beszel
   - ../../base/beszel-agent
   - ../../base/bichon
@@ -11,6 +12,7 @@ resources:
   - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/windmill
+  - actual-budget-route.yaml
   - beszel-agent-route.yaml
   - beszel-route.yaml
   - bichon-route.yaml

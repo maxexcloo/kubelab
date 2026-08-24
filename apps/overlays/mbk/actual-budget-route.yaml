@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+  annotations:
+    gethomepage.dev/description: Personal Finance
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Applications
+    gethomepage.dev/href: https://budget.excloo.com
+    gethomepage.dev/icon: actual-budget
+    gethomepage.dev/name: Actual Budget
+  labels:
+    app.kubernetes.io/name: actual-budget
+spec:
+  hostnames:
+    - budget.excloo.com
+  parentRefs:
+    - name: private
+      namespace: networking
+  rules:
+    - backendRefs:
+        - name: actual-budget
+          port: 5006

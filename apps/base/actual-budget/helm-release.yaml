@@ -1,0 +1,108 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+spec:
+  interval: 30m
+  releaseName: actual-budget
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      actual-budget:
+        strategy: Recreate
+        containers:
+          actual-budget:
+            env:
+              ACTUAL_HOSTNAME: 0.0.0.0
+              ACTUAL_OPENID_DISCOVERY_URL: https://id.excloo.com/.well-known/openid-configuration
+              ACTUAL_OPENID_SERVER_HOSTNAME: https://budget.excloo.com
+              ACTUAL_PORT: "5006"
+              ACTUAL_SERVER_FILES: /data/server-files
+              ACTUAL_USER_CREATION_MODE: login
+              ACTUAL_USER_FILES: /data/user-files
+              TZ: Australia/Sydney
+            envFrom:
+              - secretRef:
+                  name: actual-budget
+            image:
+              pullPolicy: IfNotPresent
+              repository: docker.io/actualbudget/actual-server
+              tag: 26.8.1@sha256:6478d9ddfc0924479c09e6699c205e354c6f2216dfe7de3c0fb7b590d6edcdc5
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 5006
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 5006
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  httpGet:
+                    path: /health
+                    port: 5006
+                  periodSeconds: 2
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 20m
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: actual-budget
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /data
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      actual-budget:
+        controller: actual-budget
+        ports:
+          http:
+            port: 5006
+            protocol: HTTP
