@@ -39,7 +39,8 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 Phase 1 foundations are complete. Crossplane remains installed without a
 managed resource until a compatible app-scoped API is required. Phase 2 has
 started with Anisette and Redlib on `syd`; Byparr runs on `mbk`. OpenSpeedTest
-is implemented on both clusters, and Homepage and Windmill are implemented on
+is implemented on both clusters. Beszel and Homepage are reconciled on `mbk`,
+Beszel agents are reconciled on both clusters, and Windmill is implemented on
 `mbk`.
 
 ### Progress States
@@ -63,6 +64,7 @@ mistaken for a completed migration:
 | Workload      | Current State | Next Gate                                                            |
 | ------------- | ------------- | -------------------------------------------------------------------- |
 | Anisette      | Reconciled    | Record cutover evidence and the legacy rollback window               |
+| Beszel        | Reconciled    | Add external monitoring and record cutover evidence                  |
 | Byparr        | Reconciled    | Record cutover evidence and the legacy rollback window               |
 | Homepage      | Reconciled    | Add external monitoring and record cutover evidence                  |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and record legacy retirement |
@@ -81,11 +83,12 @@ mistaken for a completed migration:
 Execute migrations with one pull request and cutover record per workload group:
 
 1. **Stateless Utilities — In Progress**: `anisette` and `redlib` run on `syd`; `byparr` runs on `mbk`.
-2. **Platform Consumers — In Progress**: Homepage is implemented on `mbk` with
-   native Gateway API discovery. Its first deployment discovers `mbk` only;
-   `syd` metadata remains on workload `HTTPRoute` objects until Homepage gains
-   native multi-cluster discovery. Reconcile and validate Homepage before
-   migrating the `beszel` hub on `mbk` and cluster agents.
+2. **Platform Consumers — Reconciled**: Homepage runs on `mbk` with native
+   Gateway API discovery. It discovers `mbk` only; `syd` metadata remains on
+   workload `HTTPRoute` objects until Homepage gains native multi-cluster
+   discovery. The Beszel hub runs privately on `mbk` with retained NFS data,
+   and agents on both clusters connect through an agent-only public WebSocket
+   route. Add direct Gatus probes before recording cutover.
 3. **Identity-Dependent & Small Stateful**: `bifrost`, `cliproxyapi`, `comfy-control`, `bichon`, `actual-budget`, `papra`, `larapaper`.
 4. **Databases & Media Libraries**:
    - CloudNativePG operator for PostgreSQL instances.
