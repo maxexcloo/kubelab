@@ -37,7 +37,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 Phase 1 foundations are complete. Crossplane remains installed without a
 managed resource until a compatible app-scoped API is required. Phase 2 has
-started with Anisette on `syd`; Byparr and Redlib are staged together on `mbk`.
+started with Anisette and Redlib on `syd`; Byparr runs on `mbk`.
 
 ### Phase 1: Observability & Dynamic Automation
 
@@ -50,7 +50,7 @@ started with Anisette on `syd`; Byparr and Redlib are staged together on `mbk`.
 
 Execute migrations with one pull request and cutover record per workload group:
 
-1. **Stateless Utilities — In Progress**: `anisette` runs on `syd`; `byparr` and `redlib` are staged together on `mbk`.
+1. **Stateless Utilities — In Progress**: `anisette` and `redlib` run on `syd`; `byparr` runs on `mbk`.
 2. **Platform Consumers**: `homepage` (using native `gethomepage.dev/*` discovery), `beszel` hub on `mbk` and cluster agents.
 3. **Identity-Dependent & Small Stateful**: `bifrost`, `cliproxyapi`, `comfy-control`, `bichon`, `actual-budget`, `papra`, `larapaper`.
 4. **Databases & Media Libraries**:
@@ -113,7 +113,7 @@ For every stateful service:
 | OpenSpeedTest                 | `homelab-docker` and `homelab-truenas` | Both clusters                | Replace first | Internal | Disposable learning workload                                         |
 | Papra                         | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical documents, Pocket ID                                        |
 | Pocket ID                     | `homelab-truenas`                      | `mbk`                        | Migrate last  | Public   | Critical identity data, Resend, break-glass required                 |
-| Redlib                        | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Stateless, Cloudflare policy                                         |
+| Redlib                        | `homelab-truenas`                      | `syd`                        | Migrate       | Public   | Stateless, Cloudflare policy                                         |
 | RoMM                          | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Critical database and retained NFS library, Pocket ID                |
 | RoMM workflows                | `homelab-workflows`                    | `mbk` Jobs                   | Replace       | None     | Guarded storage-local Jobs; no Actions runner                        |
 | Shelfmark                     | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Important data, BookOrbit and Byparr dependencies, Pocket ID         |
