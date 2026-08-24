@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../../base/beszel
   - ../../base/beszel-agent
+  - ../../base/bichon
   - ../../base/bifrost
   - ../../base/byparr
   - ../../base/cliproxyapi
@@ -12,6 +13,7 @@ resources:
   - ../../base/windmill
   - beszel-agent-route.yaml
   - beszel-route.yaml
+  - bichon-route.yaml
   - bifrost-route.yaml
   - byparr-route.yaml
   - cliproxyapi-route.yaml

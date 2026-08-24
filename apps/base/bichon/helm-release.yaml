@@ -1,0 +1,105 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bichon
+  namespace: bichon
+spec:
+  interval: 30m
+  releaseName: bichon
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      bichon:
+        strategy: Recreate
+        containers:
+          bichon:
+            env:
+              BICHON_CORS_ORIGINS: https://bichon.excloo.com
+              BICHON_HTTP_PORT: "15630"
+              BICHON_PUBLIC_URL: https://bichon.excloo.com
+              BICHON_ROOT_DIR: /data/bichon-data
+              TZ: Australia/Sydney
+            envFrom:
+              - secretRef:
+                  name: bichon
+            image:
+              pullPolicy: IfNotPresent
+              repository: docker.io/rustmailer/bichon
+              tag: 2.0.2@sha256:e4a331cfec46576bf3e9327b82017c463800dde3884235bd012b49510f7622dc
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /api/status
+                    port: 15630
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /api/status
+                    port: 15630
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  httpGet:
+                    path: /api/status
+                    port: 15630
+                  periodSeconds: 2
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 20m
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: bichon
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /data/bichon-data
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      bichon:
+        controller: bichon
+        ports:
+          http:
+            port: 15630
+            protocol: HTTP

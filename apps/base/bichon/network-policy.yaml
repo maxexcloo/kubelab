@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bichon
+  namespace: bichon
+  labels:
+    app.kubernetes.io/name: bichon
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 15630
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bichon
+  policyTypes:
+    - Ingress
