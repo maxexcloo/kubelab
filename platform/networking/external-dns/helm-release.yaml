@@ -21,11 +21,9 @@ spec:
     logFormat: json
     managedRecordTypes: [A, AAAA, CNAME]
     policy: upsert-only
-    registry: txt
+    registry: noop
     sources: [gateway-httproute]
     triggerLoopOnEvent: true
-    txtOwnerId: _
-    txtPrefix: _external-dns.
     env:
       - name: CF_API_TOKEN
         valueFrom:
