@@ -94,6 +94,10 @@ spec:
         type: persistentVolumeClaim
         globalMounts:
           - path: /data
+      static:
+        type: emptyDir
+        globalMounts:
+          - path: /CLIProxyAPI/static
       temporary:
         type: emptyDir
         globalMounts:
