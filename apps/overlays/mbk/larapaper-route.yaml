@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: larapaper
+  namespace: larapaper
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    gethomepage.dev/description: E-paper Display Manager
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Applications
+    gethomepage.dev/href: https://larapaper.excloo.com
+    gethomepage.dev/icon: mdi-tablet-dashboard
+    gethomepage.dev/name: Larapaper
+    gethomepage.dev/siteMonitor: https://larapaper.excloo.com
+  labels:
+    app.kubernetes.io/name: larapaper
+    gateway.excloo.dev/public-access: "true"
+spec:
+  hostnames:
+    - larapaper.excloo.com
+  parentRefs:
+    - name: public-tunnel
+      namespace: networking
+  rules:
+    - backendRefs:
+        - name: larapaper
+          port: 8080

@@ -1,0 +1,82 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: larapaper
+  namespace: larapaper
+spec:
+  interval: 30m
+  releaseName: larapaper
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      larapaper:
+        strategy: Recreate
+        containers:
+          larapaper:
+            env:
+              APP_TIMEZONE: Australia/Sydney
+              APP_URL: https://larapaper.excloo.com
+              DB_DATABASE: database/storage/database.sqlite
+              FORCE_HTTPS: "1"
+              PHP_OPCACHE_ENABLE: "1"
+              REGISTRATION_ENABLED: "0"
+            envFrom:
+              - secretRef:
+                  name: larapaper
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/usetrmnl/larapaper
+              tag: 0.39.0@sha256:a1206f6f3ac14fb199b8a12a795d2859cd945f4ea4a4b951d3e22d5cf7cadb3d
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 20m
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 82
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 82
+        runAsNonRoot: true
+        runAsUser: 82
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: larapaper
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        advancedMounts:
+          larapaper:
+            larapaper:
+              - path: /var/www/html/database/storage
+                subPath: database
+              - path: /var/www/html/storage/app/public/images/generated
+                subPath: images
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      larapaper:
+        controller: larapaper
+        ports:
+          http:
+            port: 8080
+            protocol: HTTP

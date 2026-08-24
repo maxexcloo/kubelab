@@ -73,6 +73,7 @@ mistaken for a completed migration:
 | CLIProxyAPI   | Cut over      | Complete the rollback window                                         |
 | Comfy Control | Cut over      | Complete the rollback window                                         |
 | Homepage      | Reconciled    | Record cutover evidence                                              |
+| Larapaper     | Implemented   | Confirm reconciliation and migrate persistent data                   |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
 | Papra         | Cut over      | Complete the rollback window                                         |
 | Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
@@ -98,7 +99,7 @@ Execute migrations with one pull request and cutover record per workload group:
    route. Both interfaces have live cutover evidence.
 3. **Identity-Dependent & Small Stateful — In Progress**: Actual Budget,
    Bichon, Bifrost, CLIProxyAPI, Comfy Control, and Papra are cut over on
-   `mbk`. Migrate `larapaper` next.
+   `mbk`. Larapaper is implemented next for reconciliation and data migration.
 4. **Databases & Media Libraries**:
    - CloudNativePG operator for PostgreSQL instances.
    - `miniflux` (Postgres).
