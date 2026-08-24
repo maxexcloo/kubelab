@@ -74,6 +74,7 @@ mistaken for a completed migration:
 | Comfy Control | Cut over      | Complete the rollback window                                         |
 | Homepage      | Reconciled    | Record cutover evidence                                              |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
+| Papra         | Cut over      | Complete the rollback window                                         |
 | Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
 | Windmill      | Implemented   | Confirm reconciliation and backup coverage                           |
 
@@ -96,8 +97,8 @@ Execute migrations with one pull request and cutover record per workload group:
    and agents on both clusters connect through an agent-only public WebSocket
    route. Both interfaces have live cutover evidence.
 3. **Identity-Dependent & Small Stateful — In Progress**: Actual Budget,
-   Bichon, Bifrost, CLIProxyAPI, and Comfy Control are cut over on `mbk`.
-   Migrate `papra` next, followed by `larapaper`.
+   Bichon, Bifrost, CLIProxyAPI, Comfy Control, and Papra are cut over on
+   `mbk`. Migrate `larapaper` next.
 4. **Databases & Media Libraries**:
    - CloudNativePG operator for PostgreSQL instances.
    - `miniflux` (Postgres).
