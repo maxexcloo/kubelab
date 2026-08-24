@@ -17,11 +17,17 @@ later, so TrueNAS 26 and the `mbk` cluster meet its version gates. It is the
 preferred dynamic-storage trial candidate even if a future suitable release is
 marked pre-release.
 
-Keep static NFS as the production default until the trial passes. Continue to
-define existing datasets, snapshots, replication, and NFS exports in `homelab`.
-Define retained static `PersistentVolume` resources in `kubelab` and bind
-workloads to them through the `truenas-nfs` storage class. Keep node-local
-`local-path` volumes limited to replaceable state.
+Keep NFS as the production default until the trial passes. `homelab` owns the
+cluster-scoped `truenas-nvme/clusters/mbk` dataset, its NFS export, snapshots,
+and replication. The upstream NFS subdirectory provisioner in `kubelab` creates
+one retained directory per claim beneath that export through the `truenas-nfs`
+storage class. Keep node-local `local-path` volumes limited to replaceable
+state.
+
+Existing standalone datasets remain explicit exceptions. Export each approved
+dataset in `homelab`, define a retained static `PersistentVolume` in `kubelab`,
+and bind it to the workload through a namespaced claim. Do not expose a whole
+pool.
 
 ### Trial Acceptance
 

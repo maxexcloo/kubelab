@@ -20,11 +20,12 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 ## Ownership & Safety Contracts
 
+- **Implementation Simplicity**: Keep migrations as clean and stock as possible. Use upstream defaults unless a current requirement or demonstrated incompatibility requires otherwise. Prefer official charts and standard Kubernetes resources; avoid speculative abstractions, custom automation, premature hardening, and future-proofing. Accept small, explicit repetition when it is clearer than introducing a framework.
 - **Substrate vs Workloads**: `homelab` (OpenTofu) owns everything required to reach or rebuild a cluster (VM, compute, OCI, Tailscale host extension, Cloudflare Tunnel credentials). `kubelab` (Flux) owns all in-cluster workloads and app-scoped integrations.
 - **Secret Contract**: 1Password is the root of trust. `mbk` uses a read/write service account; `syd` uses read-only. External Secrets Operator (1Password SDK) materialises cluster Secrets. Zero secrets in Git.
 - **Application DNS**: ExternalDNS owns explicitly labelled application records from Gateway API routes. OpenTofu owns cluster tunnel and direct-public targets. ExternalDNS adopts existing application records during cutover and uses upsert-only reconciliation.
 - **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns compatible app-scoped external APIs (Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
-- **Storage Contract**: Both clusters use node-local `local-path` volumes only for replaceable state. `mbk` additionally uses retained TrueNAS NFS for large or durable data. Databases run on CloudNativePG unless an official chart provides a simpler supported model; durable high-performance block storage requires a separately reviewed CSI evaluation.
+- **Storage Contract**: Both clusters use node-local `local-path` volumes only for replaceable state. `mbk` uses the `truenas-nfs` storage class backed by the cluster-scoped `truenas-nvme/clusters/mbk` NFS export for general retained data. Existing standalone datasets use allow-listed exports and retained static volumes. Databases run on CloudNativePG unless an official chart provides a simpler supported model; durable high-performance block storage requires a separately reviewed CSI evaluation.
 
 ## Cutover Controls
 
@@ -37,21 +38,54 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 Phase 1 foundations are complete. Crossplane remains installed without a
 managed resource until a compatible app-scoped API is required. Phase 2 has
-started with Anisette and Redlib on `syd`; Byparr runs on `mbk`.
+started with Anisette and Redlib on `syd`; Byparr runs on `mbk`. OpenSpeedTest
+is implemented on both clusters, and Homepage and Windmill are implemented on
+`mbk`.
+
+### Progress States
+
+Use these states for every workload so repository implementation is not
+mistaken for a completed migration:
+
+1. **Planned**: ownership, destination, dependencies, and cutover approach are
+   agreed.
+2. **Implemented**: declarative resources are present in `kubelab`; live
+   reconciliation is not yet confirmed.
+3. **Reconciled**: Flux and the workload report healthy on the destination
+   cluster.
+4. **Cut over**: production routing points to Kubernetes and live traffic has
+   been observed through Gatus and logs.
+5. **Verified**: the 7-day rollback window has completed without an unresolved
+   regression.
+6. **Legacy removed**: the old deployment and obsolete delivery configuration
+   have been removed.
+
+| Workload      | Current State | Next Gate                                                            |
+| ------------- | ------------- | -------------------------------------------------------------------- |
+| Anisette      | Reconciled    | Record cutover evidence and the legacy rollback window               |
+| Byparr        | Reconciled    | Record cutover evidence and the legacy rollback window               |
+| Homepage      | Implemented   | Reconcile at its private test hostname and validate `mbk` discovery  |
+| OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and record legacy retirement |
+| Redlib        | Reconciled    | Record cutover evidence and the legacy rollback window               |
+| Windmill      | Implemented   | Confirm reconciliation, backup coverage, and external monitoring     |
 
 ### Phase 1: Observability & Dynamic Automation
 
 1. **Observability — Complete**: VictoriaMetrics, VictoriaLogs, and Grafana run on `mbk` and `syd` for cluster metrics and logs (replacing Dozzle).
 2. **ExternalDNS Automation — Complete**: ExternalDNS runs on both clusters. Application records are opt-in, Cloudflare-scoped, adopt existing records during cutover, and are upsert-only.
 3. **Crossplane Automation — Foundation Complete**: Crossplane and `provider-http` run on `mbk`. Keep the provider idle until a compatible low-risk app-scoped resource is required; default every future resource to orphan-on-delete.
-4. **Storage Evaluation — Trial Ready**: `democratic-csi` is unsuitable for TrueNAS 26 because its TrueNAS integration depends on the removed REST API or privileged SSH. Trial the official WebSocket-based TrueNAS CSI driver on `mbk`; retain static NFS as the production default until provisioning, retention, snapshots, recovery, and upgrades pass. See [`docs/storage.md`](docs/storage.md).
+4. **Storage Evaluation — Trial Ready**: `democratic-csi` is unsuitable for TrueNAS 26 because its TrueNAS integration depends on the removed REST API or privileged SSH. Trial the official WebSocket-based TrueNAS CSI driver on `mbk`; retain NFS as the production default until provisioning, retention, snapshots, recovery, and upgrades pass. See [`docs/storage.md`](docs/storage.md).
 
 ### Phase 2: Workload Migration (Dependency Order)
 
 Execute migrations with one pull request and cutover record per workload group:
 
 1. **Stateless Utilities — In Progress**: `anisette` and `redlib` run on `syd`; `byparr` runs on `mbk`.
-2. **Platform Consumers**: `homepage` (using native `gethomepage.dev/*` discovery), `beszel` hub on `mbk` and cluster agents.
+2. **Platform Consumers — In Progress**: Homepage is implemented on `mbk` with
+   native Gateway API discovery. Its first deployment discovers `mbk` only;
+   `syd` metadata remains on workload `HTTPRoute` objects until Homepage gains
+   native multi-cluster discovery. Reconcile and validate Homepage before
+   migrating the `beszel` hub on `mbk` and cluster agents.
 3. **Identity-Dependent & Small Stateful**: `bifrost`, `cliproxyapi`, `comfy-control`, `bichon`, `actual-budget`, `papra`, `larapaper`.
 4. **Databases & Media Libraries**:
    - CloudNativePG operator for PostgreSQL instances.
@@ -67,7 +101,9 @@ Execute migrations with one pull request and cutover record per workload group:
 
 For every stateful service:
 
-1. Export application data and take a final TrueNAS ZFS snapshot.
+1. Inspect the legacy TrueNAS application and data through
+   `ssh root@kimbap`; export application data and take a final TrueNAS ZFS
+   snapshot.
 2. Deploy workload in Kubernetes; verify database, OIDC, mail, and storage connectivity before changing routing.
 3. Switch DNS / Cloudflare Tunnel route and monitor live traffic via Gatus and logs.
 4. Keep legacy container stopped for the rollback window (7 days).
