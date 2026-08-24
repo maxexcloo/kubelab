@@ -64,7 +64,7 @@ mistaken for a completed migration:
 | ------------- | ------------- | -------------------------------------------------------------------- |
 | Anisette      | Reconciled    | Record cutover evidence and the legacy rollback window               |
 | Byparr        | Reconciled    | Record cutover evidence and the legacy rollback window               |
-| Homepage      | Implemented   | Reconcile at its private test hostname and validate `mbk` discovery  |
+| Homepage      | Reconciled    | Add external monitoring and record cutover evidence                  |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and record legacy retirement |
 | Redlib        | Reconciled    | Record cutover evidence and the legacy rollback window               |
 | Windmill      | Implemented   | Confirm reconciliation, backup coverage, and external monitoring     |
