@@ -62,8 +62,8 @@ spec:
               REDLIB_ROBOTS_DISABLE_INDEXING: "on"
             image:
               pullPolicy: IfNotPresent
-              repository: ghcr.io/nachtalb/redlib
-              tag: latest@sha256:8d3672ad029114482e6265bf90172be23b1d4164a1e1af531383a935c6fb1da4
+              repository: ghcr.io/maxexcloo/redlib
+              tag: sha-5c3d1a6@sha256:b433bdde33e9beb10dd72d3cb3ed1e8861cf86311d0e2a895bd36c805fe8c712
             probes:
               liveness:
                 enabled: true
