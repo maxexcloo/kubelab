@@ -16,7 +16,6 @@ spec:
         namespace: flux-system
       version: 1.21.1
   values:
-    domainFilters: [excloo.com, excloo.dev]
     labelFilter: gateway.excloo.dev/public-access=true
     logFormat: json
     managedRecordTypes: [A, AAAA, CNAME]
