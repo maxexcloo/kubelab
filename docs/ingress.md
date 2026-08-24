@@ -28,6 +28,8 @@ A public application namespace must carry
 - list only the application hostnames in `spec.hostnames`.
 
 ExternalDNS creates or updates `A`, `AAAA`, and `CNAME` records within
-`excloo.com` and `excloo.dev`. Each cluster has a distinct TXT owner ID. Its
-`upsert-only` policy leaves DNS records in place when a route is removed; delete
-them only as part of an explicitly reviewed cutover or retirement.
+`excloo.com` and `excloo.dev`. It uses the `noop` registry so an explicitly
+labelled route can adopt and overwrite an existing application record during a
+cutover. Its `upsert-only` policy leaves DNS records in place when a route is
+removed; delete them only as part of an explicitly reviewed cutover or
+retirement.

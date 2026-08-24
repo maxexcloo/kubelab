@@ -22,7 +22,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 - **Substrate vs Workloads**: `homelab` (OpenTofu) owns everything required to reach or rebuild a cluster (VM, compute, OCI, Tailscale host extension, Cloudflare Tunnel credentials). `kubelab` (Flux) owns all in-cluster workloads and app-scoped integrations.
 - **Secret Contract**: 1Password is the root of trust. `mbk` uses a read/write service account; `syd` uses read-only. External Secrets Operator (1Password SDK) materialises cluster Secrets. Zero secrets in Git.
-- **Application DNS**: ExternalDNS owns explicitly labelled application records from Gateway API routes. OpenTofu owns cluster tunnel and direct-public targets. ExternalDNS uses unique cluster ownership and upsert-only reconciliation.
+- **Application DNS**: ExternalDNS owns explicitly labelled application records from Gateway API routes. OpenTofu owns cluster tunnel and direct-public targets. ExternalDNS adopts existing application records during cutover and uses upsert-only reconciliation.
 - **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns compatible app-scoped external APIs (Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
 - **Storage Contract**: Both clusters use node-local `local-path` volumes only for replaceable state. `mbk` additionally uses retained TrueNAS NFS for large or durable data. Databases run on CloudNativePG unless an official chart provides a simpler supported model; durable high-performance block storage requires a separately reviewed CSI evaluation.
 
@@ -42,7 +42,7 @@ started with Anisette on `syd`; Byparr and Redlib are staged together on `mbk`.
 ### Phase 1: Observability & Dynamic Automation
 
 1. **Observability — Complete**: VictoriaMetrics, VictoriaLogs, and Grafana run on `mbk` and `syd` for cluster metrics and logs (replacing Dozzle).
-2. **ExternalDNS Automation — Complete**: ExternalDNS runs on both clusters. Application records are opt-in, Cloudflare-scoped, cluster-owned, and upsert-only.
+2. **ExternalDNS Automation — Complete**: ExternalDNS runs on both clusters. Application records are opt-in, Cloudflare-scoped, adopt existing records during cutover, and are upsert-only.
 3. **Crossplane Automation — Foundation Complete**: Crossplane and `provider-http` run on `mbk`. Keep the provider idle until a compatible low-risk app-scoped resource is required; default every future resource to orphan-on-delete.
 4. **Storage Evaluation — Trial Ready**: `democratic-csi` is unsuitable for TrueNAS 26 because its TrueNAS integration depends on the removed REST API or privileged SSH. Trial the official WebSocket-based TrueNAS CSI driver on `mbk`; retain static NFS as the production default until provisioning, retention, snapshots, recovery, and upgrades pass. See [`docs/storage.md`](docs/storage.md).
 
