@@ -85,6 +85,14 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /app/downloaded_files
+      home-config:
+        type: emptyDir
+        globalMounts:
+          - path: /home/byparr/.config
+      home-downloads:
+        type: emptyDir
+        globalMounts:
+          - path: /home/byparr/Downloads
       screenshots:
         accessMode: ReadWriteOnce
         size: 1Gi
