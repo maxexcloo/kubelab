@@ -6,6 +6,7 @@ metadata:
 spec:
   secretName: wildcard
   dnsNames:
+    - "*.excloo.com"
     - "*.mbk.excloo.dev"
   issuerRef:
     kind: ClusterIssuer

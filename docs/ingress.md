@@ -13,8 +13,9 @@ bootstrapped by `homelab`.
 | Tunnel public | `public-tunnel` | `tunnel.<cluster>.excloo.dev` | Required         |
 
 Only `syd` currently has a direct-public Gateway. Both clusters have a tunnel
-Gateway. The `syd` public certificate covers `*.excloo.com` and
-`*.syd.excloo.dev`. Private routes are never read by ExternalDNS.
+Gateway. Each cluster certificate covers `*.excloo.com` and its cluster
+wildcard so established application names remain valid during migration.
+Private routes are never read by ExternalDNS.
 
 ## Public Route Contract
 
