@@ -7,6 +7,7 @@ resources:
   - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/windmill
+  - beszel-agent-route.yaml
   - beszel-route.yaml
   - byparr-route.yaml
   - homepage-route.yaml

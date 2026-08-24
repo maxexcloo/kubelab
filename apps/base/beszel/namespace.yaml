@@ -5,6 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: beszel
     gateway.excloo.dev/private-access: "true"
+    gateway.excloo.dev/public-access: "true"
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/warn: restricted

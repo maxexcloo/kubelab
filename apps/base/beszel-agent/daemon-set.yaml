@@ -23,7 +23,7 @@ spec:
             - name: DATA_DIR
               value: /var/lib/beszel-agent
             - name: HUB_URL
-              value: https://beszel.mbk.excloo.dev
+              value: https://beszel-agent.mbk.excloo.dev
             - name: KEY
               value: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPkxnKuxsVqSVZVXQ3OGHjZZFMAAclU/xLrEDdwOyRt+
             - name: LISTEN
