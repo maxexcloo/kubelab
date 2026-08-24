@@ -63,6 +63,7 @@ spec:
       automountServiceAccountToken: false
       annotations:
         kubectl.kubernetes.io/default-container: byparr
+        kubectl.kubernetes.io/restartedAt: "2026-08-24T10:08:00+10:00"
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
