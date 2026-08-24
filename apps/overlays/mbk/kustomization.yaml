@@ -3,14 +3,11 @@ kind: Kustomization
 resources:
   - ../../base/byparr
   - ../../base/openspeedtest
-  - ../../base/redlib
   - ../../base/windmill
   - byparr-route.yaml
-  - redlib-route.yaml
   - route.yaml
   - windmill-route.yaml
 patches:
   - path: byparr-homepage.yaml
   - path: helm-release-homepage.yaml
-  - path: redlib-homepage.yaml
   - path: windmill-homepage.yaml

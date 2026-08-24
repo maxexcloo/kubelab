@@ -3,7 +3,10 @@ kind: Kustomization
 resources:
   - ../../base/anisette
   - ../../base/openspeedtest
+  - ../../base/redlib
   - anisette-route.yaml
+  - redlib-route.yaml
   - route.yaml
 patches:
   - path: helm-release-homepage.yaml
+  - path: redlib-homepage.yaml
