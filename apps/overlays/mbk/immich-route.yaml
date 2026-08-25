@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: immich
+  namespace: immich
+  annotations:
+    gethomepage.dev/description: Photo and Video Library
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Applications
+    gethomepage.dev/href: https://photos.excloo.com
+    gethomepage.dev/icon: immich
+    gethomepage.dev/name: Immich
+  labels:
+    app.kubernetes.io/name: immich
+spec:
+  hostnames:
+    - photos.excloo.com
+  parentRefs:
+    - name: public-tunnel
+      namespace: networking
+  rules:
+    - backendRefs:
+        - name: immich-server
+          port: 2283

@@ -2,12 +2,12 @@
 set -euo pipefail
 umask 077
 
-if [[ $# -ne 0 ]]; then
-  echo "Usage: mise run bootstrap-secrets" >&2
+if [[ $# -ne 1 ]]; then
+  echo "Usage: mise run bootstrap-secrets <cluster>" >&2
   exit 1
 fi
 
-cluster="$(kubectl config current-context)"
+cluster="$1"
 repository_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 
 if [[ ! -d "${repository_dir}/clusters/${cluster}" ]]; then

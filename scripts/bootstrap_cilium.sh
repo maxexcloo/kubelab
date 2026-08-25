@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 0 ]]; then
-  echo "Usage: mise run bootstrap-cilium" >&2
+if [[ $# -ne 1 ]]; then
+  echo "Usage: mise run bootstrap-cilium <cluster>" >&2
   exit 1
 fi
 
-cluster="$(kubectl config current-context)"
+cluster="$1"
 repository_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 release_file="${repository_dir}/platform/networking/cilium/helm-release.yaml"
 repository_file="${repository_dir}/platform/sources/cilium/helm-repository.yaml"

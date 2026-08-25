@@ -19,6 +19,7 @@ resources:
   - sources/external-dns
   - sources/external-secrets
   - sources/headlamp
+  - sources/immich
   - sources/local-path-provisioner
   - sources/onepassword
   - sources/openspeedtest

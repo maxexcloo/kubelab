@@ -8,7 +8,7 @@
       "currentValueTemplate": "main",
       "customType": "regex",
       "datasourceTemplate": "git-refs",
-      "managerFilePatterns": ["/^\\.mise\\.toml$/"],
+      "managerFilePatterns": ["/^scripts/check_manifests\\.sh$/"],
       "matchStrings": ["CRDs-catalog/(?<currentDigest>[a-f0-9]{40})/"],
       "packageNameTemplate": "https://github.com/datreeio/CRDs-catalog"
     },

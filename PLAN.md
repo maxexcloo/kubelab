@@ -23,6 +23,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 - **Implementation Simplicity**: Keep migrations as clean and stock as possible. Use upstream defaults unless a current requirement or demonstrated incompatibility requires otherwise. Prefer official charts and standard Kubernetes resources; avoid speculative abstractions, custom automation, premature hardening, and future-proofing. Accept small, explicit repetition when it is clearer than introducing a framework.
 - **Substrate vs Workloads**: `homelab` (OpenTofu) owns everything required to reach or rebuild a cluster (VM, compute, OCI, Tailscale host extension, Cloudflare Tunnel credentials). `kubelab` (Flux) owns all in-cluster workloads and app-scoped integrations.
 - **Secret Contract**: 1Password is the root of trust. `homelab` owns cluster vaults and provisions each cluster's vault-scoped 1Password Connect credentials; `kubelab` owns their bootstrap delivery into Kubernetes, the in-cluster Connect deployment, workload credential definitions, generation, and delivery. External Secrets Operator uses the local Connect service to materialise cluster Secrets. Zero secrets in Git.
+- **Secret Automation**: Every workload credential is generated or obtained by its declarative owner and written to 1Password automatically before delivery to the workload. Only cluster bootstrap credentials require operator-provided secret material; no workload may depend on a manually created 1Password item.
 - **Application DNS**: ExternalDNS owns explicitly labelled application records from Gateway API routes. OpenTofu owns cluster tunnel and direct-public targets. ExternalDNS adopts existing application records during cutover and uses upsert-only reconciliation.
 - **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns compatible app-scoped external APIs (Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
 - **Storage Contract**: Both clusters use node-local `local-path` volumes only for replaceable state. `mbk` uses the `truenas-nfs` storage class backed by the cluster-scoped `truenas-nvme/clusters/mbk` NFS export for general retained data. Existing standalone datasets use allow-listed exports and retained static volumes. Databases run on CloudNativePG unless an official chart provides a simpler supported model; durable high-performance block storage requires a separately reviewed CSI evaluation.
@@ -33,36 +34,48 @@ After `homelab` has provisioned the substrate and bootstrapped Talos, initialise
 the Kubernetes layer from this repository with:
 
 ```shell
-mise run bootstrap
+mise run bootstrap syd
 ```
 
 `bootstrap` must be idempotent and safely resumable. Its task dependency graph
 must enforce this order:
 
-1. `bootstrap-cilium` validates that the current kubeconfig context has a
-   matching `clusters/<cluster>` entry, shows the context and API endpoint, and requires
-   confirmation before changing the cluster. It derives the chart name,
-   repository, version, and values from the committed Flux resources, installs
-   Cilium when Flux does not yet manage it, preserves Flux ownership otherwise,
-   and waits for the nodes to become ready.
-2. `bootstrap-secrets` depends on `bootstrap-cilium`. It reads the cluster's
-   provisioned 1Password Connect credentials from the `Homelab` vault and
-   applies the bootstrap Secret without storing secret values in Git or files
-   outside a restrictive temporary file.
-3. `bootstrap-flux` depends on `bootstrap-secrets`. It derives the
-   VictoriaMetrics chart and repository from the committed Flux resources,
-   installs the required CRDs, applies `clusters/<cluster>/flux-system`
-   server-side, waits for the Flux controllers, and reports reconciliation
-   status.
-4. `bootstrap` depends on `bootstrap-flux` and provides the documented complete
-   workflow. Every step uses the current kubeconfig context selected before the
-   task starts.
+1. `bootstrap-cilium` validates that the explicit cluster parameter has a
+   matching `clusters/<cluster>` entry and kubeconfig context, shows the context
+   and API endpoint, and requires confirmation before changing the cluster. It
+   derives the chart name, repository, version, and values from the committed
+   Flux resources, installs Cilium when Flux does not yet manage it, preserves
+   Flux ownership otherwise, and waits for the nodes to become ready.
+2. `bootstrap-secrets` waits for `bootstrap-cilium`, but does not depend on it.
+   It reads the cluster's provisioned 1Password Connect credentials from the
+   `Homelab` vault and applies the bootstrap Secret without storing secret
+   values in Git or files outside a restrictive temporary file.
+3. `bootstrap-flux` waits for `bootstrap-secrets`, but does not depend on it. It
+   derives the VictoriaMetrics chart and repository from the committed Flux
+   resources, installs the required CRDs, applies
+   `clusters/<cluster>/flux-system` server-side, waits for the Flux controllers,
+   and reports reconciliation status.
+4. `bootstrap` depends on all three component tasks and forwards the explicit
+   cluster parameter to each one. Mise schedules them as one bootstrap operation
+   while their `wait_for` relationships enforce Cilium, secrets, then Flux.
 
 Keep the reviewed OpenTofu apply and Kubernetes bootstrap as separate operator
 actions. Do not invoke this workflow from OpenTofu, a provider provisioner, or a
 `local-exec` hook. Keep every task and script within `kubelab`; bootstrap must
 not invoke another repository. Do not duplicate chart versions in tasks,
 scripts, or documentation.
+
+## Cluster Reconciliation
+
+After bootstrap, reconcile a cluster without rerunning bootstrap
+components:
+
+```shell
+mise run deploy syd
+```
+
+`deploy` reconciles the selected cluster's root Flux Kustomization and its Git
+source. Flux remains the sole routine deployer for Kubernetes resources.
 
 ## Cutover Controls
 
@@ -78,8 +91,8 @@ managed resource until a compatible app-scoped API is required. Phase 2 has
 started with Anisette and Redlib on `syd`; Byparr runs on `mbk`. OpenSpeedTest
 is implemented on both clusters. Actual Budget, Beszel, Bichon, Bifrost,
 CLIProxyAPI, and Comfy Control are cut over on `mbk`, Homepage is reconciled on
-`mbk`, Beszel agents are reconciled on both clusters, and Windmill is
-implemented on `mbk`.
+`mbk`, Beszel agents are reconciled on both clusters, BookOrbit is cut over,
+Shelfmark is reconciled, and Immich and Windmill are implemented on `mbk`.
 
 ### Progress States
 
@@ -106,18 +119,19 @@ mistaken for a completed migration:
 | Beszel        | Cut over      | Complete the rollback window                                         |
 | Bichon        | Cut over      | Complete the rollback window                                         |
 | Bifrost       | Cut over      | Complete the rollback window and migrate its provider dependencies   |
-| BookOrbit     | Implemented   | Apply retained NFS shares and restore application data               |
+| BookOrbit     | Cut over      | Complete the rollback window                                         |
 | Byparr        | Reconciled    | Record cutover evidence and the rollback window                      |
 | CLIProxyAPI   | Cut over      | Complete the rollback window                                         |
 | Comfy Control | Cut over      | Complete the rollback window                                         |
 | Homepage      | Reconciled    | Record cutover evidence                                              |
+| Immich        | Implemented   | Apply the iCloud Photos NFS share and restore PostgreSQL             |
 | Larapaper     | Cut over      | Complete the rollback window                                         |
 | Linkwarden    | Cut over      | Complete the rollback window                                         |
 | Miniflux      | Cut over      | Complete the rollback window                                         |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
 | Papra         | Cut over      | Complete the rollback window                                         |
 | Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
-| Shelfmark     | Implemented   | Apply retained NFS shares and restore application data               |
+| Shelfmark     | Reconciled    | Record cutover evidence and the rollback window                      |
 | Windmill      | Implemented   | Confirm reconciliation and backup coverage                           |
 
 ### Phase 1: Observability & Dynamic Automation
@@ -141,8 +155,10 @@ Execute migrations with one pull request and cutover record per workload group:
 3. **Identity-Dependent & Small Stateful — In Progress**: Actual Budget,
    Bichon, Bifrost, CLIProxyAPI, Comfy Control, Larapaper, and Papra are cut
    over on `mbk`.
-4. **Databases & Media Libraries**:
-   Migrate `miniflux` next.
+4. **Databases & Media Libraries — In Progress**: Miniflux, Linkwarden, and
+   BookOrbit are cut over; Shelfmark is reconciled; Immich is implemented with
+   its runtime suspended pending the PostgreSQL restore. Restore and reconcile
+   Immich next.
    - CloudNativePG operator for PostgreSQL instances.
    - `miniflux` (Postgres).
    - `linkwarden` (Postgres + storage).

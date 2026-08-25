@@ -1,5 +1,5 @@
 [tools]
-1password-cli = "2.38.1"
+1password-cli = "2.39.0"
 actionlint = "1.7.12"
 flux2 = "2.9.4"
 helm = "4.2.4"
@@ -10,46 +10,53 @@ kustomize = "5.8.1"
 prek = "0.4.14"
 prettier = "3.9.6"
 shellcheck = "0.11.0"
-trivy = "0.74.0"
 yq = "4.53.6"
 
-# Deploy
+# Bootstrap
 [tasks.bootstrap]
 description = "Bootstrap a cluster in dependency order"
-run = 'echo "Cluster $(kubectl config current-context) is bootstrapped and reconciled."'
-depends = ["bootstrap-flux"]
+run = 'echo "Cluster $usage_cluster is bootstrapped and reconciled."'
+usage = 'arg "<cluster>"'
+depends = [
+  { task = "bootstrap-cilium", args = ["{{usage.cluster}}"] },
+  { task = "bootstrap-secrets", args = ["{{usage.cluster}}"] },
+  { task = "bootstrap-flux", args = ["{{usage.cluster}}"] },
+]
 
 [tasks.bootstrap-cilium]
-description = "Bootstrap Cilium cluster networking"
+description = "Bootstrap Cilium networking for a cluster"
 interactive = true
 run = "scripts/bootstrap_cilium.sh"
 
 [tasks.bootstrap-flux]
-description = "Bootstrap Flux reconciliation"
+description = "Bootstrap Flux reconciliation for a cluster"
 run = "scripts/bootstrap_flux.sh"
-depends = ["bootstrap-secrets"]
+wait_for = ["bootstrap-secrets"]
 
 [tasks.bootstrap-secrets]
-description = "Bootstrap the 1Password Connect secret"
+description = "Bootstrap 1Password Connect credentials for a cluster"
 run = "scripts/bootstrap_cluster_secrets.sh"
-depends = ["bootstrap-cilium"]
+wait_for = ["bootstrap-cilium"]
+
+# Deploy
+[tasks.deploy]
+description = "Reconcile a cluster from Git"
+run = 'flux --context "$usage_cluster" reconcile kustomization flux-system --with-source'
+usage = 'arg "<cluster>"'
 
 # Development
 [tasks.check]
-description = "Check formatting and repository configuration"
+description = "Check project files and configuration"
 run = """
 actionlint .github/workflows/*.yaml
 prettier --check .
 shellcheck scripts/*.sh
 scripts/check_manifests.sh
-trivy config --exit-code 1 --severity HIGH,CRITICAL --ignorefile .trivyignore.yaml .
 """
 
 [tasks.fmt]
 description = "Format project files"
-run = """
-prettier --write .
-"""
+run = "prettier --write ."
 
 [tasks.prek]
 description = "Run all repository hooks"

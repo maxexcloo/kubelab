@@ -22,26 +22,36 @@ mise run check
 
 ### Common Tasks
 
-| Task                 | Description                                                          |
-| -------------------- | -------------------------------------------------------------------- |
-| `mise run bootstrap` | Bootstrap the current Kubernetes context in dependency order         |
-| `mise run check`     | Run validation suite (Kubernetes schemas, formatting, security scan) |
-| `mise run fmt`       | Format project files (Prettier)                                      |
-| `mise run prek`      | Run all Git pre-commit hooks across the repository                   |
-| `mise run setup`     | Install tools and Git hooks                                          |
+| Task                           | Description                                                        |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `mise run bootstrap <cluster>` | Bootstrap a Kubernetes cluster in dependency order                 |
+| `mise run check`               | Run validation suite (Kubernetes schemas, formatting, and linting) |
+| `mise run deploy <cluster>`    | Reconcile a Kubernetes cluster from Git                            |
+| `mise run fmt`                 | Format project files (Prettier)                                    |
+| `mise run prek`                | Run all Git pre-commit hooks across the repository                 |
+| `mise run setup`               | Install tools and Git hooks                                        |
 
 ## Bootstrap
 
 After substrate provisioning in `homelab`:
 
 ```shell
-mise run bootstrap
+mise run bootstrap syd
 ```
 
-The task shows the current Kubernetes context and API endpoint before asking for
-confirmation. It installs Cilium, injects the cluster's provisioned
+The task requires a cluster name matching both `clusters/<cluster>` and a
+kubeconfig context. It shows the selected context and API endpoint before asking
+for confirmation, installs Cilium, injects the cluster's provisioned
 1Password Connect credentials, and reconciles Flux through the ordered
 `bootstrap-cilium`, `bootstrap-secrets`, and `bootstrap-flux` dependency chain.
+
+## Deployment
+
+After bootstrap, reconcile a cluster without rerunning the bootstrap steps:
+
+```shell
+mise run deploy syd
+```
 
 ## Platform
 

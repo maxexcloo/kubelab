@@ -1,0 +1,119 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: immich
+  namespace: immich
+spec:
+  interval: 30m
+  releaseName: immich
+  suspend: true
+  chartRef:
+    kind: OCIRepository
+    name: immich
+    namespace: flux-system
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            env:
+              DB_DATABASE_NAME: immich
+              DB_HOSTNAME: immich-database-rw
+              DB_PORT: "5432"
+              DB_SSL_MODE: require
+              DB_USERNAME: immich
+              DB_VECTOR_EXTENSION: vectorchord
+              IMMICH_LOG_FORMAT: json
+              TZ: Australia/Sydney
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    key: password
+                    name: immich-database
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        supplementalGroups:
+          - 3000
+        seccompProfile:
+          type: RuntimeDefault
+    immich:
+      metrics:
+        enabled: true
+      persistence:
+        library:
+          existingClaim: library
+    machine-learning:
+      controllers:
+        main:
+          containers:
+            main:
+              image:
+                tag: v3.1.0@sha256:5a0839dc5303cd7215bcd2180a26aed3af41675aefb3e75e5157e9f10ad16e6e
+              resources:
+                limits:
+                  memory: 4Gi
+                requests:
+                  cpu: 100m
+                  memory: 1Gi
+      persistence:
+        cache:
+          accessMode: ReadWriteOnce
+          size: 10Gi
+          storageClass: local-path
+          type: persistentVolumeClaim
+    server:
+      controllers:
+        main:
+          containers:
+            main:
+              image:
+                tag: v3.1.0@sha256:b434cb9287eea1471c9974845914d4dd328c9c2d652e446ed4930f99944f0ceb
+              resources:
+                limits:
+                  memory: 4Gi
+                requests:
+                  cpu: 100m
+                  memory: 1Gi
+      persistence:
+        cli:
+          enabled: true
+          type: emptyDir
+          globalMounts:
+            - path: /.config
+        icloud-photos:
+          enabled: true
+          existingClaim: icloud-photos
+          type: persistentVolumeClaim
+          globalMounts:
+            - path: /icloud-photos
+              readOnly: true
+        temporary:
+          enabled: true
+          type: emptyDir
+          globalMounts:
+            - path: /tmp
+    valkey:
+      enabled: true
+      controllers:
+        main:
+          containers:
+            main:
+              image:
+                tag: 9.1.1@sha256:70739f85ad2ee01a726a965584a0f94895f01b0c60b3cc8b0aeef11eaa6888cf
+              resources:
+                limits:
+                  memory: 512Mi
+                requests:
+                  cpu: 20m
+                  memory: 128Mi
