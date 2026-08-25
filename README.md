@@ -22,48 +22,26 @@ mise run check
 
 ### Common Tasks
 
-| Task             | Description                                                          |
-| ---------------- | -------------------------------------------------------------------- |
-| `mise run check` | Run validation suite (Kubernetes schemas, formatting, security scan) |
-| `mise run fmt`   | Format project files (Prettier)                                      |
-| `mise run prek`  | Run all Git pre-commit hooks across the repository                   |
-| `mise run setup` | Install tools and Git hooks                                          |
+| Task                                   | Description                                                          |
+| -------------------------------------- | -------------------------------------------------------------------- |
+| `mise run bootstrap-cluster <cluster>` | Bootstrap or reconcile a cluster from Git                            |
+| `mise run check`                       | Run validation suite (Kubernetes schemas, formatting, security scan) |
+| `mise run fmt`                         | Format project files (Prettier)                                      |
+| `mise run prek`                        | Run all Git pre-commit hooks across the repository                   |
+| `mise run setup`                       | Install tools and Git hooks                                          |
 
 ## Bootstrap
 
 After substrate provisioning in `homelab`:
 
-1. **Verify API Access**:
-   ```shell
-   kubectl --context <cluster> get nodes
-   ```
-2. **Bootstrap Cilium CNI**:
-   ```shell
-   cilium_version="$(yq eval '.spec.chart.spec.version' platform/networking/cilium/helm-release.yaml)"
-   helm repo add cilium https://helm.cilium.io --force-update
-   yq eval '.spec.values' platform/networking/cilium/helm-release.yaml | \
-     helm upgrade --install cilium cilium/cilium \
-       --kube-context <cluster> \
-       --namespace kube-system \
-       --version "${cilium_version}" \
-       --values -
-   ```
-3. **Bootstrap VictoriaMetrics CRDs**:
-   ```shell
-   victoria_metrics_version="$(yq eval '.spec.chart.spec.version' platform/observability/victoria-metrics-k8s-stack/helm-release.yaml)"
-   helm show crds victoria-metrics-k8s-stack \
-     --repo https://victoriametrics.github.io/helm-charts \
-     --version "${victoria_metrics_version}" | \
-     kubectl --context <cluster> apply --filename -
-   ```
-4. **Inject 1Password Bootstrap Secret**:
-   ```shell
-   mise -C ../homelab run bootstrap-secrets
-   ```
-5. **Bootstrap Flux**:
-   ```shell
-   kubectl --context <cluster> apply --server-side --kustomize clusters/<cluster>/flux-system
-   ```
+```shell
+mise run bootstrap-cluster <cluster>
+```
+
+The task shows the selected Kubernetes context and API endpoint before asking
+for confirmation. It verifies the `homelab` credential bootstrap, installs the
+pinned bootstrap components, and reconciles Flux in dependency order. Use
+`--yes` for an explicitly non-interactive run.
 
 ## Platform
 

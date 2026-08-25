@@ -7,6 +7,7 @@ kubectl = "1.36.4"
 kustomize = "5.8.1"
 prek = "0.4.14"
 prettier = "3.9.6"
+shellcheck = "0.11.0"
 trivy = "0.74.0"
 yq = "4.53.6"
 
@@ -25,6 +26,7 @@ shell = "bash -c"
 run = """
 set -o pipefail
 actionlint .github/workflows/*.yaml
+shellcheck scripts/*.sh
 kubeconform_flags="-kubernetes-version 1.36.3 -skip CustomResourceDefinition -strict -summary -schema-location default -schema-location {% raw %}https://raw.githubusercontent.com/datreeio/CRDs-catalog/7b1e26ef9deea49293714d204c1a2270aab1178f/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json{% endraw %}"
 for target in $(
   {
@@ -48,3 +50,23 @@ prettier --write .
 [tasks.prek]
 description = "Run all repository hooks"
 run = "prek run --all-files"
+
+# Deploy
+[tasks.bootstrap-cluster]
+description = "Bootstrap or reconcile a cluster from Git"
+shell = "bash -c"
+run = """
+arguments=("${usage_cluster?}")
+if [[ "${usage_yes:-false}" == "true" ]]; then
+  arguments+=(--yes)
+fi
+scripts/bootstrap_cluster.sh "${arguments[@]}"
+"""
+usage = '''
+arg "<cluster>" {
+  help "Cluster name matching clusters/<cluster> and its kubeconfig context"
+}
+flag "--yes" {
+  help "Skip the interactive confirmation"
+}
+'''
