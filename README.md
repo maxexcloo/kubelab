@@ -22,26 +22,26 @@ mise run check
 
 ### Common Tasks
 
-| Task                                   | Description                                                          |
-| -------------------------------------- | -------------------------------------------------------------------- |
-| `mise run bootstrap-cluster <cluster>` | Bootstrap or reconcile a cluster from Git                            |
-| `mise run check`                       | Run validation suite (Kubernetes schemas, formatting, security scan) |
-| `mise run fmt`                         | Format project files (Prettier)                                      |
-| `mise run prek`                        | Run all Git pre-commit hooks across the repository                   |
-| `mise run setup`                       | Install tools and Git hooks                                          |
+| Task                 | Description                                                          |
+| -------------------- | -------------------------------------------------------------------- |
+| `mise run bootstrap` | Bootstrap the current Kubernetes context in dependency order         |
+| `mise run check`     | Run validation suite (Kubernetes schemas, formatting, security scan) |
+| `mise run fmt`       | Format project files (Prettier)                                      |
+| `mise run prek`      | Run all Git pre-commit hooks across the repository                   |
+| `mise run setup`     | Install tools and Git hooks                                          |
 
 ## Bootstrap
 
 After substrate provisioning in `homelab`:
 
 ```shell
-mise run bootstrap-cluster <cluster>
+mise run bootstrap
 ```
 
-The task shows the selected Kubernetes context and API endpoint before asking
-for confirmation. It verifies the `homelab` credential bootstrap, installs the
-pinned bootstrap components, and reconciles Flux in dependency order. Use
-`--yes` for an explicitly non-interactive run.
+The task shows the current Kubernetes context and API endpoint before asking for
+confirmation. It installs Cilium, injects the cluster's provisioned
+1Password Connect credentials, and reconciles Flux through the ordered
+`bootstrap-cilium`, `bootstrap-secrets`, and `bootstrap-flux` dependency chain.
 
 ## Platform
 

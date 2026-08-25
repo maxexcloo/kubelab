@@ -1,7 +1,9 @@
 [tools]
+1password-cli = "2.38.1"
 actionlint = "1.7.12"
 flux2 = "2.9.4"
 helm = "4.2.4"
+jq = "1.8.2"
 kubeconform = "0.8.0"
 kubectl = "1.36.4"
 kustomize = "5.8.1"
@@ -11,33 +13,35 @@ shellcheck = "0.11.0"
 trivy = "0.74.0"
 yq = "4.53.6"
 
-# Setup
-[tasks.setup]
-description = "Install tools and Git hooks"
-run = """
-mise install
-prek install
-"""
+# Deploy
+[tasks.bootstrap]
+description = "Bootstrap a cluster in dependency order"
+run = 'echo "Cluster $(kubectl config current-context) is bootstrapped and reconciled."'
+depends = ["bootstrap-flux"]
+
+[tasks.bootstrap-cilium]
+description = "Bootstrap Cilium cluster networking"
+interactive = true
+run = "scripts/bootstrap_cilium.sh"
+
+[tasks.bootstrap-flux]
+description = "Bootstrap Flux reconciliation"
+run = "scripts/bootstrap_flux.sh"
+depends = ["bootstrap-secrets"]
+
+[tasks.bootstrap-secrets]
+description = "Bootstrap the 1Password Connect secret"
+run = "scripts/bootstrap_cluster_secrets.sh"
+depends = ["bootstrap-cilium"]
 
 # Development
 [tasks.check]
 description = "Check formatting and repository configuration"
-shell = "bash -c"
 run = """
-set -o pipefail
 actionlint .github/workflows/*.yaml
-shellcheck scripts/*.sh
-kubeconform_flags="-kubernetes-version 1.36.3 -skip CustomResourceDefinition -strict -summary -schema-location default -schema-location {% raw %}https://raw.githubusercontent.com/datreeio/CRDs-catalog/7b1e26ef9deea49293714d204c1a2270aab1178f/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json{% endraw %}"
-for target in $(
-  {
-    find clusters -mindepth 1 -maxdepth 1 -type d
-    yq eval-all -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization") | .spec.path' clusters/*/*.yaml
-  } | sort -u
-); do
-  target="${target#./}"
-  kustomize build "$target" | kubeconform $kubeconform_flags
-done
 prettier --check .
+shellcheck scripts/*.sh
+scripts/check_manifests.sh
 trivy config --exit-code 1 --severity HIGH,CRITICAL --ignorefile .trivyignore.yaml .
 """
 
@@ -51,22 +55,10 @@ prettier --write .
 description = "Run all repository hooks"
 run = "prek run --all-files"
 
-# Deploy
-[tasks.bootstrap-cluster]
-description = "Bootstrap or reconcile a cluster from Git"
-shell = "bash -c"
+# Setup
+[tasks.setup]
+description = "Install tools and Git hooks"
 run = """
-arguments=("${usage_cluster?}")
-if [[ "${usage_yes:-false}" == "true" ]]; then
-  arguments+=(--yes)
-fi
-scripts/bootstrap_cluster.sh "${arguments[@]}"
+mise install
+prek install
 """
-usage = '''
-arg "<cluster>" {
-  help "Cluster name matching clusters/<cluster> and its kubeconfig context"
-}
-flag "--yes" {
-  help "Skip the interactive confirmation"
-}
-'''

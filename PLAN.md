@@ -22,45 +22,47 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 
 - **Implementation Simplicity**: Keep migrations as clean and stock as possible. Use upstream defaults unless a current requirement or demonstrated incompatibility requires otherwise. Prefer official charts and standard Kubernetes resources; avoid speculative abstractions, custom automation, premature hardening, and future-proofing. Accept small, explicit repetition when it is clearer than introducing a framework.
 - **Substrate vs Workloads**: `homelab` (OpenTofu) owns everything required to reach or rebuild a cluster (VM, compute, OCI, Tailscale host extension, Cloudflare Tunnel credentials). `kubelab` (Flux) owns all in-cluster workloads and app-scoped integrations.
-- **Secret Contract**: 1Password is the root of trust. `homelab` owns cluster vaults and bootstraps each cluster's vault-scoped 1Password Connect credentials; `kubelab` owns the in-cluster Connect deployment, workload credential definitions, generation, and delivery. External Secrets Operator uses the local Connect service to materialise cluster Secrets. Zero secrets in Git.
+- **Secret Contract**: 1Password is the root of trust. `homelab` owns cluster vaults and provisions each cluster's vault-scoped 1Password Connect credentials; `kubelab` owns their bootstrap delivery into Kubernetes, the in-cluster Connect deployment, workload credential definitions, generation, and delivery. External Secrets Operator uses the local Connect service to materialise cluster Secrets. Zero secrets in Git.
 - **Application DNS**: ExternalDNS owns explicitly labelled application records from Gateway API routes. OpenTofu owns cluster tunnel and direct-public targets. ExternalDNS adopts existing application records during cutover and uses upsert-only reconciliation.
 - **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns compatible app-scoped external APIs (Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
 - **Storage Contract**: Both clusters use node-local `local-path` volumes only for replaceable state. `mbk` uses the `truenas-nfs` storage class backed by the cluster-scoped `truenas-nvme/clusters/mbk` NFS export for general retained data. Existing standalone datasets use allow-listed exports and retained static volumes. Databases run on CloudNativePG unless an official chart provides a simpler supported model; durable high-performance block storage requires a separately reviewed CSI evaluation.
 
 ## Cluster Bootstrap
 
-After `homelab` has provisioned the substrate, bootstrapped Talos, and completed
-its cluster credential bootstrap, initialise the Kubernetes layer from this
-repository with one public task:
+After `homelab` has provisioned the substrate and bootstrapped Talos, initialise
+the Kubernetes layer from this repository with:
 
 ```shell
-mise run bootstrap-cluster <cluster>
+mise run bootstrap
 ```
 
-`bootstrap-cluster` must be idempotent and safely resumable. It must:
+`bootstrap` must be idempotent and safely resumable. Its task dependency graph
+must enforce this order:
 
-1. Validate that `clusters/<cluster>` exists and that the matching kubeconfig
-   context reaches the expected cluster. Show the selected context and require
-   confirmation before changing the cluster unless an explicit non-interactive
-   option is supplied.
-2. Derive the Cilium chart name, repository, version, and values from the
-   committed Flux resources. Install Cilium when Flux does not yet manage it;
-   otherwise, preserve Flux ownership. Wait for the nodes to become ready. Do
-   not duplicate the chart version in the task or documentation.
-3. Derive the VictoriaMetrics chart and repository from the committed Flux
-   resources and install its CRDs before Flux validates their consumers.
-4. Verify that `homelab` has injected the cluster-scoped 1Password Connect
-   bootstrap secret.
-5. Apply `clusters/<cluster>/flux-system` server-side, wait for the Flux
-   controllers, and report reconciliation status.
+1. `bootstrap-cilium` validates that the current kubeconfig context has a
+   matching `clusters/<cluster>` entry, shows the context and API endpoint, and requires
+   confirmation before changing the cluster. It derives the chart name,
+   repository, version, and values from the committed Flux resources, installs
+   Cilium when Flux does not yet manage it, preserves Flux ownership otherwise,
+   and waits for the nodes to become ready.
+2. `bootstrap-secrets` depends on `bootstrap-cilium`. It reads the cluster's
+   provisioned 1Password Connect credentials from the `Homelab` vault and
+   applies the bootstrap Secret without storing secret values in Git or files
+   outside a restrictive temporary file.
+3. `bootstrap-flux` depends on `bootstrap-secrets`. It derives the
+   VictoriaMetrics chart and repository from the committed Flux resources,
+   installs the required CRDs, applies `clusters/<cluster>/flux-system`
+   server-side, waits for the Flux controllers, and reports reconciliation
+   status.
+4. `bootstrap` depends on `bootstrap-flux` and provides the documented complete
+   workflow. Every step uses the current kubeconfig context selected before the
+   task starts.
 
 Keep the reviewed OpenTofu apply and Kubernetes bootstrap as separate operator
 actions. Do not invoke this workflow from OpenTofu, a provider provisioner, or a
-`local-exec` hook. Keep every bootstrap task within its owning repository; this
-task must not invoke Mise tasks or scripts from `homelab`. Use the `bootstrap-`
-prefix for every task that mutates a cluster during bootstrap, and keep
-`bootstrap-cluster` as the single documented entry point unless a component task
-has an independent operational use.
+`local-exec` hook. Keep every task and script within `kubelab`; bootstrap must
+not invoke another repository. Do not duplicate chart versions in tasks,
+scripts, or documentation.
 
 ## Cutover Controls
 
