@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: bookorbit-bookdrop
+  labels:
+    app.kubernetes.io/name: bookorbit
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    path: /mnt/truenas-nvme/bookorbit/bookdrop
+    server: 10.4.0.3
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: bookorbit-books
+  labels:
+    app.kubernetes.io/name: bookorbit
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    path: /mnt/truenas-nvme/bookorbit/books
+    server: 10.4.0.3
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""

@@ -6,6 +6,7 @@ resources:
   - ../../base/beszel-agent
   - ../../base/bichon
   - ../../base/bifrost
+  - ../../base/bookorbit
   - ../../base/byparr
   - ../../base/cliproxyapi
   - ../../base/comfy-control
@@ -15,12 +16,14 @@ resources:
   - ../../base/miniflux
   - ../../base/openspeedtest
   - ../../base/papra
+  - ../../base/shelfmark
   - ../../base/windmill
   - actual-budget-route.yaml
   - beszel-agent-route.yaml
   - beszel-route.yaml
   - bichon-route.yaml
   - bifrost-route.yaml
+  - bookorbit-route.yaml
   - byparr-route.yaml
   - cliproxyapi-route.yaml
   - comfy-control-route.yaml
@@ -30,6 +33,7 @@ resources:
   - miniflux-route.yaml
   - papra-route.yaml
   - route.yaml
+  - shelfmark-route.yaml
   - windmill-route.yaml
 patches:
   - path: windmill-domain.yaml

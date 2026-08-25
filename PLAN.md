@@ -69,6 +69,7 @@ mistaken for a completed migration:
 | Beszel        | Cut over      | Complete the rollback window                                         |
 | Bichon        | Cut over      | Complete the rollback window                                         |
 | Bifrost       | Cut over      | Complete the rollback window and migrate its provider dependencies   |
+| BookOrbit     | Implemented   | Apply retained NFS shares and restore application data               |
 | Byparr        | Reconciled    | Record cutover evidence and the rollback window                      |
 | CLIProxyAPI   | Cut over      | Complete the rollback window                                         |
 | Comfy Control | Cut over      | Complete the rollback window                                         |
@@ -79,6 +80,7 @@ mistaken for a completed migration:
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
 | Papra         | Cut over      | Complete the rollback window                                         |
 | Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
+| Shelfmark     | Implemented   | Apply retained NFS shares and restore application data               |
 | Windmill      | Implemented   | Confirm reconciliation and backup coverage                           |
 
 ### Phase 1: Observability & Dynamic Automation

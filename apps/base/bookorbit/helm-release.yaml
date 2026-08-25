@@ -1,0 +1,89 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bookorbit
+  namespace: bookorbit
+spec:
+  interval: 30m
+  releaseName: bookorbit
+  suspend: true
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      bookorbit:
+        strategy: Recreate
+        containers:
+          bookorbit:
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/bookorbit/bookorbit
+              tag: 2.7.0@sha256:0f46241c54ba7cd07ddf7dc519386a29c98dd0f3679cebc9ca35f3305dc79e69
+            env:
+              APP_DATA_PATH: /data
+              APP_URL: https://books.excloo.com
+              BOOK_DOCK_PATH: /books-drop
+              CLIENT_URL: https://books.excloo.com
+              LIBRARY_BROWSE_ROOT: /books
+              PORT: "3000"
+              TZ: Australia/Sydney
+            envFrom:
+              - secretRef:
+                  name: bookorbit
+            resources:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 50m
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: bookorbit
+    persistence:
+      bookdrop:
+        existingClaim: bookdrop
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /books-drop
+      books:
+        existingClaim: books
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /books
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /data
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      bookorbit:
+        controller: bookorbit
+        ports:
+          http:
+            port: 3000
+            protocol: HTTP

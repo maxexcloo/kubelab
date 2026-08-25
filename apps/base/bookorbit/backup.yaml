@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: bookorbit-backup
+  namespace: bookorbit
+  labels:
+    app.kubernetes.io/component: backup
+    app.kubernetes.io/name: bookorbit
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/component: backup
+            app.kubernetes.io/name: bookorbit
+        spec:
+          automountServiceAccountToken: false
+          containers:
+            - name: backup
+              image: ghcr.io/cloudnative-pg/postgresql:18.6-standard-trixie@sha256:e5e820a9083134141caac23cad1d6affd39101a9fefe7bf6cc07738a3fa89452
+              imagePullPolicy: IfNotPresent
+              command:
+                - /usr/bin/sh
+                - -c
+                - |-
+                  set -eu
+                  timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+                  target="/backup/bookorbit-${timestamp}.dump"
+                  pg_dump --file="$target" --format=custom --no-owner --no-privileges
+                  pg_restore --list "$target" >/dev/null
+                  find /backup -type f -name 'bookorbit-*.dump' -mtime +27 -delete
+              env:
+                - name: PGDATABASE
+                  value: bookorbit
+                - name: PGHOST
+                  value: bookorbit-database-rw
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: bookorbit-database
+                - name: PGUSER
+                  value: bookorbit
+              resources:
+                limits:
+                  memory: 256Mi
+                requests:
+                  cpu: 20m
+                  memory: 64Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          restartPolicy: Never
+          securityContext:
+            fsGroup: 26
+            fsGroupChangePolicy: OnRootMismatch
+            runAsGroup: 26
+            runAsNonRoot: true
+            runAsUser: 26
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: backup
