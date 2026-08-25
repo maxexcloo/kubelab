@@ -74,7 +74,7 @@ mistaken for a completed migration:
 | Comfy Control | Cut over      | Complete the rollback window                                         |
 | Homepage      | Reconciled    | Record cutover evidence                                              |
 | Larapaper     | Cut over      | Complete the rollback window                                         |
-| Linkwarden    | Implemented   | Confirm reconciliation and approve route cutover                     |
+| Linkwarden    | Reconciled    | Approve route cutover                                                |
 | Miniflux      | Cut over      | Complete the rollback window                                         |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
 | Papra         | Cut over      | Complete the rollback window                                         |
