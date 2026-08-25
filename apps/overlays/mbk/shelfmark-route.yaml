@@ -4,6 +4,7 @@ metadata:
   name: shelfmark
   namespace: shelfmark
   annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
     gethomepage.dev/description: E-book Search
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Applications
@@ -12,6 +13,7 @@ metadata:
     gethomepage.dev/name: Shelfmark
   labels:
     app.kubernetes.io/name: shelfmark
+    gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:
     - shelf.excloo.com
