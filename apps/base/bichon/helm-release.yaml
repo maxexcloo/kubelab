@@ -103,3 +103,19 @@ spec:
           http:
             port: 15630
             protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: Email Archive
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/href: https://bichon.excloo.com
+          gethomepage.dev/icon: mdi-email-search-outline
+          gethomepage.dev/name: Bichon
+        hostnames:
+          - bichon.excloo.com
+        labels:
+          app.kubernetes.io/name: bichon
+        parentRefs:
+          - name: private
+            namespace: networking

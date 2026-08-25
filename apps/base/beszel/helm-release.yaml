@@ -107,3 +107,20 @@ spec:
           http:
             port: 8090
             protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: Resource Monitoring Dashboard
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/href: https://beszel.mbk.excloo.dev
+          gethomepage.dev/icon: beszel
+          gethomepage.dev/name: Beszel
+          gethomepage.dev/siteMonitor: https://beszel.mbk.excloo.dev
+        hostnames:
+          - beszel.mbk.excloo.dev
+        labels:
+          app.kubernetes.io/name: beszel
+        parentRefs:
+          - name: private
+            namespace: networking

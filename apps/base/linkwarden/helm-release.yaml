@@ -129,3 +129,37 @@ spec:
           http:
             port: 7700
             protocol: HTTP
+    route:
+      private:
+        hostnames:
+          - linkwarden.mbk.excloo.dev
+        labels:
+          app.kubernetes.io/name: linkwarden
+        parentRefs:
+          - name: private
+            namespace: networking
+        rules:
+          - backendRefs:
+              - name: linkwarden
+                port: 3000
+      public:
+        annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+          gethomepage.dev/description: Bookmark Manager
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/href: https://links.excloo.com
+          gethomepage.dev/icon: linkwarden
+          gethomepage.dev/name: Linkwarden
+        hostnames:
+          - links.excloo.com
+        labels:
+          app.kubernetes.io/name: linkwarden
+          gateway.excloo.dev/public-access: "true"
+        parentRefs:
+          - name: public-tunnel
+            namespace: networking
+        rules:
+          - backendRefs:
+              - name: linkwarden
+                port: 3000

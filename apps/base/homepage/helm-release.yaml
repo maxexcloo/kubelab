@@ -135,3 +135,20 @@ spec:
       homepage:
         automountServiceAccountToken: true
         forceRename: homepage
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: Application Dashboard
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/href: https://homepage.mbk.excloo.dev
+          gethomepage.dev/icon: homepage
+          gethomepage.dev/name: Homepage
+          gethomepage.dev/siteMonitor: https://homepage.mbk.excloo.dev
+        hostnames:
+          - homepage.mbk.excloo.dev
+        labels:
+          app.kubernetes.io/name: homepage
+        parentRefs:
+          - name: private
+            namespace: networking

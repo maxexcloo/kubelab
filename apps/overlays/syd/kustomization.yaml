@@ -5,6 +5,4 @@ resources:
   - ../../base/beszel-agent
   - ../../base/openspeedtest
   - ../../base/redlib
-  - anisette-route.yaml
-  - redlib-route.yaml
   - route.yaml

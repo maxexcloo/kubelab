@@ -103,3 +103,21 @@ spec:
           http:
             port: 3000
             protocol: HTTP
+    route:
+      main:
+        annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+          gethomepage.dev/description: E-book Search
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/href: https://shelf.excloo.com
+          gethomepage.dev/icon: mdi-book-search
+          gethomepage.dev/name: Shelfmark
+        hostnames:
+          - shelf.excloo.com
+        labels:
+          app.kubernetes.io/name: shelfmark
+          gateway.excloo.dev/public-access: "true"
+        parentRefs:
+          - name: public-tunnel
+            namespace: networking

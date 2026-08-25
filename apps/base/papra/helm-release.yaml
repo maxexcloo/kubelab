@@ -127,3 +127,19 @@ spec:
           http:
             port: 21221
             protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: Document Archive
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/href: https://papra.excloo.com
+          gethomepage.dev/icon: papra
+          gethomepage.dev/name: Papra
+        hostnames:
+          - papra.excloo.com
+        labels:
+          app.kubernetes.io/name: papra
+        parentRefs:
+          - name: private
+            namespace: networking

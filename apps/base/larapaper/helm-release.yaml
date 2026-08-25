@@ -80,3 +80,22 @@ spec:
           http:
             port: 8080
             protocol: HTTP
+    route:
+      main:
+        annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+          gethomepage.dev/description: E-paper Display Manager
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/href: https://larapaper.excloo.com
+          gethomepage.dev/icon: mdi-tablet-dashboard
+          gethomepage.dev/name: Larapaper
+          gethomepage.dev/siteMonitor: https://larapaper.excloo.com
+        hostnames:
+          - larapaper.excloo.com
+        labels:
+          app.kubernetes.io/name: larapaper
+          gateway.excloo.dev/public-access: "true"
+        parentRefs:
+          - name: public-tunnel
+            namespace: networking

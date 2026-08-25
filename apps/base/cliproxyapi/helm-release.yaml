@@ -109,3 +109,19 @@ spec:
           http:
             port: 8317
             protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: AI Provider Proxy
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/href: https://cliproxy.excloo.com
+          gethomepage.dev/icon: mdi-api
+          gethomepage.dev/name: CLIProxyAPI
+        hostnames:
+          - cliproxy.excloo.com
+        labels:
+          app.kubernetes.io/name: cliproxyapi
+        parentRefs:
+          - name: private
+            namespace: networking

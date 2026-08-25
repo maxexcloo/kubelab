@@ -104,3 +104,19 @@ spec:
           http:
             port: 8000
             protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: AI Image and Video Control
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/href: https://comfy-control.excloo.com
+          gethomepage.dev/icon: comfyui
+          gethomepage.dev/name: Comfy Control
+        hostnames:
+          - comfy-control.excloo.com
+        labels:
+          app.kubernetes.io/name: comfy-control
+        parentRefs:
+          - name: private
+            namespace: networking

@@ -71,3 +71,19 @@ spec:
           http:
             port: 8080
             protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: Feed Reader
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/href: https://reader.excloo.com
+          gethomepage.dev/icon: miniflux
+          gethomepage.dev/name: Miniflux
+        hostnames:
+          - reader.excloo.com
+        labels:
+          app.kubernetes.io/name: miniflux
+        parentRefs:
+          - name: private
+            namespace: networking

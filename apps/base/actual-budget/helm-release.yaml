@@ -106,3 +106,19 @@ spec:
           http:
             port: 5006
             protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: Personal Finance
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/href: https://budget.excloo.com
+          gethomepage.dev/icon: actual-budget
+          gethomepage.dev/name: Actual Budget
+        hostnames:
+          - budget.excloo.com
+        labels:
+          app.kubernetes.io/name: actual-budget
+        parentRefs:
+          - name: private
+            namespace: networking
