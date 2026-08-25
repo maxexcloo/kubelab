@@ -66,16 +66,17 @@ spec:
                 managementPolicies: [Create, LateInitialize, Observe, Update]
                 forProvider:
                   expectedResponseCheck:
-                    logic: any(.response.body.data[]?; .name == .payload.body.name)
+                    logic: .payload.body.name as $name | any(.response.body.data[]?; .name == $name)
                     type: CUSTOM
                   headers:
                     Content-Type: [application/json]
                     User-Agent: [kubelab-crossplane/1.0]
                   mappings:
-                    - action: CREATE
-                      body: '{name: .payload.body.name, permission: .payload.body.permission}'
-                      url: .payload.baseUrl
                     - action: OBSERVE
+                      url: .payload.baseUrl
+                    - action: UPDATE
+                      body: '{name: .payload.body.name, permission: .payload.body.permission}'
+                      method: POST
                       url: .payload.baseUrl
                   payload:
                     baseUrl: https://api.resend.com/api-keys
