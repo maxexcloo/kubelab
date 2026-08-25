@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - ../../../platform
   - ../../../platform/automation/crossplane
+  - ../../../platform/databases/cloudnative-pg
+  - ../../../platform/sources/cloudnative-pg
   - ../../../platform/sources/crossplane
   - ../../../platform/sources/nfs-subdir-external-provisioner
   - ../../../platform/storage/truenas-nfs
