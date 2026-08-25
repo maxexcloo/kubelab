@@ -4,6 +4,7 @@ metadata:
   name: bookorbit
   namespace: bookorbit
   annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
     gethomepage.dev/description: E-book Library
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Applications
@@ -12,6 +13,7 @@ metadata:
     gethomepage.dev/name: BookOrbit
   labels:
     app.kubernetes.io/name: bookorbit
+    gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:
     - books.excloo.com
