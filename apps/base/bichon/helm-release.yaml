@@ -6,6 +6,7 @@ metadata:
 spec:
   interval: 30m
   releaseName: bichon
+  suspend: true
   chart:
     spec:
       chart: app-template
@@ -88,7 +89,7 @@ spec:
       nameOverride: bichon
     persistence:
       data:
-        existingClaim: data
+        existingClaim: retained-data
         type: persistentVolumeClaim
         globalMounts:
           - path: /data/bichon-data

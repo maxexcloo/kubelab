@@ -14,3 +14,17 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: truenas-nfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: retained-data
+  namespace: papra
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ""
+  volumeName: papra-data

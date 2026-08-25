@@ -14,3 +14,17 @@ spec:
     requests:
       storage: 3Gi
   storageClassName: truenas-nfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: retained-data
+  namespace: bichon
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ""
+  volumeName: bichon-data

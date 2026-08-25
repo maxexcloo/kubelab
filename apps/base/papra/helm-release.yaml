@@ -6,6 +6,7 @@ metadata:
 spec:
   interval: 30m
   releaseName: papra
+  suspend: true
   chart:
     spec:
       chart: app-template
@@ -106,14 +107,16 @@ spec:
       nameOverride: papra
     persistence:
       data:
+        existingClaim: retained-data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /app/app-data
+      ingestion:
         existingClaim: data
         type: persistentVolumeClaim
-        advancedMounts:
-          papra:
-            papra:
-              - path: /app/app-data
-              - path: /app/ingestion
-                subPath: ingestion
+        globalMounts:
+          - path: /app/ingestion
+            subPath: ingestion
       temporary:
         type: emptyDir
         globalMounts:
