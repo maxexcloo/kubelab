@@ -39,19 +39,28 @@ After substrate provisioning in `homelab`:
    ```
 2. **Bootstrap Cilium CNI**:
    ```shell
-   helm repo add cilium https://helm.cilium.io
+   cilium_version="$(yq eval '.spec.chart.spec.version' platform/networking/cilium/helm-release.yaml)"
+   helm repo add cilium https://helm.cilium.io --force-update
    yq eval '.spec.values' platform/networking/cilium/helm-release.yaml | \
      helm upgrade --install cilium cilium/cilium \
        --kube-context <cluster> \
        --namespace kube-system \
-       --version 1.20.0 \
+       --version "${cilium_version}" \
        --values -
    ```
-3. **Inject 1Password Bootstrap Secret**:
+3. **Bootstrap VictoriaMetrics CRDs**:
+   ```shell
+   victoria_metrics_version="$(yq eval '.spec.chart.spec.version' platform/observability/victoria-metrics-k8s-stack/helm-release.yaml)"
+   helm show crds victoria-metrics-k8s-stack \
+     --repo https://victoriametrics.github.io/helm-charts \
+     --version "${victoria_metrics_version}" | \
+     kubectl --context <cluster> apply --filename -
+   ```
+4. **Inject 1Password Bootstrap Secret**:
    ```shell
    mise -C ../homelab run bootstrap-secrets
    ```
-4. **Bootstrap Flux**:
+5. **Bootstrap Flux**:
    ```shell
    kubectl --context <cluster> apply --server-side --kustomize clusters/<cluster>/flux-system
    ```
