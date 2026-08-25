@@ -1,0 +1,10 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: crossplane-resend
+  labels:
+    rbac.crossplane.io/aggregate-to-crossplane: "true"
+rules:
+  - apiGroups: [external-secrets.io]
+    resources: [pushsecrets, pushsecrets/status]
+    verbs: [create, delete, get, list, patch, update, watch]

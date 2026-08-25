@@ -63,7 +63,7 @@ spec:
               metadata:
                 name: resend
               spec:
-                deletionPolicy: Orphan
+                managementPolicies: [Create, LateInitialize, Observe, Update]
                 forProvider:
                   expectedResponseCheck:
                     logic: any(.response.body.data[]?; .name == .payload.body.name)
