@@ -6,7 +6,6 @@ metadata:
 spec:
   interval: 30m
   releaseName: bichon
-  suspend: true
   chart:
     spec:
       chart: app-template

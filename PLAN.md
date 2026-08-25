@@ -67,7 +67,7 @@ mistaken for a completed migration:
 | Actual Budget | Cut over      | Complete the rollback window                                         |
 | Anisette      | Reconciled    | Record cutover evidence and the rollback window                      |
 | Beszel        | Cut over      | Complete the rollback window                                         |
-| Bichon        | Cut over      | Switch to its retained dataset and complete the rollback window      |
+| Bichon        | Cut over      | Complete the rollback window                                         |
 | Bifrost       | Cut over      | Complete the rollback window and migrate its provider dependencies   |
 | BookOrbit     | Implemented   | Apply retained NFS shares and restore application data               |
 | Byparr        | Reconciled    | Record cutover evidence and the rollback window                      |
@@ -78,7 +78,7 @@ mistaken for a completed migration:
 | Linkwarden    | Cut over      | Complete the rollback window                                         |
 | Miniflux      | Cut over      | Complete the rollback window                                         |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
-| Papra         | Cut over      | Switch to its retained dataset and complete the rollback window      |
+| Papra         | Cut over      | Complete the rollback window                                         |
 | Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
 | Shelfmark     | Implemented   | Apply retained NFS shares and restore application data               |
 | Windmill      | Implemented   | Confirm reconciliation and backup coverage                           |
