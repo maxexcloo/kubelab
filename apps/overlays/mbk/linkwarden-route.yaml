@@ -4,6 +4,7 @@ metadata:
   name: linkwarden
   namespace: linkwarden
   annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
     gethomepage.dev/description: Bookmark Manager
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Applications
@@ -12,11 +13,12 @@ metadata:
     gethomepage.dev/name: Linkwarden
   labels:
     app.kubernetes.io/name: linkwarden
+    gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:
     - links.excloo.com
   parentRefs:
-    - name: private
+    - name: public-tunnel
       namespace: networking
   rules:
     - backendRefs:
