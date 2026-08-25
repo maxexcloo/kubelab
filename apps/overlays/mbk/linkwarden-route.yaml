@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: linkwarden
+  namespace: linkwarden
+  annotations:
+    gethomepage.dev/description: Bookmark Manager
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Applications
+    gethomepage.dev/href: https://links.excloo.com
+    gethomepage.dev/icon: linkwarden
+    gethomepage.dev/name: Linkwarden
+  labels:
+    app.kubernetes.io/name: linkwarden
+spec:
+  hostnames:
+    - links.excloo.com
+  parentRefs:
+    - name: private
+      namespace: networking
+  rules:
+    - backendRefs:
+        - name: linkwarden
+          port: 3000

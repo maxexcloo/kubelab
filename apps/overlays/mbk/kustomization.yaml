@@ -11,6 +11,7 @@ resources:
   - ../../base/comfy-control
   - ../../base/homepage
   - ../../base/larapaper
+  - ../../base/linkwarden
   - ../../base/miniflux
   - ../../base/openspeedtest
   - ../../base/papra
@@ -25,6 +26,7 @@ resources:
   - comfy-control-route.yaml
   - homepage-route.yaml
   - larapaper-route.yaml
+  - linkwarden-route.yaml
   - miniflux-route.yaml
   - papra-route.yaml
   - route.yaml
