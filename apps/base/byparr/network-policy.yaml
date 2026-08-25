@@ -14,6 +14,12 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: traefik
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: shelfmark
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: shelfmark
       ports:
         - port: 8191
           protocol: TCP

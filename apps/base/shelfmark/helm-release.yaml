@@ -88,6 +88,10 @@ spec:
         type: persistentVolumeClaim
         globalMounts:
           - path: /config
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /var/log/shelfmark
       temporary:
         type: emptyDir
         globalMounts:
