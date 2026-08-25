@@ -8,3 +8,4 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - persistent-volume-claim.yaml
+  - resend.yaml

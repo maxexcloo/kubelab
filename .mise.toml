@@ -34,7 +34,7 @@ run = "scripts/bootstrap_flux.sh"
 wait_for = ["bootstrap-secrets"]
 
 [tasks.bootstrap-secrets]
-description = "Bootstrap 1Password Connect credentials for a cluster"
+description = "Bootstrap cluster controller credentials"
 run = "scripts/bootstrap_cluster_secrets.sh"
 wait_for = ["bootstrap-cilium"]
 

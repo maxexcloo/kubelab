@@ -30,11 +30,13 @@ rebuild or reach a cluster while Kubernetes is unavailable.
 - `apps/`: workload bases and cluster overlays.
 - `platform/`: cluster controllers and shared configuration.
 
-Use standard Kubernetes configuration directly. Do not add a custom application
-schema, generator, operator, generated manifest, or repository-defined resource
-type. Use Kustomize only for composition and small patches; do not use
-`configMapGenerator` or `secretGenerator`. Keep chart values directly in the
-upstream Flux `HelmRelease` that consumes them.
+Use standard Kubernetes configuration directly. Do not add a general application
+schema, generator, operator, or generated manifest. A narrow repository-defined
+resource is acceptable when it materially removes repeated security or lifecycle
+integration logic; document the contract in `PLAN.md` and compose standard
+resources underneath. Use Kustomize only for composition and small patches; do
+not use `configMapGenerator` or `secretGenerator`. Keep chart values directly in
+the upstream Flux `HelmRelease` that consumes them.
 
 Keep root Markdown limited to `AGENTS.md`, `README.md`, and `PLAN.md`. Put later
 operational documentation under `docs/`.

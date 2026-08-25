@@ -1,17 +1,17 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: apps
+  name: automation
   namespace: flux-system
 spec:
   interval: 30m
-  path: ./apps/overlays/mbk
+  path: ./platform/automation/resend
   prune: true
   retryInterval: 2m
   timeout: 10m
   wait: true
   dependsOn:
-    - name: automation
+    - name: platform
   sourceRef:
     kind: GitRepository
     name: flux-system

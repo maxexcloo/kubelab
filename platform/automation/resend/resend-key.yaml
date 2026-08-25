@@ -1,0 +1,140 @@
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: ClusterProviderConfig
+metadata:
+  name: resend
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      key: authorization
+      name: resend-credentials
+      namespace: crossplane-system
+---
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: resendkeys.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: resend-key
+  group: automation.excloo.dev
+  names:
+    kind: ResendKey
+    plural: resendkeys
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                displayName:
+                  maxLength: 40
+                  minLength: 1
+                  type: string
+              required: [displayName]
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: resend-key
+spec:
+  compositeTypeRef:
+    apiVersion: automation.excloo.dev/v1alpha1
+    kind: ResendKey
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: api-key
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: resend
+              spec:
+                deletionPolicy: Orphan
+                forProvider:
+                  expectedResponseCheck:
+                    logic: any(.response.body.data[]?; .name == .payload.body.name)
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                  mappings:
+                    - action: CREATE
+                      body: '{name: .payload.body.name, permission: .payload.body.permission}'
+                      url: .payload.baseUrl
+                    - action: OBSERVE
+                      url: .payload.baseUrl
+                  payload:
+                    baseUrl: https://api.resend.com/api-keys
+                    body: '{}'
+                  secretInjectionConfigs:
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.token
+                          secretKey: api-key
+                      secretRef:
+                        name: resend-api-key
+                        namespace: default
+                      setOwnerReference: true
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: resend
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: string
+                    string:
+                      fmt: '{"name":"cluster-mbk-%s","permission":"sending_access"}'
+                      type: Format
+          - name: onepassword-item
+            base:
+              apiVersion: external-secrets.io/v1alpha1
+              kind: PushSecret
+              metadata:
+                name: resend
+              spec:
+                data:
+                  - match:
+                      secretKey: api-key
+                      remoteRef:
+                        property: api-key-resend
+                        remoteKey: placeholder
+                    metadata:
+                      apiVersion: kubernetes.external-secrets.io/v1alpha1
+                      kind: PushSecretMetadata
+                      spec:
+                        tags: [Kubelab, Resend]
+                secretStoreRefs:
+                  - kind: ClusterSecretStore
+                    name: onepassword
+                selector:
+                  secret:
+                    name: resend-api-key
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.displayName
+                toFieldPath: spec.data[0].match.remoteRef.remoteKey

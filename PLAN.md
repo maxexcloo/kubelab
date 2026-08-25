@@ -24,6 +24,8 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 - **Substrate vs Workloads**: `homelab` (OpenTofu) owns everything required to reach or rebuild a cluster (VM, compute, OCI, Tailscale host extension, Cloudflare Tunnel credentials). `kubelab` (Flux) owns all in-cluster workloads and app-scoped integrations.
 - **Secret Contract**: 1Password is the root of trust. `homelab` owns cluster vaults and provisions each cluster's vault-scoped 1Password Connect credentials; `kubelab` owns their bootstrap delivery into Kubernetes, the in-cluster Connect deployment, workload credential definitions, generation, and delivery. External Secrets Operator uses the local Connect service to materialise cluster Secrets. Zero secrets in Git.
 - **Secret Automation**: Every workload credential is generated or obtained by its declarative owner and written to 1Password automatically before delivery to the workload. Only cluster bootstrap credentials require operator-provided secret material; no workload may depend on a manually created 1Password item.
+- **Workload Items**: Use one display-named 1Password item per workload, tagged `Kubelab`. Use native username, password, and website fields where they apply. Sort custom fields alphabetically and name compound fields by grouping first, such as `api-key-resend` and `database-password`.
+- **Purposeful APIs**: Repository-defined resources are acceptable when one small, workload-owned declaration replaces repeated integration logic and centralises security or lifecycle behaviour. Keep their scope narrow and use standard composed resources underneath.
 - **Application DNS**: ExternalDNS owns explicitly labelled application records from Gateway API routes. OpenTofu owns cluster tunnel and direct-public targets. ExternalDNS adopts existing application records during cutover and uses upsert-only reconciliation.
 - **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns compatible app-scoped external APIs (Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
 - **Storage Contract**: Both clusters use node-local `local-path` volumes only for replaceable state. `mbk` uses the `truenas-nfs` storage class backed by the cluster-scoped `truenas-nvme/clusters/mbk` NFS export for general retained data. Existing standalone datasets use allow-listed exports and retained static volumes. Databases run on CloudNativePG unless an official chart provides a simpler supported model; durable high-performance block storage requires a separately reviewed CSI evaluation.
@@ -47,9 +49,10 @@ must enforce this order:
    Flux resources, installs Cilium when Flux does not yet manage it, preserves
    Flux ownership otherwise, and waits for the nodes to become ready.
 2. `bootstrap-secrets` waits for `bootstrap-cilium`, but does not depend on it.
-   It reads the cluster's provisioned 1Password Connect credentials from the
-   `Homelab` vault and applies the bootstrap Secret without storing secret
-   values in Git or files outside a restrictive temporary file.
+   It reads controller credentials from the `Homelab` vault and applies the
+   bootstrap Secrets without storing secret values in Git or files outside a
+   restrictive temporary file. 1Password Connect is required on every cluster;
+   optional controller credentials are discovered from the cluster overlay.
 3. `bootstrap-flux` waits for `bootstrap-secrets`, but does not depend on it. It
    derives the VictoriaMetrics chart and repository from the committed Flux
    resources, installs the required CRDs, applies
@@ -86,9 +89,9 @@ source. Flux remains the sole routine deployer for Kubernetes resources.
 
 ## Migration Phases
 
-Phase 1 foundations are complete. Crossplane remains installed without a
-managed resource until a compatible app-scoped API is required. Phase 2 has
-started with Anisette and Redlib on `syd`; Byparr runs on `mbk`. OpenSpeedTest
+Phase 1 foundations are complete. Crossplane manages sending-only Resend keys
+for present mail-capable workloads on `mbk`. Phase 2 has started with Anisette
+and Redlib on `syd`; Byparr runs on `mbk`. OpenSpeedTest
 is implemented on both clusters. Actual Budget, Beszel, Bichon, Bifrost,
 CLIProxyAPI, and Comfy Control are cut over on `mbk`, Homepage is reconciled on
 `mbk`, Beszel agents are reconciled on both clusters, BookOrbit is cut over,
@@ -138,7 +141,7 @@ mistaken for a completed migration:
 
 1. **Observability — Complete**: VictoriaMetrics, VictoriaLogs, and Grafana run on `mbk` and `syd` for cluster metrics and logs (replacing Dozzle).
 2. **ExternalDNS Automation — Complete**: ExternalDNS runs on both clusters. Application records are opt-in, Cloudflare-scoped, adopt existing records during cutover, and are upsert-only.
-3. **Crossplane Automation — Foundation Complete**: Crossplane and `provider-http` run on `mbk`. Keep the provider idle until a compatible low-risk app-scoped resource is required; default every future resource to orphan-on-delete.
+3. **Crossplane Automation — Active**: Crossplane and `provider-http` run on `mbk`. Resend uses one full-access bootstrap credential per cluster, named `Resend: <cluster>` in the `Homelab` vault, and separate sending-only workload keys; default every managed resource to orphan-on-delete.
 4. **Storage Evaluation — Trial Ready**: `democratic-csi` is unsuitable for TrueNAS 26 because its TrueNAS integration depends on the removed REST API or privileged SSH. Trial the official WebSocket-based TrueNAS CSI driver on `mbk`; retain NFS as the production default until provisioning, retention, snapshots, recovery, and upgrades pass. See [`docs/storage.md`](docs/storage.md).
 
 ### Phase 2: Workload Migration (Dependency Order)
@@ -256,7 +259,7 @@ For every stateful service:
 | Global Tailscale ACLs/grants and tag owners     | Foundations OpenTofu                      | Reviewed saved plan only       |
 | OCI network, image, NSG, and `hsp` VM           | OpenTofu                                  | Reviewed saved plan only       |
 | Pocket ID app clients and groups                | Direct Crossplane provider-http resources | Orphan                         |
-| Resend app keys                                 | Direct Crossplane provider-http resources | Orphan                         |
+| Resend app keys                                 | Crossplane `ResendKey` composition         | Orphan                         |
 | Retained appliance Tailscale identities         | Appliance owner                           | Explicit appliance procedure   |
 | Tailscale operator OAuth clients                | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
 | Talos-node Tailscale bootstrap identities       | Cluster-specific OpenTofu                 | Reviewed saved plan only       |

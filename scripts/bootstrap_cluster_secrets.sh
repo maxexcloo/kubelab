@@ -33,3 +33,20 @@ env -u OP_CONNECT_HOST -u OP_CONNECT_TOKEN \
     --from-file=token=/dev/stdin \
     --dry-run=client -o yaml |
   kubectl --context "${cluster}" apply -f -
+
+if rg -q 'path: ./platform/automation/resend' "${repository_dir}/clusters/${cluster}/automation.yaml" 2>/dev/null; then
+  resend_credential="$(
+    env -u OP_CONNECT_HOST -u OP_CONNECT_TOKEN \
+      op item get --vault Homelab "Resend: ${cluster}" --format json |
+      jq -ejr 'first(.fields[] | select(.id == "credential")) | .value // empty'
+  )"
+
+  kubectl --context "${cluster}" create namespace crossplane-system --dry-run=client -o yaml |
+    kubectl --context "${cluster}" apply -f -
+
+  printf 'Bearer %s' "${resend_credential}" |
+    kubectl --context "${cluster}" -n crossplane-system create secret generic resend-credentials \
+      --from-file=authorization=/dev/stdin \
+      --dry-run=client -o yaml |
+    kubectl --context "${cluster}" apply -f -
+fi

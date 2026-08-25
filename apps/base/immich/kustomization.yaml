@@ -11,3 +11,4 @@ resources:
   - network-policy.yaml
   - persistent-volume-claim.yaml
   - persistent-volume.yaml
+  - resend.yaml
