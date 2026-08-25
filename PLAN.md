@@ -32,7 +32,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 - **Access Policy**: Cluster wildcard DNS always resolves to the corresponding Tailscale service IP. `Public` attaches to the dedicated tunnel or direct-public Gateway and opts into ExternalDNS; never repoint a cluster wildcard at a public target. `Internal` uses Tailscale through the private Gateway and wildcard DNS. `Private` has no application route. `None` has no network endpoint.
 - **State Protection**: Critical state uses retained NFS or CloudNativePG, daily snapshots, off-site backup, and application-native export where available. CloudNativePG databases write daily logical exports to retained NFS; validate the shared backup and restore mechanism once rather than repeating a restore drill during every workload cutover. Important state uses retained NFS and the Important backup tier. Replaceable state is reproducible from Git, 1Password, or upstream sources.
 - **Observability**: Every routed user interface receives a Homepage entry. Gatus remains an independent external monitor and is not a per-workload migration gate. Agents and backends are checked through their owning service.
-- **Rollback Window**: Old deployments remain stopped but recoverable for 7 days. Rollback restores previous routing and the final pre-migration snapshot/export. Previous configuration is removed only after new deployments are proven.
+- **Rollback Window**: Old deployments remain stopped but recoverable for 7 days. Rollback restores previous routing, the latest retained snapshot, and the final migration export. Previous configuration is removed only after new deployments are proven.
 
 ## Migration Phases
 
@@ -74,7 +74,7 @@ mistaken for a completed migration:
 | Comfy Control | Cut over      | Complete the rollback window                                         |
 | Homepage      | Reconciled    | Record cutover evidence                                              |
 | Larapaper     | Cut over      | Complete the rollback window                                         |
-| Linkwarden    | Reconciled    | Approve route cutover                                                |
+| Linkwarden    | Cut over      | Complete the rollback window                                         |
 | Miniflux      | Cut over      | Complete the rollback window                                         |
 | OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
 | Papra         | Cut over      | Complete the rollback window                                         |
@@ -118,8 +118,8 @@ Execute migrations with one pull request and cutover record per workload group:
 For every stateful service:
 
 1. Inspect the previous TrueNAS application and data through
-   `ssh root@kimbap`; export application data and take a final TrueNAS ZFS
-   snapshot.
+   `ssh root@kimbap`; export application data and rely on the scheduled
+   TrueNAS snapshot policy rather than creating a per-cutover snapshot.
 2. Deploy workload in Kubernetes; verify database, OIDC, mail, and storage connectivity before changing routing.
 3. Switch DNS / Cloudflare Tunnel route and observe live traffic in application or gateway logs.
 4. Keep the previous container stopped for the rollback window (7 days).
