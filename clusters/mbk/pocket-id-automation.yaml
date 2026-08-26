@@ -8,6 +8,7 @@ spec:
   path: ./apps/integrations/pocket-id
   prune: true
   retryInterval: 2m
+  suspend: true
   timeout: 10m
   dependsOn:
     - name: apps
