@@ -9,6 +9,7 @@ kubectl = "1.36.4"
 kustomize = "5.8.1"
 prek = "0.4.14"
 prettier = "3.9.6"
+python = "3.14.0"
 shellcheck = "0.11.0"
 yq = "4.53.6"
 
@@ -52,6 +53,7 @@ actionlint .github/workflows/*.yaml
 prettier --check .
 shellcheck scripts/*.sh
 scripts/check_manifests.sh
+python scripts/test_onepassword_items.py
 """
 
 [tasks.fmt]
