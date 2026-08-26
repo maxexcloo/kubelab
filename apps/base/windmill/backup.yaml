@@ -38,12 +38,14 @@ spec:
                 - name: PGDATABASE
                   value: windmill
                 - name: PGHOST
-                  value: windmill-postgresql
+                  value: windmill-database-rw
                 - name: PGPASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: password
                       name: windmill-database
+                - name: PGSSLMODE
+                  value: require
                 - name: PGUSER
                   value: windmill
               resources:

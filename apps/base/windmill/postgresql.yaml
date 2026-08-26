@@ -26,7 +26,7 @@ metadata:
     app.kubernetes.io/component: database
     app.kubernetes.io/name: windmill
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app.kubernetes.io/component: database
