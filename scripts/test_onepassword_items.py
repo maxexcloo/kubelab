@@ -40,9 +40,7 @@ def item_configuration(**overrides):
         "fields": set(),
         "generate": set(),
         "login": False,
-        "migrate": {},
         "namespaces": set(),
-        "remove": set(),
         "urls": set(),
     }
     configuration.update(overrides)
@@ -135,18 +133,23 @@ class ReconcilerTests(unittest.TestCase):
             "category": "SERVER",
             "fields": [
                 {"id": "password", "label": "password", "value": "edited"},
-                {"id": "old-token", "label": "old-token", "value": "migrated"},
+                {"id": "token", "label": "token", "value": "preserved"},
             ],
             "sections": [],
         }
         desired = item_configuration(
             constants={"database-username": "application"},
             defaults={"username": "admin"},
-            fields={"api-key", "database-username", "password", "token", "username"},
-            generate={"api-key", "password", "token"},
+            fields={
+                "api-key",
+                "database-password",
+                "database-username",
+                "password",
+                "token",
+                "username",
+            },
+            generate={"api-key", "database-password", "password", "token"},
             login=True,
-            migrate={"old-token": "token"},
-            remove={"old-token"},
             urls={"https://application.excloo.com"},
         )
         result = RECONCILER.normalise_item(current, "Application", desired, "vault")
@@ -155,14 +158,20 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(result["tags"], ["Kubelab"])
         self.assertEqual(result["urls"], [{"href": "https://application.excloo.com", "primary": True}])
         self.assertEqual(fields["password"]["value"], "edited")
-        self.assertEqual(fields["token"]["value"], "migrated")
+        self.assertEqual(fields["token"]["value"], "preserved")
         self.assertEqual(fields["username"]["value"], "admin")
         self.assertEqual(fields["database-username"]["value"], "application")
         self.assertTrue(fields["api-key"]["generate"])
-        self.assertNotIn("old-token", fields)
         self.assertEqual(
             [field["label"] for field in result["fields"]],
-            ["username", "password", "database-username", "api-key", "token"],
+            [
+                "username",
+                "password",
+                "database-username",
+                "database-password",
+                "api-key",
+                "token",
+            ],
         )
 
 
