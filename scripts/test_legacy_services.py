@@ -229,7 +229,7 @@ class LegacyServiceTests(unittest.TestCase):
             self.assertRegex(inventory, rf"(?m)^\|\s*`{re.escape(hostname)}`\s*\|")
 
     def test_b2_adopts_bucket_and_observes_nonrecoverable_key(self):
-        beszel = rendered_resources("apps/base/beszel")
+        beszel = rendered_resources("apps/integrations/b2")
         object_storage = resource_by_name(
             beszel, "ExternalSecret", "beszel-object-storage"
         )
@@ -257,7 +257,9 @@ class LegacyServiceTests(unittest.TestCase):
             ["LateInitialize", "Observe", "Update"],
         )
         self.assertEqual(key["spec"]["managementPolicies"], ["Observe"])
-        for resource in resources:
+        for resource in (
+            candidate for candidate in resources if candidate["kind"] == "Request"
+        ):
             actions = {
                 mapping["action"]
                 for mapping in resource["spec"]["forProvider"]["mappings"]

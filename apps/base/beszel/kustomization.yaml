@@ -5,6 +5,5 @@ resources:
   - helm-release.yaml
   - namespace.yaml
   - network-policy.yaml
-  - object-storage-secret.yaml
   - persistent-volume-claim.yaml
   - resend.yaml
