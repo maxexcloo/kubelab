@@ -38,6 +38,7 @@ done <"${target_file}"
 
 while IFS=$'\t' read -r xrd_group xrd_kind xrd_version; do
   mkdir -p "${schema_directory}/${xrd_group}"
+  xrd_resource_kind="$(printf '%s' "${xrd_kind}" | tr '[:upper:]' '[:lower:]')"
   # shellcheck disable=SC2016
   KUBELAB_XRD_GROUP="${xrd_group}" \
     KUBELAB_XRD_KIND="${xrd_kind}" \
@@ -68,7 +69,7 @@ while IFS=$'\t' read -r xrd_group xrd_kind xrd_version; do
       .required = (((.required // []) + ["apiVersion", "kind", "metadata"]) | unique) |
       .additionalProperties = false |
       ."$schema" = "https://json-schema.org/draft/2020-12/schema"
-    ' "${manifest_directory}"/*.yaml >"${schema_directory}/${xrd_group}/${xrd_kind}_${xrd_version}.json"
+    ' "${manifest_directory}"/*.yaml >"${schema_directory}/${xrd_group}/${xrd_resource_kind}_${xrd_version}.json"
 done < <(
   # shellcheck disable=SC2016
   yq eval-all -N -r '
