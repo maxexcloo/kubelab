@@ -4,6 +4,7 @@ metadata:
   name: immich
   namespace: immich
   annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
     gethomepage.dev/description: Photo and Video Library
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Applications
@@ -12,6 +13,7 @@ metadata:
     gethomepage.dev/name: Immich
   labels:
     app.kubernetes.io/name: immich
+    gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:
     - photos.excloo.com
