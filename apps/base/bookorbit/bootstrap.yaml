@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookorbit-bootstrap
+  namespace: bookorbit
+data:
+  bootstrap.py: |
+    import json
+    import os
+    import urllib.error
+    import urllib.request
+
+    base_url = "http://bookorbit:3000/api/v1/auth"
+    try:
+        with urllib.request.urlopen(f"{base_url}/setup-status", timeout=10) as response:
+            if not json.load(response)["needsSetup"]:
+                print("BookOrbit is already initialised")
+                raise SystemExit
+    except urllib.error.URLError:
+        print("BookOrbit is not available; bootstrap deferred")
+        raise SystemExit
+    body = json.dumps(
+        {
+            "email": os.environ["LOGIN_EMAIL"],
+            "name": "Admin",
+            "password": os.environ["LOGIN_PASSWORD"],
+            "username": os.environ["LOGIN_USERNAME"],
+        }
+    ).encode()
+    request = urllib.request.Request(
+        f"{base_url}/setup",
+        data=body,
+        headers={
+            "Content-Type": "application/json",
+            "x-setup-token": os.environ["SETUP_BOOTSTRAP_TOKEN"],
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=30):
+        print("Created BookOrbit administrator")
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: bookorbit-bootstrap
+  namespace: bookorbit
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  schedule: "37 * * * *"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/component: bootstrap
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          containers:
+            - name: bootstrap
+              image: docker.io/library/python:3.14.0-alpine3.22@sha256:8373231e1e906ddfb457748bfc032c4c06ada8c759b7b62d9c73ec2a3c56e710
+              command: [python, /app/bootstrap.py]
+              envFrom:
+                - secretRef:
+                    name: bookorbit
+              resources:
+                limits:
+                  memory: 64Mi
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsGroup: 65532
+                runAsNonRoot: true
+                runAsUser: 65532
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - mountPath: /app
+                  name: script
+                  readOnly: true
+                - mountPath: /tmp
+                  name: temporary
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - configMap:
+                name: bookorbit-bootstrap
+              name: script
+            - emptyDir: {}
+              name: temporary

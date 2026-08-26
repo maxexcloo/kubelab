@@ -1,0 +1,175 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: windmill-login
+  namespace: windmill
+  annotations:
+    onepassword.excloo.dev/defaults: '{"username":"admin@excloo.com"}'
+    onepassword.excloo.dev/generate-fields: password
+    onepassword.excloo.dev/login: "true"
+spec:
+  data:
+    - remoteRef:
+        key: Windmill
+        property: username
+      secretKey: username
+    - remoteRef:
+        key: Windmill
+        property: password
+      secretKey: password
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: windmill-login
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: windmill-bootstrap
+  namespace: windmill
+data:
+  bootstrap.py: |
+    import json
+    import os
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    base_url = "http://windmill-app:8000/api"
+
+
+    def call(path, *, body=None, token=None, method="POST"):
+        data = None if body is None else json.dumps(body).encode()
+        headers = {"Content-Type": "application/json"}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        request = urllib.request.Request(
+            f"{base_url}{path}",
+            data=data,
+            headers=headers,
+            method=method,
+        )
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return response.read().decode()
+
+
+    username = os.environ["USERNAME"]
+    password = os.environ["PASSWORD"]
+    try:
+        token = call("/auth/login", body={"email": username, "password": password})
+        try:
+            call(
+                f"/users/delete/{urllib.parse.quote('admin@windmill.dev', safe='')}",
+                method="DELETE",
+                token=token,
+            )
+        except urllib.error.HTTPError as error:
+            if error.code not in {400, 404}:
+                raise
+        print("Windmill administrator is already configured")
+        raise SystemExit
+    except urllib.error.URLError:
+        pass
+    try:
+        token = call(
+            "/auth/login",
+            body={"email": "admin@windmill.dev", "password": "changeme"},
+        )
+    except urllib.error.URLError:
+        print("Windmill is unavailable or already configured; bootstrap deferred")
+        raise SystemExit
+    try:
+        call(
+            "/users/create",
+            body={
+                "email": username,
+                "name": "Admin",
+                "password": password,
+                "skip_email": True,
+                "super_admin": True,
+            },
+            token=token,
+        )
+    except urllib.error.HTTPError as error:
+        if error.code not in {400, 409}:
+            raise
+    token = call("/auth/login", body={"email": username, "password": password})
+    try:
+        call(
+            f"/users/delete/{urllib.parse.quote('admin@windmill.dev', safe='')}",
+            method="DELETE",
+            token=token,
+        )
+    except urllib.error.HTTPError as error:
+        if error.code not in {400, 404}:
+            raise
+    print("Configured Windmill administrator")
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: windmill-bootstrap
+  namespace: windmill
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  schedule: "31 * * * *"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/component: bootstrap
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          containers:
+            - name: bootstrap
+              image: docker.io/library/python:3.14.0-alpine3.22@sha256:8373231e1e906ddfb457748bfc032c4c06ada8c759b7b62d9c73ec2a3c56e710
+              command: [python, /app/bootstrap.py]
+              env:
+                - name: PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: windmill-login
+                - name: USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: username
+                      name: windmill-login
+              resources:
+                limits:
+                  memory: 64Mi
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsGroup: 65532
+                runAsNonRoot: true
+                runAsUser: 65532
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - mountPath: /app
+                  name: script
+                  readOnly: true
+                - mountPath: /tmp
+                  name: temporary
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - configMap:
+                name: windmill-bootstrap
+              name: script
+            - emptyDir: {}
+              name: temporary

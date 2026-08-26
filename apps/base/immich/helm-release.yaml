@@ -21,7 +21,6 @@ spec:
               DB_HOSTNAME: immich-database-rw
               DB_PORT: "5432"
               DB_SSL_MODE: require
-              DB_USERNAME: immich
               DB_VECTOR_EXTENSION: vectorchord
               IMMICH_LOG_FORMAT: json
               TZ: Australia/Sydney
@@ -29,6 +28,11 @@ spec:
                 valueFrom:
                   secretKeyRef:
                     key: password
+                    name: immich-database
+              DB_USERNAME:
+                valueFrom:
+                  secretKeyRef:
+                    key: username
                     name: immich-database
             securityContext:
               allowPrivilegeEscalation: false

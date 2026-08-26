@@ -25,6 +25,9 @@ spec:
               APP_URL: https://beszel.mbk.excloo.dev
               TZ: Australia/Sydney
               USER_CREATION: "true"
+            envFrom:
+              - secretRef:
+                  name: beszel
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/henrygd/beszel/beszel

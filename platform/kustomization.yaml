@@ -12,6 +12,7 @@ resources:
   - observability
   - secrets/external-secrets
   - secrets/onepassword-connect
+  - secrets/onepassword-items
   - sources/bifrost
   - sources/bjw-s
   - sources/cert-manager

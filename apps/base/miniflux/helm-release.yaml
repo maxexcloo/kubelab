@@ -23,6 +23,7 @@ spec:
           miniflux:
             env:
               BASE_URL: https://reader.excloo.com
+              CREATE_ADMIN: "1"
               OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://id.excloo.com
               OAUTH2_OIDC_PROVIDER_NAME: Excloo ID
               OAUTH2_PROVIDER: oidc
