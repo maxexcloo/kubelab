@@ -6,7 +6,6 @@ metadata:
   annotations:
     onepassword.excloo.dev/defaults: '{"username":"admin@excloo.com"}'
     onepassword.excloo.dev/generate-fields: password
-    onepassword.excloo.dev/login: "true"
 spec:
   data:
     - remoteRef:

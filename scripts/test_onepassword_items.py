@@ -85,7 +85,6 @@ class ReconcilerTests(unittest.TestCase):
                 "metadata": {
                     "annotations": {
                         "onepassword.excloo.dev/generate-fields": "api-key,password",
-                        "onepassword.excloo.dev/login": "true",
                     },
                     "name": "comfy-control",
                     "namespace": "comfy-control",
@@ -123,6 +122,7 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(desired["Comfy Control"]["urls"], {"https://comfy.excloo.com"})
         self.assertTrue(desired["Comfy Control"]["login"])
         self.assertEqual(desired["CLIProxyAPI"]["namespaces"], set())
+        self.assertFalse(desired["CLIProxyAPI"]["login"])
 
     def test_homelab_tag_defines_external_ownership(self):
         self.assertTrue(RECONCILER.externally_owned({"tags": ["Homelab"]}))
