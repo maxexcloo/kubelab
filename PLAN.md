@@ -102,7 +102,7 @@ and Redlib on `syd`; Byparr runs on `mbk`. OpenSpeedTest
 is implemented on both clusters. Actual Budget, Beszel, Bichon, Bifrost,
 CLIProxyAPI, and Comfy Control are cut over on `mbk`, Homepage is reconciled on
 `mbk`, Beszel agents are reconciled on both clusters, BookOrbit is cut over,
-Shelfmark is reconciled, and Windmill is implemented on `mbk`.
+and Shelfmark is reconciled.
 
 ### Progress States
 
@@ -141,7 +141,6 @@ mistaken for a completed migration:
 | Papra         | Cut over      | Complete the rollback window                                         |
 | Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
 | Shelfmark     | Reconciled    | Record cutover evidence and the rollback window                      |
-| Windmill      | Implemented   | Reconcile CNPG and backups, then restore and switch the database     |
 
 ### Phase 1: Observability & Dynamic Automation
 
@@ -166,10 +165,7 @@ Execute migrations with one pull request and cutover record per workload group:
    Bichon, Bifrost, CLIProxyAPI, Comfy Control, Larapaper, and Papra are cut
    over on `mbk`.
 4. **Databases & Media Libraries — In Progress**: Miniflux, Linkwarden, and
-   BookOrbit are cut over; Shelfmark is reconciled. Windmill has a staged
-   CloudNativePG target and retained logical export alongside its active
-   database. Stop Windmill writers and take a final export before switching its
-   internal database endpoint.
+   BookOrbit are cut over; Shelfmark is reconciled.
    - CloudNativePG operator for PostgreSQL instances.
    - `miniflux` (Postgres).
    - `linkwarden` (Postgres + storage).
@@ -236,7 +232,6 @@ For every stateful service:
 | Tailscale Kubernetes operator | `homelab` and target repositories      | Both clusters                | Replace       | Private  | Flux-owned operator; OAuth client, tags, and policy stay in OpenTofu |
 | Traefik                       | `homelab-docker` and `homelab-truenas` | Both clusters                | Replace       | Private  | Gateway API implementation for internal and public routes            |
 | VictoriaMetrics               | `homelab-truenas`                      | Both clusters                | Replace       | Internal | Replaceable platform metrics; home is primary                        |
-| Windmill                      | None                                   | `mbk`                        | Deploy        | Internal | Critical PostgreSQL with staged CNPG migration and retained exports  |
 
 ### Retained Appliances and Substrate
 
