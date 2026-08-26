@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - external-secret.yaml
   - helm-release.yaml
+  - namespace.yaml
   - vm-service-scrape.yaml

@@ -4,5 +4,6 @@ namespace: headlamp
 resources:
   - cluster-role-binding.yaml
   - helm-release.yaml
+  - namespace.yaml
   - network-policy.yaml
   - service-account.yaml
