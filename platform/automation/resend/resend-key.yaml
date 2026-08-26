@@ -75,12 +75,12 @@ spec:
                     - action: OBSERVE
                       url: .payload.baseUrl
                     - action: UPDATE
-                      body: '{name: .payload.body.name, permission: .payload.body.permission}'
+                      body: "{name: .payload.body.name, permission: .payload.body.permission}"
                       method: POST
                       url: .payload.baseUrl
                   payload:
                     baseUrl: https://api.resend.com/api-keys
-                    body: '{}'
+                    body: "{}"
                   secretInjectionConfigs:
                     - keyMappings:
                         - missingFieldStrategy: preserve
@@ -125,7 +125,7 @@ spec:
                       apiVersion: kubernetes.external-secrets.io/v1alpha1
                       kind: PushSecretMetadata
                       spec:
-                        tags: [Kubelab, Resend]
+                        tags: [Kubelab]
                 secretStoreRefs:
                   - kind: ClusterSecretStore
                     name: onepassword

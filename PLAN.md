@@ -24,7 +24,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 - **Substrate vs Workloads**: `homelab` (OpenTofu) owns everything required to reach or rebuild a cluster (VM, compute, OCI, Tailscale host extension, Cloudflare Tunnel credentials). `kubelab` (Flux) owns all in-cluster workloads and app-scoped integrations.
 - **Secret Contract**: 1Password is the root of trust. `homelab` owns cluster vaults and provisions each cluster's vault-scoped 1Password Connect credentials; `kubelab` owns their bootstrap delivery into Kubernetes, the in-cluster Connect deployment, workload credential definitions, generation, and delivery. External Secrets Operator uses the local Connect service to materialise cluster Secrets. Zero secrets in Git.
 - **Secret Automation**: Every workload credential is generated or obtained by its declarative owner and written to 1Password automatically before delivery to the workload. Only cluster bootstrap credentials require operator-provided secret material; no workload may depend on a manually created 1Password item.
-- **Workload Items**: Use one display-named 1Password item per workload, tagged `Kubelab`. Use native username, password, and website fields where they apply. Sort custom fields alphabetically and name compound fields by grouping first, such as `api-key-resend` and `database-password`.
+- **Workload Items**: Use one display-named 1Password item per workload. The cluster vault carries scope; tag Kubernetes-created items only with `Kubelab`. Use native username, password, and website fields where they apply. Sort custom fields alphabetically and name compound fields by grouping first, such as `api-key-resend` and `database-password`.
 - **Purposeful APIs**: Repository-defined resources are acceptable when one small, workload-owned declaration replaces repeated integration logic and centralises security or lifecycle behaviour. Keep their scope narrow and use standard composed resources underneath.
 - **Application DNS**: ExternalDNS owns explicitly labelled application records from Gateway API routes. OpenTofu owns cluster tunnel and direct-public targets. ExternalDNS adopts existing application records during cutover and uses upsert-only reconciliation.
 - **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns compatible app-scoped external APIs (Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
@@ -259,7 +259,7 @@ For every stateful service:
 | Global Tailscale ACLs/grants and tag owners     | Foundations OpenTofu                      | Reviewed saved plan only       |
 | OCI network, image, NSG, and `hsp` VM           | OpenTofu                                  | Reviewed saved plan only       |
 | Pocket ID app clients and groups                | Direct Crossplane provider-http resources | Orphan                         |
-| Resend app keys                                 | Crossplane `ResendKey` composition         | Orphan                         |
+| Resend app keys                                 | Crossplane `ResendKey` composition        | Orphan                         |
 | Retained appliance Tailscale identities         | Appliance owner                           | Explicit appliance procedure   |
 | Tailscale operator OAuth clients                | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
 | Talos-node Tailscale bootstrap identities       | Cluster-specific OpenTofu                 | Reviewed saved plan only       |
