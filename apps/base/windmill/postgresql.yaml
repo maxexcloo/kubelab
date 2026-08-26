@@ -71,11 +71,11 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:
+            limits:
+              memory: 2Gi
             requests:
               cpu: 100m
               memory: 256Mi
-            limits:
-              memory: 2Gi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

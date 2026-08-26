@@ -43,11 +43,11 @@ spec:
           runAsNonRoot: true
           runAsUser: 1000
         resources:
+          limits:
+            memory: 1Gi
           requests:
             cpu: 100m
             memory: 256Mi
-          limits:
-            memory: 1Gi
       windmillExtra:
         containerSecurityContext:
           allowPrivilegeEscalation: false
@@ -60,11 +60,11 @@ spec:
           runAsNonRoot: true
           runAsUser: 1000
         resources:
+          limits:
+            memory: 512Mi
           requests:
             cpu: 50m
             memory: 128Mi
-          limits:
-            memory: 512Mi
       workerGroups:
         - name: default
           disableUnsharePid: true
@@ -81,8 +81,8 @@ spec:
             runAsNonRoot: true
             runAsUser: 1000
           resources:
+            limits:
+              memory: 2Gi
             requests:
               cpu: 250m
               memory: 512Mi
-            limits:
-              memory: 2Gi

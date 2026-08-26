@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: windmill-backup
+  namespace: windmill
+  labels:
+    app.kubernetes.io/component: backup
+    app.kubernetes.io/name: windmill
+spec:
+  schedule: "45 3 * * *"
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/component: backup
+            app.kubernetes.io/name: windmill
+        spec:
+          automountServiceAccountToken: false
+          containers:
+            - name: backup
+              image: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie@sha256:7497531472a822f5f49b701f9d5f7f6735e8d139a35f534cd540bf5dd6c63d29
+              imagePullPolicy: IfNotPresent
+              command:
+                - /usr/bin/sh
+                - -c
+                - |-
+                  set -eu
+                  timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+                  target="/backup/windmill-${timestamp}.dump"
+                  pg_dump --file="$target" --format=custom --no-owner --no-privileges
+                  pg_restore --list "$target" >/dev/null
+                  find /backup -type f -name 'windmill-*.dump' -mtime +27 -delete
+              env:
+                - name: PGDATABASE
+                  value: windmill
+                - name: PGHOST
+                  value: windmill-postgresql
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: windmill-database
+                - name: PGUSER
+                  value: windmill
+              resources:
+                limits:
+                  memory: 256Mi
+                requests:
+                  cpu: 20m
+                  memory: 64Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          restartPolicy: Never
+          securityContext:
+            fsGroup: 26
+            fsGroupChangePolicy: OnRootMismatch
+            runAsGroup: 26
+            runAsNonRoot: true
+            runAsUser: 26
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: backup
