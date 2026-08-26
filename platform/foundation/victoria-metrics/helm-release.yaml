@@ -1,0 +1,218 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics-k8s-stack
+  namespace: observability
+spec:
+  interval: 30m
+  releaseName: victoria-metrics-k8s-stack
+  chart:
+    spec:
+      chart: victoria-metrics-k8s-stack
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: victoria-metrics
+        namespace: flux-system
+      version: 0.91.0
+  dependsOn:
+    - name: local-path-provisioner
+      namespace: storage
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+  values:
+    alertmanager:
+      enabled: false
+    coreDns:
+      enabled: true
+    defaultDashboards:
+      enabled: false
+    defaultRules:
+      enabled: false
+    grafana:
+      automountServiceAccountToken: false
+      enabled: true
+      plugins: [victoriametrics-logs-datasource@0.31.0]
+      containerSecurityContext:
+        readOnlyRootFilesystem: true
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+            - name: VictoriaLogs
+              access: proxy
+              isDefault: false
+              type: victoriametrics-logs-datasource
+              uid: VictoriaLogs
+              url: http://vlsingle-victoria-metrics-k8s-stack.observability.svc:9428
+            - name: VictoriaMetrics
+              access: proxy
+              isDefault: true
+              type: prometheus
+              uid: VictoriaMetrics
+              url: http://vmsingle-victoria-metrics-k8s-stack.observability.svc:8428
+      extraEmptyDirMounts:
+        - name: tmp
+          mountPath: /tmp
+      grafana.ini:
+        analytics:
+          check_for_updates: false
+          reporting_enabled: false
+        security:
+          disable_gravatar: true
+        users:
+          default_theme: system
+      initChownData:
+        enabled: false
+      persistence:
+        accessModes: [ReadWriteOnce]
+        enabled: true
+        size: 1Gi
+        storageClassName: local-path
+        type: pvc
+      rbac:
+        create: false
+        namespaced: true
+      resources:
+        limits:
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+      sidecar:
+        dashboards:
+          enabled: false
+        datasources:
+          enabled: false
+    kube-state-metrics:
+      collectors:
+        [
+          cronjobs,
+          daemonsets,
+          deployments,
+          endpoints,
+          endpointslices,
+          horizontalpodautoscalers,
+          ingresses,
+          jobs,
+          leases,
+          limitranges,
+          namespaces,
+          networkpolicies,
+          nodes,
+          persistentvolumeclaims,
+          persistentvolumes,
+          poddisruptionbudgets,
+          pods,
+          replicasets,
+          replicationcontrollers,
+          resourcequotas,
+          services,
+          statefulsets,
+          storageclasses,
+          validatingwebhookconfigurations,
+          volumeattachments,
+        ]
+      enabled: true
+      resources:
+        limits:
+          memory: 128Mi
+        requests:
+          cpu: 20m
+          memory: 32Mi
+    kubeApiServer:
+      enabled: true
+    kubeControllerManager:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    prometheus-node-exporter:
+      enabled: false
+    syncJob:
+      enabled: false
+    victoria-metrics-operator:
+      watchNamespaces: [observability, observability-node]
+      crds:
+        cleanup:
+          enabled: false
+      env:
+        - name: VM_ENABLESTRICTSECURITY
+          value: "true"
+      operator:
+        disable_prometheus_converter: true
+      podSecurityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      resources:
+        limits:
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+    vlagent:
+      enabled: true
+      namespaceOverride: observability-node
+      spec:
+        useStrictSecurity: true
+        k8sCollector:
+          enabled: true
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+    vlsingle:
+      enabled: true
+      spec:
+        retentionPeriod: 7d
+        useStrictSecurity: true
+        extraArgs:
+          memory.allowedPercent: "40"
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
+        storage:
+          accessModes: [ReadWriteOnce]
+          storageClassName: local-path
+          resources:
+            requests:
+              storage: 10Gi
+    vmagent:
+      enabled: true
+      spec:
+        useStrictSecurity: true
+        externalLabels:
+          cluster: _
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+    vmalert:
+      enabled: false
+    vmsingle:
+      enabled: true
+      spec:
+        retentionPeriod: 7d
+        useStrictSecurity: true
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        storage:
+          accessModes: [ReadWriteOnce]
+          storageClassName: local-path
+          resources:
+            requests:
+              storage: 10Gi

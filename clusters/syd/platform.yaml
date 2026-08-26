@@ -11,7 +11,7 @@ spec:
   timeout: 10m
   wait: true
   dependsOn:
-    - name: crds
+    - name: foundation
   sourceRef:
     kind: GitRepository
     name: flux-system

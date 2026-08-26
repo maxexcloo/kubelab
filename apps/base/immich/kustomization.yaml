@@ -12,3 +12,4 @@ resources:
   - persistent-volume-claim.yaml
   - persistent-volume.yaml
   - resend.yaml
+  - source.yaml

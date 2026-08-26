@@ -9,7 +9,7 @@ fi
 cluster="$1"
 repository_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 release_file="${repository_dir}/platform/networking/cilium/helm-release.yaml"
-repository_file="${repository_dir}/platform/sources/cilium/helm-repository.yaml"
+repository_file="${repository_dir}/platform/sources/cilium.yaml"
 
 if [[ ! -d "${repository_dir}/clusters/${cluster}" ]]; then
   echo "error: cluster '${cluster}' is not defined under clusters/." >&2

@@ -4,5 +4,6 @@ resources:
   - apps.yaml
   - automation.yaml
   - crds.yaml
+  - foundation.yaml
   - flux-system
   - platform.yaml

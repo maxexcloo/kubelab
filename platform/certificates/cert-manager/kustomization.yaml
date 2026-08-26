@@ -4,4 +4,3 @@ namespace: cert-manager
 resources:
   - cluster-issuer.yaml
   - external-secret.yaml
-  - helm-release.yaml

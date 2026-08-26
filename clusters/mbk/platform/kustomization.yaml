@@ -4,15 +4,11 @@ resources:
   - ../../../platform
   - ../../../platform/automation/crossplane
   - ../../../platform/databases/cloudnative-pg
-  - ../../../platform/sources/cloudnative-pg
-  - ../../../platform/sources/crossplane
-  - ../../../platform/sources/nfs-subdir-external-provisioner
   - ../../../platform/storage/truenas-nfs
   - certificate.yaml
   - grafana.yaml
   - headlamp.yaml
 patches:
-  - path: observability.yaml
   - path: secret-store.yaml
   - path: tailscale.yaml
   - path: traefik-gateway.yaml

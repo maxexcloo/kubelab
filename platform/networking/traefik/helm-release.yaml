@@ -14,6 +14,10 @@ spec:
         name: traefik
         namespace: flux-system
       version: 41.2.0
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
   values:
     accessLog:
       enabled: true
@@ -46,11 +50,11 @@ spec:
       kubernetesIngress:
         enabled: false
     resources:
+      limits:
+        memory: 256Mi
       requests:
         cpu: 100m
         memory: 64Mi
-      limits:
-        memory: 256Mi
     service:
       additionalServices:
         tunnel:

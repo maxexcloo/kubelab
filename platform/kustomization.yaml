@@ -9,26 +9,16 @@ resources:
   - networking/external-dns
   - networking/tailscale
   - networking/traefik
-  - observability
   - secrets/external-secrets
   - secrets/onepassword-connect
   - secrets/onepassword-items
-  - sources/bifrost
-  - sources/bjw-s
-  - sources/cert-manager
-  - sources/cilium
-  - sources/external-dns
-  - sources/external-secrets
-  - sources/headlamp
-  - sources/immich
-  - sources/local-path-provisioner
-  - sources/onepassword
-  - sources/openspeedtest
-  - sources/tailscale
-  - sources/traefik
-  - sources/victoria-metrics
-  - sources/windmill
-  - storage/local-path-provisioner
+  - sources/bjw-s.yaml
+  - sources/cilium.yaml
+  - sources/external-dns.yaml
+  - sources/headlamp.yaml
+  - sources/onepassword.yaml
+  - sources/tailscale.yaml
+  - sources/traefik.yaml
 patches:
   - patch: |-
       apiVersion: helm.toolkit.fluxcd.io/v2
