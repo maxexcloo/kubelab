@@ -86,19 +86,6 @@ including Gateway API, cert-manager, External Secrets, local-path provisioning,
 and VictoriaMetrics. Generated CRDs are managed through their pinned upstream
 chart or source rather than copied into this repository.
 
-Publish the foundation ownership transfer in three revisions:
-
-1. Disable pruning on the existing `crds` and `platform` Kustomizations without
-   moving resources. Reconcile both cluster roots and use `flux export ks` to
-   verify the live specifications have `prune: false`.
-2. Add `foundation`, move its resources, and leave the legacy `crds`
-   Kustomization as an empty orphaning entrypoint. Reconcile both cluster roots,
-   then verify `foundation` and `platform` are ready and their `flux tree`
-   inventories contain the expected resources.
-3. Remove the `crds` entrypoints and empty directory, restore platform pruning,
-   and reconcile both cluster roots. Do not combine this cleanup revision with
-   the ownership revision.
-
 ## Cutover Controls
 
 - **Access Policy**: Cluster wildcard DNS always resolves to the corresponding Tailscale service IP. `Public` attaches to the dedicated tunnel or direct-public Gateway and opts into ExternalDNS; never repoint a cluster wildcard at a public target. `Internal` uses Tailscale through the private Gateway and wildcard DNS. `Private` has no application route. `None` has no network endpoint.

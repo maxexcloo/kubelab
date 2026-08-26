@@ -6,7 +6,7 @@ metadata:
 spec:
   interval: 30m
   path: ./clusters/mbk/platform
-  prune: false
+  prune: true
   retryInterval: 2m
   timeout: 10m
   wait: true
