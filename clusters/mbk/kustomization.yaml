@@ -18,11 +18,24 @@ patches:
         name: flux-system
         namespace: flux-system
       spec:
-        healthCheckExprs:
+        healthChecks:
           - apiVersion: kustomize.toolkit.fluxcd.io/v1
             kind: Kustomization
-            current: (has(spec.suspend) && spec.suspend) || status.conditions.exists(e, e.type == 'Ready' && e.status == 'True' && e.observedGeneration == metadata.generation)
-            failed: (!has(spec.suspend) || !spec.suspend) && status.conditions.exists(e, e.type == 'Ready' && e.status == 'False' && e.observedGeneration == metadata.generation)
+            name: apps
+            namespace: flux-system
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
+            name: automation
+            namespace: flux-system
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
+            name: foundation
+            namespace: flux-system
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
+            name: platform
+            namespace: flux-system
+        wait: false
     target:
       kind: Kustomization
       name: flux-system
