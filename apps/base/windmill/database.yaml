@@ -26,8 +26,6 @@ spec:
           - windmill_admin
           - windmill_user
         login: true
-        passwordSecret:
-          name: windmill-database
   storage:
     size: 10Gi
     storageClass: local-path
