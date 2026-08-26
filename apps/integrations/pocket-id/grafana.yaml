@@ -1,0 +1,13 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: grafana
+  namespace: observability
+spec:
+  client:
+    callbackURLs: [https://grafana.excloo.com/login/generic_oauth]
+    description: Infrastructure Observability
+    id: grafana
+    launchURL: https://grafana.excloo.com
+    name: Grafana
+    pkceEnabled: true

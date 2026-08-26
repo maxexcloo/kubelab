@@ -9,13 +9,11 @@ resources:
   - networking/tailscale
   - networking/traefik
   - secrets/external-secrets
-  - secrets/onepassword-connect
   - secrets/onepassword-items
   - sources/bjw-s.yaml
   - sources/cilium.yaml
   - sources/external-dns.yaml
   - sources/headlamp.yaml
-  - sources/onepassword.yaml
   - sources/tailscale.yaml
   - sources/traefik.yaml
 patches:

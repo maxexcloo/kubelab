@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - actual-budget.yaml
+  - beszel.yaml
+  - bookorbit.yaml
+  - grafana.yaml
+  - groups.yaml
+  - immich.yaml
+  - linkwarden.yaml
+  - miniflux.yaml
+  - open-webui.yaml
+  - papra.yaml
+  - romm.yaml
+  - shelfmark.yaml

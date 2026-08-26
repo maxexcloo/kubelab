@@ -1,0 +1,13 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: open-webui
+  namespace: open-webui
+spec:
+  client:
+    callbackURLs: [https://chat.excloo.com/oauth/oidc/callback]
+    description: AI Chat
+    id: open-webui
+    launchURL: https://chat.excloo.com
+    name: Open WebUI
+    pkceEnabled: true

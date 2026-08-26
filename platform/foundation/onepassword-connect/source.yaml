@@ -3,6 +3,8 @@ kind: HelmRepository
 metadata:
   name: onepassword
   namespace: flux-system
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   interval: 24h
   url: https://1password.github.io/connect-helm-charts

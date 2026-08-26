@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 30m
-  path: ./platform/automation/resend
+  path: ./platform/automation
   prune: true
   retryInterval: 2m
   timeout: 10m

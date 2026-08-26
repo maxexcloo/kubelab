@@ -1,0 +1,13 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: shelfmark
+  namespace: shelfmark
+spec:
+  accessPolicy: books
+  client:
+    callbackURLs: [https://shelf.excloo.com/api/auth/oidc/callback]
+    description: Book Search & Downloads
+    id: shelfmark
+    launchURL: https://shelf.excloo.com
+    name: Shelfmark

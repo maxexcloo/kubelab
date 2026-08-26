@@ -1,0 +1,13 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: beszel
+  namespace: beszel
+spec:
+  client:
+    callbackURLs: [https://beszel.excloo.com/api/oauth2-redirect]
+    description: System Monitoring
+    id: beszel
+    launchURL: https://beszel.excloo.com
+    name: Beszel
+    pkceEnabled: true

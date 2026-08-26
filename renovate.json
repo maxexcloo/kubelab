@@ -52,7 +52,7 @@
       "description": "Update VictoriaLogs Grafana plugin",
       "extractVersionTemplate": "^v(?<version>.*)$",
       "managerFilePatterns": [
-        "/platform/foundation/victoria-metrics/helm-release\\.yaml$/"
+        "/platform/observability/victoria-metrics/helm-release\\.yaml$/"
       ],
       "matchStrings": [
         "victoriametrics-logs-datasource@(?<currentValue>\\d+\\.\\d+\\.\\d+)"

@@ -7,7 +7,47 @@ metadata:
     app.kubernetes.io/name: homepage
 data:
   bookmarks.yaml: |
-    []
+    - Providers:
+        - 1Password:
+            - description: Passwords & Secrets
+              href: https://my.1password.com
+              icon: si-1password-#ffffff
+        - Backblaze:
+            - description: Object Storage
+              href: https://backblaze.com
+              icon: si-backblaze-#ffffff
+        - Cloudflare:
+            - description: DNS & Zero Trust
+              href: https://dash.cloudflare.com
+              icon: si-cloudflare-#ffffff
+        - Control D:
+            - description: DNS
+              href: https://controld.com
+              icon: control-d
+        - Fly.io:
+            - description: App Platform
+              href: https://fly.io/dashboard
+              icon: si-flydotio-#ffffff
+        - GitHub:
+            - description: Source Control
+              href: https://github.com/maxexcloo
+              icon: si-github-#ffffff
+        - Oracle Cloud:
+            - description: Cloud VMs
+              href: https://cloud.oracle.com
+              icon: si-oracle-#ffffff
+        - Resend:
+            - description: Email API
+              href: https://resend.com/overview
+              icon: si-resend-#ffffff
+        - Tailscale:
+            - description: VPN
+              href: https://login.tailscale.com/admin
+              icon: si-tailscale-#ffffff
+        - UniFi:
+            - description: Network
+              href: https://unifi.ui.com
+              icon: si-ubiquiti-#ffffff
   docker.yaml: |
     {}
   kubernetes.yaml: |
@@ -16,12 +56,89 @@ data:
     mode: cluster
     traefik: false
   services.yaml: |
-    []
+    - Home Automation:
+        - ESPHome:
+            description: ESP Device Builder
+            href: https://hass.mbk.excloo.net/5c53de3b_esphome
+            icon: esphome
+            siteMonitor: https://hass.mbk.excloo.net/5c53de3b_esphome
+        - ESPresense:
+            description: Room Presence
+            href: https://hass.mbk.excloo.net/f32ea98b_espresense-companion
+            icon: espressif
+            siteMonitor: https://hass.mbk.excloo.net/f32ea98b_espresense-companion
+        - Home Assistant:
+            description: Smart Home & Automations
+            href: https://hass.mbk.excloo.net
+            icon: home-assistant
+            siteMonitor: https://hass.mbk.excloo.net
+        - Home Assistant Matter Hub:
+            description: Matter Bridge
+            href: https://hass.mbk.excloo.net/3fd9e6b0_hamh
+            icon: sh-home-assistant-matter-hub
+            siteMonitor: https://hass.mbk.excloo.net/3fd9e6b0_hamh
+        - Studio Code Server:
+            description: Browser IDE
+            href: https://hass.mbk.excloo.net/a0d7b954_vscode
+            icon: visual-studio-code
+            siteMonitor: https://hass.mbk.excloo.net/a0d7b954_vscode
+        - Zigbee2MQTT:
+            description: Zigbee Coordinator
+            href: https://hass.mbk.excloo.net/45df7312_zigbee2mqtt
+            icon: zigbee2mqtt
+            siteMonitor: https://hass.mbk.excloo.net/45df7312_zigbee2mqtt
+    - Infrastructure:
+        - Gatus:
+            description: Health Monitoring & Status Page
+            href: https://status.excloo.com
+            icon: gatus
+            siteMonitor: https://status.excloo.com
+            widget:
+              type: gatus
+              url: https://status.excloo.com
+        - Netboot:
+            description: Network Boot Server
+            href: http://kimbap.mbk.excloo.net:31010
+            icon: netbootxyz
+            siteMonitor: http://kimbap.mbk.excloo.net:31010
+        - Syncthing:
+            description: File Synchronisation
+            href: http://kimbap.mbk.excloo.net:20910
+            icon: syncthing
+            siteMonitor: http://kimbap.mbk.excloo.net:20910
+        - TrueNAS:
+            description: Storage Appliance
+            href: https://kimbap.mbk.excloo.net:8443
+            icon: truenas
+            siteMonitor: https://kimbap.mbk.excloo.net:8443
+        - UniFi:
+            description: Network Controller
+            href: https://gateway.mbk.excloo.net
+            icon: unifi
+            siteMonitor: https://gateway.mbk.excloo.net
   settings.yaml: |
+    cardBlur: xs
+    color: slate
+    disableCollapse: true
     disableIndexing: true
-    headerStyle: boxed
+    headerStyle: clean
+    hideVersion: true
     statusStyle: dot
+    theme: dark
     title: Home
+    layout:
+      Applications:
+        columns: 4
+        style: row
+      Home Automation:
+        columns: 4
+        style: row
+      Infrastructure:
+        columns: 2
+        style: row
+      Media:
+        columns: 4
+        style: row
   widgets.yaml: |
     - kubernetes:
         cluster:

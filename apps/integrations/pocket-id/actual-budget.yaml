@@ -1,0 +1,12 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+spec:
+  client:
+    callbackURLs: [https://budget.excloo.com/openid/callback]
+    description: Personal Finance
+    id: actual-budget
+    launchURL: https://budget.excloo.com
+    name: Actual Budget

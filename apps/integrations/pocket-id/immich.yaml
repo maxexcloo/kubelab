@@ -1,0 +1,15 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: immich
+  namespace: immich
+spec:
+  client:
+    callbackURLs:
+      - app.immich:///oauth-callback
+      - https://photos.excloo.com/auth/login
+      - https://photos.excloo.com/user-settings
+    description: Photo Manager
+    id: immich
+    launchURL: https://photos.excloo.com
+    name: Immich

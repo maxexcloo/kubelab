@@ -1,0 +1,220 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: pocketidclients.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: pocket-id-client
+  group: automation.excloo.dev
+  names:
+    kind: PocketIDClient
+    plural: pocketidclients
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                accessPolicy:
+                  default: all-services
+                  enum: [all-services, books]
+                  type: string
+                client:
+                  type: object
+                  properties:
+                    accessTokenDurationMinutes:
+                      default: 60
+                      maximum: 525600
+                      minimum: 1
+                      type: integer
+                    callbackURLs:
+                      minItems: 1
+                      type: array
+                      items:
+                        type: string
+                    description:
+                      default: ""
+                      maxLength: 150
+                      type: string
+                    id:
+                      maxLength: 128
+                      minLength: 2
+                      pattern: ^[A-Za-z0-9._~-]+$
+                      type: string
+                    isGroupRestricted:
+                      default: true
+                      type: boolean
+                    isPublic:
+                      default: false
+                      type: boolean
+                    launchURL:
+                      format: uri
+                      type: string
+                    logoutCallbackURLs:
+                      default: []
+                      type: array
+                      items:
+                        type: string
+                    name:
+                      maxLength: 50
+                      minLength: 1
+                      type: string
+                    pkceEnabled:
+                      default: false
+                      type: boolean
+                    refreshTokenDurationMinutes:
+                      default: 43200
+                      maximum: 525600
+                      minimum: 1
+                      type: integer
+                    requiresPushedAuthorizationRequests:
+                      default: false
+                      type: boolean
+                    requiresReauthentication:
+                      default: false
+                      type: boolean
+                    skipConsent:
+                      default: false
+                      type: boolean
+                  required: [callbackURLs, id, launchURL, name]
+              required: [client]
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: pocket-id-client
+spec:
+  compositeTypeRef:
+    apiVersion: automation.excloo.dev/v1alpha1
+    kind: PocketIDClient
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: crossplane-contrib-function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: client
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: pocket-id-client
+              spec:
+                managementPolicies: [LateInitialize, Observe, Update]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: |-
+                      .response.statusCode == 200
+                      and .response.body.accessTokenDurationMinutes == .payload.body.accessTokenDurationMinutes
+                      and (.response.body.callbackURLs | sort) == (.payload.body.callbackURLs | sort)
+                      and .response.body.description == .payload.body.description
+                      and .response.body.isGroupRestricted == .payload.body.isGroupRestricted
+                      and .response.body.isPublic == .payload.body.isPublic
+                      and .response.body.launchURL == .payload.body.launchURL
+                      and (.response.body.logoutCallbackURLs | sort) == (.payload.body.logoutCallbackURLs | sort)
+                      and .response.body.name == .payload.body.name
+                      and .response.body.pkceEnabled == .payload.body.pkceEnabled
+                      and .response.body.refreshTokenDurationMinutes == .payload.body.refreshTokenDurationMinutes
+                      and .response.body.requiresPushedAuthorizationRequests == .payload.body.requiresPushedAuthorizationRequests
+                      and .response.body.requiresReauthentication == .payload.body.requiresReauthentication
+                      and .response.body.skipConsent == .payload.body.skipConsent
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                    X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+                  mappings:
+                    - action: OBSERVE
+                      url: .payload.baseUrl + "/" + .payload.body.id
+                    - action: UPDATE
+                      body: .payload.body | del(.id)
+                      method: PUT
+                      url: .payload.baseUrl + "/" + .payload.body.id
+                  payload:
+                    baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/oidc/clients
+                    body: "{}"
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: pocket-id
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.client
+                toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: string
+                    string:
+                      convert: ToJson
+                      type: Convert
+          - name: group-access
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: pocket-id-client-groups
+              spec:
+                managementPolicies: [LateInitialize, Observe, Update]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: "false"
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                    X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+                  mappings:
+                    - action: OBSERVE
+                      url: .payload.baseUrl
+                    - action: UPDATE
+                      body: .payload.body
+                      method: PUT
+                      url: .payload.baseUrl + "/allowed-user-groups"
+                  payload:
+                    baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/oidc/clients/placeholder
+                    body: "{}"
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: pocket-id
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.client.id
+                toFieldPath: spec.forProvider.payload.baseUrl
+                transforms:
+                  - type: string
+                    string:
+                      fmt: http://pocket-id.pocket-id.svc.cluster.local:1411/api/oidc/clients/%s
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.accessPolicy
+                toFieldPath: spec.forProvider.expectedResponseCheck.logic
+                transforms:
+                  - type: map
+                    map:
+                      all-services: |-
+                        .response.statusCode == 200
+                        and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}"] | sort)
+                      books: |-
+                        .response.statusCode == 200
+                        and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}", "{{ pocket-id-group-books:pocket-id:id }}"] | sort)
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.accessPolicy
+                toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: map
+                    map:
+                      all-services: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}"]}'
+                      books: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}","{{ pocket-id-group-books:pocket-id:id }}"]}'

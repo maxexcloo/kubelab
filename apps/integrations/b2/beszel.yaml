@@ -1,0 +1,151 @@
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: b2-authorisation
+  namespace: beszel
+spec:
+  managementPolicies: [Observe]
+  forProvider:
+    expectedResponseCheck:
+      logic: |-
+        .response.statusCode == 200
+        and .response.body.accountId != null
+        and .response.body.apiInfo.storageApi.apiUrl == "https://api005.backblazeb2.com"
+        and .response.body.apiInfo.storageApi.s3ApiUrl == "https://s3.us-east-005.backblazeb2.com"
+        and .response.body.authorizationToken != null
+      type: CUSTOM
+    headers:
+      Authorization: ["{{ b2-credentials:crossplane-system:authorization }}"]
+      User-Agent: [kubelab-crossplane/1.0]
+    mappings:
+      - action: OBSERVE
+        url: .payload.baseUrl
+    payload:
+      baseUrl: https://api.backblazeb2.com/b2api/v4/b2_authorize_account
+      body: "{}"
+    secretInjectionConfigs:
+      - keyMappings:
+          - missingFieldStrategy: preserve
+            responseJQ: .body.accountId
+            secretKey: account-id
+          - missingFieldStrategy: preserve
+            responseJQ: .body.authorizationToken
+            secretKey: authorization-token
+        secretRef:
+          name: b2-session
+          namespace: beszel
+        setOwnerReference: true
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: b2
+---
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: b2-beszel-bucket
+  namespace: beszel
+spec:
+  managementPolicies: [LateInitialize, Observe, Update]
+  forProvider:
+    expectedResponseCheck:
+      logic: |-
+        .response.statusCode == 200
+        and (.response.body.buckets | length) == 1
+        and .response.body.buckets[0].bucketType == "allPrivate"
+        and .response.body.buckets[0].defaultServerSideEncryption.isClientAuthorizedToRead == true
+        and .response.body.buckets[0].defaultServerSideEncryption.value.algorithm == "AES256"
+        and .response.body.buckets[0].defaultServerSideEncryption.value.mode == "SSE-B2"
+        and .response.body.buckets[0].lifecycleRules == [{
+          "daysFromHidingToDeleting": 1,
+          "daysFromUploadingToHiding": null,
+          "fileNamePrefix": ""
+        }]
+      type: CUSTOM
+    headers:
+      Authorization: ["{{ b2-session:beszel:authorization-token }}"]
+      Content-Type: [application/json]
+      User-Agent: [kubelab-crossplane/1.0]
+    mappings:
+      - action: OBSERVE
+        body: .payload.body
+        method: POST
+        url: .payload.baseUrl + "/b2api/v4/b2_list_buckets"
+      - action: UPDATE
+        body: |-
+          {
+            accountId: .payload.body.accountId,
+            bucketId: .response.body.buckets[0].bucketId,
+            bucketType: "allPrivate",
+            defaultServerSideEncryption: {
+              algorithm: "AES256",
+              mode: "SSE-B2"
+            },
+            lifecycleRules: [{
+              daysFromHidingToDeleting: 1,
+              daysFromUploadingToHiding: null,
+              fileNamePrefix: ""
+            }]
+          }
+        method: POST
+        url: .payload.baseUrl + "/b2api/v4/b2_update_bucket"
+    payload:
+      baseUrl: https://api005.backblazeb2.com
+      body: '{"accountId":"{{ b2-session:beszel:account-id }}","bucketName":"{{ beszel-object-storage:beszel:bucket }}"}'
+    secretInjectionConfigs:
+      - keyMappings:
+          - missingFieldStrategy: preserve
+            responseJQ: .body.buckets[0].bucketId
+            secretKey: bucket-id
+        secretRef:
+          name: b2-beszel-inventory
+          namespace: beszel
+        setOwnerReference: true
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: b2
+---
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: b2-beszel-key
+  namespace: beszel
+spec:
+  managementPolicies: [Observe]
+  forProvider:
+    expectedResponseCheck:
+      logic: |-
+        .response.statusCode == 200
+        and ([
+          .response.body.keys[]
+          | select(.applicationKeyId == "{{ beszel-object-storage:beszel:access-key-id }}")
+          | select(.keyName == "beszel")
+          | select(
+              ((.bucketIds // [ .bucketId ]) | map(select(. != null)) | sort)
+              == ["{{ b2-beszel-inventory:beszel:bucket-id }}"]
+            )
+          | select((.capabilities | sort) == ([
+              "deleteFiles",
+              "listBuckets",
+              "listFiles",
+              "readBuckets",
+              "readFiles",
+              "shareFiles",
+              "writeFiles"
+            ] | sort))
+        ] | length) == 1
+      type: CUSTOM
+    headers:
+      Authorization: ["{{ b2-session:beszel:authorization-token }}"]
+      Content-Type: [application/json]
+      User-Agent: [kubelab-crossplane/1.0]
+    mappings:
+      - action: OBSERVE
+        body: .payload.body
+        method: POST
+        url: .payload.baseUrl + "/b2api/v4/b2_list_keys"
+    payload:
+      baseUrl: https://api005.backblazeb2.com
+      body: '{"accountId":"{{ b2-session:beszel:account-id }}","maxKeyCount":1000}'
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: b2

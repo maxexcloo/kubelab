@@ -1,0 +1,13 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: papra
+  namespace: papra
+spec:
+  client:
+    callbackURLs: [https://papra.excloo.com/api/auth/oauth2/callback/pocket-id]
+    description: Document Management
+    id: papra
+    launchURL: https://papra.excloo.com
+    name: Papra
+    pkceEnabled: true

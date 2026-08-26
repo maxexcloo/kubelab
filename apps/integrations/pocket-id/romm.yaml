@@ -1,0 +1,12 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: romm
+  namespace: romm
+spec:
+  client:
+    callbackURLs: [https://games.excloo.com/api/oauth/openid]
+    description: Game & ROM Library
+    id: romm
+    launchURL: https://games.excloo.com
+    name: RoMM

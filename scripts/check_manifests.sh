@@ -14,6 +14,26 @@ schema_directory="${temporary_directory}/schemas"
 target_file="${temporary_directory}/targets"
 mkdir -p "${manifest_directory}" "${schema_directory}"
 
+provider_http_version="$(
+  yq -r '.spec.values.provider.packages[] | select(contains("provider-http:")) | split(":")[-1]' \
+    platform/automation/crossplane/helm-release.yaml
+)"
+provider_http_schema_directory="${schema_directory}/http.m.crossplane.io"
+mkdir -p "${provider_http_schema_directory}"
+# shellcheck disable=SC2016
+curl \
+  --fail \
+  --location \
+  --silent \
+  --show-error \
+  "https://raw.githubusercontent.com/crossplane-contrib/provider-http/${provider_http_version}/package/crds/http.m.crossplane.io_requests.yaml" |
+  yq -o=json -I=2 '
+    .spec.versions[] |
+    select(.name == "v1alpha2") |
+    .schema.openAPIV3Schema |
+    ."$schema" = "https://json-schema.org/draft/2020-12/schema"
+  ' >"${provider_http_schema_directory}/request_v1alpha2.json"
+
 kubeconform_flags=(
   -kubernetes-version 1.36.3
   -skip "ClusterProviderConfig,CustomResourceDefinition"

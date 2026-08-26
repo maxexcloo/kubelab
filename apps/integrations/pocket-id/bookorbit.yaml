@@ -1,0 +1,13 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: bookorbit
+  namespace: bookorbit
+spec:
+  accessPolicy: books
+  client:
+    callbackURLs: [https://books.excloo.com/oauth2-callback]
+    description: Digital Library
+    id: bookorbit
+    launchURL: https://books.excloo.com
+    name: BookOrbit

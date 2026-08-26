@@ -1,0 +1,12 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: miniflux
+  namespace: miniflux
+spec:
+  client:
+    callbackURLs: [https://reader.excloo.com/oauth2/oidc/callback]
+    description: RSS Reader
+    id: miniflux
+    launchURL: https://reader.excloo.com
+    name: Miniflux

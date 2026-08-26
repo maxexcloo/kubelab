@@ -34,7 +34,23 @@ env -u OP_CONNECT_HOST -u OP_CONNECT_TOKEN \
     --dry-run=client -o yaml |
   kubectl --context "${cluster}" apply -f -
 
-if rg -q 'path: ./platform/automation/resend' "${repository_dir}/clusters/${cluster}/automation.yaml" 2>/dev/null; then
+automation_file="${repository_dir}/clusters/${cluster}/automation.yaml"
+automation_path=""
+if [[ -f "${automation_file}" ]]; then
+  automation_path="$(
+    yq -r \
+      'select(.kind == "Kustomization" and .metadata.name == "automation") | .spec.path // ""' \
+      "${automation_file}"
+  )"
+fi
+automation_directory="${repository_dir}/${automation_path#./}"
+
+if [[ -n "${automation_path}" ]] &&
+  [[ -d "${automation_directory}" ]] &&
+  kustomize build "${automation_directory}" |
+    yq eval-all -e \
+      'select(.kind == "CompositeResourceDefinition" and .metadata.name == "resendkeys.automation.excloo.dev")' \
+      - >/dev/null; then
   resend_credential="$(
     env -u OP_CONNECT_HOST -u OP_CONNECT_TOKEN \
       op item get --vault Homelab "Resend: ${cluster}" --format json |

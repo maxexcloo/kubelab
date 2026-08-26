@@ -1,0 +1,137 @@
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: pocket-id-group-all-services
+  namespace: pocket-id
+spec:
+  managementPolicies: [Create, LateInitialize, Observe, Update]
+  forProvider:
+    expectedResponseCheck:
+      logic: .payload.body.name as $name | any(.response.body.data[]?; .name == $name)
+      type: CUSTOM
+    headers:
+      Content-Type: [application/json]
+      User-Agent: [kubelab-crossplane/1.0]
+      X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+    mappings:
+      - action: CREATE
+        body: .payload.body
+        url: .payload.baseUrl
+      - action: OBSERVE
+        url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
+      - action: UPDATE
+        body: .payload.body
+        method: POST
+        url: .payload.baseUrl
+    payload:
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
+      body: '{"friendlyName":"All Services","name":"all_services"}'
+    secretInjectionConfigs:
+      - keyMappings:
+          - missingFieldStrategy: preserve
+            responseJQ: if .body.id then .body.id else first(.body.data[]? | select(.name == "all_services") | .id) end
+            secretKey: id
+        secretRef:
+          name: pocket-id-group-all-services
+          namespace: pocket-id
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: pocket-id
+---
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: pocket-id-group-all-services-details
+  namespace: pocket-id
+spec:
+  managementPolicies: [LateInitialize, Observe, Update]
+  forProvider:
+    expectedResponseCheck:
+      logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
+      type: CUSTOM
+    headers:
+      Content-Type: [application/json]
+      User-Agent: [kubelab-crossplane/1.0]
+      X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+    mappings:
+      - action: OBSERVE
+        url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
+      - action: UPDATE
+        body: .payload.body
+        method: PUT
+        url: .payload.body.name as $name | .payload.baseUrl + "/" + (first(.response.body.data[]? | select(.name == $name)) | .id)
+    payload:
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
+      body: '{"friendlyName":"All Services","name":"all_services"}'
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: pocket-id
+---
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: pocket-id-group-books
+  namespace: pocket-id
+spec:
+  managementPolicies: [Create, LateInitialize, Observe, Update]
+  forProvider:
+    expectedResponseCheck:
+      logic: .payload.body.name as $name | any(.response.body.data[]?; .name == $name)
+      type: CUSTOM
+    headers:
+      Content-Type: [application/json]
+      User-Agent: [kubelab-crossplane/1.0]
+      X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+    mappings:
+      - action: CREATE
+        body: .payload.body
+        url: .payload.baseUrl
+      - action: OBSERVE
+        url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
+      - action: UPDATE
+        body: .payload.body
+        method: POST
+        url: .payload.baseUrl
+    payload:
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
+      body: '{"friendlyName":"Books","name":"books"}'
+    secretInjectionConfigs:
+      - keyMappings:
+          - missingFieldStrategy: preserve
+            responseJQ: if .body.id then .body.id else first(.body.data[]? | select(.name == "books") | .id) end
+            secretKey: id
+        secretRef:
+          name: pocket-id-group-books
+          namespace: pocket-id
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: pocket-id
+---
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: pocket-id-group-books-details
+  namespace: pocket-id
+spec:
+  managementPolicies: [LateInitialize, Observe, Update]
+  forProvider:
+    expectedResponseCheck:
+      logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
+      type: CUSTOM
+    headers:
+      Content-Type: [application/json]
+      User-Agent: [kubelab-crossplane/1.0]
+      X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+    mappings:
+      - action: OBSERVE
+        url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
+      - action: UPDATE
+        body: .payload.body
+        method: PUT
+        url: .payload.body.name as $name | .payload.baseUrl + "/" + (first(.response.body.data[]? | select(.name == $name)) | .id)
+    payload:
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
+      body: '{"friendlyName":"Books","name":"books"}'
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: pocket-id

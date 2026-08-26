@@ -34,3 +34,25 @@ labelled route can adopt and overwrite an existing application record during a
 cutover. Its `upsert-only` policy leaves DNS records in place when a route is
 removed; delete them only as part of an explicitly reviewed cutover or
 retirement.
+
+## Retained HAOS Webhook
+
+The `home-assistant-webhook` Flux inventory on `mbk` stages the retained
+`home-assistant.excloo.com` webhook route and is suspended by default. It exposes
+only the `/api/webhook` path prefix, targets the substrate-owned HAOS address,
+and validates the upstream certificate for `hass.mbk.excloo.net` with a
+`BackendTLSPolicy`. It does not expose the Home Assistant user interface.
+
+Before activation, confirm `10.0.0.2` remains the `hass` address in `homelab`,
+verify its port 443 certificate from an `mbk` diagnostic Pod, and record the
+current Cloudflare DNS and tunnel target for rollback. Resume and reconcile only
+the `home-assistant-webhook` inventory, then require all of these conditions:
+
+- the `BackendTLSPolicy` reports `Accepted=True`;
+- the `HTTPRoute` reports `Accepted=True` and `ResolvedRefs=True`;
+- a reviewed Home Assistant webhook succeeds through the public hostname; and
+- another path on the same hostname returns no application content.
+
+For rollback, suspend the inventory, delete only its `HTTPRoute`, and restore the
+recorded DNS/tunnel target. ExternalDNS is upsert-only and will not delete the
+record when the route is removed.

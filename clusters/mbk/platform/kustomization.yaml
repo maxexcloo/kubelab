@@ -5,6 +5,7 @@ resources:
   - ../../../platform/automation/crossplane
   - ../../../platform/databases/cloudnative-pg
   - ../../../platform/storage/truenas-nfs
+  - observability
   - certificate.yaml
   - grafana.yaml
   - headlamp.yaml

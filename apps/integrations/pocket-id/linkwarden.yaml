@@ -1,0 +1,12 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: linkwarden
+  namespace: linkwarden
+spec:
+  client:
+    callbackURLs: [https://links.excloo.com/api/v1/auth/callback/keycloak]
+    description: Bookmark Manager
+    id: linkwarden
+    launchURL: https://links.excloo.com
+    name: Linkwarden

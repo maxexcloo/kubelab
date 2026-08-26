@@ -3,6 +3,27 @@ kind: Kustomization
 resources:
   - apps.yaml
   - automation.yaml
+  - b2-automation.yaml
+  - cloudflare-automation.yaml
   - foundation.yaml
   - flux-system
+  - home-assistant-webhook.yaml
   - platform.yaml
+  - pocket-id-automation.yaml
+patches:
+  - patch: |-
+      apiVersion: kustomize.toolkit.fluxcd.io/v1
+      kind: Kustomization
+      metadata:
+        name: flux-system
+        namespace: flux-system
+      spec:
+        healthCheckExprs:
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
+            current: spec.suspend || status.conditions.exists(e, e.type == 'Ready' && e.status == 'True' && e.observedGeneration == metadata.generation)
+            failed: '!spec.suspend && status.conditions.exists(e, e.type == ''Ready'' && e.status == ''False'' && e.observedGeneration == metadata.generation)'
+    target:
+      kind: Kustomization
+      name: flux-system
+      namespace: flux-system
