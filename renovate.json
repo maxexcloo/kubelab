@@ -5,26 +5,64 @@
 
   "customManagers": [
     {
+      "customType": "regex",
+      "datasourceTemplate": "docker",
+      "description": "Update CloudNativePG container images",
+      "managerFilePatterns": ["/apps/base/.+/database\\.yaml$/"],
+      "matchStrings": [
+        "imageName:\\s+(?<depName>[^:\\s]+):(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
+      ],
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "datasourceTemplate": "docker",
+      "description": "Update Crossplane packages",
+      "managerFilePatterns": [
+        "/platform/automation/crossplane/helm-release\\.yaml$/"
+      ],
+      "matchStrings": [
+        "(?<depName>xpkg\\.(?:crossplane\\.io|upbound\\.io)/[^:\\s,\\]]+):(?<currentValue>[^\\s,\\]]+)"
+      ],
+      "versioningTemplate": "docker"
+    },
+    {
       "currentValueTemplate": "main",
       "customType": "regex",
       "datasourceTemplate": "git-refs",
+      "description": "Update Pinned CRD catalogue revision",
       "managerFilePatterns": ["/^scripts/check_manifests\\.sh$/"],
       "matchStrings": ["CRDs-catalog/(?<currentDigest>[a-f0-9]{40})/"],
       "packageNameTemplate": "https://github.com/datreeio/CRDs-catalog"
     },
     {
       "customType": "regex",
+      "datasourceTemplate": "docker",
+      "description": "Update VectorChord extension image",
+      "managerFilePatterns": ["/apps/base/immich/database\\.yaml$/"],
+      "matchStrings": [
+        "reference:\\s+(?<depName>[^:\\s]+):(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
+      ],
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "VictoriaMetrics/victorialogs-datasource",
+      "description": "Update VictoriaLogs Grafana plugin",
       "extractVersionTemplate": "^v(?<version>.*)$",
       "managerFilePatterns": [
-        "/platform/observability/victoria-metrics-k8s-stack/helm-release\\.yaml$/"
+        "/platform/foundation/victoria-metrics/helm-release\\.yaml$/"
       ],
       "matchStrings": [
         "victoriametrics-logs-datasource@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ]
     }
   ],
+
+  "flux": {
+    "managerFilePatterns": ["/(^|/).+\\.yaml$/"]
+  },
 
   "kubernetes": {
     "managerFilePatterns": ["/(^|/).+\\.yaml$/"]

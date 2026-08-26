@@ -15,6 +15,7 @@ rebuild or reach a cluster while Kubernetes is unavailable.
   implementation details.
 - Use Australian English in project-owned prose and identifiers.
 - Use `.yaml`, not `.yml`, for project-owned YAML.
+- Omit trailing slashes from project-owned base URLs.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
 - Pin tools, charts, images, and remote manifests to stable release versions.

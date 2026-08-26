@@ -9,7 +9,6 @@ repos:
       - id: check-symlinks
       - id: check-toml
       - id: detect-private-key
-        exclude: ^platform/crds/external-secrets/external-secrets\.yaml$
       - id: end-of-file-fixer
       - id: fix-byte-order-marker
       - id: mixed-line-ending

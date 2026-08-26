@@ -63,6 +63,7 @@ spec:
           containers:
             main:
               image:
+                repository: ghcr.io/immich-app/immich-machine-learning
                 tag: v3.1.0@sha256:5a0839dc5303cd7215bcd2180a26aed3af41675aefb3e75e5157e9f10ad16e6e
               resources:
                 limits:
@@ -82,6 +83,7 @@ spec:
           containers:
             main:
               image:
+                repository: ghcr.io/immich-app/immich-server
                 tag: v3.1.0@sha256:b434cb9287eea1471c9974845914d4dd328c9c2d652e446ed4930f99944f0ceb
               resources:
                 limits:
@@ -114,6 +116,7 @@ spec:
           containers:
             main:
               image:
+                repository: docker.io/valkey/valkey
                 tag: 9.1.1@sha256:70739f85ad2ee01a726a965584a0f94895f01b0c60b3cc8b0aeef11eaa6888cf
               resources:
                 limits:

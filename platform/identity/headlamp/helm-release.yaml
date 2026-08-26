@@ -21,11 +21,11 @@ spec:
     config:
       inCluster: true
     resources:
+      limits:
+        memory: 256Mi
       requests:
         cpu: 50m
         memory: 64Mi
-      limits:
-        memory: 256Mi
     securityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true

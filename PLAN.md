@@ -24,7 +24,7 @@ migrations to `kubelab`. Substrate implementation details live in `homelab`.
 - **Substrate vs Workloads**: `homelab` (OpenTofu) owns everything required to reach or rebuild a cluster (VM, compute, OCI, Tailscale host extension, Cloudflare Tunnel credentials). `kubelab` (Flux) owns all in-cluster workloads and app-scoped integrations.
 - **Secret Contract**: 1Password is the root of trust. `homelab` owns cluster vaults and provisions each cluster's vault-scoped 1Password Connect credentials; `kubelab` owns their bootstrap delivery into Kubernetes, the in-cluster Connect deployment, workload credential definitions, generation, and delivery. External Secrets Operator uses the local Connect service to materialise cluster Secrets. Zero secrets in Git.
 - **Secret Automation**: Every workload credential is generated or obtained by its declarative owner and written to 1Password automatically before delivery to the workload. Only cluster bootstrap credentials require operator-provided secret material; no workload may depend on a manually created 1Password item.
-- **Workload Items**: Use one display-named 1Password item per workload. The cluster vault carries scope; tag Kubernetes-created items only with `Kubelab`. Discover item ownership, fields, and websites from External Secrets and Gateway API resources. Preserve non-empty values edited in 1Password, generate only declared internal credentials, and archive Kubernetes-owned items with no remaining declarative consumer. Use native username and password fields only for functional browser logins. Name custom fields by grouping first and sort them by major group, then label, with `database-*` before `api-key-*`.
+- **Workload Items**: Use one display-named 1Password item per workload. The cluster vault carries scope; tag Kubernetes-created items only with `Kubelab`. Discover item ownership, fields, and websites from External Secrets and Gateway API resources. Preserve non-empty values edited in 1Password, generate only declared internal credentials, and archive Kubernetes-owned items with no remaining declarative consumer only while the cluster `apps` reconciliation is ready and has applied the current Git source revision. Keep the permanent annotation contract to constants, defaults, generated fields, and login presentation; field migration and removal annotations are temporary migration aids. Use native username and password fields only for functional browser logins. Name custom fields by grouping first and sort them by major group, then label, with `database-*` before `api-key-*`.
 - **Purposeful APIs**: Repository-defined resources are acceptable when one small, workload-owned declaration replaces repeated integration logic and centralises security or lifecycle behaviour. Keep their scope narrow and use standard composed resources underneath.
 - **Application DNS**: ExternalDNS owns explicitly labelled application records from Gateway API routes. OpenTofu owns cluster tunnel and direct-public targets. ExternalDNS adopts existing application records during cutover and uses upsert-only reconciliation.
 - **Crossplane Resources**: Crossplane `provider-http` on `mbk` owns compatible app-scoped external APIs (Pocket ID clients, Control D rules, B2 buckets, Resend keys). Every managed resource defaults to **orphan-on-delete**.
@@ -54,10 +54,9 @@ must enforce this order:
    restrictive temporary file. 1Password Connect is required on every cluster;
    optional controller credentials are discovered from the cluster overlay.
 3. `bootstrap-flux` waits for `bootstrap-secrets`, but does not depend on it. It
-   derives the VictoriaMetrics chart and repository from the committed Flux
-   resources, installs the required CRDs, applies
-   `clusters/<cluster>/flux-system` server-side, waits for the Flux controllers,
-   and reports reconciliation status.
+   applies `clusters/<cluster>/flux-system` server-side, waits for the Flux
+   controllers, starts reconciliation, and reports status. Flux then installs
+   pinned upstream APIs and their controllers through the foundation stage.
 4. `bootstrap` depends on all three component tasks and forwards the explicit
    cluster parameter to each one. Mise schedules them as one bootstrap operation
    while their `wait_for` relationships enforce Cilium, secrets, then Flux.
@@ -79,6 +78,26 @@ mise run deploy syd
 
 `deploy` reconciles the selected cluster's root Flux Kustomization and its Git
 source. Flux remains the sole routine deployer for Kubernetes resources.
+
+Reconciliation follows `flux-system`, `foundation`, `platform`, optional
+cluster automation, then applications. Foundation owns namespaces and pinned
+upstream declarations for APIs or controllers required by later stages,
+including Gateway API, cert-manager, External Secrets, local-path provisioning,
+and VictoriaMetrics. Generated CRDs are managed through their pinned upstream
+chart or source rather than copied into this repository.
+
+Publish the foundation ownership transfer in three revisions:
+
+1. Disable pruning on the existing `crds` and `platform` Kustomizations without
+   moving resources. Reconcile both cluster roots and use `flux export ks` to
+   verify the live specifications have `prune: false`.
+2. Add `foundation`, move its resources, and leave the legacy `crds`
+   Kustomization as an empty orphaning entrypoint. Reconcile both cluster roots,
+   then verify `foundation` and `platform` are ready and their `flux tree`
+   inventories contain the expected resources.
+3. Remove the `crds` entrypoints and empty directory, restore platform pruning,
+   and reconcile both cluster roots. Do not combine this cleanup revision with
+   the ownership revision.
 
 ## Cutover Controls
 
@@ -135,7 +154,7 @@ mistaken for a completed migration:
 | Papra         | Cut over      | Complete the rollback window                                         |
 | Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
 | Shelfmark     | Reconciled    | Record cutover evidence and the rollback window                      |
-| Windmill      | Implemented   | Confirm reconciliation and backup coverage                           |
+| Windmill      | Implemented   | Reconcile CNPG and backups, then restore and switch the database     |
 
 ### Phase 1: Observability & Dynamic Automation
 
@@ -160,8 +179,10 @@ Execute migrations with one pull request and cutover record per workload group:
    over on `mbk`.
 4. **Databases & Media Libraries — In Progress**: Miniflux, Linkwarden, and
    BookOrbit are cut over; Shelfmark is reconciled; Immich is implemented with
-   its runtime suspended pending the PostgreSQL restore. Restore and reconcile
-   Immich next.
+   its runtime suspended pending the PostgreSQL restore. Windmill has a staged
+   CloudNativePG target and retained logical export alongside its active
+   database. Restore and reconcile Immich next; stop Windmill writers and take a
+   final export before switching its internal database endpoint.
    - CloudNativePG operator for PostgreSQL instances.
    - `miniflux` (Postgres).
    - `linkwarden` (Postgres + storage).
@@ -230,7 +251,7 @@ For every stateful service:
 | Tailscale Kubernetes operator | `homelab` and target repositories      | Both clusters                | Replace       | Private  | Flux-owned operator; OAuth client, tags, and policy stay in OpenTofu |
 | Traefik                       | `homelab-docker` and `homelab-truenas` | Both clusters                | Replace       | Private  | Gateway API implementation for internal and public routes            |
 | VictoriaMetrics               | `homelab-truenas`                      | Both clusters                | Replace       | Internal | Replaceable platform metrics; home is primary                        |
-| Windmill                      | None                                   | `mbk`                        | Deploy        | Internal | Critical PostgreSQL data on retained NFS                             |
+| Windmill                      | None                                   | `mbk`                        | Deploy        | Internal | Critical PostgreSQL with staged CNPG migration and retained exports  |
 
 ### Retained Appliances and Substrate
 

@@ -37,11 +37,11 @@ spec:
                     key: token
                     name: tunnel-token
             resources:
+              limits:
+                memory: 128Mi
               requests:
                 cpu: 20m
                 memory: 64Mi
-              limits:
-                memory: 128Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

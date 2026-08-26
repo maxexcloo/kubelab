@@ -58,14 +58,14 @@ mise run deploy syd
 - **GitOps & Reconciliation**: Flux controllers pull and reconcile manifests declaratively from Git.
 - **Networking & Ingress**: Cilium CNI, ExternalDNS, Hubble network observability, isolated Traefik Gateway API entrypoints, and Cloudflared tunnels.
 - **Observability**: VictoriaMetrics, VictoriaLogs, and Grafana for replaceable cluster metrics and logs.
-- **Security & Certificates**: cert-manager DNS-01 ACME certificates and External Secrets Operator backed by 1Password SDK.
+- **Security & Certificates**: cert-manager DNS-01 ACME certificates and External Secrets Operator backed by 1Password Connect.
 - **Identity & Management**: Headlamp web UI with least-privilege access.
 - **Storage**: Replaceable node-local volumes on both clusters and retained TrueNAS NVMe NFS volumes on `mbk`.
 
 ## Operations & Safety
 
 - **Declarative GitOps**: CI validates syntax and security; Flux pulls and reconciles state without CI write credentials.
-- **Dependency Ordering**: CRDs install first, platform controllers second, and workloads last.
+- **Dependency Ordering**: Foundation APIs and controllers install first, shared platform configuration second, and workloads last.
 - **Secret Hygiene**: Zero secret values in Git; all credentials resolve via ExternalSecrets from 1Password vaults.
 
 ## Licence
