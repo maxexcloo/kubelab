@@ -4,9 +4,10 @@ metadata:
   name: crds
   namespace: flux-system
 spec:
+  deletionPolicy: Orphan
   interval: 30m
   path: ./platform/crds
-  prune: true
+  prune: false
   retryInterval: 2m
   timeout: 10m
   healthChecks:
