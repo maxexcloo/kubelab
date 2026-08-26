@@ -102,7 +102,7 @@ and Redlib on `syd`; Byparr runs on `mbk`. OpenSpeedTest
 is implemented on both clusters. Actual Budget, Beszel, Bichon, Bifrost,
 CLIProxyAPI, and Comfy Control are cut over on `mbk`, Homepage is reconciled on
 `mbk`, Beszel agents are reconciled on both clusters, BookOrbit is cut over,
-Shelfmark is reconciled, and Immich and Windmill are implemented on `mbk`.
+Shelfmark is reconciled, and Windmill is implemented on `mbk`.
 
 ### Progress States
 
@@ -134,7 +134,6 @@ mistaken for a completed migration:
 | CLIProxyAPI   | Cut over      | Complete the rollback window                                         |
 | Comfy Control | Cut over      | Complete the rollback window                                         |
 | Homepage      | Reconciled    | Record cutover evidence                                              |
-| Immich        | Implemented   | Apply the iCloud Photos NFS share and restore PostgreSQL             |
 | Larapaper     | Cut over      | Complete the rollback window                                         |
 | Linkwarden    | Cut over      | Complete the rollback window                                         |
 | Miniflux      | Cut over      | Complete the rollback window                                         |
@@ -167,16 +166,14 @@ Execute migrations with one pull request and cutover record per workload group:
    Bichon, Bifrost, CLIProxyAPI, Comfy Control, Larapaper, and Papra are cut
    over on `mbk`.
 4. **Databases & Media Libraries — In Progress**: Miniflux, Linkwarden, and
-   BookOrbit are cut over; Shelfmark is reconciled; Immich is implemented with
-   its runtime suspended pending the PostgreSQL restore. Windmill has a staged
+   BookOrbit are cut over; Shelfmark is reconciled. Windmill has a staged
    CloudNativePG target and retained logical export alongside its active
-   database. Restore and reconcile Immich next; stop Windmill writers and take a
-   final export before switching its internal database endpoint.
+   database. Stop Windmill writers and take a final export before switching its
+   internal database endpoint.
    - CloudNativePG operator for PostgreSQL instances.
    - `miniflux` (Postgres).
    - `linkwarden` (Postgres + storage).
    - `bookorbit` & `shelfmark` (retained NFS libraries).
-   - `immich` (Postgres + Redis/Valkey + ML + NFS photos).
    - `romm` (Postgres + Redis/Valkey + NFS library).
 5. **RoMM Workflows**: Storage-local Kubernetes Jobs mounting NFS (replacing previous GitHub Actions runners).
 6. **Identity Authority (Pocket ID)**: Migrate last. Validate break-glass cluster-admin credentials and full export/restore before DNS cutover.
@@ -224,7 +221,6 @@ For every stateful service:
 | GitHub runner                 | `homelab-truenas`                      | None                         | Retire        | None     | CI validates only; Flux deploys                                      |
 | Grafana                       | `homelab-truenas`                      | `mbk`                        | Replace       | Internal | Platform observability, Pocket ID                                    |
 | Homepage                      | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Native Kubernetes discovery plus direct appliance entries            |
-| Immich                        | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Critical photos and database, Pocket ID, Resend                      |
 | Larapaper                     | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Important NFS data                                                   |
 | Linkwarden                    | `homelab-truenas`                      | `mbk`                        | Migrate       | Public   | Critical database and archive, Pocket ID, Resend                     |
 | Miniflux                      | `homelab-truenas`                      | `mbk`                        | Migrate       | Internal | Critical database, Pocket ID                                         |
