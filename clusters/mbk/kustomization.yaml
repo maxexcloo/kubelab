@@ -21,8 +21,8 @@ patches:
         healthCheckExprs:
           - apiVersion: kustomize.toolkit.fluxcd.io/v1
             kind: Kustomization
-            current: spec.suspend || status.conditions.exists(e, e.type == 'Ready' && e.status == 'True' && e.observedGeneration == metadata.generation)
-            failed: '!spec.suspend && status.conditions.exists(e, e.type == ''Ready'' && e.status == ''False'' && e.observedGeneration == metadata.generation)'
+            current: (has(spec.suspend) && spec.suspend) || status.conditions.exists(e, e.type == 'Ready' && e.status == 'True' && e.observedGeneration == metadata.generation)
+            failed: (!has(spec.suspend) || !spec.suspend) && status.conditions.exists(e, e.type == 'Ready' && e.status == 'False' && e.observedGeneration == metadata.generation)
     target:
       kind: Kustomization
       name: flux-system
