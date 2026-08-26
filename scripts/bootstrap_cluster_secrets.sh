@@ -38,7 +38,7 @@ if rg -q 'path: ./platform/automation/resend' "${repository_dir}/clusters/${clus
   resend_credential="$(
     env -u OP_CONNECT_HOST -u OP_CONNECT_TOKEN \
       op item get --vault Homelab "Resend: ${cluster}" --format json |
-      jq -ejr 'first(.fields[] | select(.id == "credential")) | .value // empty'
+      jq -ejr 'first(.fields[] | select(.id == "password" or .id == "credential")) | .value // empty'
   )"
 
   kubectl --context "${cluster}" create namespace crossplane-system --dry-run=client -o yaml |
