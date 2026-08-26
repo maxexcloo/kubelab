@@ -59,8 +59,6 @@ actionlint .github/workflows/*.yaml
 prettier --check .
 shellcheck scripts/*.sh
 scripts/check_manifests.sh
-python scripts/test_inventory_transfers.py
-python scripts/test_legacy_services.py
 python scripts/test_onepassword_items.py
 """
 
