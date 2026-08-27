@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: pocket-id
 spec:
   schedule: "0 3 * * *"
-  suspend: true
+  suspend: false
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3
@@ -89,7 +89,7 @@ metadata:
     app.kubernetes.io/name: pocket-id
 spec:
   schedule: "30 3 * * *"
-  suspend: true
+  suspend: false
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3
