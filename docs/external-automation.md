@@ -19,15 +19,16 @@ Do not grant the B2 controller `deleteBuckets`, `deleteKeys`, or `writeKeys`.
 The legacy Beszel key cannot be recovered from the B2 API and remains adopted
 from the `Beszel` item instead of being rotated automatically.
 
-Once the items exist, seed only the Kubernetes bootstrap Secrets:
+Add a concealed `monitoring-token` field to `Cloudflare App Policy: mbk` with
+the retained Gatus bypass token from the current Redlib WAF rule. Once the items
+exist, seed only the Kubernetes bootstrap Secrets:
 
 ```shell
 mise run bootstrap-automation-secrets mbk
 ```
 
-The task also copies the existing Redlib monitoring token from the `Cluster:
-syd` vault into the `mbk` controller Secret. It does not print credential
-values or write them to Git.
+The task reads both Cloudflare values from the dedicated item and does not print
+credential values or write them to Git.
 
 ## B2 Activation
 

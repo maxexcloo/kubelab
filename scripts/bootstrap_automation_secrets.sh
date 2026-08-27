@@ -45,26 +45,24 @@ fi
 
 if [[ -f "${repository_dir}/clusters/${cluster}/cloudflare-automation.yaml" ]]; then
   configured=true
-  cloudflare_token="$(
+  cloudflare_item="$(
     env -u OP_CONNECT_HOST -u OP_CONNECT_TOKEN \
-      op item get --vault Homelab "Cloudflare App Policy: ${cluster}" --format json |
-      jq -ejr 'first(.fields[] | select(.id == "password" or .id == "credential")) | .value // empty'
+      op item get --vault Homelab "Cloudflare App Policy: ${cluster}" --format json
+  )"
+  cloudflare_token="$(
+    jq -ejr 'first(.fields[] | select(.id == "password" or .id == "credential")) | .value // empty' <<<"${cloudflare_item}"
   )"
   redlib_monitoring_token="$(
-    env -u OP_CONNECT_HOST -u OP_CONNECT_TOKEN \
-      op item get --vault "Cluster: syd" Redlib --format json |
-      jq -ejr '
+    jq -ejr '
         first(
           .fields[] |
           select(
             .id == "monitoring-token" or
-            .id == "monitoring_token" or
-            .label == "monitoring-token" or
-            .label == "monitoring_token_rw"
+            .label == "monitoring-token"
           )
         ) |
         .value // empty
-      '
+      ' <<<"${cloudflare_item}"
   )"
 
   kubectl --context "${cluster}" create namespace crossplane-system --dry-run=client -o yaml |
