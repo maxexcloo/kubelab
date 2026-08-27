@@ -7,7 +7,7 @@ spec:
   managementPolicies: [Create, LateInitialize, Observe, Update]
   forProvider:
     expectedResponseCheck:
-      logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
+      logic: .payload.body as $wanted | ((.response.body.name == $wanted.name and .response.body.friendlyName == $wanted.friendlyName) or any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName))
       type: CUSTOM
     headers:
       Content-Type: [application/json]
@@ -47,7 +47,7 @@ spec:
   managementPolicies: [LateInitialize, Observe, Update]
   forProvider:
     expectedResponseCheck:
-      logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
+      logic: .payload.body as $wanted | ((.response.body.name == $wanted.name and .response.body.friendlyName == $wanted.friendlyName) or any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName))
       type: CUSTOM
     headers:
       Content-Type: [application/json]
