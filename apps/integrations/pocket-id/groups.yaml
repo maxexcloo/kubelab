@@ -12,7 +12,7 @@ spec:
     headers:
       Content-Type: [application/json]
       User-Agent: [kubelab-crossplane/1.0]
-      X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+      X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
     mappings:
       - action: CREATE
         body: .payload.body
@@ -52,7 +52,7 @@ spec:
     headers:
       Content-Type: [application/json]
       User-Agent: [kubelab-crossplane/1.0]
-      X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+      X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
     mappings:
       - action: OBSERVE
         url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
@@ -81,7 +81,7 @@ spec:
     headers:
       Content-Type: [application/json]
       User-Agent: [kubelab-crossplane/1.0]
-      X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+      X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
     mappings:
       - action: CREATE
         body: .payload.body
@@ -121,7 +121,7 @@ spec:
     headers:
       Content-Type: [application/json]
       User-Agent: [kubelab-crossplane/1.0]
-      X-API-Key: ["{{ pocket-id:pocket-id:static-api-key }}"]
+      X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
     mappings:
       - action: OBSERVE
         url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
