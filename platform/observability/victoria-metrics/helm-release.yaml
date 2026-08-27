@@ -3,8 +3,6 @@ kind: HelmRelease
 metadata:
   name: victoria-metrics-k8s-stack
   namespace: observability
-  annotations:
-    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   interval: 30m
   releaseName: victoria-metrics-k8s-stack

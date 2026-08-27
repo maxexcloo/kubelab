@@ -17,8 +17,8 @@ retirement action.
   VictoriaLogs objects.
 - Both platform inventories are Ready and own VictoriaMetrics. Both foundation
   inventories own OnePassword Connect. No old-owner inventory entries remain.
-- The temporary foundation observability overlays are removed. Migration-only
-  prune annotations remain pending explicit lifecycle approval.
+- The temporary foundation observability overlays and migration-only prune
+  annotations are removed.
 
 ### Stateful workload handoff
 

@@ -3,8 +3,6 @@ kind: NetworkPolicy
 metadata:
   name: grafana
   namespace: observability
-  annotations:
-    kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     app.kubernetes.io/name: grafana
 spec:

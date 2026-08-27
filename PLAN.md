@@ -180,8 +180,8 @@ OnePassword Connect and VictoriaMetrics completed their Flux inventory
 transfers. `foundation` exclusively owns OnePassword Connect, while `platform`
 exclusively owns VictoriaMetrics on both clusters. The temporary foundation
 observability overlays have been removed and both foundation inventories have
-reconciled without observability objects. Remove the remaining migration-only
-`prune: disabled` annotations only after explicit lifecycle approval.
+reconciled without observability objects. The migration-only prune guards were
+removed after exclusive ownership was verified.
 
 ### Phase 2: Workload Migration (Dependency Order)
 

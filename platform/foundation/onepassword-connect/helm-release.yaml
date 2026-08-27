@@ -3,8 +3,6 @@ kind: HelmRelease
 metadata:
   name: onepassword-connect
   namespace: external-secrets
-  annotations:
-    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   interval: 30m
   releaseName: onepassword-connect
