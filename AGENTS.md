@@ -3,16 +3,18 @@
 ## Project Overview
 
 This repository owns Kubernetes resources reconciled by Flux and app-scoped
-integrations. The separate `homelab` repository owns everything required to
-rebuild or reach a cluster while Kubernetes is unavailable.
+integrations. `README.md` documents the current system, and `PLAN.md` contains
+only unfinished work. The separate `homelab` repository owns everything
+required to rebuild or reach a cluster while Kubernetes is unavailable.
 
 ## Conventions
 
-- Read `PLAN.md` before changing architecture, ownership, deletion behaviour,
-  networking, storage, secrets, or migration order.
-- Treat `PLAN.md` as authoritative for cross-repository ordering and workload
-  ownership, and `homelab` configuration as authoritative for substrate
-  implementation details.
+- Read `README.md` before changing architecture, ownership, deletion behaviour,
+  networking, storage or secrets. Read `PLAN.md` before resolving unfinished
+  cross-repository work.
+- Treat `README.md` as authoritative for current workload ownership,
+  `PLAN.md` as authoritative for unfinished ordering, and `homelab`
+  configuration as authoritative for substrate implementation details.
 - Use Australian English in project-owned prose and identifiers.
 - Use `.yaml`, not `.yml`, for project-owned YAML.
 - Omit trailing slashes from project-owned base URLs.
@@ -39,8 +41,8 @@ resources underneath. Use Kustomize only for composition and small patches; do
 not use `configMapGenerator` or `secretGenerator`. Keep chart values directly in
 the upstream Flux `HelmRelease` that consumes them.
 
-Keep root Markdown limited to `AGENTS.md`, `README.md`, and `PLAN.md`. Put later
-operational documentation under `docs/`.
+Keep root Markdown limited to `AGENTS.md`, `README.md`, and `PLAN.md`. Keep
+maintained project documentation in `README.md`; do not add a `docs/` tree.
 
 ## Sorting Convention
 
@@ -74,7 +76,7 @@ Kubernetes field and resource ordering instead of alphabetising it.
 
 - Prefer plain, direct Kubernetes manifests and upstream charts over abstractions
   and generic pipelines.
-- Keep comments local and specific; put operational explanations in `docs/`.
+- Keep comments local and specific; put operational explanations in `README.md`.
 - Keep check orchestration single-layered so the same validator is not run both
   directly and through a nested task in one path.
 
