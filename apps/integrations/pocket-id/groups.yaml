@@ -7,7 +7,7 @@ spec:
   managementPolicies: [Create, LateInitialize, Observe, Update]
   forProvider:
     expectedResponseCheck:
-      logic: .payload.body.name as $name | any(.response.body.data[]?; .name == $name)
+      logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
       type: CUSTOM
     headers:
       Content-Type: [application/json]
@@ -59,10 +59,11 @@ spec:
       - action: UPDATE
         body: .payload.body
         method: PUT
-        url: .payload.body.name as $name | .payload.baseUrl + "/" + (first(.response.body.data[]? | select(.name == $name)) | .id)
+        url: .payload.baseUrl + "/" + .payload.groupId
     payload:
       baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
       body: '{"friendlyName":"All Services","name":"all_services"}'
+      groupId: "{{ pocket-id-group-all-services:pocket-id:id }}"
   providerConfigRef:
     kind: ClusterProviderConfig
     name: pocket-id
@@ -76,7 +77,7 @@ spec:
   managementPolicies: [Create, LateInitialize, Observe, Update]
   forProvider:
     expectedResponseCheck:
-      logic: .payload.body.name as $name | any(.response.body.data[]?; .name == $name)
+      logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
       type: CUSTOM
     headers:
       Content-Type: [application/json]
@@ -128,10 +129,11 @@ spec:
       - action: UPDATE
         body: .payload.body
         method: PUT
-        url: .payload.body.name as $name | .payload.baseUrl + "/" + (first(.response.body.data[]? | select(.name == $name)) | .id)
+        url: .payload.baseUrl + "/" + .payload.groupId
     payload:
       baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
       body: '{"friendlyName":"Books","name":"books"}'
+      groupId: "{{ pocket-id-group-books:pocket-id:id }}"
   providerConfigRef:
     kind: ClusterProviderConfig
     name: pocket-id
