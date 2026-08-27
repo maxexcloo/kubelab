@@ -3,18 +3,6 @@
 This file contains only unfinished work. Current architecture and operations
 are documented in `README.md`; completed migration history remains in Git.
 
-## Cutover Close-out
-
-1. Confirm the restored Pocket ID administrator passkey and outbound mail.
-2. Confirm one interactive Pocket ID OIDC login to RoMM.
-3. Keep the stopped previous applications and source copies on `kimbap` through
-   3 September 2026.
-4. After the full rollback window and only if no regression remains, remove the
-   previous application containers, obsolete definitions and redundant source
-   copies from `kimbap`. Keep normal snapshots, scheduled backups and the
-   immutable Git archive.
-5. Remove the temporary rollback evidence from `README.md` after close-out.
-
 ## External Automation
 
 1. Create `B2 Automation: mbk` in the `Homelab` vault with a B2 application key
