@@ -60,6 +60,7 @@ spec:
               uid: VictoriaMetrics
               url: http://vmsingle-victoria-metrics-k8s-stack.observability.svc:8428
       deploymentStrategy:
+        rollingUpdate: null
         type: Recreate
       extraEmptyDirMounts:
         - name: tmp
