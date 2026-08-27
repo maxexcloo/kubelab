@@ -9,7 +9,7 @@ spec:
   prune: true
   retryInterval: 2m
   timeout: 10m
-  wait: false
+  wait: true
   dependsOn:
     - name: automation
   sourceRef:
