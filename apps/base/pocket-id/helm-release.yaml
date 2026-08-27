@@ -121,6 +121,7 @@ spec:
     route:
       main:
         annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: OIDC Provider
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Infrastructure
@@ -131,6 +132,7 @@ spec:
           - id.excloo.com
         labels:
           app.kubernetes.io/name: pocket-id
+          gateway.excloo.dev/public-access: "true"
         parentRefs:
-          - name: private
+          - name: public-tunnel
             namespace: networking
