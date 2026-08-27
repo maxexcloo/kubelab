@@ -59,6 +59,8 @@ spec:
               type: prometheus
               uid: VictoriaMetrics
               url: http://vmsingle-victoria-metrics-k8s-stack.observability.svc:8428
+      deploymentStrategy:
+        type: Recreate
       extraEmptyDirMounts:
         - name: tmp
           mountPath: /tmp
