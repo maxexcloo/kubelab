@@ -57,13 +57,12 @@ spec:
       - action: OBSERVE
         url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
       - action: UPDATE
-        body: .payload.body
+        body: .payload.body | del(.id)
         method: PUT
-        url: .payload.baseUrl + "/" + .payload.groupId
+        url: .payload.baseUrl + "/" + .payload.body.id
     payload:
       baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
-      body: '{"friendlyName":"All Services","name":"all_services"}'
-      groupId: "{{ pocket-id-group-all-services:pocket-id:id }}"
+      body: '{"friendlyName":"All Services","id":"{{ pocket-id-group-all-services:pocket-id:id }}","name":"all_services"}'
   providerConfigRef:
     kind: ClusterProviderConfig
     name: pocket-id
@@ -127,13 +126,12 @@ spec:
       - action: OBSERVE
         url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
       - action: UPDATE
-        body: .payload.body
+        body: .payload.body | del(.id)
         method: PUT
-        url: .payload.baseUrl + "/" + .payload.groupId
+        url: .payload.baseUrl + "/" + .payload.body.id
     payload:
       baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
-      body: '{"friendlyName":"Books","name":"books"}'
-      groupId: "{{ pocket-id-group-books:pocket-id:id }}"
+      body: '{"friendlyName":"Books","id":"{{ pocket-id-group-books:pocket-id:id }}","name":"books"}'
   providerConfigRef:
     kind: ClusterProviderConfig
     name: pocket-id
