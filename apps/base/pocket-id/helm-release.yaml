@@ -6,7 +6,7 @@ metadata:
 spec:
   interval: 30m
   releaseName: pocket-id
-  suspend: true
+  suspend: false
   chart:
     spec:
       chart: app-template
