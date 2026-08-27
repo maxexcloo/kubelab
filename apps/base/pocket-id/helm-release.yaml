@@ -1,0 +1,136 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pocket-id
+  namespace: pocket-id
+spec:
+  interval: 30m
+  releaseName: pocket-id
+  suspend: true
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      pocket-id:
+        strategy: Recreate
+        containers:
+          pocket-id:
+            env:
+              ALLOW_OWN_ACCOUNT_EDIT: "true"
+              ANALYTICS_DISABLED: "true"
+              APP_NAME: Excloo ID
+              APP_URL: https://id.excloo.com
+              EMAILS_VERIFIED: "true"
+              FILE_BACKEND: database
+              REQUIRE_USER_EMAIL: "true"
+              SMTP_FROM: pocket-id@excloo.dev
+              SMTP_HOST: smtp.resend.com
+              SMTP_PORT: "465"
+              SMTP_TLS: tls
+              SMTP_USER: resend
+              TRUST_PROXY: "true"
+              UI_CONFIG_DISABLED: "true"
+              VERSION_CHECK_DISABLED: "true"
+              WEBAUTHN_ALLOW_SYNCED_PASSKEYS: "true"
+              WEBAUTHN_USER_VERIFICATION: required
+            envFrom:
+              - secretRef:
+                  name: pocket-id
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/pocket-id/pocket-id
+              tag: v2.14.0@sha256:01540977dcf4c7b41b1159f34d68e4632f2658d62790e460ca65a42722b13c4a
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  exec:
+                    command:
+                      - /app/pocket-id
+                      - healthcheck
+                  failureThreshold: 3
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  exec:
+                    command:
+                      - /app/pocket-id
+                      - healthcheck
+                  failureThreshold: 3
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  exec:
+                    command:
+                      - /app/pocket-id
+                      - healthcheck
+                  failureThreshold: 30
+                  periodSeconds: 2
+                  timeoutSeconds: 5
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 20m
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              runAsGroup: 568
+              runAsNonRoot: true
+              runAsUser: 568
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: pocket-id
+    persistence:
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      pocket-id:
+        controller: pocket-id
+        ports:
+          http:
+            port: 1411
+            protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: OIDC Provider
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/href: https://id.excloo.com
+          gethomepage.dev/icon: pocket-id
+          gethomepage.dev/name: Excloo ID
+        hostnames:
+          - id.excloo.com
+        labels:
+          app.kubernetes.io/name: pocket-id
+        parentRefs:
+          - name: private
+            namespace: networking

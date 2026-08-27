@@ -5,6 +5,17 @@
 
   "customManagers": [
     {
+      "currentValueTemplate": "main",
+      "customType": "regex",
+      "datasourceTemplate": "git-refs",
+      "description": "Update AIOStreams template feeds",
+      "managerFilePatterns": ["/apps/base/aiostreams/helm-release\\.yaml$/"],
+      "matchStrings": [
+        "raw\\.githubusercontent\\.com/(?<depName>Tam-Taro/SEL-Filtering-and-Sorting|Vidhin05/Releases-Regex)/(?<currentDigest>[a-f0-9]{40})/"
+      ],
+      "packageNameTemplate": "https://github.com/{{{depName}}}"
+    },
+    {
       "customType": "regex",
       "datasourceTemplate": "docker",
       "description": "Update CloudNativePG container images",

@@ -1,0 +1,567 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: romm-workflows
+  namespace: romm
+data:
+  games.json: |
+    {
+      "non_dat_manifests": [],
+      "tested_romm_version": "5.2.0",
+      "exports": [
+        {
+          "name": "es-de-full",
+          "selection": "all"
+        },
+        {
+          "name": "es-de-portable",
+          "collection": "ES-DE Portable",
+          "selection": "collection"
+        }
+      ],
+      "formats": {
+        "non_dat": [".chd", ".cso", ".nsp", ".rvz", ".xci"],
+        "preserve": [".chd", ".cso", ".nsp", ".rvz", ".xci", ".zip"]
+      },
+      "paths": {
+        "exports": "/games/workflow/exports",
+        "inbox": "/games/workflow/staging/inbox",
+        "library": "/games/library",
+        "library_next": "/games/library.next",
+        "lock": "/games/workflow/romm-workflows.lock",
+        "processed": "/games/workflow/staging/processed",
+        "reports": "/games/workflow/reports",
+        "tools": "/games/workflow/tools",
+        "validated": "/games/workflow/staging/validated"
+      },
+      "safety": {
+        "restore_confirmation": "/games/workflow/reports/application-consistent-restore.confirmed"
+      },
+      "sources": [
+        {
+          "name": "romm",
+          "canonical_seed": true,
+          "path": "/romm"
+        },
+        {
+          "name": "roms",
+          "canonical_seed": false,
+          "path": "/games/ROMs"
+        },
+        {
+          "name": "games",
+          "canonical_seed": false,
+          "path": "/games/Games"
+        },
+        {
+          "name": "ingest",
+          "canonical_seed": false,
+          "path": "/games/Ingest"
+        },
+        {
+          "name": "retrodeck-roms",
+          "canonical_seed": false,
+          "path": "/games/retrodeck/roms"
+        },
+        {
+          "name": "legacy-sync",
+          "canonical_seed": false,
+          "path": "/games/Data/Legacy/Sync/games-roms"
+        }
+      ],
+      "tools": {
+        "fresh1g1r": {
+          "archive_sha256": "907c80726847636263a126673675e214492502f24570a823a58a99046bb85e77",
+          "archive_url": "https://codeload.github.com/UnluckyForSome/Fresh1G1R/tar.gz/5b8f9e0ebb0c34573805c337a375bbe3ee8fbec1",
+          "revision": "5b8f9e0ebb0c34573805c337a375bbe3ee8fbec1"
+        },
+        "igir": {
+          "archive_sha256": "67912875159036a2f381806a6fbf10a941f30d859c967c1772566f35cf110d0d",
+          "archive_url": "https://github.com/emmercm/igir/releases/download/v5.0.2/igir-5.0.2-Linux-amd64.tar.gz",
+          "binary_sha256": "47c534db3316282f43b257798d3cd39768f6138b2ae62a7d85e59a4b51d4113e",
+          "version": "5.0.2"
+        }
+      }
+    }
+  workflow.py: |
+    import contextlib
+    import csv
+    import fcntl
+    import hashlib
+    import json
+    import os
+    import re
+    import shutil
+    import subprocess
+    import sys
+    import tarfile
+    import time
+    import urllib.request
+    from pathlib import Path, PurePosixPath
+
+    CONFIRMATION = "PUBLISH VERIFIED ROMS"
+    CONFIG_PATH = Path(os.environ.get("CONFIG_PATH", "/app/games.json"))
+    MODES = {"audit", "export", "ingest", "inventory", "reconcile"}
+
+
+    class WorkflowError(RuntimeError):
+        pass
+
+
+    def sha256(path):
+        digest = hashlib.sha256()
+        with Path(path).open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+
+
+    def write_json(path, value):
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+        with temporary.open("w", encoding="utf-8") as stream:
+            json.dump(value, stream, indent=2, sort_keys=True)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+
+
+    @contextlib.contextmanager
+    def operation_lock(path):
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a+", encoding="utf-8") as stream:
+            try:
+                fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as error:
+                raise WorkflowError("another RoMM workflow holds the storage lock") from error
+            stream.seek(0)
+            stream.truncate()
+            stream.write(f"pid={os.getpid()} started={int(time.time())}\n")
+            stream.flush()
+            yield
+
+
+    def download_verified(url, destination, expected):
+        destination = Path(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if destination.exists() and sha256(destination) == expected:
+            return destination
+        if destination.exists():
+            invalid = destination.with_name(
+                f"{destination.name}.invalid-{int(time.time())}"
+            )
+            destination.rename(invalid)
+        partial = destination.with_name(f"{destination.name}.partial-{os.getpid()}")
+        request = urllib.request.Request(url, headers={"User-Agent": "kubelab-romm/1.0"})
+        with urllib.request.urlopen(request, timeout=60) as response, partial.open(
+            "wb"
+        ) as output:
+            shutil.copyfileobj(response, output, length=1024 * 1024)
+            output.flush()
+            os.fsync(output.fileno())
+        actual = sha256(partial)
+        if actual != expected:
+            raise WorkflowError(
+                f"download digest mismatch for {url}: expected {expected}, got {actual}"
+            )
+        os.replace(partial, destination)
+        return destination
+
+
+    def replace_directory(partial, destination):
+        partial = Path(partial)
+        destination = Path(destination)
+        if destination.exists():
+            invalid = destination.with_name(
+                f"{destination.name}.invalid-{int(time.time())}"
+            )
+            destination.rename(invalid)
+        partial.rename(destination)
+
+
+    def prepare_igir(configuration, tools_root):
+        details = configuration["tools"]["igir"]
+        downloads = tools_root / "downloads"
+        archive = download_verified(
+            details["archive_url"],
+            downloads / f"igir-{details['version']}-linux-amd64.tar.gz",
+            details["archive_sha256"],
+        )
+        destination = tools_root / f"igir-{details['version']}"
+        executable = destination / "igir"
+        if executable.exists() and sha256(executable) == details["binary_sha256"]:
+            return executable
+        partial = tools_root / f".igir-{details['version']}-{os.getpid()}"
+        partial.mkdir(parents=True)
+        with tarfile.open(archive, "r:gz") as package:
+            members = [member for member in package if member.isfile()]
+            candidates = [member for member in members if Path(member.name).name == "igir"]
+            if len(candidates) != 1:
+                raise WorkflowError("the pinned IGIR archive has an unexpected layout")
+            source = package.extractfile(candidates[0])
+            if source is None:
+                raise WorkflowError("the pinned IGIR executable could not be read")
+            with (partial / "igir").open("wb") as output:
+                shutil.copyfileobj(source, output)
+        (partial / "igir").chmod(0o555)
+        if sha256(partial / "igir") != details["binary_sha256"]:
+            raise WorkflowError("the extracted IGIR executable failed verification")
+        replace_directory(partial, destination)
+        return executable
+
+
+    def prepare_dats(configuration, tools_root):
+        details = configuration["tools"]["fresh1g1r"]
+        downloads = tools_root / "downloads"
+        archive = download_verified(
+            details["archive_url"],
+            downloads / f"fresh1g1r-{details['revision']}.tar.gz",
+            details["archive_sha256"],
+        )
+        destination = tools_root / f"fresh1g1r-{details['revision']}"
+        ready = destination / ".ready"
+        if (
+            ready.exists()
+            and ready.read_text(encoding="utf-8").strip()
+            == details["archive_sha256"]
+            and (destination / "no-intro").is_dir()
+            and (destination / "redump").is_dir()
+        ):
+            return [destination / "no-intro", destination / "redump"]
+        partial = tools_root / f".fresh1g1r-{details['revision']}-{os.getpid()}"
+        partial.mkdir(parents=True)
+        prefix = PurePosixPath(
+            f"Fresh1G1R-{details['revision']}/daily-virgin-dat"
+        )
+        with tarfile.open(archive, "r:gz") as package:
+            for member in package:
+                path = PurePosixPath(member.name)
+                try:
+                    relative = path.relative_to(prefix)
+                except ValueError:
+                    continue
+                if not relative.parts or relative.parts[0] not in {"no-intro", "redump"}:
+                    continue
+                if member.issym() or member.islnk():
+                    raise WorkflowError("the pinned DAT archive contains a link")
+                target = partial.joinpath(*relative.parts)
+                if member.isdir():
+                    target.mkdir(parents=True, exist_ok=True)
+                elif member.isfile():
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    source = package.extractfile(member)
+                    if source is None:
+                        raise WorkflowError(f"could not extract {member.name}")
+                    with target.open("wb") as output:
+                        shutil.copyfileobj(source, output)
+        (partial / ".ready").write_text(
+            f"{details['archive_sha256']}\n", encoding="utf-8"
+        )
+        replace_directory(partial, destination)
+        return [destination / "no-intro", destination / "redump"]
+
+
+    def require_directory(path, *, empty=False, writable=False):
+        path = Path(path)
+        if not path.is_dir():
+            raise WorkflowError(f"required directory does not exist: {path}")
+        if empty and next(path.iterdir(), None) is not None:
+            raise WorkflowError(f"directory must be empty: {path}")
+        if not os.access(path, os.R_OK | (os.W_OK if writable else 0)):
+            raise WorkflowError(f"directory permissions are insufficient: {path}")
+        return path
+
+
+    def run_igir(executable, arguments):
+        subprocess.run([str(executable), *map(str, arguments)], check=True)
+
+
+    def reject_unused(report):
+        with Path(report).open(newline="", encoding="utf-8-sig") as stream:
+            for row in csv.reader(stream):
+                if any(value.strip().upper() == "UNUSED" for value in row):
+                    raise WorkflowError("IGIR reported content outside the reviewed DATs")
+
+
+    def safe_relative(path, root):
+        try:
+            return Path(path).resolve().relative_to(Path(root).resolve())
+        except ValueError as error:
+            raise WorkflowError(f"path escapes its configured root: {path}") from error
+
+
+    def walk_files(root):
+        root = Path(root)
+        files = []
+        for path in root.rglob("*"):
+            if path.is_symlink():
+                raise WorkflowError(f"symbolic links are not accepted: {path}")
+            if path.is_file():
+                files.append(path)
+        return sorted(files)
+
+
+    def verify_non_dat_manifests(configuration):
+        manifests = configuration["non_dat_manifests"]
+        if not manifests:
+            raise WorkflowError("reviewed non-DAT manifests are not configured")
+        allowed = [Path(source["path"]).resolve() for source in configuration["sources"]]
+        for item in manifests:
+            manifest = Path(item["file"])
+            if sha256(manifest) != item["sha256"]:
+                raise WorkflowError(f"manifest digest mismatch: {manifest}")
+            for line in manifest.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                expected, name = line.split(maxsplit=1)
+                target = (Path("/") / name.lstrip("* ")).resolve()
+                if not any(target.is_relative_to(root) for root in allowed):
+                    raise WorkflowError(f"manifest target is outside reviewed sources: {target}")
+                if sha256(target) != expected:
+                    raise WorkflowError(f"non-DAT file digest mismatch: {target}")
+
+
+    def report_path(configuration, prefix, run_id, suffix="csv"):
+        reports = Path(configuration["paths"]["reports"])
+        reports.mkdir(parents=True, exist_ok=True)
+        return reports / f"{prefix}-{run_id}.{suffix}"
+
+
+    def dat_arguments(dat_paths):
+        arguments = []
+        for path in dat_paths:
+            arguments.extend(["--dat", str(path)])
+        return arguments
+
+
+    def inventory(configuration, executable, dat_paths, run_id):
+        report = report_path(configuration, "inventory", run_id)
+        arguments = ["report", *dat_arguments(dat_paths), "--report-output", report]
+        for source in configuration["sources"]:
+            arguments.extend(["--input", require_directory(source["path"])])
+        run_igir(executable, arguments)
+
+
+    def audit(configuration, executable, dat_paths, run_id):
+        verify_non_dat_manifests(configuration)
+        report = report_path(configuration, "audit", run_id)
+        library = require_directory(configuration["paths"]["library"])
+        run_igir(
+            executable,
+            [
+                "report",
+                "test",
+                *dat_arguments(dat_paths),
+                "--input",
+                library,
+                "--report-output",
+                report,
+            ],
+        )
+        reject_unused(report)
+
+
+    def tree_manifest(root, destination):
+        root = Path(root)
+        lines = [
+            f"{sha256(path)}  {path.relative_to(root)}"
+            for path in walk_files(root)
+        ]
+        Path(destination).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+    def remove_empty_directories(root):
+        root = Path(root)
+        for directory, _, _ in os.walk(root, topdown=False):
+            Path(directory).rmdir()
+
+
+    def publish_validated(validated, inbox, processed_root, library, journal):
+        validated = require_directory(validated)
+        inbox = require_directory(inbox)
+        processed_root = require_directory(processed_root, writable=True)
+        library = require_directory(library, writable=True)
+        files = walk_files(validated)
+        if not files:
+            raise WorkflowError("validated batch is empty")
+        entries = []
+        for source in files:
+            relative = safe_relative(source, validated)
+            destination = library / relative
+            expected = sha256(source)
+            if destination.exists() and sha256(destination) != expected:
+                raise WorkflowError(f"conflicting canonical destination: {relative}")
+            entries.append(
+                {
+                    "destination": str(destination),
+                    "sha256": expected,
+                    "source": str(source),
+                    "status": "validated",
+                }
+            )
+        state = {"batch": inbox.name, "completed": False, "entries": entries}
+        write_json(journal, state)
+        for entry in entries:
+            source = Path(entry["source"])
+            destination = Path(entry["destination"])
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            if destination.exists():
+                if sha256(destination) != entry["sha256"]:
+                    raise WorkflowError(f"destination changed during publication: {destination}")
+                source.unlink()
+            else:
+                os.replace(source, destination)
+            if sha256(destination) != entry["sha256"]:
+                raise WorkflowError(f"published file failed verification: {destination}")
+            entry["status"] = "published"
+            write_json(journal, state)
+        processed = processed_root / inbox.name
+        if processed.exists():
+            raise WorkflowError(f"processed batch already exists: {processed}")
+        os.replace(inbox, processed)
+        state["completed"] = True
+        write_json(journal, state)
+        remove_empty_directories(validated)
+
+
+    def ingest(configuration, executable, dat_paths, run_id, batch, confirmation):
+        if confirmation != CONFIRMATION:
+            raise WorkflowError(f"ingest requires the exact confirmation: {CONFIRMATION}")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", batch):
+            raise WorkflowError("batch name contains unsupported characters")
+        inbox_root = require_directory(configuration["paths"]["inbox"])
+        processed_root = require_directory(
+            configuration["paths"]["processed"], writable=True
+        )
+        inbox = inbox_root / batch
+        processed = processed_root / batch
+        if not inbox.exists() and processed.exists():
+            print(f"batch is already processed: {batch}")
+            return
+        require_directory(inbox)
+        if not walk_files(inbox):
+            raise WorkflowError("inbox batch is empty")
+        validated_root = require_directory(
+            configuration["paths"]["validated"], writable=True
+        )
+        validated = validated_root / f"{batch}-{run_id}"
+        if validated.exists():
+            raise WorkflowError(f"run-specific validation path already exists: {validated}")
+        report = report_path(configuration, f"ingest-{batch}", run_id)
+        run_igir(
+            executable,
+            [
+                "copy",
+                "test",
+                "report",
+                *dat_arguments(dat_paths),
+                "--input",
+                inbox,
+                "--output",
+                f"{validated}/roms/{{romm}}",
+                "--report-output",
+                report,
+            ],
+        )
+        reject_unused(report)
+        journal = report_path(
+            configuration, f"ingest-{batch}-{run_id}", "journal", "json"
+        )
+        publish_validated(
+            validated,
+            inbox,
+            processed_root,
+            configuration["paths"]["library"],
+            journal,
+        )
+
+
+    def reconcile(configuration, executable, dat_paths, run_id, confirmation):
+        if confirmation != CONFIRMATION:
+            raise WorkflowError(f"reconcile requires the exact confirmation: {CONFIRMATION}")
+        evidence = Path(configuration["safety"]["restore_confirmation"])
+        if evidence.read_text(encoding="utf-8").strip() != (
+            "application_consistent_restore_verified=true"
+        ):
+            raise WorkflowError("application-consistent restore evidence is missing")
+        verify_non_dat_manifests(configuration)
+        library_next = require_directory(
+            configuration["paths"]["library_next"], empty=True, writable=True
+        )
+        canonical = next(
+            source for source in configuration["sources"] if source["canonical_seed"]
+        )
+        seed = require_directory(canonical["path"])
+        for source in walk_files(seed):
+            relative = source.relative_to(seed)
+            destination = library_next / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+        report = report_path(configuration, "reconcile", run_id)
+        arguments = [
+            "copy",
+            "test",
+            "report",
+            *dat_arguments(dat_paths),
+            "--output",
+            f"{library_next}/roms/{{romm}}",
+            "--report-output",
+            report,
+        ]
+        for source in configuration["sources"]:
+            arguments.extend(["--input", require_directory(source["path"])])
+        run_igir(executable, arguments)
+        reject_unused(report)
+        manifest = report_path(configuration, "reconcile", run_id, "sha256")
+        tree_manifest(library_next, manifest)
+
+
+    def main():
+        configuration = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+        mode = os.environ.get("MODE", "inventory")
+        if mode not in MODES:
+            raise WorkflowError(f"unsupported workflow mode: {mode}")
+        run_id = re.sub(r"[^a-zA-Z0-9._-]", "-", os.environ.get("RUN_ID", "manual"))
+        paths = configuration["paths"]
+        for name in ("inbox", "processed", "reports", "tools", "validated"):
+            Path(paths[name]).mkdir(parents=True, exist_ok=True)
+        with operation_lock(paths["lock"]):
+            if mode == "export":
+                raise WorkflowError(
+                    "RoMM 5.2.0 export compatibility and collection filtering are not verified"
+                )
+            tools_root = Path(paths["tools"])
+            executable = prepare_igir(configuration, tools_root)
+            dat_paths = prepare_dats(configuration, tools_root)
+            if mode == "audit":
+                audit(configuration, executable, dat_paths, run_id)
+            elif mode == "ingest":
+                ingest(
+                    configuration,
+                    executable,
+                    dat_paths,
+                    run_id,
+                    os.environ.get("BATCH", ""),
+                    os.environ.get("CONFIRMATION", ""),
+                )
+            elif mode == "inventory":
+                inventory(configuration, executable, dat_paths, run_id)
+            elif mode == "reconcile":
+                reconcile(
+                    configuration,
+                    executable,
+                    dat_paths,
+                    run_id,
+                    os.environ.get("CONFIRMATION", ""),
+                )
+
+
+    if __name__ == "__main__":
+        try:
+            main()
+        except (OSError, subprocess.CalledProcessError, WorkflowError) as error:
+            print(f"RoMM workflow failed: {error}", file=sys.stderr)
+            raise SystemExit(1) from error

@@ -9,12 +9,7 @@ spec:
   prune: true
   retryInterval: 2m
   timeout: 10m
-  wait: true
-  healthCheckExprs:
-    - apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      current: (has(spec.suspend) && spec.suspend) || status.conditions.exists(e, e.type == 'Ready' && e.status == 'True' && e.observedGeneration == metadata.generation)
-      failed: "(!has(spec.suspend) || !spec.suspend) && status.conditions.exists(e, e.type == 'Ready' && e.status == 'False' && e.observedGeneration == metadata.generation)"
+  wait: false
   dependsOn:
     - name: automation
   sourceRef:

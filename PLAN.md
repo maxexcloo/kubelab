@@ -80,6 +80,11 @@ mise run deploy syd
 `deploy` reconciles the selected cluster's root Flux Kustomization and its Git
 source. Flux remains the sole routine deployer for Kubernetes resources.
 
+The latest read-only audit is recorded in
+[`docs/cutover-evidence.md`](docs/cutover-evidence.md). It proves both clusters
+healthy at its recorded revision and tracks remaining live cutover gates,
+including the substrate-owned `syd` wildcard DNS target.
+
 Reconciliation follows `flux-system`, `foundation`, `platform`, optional
 cluster automation, then applications. App-scoped API integrations that require
 a restored application run after applications without blocking their rollout;
@@ -91,10 +96,11 @@ only after the External Secrets CRDs are healthy, then installs secret consumers
 including VictoriaMetrics. Generated CRDs are managed through their pinned
 upstream chart or source rather than copied into this repository.
 
-Parent inventories with health waiting enabled treat a deliberately suspended
-child Kustomization or Helm release as current. Active resources must still
-report `Ready=True` for their observed generation. This permits fail-closed
-staging without making healthy dependency inventories appear failed.
+The `mbk` root inventory health-checks only active layers while optional
+integration inventories remain suspended. The applications inventory does not
+wait while staged Helm releases are suspended; active releases are verified
+directly during reconciliation. Restore normal application health waiting once
+every staged release is active.
 
 ## Cutover Controls
 
@@ -112,7 +118,11 @@ with Anisette and Redlib cut over on `syd`; Byparr runs on `mbk`. OpenSpeedTest
 is reconciled on both clusters. Actual Budget, Beszel, Bichon, Bifrost,
 CLIProxyAPI, and Comfy Control are cut over on `mbk`, Homepage is reconciled on
 `mbk`, Beszel agents are reconciled on both clusters, BookOrbit is cut over,
-and Shelfmark is reconciled.
+Shelfmark is cut over, and AIO Metadata, AIOStreams, and Open WebUI are
+implemented. RoMM and its storage-local workflow replacement are implemented in
+a suspended, fail-closed state. Pocket ID is implemented last with a suspended
+release, PostgreSQL, retained logical and application-native exports, guarded
+restore, and adoption-only OIDC client automation.
 
 ### Progress States
 
@@ -132,31 +142,37 @@ mistaken for a completed migration:
 6. **Previous removed**: the old deployment and obsolete delivery configuration
    have been removed.
 
-| Workload      | Current State | Next Gate                                                            |
-| ------------- | ------------- | -------------------------------------------------------------------- |
-| Actual Budget | Cut over      | Complete the rollback window                                         |
-| Anisette      | Reconciled    | Record cutover evidence and the rollback window                      |
-| Beszel        | Cut over      | Complete the rollback window                                         |
-| Bichon        | Cut over      | Complete the rollback window                                         |
-| Bifrost       | Cut over      | Complete the rollback window and migrate its provider dependencies   |
-| BookOrbit     | Cut over      | Complete the rollback window                                         |
-| Byparr        | Reconciled    | Record cutover evidence and the rollback window                      |
-| CLIProxyAPI   | Cut over      | Complete the rollback window                                         |
-| Comfy Control | Cut over      | Complete the rollback window                                         |
-| Homepage      | Reconciled    | Record cutover evidence                                              |
-| Larapaper     | Cut over      | Complete the rollback window                                         |
-| Linkwarden    | Cut over      | Complete the rollback window                                         |
-| Miniflux      | Cut over      | Complete the rollback window                                         |
-| OpenSpeedTest | Implemented   | Confirm reconciliation on both clusters and retire prior deployments |
-| Papra         | Cut over      | Complete the rollback window                                         |
-| Redlib        | Reconciled    | Record cutover evidence and the rollback window                      |
-| Shelfmark     | Reconciled    | Record cutover evidence and the rollback window                      |
+| Workload       | Current State | Next Gate                                                                      |
+| -------------- | ------------- | ------------------------------------------------------------------------------ |
+| Actual Budget  | Cut over      | Complete the rollback window                                                   |
+| AIO Metadata   | Implemented   | Restore retained configuration and confirm reconciliation                      |
+| AIOStreams     | Implemented   | Restore retained configuration and confirm reconciliation                      |
+| Anisette       | Cut over      | Complete the rollback window                                                   |
+| Beszel         | Cut over      | Validate and activate the adoption-only B2 inventory, then complete rollback   |
+| Bichon         | Cut over      | Complete the rollback window                                                   |
+| Bifrost        | Cut over      | Complete the rollback window                                                   |
+| BookOrbit      | Cut over      | Complete the rollback window                                                   |
+| Byparr         | Reconciled    | Record cutover evidence and the rollback window                                |
+| CLIProxyAPI    | Cut over      | Complete the rollback window                                                   |
+| Comfy Control  | Cut over      | Complete the rollback window                                                   |
+| Homepage       | Reconciled    | Record cutover evidence                                                        |
+| Larapaper      | Cut over      | Complete the rollback window                                                   |
+| Linkwarden     | Cut over      | Reconcile the private-route namespace label, then complete the rollback window |
+| Miniflux       | Cut over      | Complete the rollback window                                                   |
+| Open WebUI     | Implemented   | Restore retained data and Pocket ID client, then confirm reconciliation        |
+| OpenSpeedTest  | Reconciled    | Repair the substrate-owned `syd` wildcard DNS target, then confirm both routes |
+| Papra          | Cut over      | Complete the rollback window                                                   |
+| Pocket ID      | Implemented   | Preserve the encryption key, restore a full export, and validate privately     |
+| Redlib         | Cut over      | Activate reviewed WAF adoption, then complete the rollback window              |
+| RoMM           | Implemented   | Restore PostgreSQL and configuration, validate, then review cutover            |
+| RoMM workflows | Implemented   | Add reviewed non-DAT manifests and run the NFS disposable-copy drill           |
+| Shelfmark      | Cut over      | Complete the rollback window                                                   |
 
 ### Phase 1: Observability & Dynamic Automation
 
 1. **Observability — Complete**: VictoriaMetrics, VictoriaLogs, and Grafana run on `mbk` and `syd` for cluster metrics and logs (replacing Dozzle).
 2. **ExternalDNS Automation — Complete**: ExternalDNS runs on both clusters. Application records are opt-in, Cloudflare-scoped, adopt existing records during cutover, and are upsert-only.
-3. **1Password Workload Items — Implemented**: Homepage-labelled HTTPRoutes seed Login items instead of only enriching items discovered through External Secrets or Push Secrets. Grafana and Headlamp carry Homepage metadata on both clusters; Grafana's functional administrator credentials come from its cluster vault, while Headlamp remains URL-only. The `mbk` Grafana overlay adopts the retained OIDC client fields and configures Pocket ID; `syd` retains local administrator access only. Unit tests cover repeat normalisation and prevent archival until the current applications revision is ready. The currently deployed predecessor is healthy and idempotent on both clusters; reconcile this revision and confirm the expanded item set converges before marking the work complete.
+3. **1Password Workload Items — Reconciled**: Homepage-labelled HTTPRoutes seed Login items instead of only enriching items discovered through External Secrets or Push Secrets. Grafana and Headlamp carry Homepage metadata on both clusters; Grafana's functional administrator credentials come from its cluster vault, while Headlamp remains URL-only. Grafana retains cluster-local administrator access on both clusters. The workload-item reconciler is idempotent and archives an old item only after the current applications revision is ready.
 4. **Crossplane Automation — Implemented, External Policies Staged**: Crossplane and `provider-http` run on `mbk`. Resend uses one full-access bootstrap credential per cluster, named `Resend: <cluster>` in the `Homelab` vault, and separate sending-only workload keys. The narrow `PocketIDClient` contract composes standard provider-http Requests, adopts and updates restored clients without create or delete authority, and reconciles their group access. Pocket ID group Requests may create missing named groups but omit delete authority. The Pocket ID API declarations reconcile after applications with Flux health waiting disabled because the authority is deliberately suspended; every resource must still become Ready during private activation. Beszel's B2 Requests adopt and update bucket policy without create or delete authority and observe the existing one-time application key without rotation authority. `RedlibWAFPolicy` discovers the Cloudflare zone and updates the phase entry point while retaining every unrelated rule; its Flux inventory remains suspended because first activation changes live request handling. Bootstrap both least-privilege controller credentials with `mise run bootstrap-automation-secrets mbk`, then follow [`docs/external-automation.md`](docs/external-automation.md). All external resources remain orphan-on-delete. Add other app-scoped APIs with the workload that consumes them.
 5. **Storage Evaluation — Trial Ready**: `democratic-csi` is unsuitable for TrueNAS 26 because its TrueNAS integration depends on the removed REST API or privileged SSH. Trial the official WebSocket-based TrueNAS CSI driver on `mbk`; retain NFS as the production default until provisioning, retention, snapshots, recovery, and upgrades pass. See [`docs/storage.md`](docs/storage.md).
 
@@ -176,7 +192,7 @@ ownership.
 
 ### Phase 2: Workload Migration (Dependency Order)
 
-Execute migrations with one pull request and cutover record per workload group:
+Execute migrations with one reviewed Git change and cutover record per workload group:
 
 1. **Stateless Utilities — In Progress**: `anisette` and `redlib` are cut over on `syd`; `byparr` runs on `mbk`. Redlib's exact legacy defaults are restored, its monitoring token is adopted, and its Cloudflare JS-challenge policy is implemented in a suspended `mbk` automation inventory pending reviewed activation.
 2. **Platform Consumers — Reconciled**: Homepage runs on `mbk` with native
@@ -188,16 +204,32 @@ Execute migrations with one pull request and cutover record per workload group:
    route. Both interfaces have live cutover evidence.
 3. **Identity-Dependent & Small Stateful — In Progress**: Actual Budget,
    Bichon, Bifrost, CLIProxyAPI, Comfy Control, Larapaper, and Papra are cut
-   over on `mbk`.
-4. **Databases & Media Libraries — In Progress**: Miniflux, Linkwarden, and
-   BookOrbit are cut over; Shelfmark is reconciled.
+   over on `mbk`. AIO Metadata and AIOStreams are implemented with retained NFS
+   configuration, and Open WebUI is implemented with retained NFS data and its
+   existing Pocket ID client contract. Migration-only workload-item annotations
+   adopt their existing Homelab-owned credentials and preserve the legacy
+   AIOStreams secret and Open WebUI OIDC/session values.
+4. **Databases & Media Libraries — In Progress**: Miniflux, Linkwarden,
+   BookOrbit, and Shelfmark are cut over. RoMM is implemented with a
+   suspended application release, CloudNativePG, a suspended logical-backup
+   schedule, pinned
+   Valkey, and its retained NFS tree mounted as one filesystem. Its migration
+   annotations preserve the existing authentication, database, metadata,
+   Pocket ID, and provider credentials while copying their values into the
+   Kubernetes field contract.
    - CloudNativePG operator for PostgreSQL instances.
    - `miniflux` (Postgres).
    - `linkwarden` (Postgres + storage).
    - `bookorbit` & `shelfmark` (retained NFS libraries).
    - `romm` (Postgres + Redis/Valkey + NFS library).
-5. **RoMM Workflows**: Storage-local Kubernetes Jobs mounting NFS (replacing previous GitHub Actions runners).
-6. **Identity Authority (Pocket ID)**: Migrate last. Validate break-glass cluster-admin credentials and full export/restore before DNS cutover.
+5. **RoMM Workflows — Implemented**: A suspended storage-local Kubernetes Job
+   template replaces the previous GitHub Actions runner. Its RoMM-specific
+   ConfigMap contract pins tools and DAT input, serialises modes with an NFS
+   lock, fails closed on unreviewed non-DAT content, journals ingest publication,
+   and preserves report evidence. Populate the reviewed non-DAT manifests and
+   complete the NFS disposable-copy drill before enabling destructive modes.
+   See [`docs/romm-workflows.md`](docs/romm-workflows.md).
+6. **Identity Authority (Pocket ID) — Implemented, Staged**: Pocket ID remains suspended and attaches only to the private Gateway when enabled for validation. It uses CloudNativePG rather than SQLite on NFS, stores uploads in PostgreSQL, writes daily logical dumps and complete application-native exports to retained NFS, and provides a hash-gated restore Job template. The workload-item reconciler explicitly adopts the legacy Excloo ID item and preserves its encryption key. Crossplane adopts the eleven retained OIDC clients, reconciles the `all_services` and `books` groups, and has no authority to recreate client secrets or delete identity resources. Validate the human administrator passkey, mail, full export/restore, and every client before a reviewed public-Gateway cutover. See [`docs/pocket-id.md`](docs/pocket-id.md).
 
 ### Workload Cutover Checklist
 

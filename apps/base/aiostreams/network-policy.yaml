@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+  labels:
+    app.kubernetes.io/name: aiostreams
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 30375
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: aiostreams
+  policyTypes:
+    - Ingress

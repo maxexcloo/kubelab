@@ -1,0 +1,111 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+spec:
+  interval: 30m
+  releaseName: aiostreams
+  suspend: true
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      aiostreams:
+        strategy: Recreate
+        containers:
+          aiostreams:
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/viren070/aiostreams
+              tag: v2.33.2@sha256:b169ccfb2b6f351f1bc5a8a460e4e102db77a11fb4fc58222e411d96b3adb85b
+            env:
+              BASE_URL: https://aiostreams.excloo.com
+              DATABASE_URI: sqlite://./data/db.sqlite
+              FEATURED_TEMPLATE_IDS: tamtaro.complete,Vidhin05.english-template
+              PORT: "30375"
+              SEL_SYNC_ACCESS: all
+              TEMPLATE_REFRESH_INTERVAL: "3600"
+              TEMPLATE_URLS: '["https://raw.githubusercontent.com/Tam-Taro/SEL-Filtering-and-Sorting/2eade4be5c3e34d096ad06326a92ec4695efe385/Tamtaro-All-Templates-for-AIOStreams.json", "https://raw.githubusercontent.com/Vidhin05/Releases-Regex/2a0b55278d857e808fa37925a730b2709df87a51/all-templates.json"]'
+              WHITELISTED_SYNC_REFRESH_INTERVAL: "3600"
+            envFrom:
+              - secretRef:
+                  name: aiostreams
+            probes:
+              liveness:
+                enabled: true
+                path: /api/v1/health
+                port: 30375
+                type: HTTP
+              readiness:
+                enabled: true
+                path: /api/v1/health
+                port: 30375
+                type: HTTP
+            resources:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 50m
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              runAsGroup: 568
+              runAsNonRoot: true
+              runAsUser: 568
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: aiostreams
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /app/data
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      aiostreams:
+        controller: aiostreams
+        ports:
+          http:
+            port: 30375
+            protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: Stremio Aggregator
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/href: https://aiostreams.excloo.com
+          gethomepage.dev/icon: sh-aiostreams
+          gethomepage.dev/name: AIOStreams
+        hostnames:
+          - aiostreams.excloo.com
+        labels:
+          app.kubernetes.io/name: aiostreams
+        parentRefs:
+          - name: private
+            namespace: networking

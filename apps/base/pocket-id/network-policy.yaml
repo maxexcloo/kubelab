@@ -1,0 +1,66 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pocket-id
+  namespace: pocket-id
+  labels:
+    app.kubernetes.io/name: pocket-id
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: crossplane-system
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 1411
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/controller: pocket-id
+      app.kubernetes.io/instance: pocket-id
+      app.kubernetes.io/name: pocket-id
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pocket-id-database
+  namespace: pocket-id
+  labels:
+    app.kubernetes.io/name: pocket-id
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: backup
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: restore
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/controller: pocket-id
+              app.kubernetes.io/instance: pocket-id
+              app.kubernetes.io/name: pocket-id
+      ports:
+        - port: 5432
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - port: 8000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: pocket-id-database
+  policyTypes:
+    - Ingress

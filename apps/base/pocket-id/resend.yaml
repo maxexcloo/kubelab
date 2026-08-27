@@ -1,0 +1,7 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: ResendKey
+metadata:
+  name: resend
+  namespace: pocket-id
+spec:
+  displayName: Excloo ID

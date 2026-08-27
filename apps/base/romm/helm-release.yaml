@@ -1,0 +1,206 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: romm
+  namespace: romm
+spec:
+  interval: 30m
+  releaseName: romm
+  suspend: true
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.1.0
+  values:
+    controllers:
+      romm:
+        strategy: Recreate
+        containers:
+          romm:
+            env:
+              DB_HOST: romm-database-rw
+              DB_NAME: romm
+              DB_PORT: "5432"
+              DB_QUERY_JSON: '{"sslmode":"require"}'
+              DISABLE_USERPASS_LOGIN: "false"
+              OIDC_ALLOW_REGISTRATION: "true"
+              OIDC_ENABLED: "true"
+              OIDC_PROVIDER: Excloo ID
+              OIDC_REDIRECT_URI: https://games.excloo.com/api/oauth/openid
+              OIDC_SERVER_APPLICATION_URL: https://id.excloo.com
+              OIDC_SERVER_METADATA_URL: https://id.excloo.com/.well-known/openid-configuration
+              REDIS_HOST: localhost
+              REDIS_PORT: "6379"
+              ROMM_BASE_URL: https://games.excloo.com
+              ROMM_CORS_ALLOWED_ORIGINS: https://games.excloo.com
+              ROMM_DB_DRIVER: postgresql
+              ROMM_SESSION_SECURE_COOKIE: "true"
+              SCAN_TIMEOUT: "86400"
+              TZ: Australia/Sydney
+              WEB_SERVER_CONCURRENCY: "3"
+              DB_PASSWD:
+                valueFrom:
+                  secretKeyRef:
+                    key: password
+                    name: romm-database
+              DB_USER:
+                valueFrom:
+                  secretKeyRef:
+                    key: username
+                    name: romm-database
+            envFrom:
+              - secretRef:
+                  name: romm
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/rommapp/romm
+              tag: 5.2.0@sha256:3512f2ca455782f90247271bed23116e6bc675bc74e379be2c41696e607ab11e
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 3
+                  httpGet:
+                    path: /api/heartbeat
+                    port: 8080
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 3
+                  httpGet:
+                    path: /api/heartbeat
+                    port: 8080
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  httpGet:
+                    path: /api/heartbeat
+                    port: 8080
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+            resources:
+              limits:
+                memory: 4Gi
+              requests:
+                cpu: 100m
+                memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              runAsGroup: 568
+              runAsNonRoot: true
+              runAsUser: 568
+              capabilities:
+                drop:
+                  - ALL
+          valkey:
+            args:
+              - valkey-server
+              - --appendonly
+              - "no"
+              - --save
+              - ""
+            image:
+              pullPolicy: IfNotPresent
+              repository: docker.io/valkey/valkey
+              tag: 9.1.1@sha256:70739f85ad2ee01a726a965584a0f94895f01b0c60b3cc8b0aeef11eaa6888cf
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  tcpSocket:
+                    port: 6379
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  tcpSocket:
+                    port: 6379
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 20m
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              runAsGroup: 568
+              runAsNonRoot: true
+              runAsUser: 568
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: romm
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        advancedMounts:
+          romm:
+            romm:
+              - path: /romm
+      nginx-configuration:
+        type: emptyDir
+        advancedMounts:
+          romm:
+            romm:
+              - path: /etc/nginx/conf.d
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+      valkey:
+        type: emptyDir
+        advancedMounts:
+          romm:
+            valkey:
+              - path: /data
+    service:
+      romm:
+        controller: romm
+        ports:
+          http:
+            port: 8080
+            protocol: HTTP
+    route:
+      main:
+        annotations:
+          gethomepage.dev/description: Game & ROM Library
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/href: https://games.excloo.com
+          gethomepage.dev/icon: romm
+          gethomepage.dev/name: RoMM
+        hostnames:
+          - games.excloo.com
+        labels:
+          app.kubernetes.io/name: romm
+        parentRefs:
+          - name: private
+            namespace: networking
