@@ -142,53 +142,46 @@ mistaken for a completed migration:
 6. **Previous removed**: the old deployment and obsolete delivery configuration
    have been removed.
 
-| Workload       | Current State | Next Gate                                                                      |
-| -------------- | ------------- | ------------------------------------------------------------------------------ |
-| Actual Budget  | Cut over      | Complete the rollback window                                                   |
-| AIO Metadata   | Implemented   | Restore retained configuration and confirm reconciliation                      |
-| AIOStreams     | Implemented   | Restore retained configuration and confirm reconciliation                      |
-| Anisette       | Cut over      | Complete the rollback window                                                   |
-| Beszel         | Cut over      | Validate and activate the adoption-only B2 inventory, then complete rollback   |
-| Bichon         | Cut over      | Complete the rollback window                                                   |
-| Bifrost        | Cut over      | Complete the rollback window                                                   |
-| BookOrbit      | Cut over      | Complete the rollback window                                                   |
-| Byparr         | Reconciled    | Record cutover evidence and the rollback window                                |
-| CLIProxyAPI    | Cut over      | Complete the rollback window                                                   |
-| Comfy Control  | Cut over      | Complete the rollback window                                                   |
-| Homepage       | Reconciled    | Record cutover evidence                                                        |
-| Larapaper      | Cut over      | Complete the rollback window                                                   |
-| Linkwarden     | Cut over      | Reconcile the private-route namespace label, then complete the rollback window |
-| Miniflux       | Cut over      | Complete the rollback window                                                   |
-| Open WebUI     | Implemented   | Restore retained data and Pocket ID client, then confirm reconciliation        |
-| OpenSpeedTest  | Reconciled    | Repair the substrate-owned `syd` wildcard DNS target, then confirm both routes |
-| Papra          | Cut over      | Complete the rollback window                                                   |
-| Pocket ID      | Implemented   | Preserve the encryption key, restore a full export, and validate privately     |
-| Redlib         | Cut over      | Activate reviewed WAF adoption, then complete the rollback window              |
-| RoMM           | Implemented   | Restore PostgreSQL and configuration, validate, then review cutover            |
-| RoMM workflows | Implemented   | Add reviewed non-DAT manifests and run the NFS disposable-copy drill           |
-| Shelfmark      | Cut over      | Complete the rollback window                                                   |
+| Workload       | Current State | Next Gate                                                                    |
+| -------------- | ------------- | ---------------------------------------------------------------------------- |
+| Actual Budget  | Cut over      | Complete the rollback window                                                 |
+| AIO Metadata   | Cut over      | Complete the rollback window                                                 |
+| AIOStreams     | Cut over      | Complete the rollback window                                                 |
+| Anisette       | Cut over      | Complete the rollback window                                                 |
+| Beszel         | Cut over      | Validate and activate the adoption-only B2 inventory, then complete rollback |
+| Bichon         | Cut over      | Complete the rollback window                                                 |
+| Bifrost        | Cut over      | Complete the rollback window                                                 |
+| BookOrbit      | Cut over      | Complete the rollback window                                                 |
+| Byparr         | Reconciled    | Record cutover evidence and the rollback window                              |
+| CLIProxyAPI    | Cut over      | Complete the rollback window                                                 |
+| Comfy Control  | Cut over      | Complete the rollback window                                                 |
+| Homepage       | Reconciled    | Record cutover evidence                                                      |
+| Larapaper      | Cut over      | Complete the rollback window                                                 |
+| Linkwarden     | Cut over      | Complete the rollback window                                                 |
+| Miniflux       | Cut over      | Complete the rollback window                                                 |
+| Open WebUI     | Cut over      | Complete the rollback window                                                 |
+| OpenSpeedTest  | Cut over      | Complete the rollback window                                                 |
+| Papra          | Cut over      | Complete the rollback window                                                 |
+| Pocket ID      | Cut over      | Validate human passkey and mail, then complete the rollback window           |
+| Redlib         | Cut over      | Activate reviewed WAF adoption, then complete the rollback window            |
+| RoMM           | Cut over      | Validate human OIDC login, then complete the rollback window                 |
+| RoMM workflows | Implemented   | Add reviewed non-DAT manifests and run the NFS disposable-copy drill         |
+| Shelfmark      | Cut over      | Complete the rollback window                                                 |
 
 ### Phase 1: Observability & Dynamic Automation
 
 1. **Observability — Complete**: VictoriaMetrics, VictoriaLogs, and Grafana run on `mbk` and `syd` for cluster metrics and logs (replacing Dozzle).
 2. **ExternalDNS Automation — Complete**: ExternalDNS runs on both clusters. Application records are opt-in, Cloudflare-scoped, adopt existing records during cutover, and are upsert-only.
 3. **1Password Workload Items — Reconciled**: Homepage-labelled HTTPRoutes seed Login items instead of only enriching items discovered through External Secrets or Push Secrets. Grafana and Headlamp carry Homepage metadata on both clusters; Grafana's functional administrator credentials come from its cluster vault, while Headlamp remains URL-only. Grafana retains cluster-local administrator access on both clusters. The workload-item reconciler is idempotent and archives an old item only after the current applications revision is ready.
-4. **Crossplane Automation — Implemented, External Policies Staged**: Crossplane and `provider-http` run on `mbk`. Resend uses one full-access bootstrap credential per cluster, named `Resend: <cluster>` in the `Homelab` vault, and separate sending-only workload keys. The narrow `PocketIDClient` contract composes standard provider-http Requests, adopts and updates restored clients without create or delete authority, and reconciles their group access. Pocket ID group Requests may create missing named groups but omit delete authority. The Pocket ID API declarations reconcile after applications with Flux health waiting disabled because the authority is deliberately suspended; every resource must still become Ready during private activation. Beszel's B2 Requests adopt and update bucket policy without create or delete authority and observe the existing one-time application key without rotation authority. `RedlibWAFPolicy` discovers the Cloudflare zone and updates the phase entry point while retaining every unrelated rule; its Flux inventory remains suspended because first activation changes live request handling. Bootstrap both least-privilege controller credentials with `mise run bootstrap-automation-secrets mbk`, then follow [`docs/external-automation.md`](docs/external-automation.md). All external resources remain orphan-on-delete. Add other app-scoped APIs with the workload that consumes them.
+4. **Crossplane Automation — Pocket ID Reconciled, External Policies Staged**: Crossplane and `provider-http` run on `mbk`. Resend uses one full-access bootstrap credential per cluster, named `Resend: <cluster>` in the `Homelab` vault, and separate sending-only workload keys. The narrow `PocketIDClient` contract composes standard provider-http Requests, adopts and updates restored clients without create or delete authority, and reconciles their group access. All eleven retained Pocket ID clients and both named groups are Ready. Beszel's B2 Requests adopt and update bucket policy without create or delete authority and observe the existing one-time application key without rotation authority. `RedlibWAFPolicy` discovers the Cloudflare zone and updates the phase entry point while retaining every unrelated rule. B2 and Cloudflare inventories remain suspended because their least-privilege `Homelab` bootstrap items do not yet exist. Follow [`docs/external-automation.md`](docs/external-automation.md) after creating them. All external resources remain orphan-on-delete. Add other app-scoped APIs with the workload that consumes them.
 5. **Storage Evaluation — Trial Ready**: `democratic-csi` is unsuitable for TrueNAS 26 because its TrueNAS integration depends on the removed REST API or privileged SSH. Trial the official WebSocket-based TrueNAS CSI driver on `mbk`; retain NFS as the production default until provisioning, retention, snapshots, recovery, and upgrades pass. See [`docs/storage.md`](docs/storage.md).
 
-OnePassword Connect and VictoriaMetrics move between the `platform` and
-`foundation` Flux inventories in the current implementation. Their transferred
-live objects carry migration-only `prune: disabled` annotations. Because
-`foundation` reconciles first, it actively adopts OnePassword Connect before the
-old platform inventory drops it. Each cluster's foundation overlay temporarily
-includes only the pre-existing, cluster-patched VictoriaMetrics resources with
-Flux's `IfNotPresent` apply policy while the new platform inventory adopts and
-extends them. This prevents the old owner from reverting the new Grafana
-credential contract and preserves fresh-cluster bootstrap ordering. After both
-inventories apply this bridge revision, remove VictoriaMetrics from the
-foundation overlays in a reviewed change. Remove the prune guards only after
-that follow-up revision applies and the old inventories no longer report
-ownership.
+OnePassword Connect and VictoriaMetrics completed their Flux inventory
+transfers. `foundation` exclusively owns OnePassword Connect, while `platform`
+exclusively owns VictoriaMetrics on both clusters. The temporary foundation
+observability overlays have been removed and both foundation inventories have
+reconciled without observability objects. Remove the remaining migration-only
+`prune: disabled` annotations only after explicit lifecycle approval.
 
 ### Phase 2: Workload Migration (Dependency Order)
 
@@ -202,21 +195,15 @@ Execute migrations with one reviewed Git change and cutover record per workload 
    interfaces use static entries with current substrate addresses. The Beszel hub runs privately on `mbk` with retained NFS data,
    and agents on both clusters connect through an agent-only public WebSocket
    route. Both interfaces have live cutover evidence.
-3. **Identity-Dependent & Small Stateful — In Progress**: Actual Budget,
-   Bichon, Bifrost, CLIProxyAPI, Comfy Control, Larapaper, and Papra are cut
-   over on `mbk`. AIO Metadata and AIOStreams are implemented with retained NFS
-   configuration, and Open WebUI is implemented with retained NFS data and its
-   existing Pocket ID client contract. Migration-only workload-item annotations
-   adopt their existing Homelab-owned credentials and preserve the legacy
-   AIOStreams secret and Open WebUI OIDC/session values.
-4. **Databases & Media Libraries — In Progress**: Miniflux, Linkwarden,
-   BookOrbit, and Shelfmark are cut over. RoMM is implemented with a
-   suspended application release, CloudNativePG, a suspended logical-backup
-   schedule, pinned
-   Valkey, and its retained NFS tree mounted as one filesystem. Its migration
-   annotations preserve the existing authentication, database, metadata,
-   Pocket ID, and provider credentials while copying their values into the
-   Kubernetes field contract.
+3. **Identity-Dependent & Small Stateful — Cut Over**: Actual Budget, AIO
+   Metadata, AIOStreams, Bichon, Bifrost, CLIProxyAPI, Comfy Control, Larapaper,
+   Open WebUI, and Papra are cut over on `mbk`. Their retained data and existing
+   credentials remain recoverable for the rollback window.
+4. **Databases & Media Libraries — Cut Over**: BookOrbit, Linkwarden, Miniflux,
+   RoMM, and Shelfmark are cut over. RoMM uses CloudNativePG, pinned Valkey, its
+   retained NFS tree, and an active validated logical-backup schedule. Its old
+   web writer is stopped while the previous database and files remain
+   recoverable.
    - CloudNativePG operator for PostgreSQL instances.
    - `miniflux` (Postgres).
    - `linkwarden` (Postgres + storage).
@@ -229,7 +216,7 @@ Execute migrations with one reviewed Git change and cutover record per workload 
    and preserves report evidence. Populate the reviewed non-DAT manifests and
    complete the NFS disposable-copy drill before enabling destructive modes.
    See [`docs/romm-workflows.md`](docs/romm-workflows.md).
-6. **Identity Authority (Pocket ID) — Implemented, Staged**: Pocket ID remains suspended and attaches only to the private Gateway when enabled for validation. It uses CloudNativePG rather than SQLite on NFS, stores uploads in PostgreSQL, writes daily logical dumps and complete application-native exports to retained NFS, and provides a hash-gated restore Job template. The workload-item reconciler explicitly adopts the legacy Excloo ID item and preserves its encryption key. Crossplane adopts the eleven retained OIDC clients, reconciles the `all_services` and `books` groups, and has no authority to recreate client secrets or delete identity resources. Validate the human administrator passkey, mail, full export/restore, and every client before a reviewed public-Gateway cutover. See [`docs/pocket-id.md`](docs/pocket-id.md).
+6. **Identity Authority (Pocket ID) — Cut Over**: Pocket ID runs publicly on `mbk` with its legacy encryption key and final application export restored into CloudNativePG. Daily logical dumps and complete application-native exports are active on retained NFS; the hash-gated restore template remains suspended. All eleven retained OIDC clients and the `all_services` and `books` groups reconcile without create or delete authority over clients. Human administrator passkey, mail delivery, and interactive client login remain rollback-window checks. See [`docs/pocket-id.md`](docs/pocket-id.md).
 
 ### Workload Cutover Checklist
 
