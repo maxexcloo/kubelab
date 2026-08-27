@@ -8,11 +8,9 @@ retirement action.
 
 ### Cluster and ownership
 
-- `mbk` applications and both clusters' foundation inventories applied revision
-  `e6b160c30848f30595f2f5556325b533f4ac93d4`.
-- `mbk` platform and Pocket ID automation applied revision
-  `7922784f0b02254c307da74476e2e70eb3bc710a` before the later documentation and
-  backup-only revisions.
+- Both clusters' root, applications, foundation, and platform inventories
+  applied revision `cd6fb160c933530e9db06411b03fb379dbc71c5a`. The `mbk`
+  Pocket ID automation inventory applied the same revision.
 - Both foundation inventories are Ready and contain no VictoriaMetrics or
   VictoriaLogs objects.
 - Both platform inventories are Ready and own VictoriaMetrics. Both foundation
