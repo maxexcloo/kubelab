@@ -4,7 +4,9 @@ resources:
   - ../../../platform
   - ../../../platform/automation/crossplane
   - observability
+  - certificate-redlib-www.yaml
   - certificate.yaml
+  - cluster-issuer-http01.yaml
   - gateway-public-direct.yaml
   - grafana.yaml
   - headlamp.yaml
