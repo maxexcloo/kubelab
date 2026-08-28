@@ -23,5 +23,11 @@ spec:
   values:
     connect:
       credentialsName: onepassword-connect
+      api:
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 5m
     operator:
       create: false
