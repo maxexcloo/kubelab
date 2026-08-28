@@ -3,6 +3,19 @@
 This file contains only unfinished work. Current architecture and operations
 are documented in `README.md`; completed migration history remains in Git.
 
+## Reconciliation Blockers
+
+1. Remove one of the two display-named `LaraPaper` items from the `mbk` cluster
+   vault so External Secrets can select exactly one item. Force a refresh if
+   required, then reconcile `apps`, `pocket-id-automation` and the cluster root
+   at the current `main` revision. The retained application Secret remains
+   present while reconciliation is blocked.
+2. Apply the current `homelab` `main` branch with its normal credentials to
+   import the retained `home-assistant.excloo.com` record and reconcile the
+   generic HAOS tunnel ingress. Confirm only `/api/webhook/.+` reaches Home
+   Assistant, non-webhook paths use the `404` fallback and the record comment is
+   `Homelab OpenTofu Managed`.
+
 ## External Automation
 
 1. Review the existing Beszel B2 bucket and key settings, resume
