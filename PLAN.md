@@ -90,10 +90,14 @@ are documented in `README.md`; completed migration history remains in Git.
    Keep route-specific overrides, provider and DNS probes, and retained-
    appliance probes as direct Gatus YAML fragments in `homelab-fly`; Gatus
    natively merges its configuration directory.
-3. Include Cloudflare and Control D DNS checks, provider checks, internal and
-   external host checks and current public and private URLs. Remove stopped
-   TrueNAS and Docker targets. Fail rendering on duplicate endpoint keys,
-   invalid URLs or an empty generated route inventory.
+3. Use `<cluster> / <Homepage group>` for generated groups and the Homepage
+   name without an old target suffix. The current baseline is 29 enabled and
+   accepted routes: 24 from `mbk` and five from `syd`. Include Cloudflare and
+   Control D DNS checks, provider checks, Gatus itself and retained-appliance
+   probes as direct fragments. Remove all 33 retained `excloo.dev` catalogue
+   probes, the old `au-truenas` and `au-hsp` suffixes, stopped Docker targets
+   and deleted service URLs. Fail rendering on duplicate endpoint keys, invalid
+   URLs or an empty generated route inventory.
 4. Preserve the independent Fly failure domain, sending-only mail credential,
    Tailscale reachability, alert thresholds and Redlib `X-Gatus-Token` bypass.
    Prove one failing and one recovered alert without exposing the token.
