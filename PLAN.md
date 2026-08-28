@@ -5,43 +5,25 @@ are documented in `README.md`; completed migration history remains in Git.
 
 ## External Automation
 
-1. Review and apply the corresponding `homelab` plan to create
-   the unqualified, `Homelab`-tagged `Backblaze B2`, `Cloudflare WAF`,
-   `Control D` and `Resend` items in every corresponding cluster vault. Require
-   the plan to preserve existing item and credential identities; do not accept a
-   delete, replacement or token rotation while moving retained items from the
-   `Homelab` vault. Confirm each B2 application key has `listBuckets`, `listKeys`,
-   `readBucketEncryption`, `writeBucketEncryption`, `writeBuckets` and
-   `writeKeys`, but no object-data, key-deletion or bucket-deletion capability.
-   Treat `writeKeys` as full-account-equivalent control-plane access. Confirm
-   each Cloudflare token has only Zone Read and Zone WAF Edit for `excloo.com`.
-2. Populate `Control D` in the `mbk` cluster vault with the retained API token
-   for profile `653224sydwhf`. Restore the retained Gatus bypass value as the
-   concealed `monitoring-token` field on `Redlib` in the `syd` cluster vault.
-   Preserve existing Resend values. Do not rotate any retained value until the
-   existing Control D rules, mail delivery and Gatus access are proven.
-3. Bootstrap only the 1Password Connect credentials and token for each cluster,
-   then require the `Backblaze B2`, `Cloudflare WAF`, `Control D` and `Resend`
-   ExternalSecrets to become Ready in `crossplane-system`. Verify provider
-   credentials are non-empty before enabling a consumer; do not create any
-   provider Secret manually.
-4. Export the retained Cloudflare records and Control D rules for `budget`,
+1. Export the retained Cloudflare records and Control D rules for `budget`,
    `aiometadata`, `aiostreams`, `beszel`, `bichon`, `bifrost`, `chat`,
    `cliproxy`, `comfy-control`, `grafana`, `papra` and `reader`. Confirm each
    Cloudflare record is DNS-only and each Control D rule resolves to the current
-   `private.mbk.excloo.dev` A and AAAA targets.
-5. Resume `clusters/mbk/private-dns-automation.yaml`. Require both DNS target
+   `private.mbk.excloo.dev` A and AAAA targets. Require retained `Managed by
+ExternalDNS` and `Kubernetes private Gateway` comments to converge to
+   `Kubelab ExternalDNS Managed` during adoption.
+2. Resume `clusters/mbk/private-dns-automation.yaml`. Require both DNS target
    discovery Requests and every `PrivateDNSRecord` to become Ready, then verify
    Cloudflare and Control D answers independently before removing any legacy
    owner. Keep the inventory suspended if an existing record differs.
-6. Review the existing Beszel B2 bucket and key settings, resume
+3. Review the existing Beszel B2 bucket and key settings, resume
    `clusters/mbk/b2-automation.yaml`, and require all three provider Requests to
    become Ready. Confirm the `B2ObjectStorage` claim reads the retained bucket
    name from `beszel-object-storage`, adopts exactly one `beszel` key with the
    fixed bucket-scoped capability profile and pushes only the access-key fields
    back to the `Beszel` item. The existing application key must remain unrotated;
    suspend the inventory if the bucket, key name, scope or capabilities differ.
-7. Export the existing Cloudflare custom WAF phase, review the generated Redlib
+4. Export the existing Cloudflare custom WAF phase, review the generated Redlib
    rule, resume `clusters/syd/cloudflare-automation.yaml`, and verify that the
    Gatus bypass, browser challenge, static assets and unrelated rules remain
    intact.
@@ -64,12 +46,9 @@ are documented in `README.md`; completed migration history remains in Git.
 1. Test both the existing Beszel password login and Pocket ID against
    `beszel.excloo.com`. Confirm its persisted PocketBase provider uses the same
    issuer, client and callback; keep `DISABLE_PASSWORD_AUTH` false.
-2. Recover the retained Grafana Pocket ID client identifier and secret into the
-   `Grafana` item in the `mbk` cluster vault, then deliver those optional fields
-   without making platform readiness depend on them. Restart Grafana after the
-   Secret is Ready and test both the administrator login and Pocket ID against
-   `grafana.excloo.com`. Keep `grafana.syd.excloo.dev` local-only while Pocket ID
-   automation remains available only on `mbk`.
+2. Complete an interactive Pocket ID login against `grafana.excloo.com` after
+   its retained client is reconciled. Keep `grafana.syd.excloo.dev` local-only
+   while Pocket ID automation remains available only on `mbk`.
 3. Audit every remaining OIDC-enabled workload for a usable local recovery
    account. Record product limitations explicitly rather than disabling OIDC;
    in particular, verify Shelfmark still exposes its local form while

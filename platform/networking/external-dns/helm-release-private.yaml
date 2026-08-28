@@ -32,7 +32,7 @@ spec:
             name: cloudflare-api-token
     extraArgs:
       cloudflare-dns-records-per-page: "5000"
-      cloudflare-record-comment: Managed by ExternalDNS
+      cloudflare-record-comment: Kubelab ExternalDNS Managed
     provider:
       name: cloudflare
     resources:

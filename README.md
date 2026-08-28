@@ -131,9 +131,10 @@ Private `.excloo.com` vanity names use a namespaced `PrivateDNSRecord` contract.
 Crossplane composes a DNS-only Cloudflare CNAME through a dedicated ExternalDNS
 CRD source and a Control D spoof rule to the cluster Tailscale addresses. Both
 external records are orphaned when the Kubernetes declaration is removed. The
-initial retained-record adoption is staged and suspended as described in
-`PLAN.md`; the substrate-owned `*.mbk.excloo.dev` wildcard remains the fallback
-for private routes.
+public and private ExternalDNS instances mark Cloudflare records as
+`Kubelab ExternalDNS Managed`. The initial retained-record adoption is staged
+and suspended as described in `PLAN.md`; the substrate-owned
+`*.mbk.excloo.dev` wildcard remains the fallback for private routes.
 
 ## Secrets & External Automation
 
@@ -149,11 +150,11 @@ suspended `mbk` Flux inventories. The Redlib Cloudflare WAF policy is similarly
 staged on `syd`, where the existing Redlib application item and Secret live. The
 steps required to adopt these retained resources are in `PLAN.md`.
 
-Grafana's local administrator credential reconciles with the platform. Its OIDC
-environment references are optional at startup, so unfinished OIDC credential
-delivery cannot block local recovery access or the platform dependency chain.
-The retained client remains under Pocket ID automation; completing its credential
-delivery is tracked in `PLAN.md`.
+Grafana's local administrator credential and retained Pocket ID client
+credentials reconcile with the platform. OIDC delivery merges only the client
+fields into the existing Secret, while its environment references remain
+optional at startup so local recovery access cannot block on Pocket ID or
+External Secrets. The retained client remains under Pocket ID automation.
 
 `homelab` owns the `Backblaze B2`, `Cloudflare WAF`, `Control D` and `Resend`
 items in each corresponding cluster vault. They are unqualified and tagged
