@@ -8,7 +8,6 @@ spec:
   path: ./apps/integrations/private-dns
   prune: true
   retryInterval: 2m
-  suspend: true
   timeout: 10m
   wait: true
   dependsOn:

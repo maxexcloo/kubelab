@@ -24,7 +24,6 @@ resources:
   - ../../base/romm
   - ../../base/shelfmark
   - ../../base/windmill
-  - beszel-agent-route.yaml
   - bifrost-route.yaml
   - immich-route.yaml
   - route.yaml

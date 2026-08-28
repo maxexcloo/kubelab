@@ -73,6 +73,14 @@ spec:
 apiVersion: automation.excloo.dev/v1alpha1
 kind: PrivateDNSRecord
 metadata:
+  name: homepage
+  namespace: homepage
+spec:
+  hostname: home.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
   name: miniflux
   namespace: miniflux
 spec:

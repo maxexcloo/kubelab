@@ -21,7 +21,7 @@ spec:
         containers:
           homepage:
             env:
-              HOMEPAGE_ALLOWED_HOSTS: homepage.mbk.excloo.dev
+              HOMEPAGE_ALLOWED_HOSTS: home.excloo.com,homepage.mbk.excloo.dev
               PGID: "1000"
               PUID: "1000"
             image:
@@ -153,11 +153,12 @@ spec:
           gethomepage.dev/description: Application Dashboard
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://homepage.mbk.excloo.dev
+          gethomepage.dev/href: https://home.excloo.com
           gethomepage.dev/icon: homepage
           gethomepage.dev/name: Homepage
-          gethomepage.dev/siteMonitor: https://homepage.mbk.excloo.dev
+          gethomepage.dev/siteMonitor: https://home.excloo.com
         hostnames:
+          - home.excloo.com
           - homepage.mbk.excloo.dev
         labels:
           app.kubernetes.io/name: homepage
