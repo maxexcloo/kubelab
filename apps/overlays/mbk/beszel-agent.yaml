@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: beszel-agent
+  namespace: beszel-agent
+spec:
+  template:
+    spec:
+      containers:
+        - name: beszel-agent
+          env:
+            - name: HUB_URL
+              value: http://beszel.beszel.svc.cluster.local:8090

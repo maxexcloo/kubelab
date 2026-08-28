@@ -205,10 +205,11 @@ parity work in `PLAN.md`.
 
 Beszel agents run as a DaemonSet on every Kubernetes node, including Talos
 control-plane nodes. They use outbound WebSocket registration and the Kubernetes
-node name as their stable system identity, and both clusters use
-`https://beszel.excloo.com` as the hub. This provides node-level CPU, memory,
-load, uptime and network summaries; VictoriaMetrics remains authoritative for
-Kubernetes objects, Pod resources and detailed node metrics.
+node name as their stable system identity. The `mbk` agent reaches its local hub
+through the cluster Service; the `syd` agent reaches the `mbk` hub through the
+private HTTPS route. This provides node-level CPU, memory, load, uptime and
+network summaries; VictoriaMetrics remains authoritative for Kubernetes
+objects, Pod resources and detailed node metrics.
 
 Dozzle is not deployed. Kubernetes log aggregation remains in VictoriaLogs and
 Grafana, with Headlamp or `kubectl` for live Pod inspection; Beszel remains the

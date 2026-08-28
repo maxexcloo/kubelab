@@ -10,7 +10,11 @@ are documented in `README.md`; completed migration history remains in Git.
    required, then reconcile `apps`, `pocket-id-automation` and the cluster root
    at the current `main` revision. The retained application Secret remains
    present while reconciliation is blocked.
-2. Apply the current `homelab` `main` branch with its normal credentials to
+2. Extend the reviewed Homelab tailnet policy so only retained machine tags
+   running Beszel agents can reach `tag:kubernetes:443`. Confirm the `syd` agent
+   and retained standalone agents reconnect to `beszel.excloo.com`; `mbk` uses
+   its cluster-local Service and must not depend on this lateral allowance.
+3. Apply the current `homelab` `main` branch with its normal credentials to
    import the retained `home-assistant.excloo.com` record and reconcile the
    generic HAOS tunnel ingress. Confirm only `/api/webhook/.+` reaches Home
    Assistant, non-webhook paths use the `404` fallback and the record comment is

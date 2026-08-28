@@ -37,4 +37,5 @@ patches:
       group: automation.excloo.dev
       kind: ResendKey
       version: v1alpha1
+  - path: beszel-agent.yaml
   - path: windmill-domain.yaml
