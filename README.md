@@ -127,7 +127,9 @@ A public namespace and its `HTTPRoute` must carry
 `gateway.excloo.dev/public-access: "true"`. Tunnel routes also set
 `external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"`. ExternalDNS is
 upsert-only, so route removal does not implicitly delete a DNS record. Private
-routes are never discovered by the public ExternalDNS instance.
+routes are never discovered by the public ExternalDNS instance. Traefik
+redirects direct-public and private HTTP requests to HTTPS; Cloudflare performs
+the equivalent redirect for tunnel-public routes.
 
 `www.reddit.excloo.com` is DNS-only to Sydney's direct Gateway and redirects to
 the canonical `reddit.excloo.com` route. Its exact hostname uses a separate

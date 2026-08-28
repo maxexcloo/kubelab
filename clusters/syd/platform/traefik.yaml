@@ -13,6 +13,12 @@ spec:
         expose:
           default: false
           direct: true
+        http:
+          redirections:
+            entryPoint:
+              permanent: true
+              scheme: https
+              to: websecuredirect
       websecuredirect:
         exposedPort: 443
         port: 8444

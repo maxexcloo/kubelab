@@ -35,6 +35,13 @@ spec:
       format: json
       level: INFO
     ports:
+      web:
+        http:
+          redirections:
+            entryPoint:
+              permanent: true
+              scheme: https
+              to: websecure
       webtunnel:
         exposedPort: 80
         port: 8081
