@@ -7,7 +7,6 @@ resources:
   - crossplane-runtime.yaml
   - foundation.yaml
   - flux-system
-  - home-assistant-webhook.yaml
   - platform.yaml
   - pocket-id-automation.yaml
   - private-dns-automation.yaml
