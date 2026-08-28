@@ -34,14 +34,19 @@ are documented in `README.md`; completed migration history remains in Git.
 
 ### Dashboard
 
-1. Populate the existing display-named `Homepage` item in the `mbk` cluster
-   vault with only the still-live widget credentials. Restore the selected
-   Beszel, Home Assistant, Immich, Linkwarden, Miniflux, Tailscale, Traefik,
-   TrueNAS and UniFi widgets through `HOMEPAGE_VAR_*` substitutions; never put
-   their values in Git.
-2. Validate the Services and Servers tabs at desktop and mobile widths. Keep
-   widget-bearing cards first and otherwise preserve the legacy alphabetical
-   order; check that the explicit `syd` cards do not duplicate local discovery.
+1. Populate `beszel-password`, `home-assistant-key`, `immich-key`,
+   `linkwarden-key`, `miniflux-key`, `truenas-key` and `unifi-key` in the
+   existing display-named `Homepage` item in the `mbk` cluster vault. The
+   Beszel username defaults to `admin@excloo.com`. Force an External Secret
+   refresh and restart Homepage once after initial population; values remain
+   outside Git and missing values hide only their widget.
+2. Add Tailscale device widgets only after recording the retained devices'
+   stable device IDs. Expose the Traefik widget only through a cluster-internal
+   API Service with a NetworkPolicy limited to Homepage; do not expose the
+   unauthenticated dashboard API through a shared route.
+3. Validate the Services and Servers tabs at desktop and mobile widths. Confirm
+   widget-bearing cards sort first, other local and explicit `syd` cards merge
+   alphabetically and no remote card duplicates local discovery.
 
 ### Identity
 
@@ -67,15 +72,25 @@ are documented in `README.md`; completed migration history remains in Git.
 
 ### External Monitoring
 
-1. Recover the accepted Gatus configuration and operational data from the
-   archived `homelab` model and the current `homelab-fly` `CONFIG` repository
-   variable. Give the rendered endpoint inventory one declarative owner without
-   moving the Fly runtime into Kubernetes.
-2. Rebuild the inventory from accepted routes and retained appliances in both
-   clusters. Include Cloudflare and Control D DNS checks, provider checks,
-   internal and external host checks and the current public and private URLs;
-   remove stopped TrueNAS and Docker targets.
-3. Preserve the independent Fly failure domain, sending-only mail credential,
+1. Remove `homelab-fly`'s stale dependency on the retained `CONFIG` repository
+   variable. Keep Fly machine, certificate, alerting and UI configuration in
+   `homelab-fly`; the current `homelab` root no longer owns or publishes a
+   service catalogue.
+2. During the ephemeral `homelab-fly` render, check out public Kubelab `main`
+   and derive HTTP probes from both standard `HTTPRoute` resources and the
+   routes declared in upstream app-template `HelmRelease` values. Select only
+   routes carrying `gethomepage.dev/enabled: "true"`; use the checked Homepage
+   name, group, href and site-monitor annotations rather than adding another
+   service schema. Keep the normaliser narrow to those two current Kubernetes
+   representations and fail if an enabled route uses an unsupported shape.
+   Keep route-specific overrides, provider and DNS probes, and retained-
+   appliance probes as direct Gatus YAML fragments in `homelab-fly`; Gatus
+   natively merges its configuration directory.
+3. Include Cloudflare and Control D DNS checks, provider checks, internal and
+   external host checks and current public and private URLs. Remove stopped
+   TrueNAS and Docker targets. Fail rendering on duplicate endpoint keys,
+   invalid URLs or an empty generated route inventory.
+4. Preserve the independent Fly failure domain, sending-only mail credential,
    Tailscale reachability, alert thresholds and Redlib `X-Gatus-Token` bypass.
    Prove one failing and one recovered alert without exposing the token.
 
