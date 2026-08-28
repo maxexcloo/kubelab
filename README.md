@@ -195,9 +195,13 @@ bucket, credential, identity client or unrelated WAF rule.
 Homepage is served at `home.excloo.com` and uses the legacy Services and Servers
 tab structure, service metadata and custom card styling, including the
 repository-owned retained background. It discovers `mbk` routes and declares
-`syd` and appliance cards explicitly because Homepage does not discover a
-remote cluster. Credential-backed appliance and Cloudflare Tunnel widgets are
-unfinished parity work in `PLAN.md`.
+`syd` and appliance cards explicitly because Homepage supports only one
+Kubernetes connection. Static cards use the same weights as discovered cards,
+so cards merge alphabetically; credential-backed widgets sort first. Homepage
+extracts its optional widget credentials from the display-named `Homepage`
+item. Missing values hide only the corresponding widget and do not block the
+dashboard. Tailscale, Traefik and Cloudflare Tunnel widgets remain unfinished
+parity work in `PLAN.md`.
 
 Beszel agents run as a DaemonSet on every Kubernetes node, including Talos
 control-plane nodes. They use outbound WebSocket registration and the Kubernetes

@@ -24,6 +24,10 @@ spec:
               HOMEPAGE_ALLOWED_HOSTS: home.excloo.com,homepage.mbk.excloo.dev
               PGID: "1000"
               PUID: "1000"
+            envFrom:
+              - secretRef:
+                  name: homepage
+                  optional: true
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/gethomepage/homepage

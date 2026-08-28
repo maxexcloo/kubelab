@@ -81,6 +81,11 @@ spec:
           gethomepage.dev/href: https://reader.excloo.com
           gethomepage.dev/icon: miniflux
           gethomepage.dev/name: Miniflux
+          gethomepage.dev/weight: "-100"
+          gethomepage.dev/widget.hideErrors: "true"
+          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_MINIFLUX_KEY}}" }}'
+          gethomepage.dev/widget.type: miniflux
+          gethomepage.dev/widget.url: https://reader.excloo.com
         hostnames:
           - reader.excloo.com
         labels:

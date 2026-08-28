@@ -120,6 +120,13 @@ spec:
           gethomepage.dev/icon: beszel
           gethomepage.dev/name: Beszel
           gethomepage.dev/siteMonitor: https://beszel.excloo.com
+          gethomepage.dev/weight: "-100"
+          gethomepage.dev/widget.hideErrors: "true"
+          gethomepage.dev/widget.password: '{{ "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}" }}'
+          gethomepage.dev/widget.type: beszel
+          gethomepage.dev/widget.url: https://beszel.excloo.com
+          gethomepage.dev/widget.username: '{{ "{{HOMEPAGE_VAR_BESZEL_USERNAME}}" }}'
+          gethomepage.dev/widget.version: "2"
         hostnames:
           - beszel.excloo.com
         labels:

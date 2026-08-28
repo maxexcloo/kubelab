@@ -112,79 +112,111 @@ data:
             href: https://reddit.excloo.com
             icon: redlib
             siteMonitor: https://reddit.excloo.com
+            weight: 0
     - Home Automation:
         - ESPHome:
             description: ESP Device Builder
             href: https://hass.mbk.excloo.net/5c53de3b_esphome
             icon: esphome
             siteMonitor: https://hass.mbk.excloo.net/5c53de3b_esphome
+            weight: 0
         - ESPresense:
             description: Room Presence
             href: https://hass.mbk.excloo.net/f32ea98b_espresense-companion
             icon: espressif
             siteMonitor: https://hass.mbk.excloo.net/f32ea98b_espresense-companion
+            weight: 0
         - Home Assistant:
             description: Smart Home & Automations
             href: https://hass.mbk.excloo.net
             icon: home-assistant
             siteMonitor: https://hass.mbk.excloo.net
+            weight: -100
+            widget:
+              hideErrors: true
+              key: "{{HOMEPAGE_VAR_HOME_ASSISTANT_KEY}}"
+              type: homeassistant
+              url: https://hass.mbk.excloo.net
         - Home Assistant Matter Hub:
             description: Matter Bridge
             href: https://hass.mbk.excloo.net/3fd9e6b0_hamh
             icon: sh-home-assistant-matter-hub
             siteMonitor: https://hass.mbk.excloo.net/3fd9e6b0_hamh
+            weight: 0
         - Studio Code Server:
             description: Browser IDE
             href: https://hass.mbk.excloo.net/a0d7b954_vscode
             icon: visual-studio-code
             siteMonitor: https://hass.mbk.excloo.net/a0d7b954_vscode
+            weight: 0
         - Zigbee2MQTT:
             description: Zigbee Coordinator
             href: https://hass.mbk.excloo.net/45df7312_zigbee2mqtt
             icon: zigbee2mqtt
             siteMonitor: https://hass.mbk.excloo.net/45df7312_zigbee2mqtt
+            weight: 0
     - Infrastructure:
         - Anisette:
             description: Anisette Server
             href: https://anisette.excloo.com
             icon: si-apple-#ffffff
             siteMonitor: https://anisette.excloo.com
+            weight: 0
         - Headlamp (syd):
             description: Kubernetes Dashboard
             href: https://headlamp.syd.excloo.dev
             icon: headlamp
             siteMonitor: https://headlamp.syd.excloo.dev
+            weight: 0
         - Netboot:
             description: Network Boot Server
             href: http://kimbap.mbk.excloo.net:31010
             icon: netbootxyz
             siteMonitor: http://kimbap.mbk.excloo.net:31010
+            weight: 0
         - OpenSpeedTest (syd):
             description: Network Speed Test
             href: https://speed.syd.excloo.dev
             icon: openspeedtest
             siteMonitor: https://speed.syd.excloo.dev
+            weight: 0
         - Syncthing:
             description: File Synchronisation
             href: http://kimbap.mbk.excloo.net:20910
             icon: syncthing
             siteMonitor: http://kimbap.mbk.excloo.net:20910
+            weight: 0
         - TrueNAS:
             description: Storage Appliance
             href: https://kimbap.mbk.excloo.net:8443
             icon: truenas
             siteMonitor: https://kimbap.mbk.excloo.net:8443
+            weight: -100
+            widget:
+              enablePools: true
+              hideErrors: true
+              key: "{{HOMEPAGE_VAR_TRUENAS_KEY}}"
+              type: truenas
+              url: https://kimbap.mbk.excloo.net:8443
+              version: 2
         - UniFi:
             description: Network Controller
             href: https://gateway.mbk.excloo.net
             icon: unifi
             siteMonitor: https://gateway.mbk.excloo.net
+            weight: -100
+            widget:
+              hideErrors: true
+              key: "{{HOMEPAGE_VAR_UNIFI_KEY}}"
+              type: unifi
+              url: https://gateway.mbk.excloo.net
     - Operations:
         - Gatus:
             description: Health Monitoring & Status Page
             href: https://status.excloo.com
             icon: gatus
             siteMonitor: https://status.excloo.com
+            weight: -100
             widget:
               type: gatus
               url: https://status.excloo.com
@@ -193,6 +225,7 @@ data:
             href: https://grafana.syd.excloo.dev
             icon: grafana
             siteMonitor: https://grafana.syd.excloo.dev
+            weight: 0
   settings.yaml: |
     cardBlur: xs
     color: slate
@@ -226,8 +259,9 @@ data:
       Providers:
         columns: 2
         style: row
+        tab: Services
       Home Automation:
-        columns: 2
+        columns: 4
         style: row
         tab: Servers
       Infrastructure:

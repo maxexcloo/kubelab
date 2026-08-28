@@ -151,6 +151,11 @@ spec:
           gethomepage.dev/href: https://links.excloo.com
           gethomepage.dev/icon: linkwarden
           gethomepage.dev/name: Linkwarden
+          gethomepage.dev/weight: "-100"
+          gethomepage.dev/widget.hideErrors: "true"
+          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_LINKWARDEN_KEY}}" }}'
+          gethomepage.dev/widget.type: linkwarden
+          gethomepage.dev/widget.url: https://links.excloo.com
         hostnames:
           - links.excloo.com
         labels:

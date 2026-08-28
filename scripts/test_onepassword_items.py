@@ -192,6 +192,32 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(desired["CLIProxyAPI"]["namespaces"], set())
         self.assertFalse(desired["CLIProxyAPI"]["login"])
 
+    def test_discovery_recognises_data_from_extract_owner(self):
+        resources = [
+            {
+                "kind": "ExternalSecret",
+                "metadata": {
+                    "annotations": {
+                        "onepassword.excloo.dev/defaults": '{"widget-key":""}',
+                    },
+                    "name": "homepage",
+                    "namespace": "homepage",
+                },
+                "spec": {
+                    "dataFrom": [{"extract": {"key": "Homepage"}}],
+                    "secretStoreRef": {"name": "onepassword"},
+                },
+            }
+        ]
+        original = RECONCILER.kubernetes_list
+        self.addCleanup(setattr, RECONCILER, "kubernetes_list", original)
+        RECONCILER.kubernetes_list = lambda path: [] if "httproutes" in path else resources
+        desired = RECONCILER.discover_items()
+        self.assertEqual(set(desired), {"Homepage"})
+        self.assertEqual(desired["Homepage"]["defaults"], {"widget-key": ""})
+        self.assertEqual(desired["Homepage"]["namespaces"], {"homepage"})
+        self.assertFalse(desired["Homepage"]["login"])
+
     def test_discovery_seeds_only_homepage_routes(self):
         routes = [
             {

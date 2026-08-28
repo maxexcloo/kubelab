@@ -198,6 +198,10 @@ spec:
           gethomepage.dev/href: https://games.excloo.com
           gethomepage.dev/icon: romm
           gethomepage.dev/name: RoMM
+          gethomepage.dev/weight: "-100"
+          gethomepage.dev/widget.hideErrors: "true"
+          gethomepage.dev/widget.type: romm
+          gethomepage.dev/widget.url: https://games.excloo.com
         hostnames:
           - games.excloo.com
         labels:

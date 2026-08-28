@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - background.yaml
   - config-map.yaml
+  - external-secret.yaml
   - helm-release.yaml
   - namespace.yaml
   - network-policy.yaml
