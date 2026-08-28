@@ -11,7 +11,7 @@ spec:
   timeout: 10m
   wait: true
   dependsOn:
-    - name: platform
+    - name: crossplane-runtime
   sourceRef:
     kind: GitRepository
     name: flux-system

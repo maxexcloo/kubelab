@@ -16,33 +16,6 @@ spec:
         namespace: flux-system
       version: 2.4.0
   values:
-    extraObjects:
-      - apiVersion: pkg.crossplane.io/v1beta1
-        kind: DeploymentRuntimeConfig
-        metadata:
-          name: default
-        spec:
-          deploymentTemplate:
-            spec:
-              selector: {}
-              template:
-                spec:
-                  containers:
-                    - name: package-runtime
-                      resources:
-                        limits:
-                          memory: 256Mi
-                        requests:
-                          cpu: 20m
-                          memory: 64Mi
-                      securityContext:
-                        allowPrivilegeEscalation: false
-                        readOnlyRootFilesystem: true
-                        runAsNonRoot: true
-                        capabilities:
-                          drop: [ALL]
-                        seccompProfile:
-                          type: RuntimeDefault
     function:
       packages:
         [

@@ -77,8 +77,11 @@ mise run deploy syd
 ```
 
 Flux applies foundation APIs and controllers first, shared platform resources
-second, automation third and applications last. Flux is the only routine
-deployer; CI validates but does not deploy.
+second, the Crossplane package runtime third, external automation fourth and
+applications last. The separate runtime stage lets a new cluster install the
+Crossplane CRDs before applying the hardened package runtime configuration and
+waits for the HTTP provider and composition function before automation starts.
+Flux is the only routine deployer; CI validates but does not deploy.
 
 ## Platform
 

@@ -4,6 +4,7 @@ resources:
   - apps.yaml
   - automation.yaml
   - b2-automation.yaml
+  - crossplane-runtime.yaml
   - foundation.yaml
   - flux-system
   - home-assistant-webhook.yaml
@@ -26,6 +27,10 @@ patches:
           - apiVersion: kustomize.toolkit.fluxcd.io/v1
             kind: Kustomization
             name: automation
+            namespace: flux-system
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
+            name: crossplane-runtime
             namespace: flux-system
           - apiVersion: kustomize.toolkit.fluxcd.io/v1
             kind: Kustomization
