@@ -48,9 +48,9 @@ are documented in `README.md`; completed migration history remains in Git.
    stable device IDs. Expose the Traefik widget only through a cluster-internal
    API Service with a NetworkPolicy limited to Homepage; do not expose the
    unauthenticated dashboard API through a shared route.
-3. Validate the Services and Servers tabs at desktop and mobile widths. Confirm
-   widget-bearing cards sort first, other local and explicit `syd` cards merge
-   alphabetically and no remote card duplicates local discovery.
+3. Visually validate the Services and Servers tabs at desktop and mobile widths
+   after real widget credentials are present. Confirm errors remain hidden and
+   the four-column Home Automation and Media groups stay usable on mobile.
 
 ### Identity
 
