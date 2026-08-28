@@ -11,3 +11,27 @@ spec:
     launchURL: https://grafana.excloo.com
     name: Grafana
     pkceEnabled: true
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: grafana-oidc
+  namespace: observability
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Grafana
+        property: oidc-client-id
+      secretKey: oidc-client-id
+    - remoteRef:
+        key: Grafana
+        property: oidc-client-secret
+      secretKey: oidc-client-secret
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Merge
+    deletionPolicy: Retain
+    name: grafana

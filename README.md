@@ -149,6 +149,11 @@ suspended `mbk` Flux inventories. The Redlib Cloudflare WAF policy is similarly
 staged on `syd`, where the existing Redlib application item and Secret live. The
 steps required to adopt these retained resources are in `PLAN.md`.
 
+Grafana's local administrator credential reconciles with the platform. Its OIDC
+fields are optional at startup and merge into the same Secret only after Pocket
+ID automation has created them, so identity automation cannot block local
+recovery access or the platform dependency chain.
+
 `homelab` owns the `Backblaze B2`, `Cloudflare WAF`, `Control D` and `Resend`
 items in each corresponding cluster vault. They are unqualified and tagged
 `Homelab` so the cluster can read them while the application-item reconciler
