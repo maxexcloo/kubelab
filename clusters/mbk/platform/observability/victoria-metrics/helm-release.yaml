@@ -21,12 +21,12 @@ spec:
         GF_AUTH_GENERIC_OAUTH_CLIENT_ID:
           secretKeyRef:
             key: oidc-client-id
-            name: grafana
+            name: grafana-oidc
             optional: true
         GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
           secretKeyRef:
             key: oidc-client-secret
-            name: grafana
+            name: grafana-oidc
             optional: true
       grafana.ini:
         auth.generic_oauth:
