@@ -5,24 +5,14 @@ are documented in `README.md`; completed migration history remains in Git.
 
 ## External Automation
 
-1. Export the retained Cloudflare records and Control D rules for `budget`,
-   `aiometadata`, `aiostreams`, `beszel`, `bichon`, `bifrost`, `chat`,
-   `cliproxy`, `comfy-control`, `grafana`, `papra` and `reader`. Confirm each
-   Cloudflare record is DNS-only and each Control D rule resolves to the current
-   `private.mbk.excloo.dev` A and AAAA targets. Require each Cloudflare record
-   comment to remain `Kubelab ExternalDNS Managed` during adoption.
-2. Resume `clusters/mbk/private-dns-automation.yaml`. Require both DNS target
-   discovery Requests and every `PrivateDNSRecord` to become Ready, then verify
-   Cloudflare and Control D answers independently before removing any legacy
-   owner. Keep the inventory suspended if an existing record differs.
-3. Review the existing Beszel B2 bucket and key settings, resume
+1. Review the existing Beszel B2 bucket and key settings, resume
    `clusters/mbk/b2-automation.yaml`, and require all three provider Requests to
    become Ready. Confirm the `B2ObjectStorage` claim reads the retained bucket
    name from `beszel-object-storage`, adopts exactly one `beszel` key with the
    fixed bucket-scoped capability profile and pushes only the access-key fields
    back to the `Beszel` item. The existing application key must remain unrotated;
    suspend the inventory if the bucket, key name, scope or capabilities differ.
-4. Export the existing Cloudflare custom WAF phase, review the generated Redlib
+2. Export the existing Cloudflare custom WAF phase, review the generated Redlib
    rule, resume `clusters/syd/cloudflare-automation.yaml`, and verify that the
    Gatus bypass, browser challenge, static assets and unrelated rules remain
    intact.
@@ -97,13 +87,6 @@ are documented in `README.md`; completed migration history remains in Git.
    creating dead cards.
 
 ## Staged Integrations
-
-### Home Assistant Webhook
-
-Either activate or remove the suspended `home-assistant-webhook` inventory. To
-activate it, confirm the HAOS address and certificate, verify that only
-`/api/webhook` is exposed, resume the inventory and require the route and
-`BackendTLSPolicy` to report Ready.
 
 ### RoMM Library Workflows
 

@@ -23,7 +23,8 @@ contains only unfinished work.
 The following systems intentionally remain outside Kubernetes:
 
 - **Gatus** runs on Fly.io as an independent external monitor.
-- **HAOS** remains a dedicated Home Assistant appliance.
+- **HAOS** remains a dedicated Home Assistant appliance; `homelab` owns its
+  webhook-only Cloudflare Tunnel route and DNS record.
 - **Hotdog** receives off-site ZFS replication.
 - **Mandu** remains a Bazzite workstation and optional GPU worker.
 - **Netboot and Syncthing** remain storage-local TrueNAS applications.
@@ -113,7 +114,8 @@ between clusters.
 ## Networking & Ingress
 
 Application routes and DNS records are workload-owned. `homelab` owns cluster
-wildcards, tunnel credentials and stable tunnel or direct-public targets.
+wildcards, tunnel credentials, stable tunnel or direct-public targets and DNS
+for external services and appliances such as Gatus and Home Assistant.
 
 | Mode          | Gateway         | DNS target                    | Cloudflare proxy |
 | ------------- | --------------- | ----------------------------- | ---------------- |
@@ -127,14 +129,21 @@ A public namespace and its `HTTPRoute` must carry
 upsert-only, so route removal does not implicitly delete a DNS record. Private
 routes are never discovered by the public ExternalDNS instance.
 
+`www.reddit.excloo.com` is DNS-only to Sydney's direct Gateway and redirects to
+the canonical `reddit.excloo.com` route. Its exact hostname uses a separate
+certificate so its lifecycle cannot make either cluster wildcard certificate
+unready. DNS-01 challenges follow the `homelab`-owned CNAME delegation and
+cert-manager uses public recursive resolvers for self-checks.
+
 Private `.excloo.com` vanity names use a namespaced `PrivateDNSRecord` contract.
 Crossplane composes a DNS-only Cloudflare CNAME through a dedicated ExternalDNS
 CRD source and a Control D spoof rule to the cluster Tailscale addresses. Both
 external records are orphaned when the Kubernetes declaration is removed. The
 public and private ExternalDNS instances mark Cloudflare records as
-`Kubelab ExternalDNS Managed`. The initial retained-record adoption is staged
-and suspended as described in `PLAN.md`; the substrate-owned
-`*.mbk.excloo.dev` wildcard remains the fallback for private routes.
+`Kubelab ExternalDNS Managed`. All declared private names, including
+`beszel.excloo.com` and Homepage at `home.excloo.com`, are actively reconciled.
+The substrate-owned `*.mbk.excloo.dev` wildcard remains the fallback for
+private routes.
 
 ## Secrets & External Automation
 
@@ -144,11 +153,11 @@ vault; Kubernetes generates only declared internal credentials and preserves
 non-empty operator-managed values.
 
 Crossplane is available on every cluster and manages app-scoped provider APIs.
-Pocket ID clients and groups and sending-only Resend keys are active on `mbk`.
-B2 inventory and private Cloudflare and Control D DNS remain fail-closed behind
-suspended `mbk` Flux inventories. The Redlib Cloudflare WAF policy is similarly
-staged on `syd`, where the existing Redlib application item and Secret live. The
-steps required to adopt these retained resources are in `PLAN.md`.
+Pocket ID clients and groups, sending-only Resend keys and private Cloudflare
+and Control D DNS are active on `mbk`. B2 inventory remains fail-closed behind
+a suspended `mbk` Flux inventory. The Redlib Cloudflare WAF policy is similarly
+staged on `syd`, where the existing Redlib application item and Secret live.
+The steps required to adopt these retained resources are in `PLAN.md`.
 
 Grafana's local administrator credential and retained Pocket ID client
 credentials reconcile with the platform through separate Secrets. Its OIDC
@@ -181,15 +190,17 @@ App-scoped external resources default to orphan-on-delete. ExternalDNS is
 upsert-only. Deleting a Kubernetes declaration must not delete an external
 bucket, credential, identity client or unrelated WAF rule.
 
-Homepage uses the legacy Services and Servers tab structure, service metadata
-and custom card styling, including the repository-owned retained background. It
-discovers `mbk` routes and declares `syd` and appliance cards explicitly because
-Homepage does not discover a remote cluster. Credential-backed appliance and
-Cloudflare Tunnel widgets are unfinished parity work in `PLAN.md`.
+Homepage is served at `home.excloo.com` and uses the legacy Services and Servers
+tab structure, service metadata and custom card styling, including the
+repository-owned retained background. It discovers `mbk` routes and declares
+`syd` and appliance cards explicitly because Homepage does not discover a
+remote cluster. Credential-backed appliance and Cloudflare Tunnel widgets are
+unfinished parity work in `PLAN.md`.
 
 Beszel agents run as a DaemonSet on every Kubernetes node, including Talos
 control-plane nodes. They use outbound WebSocket registration and the Kubernetes
-node name as their stable system identity. This provides node-level CPU, memory,
+node name as their stable system identity, and both clusters use
+`https://beszel.excloo.com` as the hub. This provides node-level CPU, memory,
 load, uptime and network summaries; VictoriaMetrics remains authoritative for
 Kubernetes objects, Pod resources and detailed node metrics.
 
