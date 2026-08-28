@@ -19,4 +19,6 @@ spec:
         - type: RequestRedirect
           requestRedirect:
             hostname: reddit.excloo.com
+            port: 443
+            scheme: https
             statusCode: 301
