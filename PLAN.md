@@ -9,9 +9,8 @@ are documented in `README.md`; completed migration history remains in Git.
    `aiometadata`, `aiostreams`, `beszel`, `bichon`, `bifrost`, `chat`,
    `cliproxy`, `comfy-control`, `grafana`, `papra` and `reader`. Confirm each
    Cloudflare record is DNS-only and each Control D rule resolves to the current
-   `private.mbk.excloo.dev` A and AAAA targets. Require retained `Managed by
-ExternalDNS` and `Kubernetes private Gateway` comments to converge to
-   `Kubelab ExternalDNS Managed` during adoption.
+   `private.mbk.excloo.dev` A and AAAA targets. Require each Cloudflare record
+   comment to remain `Kubelab ExternalDNS Managed` during adoption.
 2. Resume `clusters/mbk/private-dns-automation.yaml`. Require both DNS target
    discovery Requests and every `PrivateDNSRecord` to become Ready, then verify
    Cloudflare and Control D answers independently before removing any legacy
