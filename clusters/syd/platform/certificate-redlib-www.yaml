@@ -9,4 +9,4 @@ spec:
     - www.reddit.excloo.com
   issuerRef:
     kind: ClusterIssuer
-    name: letsencrypt-http01
+    name: letsencrypt-dns01

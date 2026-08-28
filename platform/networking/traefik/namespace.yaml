@@ -3,7 +3,6 @@ kind: Namespace
 metadata:
   name: networking
   labels:
-    gateway.excloo.dev/public-access: "true"
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/warn: restricted
