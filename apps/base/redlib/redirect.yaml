@@ -4,7 +4,7 @@ metadata:
   name: redlib-www
   namespace: redlib
   annotations:
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
   labels:
     app.kubernetes.io/name: redlib
     gateway.excloo.dev/public-access: "true"
@@ -12,7 +12,7 @@ spec:
   hostnames:
     - www.reddit.excloo.com
   parentRefs:
-    - name: public-tunnel
+    - name: public-direct
       namespace: networking
   rules:
     - filters:
