@@ -150,9 +150,10 @@ staged on `syd`, where the existing Redlib application item and Secret live. The
 steps required to adopt these retained resources are in `PLAN.md`.
 
 Grafana's local administrator credential reconciles with the platform. Its OIDC
-fields are optional at startup and merge into the same Secret only after Pocket
-ID automation has created them, so identity automation cannot block local
-recovery access or the platform dependency chain.
+environment references are optional at startup, so unfinished OIDC credential
+delivery cannot block local recovery access or the platform dependency chain.
+The retained client remains under Pocket ID automation; completing its credential
+delivery is tracked in `PLAN.md`.
 
 `homelab` owns the `Backblaze B2`, `Cloudflare WAF`, `Control D` and `Resend`
 items in each corresponding cluster vault. They are unqualified and tagged

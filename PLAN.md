@@ -64,7 +64,10 @@ are documented in `README.md`; completed migration history remains in Git.
 1. Test both the existing Beszel password login and Pocket ID against
    `beszel.excloo.com`. Confirm its persisted PocketBase provider uses the same
    issuer, client and callback; keep `DISABLE_PASSWORD_AUTH` false.
-2. Test both the Grafana administrator login and Pocket ID against
+2. Recover the retained Grafana Pocket ID client identifier and secret into the
+   `Grafana` item in the `mbk` cluster vault, then deliver those optional fields
+   without making platform readiness depend on them. Restart Grafana after the
+   Secret is Ready and test both the administrator login and Pocket ID against
    `grafana.excloo.com`. Keep `grafana.syd.excloo.dev` local-only while Pocket ID
    automation remains available only on `mbk`.
 3. Audit every remaining OIDC-enabled workload for a usable local recovery
