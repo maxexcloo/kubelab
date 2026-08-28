@@ -37,3 +37,5 @@ spec:
         tailscale.com/hostname: syd
       spec:
         type: ClusterIP
+    updateStrategy:
+      type: Recreate
