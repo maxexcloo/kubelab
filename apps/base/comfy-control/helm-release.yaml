@@ -107,9 +107,9 @@ spec:
     route:
       main:
         annotations:
-          gethomepage.dev/description: AI Image and Video Control
+          gethomepage.dev/description: ComfyUI Control & Proxy
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
+          gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/href: https://comfy-control.excloo.com
           gethomepage.dev/icon: comfyui
           gethomepage.dev/name: Comfy Control

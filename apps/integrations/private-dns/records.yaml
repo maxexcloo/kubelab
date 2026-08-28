@@ -1,0 +1,95 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+spec:
+  hostname: budget.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: aiometadata
+  namespace: aiometadata
+spec:
+  hostname: aiometadata.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+spec:
+  hostname: aiostreams.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: beszel
+  namespace: beszel
+spec:
+  hostname: beszel.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: bichon
+  namespace: bichon
+spec:
+  hostname: bichon.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: bifrost
+  namespace: bifrost
+spec:
+  hostname: bifrost.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: cliproxyapi
+  namespace: cliproxyapi
+spec:
+  hostname: cliproxy.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: comfy-control
+  namespace: comfy-control
+spec:
+  hostname: comfy-control.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: grafana
+  namespace: observability
+spec:
+  hostname: grafana.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: miniflux
+  namespace: miniflux
+spec:
+  hostname: reader.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: open-webui
+  namespace: open-webui
+spec:
+  hostname: chat.excloo.com
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: papra
+  namespace: papra
+spec:
+  hostname: papra.excloo.com

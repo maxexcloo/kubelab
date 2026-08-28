@@ -64,8 +64,9 @@ mise run bootstrap syd
 The task requires a cluster name matching `clusters/<cluster>` and a kubeconfig
 context. It shows the context and API endpoint before confirmation, then
 installs Cilium, materialises the provisioned 1Password Connect credentials and
-starts Flux. OpenTofu apply and Kubernetes bootstrap remain separate operator
-actions.
+token, and starts Flux. These Connect values are the only secrets injected
+outside reconciliation. External Secrets uses them to read the cluster vault;
+OpenTofu apply and Kubernetes bootstrap remain separate operator actions.
 
 ### Reconciliation
 
@@ -76,8 +77,8 @@ mise run deploy syd
 ```
 
 Flux applies foundation APIs and controllers first, shared platform resources
-second, optional automation third and applications last. Flux is the only
-routine deployer; CI validates but does not deploy.
+second, automation third and applications last. Flux is the only routine
+deployer; CI validates but does not deploy.
 
 ## Platform
 
@@ -121,7 +122,15 @@ A public namespace and its `HTTPRoute` must carry
 `gateway.excloo.dev/public-access: "true"`. Tunnel routes also set
 `external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"`. ExternalDNS is
 upsert-only, so route removal does not implicitly delete a DNS record. Private
-routes are never discovered by ExternalDNS.
+routes are never discovered by the public ExternalDNS instance.
+
+Private `.excloo.com` vanity names use a namespaced `PrivateDNSRecord` contract.
+Crossplane composes a DNS-only Cloudflare CNAME through a dedicated ExternalDNS
+CRD source and a Control D spoof rule to the cluster Tailscale addresses. Both
+external records are orphaned when the Kubernetes declaration is removed. The
+initial retained-record adoption is staged and suspended as described in
+`PLAN.md`; the substrate-owned `*.mbk.excloo.dev` wildcard remains the fallback
+for private routes.
 
 ## Secrets & External Automation
 
@@ -130,14 +139,53 @@ values never enter Git. Each workload uses one display-named item in its cluster
 vault; Kubernetes generates only declared internal credentials and preserves
 non-empty operator-managed values.
 
-Crossplane on `mbk` manages app-scoped provider APIs. Pocket ID clients and
-groups and sending-only Resend keys are active. B2 inventory and the Redlib
-Cloudflare WAF policy remain fail-closed behind suspended Flux inventories; the
-steps required to resolve them are in `PLAN.md`.
+Crossplane is available on every cluster and manages app-scoped provider APIs.
+Pocket ID clients and groups and sending-only Resend keys are active on `mbk`.
+B2 inventory and private Cloudflare and Control D DNS remain fail-closed behind
+suspended `mbk` Flux inventories. The Redlib Cloudflare WAF policy is similarly
+staged on `syd`, where the existing Redlib application item and Secret live. The
+steps required to adopt these retained resources are in `PLAN.md`.
+
+`homelab` owns the `Backblaze B2`, `Cloudflare WAF`, `Control D` and `Resend`
+items in each corresponding cluster vault. They are unqualified and tagged
+`Homelab` so the cluster can read them while the application-item reconciler
+leaves them alone. External Secrets materialises their provider credentials in
+`crossplane-system`; no provider credential has a separate bootstrap path. The
+only out-of-band secret injection is the cluster's 1Password Connect credentials
+and token. Generated application credentials are published only to the
+corresponding application item and namespace.
+
+`B2ObjectStorage` is the narrow application-storage contract. A claim selects
+an existing bucket-name Secret, an application-key name and a display-named
+1Password item. The composition creates or adopts one private bucket with B2
+server-side encryption and the retained one-day hidden-file lifecycle, then
+creates or adopts one bucket-scoped read/write application key. Capabilities are
+fixed by the composition; claims cannot request account, bucket-management or
+key-management access. A same-name key with different or duplicate settings
+blocks reconciliation instead of creating another credential. The generated key
+is masked into the selected application Secret and pushed only to that
+application item. Deleting a claim or composed request does not delete the
+external bucket or key.
 
 App-scoped external resources default to orphan-on-delete. ExternalDNS is
 upsert-only. Deleting a Kubernetes declaration must not delete an external
 bucket, credential, identity client or unrelated WAF rule.
+
+Homepage uses the legacy Services and Servers tab structure, service metadata
+and custom card styling, including the repository-owned retained background. It
+discovers `mbk` routes and declares `syd` and appliance cards explicitly because
+Homepage does not discover a remote cluster. Credential-backed appliance and
+Cloudflare Tunnel widgets are unfinished parity work in `PLAN.md`.
+
+Beszel agents run as a DaemonSet on every Kubernetes node, including Talos
+control-plane nodes. They use outbound WebSocket registration and the Kubernetes
+node name as their stable system identity. This provides node-level CPU, memory,
+load, uptime and network summaries; VictoriaMetrics remains authoritative for
+Kubernetes objects, Pod resources and detailed node metrics.
+
+Dozzle is not deployed. Kubernetes log aggregation remains in VictoriaLogs and
+Grafana, with Headlamp or `kubectl` for live Pod inspection; Beszel remains the
+system-level dashboard rather than a second Kubernetes log interface.
 
 ## Storage & Recovery
 

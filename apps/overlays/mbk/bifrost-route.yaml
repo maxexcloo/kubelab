@@ -4,11 +4,11 @@ metadata:
   name: bifrost
   namespace: bifrost
   annotations:
-    gethomepage.dev/description: AI Gateway
+    gethomepage.dev/description: LLM Gateway
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Applications
+    gethomepage.dev/group: Artificial Intelligence
     gethomepage.dev/href: https://bifrost.excloo.com
-    gethomepage.dev/icon: bifrost
+    gethomepage.dev/icon: https://cdn.jsdelivr.net/gh/maximhq/bifrost/ui/public/bifrost-icon-dark.webp
     gethomepage.dev/name: Bifrost
     gethomepage.dev/siteMonitor: https://bifrost.excloo.com/health
   labels:

@@ -1,0 +1,10 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: crossplane-private-dns
+  labels:
+    rbac.crossplane.io/aggregate-to-crossplane: "true"
+rules:
+  - apiGroups: [externaldns.k8s.io]
+    resources: [dnsendpoints, dnsendpoints/status]
+    verbs: [create, delete, get, list, patch, update, watch]

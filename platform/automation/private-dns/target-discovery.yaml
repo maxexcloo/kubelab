@@ -1,0 +1,71 @@
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: private-dns-target-ipv4
+  namespace: crossplane-system
+spec:
+  managementPolicies: [Observe]
+  forProvider:
+    expectedResponseCheck:
+      logic: |-
+        .response.statusCode == 200
+        and .response.body.Status == 0
+        and ([.response.body.Answer[]? | select(.type == 1) | .data] | length) == 1
+      type: CUSTOM
+    headers:
+      Accept: [application/dns-json]
+      User-Agent: [kubelab-crossplane/1.0]
+    mappings:
+      - action: OBSERVE
+        url: .payload.baseUrl
+    payload:
+      baseUrl: https://cloudflare-dns.com/dns-query?name=private.mbk.excloo.dev&type=A
+      body: "{}"
+    secretInjectionConfigs:
+      - keyMappings:
+          - missingFieldStrategy: preserve
+            responseJQ: ".body.Answer[]? | select(.type == 1) | .data"
+            secretKey: address
+        secretRef:
+          name: private-dns-target-ipv4
+          namespace: crossplane-system
+        setOwnerReference: true
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: dns-over-https
+---
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: private-dns-target-ipv6
+  namespace: crossplane-system
+spec:
+  managementPolicies: [Observe]
+  forProvider:
+    expectedResponseCheck:
+      logic: |-
+        .response.statusCode == 200
+        and .response.body.Status == 0
+        and ([.response.body.Answer[]? | select(.type == 28) | .data] | length) == 1
+      type: CUSTOM
+    headers:
+      Accept: [application/dns-json]
+      User-Agent: [kubelab-crossplane/1.0]
+    mappings:
+      - action: OBSERVE
+        url: .payload.baseUrl
+    payload:
+      baseUrl: https://cloudflare-dns.com/dns-query?name=private.mbk.excloo.dev&type=AAAA
+      body: "{}"
+    secretInjectionConfigs:
+      - keyMappings:
+          - missingFieldStrategy: preserve
+            responseJQ: ".body.Answer[]? | select(.type == 28) | .data"
+            secretKey: address
+        secretRef:
+          name: private-dns-target-ipv6
+          namespace: crossplane-system
+        setOwnerReference: true
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: dns-over-https

@@ -84,12 +84,12 @@ spec:
       main:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: E-paper Display Manager
+          gethomepage.dev/description: TRMNL Server
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://larapaper.excloo.com
-          gethomepage.dev/icon: mdi-tablet-dashboard
-          gethomepage.dev/name: Larapaper
+          gethomepage.dev/icon: sh-trmnl
+          gethomepage.dev/name: LaraPaper
           gethomepage.dev/siteMonitor: https://larapaper.excloo.com
         hostnames:
           - larapaper.excloo.com

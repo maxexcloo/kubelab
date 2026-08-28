@@ -8,5 +8,4 @@ spec:
     - port: http
   selector:
     matchLabels:
-      app.kubernetes.io/instance: external-dns
       app.kubernetes.io/name: external-dns

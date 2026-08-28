@@ -23,7 +23,7 @@ data:
         - Control D:
             - description: DNS
               href: https://controld.com
-              icon: control-d
+              icon: sh-control-d-light
         - Fly.io:
             - description: App Platform
               href: https://fly.io/dashboard
@@ -48,6 +48,56 @@ data:
             - description: Network
               href: https://unifi.ui.com
               icon: si-ubiquiti-#ffffff
+  custom.css: |
+    :root {
+      --homepage-card-bg: rgba(0, 0, 0, 0.15);
+      --homepage-card-radius: 15px;
+      --tw-shadow-color: none;
+    }
+    html,
+    body {
+      -webkit-font-smoothing: auto !important;
+      font-size: 110% !important;
+      text-rendering: auto !important;
+    }
+    .rounded,
+    .rounded-md {
+      border-radius: var(--homepage-card-radius) !important;
+    }
+    .bookmark > a,
+    .service-card {
+      background: var(--homepage-card-bg) !important;
+      box-shadow: none !important;
+    }
+    .service-card {
+      transition: none !important;
+    }
+    .service-block {
+      background: transparent !important;
+    }
+    .service-container {
+      background: var(--homepage-card-bg) !important;
+      border-radius: var(--homepage-card-radius);
+    }
+    .service-card > *:nth-child(n + 3) > div {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+    .service-title {
+      position: relative;
+    }
+    .service-tags {
+      bottom: 0;
+    }
+    .site-monitor-status {
+      height: 100%;
+      padding: 8px !important;
+    }
+    .site-monitor-status > .rounded-full {
+      border-radius: var(--homepage-card-radius) !important;
+      height: 100% !important;
+      width: 6px !important;
+    }
   docker.yaml: |
     {}
   kubernetes.yaml: |
@@ -56,6 +106,12 @@ data:
     mode: cluster
     traefik: false
   services.yaml: |
+    - Applications:
+        - Redlib:
+            description: Reddit Frontend
+            href: https://reddit.excloo.com
+            icon: redlib
+            siteMonitor: https://reddit.excloo.com
     - Home Automation:
         - ESPHome:
             description: ESP Device Builder
@@ -88,19 +144,26 @@ data:
             icon: zigbee2mqtt
             siteMonitor: https://hass.mbk.excloo.net/45df7312_zigbee2mqtt
     - Infrastructure:
-        - Gatus:
-            description: Health Monitoring & Status Page
-            href: https://status.excloo.com
-            icon: gatus
-            siteMonitor: https://status.excloo.com
-            widget:
-              type: gatus
-              url: https://status.excloo.com
+        - Anisette:
+            description: Anisette Server
+            href: https://anisette.excloo.com
+            icon: si-apple-#ffffff
+            siteMonitor: https://anisette.excloo.com
+        - Headlamp (syd):
+            description: Kubernetes Dashboard
+            href: https://headlamp.syd.excloo.dev
+            icon: headlamp
+            siteMonitor: https://headlamp.syd.excloo.dev
         - Netboot:
             description: Network Boot Server
             href: http://kimbap.mbk.excloo.net:31010
             icon: netbootxyz
             siteMonitor: http://kimbap.mbk.excloo.net:31010
+        - OpenSpeedTest (syd):
+            description: Network Speed Test
+            href: https://speed.syd.excloo.dev
+            icon: openspeedtest
+            siteMonitor: https://speed.syd.excloo.dev
         - Syncthing:
             description: File Synchronisation
             href: http://kimbap.mbk.excloo.net:20910
@@ -116,6 +179,20 @@ data:
             href: https://gateway.mbk.excloo.net
             icon: unifi
             siteMonitor: https://gateway.mbk.excloo.net
+    - Operations:
+        - Gatus:
+            description: Health Monitoring & Status Page
+            href: https://status.excloo.com
+            icon: gatus
+            siteMonitor: https://status.excloo.com
+            widget:
+              type: gatus
+              url: https://status.excloo.com
+        - Grafana (syd):
+            description: Infrastructure Observability
+            href: https://grafana.syd.excloo.dev
+            icon: grafana
+            siteMonitor: https://grafana.syd.excloo.dev
   settings.yaml: |
     cardBlur: xs
     color: slate
@@ -125,20 +202,38 @@ data:
     hideVersion: true
     statusStyle: dot
     theme: dark
-    title: Home
+    title: Homepage
+    background:
+      brightness: 50
+      image: /images/background.jpg
     layout:
       Applications:
         columns: 4
         style: row
-      Home Automation:
-        columns: 4
-        style: row
-      Infrastructure:
+        tab: Services
+      Artificial Intelligence:
         columns: 2
         style: row
+        tab: Services
       Media:
         columns: 4
         style: row
+        tab: Services
+      Operations:
+        columns: 2
+        style: row
+        tab: Services
+      Providers:
+        columns: 2
+        style: row
+      Home Automation:
+        columns: 2
+        style: row
+        tab: Servers
+      Infrastructure:
+        columns: 2
+        style: row
+        tab: Servers
   widgets.yaml: |
     - kubernetes:
         cluster:
@@ -153,5 +248,5 @@ data:
           show: true
           showLabel: true
     - search:
-        provider: duckduckgo
+        provider: google
         target: _blank

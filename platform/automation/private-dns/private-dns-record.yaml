@@ -1,0 +1,151 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: privatednsrecords.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: private-dns-record
+  group: automation.excloo.dev
+  names:
+    kind: PrivateDNSRecord
+    plural: privatednsrecords
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                controlDProfileID:
+                  default: 653224sydwhf
+                  minLength: 1
+                  type: string
+                hostname:
+                  format: hostname
+                  type: string
+                target:
+                  default: private.mbk.excloo.dev
+                  format: hostname
+                  type: string
+              required: [hostname]
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: private-dns-record
+spec:
+  compositeTypeRef:
+    apiVersion: automation.excloo.dev/v1alpha1
+    kind: PrivateDNSRecord
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: crossplane-contrib-function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: cloudflare-record
+            base:
+              apiVersion: externaldns.k8s.io/v1alpha1
+              kind: DNSEndpoint
+              metadata:
+                name: private-dns
+                labels:
+                  gateway.excloo.dev/private-dns: "true"
+              spec:
+                endpoints:
+                  - dnsName: placeholder.excloo.com
+                    recordTTL: 300
+                    recordType: CNAME
+                    targets: [private.mbk.excloo.dev]
+                    providerSpecific:
+                      - name: external-dns.kubernetes.io/cloudflare-proxied
+                        value: "false"
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.hostname
+                toFieldPath: spec.endpoints[0].dnsName
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.target
+                toFieldPath: spec.endpoints[0].targets[0]
+            readinessChecks:
+              - type: None
+          - name: control-d-rule
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: private-dns
+              spec:
+                managementPolicies: [Create, LateInitialize, Observe, Update]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: |-
+                      .response.statusCode == 200
+                      and ([
+                        .response.body.body.rules[]?
+                        | select(.PK == .payload.body.hostname)
+                        | select(.action.do == 2)
+                        | select(.action.status == 1)
+                        | select(.action.via == .payload.body.ipv4)
+                        | select(.action.via_v6 == .payload.body.ipv6)
+                      ] | length) == 1
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                  mappings:
+                    - action: OBSERVE
+                      url: .payload.baseUrl
+                    - action: UPDATE
+                      body: |-
+                        {
+                          do: 2,
+                          hostnames: [.payload.body.hostname],
+                          status: 1,
+                          via: .payload.body.ipv4,
+                          via_v6: .payload.body.ipv6
+                        }
+                      method: POST
+                      url: .payload.baseUrl
+                  payload:
+                    baseUrl: https://api.controld.com/profiles/placeholder/rules
+                    body: |-
+                      {
+                        "hostname": "placeholder.excloo.com",
+                        "ipv4": "{{ private-dns-target-ipv4:crossplane-system:address }}",
+                        "ipv6": "{{ private-dns-target-ipv6:crossplane-system:address }}"
+                      }
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: control-d
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.controlDProfileID
+                toFieldPath: spec.forProvider.payload.baseUrl
+                transforms:
+                  - type: string
+                    string:
+                      fmt: https://api.controld.com/profiles/%s/rules
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.hostname
+                toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: string
+                    string:
+                      fmt: '{"hostname":"%s","ipv4":"{{ private-dns-target-ipv4:crossplane-system:address }}","ipv6":"{{ private-dns-target-ipv6:crossplane-system:address }}"}'
+                      type: Format

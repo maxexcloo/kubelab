@@ -1,0 +1,43 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns-private
+  namespace: external-dns
+spec:
+  interval: 30m
+  releaseName: external-dns-private
+  chart:
+    spec:
+      chart: external-dns
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+        namespace: flux-system
+      version: 1.21.1
+  values:
+    domainFilters: [excloo.com]
+    labelFilter: gateway.excloo.dev/private-dns=true
+    logFormat: json
+    managedRecordTypes: [CNAME]
+    policy: upsert-only
+    registry: noop
+    sources: [crd]
+    triggerLoopOnEvent: true
+    env:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: token
+            name: cloudflare-api-token
+    extraArgs:
+      cloudflare-dns-records-per-page: "5000"
+      cloudflare-record-comment: Managed by ExternalDNS
+    provider:
+      name: cloudflare
+    resources:
+      limits:
+        memory: 128Mi
+      requests:
+        cpu: 20m
+        memory: 64Mi

@@ -112,12 +112,12 @@ spec:
     route:
       main:
         annotations:
-          gethomepage.dev/description: AI Provider Proxy
+          gethomepage.dev/description: Subscription Proxy
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Infrastructure
-          gethomepage.dev/href: https://cliproxy.excloo.com
-          gethomepage.dev/icon: mdi-api
-          gethomepage.dev/name: CLIProxyAPI
+          gethomepage.dev/group: Artificial Intelligence
+          gethomepage.dev/href: https://cliproxy.excloo.com/management.html
+          gethomepage.dev/icon: https://avatars.githubusercontent.com/u/233033915
+          gethomepage.dev/name: CLI Proxy API
         hostnames:
           - cliproxy.excloo.com
         labels:

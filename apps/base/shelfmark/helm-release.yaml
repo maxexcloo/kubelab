@@ -107,11 +107,11 @@ spec:
       main:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: E-book Search
+          gethomepage.dev/description: Book Search & Downloads
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
+          gethomepage.dev/group: Media
           gethomepage.dev/href: https://shelf.excloo.com
-          gethomepage.dev/icon: mdi-book-search
+          gethomepage.dev/icon: shelfmark
           gethomepage.dev/name: Shelfmark
         hostnames:
           - shelf.excloo.com

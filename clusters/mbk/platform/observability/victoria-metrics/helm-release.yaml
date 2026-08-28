@@ -17,3 +17,29 @@ spec:
         existingSecret: grafana
         passwordKey: password
         userKey: username
+      envValueFrom:
+        GF_AUTH_GENERIC_OAUTH_CLIENT_ID:
+          secretKeyRef:
+            key: oidc-client-id
+            name: grafana
+        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+          secretKeyRef:
+            key: oidc-client-secret
+            name: grafana
+      grafana.ini:
+        auth.generic_oauth:
+          allow_sign_up: true
+          api_url: https://id.excloo.com/api/oidc/userinfo
+          auth_url: https://id.excloo.com/authorize
+          client_id: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_ID}
+          client_secret: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
+          enabled: true
+          name: Excloo ID
+          scopes: openid profile email
+          token_url: https://id.excloo.com/api/oidc/token
+          use_pkce: true
+        server:
+          domain: grafana.excloo.com
+          root_url: https://grafana.excloo.com
+        users:
+          auto_assign_org_role: Admin

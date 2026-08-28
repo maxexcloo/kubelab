@@ -4,17 +4,17 @@ metadata:
   name: grafana
   namespace: observability
   annotations:
-    gethomepage.dev/description: Cluster Observability
+    gethomepage.dev/description: Infrastructure Observability
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Infrastructure
-    gethomepage.dev/href: https://grafana.mbk.excloo.dev
+    gethomepage.dev/group: Operations
+    gethomepage.dev/href: https://grafana.excloo.com
     gethomepage.dev/icon: grafana
     gethomepage.dev/name: Grafana
   labels:
     app.kubernetes.io/name: grafana
 spec:
   hostnames:
-    - grafana.mbk.excloo.dev
+    - grafana.excloo.com
   parentRefs:
     - name: private
       namespace: networking

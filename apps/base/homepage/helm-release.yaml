@@ -88,6 +88,15 @@ spec:
     global:
       nameOverride: homepage
     persistence:
+      background:
+        name: homepage-background
+        type: configMap
+        advancedMounts:
+          homepage:
+            homepage:
+              - path: /app/public/images/background.jpg
+                readOnly: true
+                subPath: background.jpg
       cache:
         type: emptyDir
         globalMounts:
@@ -101,6 +110,9 @@ spec:
               - path: /app/config/bookmarks.yaml
                 readOnly: true
                 subPath: bookmarks.yaml
+              - path: /app/config/custom.css
+                readOnly: true
+                subPath: custom.css
               - path: /app/config/docker.yaml
                 readOnly: true
                 subPath: docker.yaml
@@ -140,7 +152,7 @@ spec:
         annotations:
           gethomepage.dev/description: Application Dashboard
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/group: Applications
           gethomepage.dev/href: https://homepage.mbk.excloo.dev
           gethomepage.dev/icon: homepage
           gethomepage.dev/name: Homepage

@@ -24,12 +24,6 @@ depends = [
   { task = "bootstrap-flux", args = ["{{usage.cluster}}"] },
 ]
 
-[tasks.bootstrap-automation-secrets]
-description = "Bootstrap staged external automation credentials"
-interactive = true
-run = "scripts/bootstrap_automation_secrets.sh"
-usage = 'arg "<cluster>"'
-
 [tasks.bootstrap-cilium]
 description = "Bootstrap Cilium networking for a cluster"
 interactive = true
@@ -41,7 +35,7 @@ run = "scripts/bootstrap_flux.sh"
 wait_for = ["bootstrap-secrets"]
 
 [tasks.bootstrap-secrets]
-description = "Bootstrap cluster controller credentials"
+description = "Bootstrap 1Password Connect credentials"
 run = "scripts/bootstrap_cluster_secrets.sh"
 wait_for = ["bootstrap-cilium"]
 

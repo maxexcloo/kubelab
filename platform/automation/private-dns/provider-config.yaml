@@ -1,0 +1,19 @@
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: ClusterProviderConfig
+metadata:
+  name: control-d
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      key: authorization
+      name: control-d-credentials
+      namespace: crossplane-system
+---
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: ClusterProviderConfig
+metadata:
+  name: dns-over-https
+spec:
+  credentials:
+    source: None

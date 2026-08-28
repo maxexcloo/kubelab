@@ -1,0 +1,396 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: b2objectstorages.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: b2-object-storage
+  group: automation.excloo.dev
+  names:
+    kind: B2ObjectStorage
+    plural: b2objectstorages
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                apiURL:
+                  default: https://api005.backblazeb2.com
+                  format: uri
+                  type: string
+                displayName:
+                  maxLength: 128
+                  minLength: 1
+                  type: string
+                keyName:
+                  maxLength: 100
+                  minLength: 1
+                  pattern: ^[A-Za-z0-9-]+$
+                  type: string
+                secretRef:
+                  type: object
+                  properties:
+                    bucketKey:
+                      default: bucket
+                      maxLength: 253
+                      minLength: 1
+                      type: string
+                    name:
+                      maxLength: 253
+                      minLength: 1
+                      type: string
+                  required: [name]
+              required: [displayName, keyName, secretRef]
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: b2-object-storage
+spec:
+  compositeTypeRef:
+    apiVersion: automation.excloo.dev/v1alpha1
+    kind: B2ObjectStorage
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: crossplane-contrib-function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: authorisation
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: b2-authorisation
+              spec:
+                managementPolicies: [Observe]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: |-
+                      .response.statusCode == 200
+                      and .response.body.accountId != null
+                      and (.response.body.apiInfo.storageApi.apiUrl | startswith("https://"))
+                      and (.response.body.apiInfo.storageApi.s3ApiUrl | startswith("https://"))
+                      and .response.body.authorizationToken != null
+                    type: CUSTOM
+                  headers:
+                    Authorization:
+                      ["{{ b2-credentials:crossplane-system:authorization }}"]
+                    User-Agent: [kubelab-crossplane/1.0]
+                  mappings:
+                    - action: OBSERVE
+                      url: .payload.baseUrl
+                  payload:
+                    baseUrl: https://api.backblazeb2.com/b2api/v4/b2_authorize_account
+                    body: "{}"
+                  secretInjectionConfigs:
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.accountId
+                          secretKey: account-id
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.authorizationToken
+                          secretKey: authorization-token
+                      secretRef:
+                        name: b2-session
+                        namespace: default
+                      setOwnerReference: true
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: b2
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
+          - name: bucket
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: b2-bucket
+              spec:
+                managementPolicies: [Create, LateInitialize, Observe, Update]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: |-
+                      .response.statusCode == 200
+                      and ((
+                        if .response.body.buckets
+                        then .response.body.buckets[0]
+                        else .response.body
+                        end
+                      ) as $bucket |
+                        $bucket.bucketType == "allPrivate"
+                        and $bucket.defaultServerSideEncryption.isClientAuthorizedToRead == true
+                        and $bucket.defaultServerSideEncryption.value.algorithm == "AES256"
+                        and $bucket.defaultServerSideEncryption.value.mode == "SSE-B2"
+                        and $bucket.lifecycleRules == [{
+                          "daysFromHidingToDeleting": 1,
+                          "daysFromUploadingToHiding": null,
+                          "fileNamePrefix": ""
+                        }]
+                      )
+                    type: CUSTOM
+                  headers:
+                    Authorization:
+                      ["{{ b2-session:default:authorization-token }}"]
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                  mappings:
+                    - action: CREATE
+                      body: |-
+                        .payload.body + {
+                          bucketType: "allPrivate",
+                          defaultServerSideEncryption: {
+                            algorithm: "AES256",
+                            mode: "SSE-B2"
+                          },
+                          lifecycleRules: [{
+                            daysFromHidingToDeleting: 1,
+                            daysFromUploadingToHiding: null,
+                            fileNamePrefix: ""
+                          }]
+                        }
+                      method: POST
+                      url: .payload.baseUrl + "/b2api/v4/b2_create_bucket"
+                    - action: OBSERVE
+                      body: .payload.body
+                      method: POST
+                      url: .payload.baseUrl + "/b2api/v4/b2_list_buckets"
+                    - action: UPDATE
+                      body: |-
+                        if (.response.body.buckets | length) == 0
+                        then .payload.body + {
+                          bucketType: "allPrivate",
+                          defaultServerSideEncryption: {
+                            algorithm: "AES256",
+                            mode: "SSE-B2"
+                          },
+                          lifecycleRules: [{
+                            daysFromHidingToDeleting: 1,
+                            daysFromUploadingToHiding: null,
+                            fileNamePrefix: ""
+                          }]
+                        }
+                        else {
+                          accountId: .payload.body.accountId,
+                          bucketId: .response.body.buckets[0].bucketId,
+                          bucketType: "allPrivate",
+                          defaultServerSideEncryption: {
+                            algorithm: "AES256",
+                            mode: "SSE-B2"
+                          },
+                          lifecycleRules: [{
+                            daysFromHidingToDeleting: 1,
+                            daysFromUploadingToHiding: null,
+                            fileNamePrefix: ""
+                          }]
+                        }
+                        end
+                      method: POST
+                      url: |-
+                        if (.response.body.buckets | length) == 0
+                        then .payload.baseUrl + "/b2api/v4/b2_create_bucket"
+                        else .payload.baseUrl + "/b2api/v4/b2_update_bucket"
+                        end
+                  payload:
+                    baseUrl: https://api005.backblazeb2.com
+                    body: "{}"
+                  secretInjectionConfigs:
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: if .body.bucketId then .body.bucketId else .body.buckets[0].bucketId end
+                          secretKey: bucket-id
+                      secretRef:
+                        name: b2-bucket
+                        namespace: default
+                      setOwnerReference: true
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: b2
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.apiURL
+                toFieldPath: spec.forProvider.payload.baseUrl
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.headers.Authorization[0]
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "{{ b2-session:%s:authorization-token }}"
+                      type: Format
+              - type: CombineFromComposite
+                combine:
+                  strategy: string
+                  string:
+                    fmt: '{"accountId":"{{ b2-session:%s:account-id }}","bucketName":"{{ %s:%s:%s }}"}'
+                  variables:
+                    - fromFieldPath: metadata.namespace
+                    - fromFieldPath: spec.secretRef.name
+                    - fromFieldPath: metadata.namespace
+                    - fromFieldPath: spec.secretRef.bucketKey
+                toFieldPath: spec.forProvider.payload.body
+          - name: application-key
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: b2-application-key
+              spec:
+                managementPolicies: [Create, LateInitialize, Observe, Update]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: |-
+                      .response.statusCode == 200
+                      and (.payload.body as $desired |
+                        if .response.body.applicationKeyId
+                        then (
+                          .response.body.keyName == $desired.keyName
+                          and (.response.body.bucketIds | sort) == ($desired.bucketIds | sort)
+                          and (.response.body.capabilities | sort) == ($desired.capabilities | sort)
+                        )
+                        else ([
+                          .response.body.keys[]?
+                          | select(.keyName == $desired.keyName)
+                          | select((.bucketIds | sort) == ($desired.bucketIds | sort))
+                          | select((.capabilities | sort) == ($desired.capabilities | sort))
+                        ] | length) == 1
+                        end
+                      )
+                    type: CUSTOM
+                  headers:
+                    Authorization:
+                      ["{{ b2-session:default:authorization-token }}"]
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                  mappings:
+                    - action: CREATE
+                      body: .payload.body
+                      method: POST
+                      url: .payload.baseUrl + "/b2api/v4/b2_create_key"
+                    - action: OBSERVE
+                      body: "{accountId: .payload.body.accountId, maxKeyCount: 1000}"
+                      method: POST
+                      url: .payload.baseUrl + "/b2api/v4/b2_list_keys"
+                    - action: UPDATE
+                      body: |-
+                        .payload.body as $desired |
+                        if ([
+                          .response.body.keys[]?
+                          | select(.keyName == $desired.keyName)
+                        ] | length) == 0
+                        then $desired
+                        else error("application key name already exists with different or duplicate settings")
+                        end
+                      method: POST
+                      url: .payload.baseUrl + "/b2api/v4/b2_create_key"
+                  payload:
+                    baseUrl: https://api005.backblazeb2.com
+                    body: "{}"
+                  secretInjectionConfigs:
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.applicationKeyId
+                          secretKey: access-key-id
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.applicationKey
+                          secretKey: secret-access-key
+                      secretRef:
+                        name: b2-application-key
+                        namespace: default
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: b2
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.headers.Authorization[0]
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "{{ b2-session:%s:authorization-token }}"
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.apiURL
+                toFieldPath: spec.forProvider.payload.baseUrl
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.secretRef.name
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name
+              - type: CombineFromComposite
+                combine:
+                  strategy: string
+                  string:
+                    fmt: '{"accountId":"{{ b2-session:%s:account-id }}","bucketIds":["{{ b2-bucket:%s:bucket-id }}"],"capabilities":["deleteFiles","listBuckets","listFiles","readBuckets","readFiles","shareFiles","writeFiles"],"keyName":"%s"}'
+                  variables:
+                    - fromFieldPath: metadata.namespace
+                    - fromFieldPath: metadata.namespace
+                    - fromFieldPath: spec.keyName
+                toFieldPath: spec.forProvider.payload.body
+          - name: onepassword-item
+            base:
+              apiVersion: external-secrets.io/v1alpha1
+              kind: PushSecret
+              metadata:
+                name: b2-object-storage
+              spec:
+                data:
+                  - match:
+                      secretKey: access-key-id
+                      remoteRef:
+                        property: object-storage-access-key-id
+                        remoteKey: placeholder
+                  - match:
+                      secretKey: secret-access-key
+                      remoteRef:
+                        property: object-storage-secret-access-key
+                        remoteKey: placeholder
+                    metadata:
+                      apiVersion: kubernetes.external-secrets.io/v1alpha1
+                      kind: PushSecretMetadata
+                      spec:
+                        tags: [Kubelab]
+                secretStoreRefs:
+                  - kind: ClusterSecretStore
+                    name: onepassword
+                selector:
+                  secret:
+                    name: b2-application-key
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.displayName
+                toFieldPath: spec.data[0].match.remoteRef.remoteKey
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.displayName
+                toFieldPath: spec.data[1].match.remoteRef.remoteKey
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.secretRef.name
+                toFieldPath: spec.selector.secret.name

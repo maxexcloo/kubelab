@@ -2,6 +2,38 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - apps.yaml
+  - automation.yaml
+  - cloudflare-automation.yaml
   - foundation.yaml
   - flux-system
   - platform.yaml
+patches:
+  - patch: |-
+      apiVersion: kustomize.toolkit.fluxcd.io/v1
+      kind: Kustomization
+      metadata:
+        name: flux-system
+        namespace: flux-system
+      spec:
+        healthChecks:
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
+            name: apps
+            namespace: flux-system
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
+            name: automation
+            namespace: flux-system
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
+            name: foundation
+            namespace: flux-system
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
+            name: platform
+            namespace: flux-system
+        wait: false
+    target:
+      kind: Kustomization
+      name: flux-system
+      namespace: flux-system

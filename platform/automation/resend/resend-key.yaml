@@ -33,11 +33,16 @@ spec:
             spec:
               type: object
               properties:
+                cluster:
+                  maxLength: 63
+                  minLength: 1
+                  pattern: ^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$
+                  type: string
                 displayName:
                   maxLength: 40
                   minLength: 1
                   type: string
-              required: [displayName]
+              required: [cluster, displayName]
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
@@ -100,14 +105,15 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
-              - type: FromCompositeFieldPath
-                fromFieldPath: metadata.namespace
+              - type: CombineFromComposite
+                combine:
+                  strategy: string
+                  string:
+                    fmt: '{"name":"cluster-%s-%s","permission":"sending_access"}'
+                  variables:
+                    - fromFieldPath: spec.cluster
+                    - fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.payload.body
-                transforms:
-                  - type: string
-                    string:
-                      fmt: '{"name":"cluster-mbk-%s","permission":"sending_access"}'
-                      type: Format
           - name: onepassword-item
             base:
               apiVersion: external-secrets.io/v1alpha1

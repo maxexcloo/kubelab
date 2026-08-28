@@ -1,11 +1,11 @@
 apiVersion: http.m.crossplane.io/v1alpha2
 kind: ClusterProviderConfig
 metadata:
-  name: cloudflare-app-policy
+  name: cloudflare-waf
 spec:
   credentials:
     source: Secret
     secretRef:
       key: authorization
-      name: cloudflare-app-policy-credentials
+      name: cloudflare-waf-credentials
       namespace: crossplane-system

@@ -30,4 +30,12 @@ resources:
   - route.yaml
   - windmill-route.yaml
 patches:
+  - patch: |-
+      - op: add
+        path: /spec/cluster
+        value: mbk
+    target:
+      group: automation.excloo.dev
+      kind: ResendKey
+      version: v1alpha1
   - path: windmill-domain.yaml

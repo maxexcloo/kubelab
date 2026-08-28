@@ -22,12 +22,18 @@ spec:
           env:
             - name: DATA_DIR
               value: /var/lib/beszel-agent
+            - name: DISABLE_SSH
+              value: "true"
             - name: HUB_URL
               value: https://beszel-agent.excloo.com
             - name: KEY
               value: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPkxnKuxsVqSVZVXQ3OGHjZZFMAAclU/xLrEDdwOyRt+
             - name: LISTEN
               value: "45876"
+            - name: SYSTEM_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
             - name: TOKEN
               valueFrom:
                 secretKeyRef:

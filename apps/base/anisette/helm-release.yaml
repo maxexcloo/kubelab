@@ -93,11 +93,11 @@ spec:
       main:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-          gethomepage.dev/description: Apple Anisette Data Service
+          gethomepage.dev/description: Anisette Server
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/href: https://anisette.excloo.com
-          gethomepage.dev/icon: apple
+          gethomepage.dev/icon: si-apple-#ffffff
           gethomepage.dev/name: Anisette
           gethomepage.dev/siteMonitor: https://anisette.excloo.com
         hostnames:

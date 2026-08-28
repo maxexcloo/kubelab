@@ -4,9 +4,9 @@ metadata:
   name: grafana
   namespace: observability
   annotations:
-    gethomepage.dev/description: Cluster Observability
+    gethomepage.dev/description: Infrastructure Observability
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Infrastructure
+    gethomepage.dev/group: Operations
     gethomepage.dev/href: https://grafana.syd.excloo.dev
     gethomepage.dev/icon: grafana
     gethomepage.dev/name: Grafana

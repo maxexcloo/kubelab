@@ -90,11 +90,11 @@ spec:
       main:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: E-book Library
+          gethomepage.dev/description: Digital Library
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
+          gethomepage.dev/group: Media
           gethomepage.dev/href: https://books.excloo.com
-          gethomepage.dev/icon: mdi-bookshelf
+          gethomepage.dev/icon: bookorbit
           gethomepage.dev/name: BookOrbit
         hostnames:
           - books.excloo.com

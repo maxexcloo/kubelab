@@ -79,7 +79,7 @@ spec:
                       setOwnerReference: true
                 providerConfigRef:
                   kind: ClusterProviderConfig
-                  name: cloudflare-app-policy
+                  name: cloudflare-waf
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
@@ -126,7 +126,7 @@ spec:
                         "action": "js_challenge",
                         "description": "Kubelab Redlib JavaScript challenge",
                         "enabled": true,
-                        "expression": "(http.request.full_uri wildcard r\"https://reddit.excloo.com/*\" and not any(http.request.headers[\"x-gatus-token\"][*] eq \"{{ redlib-waf-credentials:crossplane-system:monitoring-token }}\") and not http.cookie contains \"cf_clearance\" and not ends_with(http.request.uri.path, \".css\") and not ends_with(http.request.uri.path, \".js\") and not ends_with(http.request.uri.path, \".woff2\") and not ends_with(http.request.uri.path, \"favicon.ico\") and not ends_with(http.request.uri.path, \"manifest.json\") and not ends_with(http.request.uri.path, \"touch-icon-iphone.png\"))",
+                        "expression": "(http.request.full_uri wildcard r\"https://reddit.excloo.com/*\" and not any(http.request.headers[\"x-gatus-token\"][*] eq \"{{ redlib:redlib:monitoring-token }}\") and not http.cookie contains \"cf_clearance\" and not ends_with(http.request.uri.path, \".css\") and not ends_with(http.request.uri.path, \".js\") and not ends_with(http.request.uri.path, \".woff2\") and not ends_with(http.request.uri.path, \"favicon.ico\") and not ends_with(http.request.uri.path, \"manifest.json\") and not ends_with(http.request.uri.path, \"touch-icon-iphone.png\"))",
                         "ref": "kubelab-redlib-js-challenge"
                       }
                     type: CUSTOM
@@ -176,7 +176,7 @@ spec:
                           "action": "js_challenge",
                           "description": "Kubelab Redlib JavaScript challenge",
                           "enabled": true,
-                          "expression": "(http.request.full_uri wildcard r\"https://reddit.excloo.com/*\" and not any(http.request.headers[\"x-gatus-token\"][*] eq \"{{ redlib-waf-credentials:crossplane-system:monitoring-token }}\") and not http.cookie contains \"cf_clearance\" and not ends_with(http.request.uri.path, \".css\") and not ends_with(http.request.uri.path, \".js\") and not ends_with(http.request.uri.path, \".woff2\") and not ends_with(http.request.uri.path, \"favicon.ico\") and not ends_with(http.request.uri.path, \"manifest.json\") and not ends_with(http.request.uri.path, \"touch-icon-iphone.png\"))",
+                          "expression": "(http.request.full_uri wildcard r\"https://reddit.excloo.com/*\" and not any(http.request.headers[\"x-gatus-token\"][*] eq \"{{ redlib:redlib:monitoring-token }}\") and not http.cookie contains \"cf_clearance\" and not ends_with(http.request.uri.path, \".css\") and not ends_with(http.request.uri.path, \".js\") and not ends_with(http.request.uri.path, \".woff2\") and not ends_with(http.request.uri.path, \"favicon.ico\") and not ends_with(http.request.uri.path, \"manifest.json\") and not ends_with(http.request.uri.path, \"touch-icon-iphone.png\"))",
                           "ref": "kubelab-redlib-js-challenge"
                         }
                       }
@@ -191,7 +191,7 @@ spec:
                       setOwnerReference: true
                 providerConfigRef:
                   kind: ClusterProviderConfig
-                  name: cloudflare-app-policy
+                  name: cloudflare-waf
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace

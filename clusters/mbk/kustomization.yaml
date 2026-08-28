@@ -4,12 +4,12 @@ resources:
   - apps.yaml
   - automation.yaml
   - b2-automation.yaml
-  - cloudflare-automation.yaml
   - foundation.yaml
   - flux-system
   - home-assistant-webhook.yaml
   - platform.yaml
   - pocket-id-automation.yaml
+  - private-dns-automation.yaml
 patches:
   - patch: |-
       apiVersion: kustomize.toolkit.fluxcd.io/v1

@@ -2,6 +2,6 @@ apiVersion: automation.excloo.dev/v1alpha1
 kind: RedlibWAFPolicy
 metadata:
   name: redlib
-  namespace: crossplane-system
+  namespace: redlib
 spec:
   zoneName: excloo.com

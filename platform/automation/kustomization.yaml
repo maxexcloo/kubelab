@@ -4,4 +4,6 @@ resources:
   - b2
   - cloudflare
   - pocket-id
+  - private-dns
+  - provider-credentials.yaml
   - resend
