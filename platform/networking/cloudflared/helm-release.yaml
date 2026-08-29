@@ -18,7 +18,7 @@ spec:
   values:
     controllers:
       cloudflared:
-        strategy: Recreate
+        strategy: RollingUpdate
         type: deployment
         containers:
           cloudflared:

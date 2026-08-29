@@ -118,6 +118,13 @@ RoMM, Shelfmark and Windmill.
 Workload differences belong in `apps/overlays/<cluster>`; bases are not copied
 between clusters.
 
+Companion containers are limited to AIOMetadata's disposable Redis, Redlib's
+app-scoped `ctrld` DNS proxy and RoMM's disposable Valkey; each owns a distinct
+runtime service. Open WebUI's upstream chart uses its `copy-app-data` init
+container to seed persistent application data. Stateful or migration-owning
+single replicas use recreate updates, while stateless Cloudflared uses rolling
+updates.
+
 ## Networking & Ingress
 
 Application routes and DNS records are workload-owned. `homelab` owns cluster
