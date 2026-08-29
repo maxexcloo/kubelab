@@ -4,8 +4,7 @@ Kubernetes resources reconciled by Flux for a two-cluster homelab. The separate
 `homelab` repository owns the substrate required to rebuild or reach a cluster
 while Kubernetes is unavailable.
 
-This README is the operational reference for the current system. `PLAN.md`
-contains only unfinished work.
+This README is the operational reference for the current system.
 
 ## Architecture & Ownership
 
@@ -266,8 +265,8 @@ verify the encryption key before creating a restore Job.
 
 RoMM has an active logical-backup schedule. Its storage-local workflow CronJob
 is an intentionally suspended Job template. It serialises runs with an NFS lock
-and fails closed for destructive modes; its outstanding activation decision is
-recorded in `PLAN.md`.
+and fails closed for destructive modes. Activation requires explicit operator
+approval after reviewing its destructive-mode guardrails.
 
 ### Current Rollback Window
 

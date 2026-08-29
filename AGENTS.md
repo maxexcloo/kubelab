@@ -3,18 +3,17 @@
 ## Project Overview
 
 This repository owns Kubernetes resources reconciled by Flux and app-scoped
-integrations. `README.md` documents the current system, and `PLAN.md` contains
-only unfinished work. The separate `homelab` repository owns everything
-required to rebuild or reach a cluster while Kubernetes is unavailable.
+integrations. `README.md` documents the current system. The separate `homelab`
+repository owns everything required to rebuild or reach a cluster while
+Kubernetes is unavailable.
 
 ## Conventions
 
 - Read `README.md` before changing architecture, ownership, deletion behaviour,
-  networking, storage or secrets. Read `PLAN.md` before resolving unfinished
-  cross-repository work.
-- Treat `README.md` as authoritative for current workload ownership,
-  `PLAN.md` as authoritative for unfinished ordering, and `homelab`
-  configuration as authoritative for substrate implementation details.
+  networking, storage or secrets.
+- Treat `README.md` as authoritative for current workload ownership and
+  `homelab` configuration as authoritative for substrate implementation
+  details.
 - Use Australian English in project-owned prose and identifiers.
 - Use `.yaml`, not `.yml`, for project-owned YAML.
 - Omit trailing slashes from project-owned base URLs.
@@ -36,13 +35,13 @@ required to rebuild or reach a cluster while Kubernetes is unavailable.
 Use standard Kubernetes configuration directly. Do not add a general application
 schema, generator, operator, or generated manifest. A narrow repository-defined
 resource is acceptable when it materially removes repeated security or lifecycle
-integration logic; document the contract in `PLAN.md` and compose standard
+integration logic; document the contract in `README.md` and compose standard
 resources underneath. Use Kustomize only for composition and small patches; do
 not use `configMapGenerator` or `secretGenerator`. Keep chart values directly in
 the upstream Flux `HelmRelease` that consumes them.
 
-Keep root Markdown limited to `AGENTS.md`, `README.md`, and `PLAN.md`. Keep
-maintained project documentation in `README.md`; do not add a `docs/` tree.
+Keep root Markdown limited to `AGENTS.md` and `README.md`. Keep maintained
+project documentation in `README.md`; do not add a `docs/` tree.
 
 ## Sorting Convention
 
