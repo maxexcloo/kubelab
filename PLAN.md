@@ -3,6 +3,17 @@
 This file contains only unfinished work. Current architecture and operations
 are documented in `README.md`; completed migration history remains in Git.
 
+## Repository Simplification
+
+1. Reuse `scripts/render_service_inventory.sh --include-static` in the
+   `homelab-fly` external-monitoring render described below.
+2. Add a renderable `B2ObjectStorage` claim fixture before the first workload
+   uses the contract.
+3. Audit workloads for avoidable init containers, sidecars and lifecycle
+   workarounds. Prefer direct workload configuration when it provides the
+   required behaviour; keep helper containers only when they own a distinct
+   runtime responsibility.
+
 ## External Monitoring
 
 1. Remove `homelab-fly`'s stale dependency on the retained `CONFIG` repository
@@ -10,18 +21,15 @@ are documented in `README.md`; completed migration history remains in Git.
    `homelab-fly`; the current `homelab` root no longer owns or publishes a
    service catalogue.
 2. During the ephemeral `homelab-fly` render, check out public Kubelab `main`
-   and derive HTTP probes from both standard `HTTPRoute` resources and the
-   routes declared in upstream app-template `HelmRelease` values. Select only
-   routes carrying `gethomepage.dev/enabled: "true"`; use the checked Homepage
-   name, group, href and site-monitor annotations. Add the standard static
-   Homepage `services.yaml` entries carrying `siteMonitor` so retained systems
-   such as Home Assistant, TrueNAS and UniFi use the same source as the
-   dashboards. Read the Git-owned configuration rather than querying a running
-   Homepage instance. Do not add another service schema or publish the inventory
-   through a GitHub variable. Keep the normaliser narrow to these three current
-   representations and fail if an enabled entry uses an unsupported shape. Keep
-   route-specific overrides and provider and DNS probes as direct Gatus YAML
-   fragments in `homelab-fly`; Gatus natively merges its configuration directory.
+   and run `scripts/render_service_inventory.sh --include-static` from that
+   checkout. It derives HTTP probes from standard `HTTPRoute` resources, routes
+   declared in upstream app-template `HelmRelease` values and static Homepage
+   `services.yaml` entries carrying `siteMonitor`. Read the Git-owned
+   configuration rather than querying a running Homepage instance. Do not add
+   another service schema or publish the inventory through a GitHub variable.
+   Fail if an enabled entry uses an unsupported shape. Keep route-specific
+   overrides and provider and DNS probes as direct Gatus YAML fragments in
+   `homelab-fly`; Gatus natively merges its configuration directory.
 3. Use `<cluster> / <Homepage group>` for generated groups and the Homepage
    name without an old target suffix. The current baseline is 30 enabled and
    accepted routes: 24 from `mbk` and six from `syd`. The 11 static Homepage

@@ -17,9 +17,11 @@ spec:
       schema:
         openAPIV3Schema:
           type: object
+          additionalProperties: false
           properties:
             spec:
               type: object
+              additionalProperties: false
               properties:
                 accessPolicy:
                   default: all-services
@@ -27,6 +29,7 @@ spec:
                   type: string
                 client:
                   type: object
+                  additionalProperties: false
                   properties:
                     accessTokenDurationMinutes:
                       default: 60
@@ -37,6 +40,7 @@ spec:
                       minItems: 1
                       type: array
                       items:
+                        format: uri
                         type: string
                     description:
                       default: ""
@@ -55,11 +59,13 @@ spec:
                       type: boolean
                     launchURL:
                       format: uri
+                      minLength: 1
                       type: string
                     logoutCallbackURLs:
                       default: []
                       type: array
                       items:
+                        format: uri
                         type: string
                     name:
                       maxLength: 50

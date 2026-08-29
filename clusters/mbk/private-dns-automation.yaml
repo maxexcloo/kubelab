@@ -11,7 +11,7 @@ spec:
   timeout: 10m
   wait: true
   dependsOn:
-    - name: automation
+    - name: apps
   sourceRef:
     kind: GitRepository
     name: flux-system

@@ -1,0 +1,242 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: linkwarden
+  namespace: linkwarden
+  annotations:
+    onepassword.excloo.dev/constants: '{"database-username":"linkwarden"}'
+    onepassword.excloo.dev/defaults: '{"username":"admin@excloo.com"}'
+    onepassword.excloo.dev/generate-fields: database-password,meili-master-key,nextauth-secret,password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Linkwarden
+        property: database-password
+      secretKey: database-password
+    - remoteRef:
+        key: Linkwarden
+        property: database-username
+      secretKey: database-username
+    - remoteRef:
+        key: Linkwarden
+        property: api-key-resend
+      secretKey: api-key-resend
+    - remoteRef:
+        key: Linkwarden
+        property: keycloak-client-id
+      secretKey: KEYCLOAK_CLIENT_ID
+    - remoteRef:
+        key: Linkwarden
+        property: keycloak-client-secret
+      secretKey: KEYCLOAK_CLIENT_SECRET
+    - remoteRef:
+        key: Linkwarden
+        property: username
+      secretKey: LOGIN_EMAIL
+    - remoteRef:
+        key: Linkwarden
+        property: password
+      secretKey: LOGIN_PASSWORD
+    - remoteRef:
+        key: Linkwarden
+        property: meili-master-key
+      secretKey: MEILI_MASTER_KEY
+    - remoteRef:
+        key: Linkwarden
+        property: nextauth-secret
+      secretKey: NEXTAUTH_SECRET
+    - remoteRef:
+        key: Linkwarden
+        property: api-key-openrouter
+      secretKey: OPENROUTER_API_KEY
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    deletionPolicy: Retain
+    name: linkwarden
+    template:
+      engineVersion: v2
+      data:
+        DATABASE_URL: 'postgresql://{{ index . "database-username" | urlquery }}:{{ index . "database-password" | urlquery }}@linkwarden-database-rw:5432/linkwarden?sslmode=require'
+        EMAIL_SERVER: 'smtps://resend:{{ index . "api-key-resend" | urlquery }}@smtp.resend.com:465'
+        KEYCLOAK_CLIENT_ID: "{{ .KEYCLOAK_CLIENT_ID }}"
+        KEYCLOAK_CLIENT_SECRET: "{{ .KEYCLOAK_CLIENT_SECRET }}"
+        LOGIN_EMAIL: "{{ .LOGIN_EMAIL }}"
+        LOGIN_PASSWORD: "{{ .LOGIN_PASSWORD }}"
+        MEILI_MASTER_KEY: "{{ .MEILI_MASTER_KEY }}"
+        NEXTAUTH_SECRET: "{{ .NEXTAUTH_SECRET }}"
+        OPENROUTER_API_KEY: "{{ .OPENROUTER_API_KEY }}"
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: linkwarden-database
+  namespace: linkwarden
+  annotations:
+    onepassword.excloo.dev/constants: '{"database-username":"linkwarden"}'
+    onepassword.excloo.dev/generate-fields: database-password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Linkwarden
+        property: database-password
+      secretKey: password
+    - remoteRef:
+        key: Linkwarden
+        property: database-username
+      secretKey: username
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    deletionPolicy: Retain
+    name: linkwarden-database
+    template:
+      engineVersion: v2
+      type: kubernetes.io/basic-auth
+      data:
+        password: "{{ .password }}"
+        username: "{{ .username }}"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: linkwarden
+  labels:
+    app.kubernetes.io/name: linkwarden
+    gateway.excloo.dev/private-access: "true"
+    gateway.excloo.dev/public-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: linkwarden
+  namespace: linkwarden
+  labels:
+    app.kubernetes.io/name: linkwarden
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: bootstrap
+      ports:
+        - port: 3000
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 3000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/controller: linkwarden
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: linkwarden-database
+  namespace: linkwarden
+  labels:
+    app.kubernetes.io/name: linkwarden
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: backup
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/controller: linkwarden
+      ports:
+        - port: 5432
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - port: 8000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: linkwarden-database
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: linkwarden-meilisearch
+  namespace: linkwarden
+  labels:
+    app.kubernetes.io/name: linkwarden
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/controller: linkwarden
+      ports:
+        - port: 7700
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/controller: meilisearch
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup
+  namespace: linkwarden
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "26"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "26"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: truenas-nfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: linkwarden
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "568"
+    k8s-sigs.io/nfs-directory-mode: "0770"
+    k8s-sigs.io/nfs-directory-uid: "568"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: truenas-nfs
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: ResendKey
+metadata:
+  name: resend
+  namespace: linkwarden
+spec:
+  displayName: Linkwarden

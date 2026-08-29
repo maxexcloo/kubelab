@@ -1,0 +1,241 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: romm
+  namespace: romm
+  annotations:
+    onepassword.excloo.dev/generate-fields: auth-secret-key
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: RoMM
+        property: auth-secret-key
+      secretKey: ROMM_AUTH_SECRET_KEY
+    - remoteRef:
+        key: RoMM
+        property: igdb-client-id
+      secretKey: IGDB_CLIENT_ID
+    - remoteRef:
+        key: RoMM
+        property: igdb-client-secret
+      secretKey: IGDB_CLIENT_SECRET
+    - remoteRef:
+        key: RoMM
+        property: oidc-client-id
+      secretKey: OIDC_CLIENT_ID
+    - remoteRef:
+        key: RoMM
+        property: oidc-client-secret
+      secretKey: OIDC_CLIENT_SECRET
+    - remoteRef:
+        key: RoMM
+        property: retroachievements-api-key
+      secretKey: RETROACHIEVEMENTS_API_KEY
+    - remoteRef:
+        key: RoMM
+        property: screenscraper-password
+      secretKey: SCREENSCRAPER_PASSWORD
+    - remoteRef:
+        key: RoMM
+        property: screenscraper-username
+      secretKey: SCREENSCRAPER_USER
+    - remoteRef:
+        key: RoMM
+        property: steamgriddb-api-key
+      secretKey: STEAMGRIDDB_API_KEY
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    name: romm
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: romm-database
+  namespace: romm
+  annotations:
+    onepassword.excloo.dev/constants: '{"database-username":"romm"}'
+    onepassword.excloo.dev/generate-fields: database-password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: RoMM
+        property: database-password
+      secretKey: password
+    - remoteRef:
+        key: RoMM
+        property: database-username
+      secretKey: username
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    name: romm-database
+    template:
+      engineVersion: v2
+      type: kubernetes.io/basic-auth
+      data:
+        password: "{{ .password }}"
+        username: "{{ .username }}"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: romm
+  labels:
+    app.kubernetes.io/name: romm
+    gateway.excloo.dev/public-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: romm
+  namespace: romm
+  labels:
+    app.kubernetes.io/name: romm
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 8080
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/controller: romm
+      app.kubernetes.io/instance: romm
+      app.kubernetes.io/name: romm
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: romm-database
+  namespace: romm
+  labels:
+    app.kubernetes.io/name: romm
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: backup
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/controller: romm
+              app.kubernetes.io/instance: romm
+              app.kubernetes.io/name: romm
+      ports:
+        - port: 5432
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - port: 8000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: romm-database
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup
+  namespace: romm
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "26"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "26"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: truenas-nfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: romm
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Ti
+  storageClassName: ""
+  volumeName: romm-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: games
+  namespace: romm
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 4Ti
+  storageClassName: ""
+  volumeName: romm-games
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: romm-data
+  labels:
+    app.kubernetes.io/name: romm
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 2Ti
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    path: /mnt/truenas-nvme/romm
+    server: 10.4.0.3
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: romm-games
+  labels:
+    app.kubernetes.io/name: romm
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 4Ti
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    path: /mnt/truenas/games
+    server: 10.4.0.3
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""

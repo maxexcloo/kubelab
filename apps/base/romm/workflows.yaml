@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/name: romm
 spec:
   schedule: "0 0 1 1 *"
+  timeZone: Australia/Sydney
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3

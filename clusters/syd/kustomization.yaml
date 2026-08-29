@@ -27,6 +27,10 @@ patches:
             namespace: flux-system
           - apiVersion: kustomize.toolkit.fluxcd.io/v1
             kind: Kustomization
+            name: cloudflare-automation
+            namespace: flux-system
+          - apiVersion: kustomize.toolkit.fluxcd.io/v1
+            kind: Kustomization
             name: crossplane-runtime
             namespace: flux-system
           - apiVersion: kustomize.toolkit.fluxcd.io/v1

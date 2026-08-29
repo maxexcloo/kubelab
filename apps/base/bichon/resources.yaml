@@ -1,0 +1,106 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: bichon
+  namespace: bichon
+  annotations:
+    onepassword.excloo.dev/generate-fields: encryption-password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Bichon
+        property: encryption-password
+      secretKey: BICHON_ENCRYPT_PASSWORD
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: bichon
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bichon
+  labels:
+    app.kubernetes.io/name: bichon
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bichon
+  namespace: bichon
+  labels:
+    app.kubernetes.io/name: bichon
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 15630
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bichon
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: bichon
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "568"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "568"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 3Gi
+  storageClassName: truenas-nfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: retained-data
+  namespace: bichon
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ""
+  volumeName: bichon-data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: bichon-data
+  labels:
+    app.kubernetes.io/name: bichon
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 5Gi
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    path: /mnt/truenas-nvme/bichon
+    server: 10.4.0.3
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""

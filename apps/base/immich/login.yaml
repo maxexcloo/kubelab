@@ -71,6 +71,7 @@ spec:
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 1
   schedule: "29 * * * *"
+  timeZone: Australia/Sydney
   successfulJobsHistoryLimit: 1
   jobTemplate:
     spec:

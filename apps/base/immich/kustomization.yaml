@@ -4,12 +4,7 @@ resources:
   - backup.yaml
   - database-extension.yaml
   - database.yaml
-  - external-secret.yaml
   - helm-release.yaml
   - login.yaml
-  - namespace.yaml
-  - network-policy.yaml
-  - persistent-volume-claim.yaml
-  - persistent-volume.yaml
-  - resend.yaml
+  - resources.yaml
   - source.yaml

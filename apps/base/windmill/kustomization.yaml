@@ -3,11 +3,8 @@ kind: Kustomization
 resources:
   - backup.yaml
   - database.yaml
-  - external-secret.yaml
   - helm-release.yaml
   - login.yaml
-  - namespace.yaml
-  - network-policy.yaml
-  - persistent-volume-claim.yaml
   - postgresql.yaml
+  - resources.yaml
   - source.yaml

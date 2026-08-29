@@ -1,0 +1,101 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: cliproxyapi
+  namespace: cliproxyapi
+  annotations:
+    onepassword.excloo.dev/generate-fields: api-key,management-key
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: CLI Proxy API
+        property: api-key
+      secretKey: apiKey
+    - remoteRef:
+        key: CLI Proxy API
+        property: management-key
+      secretKey: managementKey
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: cliproxyapi
+    template:
+      engineVersion: v2
+      data:
+        config.yaml: |
+          port: 8317
+          auth-dir: /data
+          api-keys:
+            - "{{ .apiKey }}"
+          remote-management:
+            allow-remote: true
+            secret-key: "{{ .managementKey }}"
+          usage-statistics-enabled: true
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cliproxyapi
+  labels:
+    app.kubernetes.io/name: cliproxyapi
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cliproxyapi
+  namespace: cliproxyapi
+  labels:
+    app.kubernetes.io/name: cliproxyapi
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: bifrost
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: bifrost
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: comfy-control
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: comfy-control
+      ports:
+        - port: 8317
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cliproxyapi
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: cliproxyapi
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "568"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "568"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: truenas-nfs

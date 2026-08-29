@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/name: miniflux
 spec:
   schedule: "30 2 * * *"
+  timeZone: Australia/Sydney
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3

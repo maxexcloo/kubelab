@@ -41,9 +41,12 @@ wait_for = ["bootstrap-cilium"]
 
 # Deploy
 [tasks.deploy]
-description = "Reconcile a cluster from Git"
-run = 'flux --context "$usage_cluster" reconcile kustomization flux-system --with-source'
-usage = 'arg "<cluster>"'
+description = "Reconcile a cluster or Flux component from Git"
+run = 'flux --context "$usage_cluster" reconcile kustomization "${usage_component:-flux-system}" --with-source'
+usage = '''
+arg "<cluster>"
+arg "[component]"
+'''
 
 # Development
 [tasks.check]

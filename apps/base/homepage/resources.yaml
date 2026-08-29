@@ -1,0 +1,66 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: homepage
+  namespace: homepage
+  annotations:
+    onepassword.excloo.dev/defaults: '{"beszel-password":"","beszel-username":"admin@excloo.com","home-assistant-key":"","immich-key":"","linkwarden-key":"","miniflux-key":"","tailscale-key":"","truenas-key":"","unifi-key":""}'
+spec:
+  refreshInterval: 1h
+  dataFrom:
+    - extract:
+        key: Homepage
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: homepage
+    template:
+      engineVersion: v2
+      data:
+        HOMEPAGE_VAR_BESZEL_PASSWORD: '{{ index . "beszel-password" }}'
+        HOMEPAGE_VAR_BESZEL_USERNAME: '{{ index . "beszel-username" }}'
+        HOMEPAGE_VAR_HOME_ASSISTANT_KEY: '{{ index . "home-assistant-key" }}'
+        HOMEPAGE_VAR_IMMICH_KEY: '{{ index . "immich-key" }}'
+        HOMEPAGE_VAR_LINKWARDEN_KEY: '{{ index . "linkwarden-key" }}'
+        HOMEPAGE_VAR_MINIFLUX_KEY: '{{ index . "miniflux-key" }}'
+        HOMEPAGE_VAR_TAILSCALE_KEY: '{{ index . "tailscale-key" }}'
+        HOMEPAGE_VAR_TRUENAS_KEY: '{{ index . "truenas-key" }}'
+        HOMEPAGE_VAR_UNIFI_KEY: '{{ index . "unifi-key" }}'
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 3000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: homepage
+  policyTypes:
+    - Ingress

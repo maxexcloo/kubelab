@@ -1,7 +1,13 @@
 apiVersion: automation.excloo.dev/v1alpha1
-kind: RedlibWAFPolicy
+kind: CloudflareWAFPolicy
 metadata:
   name: redlib
   namespace: redlib
 spec:
+  rule:
+    action: js_challenge
+    description: Kubelab Redlib JavaScript challenge
+    enabled: true
+    expression: '(http.request.full_uri wildcard r"https://reddit.excloo.com/*" and not any(http.request.headers["x-gatus-token"][*] eq "{{ redlib:redlib:monitoring-token }}") and not http.cookie contains "cf_clearance" and not ends_with(http.request.uri.path, ".css") and not ends_with(http.request.uri.path, ".js") and not ends_with(http.request.uri.path, ".woff2") and not ends_with(http.request.uri.path, "favicon.ico") and not ends_with(http.request.uri.path, "manifest.json") and not ends_with(http.request.uri.path, "touch-icon-iphone.png"))'
+    ref: kubelab-redlib-js-challenge
   zoneName: excloo.com

@@ -1,0 +1,75 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Actual Budget
+        property: oidc-client-id
+      secretKey: ACTUAL_OPENID_CLIENT_ID
+    - remoteRef:
+        key: Actual Budget
+        property: oidc-client-secret
+      secretKey: ACTUAL_OPENID_CLIENT_SECRET
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: actual-budget
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: actual-budget
+  labels:
+    app.kubernetes.io/name: actual-budget
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+  labels:
+    app.kubernetes.io/name: actual-budget
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 5006
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: actual-budget
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: actual-budget
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "568"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "568"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: truenas-nfs

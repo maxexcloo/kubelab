@@ -1,0 +1,236 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: cloudflarewafpolicies.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: cloudflare-waf-policy
+  group: automation.excloo.dev
+  names:
+    kind: CloudflareWAFPolicy
+    plural: cloudflarewafpolicies
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          additionalProperties: false
+          properties:
+            spec:
+              type: object
+              additionalProperties: false
+              properties:
+                rule:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      maxLength: 64
+                      minLength: 1
+                      pattern: ^[a-z_]+$
+                      type: string
+                    description:
+                      maxLength: 500
+                      minLength: 1
+                      type: string
+                    enabled:
+                      default: true
+                      type: boolean
+                    expression:
+                      maxLength: 4096
+                      minLength: 1
+                      type: string
+                    ref:
+                      maxLength: 255
+                      minLength: 1
+                      pattern: ^[A-Za-z0-9_-]+$
+                      type: string
+                  required: [action, description, expression, ref]
+                zoneName:
+                  format: hostname
+                  maxLength: 253
+                  minLength: 1
+                  type: string
+              required: [rule, zoneName]
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: cloudflare-waf-policy
+spec:
+  compositeTypeRef:
+    apiVersion: automation.excloo.dev/v1alpha1
+    kind: CloudflareWAFPolicy
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: crossplane-contrib-function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: zone
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: cloudflare-zone
+              spec:
+                managementPolicies: [Observe]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: |-
+                      .response.statusCode == 200
+                      and .response.body.success == true
+                      and (.response.body.result | length) == 1
+                      and .response.body.result[0].name == .payload.body.zoneName
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                  mappings:
+                    - action: OBSERVE
+                      url: .payload.baseUrl + "?name=" + .payload.body.zoneName
+                  payload:
+                    baseUrl: https://api.cloudflare.com/client/v4/zones
+                    body: "{}"
+                  secretInjectionConfigs:
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.result[0].id
+                          secretKey: zone-id
+                      secretRef:
+                        name: cloudflare-zone
+                        namespace: default
+                      setOwnerReference: true
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: cloudflare-waf
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "%s-zone"
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "%s-cloudflare-zone"
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.zoneName
+                toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: string
+                    string:
+                      fmt: '{"zoneName":"%s"}'
+                      type: Format
+          - name: waf
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: cloudflare-waf
+              spec:
+                managementPolicies: [Create, LateInitialize, Observe, Update]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: |-
+                      .response.statusCode == 200
+                      and .response.body.success == true
+                      and (
+                        .payload.body as $wanted
+                        | ([
+                            .response.body.result.rules[]?
+                            | select(.ref == $wanted.ref)
+                            | {
+                                action,
+                                description,
+                                enabled,
+                                expression,
+                                ref
+                              }
+                          ] | first) == $wanted
+                      )
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                  mappings:
+                    - action: CREATE
+                      body: |-
+                        {
+                          description: "Kubelab app WAF rules",
+                          rules: [.payload.body]
+                        }
+                      method: PUT
+                      url: .payload.baseUrl
+                    - action: OBSERVE
+                      url: .payload.baseUrl
+                    - action: UPDATE
+                      body: |-
+                        .payload.body as $wanted
+                        | .response.body.result as $current
+                        | {
+                            description: ($current.description // "Kubelab app WAF rules"),
+                            rules: (
+                              [
+                                $current.rules[]?
+                                | select((.ref // "") != $wanted.ref)
+                                | del(.id, .last_updated, .version)
+                              ] + [$wanted]
+                            )
+                          }
+                      method: PUT
+                      url: .payload.baseUrl
+                  payload:
+                    baseUrl: https://api.cloudflare.com/client/v4/zones/{{ redlib-cloudflare-zone:default:zone-id }}/rulesets/phases/http_request_firewall_custom/entrypoint
+                    body: '{"action":"block","description":"placeholder","enabled":true,"expression":"false","ref":"placeholder"}'
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: cloudflare-waf
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "%s-waf"
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: CombineFromComposite
+                combine:
+                  strategy: string
+                  string:
+                    fmt: https://api.cloudflare.com/client/v4/zones/{{ %s-cloudflare-zone:%s:zone-id }}/rulesets/phases/http_request_firewall_custom/entrypoint
+                  variables:
+                    - fromFieldPath: metadata.name
+                    - fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.payload.baseUrl
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.rule
+                toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: convert
+                    convert:
+                      format: json
+                      toType: string

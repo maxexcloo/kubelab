@@ -23,7 +23,7 @@ repos:
     hooks:
       - id: project-check
         name: Check project source
-        always_run: true
         entry: mise run check
+        files: ^(\.github/workflows/.*\.yaml|\.gitignore|\.mise\.toml|\.pre-commit-config\.yaml|\.prettierignore|AGENTS\.md|PLAN\.md|README\.md|apps/|clusters/|platform/|renovate\.json|scripts/)
         language: system
         pass_filenames: false

@@ -1,0 +1,199 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: windmill-database
+  namespace: windmill
+  annotations:
+    onepassword.excloo.dev/constants: '{"database-username":"windmill"}'
+    onepassword.excloo.dev/generate-fields: database-password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Windmill
+        property: database-password
+      secretKey: password
+    - remoteRef:
+        key: Windmill
+        property: database-username
+      secretKey: username
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    deletionPolicy: Retain
+    name: windmill-database
+    template:
+      engineVersion: v2
+      data:
+        password: "{{ .password }}"
+        url: "postgres://{{ .username | urlquery }}:{{ .password | urlquery }}@windmill-database-rw:5432/windmill?sslmode=require"
+        username: "{{ .username }}"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: windmill
+  labels:
+    app.kubernetes.io/name: windmill
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: windmill-app
+  namespace: windmill
+  labels:
+    app.kubernetes.io/name: windmill
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: bootstrap
+      ports:
+        - port: 8000
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 8000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: windmill-app
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: windmill-database
+  namespace: windmill
+  labels:
+    app.kubernetes.io/name: windmill
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: backup
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - windmill-app
+                  - windmill-workers
+      ports:
+        - port: 5432
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - port: 8000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: windmill-database
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: windmill-extra
+  namespace: windmill
+  labels:
+    app.kubernetes.io/name: windmill
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 3000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: windmill-extra
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: windmill-postgresql
+  namespace: windmill
+  labels:
+    app.kubernetes.io/name: windmill
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: backup
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - windmill-app
+                  - windmill-workers
+      ports:
+        - port: 5432
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: database
+      app.kubernetes.io/name: windmill
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup
+  namespace: windmill
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "26"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "26"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: truenas-nfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql
+  namespace: windmill
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "999"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "999"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: truenas-nfs

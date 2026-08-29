@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/name: linkwarden
 spec:
   schedule: "45 2 * * *"
+  timeZone: Australia/Sydney
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3

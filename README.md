@@ -45,14 +45,14 @@ mise run setup
 mise run check
 ```
 
-| Task                           | Description                                            |
-| ------------------------------ | ------------------------------------------------------ |
-| `mise run bootstrap <cluster>` | Bootstrap Cilium, secrets and Flux in dependency order |
-| `mise run check`               | Run schema, formatting, lint and repository checks     |
-| `mise run deploy <cluster>`    | Reconcile a cluster from Git                           |
-| `mise run fmt`                 | Format project files                                   |
-| `mise run prek`                | Run every Git hook across the repository               |
-| `mise run setup`               | Install tools and Git hooks                            |
+| Task                                    | Description                                            |
+| --------------------------------------- | ------------------------------------------------------ |
+| `mise run bootstrap <cluster>`          | Bootstrap Cilium, secrets and Flux in dependency order |
+| `mise run check`                        | Run schema, formatting, lint and repository checks     |
+| `mise run deploy <cluster> [component]` | Reconcile a cluster or Flux component from Git         |
+| `mise run fmt`                          | Format project files                                   |
+| `mise run prek`                         | Run every Git hook across the repository               |
+| `mise run setup`                        | Install tools and Git hooks                            |
 
 ### Bootstrap
 
@@ -75,6 +75,13 @@ Reconcile an existing cluster without rerunning bootstrap:
 
 ```shell
 mise run deploy syd
+```
+
+Pass a Flux Kustomization name such as `apps` when only one reconciliation
+component needs to be applied and awaited:
+
+```shell
+mise run deploy syd apps
 ```
 
 Flux applies foundation APIs and controllers first, shared platform resources
@@ -147,6 +154,11 @@ public and private ExternalDNS instances mark Cloudflare records as
 The substrate-owned `*.mbk.excloo.dev` wildcard remains the fallback for
 private routes.
 
+`scripts/render_service_inventory.sh` is the single normalised view of enabled
+route metadata. It discovers clusters and supported route shapes dynamically,
+emits stable JSON and can include Homepage's static monitored services with
+`--include-static`.
+
 ## Secrets & External Automation
 
 1Password is the root of trust. Credentials, kubeconfigs and rendered Secret
@@ -157,9 +169,9 @@ non-empty operator-managed values.
 Crossplane is available on every cluster and manages app-scoped provider APIs.
 The B2 application-storage contract is available on every cluster, with no
 current workload claim. Pocket ID clients and groups, sending-only Resend keys
-and private Cloudflare and Control D DNS are active on `mbk`. The Redlib
-Cloudflare WAF policy is active on `syd`, where the existing Redlib application
-item and Secret live.
+and private Cloudflare and Control D DNS are active on `mbk`. The generic
+`CloudflareWAFPolicy` contract is active on `syd` through Redlib's app-scoped
+claim, item and Secret.
 
 Grafana's local administrator credential and retained Pocket ID client
 credentials reconcile with the platform through separate Secrets. Its OIDC
@@ -180,13 +192,14 @@ the corresponding application item and namespace.
 an existing bucket-name Secret, an application-key name and a display-named
 1Password item. The composition creates or adopts one private bucket with B2
 server-side encryption and a one-day hidden-file lifecycle, then creates or
-adopts one bucket-scoped read/write application key. Capabilities are fixed by
-the composition; claims cannot request account, bucket-management or
-key-management access. A same-name key with different or duplicate settings
-blocks reconciliation instead of creating another credential. The generated
-key is masked into the selected application Secret and pushed only to that
-application item. Deleting a claim or composed request does not delete the
-external bucket or key.
+adopts one bucket-scoped read/write application key. The storage API endpoint is
+discovered from each account authorisation response rather than fixed to an
+account-specific URL. Capabilities are fixed by the composition; claims cannot
+request account, bucket-management or key-management access. A same-name key
+with different or duplicate settings blocks reconciliation instead of creating
+another credential. The generated key is masked into the selected application
+Secret and pushed only to that application item. Deleting a claim or composed
+request does not delete the external bucket or key.
 
 App-scoped external resources default to orphan-on-delete. ExternalDNS is
 upsert-only. Deleting a Kubernetes declaration must not delete an external
@@ -202,7 +215,9 @@ non-cluster services and provider bookmarks. Static cards use the same weights
 as discovered cards, so cards merge alphabetically; credential-backed widgets
 sort first. Each instance extracts its optional widget credentials from the
 display-named `Homepage` item in its cluster vault. Missing values hide only the
-corresponding widget and do not block the dashboard.
+corresponding widget and do not block the dashboard. The non-root Homepage
+container keeps its Next.js prerender cache writable so the initial response
+uses current configuration rather than the image's bundled default page.
 
 Beszel agents run as a DaemonSet on every Kubernetes node, including Talos
 control-plane nodes. They use outbound WebSocket registration and the Kubernetes

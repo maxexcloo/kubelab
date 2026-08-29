@@ -37,15 +37,12 @@ RECONCILER = load_reconciler()
 
 def item_configuration(**overrides):
     configuration = {
-        "adopt": set(),
         "constants": {},
         "defaults": {},
         "fields": set(),
         "generate": set(),
         "login": False,
-        "migrate": {},
         "namespaces": set(),
-        "remove": set(),
         "urls": set(),
     }
     configuration.update(overrides)
@@ -53,16 +50,16 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
-    def test_adoption_migrates_legacy_fields_without_archiving_the_item(self):
-        legacy = {
+    def test_main_leaves_externally_owned_existing_item_unchanged(self):
+        existing = {
             "category": "LOGIN",
             "fields": [
-                {"id": "encryption_key", "label": "encryption_key", "value": "preserve-me"},
+                {"id": "password", "label": "password", "value": "preserve-me"},
             ],
-            "id": "legacy-id",
+            "id": "existing-id",
             "sections": [],
             "tags": ["Homelab"],
-            "title": "Excloo ID (pocket-id)",
+            "title": "Excloo ID",
         }
         calls = []
 
@@ -71,19 +68,14 @@ class ReconcilerTests(unittest.TestCase):
             if path == "/vaults":
                 return [{"id": "vault"}]
             if path == "/vaults/vault/items":
-                return [{"id": "legacy-id", "title": legacy["title"]}]
-            if path == "/vaults/vault/items/legacy-id" and method == "GET":
-                return dict(legacy)
-            if path == "/vaults/vault/items/legacy-id" and method == "PUT":
-                return body
+                return [{"id": "existing-id", "title": existing["title"]}]
+            if path == "/vaults/vault/items/existing-id" and method == "GET":
+                return dict(existing)
             self.fail(f"unexpected Connect request: {method} {path}")
 
         desired = item_configuration(
-            adopt={legacy["title"]},
-            fields={"encryption-key"},
+            fields={"password"},
             login=True,
-            migrate={"encryption_key": "encryption-key"},
-            remove={"encryption_key"},
             urls={"https://id.excloo.com"},
         )
         originals = {
@@ -100,13 +92,7 @@ class ReconcilerTests(unittest.TestCase):
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
-        updates = [body for method, _, body in calls if method == "PUT"]
-        self.assertEqual(len(updates), 1)
-        fields = {field["label"]: field for field in updates[0]["fields"]}
-        self.assertEqual(updates[0]["title"], "Excloo ID")
-        self.assertEqual(fields["encryption-key"]["value"], "preserve-me")
-        self.assertNotIn("encryption_key", fields)
-        self.assertFalse(any(method == "DELETE" for method, _, _ in calls))
+        self.assertFalse(any(method in {"DELETE", "POST", "PUT"} for method, _, _ in calls))
 
     def test_applications_ready_requires_current_ready_condition(self):
         application = {
@@ -284,25 +270,6 @@ class ReconcilerTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
         self.assertFalse(any(method == "DELETE" for method, _, _ in calls))
-
-    def test_migration_preserves_legacy_source_for_rollback(self):
-        current = {
-            "category": "LOGIN",
-            "fields": [
-                {"id": "secret_key", "label": "secret_key", "value": "preserve-me"},
-            ],
-            "sections": [],
-        }
-        desired = item_configuration(
-            fields={"secret-key"},
-            login=True,
-            migrate={"secret_key": "secret-key"},
-            urls={"https://application.excloo.com"},
-        )
-        result = RECONCILER.normalise_item(current, "Application", desired, "vault")
-        fields = {field["label"]: field for field in result["fields"]}
-        self.assertEqual(fields["secret-key"]["value"], "preserve-me")
-        self.assertEqual(fields["secret_key"]["value"], "preserve-me")
 
     def test_normalisation_preserves_values_and_orders_login_fields(self):
         current = {

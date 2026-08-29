@@ -3,8 +3,5 @@ kind: Kustomization
 resources:
   - backup.yaml
   - database.yaml
-  - external-secret.yaml
   - helm-release.yaml
-  - namespace.yaml
-  - network-policy.yaml
-  - persistent-volume-claim.yaml
+  - resources.yaml

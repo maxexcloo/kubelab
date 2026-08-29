@@ -1,0 +1,119 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: open-webui
+  namespace: open-webui
+  annotations:
+    onepassword.excloo.dev/defaults: '{"admin-email":"max@excloo.com","admin-name":"Max"}'
+    onepassword.excloo.dev/generate-fields: password,webui-secret-key
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Open WebUI
+        property: admin-email
+      secretKey: WEBUI_ADMIN_EMAIL
+    - remoteRef:
+        key: Open WebUI
+        property: admin-name
+      secretKey: WEBUI_ADMIN_NAME
+    - remoteRef:
+        key: Open WebUI
+        property: oidc-client-id
+      secretKey: OAUTH_CLIENT_ID
+    - remoteRef:
+        key: Open WebUI
+        property: oidc-client-secret
+      secretKey: OAUTH_CLIENT_SECRET
+    - remoteRef:
+        key: Open WebUI
+        property: password
+      secretKey: WEBUI_ADMIN_PASSWORD
+    - remoteRef:
+        key: Open WebUI
+        property: webui-secret-key
+      secretKey: WEBUI_SECRET_KEY
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    name: open-webui
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: open-webui
+  labels:
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: open-webui
+  namespace: open-webui
+  labels:
+    app.kubernetes.io/name: open-webui
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 8080
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: open-webui
+      app.kubernetes.io/instance: open-webui
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: open-webui-redis
+  namespace: open-webui
+  labels:
+    app.kubernetes.io/name: open-webui
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: open-webui
+              app.kubernetes.io/instance: open-webui
+      ports:
+        - port: 6379
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: open-webui-redis
+      app.kubernetes.io/instance: open-webui
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: open-webui
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "568"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "568"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: truenas-nfs

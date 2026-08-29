@@ -1,0 +1,247 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: immich-database
+  namespace: immich
+  annotations:
+    onepassword.excloo.dev/constants: '{"database-username":"immich"}'
+    onepassword.excloo.dev/generate-fields: database-password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Immich
+        property: database-password
+      secretKey: password
+    - remoteRef:
+        key: Immich
+        property: database-username
+      secretKey: username
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    deletionPolicy: Retain
+    name: immich-database
+    template:
+      engineVersion: v2
+      type: kubernetes.io/basic-auth
+      data:
+        password: "{{ .password }}"
+        username: "{{ .username }}"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: immich
+  labels:
+    app.kubernetes.io/name: immich
+    gateway.excloo.dev/public-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: immich-server
+  namespace: immich
+  labels:
+    app.kubernetes.io/name: immich
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: bootstrap
+      ports:
+        - port: 2283
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 2283
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: immich
+      app.kubernetes.io/name: server
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: immich-database
+  namespace: immich
+  labels:
+    app.kubernetes.io/name: immich
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: backup
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: immich
+              app.kubernetes.io/name: server
+      ports:
+        - port: 5432
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - port: 8000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: immich-database
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: immich-machine-learning
+  namespace: immich
+  labels:
+    app.kubernetes.io/name: immich
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: immich
+              app.kubernetes.io/name: server
+      ports:
+        - port: 3003
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: immich
+      app.kubernetes.io/name: machine-learning
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: immich-valkey
+  namespace: immich
+  labels:
+    app.kubernetes.io/name: immich
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: immich
+              app.kubernetes.io/name: server
+      ports:
+        - port: 6379
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: immich
+      app.kubernetes.io/name: valkey
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup
+  namespace: immich
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "26"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "26"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: truenas-nfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: icloud-photos
+  namespace: immich
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: ""
+  volumeName: immich-icloud-photos
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: library
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 4Ti
+  storageClassName: ""
+  volumeName: immich-library
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-icloud-photos
+  labels:
+    app.kubernetes.io/name: immich
+spec:
+  accessModes:
+    - ReadOnlyMany
+  capacity:
+    storage: 50Gi
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    path: /mnt/truenas/icloud-photos
+    server: 10.4.0.3
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-library
+  labels:
+    app.kubernetes.io/name: immich
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 4Ti
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    path: /mnt/truenas-nvme/immich
+    server: 10.4.0.3
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: ResendKey
+metadata:
+  name: resend
+  namespace: immich
+spec:
+  displayName: Immich

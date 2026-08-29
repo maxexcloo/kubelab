@@ -1,0 +1,94 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: bifrost
+  namespace: bifrost
+  annotations:
+    onepassword.excloo.dev/defaults: '{"username":"admin"}'
+    onepassword.excloo.dev/generate-fields: api-key,encryption-key,password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Bifrost
+        property: api-key
+      secretKey: BIFROST_API_KEY
+    - remoteRef:
+        key: Bifrost
+        property: api-key-cliproxy
+      secretKey: CLIPROXY_API_KEY
+    - remoteRef:
+        key: Bifrost
+        property: api-key-comfy-control
+      secretKey: COMFY_CONTROL_API_KEY
+    - remoteRef:
+        key: Bifrost
+        property: encryption-key
+      secretKey: encryption-key
+    - remoteRef:
+        key: Bifrost
+        property: password
+      secretKey: password
+    - remoteRef:
+        key: Bifrost
+        property: username
+      secretKey: username
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: bifrost
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bifrost
+  labels:
+    app.kubernetes.io/name: bifrost
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bifrost
+  namespace: bifrost
+  labels:
+    app.kubernetes.io/name: bifrost
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 8080
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bifrost
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: bifrost
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "1000"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "1000"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: truenas-nfs

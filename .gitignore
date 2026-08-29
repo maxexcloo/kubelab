@@ -1,3 +1,4 @@
 *.kubeconfig
+.cache/
 .mise.local.toml
 kubeconfig

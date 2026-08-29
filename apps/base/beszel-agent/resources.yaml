@@ -1,0 +1,28 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: beszel-agent
+  namespace: beszel-agent
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Beszel Agent
+        property: agent-token
+      secretKey: token
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    deletionPolicy: Retain
+    name: beszel-agent
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: beszel-agent
+  labels:
+    app.kubernetes.io/name: beszel-agent
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: restricted

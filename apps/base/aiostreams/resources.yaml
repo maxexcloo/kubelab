@@ -1,0 +1,86 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+  annotations:
+    onepassword.excloo.dev/defaults: '{"username":"max@excloo.com"}'
+    onepassword.excloo.dev/generate-fields: password,secret-key
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: AIOStreams
+        property: password
+      secretKey: PASSWORD
+    - remoteRef:
+        key: AIOStreams
+        property: secret-key
+      secretKey: SECRET_KEY
+    - remoteRef:
+        key: AIOStreams
+        property: username
+      secretKey: USERNAME
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: aiostreams
+    template:
+      data:
+        AIOSTREAMS_AUTH: "{{ .USERNAME }}:{{ .PASSWORD }}"
+        SECRET_KEY: "{{ .SECRET_KEY }}"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aiostreams
+  labels:
+    app.kubernetes.io/name: aiostreams
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+  labels:
+    app.kubernetes.io/name: aiostreams
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 30375
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: aiostreams
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: aiostreams
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "568"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "568"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: truenas-nfs

@@ -1,0 +1,116 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: shelfmark
+  namespace: shelfmark
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Shelfmark
+        property: api-key-googlebooks
+      secretKey: GOOGLEBOOKS_API_KEY
+    - remoteRef:
+        key: Shelfmark
+        property: api-key-hardcover
+      secretKey: HARDCOVER_API_KEY
+    - remoteRef:
+        key: Shelfmark
+        property: oidc-client-id
+      secretKey: OIDC_CLIENT_ID
+    - remoteRef:
+        key: Shelfmark
+        property: oidc-client-secret
+      secretKey: OIDC_CLIENT_SECRET
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    deletionPolicy: Retain
+    name: shelfmark
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: shelfmark
+  labels:
+    app.kubernetes.io/name: shelfmark
+    gateway.excloo.dev/public-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: shelfmark
+  namespace: shelfmark
+  labels:
+    app.kubernetes.io/name: shelfmark
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 3000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: shelfmark
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: books
+  namespace: shelfmark
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ""
+  volumeName: shelfmark-bookdrop
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config
+  namespace: shelfmark
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "568"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "568"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: truenas-nfs
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: shelfmark-bookdrop
+  labels:
+    app.kubernetes.io/name: shelfmark
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 1Gi
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    path: /mnt/truenas-nvme/bookorbit/bookdrop
+    server: 10.4.0.3
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""

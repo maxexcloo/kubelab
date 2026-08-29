@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/name: immich
 spec:
   schedule: "15 3 * * *"
+  timeZone: Australia/Sydney
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3

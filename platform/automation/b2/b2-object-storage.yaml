@@ -17,14 +17,12 @@ spec:
       schema:
         openAPIV3Schema:
           type: object
+          additionalProperties: false
           properties:
             spec:
               type: object
+              additionalProperties: false
               properties:
-                apiURL:
-                  default: https://api005.backblazeb2.com
-                  format: uri
-                  type: string
                 displayName:
                   maxLength: 128
                   minLength: 1
@@ -36,15 +34,18 @@ spec:
                   type: string
                 secretRef:
                   type: object
+                  additionalProperties: false
                   properties:
                     bucketKey:
                       default: bucket
                       maxLength: 253
                       minLength: 1
+                      pattern: ^[-._A-Za-z0-9]+$
                       type: string
                     name:
                       maxLength: 253
                       minLength: 1
+                      pattern: ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$
                       type: string
                   required: [name]
               required: [displayName, keyName, secretRef]
@@ -98,6 +99,9 @@ spec:
                         - missingFieldStrategy: preserve
                           responseJQ: .body.accountId
                           secretKey: account-id
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.apiInfo.storageApi.apiUrl
+                          secretKey: api-url
                         - missingFieldStrategy: preserve
                           responseJQ: .body.authorizationToken
                           secretKey: authorization-token
@@ -207,7 +211,7 @@ spec:
                         else .payload.baseUrl + "/b2api/v4/b2_update_bucket"
                         end
                   payload:
-                    baseUrl: https://api005.backblazeb2.com
+                    baseUrl: "{{ b2-session:default:api-url }}"
                     body: "{}"
                   secretInjectionConfigs:
                     - keyMappings:
@@ -229,15 +233,20 @@ spec:
                 fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.apiURL
-                toFieldPath: spec.forProvider.payload.baseUrl
-              - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.headers.Authorization[0]
                 transforms:
                   - type: string
                     string:
                       fmt: "{{ b2-session:%s:authorization-token }}"
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.payload.baseUrl
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "{{ b2-session:%s:api-url }}"
                       type: Format
               - type: CombineFromComposite
                 combine:
@@ -305,7 +314,7 @@ spec:
                       method: POST
                       url: .payload.baseUrl + "/b2api/v4/b2_create_key"
                   payload:
-                    baseUrl: https://api005.backblazeb2.com
+                    baseUrl: "{{ b2-session:default:api-url }}"
                     body: "{}"
                   secretInjectionConfigs:
                     - keyMappings:
@@ -337,8 +346,13 @@ spec:
                 fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.apiURL
+                fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.payload.baseUrl
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "{{ b2-session:%s:api-url }}"
+                      type: Format
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.secretRef.name
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name

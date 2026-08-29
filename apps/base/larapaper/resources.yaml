@@ -1,0 +1,71 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: larapaper
+  namespace: larapaper
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: LaraPaper
+        property: app-key
+      secretKey: APP_KEY
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: larapaper
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: larapaper
+  labels:
+    app.kubernetes.io/name: larapaper
+    gateway.excloo.dev/public-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: larapaper
+  namespace: larapaper
+  labels:
+    app.kubernetes.io/name: larapaper
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 8080
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: larapaper
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: larapaper
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "82"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "82"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: truenas-nfs

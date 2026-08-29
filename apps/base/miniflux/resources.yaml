@@ -1,0 +1,164 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: miniflux
+  namespace: miniflux
+  annotations:
+    onepassword.excloo.dev/constants: '{"database-username":"miniflux"}'
+    onepassword.excloo.dev/defaults: '{"username":"admin"}'
+    onepassword.excloo.dev/generate-fields: database-password,password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Miniflux
+        property: database-password
+      secretKey: database-password
+    - remoteRef:
+        key: Miniflux
+        property: database-username
+      secretKey: database-username
+    - remoteRef:
+        key: Miniflux
+        property: oauth-client-id
+      secretKey: OAUTH2_CLIENT_ID
+    - remoteRef:
+        key: Miniflux
+        property: oauth-client-secret
+      secretKey: OAUTH2_CLIENT_SECRET
+    - remoteRef:
+        key: Miniflux
+        property: password
+      secretKey: password
+    - remoteRef:
+        key: Miniflux
+        property: username
+      secretKey: username
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    deletionPolicy: Retain
+    name: miniflux
+    template:
+      engineVersion: v2
+      data:
+        ADMIN_PASSWORD: "{{ .password }}"
+        ADMIN_USERNAME: "{{ .username }}"
+        DATABASE_URL: 'postgres://{{ index . "database-username" | urlquery }}:{{ index . "database-password" | urlquery }}@miniflux-database-rw:5432/miniflux?sslmode=require'
+        OAUTH2_CLIENT_ID: "{{ .OAUTH2_CLIENT_ID }}"
+        OAUTH2_CLIENT_SECRET: "{{ .OAUTH2_CLIENT_SECRET }}"
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: miniflux-database
+  namespace: miniflux
+  annotations:
+    onepassword.excloo.dev/constants: '{"database-username":"miniflux"}'
+    onepassword.excloo.dev/generate-fields: database-password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Miniflux
+        property: database-password
+      secretKey: password
+    - remoteRef:
+        key: Miniflux
+        property: database-username
+      secretKey: username
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    deletionPolicy: Retain
+    name: miniflux-database
+    template:
+      engineVersion: v2
+      type: kubernetes.io/basic-auth
+      data:
+        password: "{{ .password }}"
+        username: "{{ .username }}"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: miniflux
+  labels:
+    app.kubernetes.io/name: miniflux
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: miniflux
+  namespace: miniflux
+  labels:
+    app.kubernetes.io/name: miniflux
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 8080
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: miniflux
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: miniflux-database
+  namespace: miniflux
+  labels:
+    app.kubernetes.io/name: miniflux
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: miniflux
+      ports:
+        - port: 5432
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - port: 8000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: miniflux-database
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup
+  namespace: miniflux
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "26"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "26"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: truenas-nfs
