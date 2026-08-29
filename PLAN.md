@@ -5,16 +5,13 @@ are documented in `README.md`; completed migration history remains in Git.
 
 ## Reconciliation Blockers
 
-1. Remove one of the two display-named `LaraPaper` items from the `mbk` cluster
-   vault so External Secrets can select exactly one item. Force a refresh if
-   required, then reconcile `apps`, `pocket-id-automation` and the cluster root
-   at the current `main` revision. The retained application Secret remains
-   present while reconciliation is blocked.
-2. Extend the reviewed Homelab tailnet policy so only retained machine tags
-   running Beszel agents can reach `tag:kubernetes:443`. Confirm the `syd` agent
-   and retained standalone agents reconnect to `beszel.excloo.com`; `mbk` uses
-   its cluster-local Service and must not depend on this lateral allowance.
-3. Apply the current `homelab` `main` branch with its normal credentials to
+1. Replace the ineffective Homelab tailnet allowance to
+   `tag:kubernetes:443` with a reviewed policy under which only retained machine
+   tags running Beszel agents can reach the actual `tag:mbk:443` Tailscale
+   Service proxy. Confirm the `syd` agent and retained standalone agents
+   reconnect to `beszel.excloo.com`; `mbk` uses its cluster-local Service and
+   must not depend on this lateral allowance.
+2. Apply the current `homelab` `main` branch with its normal credentials to
    import the retained `home-assistant.excloo.com` record and reconcile the
    generic HAOS tunnel ingress. Confirm only `/api/webhook/.+` reaches Home
    Assistant, non-webhook paths use the `404` fallback and the record comment is
@@ -84,20 +81,24 @@ are documented in `README.md`; completed migration history remains in Git.
    and derive HTTP probes from both standard `HTTPRoute` resources and the
    routes declared in upstream app-template `HelmRelease` values. Select only
    routes carrying `gethomepage.dev/enabled: "true"`; use the checked Homepage
-   name, group, href and site-monitor annotations rather than adding another
-   service schema. Keep the normaliser narrow to those two current Kubernetes
-   representations and fail if an enabled route uses an unsupported shape.
-   Keep route-specific overrides, provider and DNS probes, and retained-
-   appliance probes as direct Gatus YAML fragments in `homelab-fly`; Gatus
-   natively merges its configuration directory.
+   name, group, href and site-monitor annotations. Add the standard static
+   Homepage `services.yaml` entries carrying `siteMonitor` so retained systems
+   such as Home Assistant, TrueNAS and UniFi use the same source as the
+   dashboard. Do not add another service schema or publish the inventory through
+   a GitHub variable. Keep the normaliser narrow to these three current
+   representations and fail if an enabled entry uses an unsupported shape.
+   Keep route-specific overrides and provider and DNS probes as direct Gatus
+   YAML fragments in `homelab-fly`; Gatus natively merges its configuration
+   directory.
 3. Use `<cluster> / <Homepage group>` for generated groups and the Homepage
    name without an old target suffix. The current baseline is 29 enabled and
-   accepted routes: 24 from `mbk` and five from `syd`. Include Cloudflare and
-   Control D DNS checks, provider checks, Gatus itself and retained-appliance
-   probes as direct fragments. Remove all 33 retained `excloo.dev` catalogue
-   probes, the old `au-truenas` and `au-hsp` suffixes, stopped Docker targets
-   and deleted service URLs. Fail rendering on duplicate endpoint keys, invalid
-   URLs or an empty generated route inventory.
+   accepted routes: 24 from `mbk` and five from `syd`. The 16 static Homepage
+   entries overlap five of those routes, producing 40 unique service probes.
+   Include Cloudflare and Control D DNS checks and provider checks as direct
+   fragments. Remove all 33 retained `excloo.dev` catalogue probes, the old
+   `au-truenas` and `au-hsp` suffixes, stopped Docker targets and deleted service
+   URLs. Fail rendering on conflicting duplicates, invalid URLs or an empty
+   generated route inventory.
 4. Preserve the independent Fly failure domain, sending-only mail credential,
    Tailscale reachability, alert thresholds and Redlib `X-Gatus-Token` bypass.
    Prove one failing and one recovered alert without exposing the token.
