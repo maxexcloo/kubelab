@@ -1,0 +1,10 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: B2ObjectStorage
+metadata:
+  name: example
+  namespace: example
+spec:
+  displayName: Example
+  keyName: example
+  secretRef:
+    name: example-object-storage

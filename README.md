@@ -201,6 +201,9 @@ another credential. The generated key is masked into the selected application
 Secret and pushed only to that application item. Deleting a claim or composed
 request does not delete the external bucket or key.
 
+The non-reconciled fixture in `platform/automation/b2/fixtures` exercises the
+claim schema during `mise run check` without creating an external resource.
+
 App-scoped external resources default to orphan-on-delete. ExternalDNS is
 upsert-only. Deleting a Kubernetes declaration must not delete an external
 bucket, credential, identity client or unrelated WAF rule.

@@ -96,6 +96,7 @@ kubeconform_flags=(
 
 {
   find clusters -mindepth 1 -maxdepth 1 -type d
+  find platform -type d -name fixtures
   yq eval-all -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization") | .spec.path' clusters/*/*.yaml
 } | sort -u >"${target_file}"
 
