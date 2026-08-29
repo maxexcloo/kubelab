@@ -5,25 +5,3 @@ metadata:
   namespace: redlib
 spec:
   zoneName: excloo.com
----
-apiVersion: external-secrets.io/v1
-kind: ExternalSecret
-metadata:
-  name: redlib-waf
-  namespace: redlib
-  annotations:
-    onepassword.excloo.dev/migrate-fields: '{"monitoring_token":"monitoring-token"}'
-spec:
-  refreshInterval: 1h
-  data:
-    - remoteRef:
-        key: Redlib
-        property: monitoring-token
-      secretKey: monitoring-token
-  secretStoreRef:
-    kind: ClusterSecretStore
-    name: onepassword
-  target:
-    creationPolicy: Merge
-    deletionPolicy: Retain
-    name: redlib
