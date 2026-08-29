@@ -17,11 +17,9 @@ spec:
       schema:
         openAPIV3Schema:
           type: object
-          additionalProperties: false
           properties:
             spec:
               type: object
-              additionalProperties: false
               properties:
                 displayName:
                   maxLength: 128
@@ -34,7 +32,6 @@ spec:
                   type: string
                 secretRef:
                   type: object
-                  additionalProperties: false
                   properties:
                     bucketKey:
                       default: bucket
