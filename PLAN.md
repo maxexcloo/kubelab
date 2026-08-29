@@ -16,16 +16,16 @@ are documented in `README.md`; completed migration history remains in Git.
    name, group, href and site-monitor annotations. Add the standard static
    Homepage `services.yaml` entries carrying `siteMonitor` so retained systems
    such as Home Assistant, TrueNAS and UniFi use the same source as the
-   dashboard. Do not add another service schema or publish the inventory through
-   a GitHub variable. Keep the normaliser narrow to these three current
-   representations and fail if an enabled entry uses an unsupported shape.
-   Keep route-specific overrides and provider and DNS probes as direct Gatus
-   YAML fragments in `homelab-fly`; Gatus natively merges its configuration
-   directory.
+   dashboards. Read the Git-owned configuration rather than querying a running
+   Homepage instance. Do not add another service schema or publish the inventory
+   through a GitHub variable. Keep the normaliser narrow to these three current
+   representations and fail if an enabled entry uses an unsupported shape. Keep
+   route-specific overrides and provider and DNS probes as direct Gatus YAML
+   fragments in `homelab-fly`; Gatus natively merges its configuration directory.
 3. Use `<cluster> / <Homepage group>` for generated groups and the Homepage
-   name without an old target suffix. The current baseline is 29 enabled and
-   accepted routes: 24 from `mbk` and five from `syd`. The 16 static Homepage
-   entries overlap five of those routes, producing 40 unique service probes.
+   name without an old target suffix. The current baseline is 30 enabled and
+   accepted routes: 24 from `mbk` and six from `syd`. The 11 static Homepage
+   entries do not overlap those routes, producing 41 unique service probes.
    Include Cloudflare and Control D DNS checks and provider checks as direct
    fragments. Remove all 33 retained `excloo.dev` catalogue probes, the old
    `au-truenas` and `au-hsp` suffixes, stopped Docker targets and deleted service

@@ -106,7 +106,7 @@ Bifrost, BookOrbit, Byparr, CLIProxyAPI, Comfy Control, Homepage, Immich,
 Larapaper, Linkwarden, Miniflux, Open WebUI, OpenSpeedTest, Papra, Pocket ID,
 RoMM, Shelfmark and Windmill.
 
-`syd` runs Anisette, Beszel Agent, OpenSpeedTest and Redlib.
+`syd` runs Anisette, Beszel Agent, Homepage, OpenSpeedTest and Redlib.
 
 Workload differences belong in `apps/overlays/<cluster>`; bases are not copied
 between clusters.
@@ -192,15 +192,17 @@ App-scoped external resources default to orphan-on-delete. ExternalDNS is
 upsert-only. Deleting a Kubernetes declaration must not delete an external
 bucket, credential, identity client or unrelated WAF rule.
 
-Homepage is served at `home.excloo.com` and uses the legacy Services and Servers
-tab structure, service metadata and custom card styling, including the
-repository-owned retained background. It discovers `mbk` routes and declares
-`syd` and appliance cards explicitly because Homepage supports only one
-Kubernetes connection. Static cards use the same weights as discovered cards,
-so cards merge alphabetically; credential-backed widgets sort first. Homepage
-extracts its optional widget credentials from the display-named `Homepage`
-item. Missing values hide only the corresponding widget and do not block the
-dashboard.
+Homepage runs on every cluster and uses the legacy Services and Servers tab
+structure, service metadata and custom card styling, including the
+repository-owned retained background. Each instance discovers only its local
+cluster. The `mbk` instance is served at `home.excloo.com` and
+`homepage.mbk.excloo.dev`; the `syd` instance is served at
+`homepage.syd.excloo.dev`. Their shared static configuration contains only
+non-cluster services and provider bookmarks. Static cards use the same weights
+as discovered cards, so cards merge alphabetically; credential-backed widgets
+sort first. Each instance extracts its optional widget credentials from the
+display-named `Homepage` item in its cluster vault. Missing values hide only the
+corresponding widget and do not block the dashboard.
 
 Beszel agents run as a DaemonSet on every Kubernetes node, including Talos
 control-plane nodes. They use outbound WebSocket registration and the Kubernetes

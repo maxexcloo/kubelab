@@ -106,13 +106,6 @@ data:
     mode: cluster
     traefik: false
   services.yaml: |
-    - Applications:
-        - Redlib:
-            description: Reddit Frontend
-            href: https://reddit.excloo.com
-            icon: redlib
-            siteMonitor: https://reddit.excloo.com
-            weight: 0
     - Home Automation:
         - ESPHome:
             description: ESP Device Builder
@@ -156,29 +149,11 @@ data:
             siteMonitor: https://hass.mbk.excloo.net/45df7312_zigbee2mqtt
             weight: 0
     - Infrastructure:
-        - Anisette:
-            description: Anisette Server
-            href: https://anisette.excloo.com
-            icon: si-apple-#ffffff
-            siteMonitor: https://anisette.excloo.com
-            weight: 0
-        - Headlamp (syd):
-            description: Kubernetes Dashboard
-            href: https://headlamp.syd.excloo.dev
-            icon: headlamp
-            siteMonitor: https://headlamp.syd.excloo.dev
-            weight: 0
         - Netboot:
             description: Network Boot Server
             href: http://kimbap.mbk.excloo.net:31010
             icon: netbootxyz
             siteMonitor: http://kimbap.mbk.excloo.net:31010
-            weight: 0
-        - OpenSpeedTest (syd):
-            description: Network Speed Test
-            href: https://speed.syd.excloo.dev
-            icon: openspeedtest
-            siteMonitor: https://speed.syd.excloo.dev
             weight: 0
         - Syncthing:
             description: File Synchronisation
@@ -220,12 +195,6 @@ data:
             widget:
               type: gatus
               url: https://status.excloo.com
-        - Grafana (syd):
-            description: Infrastructure Observability
-            href: https://grafana.syd.excloo.dev
-            icon: grafana
-            siteMonitor: https://grafana.syd.excloo.dev
-            weight: 0
   settings.yaml: |
     cardBlur: xs
     color: slate
@@ -272,7 +241,7 @@ data:
     - kubernetes:
         cluster:
           cpu: true
-          label: mbk
+          label: "{{HOMEPAGE_VAR_CLUSTER}}"
           memory: true
           show: true
           showLabel: true

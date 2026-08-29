@@ -3,6 +3,12 @@ kind: Kustomization
 resources:
   - ../../base/anisette
   - ../../base/beszel-agent
+  - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/redlib
   - route.yaml
+patches:
+  - path: homepage.yaml
+    target:
+      kind: HelmRelease
+      name: homepage
