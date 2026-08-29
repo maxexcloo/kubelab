@@ -156,10 +156,8 @@ non-empty operator-managed values.
 
 Crossplane is available on every cluster and manages app-scoped provider APIs.
 Pocket ID clients and groups, sending-only Resend keys and private Cloudflare
-and Control D DNS are active on `mbk`. B2 inventory remains fail-closed behind
-a suspended `mbk` Flux inventory. The Redlib Cloudflare WAF policy is similarly
-staged on `syd`, where the existing Redlib application item and Secret live.
-The steps required to adopt these retained resources are in `PLAN.md`.
+and Control D DNS are active on `mbk`. The Redlib Cloudflare WAF policy is
+active on `syd`, where the existing Redlib application item and Secret live.
 
 Grafana's local administrator credential and retained Pocket ID client
 credentials reconcile with the platform through separate Secrets. Its OIDC
@@ -167,30 +165,18 @@ environment references remain optional at startup so local recovery access
 cannot block on Pocket ID or External Secrets. The retained client remains under
 Pocket ID automation.
 
-`homelab` owns the `Backblaze B2`, `Cloudflare WAF`, `Control D` and `Resend`
-items in each corresponding cluster vault. They are unqualified and tagged
-`Homelab` so the cluster can read them while the application-item reconciler
-leaves them alone. External Secrets materialises their provider credentials in
-`crossplane-system`; no provider credential has a separate bootstrap path. The
-only out-of-band secret injection is the cluster's 1Password Connect credentials
-and token. Generated application credentials are published only to the
-corresponding application item and namespace.
-
-`B2ObjectStorage` is the narrow application-storage contract. A claim selects
-an existing bucket-name Secret, an application-key name and a display-named
-1Password item. The composition creates or adopts one private bucket with B2
-server-side encryption and the retained one-day hidden-file lifecycle, then
-creates or adopts one bucket-scoped read/write application key. Capabilities are
-fixed by the composition; claims cannot request account, bucket-management or
-key-management access. A same-name key with different or duplicate settings
-blocks reconciliation instead of creating another credential. The generated key
-is masked into the selected application Secret and pushed only to that
-application item. Deleting a claim or composed request does not delete the
-external bucket or key.
+`homelab` owns the `Cloudflare WAF`, `Control D` and `Resend` items in each
+corresponding cluster vault. They are unqualified and tagged `Homelab` so the
+cluster can read them while the application-item reconciler leaves them alone.
+External Secrets materialises their provider credentials in `crossplane-system`;
+no provider credential has a separate bootstrap path. The only out-of-band
+secret injection is the cluster's 1Password Connect credentials and token.
+Generated application credentials are published only to the corresponding
+application item and namespace.
 
 App-scoped external resources default to orphan-on-delete. ExternalDNS is
 upsert-only. Deleting a Kubernetes declaration must not delete an external
-bucket, credential, identity client or unrelated WAF rule.
+credential, identity client or unrelated WAF rule.
 
 Homepage is served at `home.excloo.com` and uses the legacy Services and Servers
 tab structure, service metadata and custom card styling, including the
@@ -200,16 +186,16 @@ Kubernetes connection. Static cards use the same weights as discovered cards,
 so cards merge alphabetically; credential-backed widgets sort first. Homepage
 extracts its optional widget credentials from the display-named `Homepage`
 item. Missing values hide only the corresponding widget and do not block the
-dashboard. Tailscale, Traefik and Cloudflare Tunnel widgets remain unfinished
-parity work in `PLAN.md`.
+dashboard.
 
 Beszel agents run as a DaemonSet on every Kubernetes node, including Talos
 control-plane nodes. They use outbound WebSocket registration and the Kubernetes
-node name as their stable system identity. The `mbk` agent reaches its local hub
-through the cluster Service; the `syd` agent reaches the `mbk` hub through the
-private HTTPS route. This provides node-level CPU, memory, load, uptime and
-network summaries; VictoriaMetrics remains authoritative for Kubernetes
-objects, Pod resources and detailed node metrics.
+node name as their stable system identity and retain their fingerprint in
+per-node host storage. The `mbk` agent reaches its local hub through the cluster
+Service; the `syd` agent reaches the `mbk` hub through the private HTTPS route.
+This provides node-level CPU, memory, load, uptime and network summaries;
+VictoriaMetrics remains authoritative for Kubernetes objects, Pod resources and
+detailed node metrics.
 
 Dozzle is not deployed. Kubernetes log aggregation remains in VictoriaLogs and
 Grafana, with Headlamp or `kubectl` for live Pod inspection; Beszel remains the

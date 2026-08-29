@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - apps.yaml
   - automation.yaml
-  - b2-automation.yaml
   - crossplane-runtime.yaml
   - foundation.yaml
   - flux-system

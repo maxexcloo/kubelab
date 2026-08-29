@@ -3,16 +3,6 @@
 This file contains only unfinished work. Current architecture and operations
 are documented in `README.md`; completed migration history remains in Git.
 
-## External Automation
-
-1. Decide whether to provision new Beszel B2 object storage or remove the
-   suspended integration. A read-only review on 29 August 2026 confirmed that
-   the configured account has no Beszel bucket or application key and the
-   display-named `Beszel` item has no object-storage fields, so there is no
-   retained resource to adopt. Keep `clusters/mbk/b2-automation.yaml` suspended
-   unless a reviewed globally unique bucket name and new bucket-scoped
-   application key creation are explicitly approved.
-
 ## External Monitoring
 
 1. Remove `homelab-fly`'s stale dependency on the retained `CONFIG` repository
