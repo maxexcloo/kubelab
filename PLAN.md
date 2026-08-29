@@ -5,11 +5,9 @@ are documented in `README.md`; completed migration history remains in Git.
 
 ## Repository Simplification
 
-1. Reuse `scripts/render_service_inventory.sh --include-static` in the
-   `homelab-fly` external-monitoring render described below.
-2. Add a renderable `B2ObjectStorage` claim fixture before the first workload
+1. Add a renderable `B2ObjectStorage` claim fixture before the first workload
    uses the contract.
-3. Audit workloads for avoidable init containers, sidecars and lifecycle
+2. Audit workloads for avoidable init containers, sidecars and lifecycle
    workarounds. Prefer direct workload configuration when it provides the
    required behaviour; keep helper containers only when they own a distinct
    runtime responsibility.
