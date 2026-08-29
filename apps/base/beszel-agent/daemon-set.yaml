@@ -91,7 +91,9 @@ spec:
           operator: Exists
       volumes:
         - name: data
-          emptyDir: {}
+          hostPath:
+            path: /var/lib/beszel-agent
+            type: DirectoryOrCreate
   updateStrategy:
     rollingUpdate:
       maxSurge: 0
