@@ -223,11 +223,15 @@ spec:
                     - fromFieldPath: metadata.name
                     - fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.payload.baseUrl
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.rule
+              - type: CombineFromComposite
+                combine:
+                  strategy: string
+                  string:
+                    fmt: '{"action":%q,"description":%q,"enabled":%t,"expression":%q,"ref":%q}'
+                  variables:
+                    - fromFieldPath: spec.rule.action
+                    - fromFieldPath: spec.rule.description
+                    - fromFieldPath: spec.rule.enabled
+                    - fromFieldPath: spec.rule.expression
+                    - fromFieldPath: spec.rule.ref
                 toFieldPath: spec.forProvider.payload.body
-                transforms:
-                  - type: convert
-                    convert:
-                      format: json
-                      toType: string
