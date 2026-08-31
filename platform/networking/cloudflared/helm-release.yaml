@@ -25,7 +25,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: cloudflare/cloudflared
-              tag: 2026.8.0@sha256:2535e54b16adf1d50630f99d0886471926c5ef3f6b328100ec6589f731c48969
+              tag: 2026.8.3@sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339
             args:
               - tunnel
               - --no-autoupdate
