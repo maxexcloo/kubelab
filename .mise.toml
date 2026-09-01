@@ -57,7 +57,7 @@ prettier --check .
 shellcheck scripts/*.sh
 scripts/check_manifests.sh
 scripts/check_service_metadata.sh
-python scripts/test_onepassword_items.py
+python tests/test_onepassword_items.py
 """
 
 [tasks.fmt]

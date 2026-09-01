@@ -24,6 +24,6 @@ repos:
       - id: project-check
         name: Check project source
         entry: mise run check
-        files: ^(\.github/workflows/.*\.yaml|\.gitignore|\.mise\.toml|\.pre-commit-config\.yaml|\.prettierignore|AGENTS\.md|README\.md|apps/|clusters/|platform/|renovate\.json|scripts/)
+        files: ^(\.github/workflows/.*\.yaml|\.gitignore|\.mise\.toml|\.pre-commit-config\.yaml|\.prettierignore|AGENTS\.md|README\.md|apps/|clusters/|platform/|renovate\.json|scripts/|tests/)
         language: system
         pass_filenames: false

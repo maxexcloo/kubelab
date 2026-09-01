@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Tests for the embedded 1Password item reconciler."""
+
 import contextlib
 import io
 import subprocess
