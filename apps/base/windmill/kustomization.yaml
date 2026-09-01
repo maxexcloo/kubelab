@@ -4,7 +4,5 @@ resources:
   - backup.yaml
   - database.yaml
   - helm-release.yaml
-  - login.yaml
-  - postgresql.yaml
   - resources.yaml
   - source.yaml

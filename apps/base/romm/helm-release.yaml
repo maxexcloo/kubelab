@@ -6,7 +6,6 @@ metadata:
 spec:
   interval: 30m
   releaseName: romm
-  suspend: false
   chart:
     spec:
       chart: app-template

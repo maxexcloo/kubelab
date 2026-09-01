@@ -88,7 +88,10 @@ second, the Crossplane package runtime third, external automation fourth and
 applications last. The separate runtime stage lets a new cluster install the
 Crossplane CRDs before applying the hardened package runtime configuration and
 waits for the HTTP provider and composition function before automation starts.
-Flux is the only routine deployer; CI validates but does not deploy.
+Shared reconciliation policy lives in
+`platform/bootstrap/flux-reconciliation`; cluster entry points contain only
+cluster-specific stages and exceptional health checks. Flux is the only routine
+deployer; CI validates but does not deploy.
 
 ## Platform
 
@@ -185,6 +188,11 @@ environment references remain optional at startup so local recovery access
 cannot block on Pocket ID or External Secrets. The retained client remains under
 Pocket ID automation.
 
+Application administrators are created through each application's upstream
+setup flow. Generated login credentials remain in 1Password, but no in-cluster
+job calls application APIs to create or modify accounts. Restored databases
+retain their existing administrators.
+
 `homelab` owns the `Backblaze B2`, `Cloudflare WAF`, `Control D` and `Resend`
 items in each corresponding cluster vault. They are unqualified and tagged
 `Homelab` so the cluster can read them while the application-item reconciler
@@ -214,7 +222,7 @@ App-scoped external resources default to orphan-on-delete. ExternalDNS is
 upsert-only. Deleting a Kubernetes declaration must not delete an external
 bucket, credential, identity client or unrelated WAF rule.
 
-Homepage runs on every cluster and uses the legacy Services and Servers tab
+Homepage runs on every cluster and uses the Services and Servers tab
 structure, service metadata and custom card styling, including the
 repository-owned retained background. Each instance discovers only its local
 cluster. The `mbk` instance is served at `home.excloo.com` and
@@ -248,9 +256,9 @@ creates retained directories beneath `/mnt/truenas-nvme/clusters/mbk`.
 Allow-listed standalone datasets use retained static volumes.
 
 `taco` holds the active Kubernetes node-local volumes, including current
-CloudNativePG database volumes. These are live production state, not legacy
-copies. Critical database workloads write validated logical backups to retained
-NFS. Replaceable caches, metrics and logs may remain node-local.
+CloudNativePG database volumes. Critical database workloads write validated
+logical backups to retained NFS. Replaceable caches, metrics and logs may remain
+node-local.
 
 | Tier        | Local retention         | Off-site retention                             |
 | ----------- | ----------------------- | ---------------------------------------------- |
@@ -261,28 +269,8 @@ NFS. Replaceable caches, metrics and logs may remain node-local.
 Pocket ID has active database-backup and complete application-export schedules.
 Its restore CronJob is intentionally suspended and manual: stop the active
 authority, provide the exact retained archive path and SHA-256 digest, and
-verify the encryption key before creating a restore Job.
-
-RoMM has an active logical-backup schedule. Its storage-local workflow CronJob
-is an intentionally suspended Job template. It serialises runs with an NFS lock
-and fails closed for destructive modes. Activation requires explicit operator
-approval after reviewing its destructive-mode guardrails.
-
-### Current Rollback Window
-
-The final workloads were cut over on 27 August 2026. Their stopped previous
-applications and source copies remain on `kimbap`; no legacy container, rollback
-archive or one-off cutover Job remains on `taco`.
-
-- Pocket ID export: `/backup/pocket-id-final-20260827.zip`, SHA-256
-  `aeffec66980a98f54be102efe02538f9edf2663cf08fe44a73162fcea8f83fd8`.
-- RoMM dump: `/backup/romm-final-20260827.dump`, SHA-256
-  `9053de9e22d743ac9f8c9568c685f458dcfb188120f5177615a46d1d256fbec0`.
-
-Both archives are on NFS served by `kimbap`. Normal scheduled backups remain
-active. The previous declarative implementation is preserved only as Git
-history on `homelab` branch `archive/pre-kubernetes` at commit `1c9fc2a` and the
-immutable `legacy` tag.
+verify the encryption key before creating a restore Job. RoMM has an active
+logical-backup schedule.
 
 ## Licence
 

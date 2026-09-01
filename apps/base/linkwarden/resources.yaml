@@ -123,13 +123,6 @@ metadata:
 spec:
   ingress:
     - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/component: bootstrap
-      ports:
-        - port: 3000
-          protocol: TCP
-    - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking

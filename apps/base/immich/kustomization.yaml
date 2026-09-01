@@ -5,6 +5,5 @@ resources:
   - database-extension.yaml
   - database.yaml
   - helm-release.yaml
-  - login.yaml
   - resources.yaml
   - source.yaml

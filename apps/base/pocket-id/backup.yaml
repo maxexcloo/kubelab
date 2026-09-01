@@ -9,7 +9,6 @@ metadata:
 spec:
   schedule: "0 3 * * *"
   timeZone: Australia/Sydney
-  suspend: false
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3
@@ -91,7 +90,6 @@ metadata:
 spec:
   schedule: "30 3 * * *"
   timeZone: Australia/Sydney
-  suspend: false
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 3

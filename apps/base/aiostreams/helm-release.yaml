@@ -6,7 +6,6 @@ metadata:
 spec:
   interval: 30m
   releaseName: aiostreams
-  suspend: false
   chart:
     spec:
       chart: app-template

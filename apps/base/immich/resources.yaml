@@ -51,13 +51,6 @@ metadata:
 spec:
   ingress:
     - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/component: bootstrap
-      ports:
-        - port: 2283
-          protocol: TCP
-    - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking
@@ -245,3 +238,29 @@ metadata:
   namespace: immich
 spec:
   displayName: Immich
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: immich-login
+  namespace: immich
+  annotations:
+    onepassword.excloo.dev/defaults: '{"username":"admin@excloo.com"}'
+    onepassword.excloo.dev/generate-fields: password
+spec:
+  data:
+    - remoteRef:
+        key: Immich
+        property: username
+      secretKey: username
+    - remoteRef:
+        key: Immich
+        property: password
+      secretKey: password
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: immich-login

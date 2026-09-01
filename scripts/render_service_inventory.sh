@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-include_static=false
+all_routes=false
 clusters=()
+include_static=false
 
 usage() {
-  echo "Usage: $0 [--include-static] [cluster ...]" >&2
+  echo "Usage: $0 [--all-routes] [--include-static] [cluster ...]" >&2
 }
 
 while (($# > 0)); do
   case "$1" in
+    --all-routes)
+      all_routes=true
+      ;;
     --include-static)
       include_static=true
       ;;
@@ -49,13 +53,14 @@ for cluster in "${clusters[@]}"; do
   for target in "apps/overlays/${cluster}" "clusters/${cluster}/platform"; do
     # shellcheck disable=SC2016
     kustomize build "${target}" |
-      CLUSTER="${cluster}" yq eval -N -r '
+      ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -r '
         (
           (
             select(.kind == "HTTPRoute") |
             {
               "annotations": (.metadata.annotations // {}),
               "hostnames": (.spec.hostnames // []),
+              "labels": (.metadata.labels // {}),
               "namespace": .metadata.namespace,
               "parentRefs": ((.spec.parentRefs // []) | map(.name)),
               "source": ("HTTPRoute/" + .metadata.namespace + "/" + .metadata.name)
@@ -69,6 +74,7 @@ for cluster in "${clusters[@]}"; do
             {
               "annotations": (.value.annotations // {}),
               "hostnames": (.value.hostnames // []),
+              "labels": (.value.labels // {}),
               "namespace": $metadata.namespace,
               "parentRefs": ((.value.parentRefs // []) | map(.name)),
               "source": (
@@ -86,6 +92,7 @@ for cluster in "${clusters[@]}"; do
             {
               "annotations": (.spec.values.route.annotations // {}),
               "hostnames": (.spec.values.route.hostnames // []),
+              "labels": (.spec.values.route.labels // {}),
               "namespace": .metadata.namespace,
               "parentRefs": ((.spec.values.route.parentRefs // []) | map(.name)),
               "source": (
@@ -94,9 +101,16 @@ for cluster in "${clusters[@]}"; do
             }
           )
         ) |
-        select(.annotations."gethomepage.dev/enabled" == "true") |
+        select(
+          strenv(ALL_ROUTES) == "true" or
+          .annotations."gethomepage.dev/enabled" == "true"
+        ) |
         {
           "cluster": strenv(CLUSTER),
+          "cloudflareProxied": (
+            .annotations."external-dns.alpha.kubernetes.io/cloudflare-proxied" //
+            ""
+          ),
           "description": (.annotations."gethomepage.dev/description" // ""),
           "group": (.annotations."gethomepage.dev/group" // ""),
           "hostnames": .hostnames,
@@ -110,6 +124,7 @@ for cluster in "${clusters[@]}"; do
           "name": (.annotations."gethomepage.dev/name" // ""),
           "namespace": .namespace,
           "parentRefs": .parentRefs,
+          "publicAccess": (.labels."gateway.excloo.dev/public-access" // ""),
           "source": .source,
           "type": "route"
         } |
@@ -130,6 +145,7 @@ if [[ "${include_static}" == true ]]; then
       select(.value.siteMonitor != null) |
       {
         cluster: null,
+        cloudflareProxied: "",
         description: (.value.description // ""),
         group: $group.key,
         hostnames: [],
@@ -139,6 +155,7 @@ if [[ "${include_static}" == true ]]; then
         name: .key,
         namespace: null,
         parentRefs: [],
+        publicAccess: "",
         source: ("Homepage/services/" + $group.key + "/" + .key),
         type: "homepage"
       }

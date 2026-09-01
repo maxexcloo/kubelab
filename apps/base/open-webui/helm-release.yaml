@@ -6,7 +6,6 @@ metadata:
 spec:
   interval: 30m
   releaseName: open-webui
-  suspend: false
   chart:
     spec:
       chart: open-webui

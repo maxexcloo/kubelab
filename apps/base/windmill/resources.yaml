@@ -51,13 +51,6 @@ metadata:
 spec:
   ingress:
     - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/component: bootstrap
-      ports:
-        - port: 8000
-          protocol: TCP
-    - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking
@@ -134,36 +127,6 @@ spec:
   policyTypes:
     - Ingress
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: windmill-postgresql
-  namespace: windmill
-  labels:
-    app.kubernetes.io/name: windmill
-spec:
-  ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/component: backup
-        - podSelector:
-            matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                  - windmill-app
-                  - windmill-workers
-      ports:
-        - port: 5432
-          protocol: TCP
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/component: database
-      app.kubernetes.io/name: windmill
-  policyTypes:
-    - Ingress
----
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -181,19 +144,28 @@ spec:
       storage: 5Gi
   storageClassName: truenas-nfs
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
 metadata:
-  name: postgresql
+  name: windmill-login
   namespace: windmill
   annotations:
-    k8s-sigs.io/nfs-directory-gid: "999"
-    k8s-sigs.io/nfs-directory-mode: "0700"
-    k8s-sigs.io/nfs-directory-uid: "999"
+    onepassword.excloo.dev/defaults: '{"username":"admin@excloo.com"}'
+    onepassword.excloo.dev/generate-fields: password
 spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 10Gi
-  storageClassName: truenas-nfs
+  data:
+    - remoteRef:
+        key: Windmill
+        property: username
+      secretKey: username
+    - remoteRef:
+        key: Windmill
+        property: password
+      secretKey: password
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: windmill-login
