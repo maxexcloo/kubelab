@@ -26,7 +26,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/eceasy/cli-proxy-api
-              tag: v7.2.128
+              tag: v7.2.151
             probes:
               liveness:
                 custom: true
