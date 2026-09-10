@@ -20,7 +20,7 @@ spec:
     image:
       pullPolicy: IfNotPresent
       repository: docker.io/maximhq/bifrost
-      tag: v1.6.9
+      tag: v1.6.11
     bifrost:
       authConfig:
         existingSecret: bifrost
