@@ -13,7 +13,7 @@ spec:
   values:
     helperImage:
       repository: docker.io/library/busybox
-      tag: 1.37.0
+      tag: 1.38.0
     nodePathMap:
       - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
         paths:

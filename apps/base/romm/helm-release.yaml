@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-      version: 5.1.0
+      version: 5.2.1
   values:
     controllers:
       romm:
@@ -58,7 +58,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/rommapp/romm
-              tag: 5.2.0@sha256:3512f2ca455782f90247271bed23116e6bc675bc74e379be2c41696e607ab11e
+              tag: 5.3.1@sha256:0d66b4ea152a237c7f24b95e87459f46d3c596a7c0b35a82f26bc971487278b3
             probes:
               liveness:
                 custom: true
@@ -115,7 +115,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/valkey/valkey
-              tag: 9.1.1@sha256:70739f85ad2ee01a726a965584a0f94895f01b0c60b3cc8b0aeef11eaa6888cf
+              tag: 9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
             probes:
               liveness:
                 custom: true

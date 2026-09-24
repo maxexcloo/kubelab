@@ -14,13 +14,13 @@ spec:
         kind: HelmRepository
         name: bifrost
         namespace: flux-system
-      version: 2.1.34
+      version: 2.1.43
   values:
     fullnameOverride: bifrost
     image:
       pullPolicy: IfNotPresent
       repository: docker.io/maximhq/bifrost
-      tag: v1.6.9
+      tag: v2.2.2
     bifrost:
       authConfig:
         existingSecret: bifrost

@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-      version: 5.1.0
+      version: 5.2.1
   values:
     controllers:
       cliproxyapi:
@@ -26,7 +26,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/eceasy/cli-proxy-api
-              tag: v7.2.128
+              tag: v7.3.15
             probes:
               liveness:
                 custom: true

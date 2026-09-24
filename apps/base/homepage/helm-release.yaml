@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-      version: 5.1.0
+      version: 5.2.1
   values:
     controllers:
       homepage:
@@ -32,7 +32,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/gethomepage/homepage
-              tag: v2.0.0
+              tag: v2.4.0
             probes:
               liveness:
                 custom: true

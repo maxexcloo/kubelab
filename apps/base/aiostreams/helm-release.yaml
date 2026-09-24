@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-      version: 5.1.0
+      version: 5.2.1
   values:
     controllers:
       aiostreams:
@@ -24,7 +24,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/viren070/aiostreams
-              tag: v2.33.2@sha256:b169ccfb2b6f351f1bc5a8a460e4e102db77a11fb4fc58222e411d96b3adb85b
+              tag: v2.34.1@sha256:70c0f2de448bcc1e39dd6a2db3f45585ab4e2d6d35761d2264047d8f38078b74
             env:
               BASE_URL: https://aiostreams.excloo.com
               DATABASE_URI: sqlite://./data/db.sqlite
@@ -32,7 +32,7 @@ spec:
               PORT: "30375"
               SEL_SYNC_ACCESS: all
               TEMPLATE_REFRESH_INTERVAL: "3600"
-              TEMPLATE_URLS: '["https://raw.githubusercontent.com/Tam-Taro/SEL-Filtering-and-Sorting/2eade4be5c3e34d096ad06326a92ec4695efe385/Tamtaro-All-Templates-for-AIOStreams.json", "https://raw.githubusercontent.com/Vidhin05/Releases-Regex/2a0b55278d857e808fa37925a730b2709df87a51/all-templates.json"]'
+              TEMPLATE_URLS: '["https://raw.githubusercontent.com/Tam-Taro/SEL-Filtering-and-Sorting/bd0dee43bdf7e262cf9fc7ebf8402ad94057fb2b/Tamtaro-All-Templates-for-AIOStreams.json", "https://raw.githubusercontent.com/Vidhin05/Releases-Regex/b75a607fbb96fee63a44c30f403d1e6399d9c8fe/all-templates.json"]'
               WHITELISTED_SYNC_REFRESH_INTERVAL: "3600"
             envFrom:
               - secretRef:

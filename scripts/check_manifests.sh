@@ -14,8 +14,9 @@ schema_directory="${temporary_directory}/schemas"
 target_file="${temporary_directory}/targets"
 schema_cache_directory=".cache/kubeconform"
 remote_schema_cache_directory="${schema_cache_directory}/remote"
-kubernetes_version="1.36.3"
-crd_catalog_revision="7b1e26ef9deea49293714d204c1a2270aab1178f"
+# Validate the cluster API; schema publication can lag newer kubectl releases.
+kubernetes_version="1.36.4"
+crd_catalog_revision="ad3b08c5045129d7bb1eeffd8e61719b2c8dd1e2"
 mkdir -p \
   "${manifest_directory}" \
   "${remote_schema_cache_directory}" \
@@ -28,7 +29,6 @@ provider_http_version="$(
 provider_http_schema_root="${schema_cache_directory}/provider-http-${provider_http_version}"
 provider_http_schema_directory="${provider_http_schema_root}/http.m.crossplane.io"
 provider_http_schema_file="${provider_http_schema_directory}/request_v1alpha2.json"
-resolved_schema_directory="${schema_cache_directory}/resolved"
 mkdir -p "${provider_http_schema_directory}"
 if [[ ! -s "${provider_http_schema_file}" ]]; then
   provider_http_schema_temporary_file="${provider_http_schema_file}.tmp"
@@ -48,46 +48,12 @@ if [[ ! -s "${provider_http_schema_file}" ]]; then
   mv "${provider_http_schema_temporary_file}" "${provider_http_schema_file}"
 fi
 
-materialise_cached_schemas() {
-  while IFS=$'\t' read -r api_version kind; do
-    group=""
-    version="${api_version}"
-    if [[ "${api_version}" == */* ]]; then
-      group="${api_version%/*}"
-      version="${api_version##*/}"
-    fi
-    kind_suffix="-${version}"
-    if [[ -n "${group}" ]]; then
-      kind_suffix="-${group%%.*}-${version}"
-    fi
-    default_url="https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v${kubernetes_version}-standalone-strict/${kind}${kind_suffix}.json"
-    catalog_url="https://raw.githubusercontent.com/datreeio/CRDs-catalog/${crd_catalog_revision}/${group}/${kind}_${version}.json"
-    for url in "${default_url}" "${catalog_url}"; do
-      cache_key="$(printf '%s' "${url}" | shasum -a 256 | cut -d' ' -f1)"
-      if [[ -s "${remote_schema_cache_directory}/${cache_key}" ]]; then
-        mkdir -p "${resolved_schema_directory}/${group}"
-        cp \
-          "${remote_schema_cache_directory}/${cache_key}" \
-          "${resolved_schema_directory}/${group}/${kind}_${version}.json"
-        break
-      fi
-    done
-  done < <(
-    yq eval -N -r '
-      select(.apiVersion != null and .kind != null) |
-      [.apiVersion, (.kind | downcase)] |
-      @tsv
-    ' "${manifest_directory}"/*.yaml | sort -u
-  )
-}
-
 kubeconform_flags=(
   -kubernetes-version "${kubernetes_version}"
   -skip "ClusterProviderConfig,CustomResourceDefinition"
   -strict
   -summary
   -cache "${remote_schema_cache_directory}"
-  -schema-location "${resolved_schema_directory}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location "${schema_directory}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location "${provider_http_schema_root}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location default
@@ -117,13 +83,13 @@ while IFS=$'\t' read -r xrd_group xrd_kind xrd_version; do
   KUBELAB_XRD_GROUP="${xrd_group}" \
     KUBELAB_XRD_KIND="${xrd_kind}" \
     KUBELAB_XRD_VERSION="${xrd_version}" \
-    yq eval -o=json -I=2 '
-      select(
+    yq eval-all -o=json -I=2 '
+      [select(
         .apiVersion == "apiextensions.crossplane.io/v2" and
         .kind == "CompositeResourceDefinition" and
         .spec.group == strenv(KUBELAB_XRD_GROUP) and
         .spec.names.kind == strenv(KUBELAB_XRD_KIND)
-      ) |
+      )] | .[0] |
       .spec.versions[] |
       select(.name == strenv(KUBELAB_XRD_VERSION)) |
       .schema.openAPIV3Schema |
@@ -157,6 +123,4 @@ done < <(
   ' "${manifest_directory}"/*.yaml | sort -u
 )
 
-materialise_cached_schemas
 kubeconform "${kubeconform_flags[@]}" "${manifest_directory}"
-materialise_cached_schemas

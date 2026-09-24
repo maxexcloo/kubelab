@@ -68,6 +68,14 @@ token, and starts Flux. These Connect values are the only secrets injected
 outside reconciliation. External Secrets uses them to read the cluster vault;
 OpenTofu apply and Kubernetes bootstrap remain separate operator actions.
 
+### Application Changes
+
+Keep an application's Helm release and supporting resources in
+`apps/base/<application>`, then include it in the cluster overlay. Add external
+integration claims only where the application needs them. Shared controllers
+live in `platform/`; each cluster selects its external integrations in
+`clusters/<cluster>/automation`.
+
 ### Reconciliation
 
 Reconcile an existing cluster without rerunning bootstrap:
@@ -91,7 +99,10 @@ waits for the HTTP provider and composition function before automation starts.
 Shared reconciliation policy lives in
 `platform/bootstrap/flux-reconciliation`; cluster entry points contain only
 cluster-specific stages and exceptional health checks. Flux is the only routine
-deployer; CI validates but does not deploy.
+deployer; CI validates but does not deploy. Checks use Kustomize and kubeconform
+for manifest schemas, plus repository-specific service metadata and secret
+reconciler checks. Helm rendering and external API behaviour require separate
+validation when those integrations change.
 
 ## Platform
 
@@ -120,11 +131,11 @@ RoMM, Shelfmark and Windmill.
 Workload differences belong in `apps/overlays/<cluster>`; bases are not copied
 between clusters.
 
-Companion containers are limited to AIOMetadata's disposable Redis, Redlib's
-app-scoped `ctrld` DNS proxy and RoMM's disposable Valkey; each owns a distinct
-runtime service. Open WebUI's upstream chart uses its `copy-app-data` init
-container to seed persistent application data. Stateful or migration-owning
-single replicas use recreate updates, while stateless Cloudflared uses rolling
+Companion services include AIOMetadata's disposable Redis, Linkwarden's
+Meilisearch, Open WebUI's Valkey, Redlib's app-scoped `ctrld` DNS proxy and
+RoMM's disposable Valkey; each owns a distinct runtime service. Open WebUI's
+upstream chart uses its `copy-app-data` init container to seed persistent
+application data. Stateful or migration-owning single replicas use recreate updates, while stateless Cloudflared uses rolling
 updates.
 
 ## Networking & Ingress
@@ -178,15 +189,20 @@ non-empty operator-managed values.
 Crossplane is available on every cluster and manages app-scoped provider APIs.
 The B2 application-storage contract is available on every cluster, with no
 current workload claim. Pocket ID clients and groups, sending-only Resend keys
-and private Cloudflare and Control D DNS are active on `mbk`. The generic
+and private Cloudflare and Control D DNS are active on `mbk`. The
 `CloudflareWAFPolicy` contract is active on `syd` through Redlib's app-scoped
-claim, item and Secret.
+claim, item and Secret. Each cluster selects its integrations in
+`clusters/<cluster>/automation`; provider credentials are loaded only for those
+integrations. Private DNS discovery and its ExternalDNS controller run only on
+`mbk`.
 
 Grafana's local administrator credential and retained Pocket ID client
 credentials reconcile with the platform through separate Secrets. Its OIDC
 environment references remain optional at startup so local recovery access
 cannot block on Pocket ID or External Secrets. The retained client remains under
-Pocket ID automation.
+Pocket ID automation. Pocket ID automation updates existing clients; restore
+its database and the application items containing client credentials before
+recovering dependent workloads.
 
 Application administrators are created through each application's upstream
 setup flow. Generated login credentials remain in 1Password, but no in-cluster
@@ -218,9 +234,12 @@ request does not delete the external bucket or key.
 The non-reconciled fixture in `platform/automation/b2/fixtures` exercises the
 claim schema during `mise run check` without creating an external resource.
 
-App-scoped external resources default to orphan-on-delete. ExternalDNS is
-upsert-only. Deleting a Kubernetes declaration must not delete an external
-bucket, credential, identity client or unrelated WAF rule.
+Crossplane-managed external resources default to orphan-on-delete. ExternalDNS
+is upsert-only: removing a declaration retains the external bucket, API key,
+identity client, DNS record or WAF rule. The 1Password item reconciler
+automatically archives unreferenced items tagged only `Kubelab` once the apps
+have reconciled the current Git revision. Items tagged `Homelab` are never
+modified. Restore an archived application item before restoring its workload.
 
 Homepage runs on every cluster and uses the Services and Servers tab
 structure, service metadata and custom card styling, including the
@@ -250,6 +269,12 @@ Grafana, with Headlamp or `kubectl` for live Pod inspection; Beszel remains the
 system-level dashboard rather than a second Kubernetes log interface.
 
 ## Storage & Recovery
+
+Bifrost 2 performs irreversible database migrations. Before upgrading from
+Bifrost 1, stop the application and back up its retained data volume; reverting
+the image alone is not a rollback. Review the upstream
+[migration guide](https://docs.getbifrost.ai/migration-guides/v2.0.0) for external
+API clients and plugins.
 
 `kimbap` serves retained NFS storage at `10.4.0.3`. The `truenas-nfs` class
 creates retained directories beneath `/mnt/truenas-nvme/clusters/mbk`.

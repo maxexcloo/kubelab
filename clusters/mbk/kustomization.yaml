@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: flux-system
 resources:
   - apps.yaml
+  - automation.yaml
   - flux-system
   - platform.yaml
   - pocket-id-automation.yaml

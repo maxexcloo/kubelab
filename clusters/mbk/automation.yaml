@@ -3,6 +3,6 @@ kind: Kustomization
 metadata:
   name: automation
 spec:
-  path: ./platform/automation
+  path: ./clusters/mbk/automation
   dependsOn:
     - name: crossplane-runtime

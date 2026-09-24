@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: open-webui
         namespace: flux-system
-      version: 16.1.0
+      version: 16.6.0
   values:
     enableOpenaiApi: false
     fullnameOverride: open-webui
@@ -79,7 +79,7 @@ spec:
     image:
       pullPolicy: IfNotPresent
       repository: ghcr.io/open-webui/open-webui
-      tag: v0.11.1@sha256:6bb1fbe8ab0a3e0456067f493044ffb66a30a65a34be47f6a5862176a370dd16
+      tag: v0.11.4@sha256:9591b13f13843c7721c2b8eaf7382846c81b3ffe126526d1888d1fed50c6a33f
     livenessProbe:
       failureThreshold: 3
       httpGet:
@@ -180,7 +180,7 @@ spec:
         image:
           pullPolicy: IfNotPresent
           repository: docker.io/valkey/valkey
-          tag: 9.1.1@sha256:70739f85ad2ee01a726a965584a0f94895f01b0c60b3cc8b0aeef11eaa6888cf
+          tag: 9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
         podSecurityContext:
           fsGroup: 999
           fsGroupChangePolicy: OnRootMismatch

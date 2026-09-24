@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: victoria-metrics
         namespace: flux-system
-      version: 0.91.0
+      version: 0.93.0
   dependsOn:
     - name: local-path-provisioner
       namespace: storage
@@ -38,7 +38,7 @@ spec:
     grafana:
       automountServiceAccountToken: false
       enabled: true
-      plugins: [victoriametrics-logs-datasource@0.31.0]
+      plugins: [victoriametrics-logs-datasource@0.32.0]
       containerSecurityContext:
         readOnlyRootFilesystem: true
       datasources:

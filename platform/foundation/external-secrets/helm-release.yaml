@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: external-secrets
         namespace: flux-system
-      version: 2.9.0
+      version: 2.11.0
   install:
     crds: CreateReplace
   upgrade:

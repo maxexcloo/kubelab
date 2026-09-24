@@ -6,6 +6,12 @@ metadata:
 spec:
   interval: 30m
   releaseName: external-dns-private
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
   chart:
     spec:
       chart: external-dns
@@ -14,7 +20,7 @@ spec:
         kind: HelmRepository
         name: external-dns
         namespace: flux-system
-      version: 1.21.1
+      version: 1.22.0
   values:
     domainFilters: [excloo.com]
     labelFilter: gateway.excloo.dev/private-dns=true

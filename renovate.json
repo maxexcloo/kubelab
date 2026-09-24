@@ -2,7 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "dependencyDashboard": false,
   "extends": ["config:recommended", ":enablePreCommit"],
-
+  "customDatasources": {
+    "onepassword-cli": {
+      "defaultRegistryUrlTemplate": "https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N",
+      "transformTemplates": ["{\"releases\":[{\"version\":version}]}"]
+    }
+  },
   "customManagers": [
     {
       "currentValueTemplate": "main",
@@ -43,7 +48,9 @@
       "datasourceTemplate": "git-refs",
       "description": "Update Pinned CRD catalogue revision",
       "managerFilePatterns": ["/^scripts/check_manifests\\.sh$/"],
-      "matchStrings": ["CRDs-catalog/(?<currentDigest>[a-f0-9]{40})/"],
+      "matchStrings": [
+        "crd_catalog_revision=\"(?<currentDigest>[a-f0-9]{40})\""
+      ],
       "packageNameTemplate": "https://github.com/datreeio/CRDs-catalog"
     },
     {
@@ -70,12 +77,26 @@
       ]
     }
   ],
-
   "flux": {
     "managerFilePatterns": ["/(^|/).+\\.yaml$/"]
   },
-
   "kubernetes": {
     "managerFilePatterns": ["/(^|/).+\\.yaml$/"]
-  }
+  },
+  "packageRules": [
+    {
+      "description": "Order Anisette releases by year and month",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["dadoum/anisette-v3-server"],
+      "versioning": "regex:^(?<minor>\\d{2})-(?<major>\\d{4})$"
+    },
+    {
+      "description": "Read 1Password CLI releases from the official update feed",
+      "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)$",
+      "matchDepNames": ["1password-cli"],
+      "matchManagers": ["mise"],
+      "overrideDatasource": "custom.onepassword-cli",
+      "overridePackageName": "1password-cli"
+    }
+  ]
 }

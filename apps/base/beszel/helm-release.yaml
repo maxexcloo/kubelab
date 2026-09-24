@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-      version: 5.1.0
+      version: 5.2.1
   values:
     controllers:
       beszel:
@@ -31,7 +31,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/henrygd/beszel/beszel
-              tag: 0.18.8
+              tag: 0.20.0
             probes:
               liveness:
                 custom: true

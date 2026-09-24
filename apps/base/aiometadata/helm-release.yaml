@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-      version: 5.1.0
+      version: 5.2.1
   values:
     controllers:
       aiometadata:
@@ -24,7 +24,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/cedya77/aiometadata
-              tag: 2.15.0@sha256:3bbdcb47202c62eb66a664ef923c661e43f6a1eb0be7d2eebe26d029093fddd2
+              tag: 3.0.0@sha256:28c23a346baa363a05c7827a4e15644119cdbe5209cb032806621d3a1c056ab8
             env:
               DATABASE_URI: sqlite://addon/data/db.sqlite
               HOST_NAME: https://aiometadata.excloo.com
@@ -70,7 +70,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/library/redis
-              tag: 8.10.0@sha256:344e3945a0b431c8ff1eecd58c5573538126bd756f02fc7e218ddf1fc2546366
+              tag: 8.10.2@sha256:d5ac52db24d4e70566fe9944f22cf5bdc2bc739b05c0f426335161ea6c23f3b3
             args: [redis-server, --appendonly, "no", --save, ""]
             probes:
               liveness:

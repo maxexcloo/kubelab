@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-      version: 5.1.0
+      version: 5.2.1
   values:
     controllers:
       linkwarden:
@@ -24,7 +24,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/linkwarden/linkwarden
-              tag: v2.16.1@sha256:6902e62a6d68e1906045310dbf9b2df7f3d784a7b2e9d0f02c23666023791634
+              tag: v2.16.3@sha256:0664c28a039bda8ffa6663389e8536b2fc717219e329f85b83faca7efed3b144
             env:
               BASE_URL: https://links.excloo.com
               EMAIL_FROM: linkwarden@excloo.dev
@@ -60,7 +60,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/getmeili/meilisearch
-              tag: v1.53.1@sha256:8d6643d86d71fad6ad3cba92cde7ccfce9e4d6c384bda67598eb553571c32431
+              tag: v1.54.0@sha256:0bf32debcbfa8ba4e418679025f4935884972171513c92f0584689ff994a61df
             env:
               MEILI_HTTP_ADDR: 0.0.0.0:7700
               MEILI_MASTER_KEY:
