@@ -1,40 +1,20 @@
 #!/usr/bin/env python3
 
-"""Tests for the embedded 1Password item reconciler."""
+"""Tests for the 1Password item reconciler."""
 
 import contextlib
+import importlib.util
 import io
-import subprocess
-import types
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
-RECONCILER_MANIFEST = (
-    REPOSITORY_ROOT / "platform/secrets/onepassword-items/reconciler.yaml"
-)
-
-
-def load_reconciler():
-    result = subprocess.run(
-        [
-            "yq",
-            "-r",
-            'select(.kind == "ConfigMap" and .metadata.name == "onepassword-items") '
-            '| .data."reconcile.py"',
-            RECONCILER_MANIFEST,
-        ],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    module = types.ModuleType("onepassword_items")
-    exec(compile(result.stdout, RECONCILER_MANIFEST, "exec"), module.__dict__)
-    return module
-
-
-RECONCILER = load_reconciler()
+RECONCILER_PATH = REPOSITORY_ROOT / "platform/secrets/onepassword-items/reconcile.py"
+SPEC = importlib.util.spec_from_file_location("onepassword_items", RECONCILER_PATH)
+RECONCILER = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(RECONCILER)
 
 
 def item_configuration(**overrides):
@@ -52,6 +32,33 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_duplicate_titles_stop_before_any_item_changes(self):
+        summaries = [
+            {"id": "first", "title": "Application"},
+            {"id": "second", "title": "Application"},
+        ]
+        with patch.object(RECONCILER, "discover_items", return_value={}), patch.object(
+            RECONCILER, "connect", side_effect=[[{"id": "vault"}], summaries]
+        ) as connect:
+            with self.assertRaisesRegex(RuntimeError, "duplicate 1Password item title"):
+                RECONCILER.main()
+        self.assertEqual(connect.call_count, 2)
+
+    def test_route_changes_do_not_replace_existing_items(self):
+        current = {
+            "category": "SERVER", "id": "stable-id", "fields": [],
+            "sections": [], "tags": ["Kubelab"], "title": "Application",
+            "urls": [], "vault": {"id": "vault"},
+        }
+        with patch.object(
+            RECONCILER, "discover_items",
+            return_value={"Application": item_configuration(login=True, urls={"https://new.example.com"})},
+        ), patch.object(RECONCILER, "connect", side_effect=[
+            [{"id": "vault"}], [{"id": "stable-id", "title": "Application"}], current,
+        ]) as connect, contextlib.redirect_stdout(io.StringIO()):
+            RECONCILER.main()
+        self.assertEqual(connect.call_count, 3)
+
     def test_main_leaves_externally_owned_existing_item_unchanged(self):
         existing = {
             "category": "LOGIN",
@@ -81,50 +88,18 @@ class ReconcilerTests(unittest.TestCase):
             urls={"https://id.excloo.com"},
         )
         originals = {
-            "applications_ready": RECONCILER.applications_ready,
             "connect": RECONCILER.connect,
             "discover_items": RECONCILER.discover_items,
             "is_dry_run": RECONCILER.is_dry_run,
         }
         for name, value in originals.items():
             self.addCleanup(setattr, RECONCILER, name, value)
-        RECONCILER.applications_ready = lambda: True
         RECONCILER.connect = connect
         RECONCILER.discover_items = lambda: {"Excloo ID": desired}
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
         self.assertFalse(any(method in {"DELETE", "POST", "PUT"} for method, _, _ in calls))
-
-    def test_applications_ready_requires_current_ready_condition(self):
-        application = {
-            "metadata": {"generation": 3, "namespace": "flux-system"},
-            "spec": {
-                "sourceRef": {
-                    "kind": "GitRepository",
-                    "name": "flux-system",
-                }
-            },
-            "status": {
-                "conditions": [{"status": "True", "type": "Ready"}],
-                "lastAppliedRevision": "main@sha1:current",
-                "observedGeneration": 3,
-            },
-        }
-        source = {
-            "status": {"artifact": {"revision": "main@sha1:current"}},
-        }
-        original = RECONCILER.kubernetes_get
-        self.addCleanup(setattr, RECONCILER, "kubernetes_get", original)
-        RECONCILER.kubernetes_get = (
-            lambda path: source if "gitrepositories" in path else application
-        )
-        self.assertTrue(RECONCILER.applications_ready())
-        source["status"]["artifact"]["revision"] = "main@sha1:new"
-        self.assertFalse(RECONCILER.applications_ready())
-        source["status"]["artifact"]["revision"] = "main@sha1:current"
-        application["status"]["observedGeneration"] = 2
-        self.assertFalse(RECONCILER.applications_ready())
 
     def test_discovery_infers_owner_and_route_without_title_annotation(self):
         resources = [
@@ -244,7 +219,7 @@ class ReconcilerTests(unittest.TestCase):
         self.assertTrue(RECONCILER.externally_owned({"tags": ["Homelab"]}))
         self.assertFalse(RECONCILER.externally_owned({"tags": ["Kubelab"]}))
 
-    def test_main_skips_archival_until_applications_are_current(self):
+    def test_main_leaves_unreferenced_items_untouched(self):
         calls = []
 
         def connect(path, *, body=None, method="GET"):
@@ -258,14 +233,12 @@ class ReconcilerTests(unittest.TestCase):
             self.fail(f"unexpected Connect request: {method} {path}")
 
         originals = {
-            "applications_ready": RECONCILER.applications_ready,
             "connect": RECONCILER.connect,
             "discover_items": RECONCILER.discover_items,
             "is_dry_run": RECONCILER.is_dry_run,
         }
         for name, value in originals.items():
             self.addCleanup(setattr, RECONCILER, name, value)
-        RECONCILER.applications_ready = lambda: False
         RECONCILER.connect = connect
         RECONCILER.discover_items = lambda: {}
         RECONCILER.is_dry_run = lambda: False
@@ -273,9 +246,12 @@ class ReconcilerTests(unittest.TestCase):
             RECONCILER.main()
         self.assertFalse(any(method == "DELETE" for method, _, _ in calls))
 
-    def test_normalisation_preserves_values_and_orders_login_fields(self):
+    def test_normalisation_preserves_existing_item_and_credentials(self):
         current = {
             "category": "SERVER",
+            "id": "existing-id",
+            "tags": ["Kubelab", "Personal"],
+            "urls": [{"href": "https://old.example.com", "primary": True}],
             "fields": [
                 {"id": "password", "label": "password", "value": "edited"},
                 {"id": "token", "label": "token", "value": "preserved"},
@@ -299,9 +275,10 @@ class ReconcilerTests(unittest.TestCase):
         )
         result = RECONCILER.normalise_item(current, "Application", desired, "vault")
         fields = {field["label"]: field for field in result["fields"]}
-        self.assertEqual(result["category"], "LOGIN")
-        self.assertEqual(result["tags"], ["Kubelab"])
-        self.assertEqual(result["urls"], [{"href": "https://application.excloo.com", "primary": True}])
+        self.assertEqual(result["category"], "SERVER")
+        self.assertEqual(result["id"], "existing-id")
+        self.assertEqual(result["tags"], ["Kubelab", "Personal"])
+        self.assertEqual(result["urls"], [{"href": "https://old.example.com", "primary": True}])
         self.assertEqual(fields["password"]["value"], "edited")
         self.assertEqual(fields["token"]["value"], "preserved")
         self.assertEqual(fields["username"]["value"], "admin")
@@ -310,12 +287,12 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(
             [field["label"] for field in result["fields"]],
             [
-                "username",
                 "password",
-                "database-username",
-                "database-password",
-                "api-key",
                 "token",
+                "api-key",
+                "database-password",
+                "database-username",
+                "username",
             ],
         )
         repeated = RECONCILER.normalise_item(

@@ -36,52 +36,41 @@ Use standard Kubernetes configuration directly. Do not add a general application
 schema, generator, operator, or generated manifest. A narrow repository-defined
 resource is acceptable when it materially removes repeated security or lifecycle
 integration logic; document the contract in `README.md` and compose standard
-resources underneath. Use Kustomize only for composition and small patches; do
-not use `configMapGenerator` or `secretGenerator`. Keep chart values directly in
-the upstream Flux `HelmRelease` that consumes them.
+resources underneath. Use Kustomize for composition and small patches. Use
+`configMapGenerator` only to mount checked-in scripts or assets; do not use
+`secretGenerator`. Keep executable code in its own source file. Keep chart values
+directly in the upstream Flux `HelmRelease` that consumes them.
 
 Keep root Markdown limited to `AGENTS.md` and `README.md`. Keep maintained
 project documentation in `README.md`; do not add a `docs/` tree.
 
 ## Sorting Convention
 
-Sort unordered assignments in this order:
+Use conventional Kubernetes field and resource ordering. In other unordered
+mappings, sort single-line values before objects, alphabetically within each;
+keep list-item identifiers first. Preserve dependency, routing and procedural
+order. Keep project-owned YAML free of blank separator lines.
 
-1. Single-line values, alphabetically by key.
-2. Multi-line values, alphabetically by key.
-
-Underscore-prefixed names sort before other names. Apply this recursively to
-unordered project-owned YAML mappings, environment blocks, and template argument
-objects. A non-empty object is multi-line. A scalar-only array is a single-line
-value even when formatting wraps it; an array containing an object or array is
-multi-line. Do not use blank separator lines in project-owned YAML. Preserve
-blank lines in pinned upstream and generated manifests.
-
-List-item identifiers come first in `type`, `name`, `id` order. Prek hook items
-use `id`, then `name`; sort remaining fields normally.
-
-Sort Mise tools alphabetically and tasks alphabetically within each lifecycle
-section. Sort Renovate package rules by description and Prek hooks by `id`.
-GitHub workflows use top-level `name`, `on`, `permissions`, `concurrency`, then
-global configuration and `jobs`. Preserve dependency order within workflow
-steps.
-
-Sort unordered peer headings, lists, and table rows alphabetically. Preserve
-API, schema, interface, procedural, dependency, routing, priority,
-chronological, and other meaningful order. In particular, keep conventional
-Kubernetes field and resource ordering instead of alphabetising it.
+Sort Mise tools and tasks within lifecycle sections, Renovate rules by description,
+and Prek hooks by ID. Workflows start with `name`, `on`, `permissions`,
+`concurrency`, then configuration and jobs. Sort unordered prose lists and tables.
 
 ## Style
 
 - Prefer plain, direct Kubernetes manifests and upstream charts over abstractions
   and generic pipelines.
-- Keep comments local and specific; put operational explanations in `README.md`.
+- Add scheduled jobs or automatic deletion only when explicitly requested.
+- Use supported app configuration interfaces; leave unsupported settings manual.
+- Keep comments local and specific; document only material operational behaviour
+  in `README.md`.
 - Keep check orchestration single-layered so the same validator is not run both
   directly and through a nested task in one path.
 
 ## Verification
 
 - Run `mise run check` before handoff.
+- Render changed Helm charts and use small response fixtures for changed API
+  comparisons; avoid adding a general validation framework.
 - Run `mise run prek` after changing hooks or workflows.
 
 ## Git History

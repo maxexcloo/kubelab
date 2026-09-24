@@ -1,4 +1,5 @@
 *.kubeconfig
 .cache/
 .mise.local.toml
+__pycache__/
 kubeconfig

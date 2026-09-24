@@ -1,0 +1,322 @@
+import copy
+import json
+import os
+import ssl
+import urllib.error
+import urllib.request
+
+ANNOTATION_PREFIX = "onepassword.excloo.dev/"
+KUBERNETES_HOST = "https://kubernetes.default.svc"
+KUBERNETES_SERVICE_ACCOUNT = "/var/run/secrets/kubernetes.io/serviceaccount"
+SECRET_SUFFIXES = ("key", "password", "secret", "token")
+
+
+def request(url, *, token, body=None, context=None, method="GET"):
+    data = None if body is None else json.dumps(body).encode()
+    headers = {"Authorization": f"Bearer {token}"}
+    if data is not None:
+        headers["Content-Type"] = "application/json"
+    api_request = urllib.request.Request(
+        url,
+        data=data,
+        headers=headers,
+        method=method,
+    )
+    try:
+        with urllib.request.urlopen(api_request, context=context, timeout=30) as response:
+            content = response.read()
+            return None if not content else json.loads(content)
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode(errors="replace")
+        raise RuntimeError(f"{method} {url} returned {error.code}: {detail}") from error
+    except urllib.error.URLError as error:
+        raise RuntimeError(f"{method} {url} failed: {error.reason}") from error
+
+
+def kubernetes_request(path):
+    with open(
+        f"{KUBERNETES_SERVICE_ACCOUNT}/token",
+        encoding="utf-8",
+    ) as token_file:
+        token = token_file.read()
+    context = ssl.create_default_context(
+        cafile=f"{KUBERNETES_SERVICE_ACCOUNT}/ca.crt"
+    )
+    return request(
+        f"{KUBERNETES_HOST}{path}",
+        token=token,
+        context=context,
+    )
+
+
+def kubernetes_list(path):
+    return kubernetes_request(path).get("items", [])
+
+
+def connect(path, *, body=None, method="GET"):
+    host = os.environ["OP_CONNECT_HOST"].rstrip("/")
+    token = os.environ["OP_CONNECT_TOKEN"]
+    return request(
+        f"{host}/v1{path}",
+        token=token,
+        body=body,
+        method=method,
+    )
+
+
+def annotations(resource):
+    return resource.get("metadata", {}).get("annotations", {})
+
+
+def item_configuration(resource):
+    values = annotations(resource)
+    return {
+        "constants": json.loads(values.get(f"{ANNOTATION_PREFIX}constants", "{}")),
+        "defaults": json.loads(values.get(f"{ANNOTATION_PREFIX}defaults", "{}")),
+        "generate": set(
+            filter(None, values.get(f"{ANNOTATION_PREFIX}generate-fields", "").split(","))
+        ),
+    }
+
+
+def merge_configuration(item, resource):
+    configuration = item_configuration(resource)
+    item["constants"].update(configuration["constants"])
+    item["defaults"].update(configuration["defaults"])
+    item["generate"].update(configuration["generate"])
+
+
+def new_item():
+    return {
+        "constants": {},
+        "defaults": {},
+        "fields": set(),
+        "generate": set(),
+        "login": False,
+        "namespaces": set(),
+        "urls": set(),
+    }
+
+
+def slug(value):
+    return "".join(character for character in value.lower() if character.isalnum())
+
+
+def externally_owned(item):
+    return "Homelab" in item.get("tags", [])
+
+
+def is_dry_run():
+    return os.environ.get("DRY_RUN", "false") == "true"
+
+
+def discover_items():
+    desired = {}
+    resources = kubernetes_list(
+        "/apis/external-secrets.io/v1/externalsecrets"
+    ) + kubernetes_list("/apis/external-secrets.io/v1alpha1/pushsecrets")
+    for resource in resources:
+        namespace = resource["metadata"]["namespace"]
+        references = []
+        if resource["kind"] == "ExternalSecret":
+            store = resource.get("spec", {}).get("secretStoreRef", {})
+            if store.get("name") != "onepassword":
+                continue
+            references = (
+                [
+                    data.get("remoteRef", {})
+                    for data in resource.get("spec", {}).get("data", [])
+                ]
+                + [
+                    {"key": data.get("extract", {}).get("key")}
+                    for data in resource.get("spec", {}).get("dataFrom", [])
+                ]
+            )
+        else:
+            stores = resource.get("spec", {}).get("secretStoreRefs", [])
+            if not any(store.get("name") == "onepassword" for store in stores):
+                continue
+            references = [
+                data.get("match", {}).get("remoteRef", {})
+                for data in resource.get("spec", {}).get("data", [])
+            ]
+        titles = {
+            reference.get("key") or reference.get("remoteKey")
+            for reference in references
+        } - {None}
+        matching_titles = {
+            title
+            for title in titles
+            if slug(title) == slug(resource["metadata"]["name"])
+        }
+        owner_title = None
+        if len(matching_titles) == 1:
+            owner_title = matching_titles.pop()
+        elif len(titles) == 1:
+            owner_title = next(iter(titles))
+        for reference in references:
+            title = reference.get("key") or reference.get("remoteKey")
+            field = reference.get("property")
+            if not title:
+                continue
+            item = desired.setdefault(title, new_item())
+            if title == owner_title:
+                item["namespaces"].add(namespace)
+                merge_configuration(item, resource)
+            if field:
+                item["fields"].add(field)
+    routes = kubernetes_list("/apis/gateway.networking.k8s.io/v1/httproutes")
+    routes_by_namespace = {}
+    for route in routes:
+        namespace = route["metadata"]["namespace"]
+        route_annotations = annotations(route)
+        if route_annotations.get("gethomepage.dev/enabled") != "true":
+            continue
+        urls = set()
+        homepage_url = route_annotations.get("gethomepage.dev/href")
+        if homepage_url:
+            urls.add(homepage_url)
+        for hostname in route.get("spec", {}).get("hostnames", []):
+            urls.add(f"https://{hostname}")
+        title = route_annotations.get("gethomepage.dev/name")
+        if not title or not urls:
+            continue
+        item = desired.setdefault(title, new_item())
+        item["login"] = True
+        item["namespaces"].add(namespace)
+        item["urls"].update(urls)
+        namespace_routes = routes_by_namespace.setdefault(namespace, [])
+        namespace_routes.append((route["metadata"]["name"], urls))
+    for title, item in desired.items():
+        for namespace in item["namespaces"]:
+            namespace_routes = routes_by_namespace.get(namespace, [])
+            matching_routes = [
+                urls
+                for name, urls in namespace_routes
+                if slug(name)
+                in {slug(title), f"{slug(title)}private", f"{slug(title)}public"}
+            ]
+            if matching_routes:
+                for urls in matching_routes:
+                    item["urls"].update(urls)
+            elif len(namespace_routes) == 1:
+                item["urls"].update(namespace_routes[0][1])
+        item["login"] = bool(item["urls"])
+    return desired
+
+
+def field_label(field):
+    return field.get("label") or field.get("id")
+
+
+def generated_field(label, *, value=None):
+    native = label in {"password", "username"}
+    field = {
+        "id": label,
+        "label": label,
+        "type": "CONCEALED" if label.endswith(SECRET_SUFFIXES) else "STRING",
+    }
+    if native:
+        field["purpose"] = label.upper()
+    if value is None:
+        field["generate"] = True
+        field["recipe"] = {
+            "characterSets": ["DIGITS", "LETTERS", "SYMBOLS"],
+            "length": 48,
+        }
+    else:
+        field["value"] = value
+    return field
+
+
+def normalise_item(current, title, desired, vault_id):
+    current.setdefault("category", "LOGIN" if desired["login"] else "SERVER")
+    current.setdefault("tags", ["Kubelab"])
+    current.setdefault("title", title)
+    current.setdefault("vault", {"id": vault_id})
+    current.setdefault("urls", [
+        {"href": url} | ({"primary": True} if index == 0 else {})
+        for index, url in enumerate(sorted(desired["urls"]))
+    ])
+    fields = current.setdefault("fields", [])
+    by_label = {field_label(field): field for field in fields}
+    for label in sorted(
+        desired["fields"] | desired["generate"]
+        | set(desired["constants"]) | set(desired["defaults"])
+    ):
+        field = by_label.get(label)
+        if label in desired["constants"]:
+            replacement = generated_field(label, value=desired["constants"][label])
+        elif field and (field.get("value") or field.get("generate")):
+            continue
+        elif label in desired["defaults"]:
+            replacement = generated_field(label, value=desired["defaults"][label])
+        elif label in desired["generate"]:
+            replacement = generated_field(label)
+        else:
+            continue
+        if field is not None:
+            # Preserve IDs, sections and presentation of existing fields.
+            field.update({key: value for key, value in replacement.items()
+                          if key in {"value", "generate", "recipe"}})
+        else:
+            if current["category"] != "LOGIN":
+                replacement.pop("purpose", None)
+            fields.append(replacement)
+    return current
+
+
+def comparable(item):
+    ignored = {"createdAt", "lastEditedBy", "updatedAt", "version"}
+    result = {key: value for key, value in item.items() if key not in ignored}
+    result["urls"] = result.get("urls") or []
+    return result
+
+
+def main():
+    dry_run = is_dry_run()
+    vaults = connect("/vaults")
+    if len(vaults) != 1:
+        raise RuntimeError(f"Connect token must expose exactly one vault; found {len(vaults)}")
+    vault_id = vaults[0]["id"]
+    desired = discover_items()
+    summaries = connect(f"/vaults/{vault_id}/items")
+    active = {}
+    for summary in summaries:
+        title = summary["title"]
+        if title in active:
+            raise RuntimeError(f"duplicate 1Password item title: {title}")
+        active[title] = summary
+    changed = 0
+    for title, configuration in sorted(desired.items()):
+        summary = active.get(title)
+        current = (
+            connect(f"/vaults/{vault_id}/items/{summary['id']}")
+            if summary
+            else {"fields": [], "sections": []}
+        )
+        if externally_owned(current):
+            continue
+        wanted = normalise_item(copy.deepcopy(current), title, configuration, vault_id)
+        if summary:
+            if comparable(current) == comparable(wanted):
+                continue
+            action = "updated"
+            if not dry_run:
+                connect(
+                    f"/vaults/{vault_id}/items/{summary['id']}",
+                    body=wanted,
+                    method="PUT",
+                )
+        else:
+            action = "created"
+            if not dry_run:
+                connect(f"/vaults/{vault_id}/items", body=wanted, method="POST")
+        changed += 1
+        prefix = "would be " if dry_run else ""
+        print(f"{title} {prefix}{action}")
+    print(f"reconciled {len(desired)} items; changed {changed}")
+
+
+if __name__ == "__main__":
+    main()
