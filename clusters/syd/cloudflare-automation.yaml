@@ -3,6 +3,7 @@ kind: Kustomization
 metadata:
   name: cloudflare-automation
 spec:
+  deletionPolicy: Orphan
   path: ./apps/integrations/cloudflare
   dependsOn:
     - name: automation

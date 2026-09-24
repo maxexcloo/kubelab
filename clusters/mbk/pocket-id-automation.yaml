@@ -3,6 +3,7 @@ kind: Kustomization
 metadata:
   name: pocket-id-automation
 spec:
+  deletionPolicy: Orphan
   path: ./apps/integrations/pocket-id
   dependsOn:
     - name: automation

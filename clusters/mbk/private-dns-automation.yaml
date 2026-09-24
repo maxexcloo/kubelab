@@ -3,6 +3,7 @@ kind: Kustomization
 metadata:
   name: private-dns-automation
 spec:
+  deletionPolicy: Orphan
   path: ./apps/integrations/private-dns
   dependsOn:
     - name: automation
