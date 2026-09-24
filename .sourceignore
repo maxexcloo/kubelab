@@ -1,0 +1,2 @@
+# Homepage mounts this image through a generated ConfigMap.
+!/apps/base/homepage/background.jpg
