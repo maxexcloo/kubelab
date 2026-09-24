@@ -158,7 +158,7 @@ OpenSpeedTest and Redlib.
 
 Companion caches, search services and Redlib's `ctrld` DNS proxy belong to their
 apps. Stateful or migration-owning single replicas use recreate updates;
-stateless Cloudflared uses rolling updates.
+stateless Cloudflared and Redlib use rolling updates.
 
 Homepage discovers its local cluster and adds shared external services and
 bookmarks. Optional widget credentials come from the cluster's `Homepage` item;

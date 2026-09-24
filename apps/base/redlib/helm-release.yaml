@@ -18,6 +18,7 @@ spec:
   values:
     controllers:
       redlib:
+        strategy: RollingUpdate
         containers:
           ctrld:
             args:
@@ -93,6 +94,9 @@ spec:
               capabilities:
                 drop:
                   - ALL
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 0
     defaultPodOptions:
       automountServiceAccountToken: false
       dnsConfig:
