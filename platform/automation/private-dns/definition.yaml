@@ -1,0 +1,41 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: privatednsrecords.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: private-dns-record
+  group: automation.excloo.dev
+  names:
+    kind: PrivateDNSRecord
+    plural: privatednsrecords
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                controlDProfileID:
+                  default: 653224sydwhf
+                  maxLength: 128
+                  minLength: 1
+                  pattern: ^[A-Za-z0-9_-]+$
+                  type: string
+                hostname:
+                  format: hostname
+                  maxLength: 253
+                  minLength: 1
+                  type: string
+                target:
+                  default: private.mbk.excloo.dev
+                  format: hostname
+                  maxLength: 253
+                  minLength: 1
+                  type: string
+              required: [hostname]

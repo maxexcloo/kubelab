@@ -1,0 +1,11 @@
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: ClusterProviderConfig
+metadata:
+  name: resend
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      key: authorization
+      name: resend-credentials
+      namespace: crossplane-system

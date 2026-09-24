@@ -1,0 +1,33 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: resendkeys.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: resend-key
+  group: automation.excloo.dev
+  names:
+    kind: ResendKey
+    plural: resendkeys
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                cluster:
+                  maxLength: 63
+                  minLength: 1
+                  pattern: ^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$
+                  type: string
+                displayName:
+                  maxLength: 40
+                  minLength: 1
+                  type: string
+              required: [cluster, displayName]

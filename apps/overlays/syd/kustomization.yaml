@@ -6,7 +6,7 @@ resources:
   - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/redlib
-  - route.yaml
+  - openspeedtest-route.yaml
 patches:
   - path: homepage.yaml
     target:

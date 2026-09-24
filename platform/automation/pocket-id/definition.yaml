@@ -1,0 +1,89 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: pocketidclients.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: pocket-id-client
+  group: automation.excloo.dev
+  names:
+    kind: PocketIDClient
+    plural: pocketidclients
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                accessPolicy:
+                  default: all-services
+                  enum: [all-services, books]
+                  type: string
+                client:
+                  type: object
+                  properties:
+                    accessTokenDurationMinutes:
+                      default: 60
+                      maximum: 525600
+                      minimum: 1
+                      type: integer
+                    callbackURLs:
+                      minItems: 1
+                      type: array
+                      items:
+                        format: uri
+                        type: string
+                    description:
+                      default: ""
+                      maxLength: 150
+                      type: string
+                    id:
+                      maxLength: 128
+                      minLength: 2
+                      pattern: ^[A-Za-z0-9._~-]+$
+                      type: string
+                    isGroupRestricted:
+                      default: true
+                      type: boolean
+                    isPublic:
+                      default: false
+                      type: boolean
+                    launchURL:
+                      format: uri
+                      minLength: 1
+                      type: string
+                    logoutCallbackURLs:
+                      default: []
+                      type: array
+                      items:
+                        format: uri
+                        type: string
+                    name:
+                      maxLength: 50
+                      minLength: 1
+                      type: string
+                    pkceEnabled:
+                      default: false
+                      type: boolean
+                    refreshTokenDurationMinutes:
+                      default: 43200
+                      maximum: 525600
+                      minimum: 1
+                      type: integer
+                    requiresPushedAuthorizationRequests:
+                      default: false
+                      type: boolean
+                    requiresReauthentication:
+                      default: false
+                      type: boolean
+                    skipConsent:
+                      default: false
+                      type: boolean
+                  required: [callbackURLs, id, launchURL, name]
+              required: [client]

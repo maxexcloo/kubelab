@@ -53,7 +53,10 @@ mise run check
 
 Keep Helm releases and supporting resources in `apps/base/<application>` and
 include them through `apps/overlays/<cluster>`. Keep differences in overlays;
-do not copy application bases. Select each cluster's external automation in
+do not copy application bases. Larger apps separate secrets and storage into
+`external-secrets.yaml` and `storage.yaml`. Automation packages separate their API
+schema (`definition.yaml`) from implementation (`composition.yaml`).
+Select each cluster's external automation in
 `clusters/<cluster>/automation` and add claims only where needed.
 
 ### Bootstrap

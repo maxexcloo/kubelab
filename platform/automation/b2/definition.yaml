@@ -1,0 +1,53 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: b2objectstorages.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: b2-object-storage
+  group: automation.excloo.dev
+  names:
+    kind: B2ObjectStorage
+    plural: b2objectstorages
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                displayName:
+                  maxLength: 128
+                  minLength: 1
+                  type: string
+                keyName:
+                  maxLength: 100
+                  minLength: 1
+                  pattern: ^[A-Za-z0-9-]+$
+                  type: string
+                secretRef:
+                  type: object
+                  properties:
+                    bucketKey:
+                      default: bucket
+                      maxLength: 253
+                      minLength: 1
+                      pattern: ^[-._A-Za-z0-9]+$
+                      type: string
+                    name:
+                      maxLength: 253
+                      minLength: 1
+                      pattern: ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$
+                      type: string
+                  required: [name]
+              required: [displayName, keyName, secretRef]
+            status:
+              type: object
+              properties:
+                apiUrl:
+                  type: string

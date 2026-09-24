@@ -26,7 +26,7 @@ resources:
   - ../../base/windmill
   - bifrost-route.yaml
   - immich-route.yaml
-  - route.yaml
+  - openspeedtest-route.yaml
   - windmill-route.yaml
 patches:
   - patch: |-

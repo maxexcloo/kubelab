@@ -42,7 +42,7 @@ class PrivateDNSComparisonTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         resource = composition_resource(
-            "platform/automation/private-dns/private-dns-record.yaml", "control-d-rule"
+            "platform/automation/private-dns/composition.yaml", "control-d-rule"
         )
         # The provider resolves placeholders in the expression, not in payload.
         cls.expression = resource["spec"]["forProvider"]["expectedResponseCheck"]["logic"]
@@ -106,7 +106,7 @@ class B2ComparisonTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.resource = composition_resource(
-            "platform/automation/b2/b2-object-storage.yaml", "application-key", base=False
+            "platform/automation/b2/composition.yaml", "application-key", base=False
         )
         comparison = next(
             patch
@@ -130,7 +130,7 @@ class B2ComparisonTests(unittest.TestCase):
 
     def test_authorisation_publishes_only_the_public_api_url(self):
         resource = composition_resource(
-            "platform/automation/b2/b2-object-storage.yaml", "authorisation", base=False
+            "platform/automation/b2/composition.yaml", "authorisation", base=False
         )
         patch = next(
             patch for patch in resource["patches"]

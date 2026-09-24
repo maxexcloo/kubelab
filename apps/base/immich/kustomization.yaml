@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - database-extension.yaml
   - database.yaml
+  - external-secrets.yaml
   - helm-release.yaml
   - resources.yaml
   - source.yaml
+  - storage.yaml
