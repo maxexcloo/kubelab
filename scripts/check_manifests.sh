@@ -60,13 +60,11 @@ kubeconform_flags=(
   -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/${crd_catalog_revision}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
 )
 
-{
-  while IFS= read -r cluster_directory; do
-    printf '%s\n' "${cluster_directory}"
-    kustomize build "${cluster_directory}" |
-      yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization") | .spec.path' -
-  done < <(find clusters -mindepth 1 -maxdepth 1 -type d | sort)
-} | sort -u >"${target_file}"
+while IFS= read -r cluster_directory; do
+  printf '%s\n' "${cluster_directory}"
+  kustomize build "${cluster_directory}" |
+    yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization") | .spec.path' -
+done < <(find clusters -mindepth 1 -maxdepth 1 -type d | sort) | sort -u >"${target_file}"
 
 manifest_index=0
 while IFS= read -r target; do

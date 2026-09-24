@@ -11,6 +11,7 @@ KUBERNETES_HOST = "https://kubernetes.default.svc"
 KUBERNETES_SERVICE_ACCOUNT = "/var/run/secrets/kubernetes.io/serviceaccount"
 SECRET_SUFFIXES = ("key", "password", "secret", "token")
 
+
 def request(url, *, token, body=None, context=None, method="GET"):
     data = None if body is None else json.dumps(body).encode()
     headers = {"Authorization": f"Bearer {token}"}
@@ -32,6 +33,7 @@ def request(url, *, token, body=None, context=None, method="GET"):
     except urllib.error.URLError as error:
         raise RuntimeError(f"{method} {url} failed: {error.reason}") from error
 
+
 def kubernetes_request(path):
     with open(
         f"{KUBERNETES_SERVICE_ACCOUNT}/token",
@@ -47,8 +49,10 @@ def kubernetes_request(path):
         context=context,
     )
 
+
 def kubernetes_list(path):
     return kubernetes_request(path).get("items", [])
+
 
 def kubernetes_get(path):
     return kubernetes_request(path)
@@ -64,8 +68,10 @@ def connect(path, *, body=None, method="GET"):
         method=method,
     )
 
+
 def annotations(resource):
     return resource.get("metadata", {}).get("annotations", {})
+
 
 def item_configuration(resource):
     values = annotations(resource)
@@ -77,11 +83,13 @@ def item_configuration(resource):
         ),
     }
 
+
 def merge_configuration(item, resource):
     configuration = item_configuration(resource)
     item["constants"].update(configuration["constants"])
     item["defaults"].update(configuration["defaults"])
     item["generate"].update(configuration["generate"])
+
 
 def new_item():
     return {
@@ -94,8 +102,10 @@ def new_item():
         "urls": set(),
     }
 
+
 def slug(value):
     return "".join(character for character in value.lower() if character.isalnum())
+
 
 def applications_ready():
     resource = kubernetes_get(
@@ -126,8 +136,10 @@ def applications_ready():
 def externally_owned(item):
     return "Homelab" in item.get("tags", [])
 
+
 def is_dry_run():
     return os.environ.get("DRY_RUN", "false") == "true"
+
 
 def discover_items():
     desired = {}
@@ -223,8 +235,10 @@ def discover_items():
         item["login"] = bool(item["urls"])
     return desired
 
+
 def field_label(field):
     return field.get("label") or field.get("id")
+
 
 def generated_field(label, *, value=None):
     native = label in {"password", "username"}
@@ -245,20 +259,26 @@ def generated_field(label, *, value=None):
         field["value"] = value
     return field
 
+
 def normalise_item(current, title, desired, vault_id):
     current["category"] = "LOGIN" if desired["login"] else "SERVER"
     current.setdefault("tags", ["Kubelab"])
     current.setdefault("title", title)
     current.setdefault("vault", {"id": vault_id})
-    current.setdefault("urls", [
-        {"href": url} | ({"primary": True} if index == 0 else {})
-        for index, url in enumerate(sorted(desired["urls"]))
-    ])
+    current.setdefault(
+        "urls",
+        [
+            {"href": url} | ({"primary": True} if index == 0 else {})
+            for index, url in enumerate(sorted(desired["urls"]))
+        ],
+    )
     fields = current.setdefault("fields", [])
     by_label = {field_label(field): field for field in fields}
     for label in sorted(
-        desired["fields"] | desired["generate"]
-        | set(desired["constants"]) | set(desired["defaults"])
+        desired["fields"]
+        | desired["generate"]
+        | set(desired["constants"])
+        | set(desired["defaults"])
     ):
         field = by_label.get(label)
         if label in desired["constants"]:
@@ -273,8 +293,13 @@ def normalise_item(current, title, desired, vault_id):
             continue
         if field is not None:
             # Preserve IDs, sections and presentation of existing fields.
-            field.update({key: value for key, value in replacement.items()
-                          if key in {"value", "generate", "recipe"}})
+            field.update(
+                {
+                    key: value
+                    for key, value in replacement.items()
+                    if key in {"value", "generate", "recipe"}
+                }
+            )
         else:
             if current["category"] != "LOGIN":
                 replacement.pop("purpose", None)
@@ -288,11 +313,13 @@ def normalise_item(current, title, desired, vault_id):
                 field.pop("purpose", None)
     return current
 
+
 def comparable(item):
     ignored = {"createdAt", "lastEditedBy", "updatedAt", "version"}
     result = {key: value for key, value in item.items() if key not in ignored}
     result["urls"] = result.get("urls") or []
     return result
+
 
 def creation_payload(item, vault_id):
     return {

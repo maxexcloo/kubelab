@@ -13,20 +13,26 @@ ROOT = Path(__file__).resolve().parent.parent
 def composition_resource(path, name, *, base=True):
     result = subprocess.run(
         [
-            "yq", "-o=json",
+            "yq",
+            "-o=json",
             'select(.kind == "Composition") | .spec.pipeline[0].input.resources[] '
-            f'| select(.name == "{name}")' + (' | .base' if base else ''),
+            f'| select(.name == "{name}")' + (" | .base" if base else ""),
             ROOT / path,
         ],
-        check=True, capture_output=True, text=True,
+        check=True,
+        capture_output=True,
+        text=True,
     )
     return json.loads(result.stdout)
 
 
 def evaluate(expression, data):
     result = subprocess.run(
-        ["jq", "-c", expression], input=json.dumps(data),
-        check=True, capture_output=True, text=True,
+        ["jq", "-c", expression],
+        input=json.dumps(data),
+        check=True,
+        capture_output=True,
+        text=True,
     )
     return json.loads(result.stdout)
 
@@ -45,15 +51,31 @@ class PrivateDNSComparisonTests(unittest.TestCase):
 
     def setUp(self):
         self.data = {
-            "payload": {"body": {
-                "hostname": "reader.example.com",
-                "ipv4": "{{ private-dns-target-ipv4:crossplane-system:address }}",
-                "ipv6": "{{ private-dns-target-ipv6:crossplane-system:address }}",
-            }},
-            "response": {"statusCode": 200, "body": {"body": {"rules": [{
-                "PK": "reader.example.com",
-                "action": {"do": 2, "status": 1, "via": "100.64.0.1", "via_v6": "fd00::1"},
-            }]}}},
+            "payload": {
+                "body": {
+                    "hostname": "reader.example.com",
+                    "ipv4": "{{ private-dns-target-ipv4:crossplane-system:address }}",
+                    "ipv6": "{{ private-dns-target-ipv6:crossplane-system:address }}",
+                },
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {
+                    "body": {
+                        "rules": [
+                            {
+                                "PK": "reader.example.com",
+                                "action": {
+                                    "do": 2,
+                                    "status": 1,
+                                    "via": "100.64.0.1",
+                                    "via_v6": "fd00::1",
+                                },
+                            },
+                        ],
+                    },
+                },
+            },
         }
 
     def test_matching_rule_is_in_sync(self):
@@ -86,7 +108,8 @@ class B2ComparisonTests(unittest.TestCase):
             "platform/automation/b2/b2-object-storage.yaml", "application-key", base=False
         )
         comparison = next(
-            patch for patch in cls.resource["patches"]
+            patch
+            for patch in cls.resource["patches"]
             if patch["toFieldPath"] == "spec.forProvider.expectedResponseCheck.logic"
         )
         cls.expression = comparison["transforms"][0]["string"]["fmt"] % "beszel"
@@ -94,8 +117,10 @@ class B2ComparisonTests(unittest.TestCase):
 
     def setUp(self):
         self.key = {
-            "applicationKeyId": "key-id", "keyName": "kubelab-mbk-beszel",
-            "bucketIds": ["bucket-id"], "capabilities": ["readFiles", "writeFiles"],
+            "applicationKeyId": "key-id",
+            "keyName": "kubelab-mbk-beszel",
+            "bucketIds": ["bucket-id"],
+            "capabilities": ["readFiles", "writeFiles"],
         }
         self.data = {
             "payload": {"body": dict(self.key, bucketIds=["{{ b2-bucket:beszel:bucket-id }}"])},

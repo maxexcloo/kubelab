@@ -1,8 +1,19 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - background.yaml
   - config-map.yaml
   - helm-release.yaml
   - rbac.yaml
   - resources.yaml
+configMapGenerator:
+  - name: homepage-background
+    namespace: homepage
+    files:
+      - background.jpg
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        homepage.excloo.dev/original-sha256: d80bc91f85fcec93c826b3ae4122aba5f7265f7f22adfd8f41e42b9f3c2777e1
+        homepage.excloo.dev/rendered-sha256: b2a02ba177a8ad1a0de2b9405b7a44199f875135f01bfe5a3b4bc14c987ab982
+      labels:
+        app.kubernetes.io/name: homepage
