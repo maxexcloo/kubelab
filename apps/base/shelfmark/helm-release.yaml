@@ -116,13 +116,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      shelfmark:
-        controller: shelfmark
-        ports:
-          http:
-            port: 3000
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -141,3 +134,10 @@ spec:
         parentRefs:
           - name: public-tunnel
             namespace: networking
+    service:
+      shelfmark:
+        controller: shelfmark
+        ports:
+          http:
+            port: 3000
+            protocol: HTTP

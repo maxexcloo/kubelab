@@ -81,15 +81,15 @@ spec:
               tag: v1.54.0@sha256:0bf32debcbfa8ba4e418679025f4935884972171513c92f0584689ff994a61df
             env:
               MEILI_HTTP_ADDR: 0.0.0.0:7700
+              MEILI_NO_ANALYTICS: "true"
+              MEILI_SERVER_PROVIDER: docker
+              MEILI_UPGRADE_DB: "true"
+              TZ: Australia/Sydney
               MEILI_MASTER_KEY:
                 valueFrom:
                   secretKeyRef:
                     key: MEILI_MASTER_KEY
                     name: linkwarden
-              MEILI_NO_ANALYTICS: "true"
-              MEILI_SERVER_PROVIDER: docker
-              MEILI_UPGRADE_DB: "true"
-              TZ: Australia/Sydney
             probes:
               readiness:
                 custom: true
@@ -154,19 +154,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      linkwarden:
-        controller: linkwarden
-        ports:
-          http:
-            port: 3000
-            protocol: HTTP
-      meilisearch:
-        controller: meilisearch
-        ports:
-          http:
-            port: 7700
-            protocol: HTTP
     route:
       private:
         hostnames:
@@ -206,3 +193,16 @@ spec:
           - backendRefs:
               - name: linkwarden
                 port: 3000
+    service:
+      linkwarden:
+        controller: linkwarden
+        ports:
+          http:
+            port: 3000
+            protocol: HTTP
+      meilisearch:
+        controller: meilisearch
+        ports:
+          http:
+            port: 7700
+            protocol: HTTP

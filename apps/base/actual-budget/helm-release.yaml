@@ -99,13 +99,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      actual-budget:
-        controller: actual-budget
-        ports:
-          http:
-            port: 5006
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -122,3 +115,10 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+    service:
+      actual-budget:
+        controller: actual-budget
+        ports:
+          http:
+            port: 5006
+            protocol: HTTP

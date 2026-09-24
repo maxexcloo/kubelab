@@ -28,8 +28,8 @@ Kubernetes is unavailable.
 
 ## File Organisation
 
-- `clusters/`: Flux entry points for each cluster.
 - `apps/`: workload bases and cluster overlays.
+- `clusters/`: Flux entry points for each cluster.
 - `platform/`: cluster controllers and shared configuration.
 
 Use standard Kubernetes configuration directly. Do not add a general application

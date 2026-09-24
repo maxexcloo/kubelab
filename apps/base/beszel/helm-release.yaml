@@ -103,13 +103,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      beszel:
-        controller: beszel
-        ports:
-          http:
-            port: 8090
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -134,3 +127,10 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+    service:
+      beszel:
+        controller: beszel
+        ports:
+          http:
+            port: 8090
+            protocol: HTTP

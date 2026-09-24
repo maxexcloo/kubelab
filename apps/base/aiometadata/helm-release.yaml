@@ -125,13 +125,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      aiometadata:
-        controller: aiometadata
-        ports:
-          http:
-            port: 3232
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -148,3 +141,10 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+    service:
+      aiometadata:
+        controller: aiometadata
+        ports:
+          http:
+            port: 3232
+            protocol: HTTP

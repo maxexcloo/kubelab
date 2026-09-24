@@ -180,13 +180,6 @@ spec:
           romm:
             valkey:
               - path: /data
-    service:
-      romm:
-        controller: romm
-        ports:
-          http:
-            port: 8080
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -209,3 +202,10 @@ spec:
         parentRefs:
           - name: public-tunnel
             namespace: networking
+    service:
+      romm:
+        controller: romm
+        ports:
+          http:
+            port: 8080
+            protocol: HTTP

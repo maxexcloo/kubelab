@@ -141,17 +141,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      homepage:
-        controller: homepage
-        ports:
-          http:
-            port: 3000
-            protocol: HTTP
-    serviceAccount:
-      homepage:
-        automountServiceAccountToken: true
-        forceRename: homepage
     route:
       main:
         annotations:
@@ -170,3 +159,14 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+    service:
+      homepage:
+        controller: homepage
+        ports:
+          http:
+            port: 3000
+            protocol: HTTP
+    serviceAccount:
+      homepage:
+        automountServiceAccountToken: true
+        forceRename: homepage

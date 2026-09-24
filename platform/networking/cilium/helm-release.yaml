@@ -15,16 +15,32 @@ spec:
         namespace: flux-system
       version: 1.20.2
   values:
-    ipam:
-      mode: kubernetes
     MTU: 1500
     kubeProxyReplacement: false
+    bpf:
+      hostLegacyRouting: true
     cgroup:
       autoMount:
         enabled: false
       hostRoot: /sys/fs/cgroup
-    bpf:
-      hostLegacyRouting: true
+    hubble:
+      relay:
+        enabled: true
+      ui:
+        enabled: true
+      metrics:
+        enabled:
+          - dns
+          - drop
+          - flow
+          - httpV2
+          - icmp
+          - port-distribution
+          - tcp
+    ipam:
+      mode: kubernetes
+    operator:
+      replicas: 1
     securityContext:
       capabilities:
         ciliumAgent:
@@ -43,19 +59,3 @@ spec:
           - NET_ADMIN
           - SYS_ADMIN
           - SYS_RESOURCE
-    operator:
-      replicas: 1
-    hubble:
-      relay:
-        enabled: true
-      ui:
-        enabled: true
-      metrics:
-        enabled:
-          - dns
-          - drop
-          - flow
-          - httpV2
-          - icmp
-          - port-distribution
-          - tcp

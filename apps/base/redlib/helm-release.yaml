@@ -122,13 +122,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      redlib:
-        controller: redlib
-        ports:
-          http:
-            port: 8080
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -148,3 +141,10 @@ spec:
         parentRefs:
           - name: public-tunnel
             namespace: networking
+    service:
+      redlib:
+        controller: redlib
+        ports:
+          http:
+            port: 8080
+            protocol: HTTP

@@ -85,13 +85,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      aiostreams:
-        controller: aiostreams
-        ports:
-          http:
-            port: 30375
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -108,3 +101,10 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+    service:
+      aiostreams:
+        controller: aiostreams
+        ports:
+          http:
+            port: 30375
+            protocol: HTTP

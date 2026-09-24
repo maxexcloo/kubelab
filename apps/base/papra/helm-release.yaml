@@ -120,13 +120,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      papra:
-        controller: papra
-        ports:
-          http:
-            port: 21221
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -143,3 +136,10 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+    service:
+      papra:
+        controller: papra
+        ports:
+          http:
+            port: 21221
+            protocol: HTTP

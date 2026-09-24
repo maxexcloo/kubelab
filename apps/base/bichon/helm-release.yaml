@@ -96,13 +96,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      bichon:
-        controller: bichon
-        ports:
-          http:
-            port: 15630
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -119,3 +112,10 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+    service:
+      bichon:
+        controller: bichon
+        ports:
+          http:
+            port: 15630
+            protocol: HTTP

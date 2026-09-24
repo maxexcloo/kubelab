@@ -102,13 +102,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      cliproxyapi:
-        controller: cliproxyapi
-        ports:
-          http:
-            port: 8317
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -125,3 +118,10 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+    service:
+      cliproxyapi:
+        controller: cliproxyapi
+        ports:
+          http:
+            port: 8317
+            protocol: HTTP

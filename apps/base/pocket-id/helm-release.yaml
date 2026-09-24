@@ -110,13 +110,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      pocket-id:
-        controller: pocket-id
-        ports:
-          http:
-            port: 1411
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -135,3 +128,10 @@ spec:
         parentRefs:
           - name: public-tunnel
             namespace: networking
+    service:
+      pocket-id:
+        controller: pocket-id
+        ports:
+          http:
+            port: 1411
+            protocol: HTTP

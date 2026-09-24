@@ -82,13 +82,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-    service:
-      anisette:
-        controller: anisette
-        ports:
-          http:
-            port: 6969
-            protocol: HTTP
     route:
       main:
         annotations:
@@ -109,3 +102,10 @@ spec:
           - name: public-direct
             namespace: networking
             sectionName: websecuredirect
+    service:
+      anisette:
+        controller: anisette
+        ports:
+          http:
+            port: 6969
+            protocol: HTTP
