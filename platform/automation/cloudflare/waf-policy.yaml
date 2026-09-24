@@ -52,6 +52,19 @@ spec:
                   minLength: 1
                   type: string
               required: [rule, zoneName]
+            status:
+              type: object
+              properties:
+                zone:
+                  type: object
+                  properties:
+                    result:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
@@ -95,15 +108,6 @@ spec:
                   payload:
                     baseUrl: https://api.cloudflare.com/client/v4/zones
                     body: "{}"
-                  secretInjectionConfigs:
-                    - keyMappings:
-                        - missingFieldStrategy: preserve
-                          responseJQ: .body.result[0].id
-                          secretKey: zone-id
-                      secretRef:
-                        name: cloudflare-zone
-                        namespace: default
-                      setOwnerReference: true
                 providerConfigRef:
                   kind: ClusterProviderConfig
                   name: cloudflare-waf
@@ -119,17 +123,14 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: metadata.namespace
-              - type: FromCompositeFieldPath
-                fromFieldPath: metadata.name
-                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.response.body
+                toFieldPath: status.zone
                 transforms:
-                  - type: string
-                    string:
-                      fmt: "%s-cloudflare-zone"
-                      type: Format
-              - type: FromCompositeFieldPath
-                fromFieldPath: metadata.namespace
-                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
+                  - type: convert
+                    convert:
+                      format: json
+                      toType: object
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.zoneName
                 toFieldPath: spec.forProvider.payload.body
@@ -197,8 +198,17 @@ spec:
                       method: PUT
                       url: .payload.baseUrl
                   payload:
-                    baseUrl: https://api.cloudflare.com/client/v4/zones/{{ redlib-cloudflare-zone:default:zone-id }}/rulesets/phases/http_request_firewall_custom/entrypoint
+                    baseUrl: https://api.cloudflare.com/client/v4/zones/pending/rulesets/phases/http_request_firewall_custom/entrypoint
                     body: '{"action":"block","description":"placeholder","enabled":true,"expression":"false","ref":"placeholder"}'
+                  secretInjectionConfigs:
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.result.rules[]? | select(.ref == "pending") | .expression | capture("eq \"(?<token>[^\"]+)\"").token
+                          secretKey: monitoring-token
+                      secretRef:
+                        name: redlib
+                        namespace: redlib
+                      setOwnerReference: false
                 providerConfigRef:
                   kind: ClusterProviderConfig
                   name: cloudflare-waf
@@ -214,15 +224,28 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: metadata.namespace
-              - type: CombineFromComposite
-                combine:
-                  strategy: string
-                  string:
-                    fmt: https://api.cloudflare.com/client/v4/zones/{{ %s-cloudflare-zone:%s:zone-id }}/rulesets/phases/http_request_firewall_custom/entrypoint
-                  variables:
-                    - fromFieldPath: metadata.name
-                    - fromFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.rule.ref
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].keyMappings[0].responseJQ
+                transforms:
+                  - type: string
+                    string:
+                      fmt: .body.result.rules[]? | select(.ref == "%s") | .expression | capture("eq \"(?<token>[^\"]+)\"").token
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: status.zone.result[0].id
                 toFieldPath: spec.forProvider.payload.baseUrl
+                transforms:
+                  - type: string
+                    string:
+                      fmt: https://api.cloudflare.com/client/v4/zones/%s/rulesets/phases/http_request_firewall_custom/entrypoint
+                      type: Format
               - type: CombineFromComposite
                 combine:
                   strategy: string
