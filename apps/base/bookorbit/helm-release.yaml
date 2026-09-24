@@ -36,6 +36,26 @@ spec:
             envFrom:
               - secretRef:
                   name: bookorbit
+            probes:
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  httpGet:
+                    path: /api/v1/health
+                    port: 3000
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  httpGet:
+                    path: /api/v1/health
+                    port: 3000
             resources:
               limits:
                 memory: 1Gi

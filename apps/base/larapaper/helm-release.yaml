@@ -35,6 +35,24 @@ spec:
               pullPolicy: IfNotPresent
               repository: ghcr.io/usetrmnl/larapaper
               tag: 0.42.0@sha256:2e0bd58aff9feaa082fc5e19aab6b91144ff2dab91939c8c610d72e2264d5a9e
+            probes:
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  tcpSocket:
+                    port: 8080
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  tcpSocket:
+                    port: 8080
             resources:
               limits:
                 memory: 512Mi

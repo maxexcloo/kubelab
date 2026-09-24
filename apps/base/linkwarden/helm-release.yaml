@@ -42,6 +42,24 @@ spec:
             envFrom:
               - secretRef:
                   name: linkwarden
+            probes:
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  tcpSocket:
+                    port: 3000
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  tcpSocket:
+                    port: 3000
             resources:
               limits:
                 memory: 2Gi
@@ -72,6 +90,26 @@ spec:
               MEILI_SERVER_PROVIDER: docker
               MEILI_UPGRADE_DB: "true"
               TZ: Australia/Sydney
+            probes:
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  httpGet:
+                    path: /health
+                    port: 7700
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  httpGet:
+                    path: /health
+                    port: 7700
             resources:
               limits:
                 memory: 512Mi

@@ -94,13 +94,13 @@ Readiness gates follow actual prerequisites:
 Monitoring, platform certificates and dashboards report their own health without
 blocking unrelated upgrades. Identity, DNS and WAF claims retry until their own
 namespace, credentials and API are available. The `apps` stage retains aggregate
-workload health for status and safe 1Password archival. Failed stages retry after
-30 seconds; dependency checks retry after five seconds.
+workload health for status. Failed stages retry after 30 seconds; dependency
+checks retry after five seconds.
 
 Shared policy lives in `platform/bootstrap/flux-reconciliation`. Flux is the
 routine deployer; CI only validates. Checks cover manifest schemas, service
-metadata and secret reconciliation. Render Helm charts and validate external
-API behaviour separately when changing those integrations.
+metadata, secret reconciliation and focused external-API fixtures. Render changed
+Helm charts separately; schema checks do not validate their generated workloads.
 
 ### Resources
 
@@ -159,6 +159,7 @@ Beszel agents run on every node, retain their identity in host storage and
 register by outbound WebSocket. The `mbk` agent uses the local hub Service;
 `syd` uses its private HTTPS route. Use VictoriaMetrics for Pod metrics,
 VictoriaLogs/Grafana for logs, and Headlamp or `kubectl` for live inspection.
+Workload/Flux notification delivery is not configured.
 
 ## Networking & Ingress
 
@@ -194,19 +195,27 @@ for self-checks.
 
 1Password is the root of trust. Each app uses a display-named item in its cluster
 vault. Only declared internal credentials are generated; non-empty operator
-values are preserved. Credentials, kubeconfigs and rendered Secrets stay out of
-Git. Application administrators use upstream setup flows; no job provisions
-accounts through application APIs.
+values are preserved except fields explicitly declared as constants. Existing item
+IDs, categories, tags, URLs and field order are preserved; duplicate titles stop
+reconciliation. Credentials, kubeconfigs and rendered Secrets stay out of Git.
+Application administrators use upstream setup flows; no job provisions accounts
+through application APIs.
 
 Crossplane runs on both clusters. `mbk` automates Pocket ID clients and groups,
 sending-only Resend keys, and private Cloudflare/Control D DNS. `syd` automates
-Redlib's `CloudflareWAFPolicy`. B2 is available on both, with no current app claim.
-Only selected integrations load provider credentials.
+Redlib's `CloudflareWAFPolicy`. B2 is available on both and provisions Beszel's
+bucket and key on `mbk`. Only selected integrations load provider credentials.
 
 `homelab` owns the unqualified `Backblaze B2`, `Cloudflare WAF`, `Control D` and
 `Resend` vault items tagged `Homelab`. External Secrets loads them into
 `crossplane-system`. Generated app credentials are published only to their app
 item and namespace.
+
+The only repository-owned CronJob is `onepassword-items` (hourly at minute 17).
+Its Python source lives beside the manifest in `platform/secrets/onepassword-items`.
+Crossplane reconciles the integrations above continuously; Flux deploys resources
+and External Secrets synchronises credentials. App settings without a supported
+declarative interface are configured manually.
 
 ### B2 Storage Contract
 
@@ -215,16 +224,20 @@ item. It creates or adopts a private encrypted bucket with a one-day hidden-file
 lifecycle and a bucket-scoped read/write key. API endpoints are discovered at
 authorisation. Claims cannot request account, bucket-management or key-management
 permissions; duplicate or mismatched same-name keys block reconciliation.
-The key is masked into the app Secret and pushed to its item. Schema checks use
-the non-reconciled fixture in `platform/automation/b2/fixtures`.
+The bucket-name Secret is input only. The endpoint and key are published to
+`b2-application-key` in the app namespace and its 1Password item. Use one claim
+per namespace. Restore an existing key from 1Password if its local Secret is lost;
+B2 cannot return a previously issued secret key.
+
+Beszel's `object-storage-*` fields live in its `Beszel` item. Configure backups
+manually in Beszel's Backups screen; no job configures the app or runs its backups.
 
 ### Deletion & Recovery
 
 Crossplane defaults to orphan-on-delete; ExternalDNS is upsert-only. Removing a
 declaration retains its external bucket, key, identity client, DNS record or WAF
-rule. The 1Password reconciler archives unreferenced items tagged only `Kubelab`
-after apps reconcile the current Git revision. It never modifies `Homelab` items.
-Restore an archived item before restoring its workload.
+rule. Removing an app also leaves its 1Password item intact. Item archival and
+external resource cleanup are manual; the reconciler never modifies `Homelab` items.
 
 Pocket ID automation updates existing clients. Restore its database and the app
 items containing client credentials before dependent workloads. Grafana keeps
@@ -236,19 +249,10 @@ for local recovery access.
 `kimbap` serves NFS at `10.4.0.3`. The `truenas-nfs` class retains directories
 under `/mnt/truenas-nvme/clusters/mbk`; allow-listed standalone datasets use
 retained static volumes. `taco` holds active node-local volumes, including
-CloudNativePG databases. Critical databases write validated logical backups to
-NFS. Replaceable caches, metrics and logs may stay node-local.
-
-| Tier        | Local retention         | Off-site retention                             |
-| ----------- | ----------------------- | ---------------------------------------------- |
-| Critical    | Daily TrueNAS snapshots | Weekly Hotdog replication and weekly B2 export |
-| Important   | Daily TrueNAS snapshots | Weekly Hotdog replication                      |
-| Replaceable | None or short retention | None                                           |
-
-Pocket ID has database-backup and complete app-export schedules. Its restore
-CronJob is suspended and manual: stop the active authority, provide the exact
-archive path and SHA-256 digest, and verify the encryption key before creating
-a restore Job. RoMM also has a scheduled logical backup.
+CloudNativePG databases. Storage snapshots and off-site replication belong to
+`homelab`; this repository does not schedule database backups or restores.
+Existing `backup` PVCs and dumps are retained, but no longer refreshed. Recovery
+of node-local databases must use an independently maintained backup or snapshot.
 
 Bifrost 2 performs irreversible migrations. Before upgrading from Bifrost 1,
 stop the app and back up its retained volume; follow the upstream

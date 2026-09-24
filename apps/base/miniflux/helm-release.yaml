@@ -38,6 +38,26 @@ spec:
               pullPolicy: IfNotPresent
               repository: docker.io/miniflux/miniflux
               tag: 2.3.3@sha256:49d7b60987616387c306a8023087b31f2c9b7b21288b523026cb04058e8b6dbb
+            probes:
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  httpGet:
+                    path: /healthcheck
+                    port: 8080
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  httpGet:
+                    path: /healthcheck
+                    port: 8080
             resources:
               limits:
                 memory: 256Mi
