@@ -97,14 +97,15 @@ spec:
                 forProvider:
                   expectedResponseCheck:
                     logic: |-
+                      .payload.body as $wanted |
                       .response.statusCode == 200
                       and ([
                         .response.body.body.rules[]?
-                        | select(.PK == .payload.body.hostname)
+                        | select(.PK == $wanted.hostname)
                         | select(.action.do == 2)
                         | select(.action.status == 1)
-                        | select(.action.via == .payload.body.ipv4)
-                        | select(.action.via_v6 == .payload.body.ipv6)
+                        | select(.action.via == "{{ private-dns-target-ipv4:crossplane-system:address }}")
+                        | select(.action.via_v6 == "{{ private-dns-target-ipv6:crossplane-system:address }}")
                       ] | length) == 1
                     type: CUSTOM
                   headers:

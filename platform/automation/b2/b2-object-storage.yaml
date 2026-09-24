@@ -46,6 +46,20 @@ spec:
                       type: string
                   required: [name]
               required: [displayName, keyName, secretRef]
+            status:
+              type: object
+              properties:
+                authorisation:
+                  type: object
+                  properties:
+                    apiInfo:
+                      type: object
+                      properties:
+                        storageApi:
+                          type: object
+                          properties:
+                            apiUrl:
+                              type: string
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
@@ -97,15 +111,19 @@ spec:
                           responseJQ: .body.accountId
                           secretKey: account-id
                         - missingFieldStrategy: preserve
-                          responseJQ: .body.apiInfo.storageApi.apiUrl
-                          secretKey: api-url
-                        - missingFieldStrategy: preserve
                           responseJQ: .body.authorizationToken
                           secretKey: authorization-token
                       secretRef:
                         name: b2-session
                         namespace: default
                       setOwnerReference: true
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.apiInfo.storageApi.s3ApiUrl
+                          secretKey: endpoint
+                      secretRef:
+                        name: b2-application-key
+                        namespace: default
                 providerConfigRef:
                   kind: ClusterProviderConfig
                   name: b2
@@ -116,6 +134,17 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.secretInjectionConfigs[1].secretRef.namespace
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.response.body
+                toFieldPath: status.authorisation
+                transforms:
+                  - type: convert
+                    convert:
+                      format: json
+                      toType: object
           - name: bucket
             base:
               apiVersion: http.m.crossplane.io/v1alpha2
@@ -208,7 +237,7 @@ spec:
                         else .payload.baseUrl + "/b2api/v4/b2_update_bucket"
                         end
                   payload:
-                    baseUrl: "{{ b2-session:default:api-url }}"
+                    baseUrl: https://pending.invalid
                     body: "{}"
                   secretInjectionConfigs:
                     - keyMappings:
@@ -238,13 +267,8 @@ spec:
                       fmt: "{{ b2-session:%s:authorization-token }}"
                       type: Format
               - type: FromCompositeFieldPath
-                fromFieldPath: metadata.namespace
+                fromFieldPath: status.authorisation.apiInfo.storageApi.apiUrl
                 toFieldPath: spec.forProvider.payload.baseUrl
-                transforms:
-                  - type: string
-                    string:
-                      fmt: "{{ b2-session:%s:api-url }}"
-                      type: Format
               - type: CombineFromComposite
                 combine:
                   strategy: string
@@ -266,23 +290,7 @@ spec:
                 managementPolicies: [Create, LateInitialize, Observe, Update]
                 forProvider:
                   expectedResponseCheck:
-                    logic: |-
-                      .response.statusCode == 200
-                      and (.payload.body as $desired |
-                        if .response.body.applicationKeyId
-                        then (
-                          .response.body.keyName == $desired.keyName
-                          and (.response.body.bucketIds | sort) == ($desired.bucketIds | sort)
-                          and (.response.body.capabilities | sort) == ($desired.capabilities | sort)
-                        )
-                        else ([
-                          .response.body.keys[]?
-                          | select(.keyName == $desired.keyName)
-                          | select((.bucketIds | sort) == ($desired.bucketIds | sort))
-                          | select((.capabilities | sort) == ($desired.capabilities | sort))
-                        ] | length) == 1
-                        end
-                      )
+                    logic: "false"
                     type: CUSTOM
                   headers:
                     Authorization:
@@ -311,7 +319,7 @@ spec:
                       method: POST
                       url: .payload.baseUrl + "/b2api/v4/b2_create_key"
                   payload:
-                    baseUrl: "{{ b2-session:default:api-url }}"
+                    baseUrl: https://pending.invalid
                     body: "{}"
                   secretInjectionConfigs:
                     - keyMappings:
@@ -343,16 +351,28 @@ spec:
                 fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
               - type: FromCompositeFieldPath
-                fromFieldPath: metadata.namespace
+                fromFieldPath: status.authorisation.apiInfo.storageApi.apiUrl
                 toFieldPath: spec.forProvider.payload.baseUrl
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.expectedResponseCheck.logic
                 transforms:
                   - type: string
                     string:
-                      fmt: "{{ b2-session:%s:api-url }}"
+                      fmt: |-
+                        .response.statusCode == 200
+                        and (.payload.body as $desired |
+                          ["{{ b2-bucket:%s:bucket-id }}"] as $bucketIds |
+                          (if .response.body.applicationKeyId
+                           then [.response.body]
+                           else [.response.body.keys[]? | select(.keyName == $desired.keyName)]
+                           end) as $keys |
+                          ($keys | length) == 1
+                          and $keys[0].keyName == $desired.keyName
+                          and ($keys[0].bucketIds | sort) == ($bucketIds | sort)
+                          and ($keys[0].capabilities | sort) == ($desired.capabilities | sort)
+                        )
                       type: Format
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.secretRef.name
-                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name
               - type: CombineFromComposite
                 combine:
                   strategy: string
@@ -386,6 +406,11 @@ spec:
                       kind: PushSecretMetadata
                       spec:
                         tags: [Kubelab]
+                  - match:
+                      secretKey: endpoint
+                      remoteRef:
+                        property: object-storage-endpoint
+                        remoteKey: placeholder
                 secretStoreRefs:
                   - kind: ClusterSecretStore
                     name: onepassword
@@ -403,5 +428,5 @@ spec:
                 fromFieldPath: spec.displayName
                 toFieldPath: spec.data[1].match.remoteRef.remoteKey
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.secretRef.name
-                toFieldPath: spec.selector.secret.name
+                fromFieldPath: spec.displayName
+                toFieldPath: spec.data[2].match.remoteRef.remoteKey

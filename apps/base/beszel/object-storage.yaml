@@ -1,0 +1,31 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: beszel-object-storage
+  namespace: beszel
+  annotations:
+    onepassword.excloo.dev/defaults: '{"object-storage-bucket":"excloo-mbk-beszel"}'
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Beszel
+        property: object-storage-bucket
+      secretKey: bucket
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    deletionPolicy: Retain
+    name: beszel-object-storage
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: B2ObjectStorage
+metadata:
+  name: beszel
+  namespace: beszel
+spec:
+  displayName: Beszel
+  keyName: kubelab-mbk-beszel
+  secretRef:
+    name: beszel-object-storage

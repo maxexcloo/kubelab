@@ -61,7 +61,6 @@ kubeconform_flags=(
 )
 
 {
-  find platform -type d -name fixtures
   while IFS= read -r cluster_directory; do
     printf '%s\n' "${cluster_directory}"
     kustomize build "${cluster_directory}" |
