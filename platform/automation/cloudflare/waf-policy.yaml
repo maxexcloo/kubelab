@@ -193,15 +193,16 @@ spec:
                   payload:
                     baseUrl: https://api.cloudflare.com/client/v4/zones/pending/rulesets/phases/http_request_firewall_custom/entrypoint
                     body: '{"action":"block","description":"placeholder","enabled":true,"expression":"false","ref":"placeholder"}'
+                  # The provider masks literal JSON strings, so escape the returned expression.
                   secretInjectionConfigs:
                     - keyMappings:
                         - missingFieldStrategy: preserve
-                          responseJQ: .body.result.rules[]? | select(.ref == "pending") | .expression | capture("eq \"(?<token>[^\"]+)\"").token
-                          secretKey: monitoring-token
+                          responseJQ: .body.result.rules[]? | select(.ref == "pending") | .expression | @json | .[1:-1]
+                          secretKey: expression
                       secretRef:
-                        name: redlib
-                        namespace: redlib
-                      setOwnerReference: false
+                        name: cloudflare-waf-response
+                        namespace: default
+                      setOwnerReference: true
                 providerConfigRef:
                   kind: ClusterProviderConfig
                   name: cloudflare-waf
@@ -220,6 +221,11 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.name
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "%s-waf-response"
+                      type: Format
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
@@ -229,7 +235,7 @@ spec:
                 transforms:
                   - type: string
                     string:
-                      fmt: .body.result.rules[]? | select(.ref == "%s") | .expression | capture("eq \"(?<token>[^\"]+)\"").token
+                      fmt: .body.result.rules[]? | select(.ref == "%s") | .expression | @json | .[1:-1]
                       type: Format
               - type: FromCompositeFieldPath
                 fromFieldPath: status.zone.result[0].id
