@@ -5,4 +5,4 @@ metadata:
 spec:
   path: ./apps/integrations/private-dns
   dependsOn:
-    - name: apps
+    - name: automation

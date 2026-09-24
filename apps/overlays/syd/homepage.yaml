@@ -14,6 +14,9 @@
   path: /spec/values/controllers/homepage/containers/homepage/probes/startup/spec/httpGet/httpHeaders/0/value
   value: homepage.syd.excloo.dev
 - op: replace
+  path: /spec/values/controllers/homepage/containers/homepage/resources/requests/cpu
+  value: 10m
+- op: replace
   path: /spec/values/route/main/annotations/gethomepage.dev~1href
   value: https://homepage.syd.excloo.dev
 - op: replace

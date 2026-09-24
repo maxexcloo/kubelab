@@ -1,42 +1,37 @@
 # Kubelab
 
-Kubernetes resources reconciled by Flux for a two-cluster homelab. The separate
-`homelab` repository owns the substrate required to rebuild or reach a cluster
-while Kubernetes is unavailable.
-
-This README is the operational reference for the current system.
+Kubernetes workloads and app integrations reconciled by Flux. This README is
+the operational reference; `AGENTS.md` contains repository conventions.
 
 ## Architecture & Ownership
 
-- **`homelab`** owns Talos machines, cluster networking, Cloudflare tunnel
-  credentials, Tailscale host identities, OCI resources, TrueNAS datasets and
-  cluster-scoped 1Password Connect credentials.
-- **`kubelab`** owns in-cluster controllers, workloads, application routes,
-  application DNS and app-scoped external integrations.
+| Cluster | Node   | Location           | Purpose                                    | Storage                            |
+| ------- | ------ | ------------------ | ------------------------------------------ | ---------------------------------- |
+| `mbk`   | `taco` | TrueNAS VM at home | Primary workloads                          | Local-path and TrueNAS NVMe NFS    |
+| `syd`   | `hsp`  | OCI Sydney         | Independent secondary workloads and canary | Local-path; replaceable state only |
 
-| Cluster | Node   | Location              | Role                                       | Storage                            |
-| ------- | ------ | --------------------- | ------------------------------------------ | ---------------------------------- |
-| `mbk`   | `taco` | Home, as a TrueNAS VM | Primary workloads and control plane        | Local-path and TrueNAS NVMe NFS    |
-| `syd`   | `hsp`  | OCI Sydney            | Independent secondary workloads and canary | Local-path, replaceable state only |
+Both clusters have one node.
 
-The following systems intentionally remain outside Kubernetes:
+- **`homelab`** owns what is needed to rebuild or reach a cluster while Kubernetes
+  is unavailable: Talos, cluster networking, tunnel credentials, Tailscale host
+  identities, OCI resources, TrueNAS datasets and 1Password Connect credentials.
+- **`kubelab`** owns in-cluster controllers, workloads, application routes and DNS,
+  and app-scoped external integrations.
 
-- **Gatus** runs on Fly.io as an independent external monitor.
-- **HAOS** remains a dedicated Home Assistant appliance; `homelab` owns its
-  webhook-only Cloudflare Tunnel route and DNS record.
-- **Hotdog** receives off-site ZFS replication.
-- **Mandu** remains a Bazzite workstation and optional GPU worker.
-- **Netboot and Syncthing** remain storage-local TrueNAS applications.
+Gatus stays on Fly.io for independent monitoring. HAOS stays a dedicated
+appliance with a `homelab`-owned webhook-only tunnel and DNS. Hotdog receives
+off-site ZFS replication; Mandu is a Bazzite workstation and optional GPU worker.
+Netboot and Syncthing remain storage-local TrueNAS applications.
 
 ## Repository Layout
 
-- `apps/`: workload bases, integrations and cluster overlays.
-- `clusters/`: Flux entry points for each cluster.
-- `platform/`: controllers and shared cluster configuration.
+- `apps/`: workload bases, external integration claims and cluster overlays.
+- `clusters/`: Flux entry points and cluster-specific platform configuration.
+- `platform/`: shared controllers, sources and automation contracts.
 
 ## Operations
 
-Tooling is pinned and managed through [Mise](https://mise.jdx.dev/):
+Install the pinned tools and hooks through [Mise](https://mise.jdx.dev/):
 
 ```shell
 mise trust
@@ -44,105 +39,131 @@ mise run setup
 mise run check
 ```
 
-| Task                                    | Description                                            |
-| --------------------------------------- | ------------------------------------------------------ |
-| `mise run bootstrap <cluster>`          | Bootstrap Cilium, secrets and Flux in dependency order |
-| `mise run check`                        | Run schema, formatting, lint and repository checks     |
-| `mise run deploy <cluster> [component]` | Reconcile a cluster or Flux component from Git         |
-| `mise run fmt`                          | Format project files                                   |
-| `mise run prek`                         | Run every Git hook across the repository               |
-| `mise run setup`                        | Install tools and Git hooks                            |
-
-### Bootstrap
-
-After `homelab` provisions the substrate:
-
-```shell
-mise run bootstrap syd
-```
-
-The task requires a cluster name matching `clusters/<cluster>` and a kubeconfig
-context. It shows the context and API endpoint before confirmation, then
-installs Cilium, materialises the provisioned 1Password Connect credentials and
-token, and starts Flux. These Connect values are the only secrets injected
-outside reconciliation. External Secrets uses them to read the cluster vault;
-OpenTofu apply and Kubernetes bootstrap remain separate operator actions.
+| Command                                   | Purpose                                                                     |
+| ----------------------------------------- | --------------------------------------------------------------------------- |
+| `mise run bootstrap <cluster>`            | Install Cilium, bootstrap secrets and start Flux                            |
+| `mise run check`                          | Validate manifests, metadata, formatting, scripts and secret reconciliation |
+| `mise run deploy <cluster> [component]`   | Fetch Git and reconcile Flux entry points or a named stage                  |
+| `mise run fmt`                            | Format project files                                                        |
+| `mise run prek`                           | Run all Git hooks                                                           |
+| `mise run setup`                          | Install tools and Git hooks                                                 |
+| `mise run status <cluster> [application]` | Show reconciliation status or watch one app upgrade                         |
 
 ### Application Changes
 
-Keep an application's Helm release and supporting resources in
-`apps/base/<application>`, then include it in the cluster overlay. Add external
-integration claims only where the application needs them. Shared controllers
-live in `platform/`; each cluster selects its external integrations in
-`clusters/<cluster>/automation`.
+Keep Helm releases and supporting resources in `apps/base/<application>` and
+include them through `apps/overlays/<cluster>`. Keep differences in overlays;
+do not copy application bases. Select each cluster's external automation in
+`clusters/<cluster>/automation` and add claims only where needed.
+
+### Bootstrap
+
+After `homelab` provisions the substrate, run `mise run bootstrap syd` with a
+matching kubeconfig context. The task confirms the context and API endpoint,
+installs Cilium, injects the provisioned 1Password Connect credentials and token,
+and starts Flux. Check progress with `mise run status syd`.
+
+Connect credentials are the only secrets injected outside reconciliation.
+OpenTofu apply and Kubernetes bootstrap are separate actions; routine upgrades
+need neither.
 
 ### Reconciliation
 
-Reconcile an existing cluster without rerunning bootstrap:
+Merge to `main`; Flux polls Git every minute. Use `mise run deploy mbk` to fetch
+immediately. This waits for entry-point application, not whole-cluster health.
+Each Helm release upgrades independently:
 
 ```shell
-mise run deploy syd
+mise run status mbk miniflux
+mise run status mbk
 ```
 
-Pass a Flux Kustomization name such as `apps` when only one reconciliation
-component needs to be applied and awaited:
+The optional application argument is its Helm release and namespace name.
+Beszel Agent is a DaemonSet; inspect it with
+`kubectl --context mbk -n beszel-agent rollout status daemonset/beszel-agent`.
+Use `mise run deploy mbk apps` when you explicitly want to await all apps.
 
-```shell
-mise run deploy syd apps
-```
+Readiness gates follow actual prerequisites:
 
-Flux applies foundation APIs and controllers first, shared platform resources
-second, the Crossplane package runtime third, external automation fourth and
-applications last. The separate runtime stage lets a new cluster install the
-Crossplane CRDs before applying the hardened package runtime configuration and
-waits for the HTTP provider and composition function before automation starts.
-Shared reconciliation policy lives in
-`platform/bootstrap/flux-reconciliation`; cluster entry points contain only
-cluster-specific stages and exceptional health checks. Flux is the only routine
-deployer; CI validates but does not deploy. Checks use Kustomize and kubeconform
-for manifest schemas, plus repository-specific service metadata and secret
-reconciler checks. Helm rendering and external API behaviour require separate
-validation when those integrations change.
+1. Foundation installs the base APIs and controllers.
+2. Platform waits for Crossplane and, on `mbk`, database and NFS controllers.
+3. Crossplane runtime waits for the HTTP provider and composition function.
+4. Automation waits for its generated CRDs.
+5. Applications and external integration claims reconcile in parallel.
 
-## Platform
+Monitoring, platform certificates and dashboards report their own health without
+blocking unrelated upgrades. Identity, DNS and WAF claims retry until their own
+namespace, credentials and API are available. The `apps` stage retains aggregate
+workload health for status and safe 1Password archival. Failed stages retry after
+30 seconds; dependency checks retry after five seconds.
 
-| Area          | Implementation                                                            |
-| ------------- | ------------------------------------------------------------------------- |
-| Certificates  | cert-manager with Cloudflare DNS-01 ACME                                  |
-| GitOps        | Flux                                                                      |
-| Management    | Headlamp and Homepage                                                     |
-| Networking    | Cilium, Cloudflared, ExternalDNS and Traefik Gateway API                  |
-| Observability | Grafana, VictoriaLogs and VictoriaMetrics                                 |
-| Secrets       | External Secrets Operator backed by cluster-local 1Password Connect       |
-| Storage       | Local Path Provisioner and the `truenas-nfs` NFS subdirectory provisioner |
+Shared policy lives in `platform/bootstrap/flux-reconciliation`. Flux is the
+routine deployer; CI only validates. Checks cover manifest schemas, service
+metadata and secret reconciliation. Render Helm charts and validate external
+API behaviour separately when changing those integrations.
 
-OnePassword Connect is owned only by the foundation inventory. VictoriaMetrics
-is owned only by the platform inventory.
+### Resources
 
-## Workloads
+CPU requests reserve scheduling capacity; CPU limits cap execution. Flux and
+Crossplane can burst without CPU limits. Memory limits remain enabled;
+Crossplane package runtimes request 128 MiB and allow 512 MiB.
+
+Sydney uses smaller CPU requests for lightly loaded services to leave room for
+rolling upgrades. Revisit these as sustained usage grows. Diagnose
+`Insufficient cpu` using node allocations and pending Pod events; diagnose
+`OOMKilled` using container memory usage and limits. VictoriaMetrics and kubelet
+statistics provide utilisation data; `kubectl top` requires a Metrics API that
+is not installed here.
+
+### Upgrades
+
+Use Renovate's GitHub Dependency Dashboard as the update queue and retry panel.
+PRs are scheduled for Monday 00:00–07:00 Australia/Sydney. Non-major development
+tooling updates are grouped, as are platform chart patch and digest updates.
+Application upgrades, platform minor releases and major releases remain separate.
+The dashboard can request updates outside the schedule; merges remain manual.
+
+Review the PR, merge, then watch the affected application. Check release notes
+and take the relevant backup before migrations: reverting an image does not
+undo database changes.
+
+## Platform & Workloads
+
+| Area                | Implementation                                                               |
+| ------------------- | ---------------------------------------------------------------------------- |
+| Certificates        | cert-manager with Cloudflare DNS-01 ACME                                     |
+| External automation | Crossplane with the HTTP provider and patch-and-transform function           |
+| GitOps              | Flux                                                                         |
+| Management          | Headlamp and Homepage                                                        |
+| Networking          | Cilium, Cloudflared, ExternalDNS, Tailscale and Traefik Gateway API          |
+| Observability       | Beszel for systems; Grafana, VictoriaLogs and VictoriaMetrics for Kubernetes |
+| Secrets             | External Secrets backed by cluster-local 1Password Connect                   |
+| Storage             | Local Path Provisioner and the `truenas-nfs` NFS subdirectory provisioner    |
 
 `mbk` runs Actual Budget, AIOMetadata, AIOStreams, Beszel, Beszel Agent, Bichon,
 Bifrost, BookOrbit, Byparr, CLIProxyAPI, Comfy Control, Homepage, Immich,
 Larapaper, Linkwarden, Miniflux, Open WebUI, OpenSpeedTest, Papra, Pocket ID,
-RoMM, Shelfmark and Windmill.
+RoMM, Shelfmark and Windmill. `syd` runs Anisette, Beszel Agent, Homepage,
+OpenSpeedTest and Redlib.
 
-`syd` runs Anisette, Beszel Agent, Homepage, OpenSpeedTest and Redlib.
+Companion caches, search services and Redlib's `ctrld` DNS proxy belong to their
+apps. Stateful or migration-owning single replicas use recreate updates;
+stateless Cloudflared uses rolling updates.
 
-Workload differences belong in `apps/overlays/<cluster>`; bases are not copied
-between clusters.
+Homepage discovers its local cluster and adds shared external services and
+bookmarks. Optional widget credentials come from the cluster's `Homepage` item;
+missing values hide only that widget. It is served at `home.excloo.com` and
+`homepage.mbk.excloo.dev` on `mbk`, and `homepage.syd.excloo.dev` on `syd`.
 
-Companion services include AIOMetadata's disposable Redis, Linkwarden's
-Meilisearch, Open WebUI's Valkey, Redlib's app-scoped `ctrld` DNS proxy and
-RoMM's disposable Valkey; each owns a distinct runtime service. Open WebUI's
-upstream chart uses its `copy-app-data` init container to seed persistent
-application data. Stateful or migration-owning single replicas use recreate updates, while stateless Cloudflared uses rolling
-updates.
+Beszel agents run on every node, retain their identity in host storage and
+register by outbound WebSocket. The `mbk` agent uses the local hub Service;
+`syd` uses its private HTTPS route. Use VictoriaMetrics for Pod metrics,
+VictoriaLogs/Grafana for logs, and Headlamp or `kubectl` for live inspection.
 
 ## Networking & Ingress
 
-Application routes and DNS records are workload-owned. `homelab` owns cluster
-wildcards, tunnel credentials, stable tunnel or direct-public targets and DNS
-for external services and appliances such as Gatus and Home Assistant.
+Apps own their routes and DNS. `homelab` owns cluster wildcards, stable targets,
+tunnel credentials and DNS for services outside Kubernetes.
 
 | Mode          | Gateway         | DNS target                    | Cloudflare proxy |
 | ------------- | --------------- | ----------------------------- | ---------------- |
@@ -150,140 +171,73 @@ for external services and appliances such as Gatus and Home Assistant.
 | Internal      | `private`       | Cluster Tailscale wildcard    | None             |
 | Tunnel public | `public-tunnel` | `tunnel.<cluster>.excloo.dev` | Required         |
 
-A public namespace and its `HTTPRoute` must carry
-`gateway.excloo.dev/public-access: "true"`. Tunnel routes also set
-`external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"`. ExternalDNS is
-upsert-only, so route removal does not implicitly delete a DNS record. Private
-routes are never discovered by the public ExternalDNS instance. Traefik
-redirects direct-public and private HTTP requests to HTTPS; Cloudflare performs
-the equivalent redirect for tunnel-public routes.
+Public namespaces and HTTPRoutes require `gateway.excloo.dev/public-access: "true"`.
+Tunnel routes also require
+`external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"`. Private routes are
+excluded from public ExternalDNS discovery. Traefik redirects private and direct
+HTTP to HTTPS; Cloudflare handles tunnel redirects.
+
+Private vanity names use `PrivateDNSRecord`: Crossplane composes a DNS-only
+Cloudflare CNAME through a dedicated ExternalDNS instance and a Control D spoof
+rule to the cluster's Tailscale addresses. Both ExternalDNS instances mark records
+`Kubelab ExternalDNS Managed`. The `homelab` wildcard remains the fallback.
 
 `www.reddit.excloo.com` is DNS-only to Sydney's direct Gateway and redirects to
-the canonical `reddit.excloo.com` route. Its exact hostname uses a separate
-certificate so its lifecycle cannot make either cluster wildcard certificate
-unready. DNS-01 challenges follow the `homelab`-owned CNAME delegation and
-cert-manager uses public recursive resolvers for self-checks.
+`reddit.excloo.com`. Its separate certificate isolates it from cluster wildcard
+renewals. DNS-01 follows `homelab`'s CNAME delegation and uses public resolvers
+for self-checks.
 
-Private `.excloo.com` vanity names use a namespaced `PrivateDNSRecord` contract.
-Crossplane composes a DNS-only Cloudflare CNAME through a dedicated ExternalDNS
-CRD source and a Control D spoof rule to the cluster Tailscale addresses. Both
-external records are orphaned when the Kubernetes declaration is removed. The
-public and private ExternalDNS instances mark Cloudflare records as
-`Kubelab ExternalDNS Managed`. All declared private names, including
-`beszel.excloo.com` and Homepage at `home.excloo.com`, are actively reconciled.
-The substrate-owned `*.mbk.excloo.dev` wildcard remains the fallback for
-private routes.
-
-`scripts/render_service_inventory.sh` is the single normalised view of enabled
-route metadata. It discovers clusters and supported route shapes dynamically,
-emits stable JSON and can include Homepage's static monitored services with
-`--include-static`.
+`scripts/render_service_inventory.sh` emits normalised route metadata as JSON;
+`--include-static` adds Homepage's external monitored services.
 
 ## Secrets & External Automation
 
-1Password is the root of trust. Credentials, kubeconfigs and rendered Secret
-values never enter Git. Each workload uses one display-named item in its cluster
-vault; Kubernetes generates only declared internal credentials and preserves
-non-empty operator-managed values.
+1Password is the root of trust. Each app uses a display-named item in its cluster
+vault. Only declared internal credentials are generated; non-empty operator
+values are preserved. Credentials, kubeconfigs and rendered Secrets stay out of
+Git. Application administrators use upstream setup flows; no job provisions
+accounts through application APIs.
 
-Crossplane is available on every cluster and manages app-scoped provider APIs.
-The B2 application-storage contract is available on every cluster, with no
-current workload claim. Pocket ID clients and groups, sending-only Resend keys
-and private Cloudflare and Control D DNS are active on `mbk`. The
-`CloudflareWAFPolicy` contract is active on `syd` through Redlib's app-scoped
-claim, item and Secret. Each cluster selects its integrations in
-`clusters/<cluster>/automation`; provider credentials are loaded only for those
-integrations. Private DNS discovery and its ExternalDNS controller run only on
-`mbk`.
+Crossplane runs on both clusters. `mbk` automates Pocket ID clients and groups,
+sending-only Resend keys, and private Cloudflare/Control D DNS. `syd` automates
+Redlib's `CloudflareWAFPolicy`. B2 is available on both, with no current app claim.
+Only selected integrations load provider credentials.
 
-Grafana's local administrator credential and retained Pocket ID client
-credentials reconcile with the platform through separate Secrets. Its OIDC
-environment references remain optional at startup so local recovery access
-cannot block on Pocket ID or External Secrets. The retained client remains under
-Pocket ID automation. Pocket ID automation updates existing clients; restore
-its database and the application items containing client credentials before
-recovering dependent workloads.
+`homelab` owns the unqualified `Backblaze B2`, `Cloudflare WAF`, `Control D` and
+`Resend` vault items tagged `Homelab`. External Secrets loads them into
+`crossplane-system`. Generated app credentials are published only to their app
+item and namespace.
 
-Application administrators are created through each application's upstream
-setup flow. Generated login credentials remain in 1Password, but no in-cluster
-job calls application APIs to create or modify accounts. Restored databases
-retain their existing administrators.
+### B2 Storage Contract
 
-`homelab` owns the `Backblaze B2`, `Cloudflare WAF`, `Control D` and `Resend`
-items in each corresponding cluster vault. They are unqualified and tagged
-`Homelab` so the cluster can read them while the application-item reconciler
-leaves them alone. External Secrets materialises their provider credentials in
-`crossplane-system`; no provider credential has a separate bootstrap path. The
-only out-of-band secret injection is the cluster's 1Password Connect
-credentials and token. Generated application credentials are published only to
-the corresponding application item and namespace.
+`B2ObjectStorage` selects a bucket-name Secret, application-key name and 1Password
+item. It creates or adopts a private encrypted bucket with a one-day hidden-file
+lifecycle and a bucket-scoped read/write key. API endpoints are discovered at
+authorisation. Claims cannot request account, bucket-management or key-management
+permissions; duplicate or mismatched same-name keys block reconciliation.
+The key is masked into the app Secret and pushed to its item. Schema checks use
+the non-reconciled fixture in `platform/automation/b2/fixtures`.
 
-`B2ObjectStorage` is the narrow application-storage contract. A claim selects
-an existing bucket-name Secret, an application-key name and a display-named
-1Password item. The composition creates or adopts one private bucket with B2
-server-side encryption and a one-day hidden-file lifecycle, then creates or
-adopts one bucket-scoped read/write application key. The storage API endpoint is
-discovered from each account authorisation response rather than fixed to an
-account-specific URL. Capabilities are fixed by the composition; claims cannot
-request account, bucket-management or key-management access. A same-name key
-with different or duplicate settings blocks reconciliation instead of creating
-another credential. The generated key is masked into the selected application
-Secret and pushed only to that application item. Deleting a claim or composed
-request does not delete the external bucket or key.
+### Deletion & Recovery
 
-The non-reconciled fixture in `platform/automation/b2/fixtures` exercises the
-claim schema during `mise run check` without creating an external resource.
+Crossplane defaults to orphan-on-delete; ExternalDNS is upsert-only. Removing a
+declaration retains its external bucket, key, identity client, DNS record or WAF
+rule. The 1Password reconciler archives unreferenced items tagged only `Kubelab`
+after apps reconcile the current Git revision. It never modifies `Homelab` items.
+Restore an archived item before restoring its workload.
 
-Crossplane-managed external resources default to orphan-on-delete. ExternalDNS
-is upsert-only: removing a declaration retains the external bucket, API key,
-identity client, DNS record or WAF rule. The 1Password item reconciler
-automatically archives unreferenced items tagged only `Kubelab` once the apps
-have reconciled the current Git revision. Items tagged `Homelab` are never
-modified. Restore an archived application item before restoring its workload.
-
-Homepage runs on every cluster and uses the Services and Servers tab
-structure, service metadata and custom card styling, including the
-repository-owned retained background. Each instance discovers only its local
-cluster. The `mbk` instance is served at `home.excloo.com` and
-`homepage.mbk.excloo.dev`; the `syd` instance is served at
-`homepage.syd.excloo.dev`. Their shared static configuration contains only
-non-cluster services and provider bookmarks. Static cards use the same weights
-as discovered cards, so cards merge alphabetically; credential-backed widgets
-sort first. Each instance extracts its optional widget credentials from the
-display-named `Homepage` item in its cluster vault. Missing values hide only the
-corresponding widget and do not block the dashboard. The non-root Homepage
-container keeps its Next.js prerender cache writable so the initial response
-uses current configuration rather than the image's bundled default page.
-
-Beszel agents run as a DaemonSet on every Kubernetes node, including Talos
-control-plane nodes. They use outbound WebSocket registration and the Kubernetes
-node name as their stable system identity and retain their fingerprint in
-per-node host storage. The `mbk` agent reaches its local hub through the cluster
-Service; the `syd` agent reaches the `mbk` hub through the private HTTPS route.
-This provides node-level CPU, memory, load, uptime and network summaries;
-VictoriaMetrics remains authoritative for Kubernetes objects, Pod resources and
-detailed node metrics.
-
-Dozzle is not deployed. Kubernetes log aggregation remains in VictoriaLogs and
-Grafana, with Headlamp or `kubectl` for live Pod inspection; Beszel remains the
-system-level dashboard rather than a second Kubernetes log interface.
+Pocket ID automation updates existing clients. Restore its database and the app
+items containing client credentials before dependent workloads. Grafana keeps
+separate local-admin and OIDC Secrets, with optional OIDC references at startup
+for local recovery access.
 
 ## Storage & Recovery
 
-Bifrost 2 performs irreversible database migrations. Before upgrading from
-Bifrost 1, stop the application and back up its retained data volume; reverting
-the image alone is not a rollback. Review the upstream
-[migration guide](https://docs.getbifrost.ai/migration-guides/v2.0.0) for external
-API clients and plugins.
-
-`kimbap` serves retained NFS storage at `10.4.0.3`. The `truenas-nfs` class
-creates retained directories beneath `/mnt/truenas-nvme/clusters/mbk`.
-Allow-listed standalone datasets use retained static volumes.
-
-`taco` holds the active Kubernetes node-local volumes, including current
-CloudNativePG database volumes. Critical database workloads write validated
-logical backups to retained NFS. Replaceable caches, metrics and logs may remain
-node-local.
+`kimbap` serves NFS at `10.4.0.3`. The `truenas-nfs` class retains directories
+under `/mnt/truenas-nvme/clusters/mbk`; allow-listed standalone datasets use
+retained static volumes. `taco` holds active node-local volumes, including
+CloudNativePG databases. Critical databases write validated logical backups to
+NFS. Replaceable caches, metrics and logs may stay node-local.
 
 | Tier        | Local retention         | Off-site retention                             |
 | ----------- | ----------------------- | ---------------------------------------------- |
@@ -291,11 +245,14 @@ node-local.
 | Important   | Daily TrueNAS snapshots | Weekly Hotdog replication                      |
 | Replaceable | None or short retention | None                                           |
 
-Pocket ID has active database-backup and complete application-export schedules.
-Its restore CronJob is intentionally suspended and manual: stop the active
-authority, provide the exact retained archive path and SHA-256 digest, and
-verify the encryption key before creating a restore Job. RoMM has an active
-logical-backup schedule.
+Pocket ID has database-backup and complete app-export schedules. Its restore
+CronJob is suspended and manual: stop the active authority, provide the exact
+archive path and SHA-256 digest, and verify the encryption key before creating
+a restore Job. RoMM also has a scheduled logical backup.
+
+Bifrost 2 performs irreversible migrations. Before upgrading from Bifrost 1,
+stop the app and back up its retained volume; follow the upstream
+[migration guide](https://docs.getbifrost.ai/migration-guides/v2.0.0).
 
 ## Licence
 

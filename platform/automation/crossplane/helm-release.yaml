@@ -25,12 +25,14 @@ spec:
       packages: [xpkg.upbound.io/crossplane-contrib/provider-http:v1.0.14]
     resourcesCrossplane:
       limits:
+        cpu: null
         memory: 512Mi
       requests:
         cpu: 50m
         memory: 128Mi
     resourcesRBACManager:
       limits:
+        cpu: null
         memory: 256Mi
       requests:
         cpu: 20m

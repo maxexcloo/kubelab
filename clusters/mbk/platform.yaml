@@ -6,3 +6,16 @@ spec:
   path: ./clusters/mbk/platform
   dependsOn:
     - name: foundation
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: cloudnative-pg
+      namespace: cnpg-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: crossplane
+      namespace: crossplane-system
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: nfs-subdir-external-provisioner
+      namespace: storage

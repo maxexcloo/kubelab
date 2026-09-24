@@ -5,4 +5,4 @@ metadata:
 spec:
   path: ./apps/integrations/cloudflare
   dependsOn:
-    - name: apps
+    - name: automation

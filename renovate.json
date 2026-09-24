@@ -1,7 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "dependencyDashboard": false,
   "extends": ["config:recommended", ":enablePreCommit"],
+  "schedule": ["* 0-6 * * 1"],
+  "timezone": "Australia/Sydney",
   "customDatasources": {
     "onepassword-cli": {
       "defaultRegistryUrlTemplate": "https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N",
@@ -23,22 +24,22 @@
     {
       "customType": "regex",
       "datasourceTemplate": "docker",
-      "description": "Update CloudNativePG container images",
-      "managerFilePatterns": ["/apps/base/.+/database\\.yaml$/"],
-      "matchStrings": [
-        "imageName:\\s+(?<depName>[^:\\s]+):(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
-      ],
-      "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "datasourceTemplate": "docker",
       "description": "Update Crossplane packages",
       "managerFilePatterns": [
         "/platform/automation/crossplane/helm-release\\.yaml$/"
       ],
       "matchStrings": [
         "(?<depName>xpkg\\.(?:crossplane\\.io|upbound\\.io)/[^:\\s,\\]]+):(?<currentValue>[^\\s,\\]]+)"
+      ],
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "datasourceTemplate": "docker",
+      "description": "Update database container and extension images",
+      "managerFilePatterns": ["/apps/base/.+/database\\.yaml$/"],
+      "matchStrings": [
+        "(?:imageName|reference):\\s+(?<depName>[^:\\s]+):(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
       ],
       "versioningTemplate": "docker"
     },
@@ -52,16 +53,6 @@
         "crd_catalog_revision=\"(?<currentDigest>[a-f0-9]{40})\""
       ],
       "packageNameTemplate": "https://github.com/datreeio/CRDs-catalog"
-    },
-    {
-      "customType": "regex",
-      "datasourceTemplate": "docker",
-      "description": "Update VectorChord extension image",
-      "managerFilePatterns": ["/apps/base/immich/database\\.yaml$/"],
-      "matchStrings": [
-        "reference:\\s+(?<depName>[^:\\s]+):(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
-      ],
-      "versioningTemplate": "docker"
     },
     {
       "customType": "regex",
@@ -84,6 +75,19 @@
     "managerFilePatterns": ["/(^|/).+\\.yaml$/"]
   },
   "packageRules": [
+    {
+      "description": "Group non-major development tooling updates",
+      "groupName": "development tooling",
+      "matchManagers": ["github-actions", "mise", "pre-commit"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"]
+    },
+    {
+      "description": "Group patch and digest updates to platform charts",
+      "groupName": "platform chart patches",
+      "matchFileNames": ["platform/**"],
+      "matchManagers": ["flux"],
+      "matchUpdateTypes": ["patch", "pin", "digest"]
+    },
     {
       "description": "Order Anisette releases by year and month",
       "matchDatasources": ["docker"],

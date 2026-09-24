@@ -10,6 +10,13 @@ resources:
   - grafana.yaml
   - headlamp.yaml
 patches:
+  - patch: |-
+      - op: replace
+        path: /spec/values/resources/requests/cpu
+        value: 10m
+    target:
+      kind: HelmRelease
+      name: headlamp
   - path: secret-store.yaml
   - path: tailscale.yaml
   - path: traefik-gateway.yaml

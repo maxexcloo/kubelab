@@ -26,6 +26,9 @@ spec:
         expose:
           default: false
           direct: true
+    resources:
+      requests:
+        cpu: 25m
     service:
       additionalServices:
         direct:

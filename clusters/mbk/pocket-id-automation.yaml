@@ -5,4 +5,4 @@ metadata:
 spec:
   path: ./apps/integrations/pocket-id
   dependsOn:
-    - name: apps
+    - name: automation

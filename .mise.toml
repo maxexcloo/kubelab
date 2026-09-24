@@ -16,7 +16,7 @@ yq = "4.53.6"
 # Bootstrap
 [tasks.bootstrap]
 description = "Bootstrap a cluster in dependency order"
-run = 'echo "Cluster $usage_cluster is bootstrapped and reconciled."'
+run = 'echo "Cluster $usage_cluster bootstrap submitted. Check progress with: mise run status $usage_cluster"'
 usage = 'arg "<cluster>"'
 depends = [
   { task = "bootstrap-cilium", args = ["{{usage.cluster}}"] },
@@ -46,6 +46,21 @@ run = 'flux --context "$usage_cluster" reconcile kustomization "${usage_componen
 usage = '''
 arg "<cluster>"
 arg "[component]"
+'''
+
+[tasks.status]
+description = "Show cluster reconciliation or watch an application's Helm release"
+run = '''
+if [ -n "${usage_application:-}" ]; then
+  flux --context "$usage_cluster" get helmreleases "$usage_application" --namespace "$usage_application" --watch
+else
+  flux --context "$usage_cluster" get kustomizations
+  flux --context "$usage_cluster" get helmreleases --all-namespaces
+fi
+'''
+usage = '''
+arg "<cluster>"
+arg "[application]"
 '''
 
 # Development

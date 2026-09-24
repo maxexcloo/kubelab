@@ -12,3 +12,10 @@ patches:
     target:
       kind: HelmRelease
       name: homepage
+  - patch: |-
+      - op: replace
+        path: /spec/values/resources/requests/cpu
+        value: 10m
+    target:
+      kind: HelmRelease
+      name: openspeedtest
