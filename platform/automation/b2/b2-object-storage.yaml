@@ -49,17 +49,8 @@ spec:
             status:
               type: object
               properties:
-                authorisation:
-                  type: object
-                  properties:
-                    apiInfo:
-                      type: object
-                      properties:
-                        storageApi:
-                          type: object
-                          properties:
-                            apiUrl:
-                              type: string
+                apiUrl:
+                  type: string
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
@@ -139,12 +130,14 @@ spec:
                 toFieldPath: spec.forProvider.secretInjectionConfigs[1].secretRef.namespace
               - type: ToCompositeFieldPath
                 fromFieldPath: status.response.body
-                toFieldPath: status.authorisation
+                toFieldPath: status.apiUrl
                 transforms:
-                  - type: convert
-                    convert:
-                      format: json
-                      toType: object
+                  - type: string
+                    string:
+                      type: Regexp
+                      regexp:
+                        group: 1
+                        match: '"apiUrl"\s*:\s*"(https://[^"\s]+)"'
           - name: bucket
             base:
               apiVersion: http.m.crossplane.io/v1alpha2
@@ -267,7 +260,7 @@ spec:
                       fmt: "{{ b2-session:%s:authorization-token }}"
                       type: Format
               - type: FromCompositeFieldPath
-                fromFieldPath: status.authorisation.apiInfo.storageApi.apiUrl
+                fromFieldPath: status.apiUrl
                 toFieldPath: spec.forProvider.payload.baseUrl
               - type: CombineFromComposite
                 combine:
@@ -351,7 +344,7 @@ spec:
                 fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
               - type: FromCompositeFieldPath
-                fromFieldPath: status.authorisation.apiInfo.storageApi.apiUrl
+                fromFieldPath: status.apiUrl
                 toFieldPath: spec.forProvider.payload.baseUrl
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace

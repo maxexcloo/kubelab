@@ -2,6 +2,7 @@
 
 import copy
 import json
+import re
 import subprocess
 import unittest
 from pathlib import Path
@@ -126,6 +127,26 @@ class B2ComparisonTests(unittest.TestCase):
             "payload": {"body": dict(self.key, bucketIds=["{{ b2-bucket:beszel:bucket-id }}"])},
             "response": {"statusCode": 200, "body": {"keys": [self.key]}},
         }
+
+    def test_authorisation_publishes_only_the_public_api_url(self):
+        resource = composition_resource(
+            "platform/automation/b2/b2-object-storage.yaml", "authorisation", base=False
+        )
+        patch = next(
+            patch for patch in resource["patches"]
+            if patch["type"] == "ToCompositeFieldPath"
+        )
+        expression = patch["transforms"][0]["string"]["regexp"]
+        response = {
+            "accountId": "account",
+            "authorizationToken": "private-token",
+            "apiInfo": {"storageApi": {"apiUrl": "https://api005.backblazeb2.com"}},
+        }
+        self.assertEqual(patch["toFieldPath"], "status.apiUrl")
+        for indent in [None, 2]:
+            body = json.dumps(response, indent=indent)
+            match = re.search(expression["match"], body)
+            self.assertEqual(match.group(expression["group"]), "https://api005.backblazeb2.com")
 
     def test_existing_and_created_key_are_in_sync(self):
         self.assertTrue(evaluate(self.expression, self.data))
