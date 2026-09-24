@@ -2,6 +2,7 @@ import copy
 import json
 import os
 import ssl
+import time
 import urllib.error
 import urllib.request
 
@@ -9,7 +10,6 @@ ANNOTATION_PREFIX = "onepassword.excloo.dev/"
 KUBERNETES_HOST = "https://kubernetes.default.svc"
 KUBERNETES_SERVICE_ACCOUNT = "/var/run/secrets/kubernetes.io/serviceaccount"
 SECRET_SUFFIXES = ("key", "password", "secret", "token")
-
 
 def request(url, *, token, body=None, context=None, method="GET"):
     data = None if body is None else json.dumps(body).encode()
@@ -32,7 +32,6 @@ def request(url, *, token, body=None, context=None, method="GET"):
     except urllib.error.URLError as error:
         raise RuntimeError(f"{method} {url} failed: {error.reason}") from error
 
-
 def kubernetes_request(path):
     with open(
         f"{KUBERNETES_SERVICE_ACCOUNT}/token",
@@ -48,9 +47,11 @@ def kubernetes_request(path):
         context=context,
     )
 
-
 def kubernetes_list(path):
     return kubernetes_request(path).get("items", [])
+
+def kubernetes_get(path):
+    return kubernetes_request(path)
 
 
 def connect(path, *, body=None, method="GET"):
@@ -63,10 +64,8 @@ def connect(path, *, body=None, method="GET"):
         method=method,
     )
 
-
 def annotations(resource):
     return resource.get("metadata", {}).get("annotations", {})
-
 
 def item_configuration(resource):
     values = annotations(resource)
@@ -78,13 +77,11 @@ def item_configuration(resource):
         ),
     }
 
-
 def merge_configuration(item, resource):
     configuration = item_configuration(resource)
     item["constants"].update(configuration["constants"])
     item["defaults"].update(configuration["defaults"])
     item["generate"].update(configuration["generate"])
-
 
 def new_item():
     return {
@@ -97,18 +94,40 @@ def new_item():
         "urls": set(),
     }
 
-
 def slug(value):
     return "".join(character for character in value.lower() if character.isalnum())
+
+def applications_ready():
+    resource = kubernetes_get(
+        "/apis/kustomize.toolkit.fluxcd.io/v1/namespaces/flux-system/"
+        "kustomizations/apps"
+    )
+    metadata = resource.get("metadata", {})
+    source_reference = resource.get("spec", {}).get("sourceRef", {})
+    status = resource.get("status", {})
+    source_namespace = source_reference.get("namespace", metadata.get("namespace"))
+    source = kubernetes_get(
+        f"/apis/source.toolkit.fluxcd.io/v1/namespaces/{source_namespace}/"
+        f"gitrepositories/{source_reference.get('name')}"
+    )
+    source_revision = source.get("status", {}).get("artifact", {}).get("revision")
+    ready = any(
+        condition.get("type") == "Ready" and condition.get("status") == "True"
+        for condition in status.get("conditions", [])
+    )
+    return (
+        ready
+        and status.get("observedGeneration") == metadata.get("generation")
+        and bool(source_revision)
+        and status.get("lastAppliedRevision") == source_revision
+    )
 
 
 def externally_owned(item):
     return "Homelab" in item.get("tags", [])
 
-
 def is_dry_run():
     return os.environ.get("DRY_RUN", "false") == "true"
-
 
 def discover_items():
     desired = {}
@@ -204,10 +223,8 @@ def discover_items():
         item["login"] = bool(item["urls"])
     return desired
 
-
 def field_label(field):
     return field.get("label") or field.get("id")
-
 
 def generated_field(label, *, value=None):
     native = label in {"password", "username"}
@@ -228,9 +245,8 @@ def generated_field(label, *, value=None):
         field["value"] = value
     return field
 
-
 def normalise_item(current, title, desired, vault_id):
-    current.setdefault("category", "LOGIN" if desired["login"] else "SERVER")
+    current["category"] = "LOGIN" if desired["login"] else "SERVER"
     current.setdefault("tags", ["Kubelab"])
     current.setdefault("title", title)
     current.setdefault("vault", {"id": vault_id})
@@ -263,14 +279,37 @@ def normalise_item(current, title, desired, vault_id):
             if current["category"] != "LOGIN":
                 replacement.pop("purpose", None)
             fields.append(replacement)
+    for field in fields:
+        label = field_label(field)
+        if label in {"username", "password"}:
+            if desired["login"]:
+                field["purpose"] = label.upper()
+            else:
+                field.pop("purpose", None)
     return current
-
 
 def comparable(item):
     ignored = {"createdAt", "lastEditedBy", "updatedAt", "version"}
     result = {key: value for key, value in item.items() if key not in ignored}
     result["urls"] = result.get("urls") or []
     return result
+
+def creation_payload(item, vault_id):
+    return {
+        key: item[key]
+        for key in ("category", "fields", "sections", "tags", "title", "urls")
+        if key in item
+    } | {"vault": {"id": vault_id}}
+
+
+def update_eventually(path, item):
+    for attempt in range(1, 7):
+        try:
+            return connect(path, body=item, method="PUT")
+        except RuntimeError as error:
+            if " returned 404:" not in str(error) or attempt == 6:
+                raise
+            time.sleep(attempt * 5)
 
 
 def main():
@@ -299,6 +338,29 @@ def main():
             continue
         wanted = normalise_item(copy.deepcopy(current), title, configuration, vault_id)
         if summary:
+            if current.get("category") != wanted["category"]:
+                action = "replaced"
+                if not dry_run:
+                    replacement = creation_payload(wanted, vault_id)
+                    replacement["title"] = f"{title} (Kubelab replacement)"
+                    created = connect(
+                        f"/vaults/{vault_id}/items",
+                        body=replacement,
+                        method="POST",
+                    )
+                    created["title"] = title
+                    update_eventually(
+                        f"/vaults/{vault_id}/items/{created['id']}",
+                        created,
+                    )
+                    connect(
+                        f"/vaults/{vault_id}/items/{summary['id']}",
+                        method="DELETE",
+                    )
+                changed += 1
+                prefix = "would be " if dry_run else ""
+                print(f"{title} {prefix}{action}")
+                continue
             if comparable(current) == comparable(wanted):
                 continue
             action = "updated"
@@ -315,6 +377,29 @@ def main():
         changed += 1
         prefix = "would be " if dry_run else ""
         print(f"{title} {prefix}{action}")
+    try:
+        archive_ready = applications_ready()
+    except RuntimeError as error:
+        archive_ready = False
+        print(f"skipped archival because application readiness could not be read: {error}")
+    else:
+        if not archive_ready:
+            print("skipped archival because applications are not fully reconciled")
+    if not archive_ready:
+        print(f"reconciled {len(desired)} items; changed {changed}")
+        return
+    for summary in sorted(summaries, key=lambda item: item["title"].lower()):
+        title = summary["title"]
+        if title in desired:
+            continue
+        current = connect(f"/vaults/{vault_id}/items/{summary['id']}")
+        if current.get("tags") != ["Kubelab"]:
+            continue
+        if not dry_run:
+            connect(f"/vaults/{vault_id}/items/{summary['id']}", method="DELETE")
+        changed += 1
+        prefix = "would be " if dry_run else ""
+        print(f"{title} {prefix}archived")
     print(f"reconciled {len(desired)} items; changed {changed}")
 
 

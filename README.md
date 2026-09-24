@@ -195,9 +195,10 @@ for self-checks.
 
 1Password is the root of trust. Each app uses a display-named item in its cluster
 vault. Only declared internal credentials are generated; non-empty operator
-values are preserved except fields explicitly declared as constants. Existing item
-IDs, categories, tags, URLs and field order are preserved; duplicate titles stop
-reconciliation. Credentials, kubeconfigs and rendered Secrets stay out of Git.
+values are preserved except fields explicitly declared as constants. Existing
+credentials, tags, URLs and field order are preserved. Category changes replace
+the item; duplicate titles stop reconciliation before any writes. Credentials,
+kubeconfigs and rendered Secrets stay out of Git.
 Application administrators use upstream setup flows; no job provisions accounts
 through application APIs.
 
@@ -236,8 +237,10 @@ manually in Beszel's Backups screen; no job configures the app or runs its backu
 
 Crossplane defaults to orphan-on-delete; ExternalDNS is upsert-only. Removing a
 declaration retains its external bucket, key, identity client, DNS record or WAF
-rule. Removing an app also leaves its 1Password item intact. Item archival and
-external resource cleanup are manual; the reconciler never modifies `Homelab` items.
+rule. The 1Password reconciler archives unreferenced items tagged only `Kubelab`
+after apps reconcile the current Git revision. Restore archived items before
+restoring workloads. It never modifies `Homelab` items; external resource cleanup
+remains manual.
 
 Pocket ID automation updates existing clients. Restore its database and the app
 items containing client credentials before dependent workloads. Grafana keeps

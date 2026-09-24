@@ -3,6 +3,7 @@
 """Tests for the 1Password item reconciler."""
 
 import contextlib
+import copy
 import importlib.util
 import io
 import unittest
@@ -32,6 +33,71 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_category_replacement_preserves_credentials_before_removing_original(self):
+        original = {
+            "category": "SERVER",
+            "id": "original-id",
+            "title": "Application",
+            "fields": [{"id": "password", "label": "password", "value": "keep-me"}],
+            "tags": ["Kubelab"],
+            "urls": [],
+            "vault": {"id": "vault"},
+        }
+        replacement = dict(original, category="LOGIN", id="replacement-id")
+        replies = [
+            [{"id": "vault"}],
+            [{"id": "original-id", "title": "Application"}],
+            original,
+            replacement,
+            replacement,
+            None,
+        ]
+        with (
+            patch.object(RECONCILER, "applications_ready", return_value=False),
+            patch.object(RECONCILER, "is_dry_run", return_value=False),
+            patch.object(
+                RECONCILER, "discover_items",
+                return_value={"Application": item_configuration(login=True)},
+            ),
+            patch.object(RECONCILER, "connect", side_effect=replies) as connect,
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            RECONCILER.main()
+        writes = connect.call_args_list[3:]
+        self.assertEqual([call.kwargs["method"] for call in writes], ["POST", "PUT", "DELETE"])
+        self.assertEqual(writes[0].kwargs["body"]["fields"][0]["value"], "keep-me")
+        self.assertEqual(writes[1].args[0], "/vaults/vault/items/replacement-id")
+        self.assertEqual(writes[2].args[0], "/vaults/vault/items/original-id")
+
+    def test_archival_only_removes_unreferenced_exclusively_managed_items(self):
+        items = {
+            "stale": {"title": "Stale", "tags": ["Kubelab"]},
+            "shared": {"title": "Shared", "tags": ["Kubelab", "Personal"]},
+            "homelab": {"title": "Homelab", "tags": ["Homelab"]},
+        }
+        archived = []
+
+        def connect(path, *, method="GET", body=None):
+            if path == "/vaults":
+                return [{"id": "vault"}]
+            if path == "/vaults/vault/items":
+                return [dict(item, id=item_id) for item_id, item in items.items()]
+            item_id = path.rsplit("/", 1)[-1]
+            if method == "DELETE":
+                archived.append(item_id)
+                return None
+            return copy.deepcopy(items[item_id])
+
+        with (
+            patch.object(RECONCILER, "applications_ready", return_value=True),
+            patch.object(RECONCILER, "is_dry_run", return_value=False),
+            patch.object(RECONCILER, "discover_items", return_value={}),
+            patch.object(RECONCILER, "connect", side_effect=connect),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            RECONCILER.main()
+        self.assertEqual(archived, ["stale"])
+
     def test_duplicate_titles_stop_before_any_item_changes(self):
         summaries = [
             {"id": "first", "title": "Application"},
@@ -43,21 +109,6 @@ class ReconcilerTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "duplicate 1Password item title"):
                 RECONCILER.main()
         self.assertEqual(connect.call_count, 2)
-
-    def test_route_changes_do_not_replace_existing_items(self):
-        current = {
-            "category": "SERVER", "id": "stable-id", "fields": [],
-            "sections": [], "tags": ["Kubelab"], "title": "Application",
-            "urls": [], "vault": {"id": "vault"},
-        }
-        with patch.object(
-            RECONCILER, "discover_items",
-            return_value={"Application": item_configuration(login=True, urls={"https://new.example.com"})},
-        ), patch.object(RECONCILER, "connect", side_effect=[
-            [{"id": "vault"}], [{"id": "stable-id", "title": "Application"}], current,
-        ]) as connect, contextlib.redirect_stdout(io.StringIO()):
-            RECONCILER.main()
-        self.assertEqual(connect.call_count, 3)
 
     def test_main_leaves_externally_owned_existing_item_unchanged(self):
         existing = {
@@ -88,18 +139,50 @@ class ReconcilerTests(unittest.TestCase):
             urls={"https://id.excloo.com"},
         )
         originals = {
+            "applications_ready": RECONCILER.applications_ready,
             "connect": RECONCILER.connect,
             "discover_items": RECONCILER.discover_items,
             "is_dry_run": RECONCILER.is_dry_run,
         }
         for name, value in originals.items():
             self.addCleanup(setattr, RECONCILER, name, value)
+        RECONCILER.applications_ready = lambda: False
         RECONCILER.connect = connect
         RECONCILER.discover_items = lambda: {"Excloo ID": desired}
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
         self.assertFalse(any(method in {"DELETE", "POST", "PUT"} for method, _, _ in calls))
+
+    def test_applications_ready_requires_current_ready_condition(self):
+        application = {
+            "metadata": {"generation": 3, "namespace": "flux-system"},
+            "spec": {
+                "sourceRef": {
+                    "kind": "GitRepository",
+                    "name": "flux-system",
+                }
+            },
+            "status": {
+                "conditions": [{"status": "True", "type": "Ready"}],
+                "lastAppliedRevision": "main@sha1:current",
+                "observedGeneration": 3,
+            },
+        }
+        source = {
+            "status": {"artifact": {"revision": "main@sha1:current"}},
+        }
+        original = RECONCILER.kubernetes_get
+        self.addCleanup(setattr, RECONCILER, "kubernetes_get", original)
+        RECONCILER.kubernetes_get = (
+            lambda path: source if "gitrepositories" in path else application
+        )
+        self.assertTrue(RECONCILER.applications_ready())
+        source["status"]["artifact"]["revision"] = "main@sha1:new"
+        self.assertFalse(RECONCILER.applications_ready())
+        source["status"]["artifact"]["revision"] = "main@sha1:current"
+        application["status"]["observedGeneration"] = 2
+        self.assertFalse(RECONCILER.applications_ready())
 
     def test_discovery_infers_owner_and_route_without_title_annotation(self):
         resources = [
@@ -219,7 +302,7 @@ class ReconcilerTests(unittest.TestCase):
         self.assertTrue(RECONCILER.externally_owned({"tags": ["Homelab"]}))
         self.assertFalse(RECONCILER.externally_owned({"tags": ["Kubelab"]}))
 
-    def test_main_leaves_unreferenced_items_untouched(self):
+    def test_main_skips_archival_until_applications_are_current(self):
         calls = []
 
         def connect(path, *, body=None, method="GET"):
@@ -233,12 +316,14 @@ class ReconcilerTests(unittest.TestCase):
             self.fail(f"unexpected Connect request: {method} {path}")
 
         originals = {
+            "applications_ready": RECONCILER.applications_ready,
             "connect": RECONCILER.connect,
             "discover_items": RECONCILER.discover_items,
             "is_dry_run": RECONCILER.is_dry_run,
         }
         for name, value in originals.items():
             self.addCleanup(setattr, RECONCILER, name, value)
+        RECONCILER.applications_ready = lambda: False
         RECONCILER.connect = connect
         RECONCILER.discover_items = lambda: {}
         RECONCILER.is_dry_run = lambda: False
@@ -275,7 +360,7 @@ class ReconcilerTests(unittest.TestCase):
         )
         result = RECONCILER.normalise_item(current, "Application", desired, "vault")
         fields = {field["label"]: field for field in result["fields"]}
-        self.assertEqual(result["category"], "SERVER")
+        self.assertEqual(result["category"], "LOGIN")
         self.assertEqual(result["id"], "existing-id")
         self.assertEqual(result["tags"], ["Kubelab", "Personal"])
         self.assertEqual(result["urls"], [{"href": "https://old.example.com", "primary": True}])
