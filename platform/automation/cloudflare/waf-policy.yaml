@@ -57,14 +57,7 @@ spec:
               properties:
                 zone:
                   type: object
-                  properties:
-                    result:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id:
-                            type: string
+                  x-kubernetes-preserve-unknown-fields: true
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
