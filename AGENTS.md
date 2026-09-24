@@ -32,6 +32,9 @@ Kubernetes is unavailable.
 - `clusters/`: Flux entry points for each cluster.
 - `platform/`: cluster controllers and shared configuration.
 
+Keep app-specific configuration and integration declarations beside the app. Keep
+shared controllers and integration implementations under `platform/`.
+
 Use standard Kubernetes configuration directly. Do not add a general application
 schema, generator, operator, or generated manifest. A narrow repository-defined
 resource is acceptable when it materially removes repeated security or lifecycle

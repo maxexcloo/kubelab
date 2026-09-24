@@ -5,6 +5,7 @@ resources:
   - database.yaml
   - external-secrets.yaml
   - helm-release.yaml
+  - pocket-id.yaml
   - resources.yaml
   - source.yaml
   - storage.yaml

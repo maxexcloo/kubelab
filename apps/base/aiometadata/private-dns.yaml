@@ -1,0 +1,7 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: aiometadata
+  namespace: aiometadata
+spec:
+  hostname: aiometadata.excloo.com

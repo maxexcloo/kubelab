@@ -1,0 +1,7 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+spec:
+  hostname: aiostreams.excloo.com

@@ -1,0 +1,7 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: grafana
+  namespace: observability
+spec:
+  hostname: grafana.excloo.com

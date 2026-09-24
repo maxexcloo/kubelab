@@ -1,0 +1,7 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+spec:
+  hostname: budget.excloo.com

@@ -4,7 +4,6 @@ namespace: flux-system
 resources:
   - apps.yaml
   - automation.yaml
-  - cloudflare-automation.yaml
   - flux-system
   - platform.yaml
 components:

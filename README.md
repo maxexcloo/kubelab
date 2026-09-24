@@ -57,7 +57,10 @@ do not copy application bases. Larger apps separate secrets and storage into
 `external-secrets.yaml` and `storage.yaml`. Automation packages separate their API
 schema (`definition.yaml`) from implementation (`composition.yaml`).
 Select each cluster's external automation in
-`clusters/<cluster>/automation` and add claims only where needed.
+`clusters/<cluster>/automation` and keep app-specific identity, DNS and WAF
+declarations beside their app.
+Keep cluster-specific declarations in overlays. Grafana's integrations live beside
+its `mbk` monitoring configuration and reconcile after the automation APIs exist.
 
 ### Bootstrap
 
@@ -92,13 +95,14 @@ Readiness gates follow actual prerequisites:
 2. Platform waits for Crossplane and, on `mbk`, database and NFS controllers.
 3. Crossplane runtime waits for the HTTP provider and composition function.
 4. Automation waits for its generated CRDs.
-5. Applications and external integration claims reconcile in parallel.
+5. Applications reconcile with their integration claims; Grafana integrations
+   reconcile separately after automation.
 
 Monitoring, platform certificates and dashboards report their own health without
 blocking unrelated upgrades. Identity, DNS and WAF claims retry until their own
-namespace, credentials and API are available. The `apps` stage retains aggregate
-workload health for status. Failed stages retry after 30 seconds; dependency
-checks retry after five seconds.
+namespace, credentials and API are available. The `apps` stage reports aggregate
+workload and app-integration health. Failed stages retry after 30 seconds;
+dependency checks retry after five seconds.
 
 Shared policy lives in `platform/bootstrap/flux-reconciliation`. Flux is the
 routine deployer; CI only validates. Checks cover manifest schemas, service

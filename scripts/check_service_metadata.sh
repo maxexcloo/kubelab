@@ -9,6 +9,9 @@ cleanup() {
 
 trap cleanup EXIT
 
+manifest_directory="${temporary_directory}/manifests"
+mkdir -p "${manifest_directory}"
+
 inventory_file="${temporary_directory}/inventory.json"
 namespace_file="${temporary_directory}/namespaces.json"
 namespace_lines_file="${temporary_directory}/namespaces.jsonl"
@@ -22,9 +25,12 @@ scripts/render_service_inventory.sh --all-routes >"${route_file}"
 : >"${namespace_lines_file}"
 while IFS= read -r cluster_directory; do
   cluster="${cluster_directory##*/}"
-  for target in "apps/overlays/${cluster}" "clusters/${cluster}/platform"; do
-    kustomize build "${target}" |
-      CLUSTER="${cluster}" yq eval -N -o=json -I=0 '
+  manifest_index=0
+  while IFS= read -r target; do
+    manifest_file="${manifest_directory}/${cluster}-${manifest_index}.yaml"
+    kustomize build "${target}" >"${manifest_file}"
+    manifest_index=$((manifest_index + 1))
+    CLUSTER="${cluster}" yq eval -N -o=json -I=0 '
         select(.kind == "Namespace") |
         {
           "cluster": strenv(CLUSTER),
@@ -33,8 +39,12 @@ while IFS= read -r cluster_directory; do
             .metadata.labels."gateway.excloo.dev/public-access" // ""
           )
         }
-      ' - | sed '/^null$/d; /^$/d' >>"${namespace_lines_file}"
-  done
+      ' "${manifest_file}" | sed '/^null$/d; /^$/d' >>"${namespace_lines_file}"
+  done < <(
+    kustomize build "clusters/${cluster}" |
+      yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .spec.sourceRef.name == "flux-system") | .spec.path' - |
+      sort -u
+  )
 done < <(find clusters -mindepth 1 -maxdepth 1 -type d | sort)
 jq -s 'unique_by(.cluster, .name)' "${namespace_lines_file}" >"${namespace_file}"
 
@@ -44,7 +54,7 @@ yq eval -N -o=json -I=0 '
     "launchURL": .spec.client.launchURL,
     "source": ("PocketIDClient/" + .metadata.namespace + "/" + .metadata.name)
   }
-' apps/integrations/pocket-id/*.yaml | jq -s '.' >"${pocket_id_file}"
+' "${manifest_directory}"/*.yaml | jq -s '.' >"${pocket_id_file}"
 
 yq eval -N -o=json -I=0 '
   select(.kind == "PrivateDNSRecord") |
@@ -52,7 +62,7 @@ yq eval -N -o=json -I=0 '
     "hostname": .spec.hostname,
     "source": ("PrivateDNSRecord/" + .metadata.namespace + "/" + .metadata.name)
   }
-' apps/integrations/private-dns/*.yaml | jq -s '.' >"${private_dns_file}"
+' "${manifest_directory}"/*.yaml | jq -s '.' >"${private_dns_file}"
 
 jq -e \
   --slurpfile namespaces "${namespace_file}" \

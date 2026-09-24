@@ -3,4 +3,6 @@ kind: Kustomization
 resources:
   - helm-release.yaml
   - object-storage.yaml
+  - pocket-id.yaml
+  - private-dns.yaml
   - resources.yaml

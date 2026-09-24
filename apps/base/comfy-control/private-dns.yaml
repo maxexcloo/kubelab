@@ -1,0 +1,7 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: comfy-control
+  namespace: comfy-control
+spec:
+  hostname: comfy-control.excloo.com

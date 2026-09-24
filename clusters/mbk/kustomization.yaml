@@ -5,8 +5,7 @@ resources:
   - apps.yaml
   - automation.yaml
   - flux-system
+  - observability-integrations.yaml
   - platform.yaml
-  - pocket-id-automation.yaml
-  - private-dns-automation.yaml
 components:
   - ../../platform/bootstrap/flux-reconciliation
