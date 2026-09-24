@@ -5,3 +5,10 @@ resources:
   - helm-release.yaml
   - redirect.yaml
   - resources.yaml
+configMapGenerator:
+  - name: redlib-config
+    namespace: redlib
+    files:
+      - redlib.toml
+configurations:
+  - name-reference.yaml

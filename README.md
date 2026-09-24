@@ -54,7 +54,10 @@ mise run check
 Keep Helm releases and supporting resources in `apps/base/<application>` and
 include them through `apps/overlays/<cluster>`. Keep differences in overlays;
 do not copy application bases. Larger apps separate secrets and storage into
-`external-secrets.yaml` and `storage.yaml`. Automation packages separate their API
+`external-secrets.yaml` and `storage.yaml`. Keep substantial app settings in their
+native configuration file beside the app; keep small environment blocks inline.
+Redlib uses `redlib.toml`, with a content-named ConfigMap that triggers a rollout
+when its configuration changes. Automation packages separate their API
 schema (`definition.yaml`) from implementation (`composition.yaml`).
 Select each cluster's external automation in
 `clusters/<cluster>/automation` and keep app-specific identity, DNS and WAF

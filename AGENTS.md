@@ -40,9 +40,9 @@ schema, generator, operator, or generated manifest. A narrow repository-defined
 resource is acceptable when it materially removes repeated security or lifecycle
 integration logic; document the contract in `README.md` and compose standard
 resources underneath. Use Kustomize for composition and small patches. Use
-`configMapGenerator` only to mount checked-in scripts or assets; do not use
-`secretGenerator`. Keep executable code in its own source file. Keep chart values
-directly in the upstream Flux `HelmRelease` that consumes them.
+`configMapGenerator` only to mount checked-in app configuration, scripts or assets;
+do not use `secretGenerator`. Keep executable code in its own source file. Keep
+chart values directly in the upstream Flux `HelmRelease` that consumes them.
 
 Keep root Markdown limited to `AGENTS.md` and `README.md`. Keep maintained
 project documentation in `README.md`; do not add a `docs/` tree.
