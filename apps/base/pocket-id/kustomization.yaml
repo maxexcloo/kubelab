@@ -4,4 +4,5 @@ resources:
   - database.yaml
   - groups.yaml
   - helm-release.yaml
+  - private-dns.yaml
   - resources.yaml

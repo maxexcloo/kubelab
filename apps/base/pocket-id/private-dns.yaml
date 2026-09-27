@@ -1,0 +1,11 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: pocket-id
+  namespace: pocket-id
+spec:
+  hostname: id.excloo.com
+  ipv6Enabled: false
+  crossplane:
+    compositionRef:
+      name: private-dns-record-control-d-only

@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - cloudflare.yaml
   - helm-release.yaml
+  - private-dns.yaml
   - private-redirect.yaml
   - redirect.yaml
   - resources.yaml

@@ -63,7 +63,13 @@ spec:
                         | select(.action.do == 2)
                         | select(.action.status == 1)
                         | select(.action.via == "{{ private-dns-target-ipv4:crossplane-system:address }}")
-                        | select(.action.via_v6 == "{{ private-dns-target-ipv6:crossplane-system:address }}")
+                        | select(
+                            if $wanted.ipv6Enabled then
+                              .action.via_v6 == "{{ private-dns-target-ipv6:crossplane-system:address }}"
+                            else
+                              (.action.via_v6 // "") == ""
+                            end
+                          )
                       ] | length) == 1
                     type: CUSTOM
                   headers:
@@ -79,7 +85,7 @@ spec:
                           hostnames: [.payload.body.hostname],
                           status: 1,
                           via: .payload.body.ipv4,
-                          via_v6: .payload.body.ipv6
+                          via_v6: (if .payload.body.ipv6Enabled then .payload.body.ipv6 else "" end)
                         }
                       method: PUT
                       url: .payload.baseUrl
@@ -89,7 +95,8 @@ spec:
                       {
                         "hostname": "placeholder.excloo.com",
                         "ipv4": "{{ private-dns-target-ipv4:crossplane-system:address }}",
-                        "ipv6": "{{ private-dns-target-ipv6:crossplane-system:address }}"
+                        "ipv6": "{{ private-dns-target-ipv6:crossplane-system:address }}",
+                        "ipv6Enabled": true
                       }
                 providerConfigRef:
                   kind: ClusterProviderConfig
@@ -106,11 +113,14 @@ spec:
                     string:
                       fmt: https://api.controld.com/profiles/%s/rules
                       type: Format
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.hostname
+              - type: CombineFromComposite
                 toFieldPath: spec.forProvider.payload.body
-                transforms:
-                  - type: string
-                    string:
-                      fmt: '{"hostname":"%s","ipv4":"{{ private-dns-target-ipv4:crossplane-system:address }}","ipv6":"{{ private-dns-target-ipv6:crossplane-system:address }}"}'
-                      type: Format
+                combine:
+                  strategy: string
+                  string:
+                    fmt: '{"hostname":"%s","ipv4":"{{ private-dns-target-ipv4:crossplane-system:address }}","ipv6":"{{ private-dns-target-ipv6:crossplane-system:address }}","ipv6Enabled":%t}'
+                  variables:
+                    - fromFieldPath: spec.hostname
+                    - fromFieldPath: spec.ipv6Enabled
+                policy:
+                  fromFieldPath: Required

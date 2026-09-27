@@ -202,7 +202,11 @@ public ExternalDNS cannot publish their targets. Both compositions share the sam
 Control D implementation and default to the existing private-services profile
 `653224sydwhf`. Each cluster discovers its own Tailscale IPv4 and IPv6 addresses
 from `private.<cluster>.excloo.dev`; `spec.target` only sets the public CNAME in
-the default composition.
+the default composition. The new Control D-only claims set `spec.ipv6Enabled:
+false` because both Traefik Services are IPv4-only. These rules return a Tailscale
+A record without an AAAA target. The default remains `true` for existing claims;
+this rollout does not change their DNS rules. Private IPv6 requires a separate
+cluster dual-stack migration before enabling it for these claims.
 
 Clients using that profile reach BookOrbit, Immich, LaraPaper, Linkwarden,
 Pocket ID, Redlib, RoMM and Shelfmark over Tailscale, bypassing Cloudflare's WAF.
@@ -215,8 +219,9 @@ Redlib's `www` redirect and its dedicated certificate on the private Gateway.
 For rollout, use two Git revisions: first reconcile and verify private routes
 and certificates, then add the Control D claims. Sydney also needs a populated
 `Control D` password in its cluster vault before the claims can reconcile. Check
-each hostname against its cluster's Tailscale address with `curl --resolve`, then verify A and AAAA answers through the profile
-and test normal HTTPS access. Confirm public DNS still points through Cloudflare.
+each hostname against its cluster's Tailscale IPv4 address with `curl --resolve`,
+then verify the A answer and absence of an AAAA answer through the profile and
+test normal HTTPS access. Confirm public DNS still points through Cloudflare.
 For rollback, disable the new Control D rules before removing private routes;
 orphan-on-delete means removing claims alone does not remove the overrides.
 

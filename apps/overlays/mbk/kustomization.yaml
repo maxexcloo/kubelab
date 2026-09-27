@@ -26,6 +26,7 @@ resources:
   - ../../base/windmill
   - bifrost-route.yaml
   - homepage-private-dns.yaml
+  - immich-private-dns.yaml
   - immich-private-route.yaml
   - immich-route.yaml
   - openspeedtest-route.yaml

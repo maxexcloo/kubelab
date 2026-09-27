@@ -32,6 +32,9 @@ spec:
                   maxLength: 253
                   minLength: 1
                   type: string
+                ipv6Enabled:
+                  default: true
+                  type: boolean
                 target:
                   default: private.mbk.excloo.dev
                   format: hostname

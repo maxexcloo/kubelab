@@ -55,6 +55,7 @@ class PrivateDNSComparisonTests(unittest.TestCase):
             "payload": {
                 "body": {
                     "hostname": "reader.example.com",
+                    "ipv6Enabled": True,
                     "ipv4": "{{ private-dns-target-ipv4:crossplane-system:address }}",
                     "ipv6": "{{ private-dns-target-ipv6:crossplane-system:address }}",
                 },
@@ -96,6 +97,33 @@ class PrivateDNSComparisonTests(unittest.TestCase):
                 data = copy.deepcopy(self.data)
                 data["response"]["body"]["body"]["rules"] = replacement
                 self.assertFalse(evaluate(self.expression, data))
+
+    def test_ipv4_only_rule_requires_no_ipv6_target(self):
+        self.data["payload"]["body"]["ipv6Enabled"] = False
+        action = self.data["response"]["body"]["body"]["rules"][0]["action"]
+        self.assertFalse(evaluate(self.expression, self.data))
+        for empty in [None, ""]:
+            action["via_v6"] = empty
+            self.assertTrue(evaluate(self.expression, self.data))
+        del action["via_v6"]
+        self.assertTrue(evaluate(self.expression, self.data))
+        action["via"] = "100.64.0.2"
+        self.assertFalse(evaluate(self.expression, self.data))
+
+    def test_ipv4_only_update_clears_existing_ipv6_target(self):
+        resource = composition_resource(
+            "platform/automation/private-dns/composition/composition.yaml", "control-d-rule"
+        )
+        expression = next(
+            mapping["body"] for mapping in resource["spec"]["forProvider"]["mappings"]
+            if mapping["action"] == "UPDATE"
+        )
+        self.data["payload"]["body"]["ipv6Enabled"] = False
+        result = evaluate(expression, self.data)
+        self.assertEqual(result["via_v6"], "")
+        self.assertEqual(result["via"], self.data["payload"]["body"]["ipv4"])
+        self.data["payload"]["body"]["ipv6Enabled"] = True
+        self.assertEqual(evaluate(expression, self.data)["via_v6"], self.data["payload"]["body"]["ipv6"])
 
     def test_api_error_is_out_of_sync(self):
         self.data["response"] = {"statusCode": 403, "body": {"error": "forbidden"}}
