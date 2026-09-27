@@ -111,7 +111,20 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
+        hostnames:
+          - id.excloo.com
+        labels:
+          app.kubernetes.io/name: pocket-id
+        parentRefs:
+          - name: private
+            namespace: networking
+        rules:
+          - backendRefs:
+              - name: pocket-id
+                port: 1411
+      public:
+        forceRename: pocket-id
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: OIDC Provider

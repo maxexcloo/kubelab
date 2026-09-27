@@ -4,6 +4,7 @@ metadata:
   name: bookorbit
   labels:
     app.kubernetes.io/name: bookorbit
+    gateway.excloo.dev/private-access: "true"
     gateway.excloo.dev/public-access: "true"
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/enforce: restricted

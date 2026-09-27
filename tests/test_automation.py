@@ -42,7 +42,7 @@ class PrivateDNSComparisonTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         resource = composition_resource(
-            "platform/automation/private-dns/composition.yaml", "control-d-rule"
+            "platform/automation/private-dns/composition/composition.yaml", "control-d-rule"
         )
         # The provider resolves placeholders in the expression, not in payload.
         cls.expression = resource["spec"]["forProvider"]["expectedResponseCheck"]["logic"]
@@ -100,6 +100,40 @@ class PrivateDNSComparisonTests(unittest.TestCase):
     def test_api_error_is_out_of_sync(self):
         self.data["response"] = {"statusCode": 403, "body": {"error": "forbidden"}}
         self.assertFalse(evaluate(self.expression, self.data))
+
+
+class PrivateDNSCompositionTests(unittest.TestCase):
+    def test_control_d_only_preserves_rule_without_public_dns_resource(self):
+        rendered = subprocess.run(
+            ["kustomize", "build", ROOT / "platform/automation/private-dns/control-d-only"],
+            check=True, capture_output=True, text=True,
+        )
+        composition = json.loads(subprocess.run(
+            ["yq", "-o=json", "."], input=rendered.stdout,
+            check=True, capture_output=True, text=True,
+        ).stdout)
+        self.assertEqual(composition["metadata"]["name"], "private-dns-record-control-d-only")
+        resources = composition["spec"]["pipeline"][0]["input"]["resources"]
+        self.assertEqual(resources, [composition_resource(
+            "platform/automation/private-dns/composition/composition.yaml",
+            "control-d-rule", base=False,
+        )])
+
+    def test_each_cluster_discovers_its_own_tailscale_addresses(self):
+        for cluster in ["mbk", "syd"]:
+            with self.subTest(cluster=cluster):
+                rendered = subprocess.run(
+                    ["kustomize", "build", ROOT / "clusters" / cluster / "automation"],
+                    check=True, capture_output=True, text=True,
+                )
+                result = subprocess.run(
+                    ["yq", "-N", "-r", 'select(.kind == "Request") | .spec.forProvider.payload.baseUrl'],
+                    input=rendered.stdout, check=True, capture_output=True, text=True,
+                )
+                self.assertEqual(set(result.stdout.splitlines()), {
+                    f"https://cloudflare-dns.com/dns-query?name=private.{cluster}.excloo.dev&type={record_type}"
+                    for record_type in ["A", "AAAA"]
+                })
 
 
 class B2ComparisonTests(unittest.TestCase):

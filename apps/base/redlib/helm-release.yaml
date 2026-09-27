@@ -130,7 +130,20 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
+        hostnames:
+          - reddit.excloo.com
+        labels:
+          app.kubernetes.io/name: redlib
+        parentRefs:
+          - name: private
+            namespace: networking
+        rules:
+          - backendRefs:
+              - name: redlib
+                port: 8080
+      public:
+        forceRename: redlib
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: Reddit Frontend

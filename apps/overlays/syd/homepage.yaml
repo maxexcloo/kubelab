@@ -17,11 +17,11 @@
   path: /spec/values/controllers/homepage/containers/homepage/resources/requests/cpu
   value: 10m
 - op: replace
-  path: /spec/values/route/main/annotations/gethomepage.dev~1href
+  path: /spec/values/route/private/annotations/gethomepage.dev~1href
   value: https://homepage.syd.excloo.dev
 - op: replace
-  path: /spec/values/route/main/annotations/gethomepage.dev~1siteMonitor
+  path: /spec/values/route/private/annotations/gethomepage.dev~1siteMonitor
   value: https://homepage.syd.excloo.dev
 - op: replace
-  path: /spec/values/route/main/hostnames
+  path: /spec/values/route/private/hostnames
   value: [homepage.syd.excloo.dev]

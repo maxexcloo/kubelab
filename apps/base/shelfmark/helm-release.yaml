@@ -117,7 +117,20 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
+        hostnames:
+          - shelf.excloo.com
+        labels:
+          app.kubernetes.io/name: shelfmark
+        parentRefs:
+          - name: private
+            namespace: networking
+        rules:
+          - backendRefs:
+              - name: shelfmark
+                port: 3000
+      public:
+        forceRename: shelfmark
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: Book Search & Downloads

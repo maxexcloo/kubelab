@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: immich-private
+  namespace: immich
+  labels:
+    app.kubernetes.io/name: immich
+spec:
+  hostnames:
+    - photos.excloo.com
+  parentRefs:
+    - name: private
+      namespace: networking
+  rules:
+    - backendRefs:
+        - name: immich-server
+          port: 2283

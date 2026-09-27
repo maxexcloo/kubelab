@@ -5,4 +5,3 @@ resources:
   - ../../../platform/automation/pocket-id
   - ../../../platform/automation/private-dns
   - ../../../platform/automation/resend
-  - target-discovery.yaml

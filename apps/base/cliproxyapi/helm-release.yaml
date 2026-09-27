@@ -103,7 +103,7 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
         annotations:
           gethomepage.dev/description: Subscription Proxy
           gethomepage.dev/enabled: "true"

@@ -86,7 +86,7 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
         annotations:
           gethomepage.dev/description: Stremio Aggregator
           gethomepage.dev/enabled: "true"

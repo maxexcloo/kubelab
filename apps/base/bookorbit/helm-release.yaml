@@ -100,7 +100,20 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
+        hostnames:
+          - books.excloo.com
+        labels:
+          app.kubernetes.io/name: bookorbit
+        parentRefs:
+          - name: private
+            namespace: networking
+        rules:
+          - backendRefs:
+              - name: bookorbit
+                port: 3000
+      public:
+        forceRename: bookorbit
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: Digital Library

@@ -121,7 +121,7 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
         annotations:
           gethomepage.dev/description: Document Management
           gethomepage.dev/enabled: "true"

@@ -111,7 +111,7 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
         annotations:
           gethomepage.dev/description: Anti-Bot Challenge Solver
           gethomepage.dev/enabled: "true"

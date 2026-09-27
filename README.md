@@ -193,6 +193,33 @@ Cloudflare CNAME through a dedicated ExternalDNS instance and a Control D spoof
 rule to the cluster's Tailscale addresses. Both ExternalDNS instances mark records
 `Kubelab ExternalDNS Managed`. The `homelab` wildcard remains the fallback.
 
+Cloudflare-proxied services also have separate routes on the private Gateway,
+using the same hostnames and application authentication. Their `PrivateDNSRecord`
+selects `spec.crossplane.compositionRef.name: private-dns-record-control-d-only`.
+This composition creates only a Control D rule; public ExternalDNS retains the
+proxied tunnel record. Separate private routes carry no public-access label, so
+public ExternalDNS cannot publish their targets. Both compositions share the same
+Control D implementation and default to the existing private-services profile
+`653224sydwhf`. Each cluster discovers its own Tailscale IPv4 and IPv6 addresses
+from `private.<cluster>.excloo.dev`; `spec.target` only sets the public CNAME in
+the default composition.
+
+Clients using that profile reach BookOrbit, Immich, LaraPaper, Linkwarden,
+Pocket ID, Redlib, RoMM and Shelfmark over Tailscale, bypassing Cloudflare's WAF.
+Control D profile selection is independent of Tailscale connectivity: these names
+require Tailscale while the profile is active. Other resolvers retain the public
+Cloudflare path. Browsers using their own DNS resolver must use the same profile
+to take the private path. Control D rules also cover subdomains, so Sydney serves
+Redlib's `www` redirect and its dedicated certificate on the private Gateway.
+
+For rollout, use two Git revisions: first reconcile and verify private routes
+and certificates, then add the Control D claims. Sydney also needs a populated
+`Control D` password in its cluster vault before the claims can reconcile. Check
+each hostname against its cluster's Tailscale address with `curl --resolve`, then verify A and AAAA answers through the profile
+and test normal HTTPS access. Confirm public DNS still points through Cloudflare.
+For rollback, disable the new Control D rules before removing private routes;
+orphan-on-delete means removing claims alone does not remove the overrides.
+
 `www.reddit.excloo.com` is DNS-only to Sydney's direct Gateway and redirects to
 `reddit.excloo.com`. Its separate certificate isolates it from cluster wildcard
 renewals. DNS-01 follows `homelab`'s CNAME delegation and uses public resolvers
@@ -214,8 +241,9 @@ through application APIs.
 
 Crossplane runs on both clusters. `mbk` automates Pocket ID clients and groups,
 sending-only Resend keys, and private Cloudflare/Control D DNS. `syd` automates
-Redlib's `CloudflareWAFPolicy`. B2 is available on both and provisions Beszel's
-bucket and key on `mbk`. Only selected integrations load provider credentials.
+Redlib's `CloudflareWAFPolicy` and Control D DNS. B2 is available on both and
+provisions Beszel's bucket and key on `mbk`. Only selected integrations load
+provider credentials.
 
 `homelab` owns the unqualified `Backblaze B2`, `Cloudflare WAF`, `Control D` and
 `Resend` vault items tagged `Homelab`. External Secrets loads them into

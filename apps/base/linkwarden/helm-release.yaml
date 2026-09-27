@@ -157,6 +157,7 @@ spec:
     route:
       private:
         hostnames:
+          - links.excloo.com
           - linkwarden.mbk.excloo.dev
         labels:
           app.kubernetes.io/name: linkwarden

@@ -92,7 +92,20 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
+        hostnames:
+          - larapaper.excloo.com
+        labels:
+          app.kubernetes.io/name: larapaper
+        parentRefs:
+          - name: private
+            namespace: networking
+        rules:
+          - backendRefs:
+              - name: larapaper
+                port: 8080
+      public:
+        forceRename: larapaper
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: TRMNL Server

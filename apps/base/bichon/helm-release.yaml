@@ -97,7 +97,7 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
         annotations:
           gethomepage.dev/description: Email Archiving
           gethomepage.dev/enabled: "true"

@@ -11,6 +11,14 @@ resources:
   - headlamp.yaml
 patches:
   - patch: |-
+      - op: add
+        path: /spec/listeners/1/tls/certificateRefs/-
+        value:
+          name: redlib-www
+    target:
+      kind: Gateway
+      name: private
+  - patch: |-
       - op: replace
         path: /spec/values/resources/requests/cpu
         value: 10m

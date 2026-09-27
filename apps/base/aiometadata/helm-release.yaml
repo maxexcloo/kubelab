@@ -126,7 +126,7 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
         annotations:
           gethomepage.dev/description: Stremio Metadata
           gethomepage.dev/enabled: "true"

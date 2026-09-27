@@ -181,7 +181,20 @@ spec:
             valkey:
               - path: /data
     route:
-      main:
+      private:
+        hostnames:
+          - games.excloo.com
+        labels:
+          app.kubernetes.io/name: romm
+        parentRefs:
+          - name: private
+            namespace: networking
+        rules:
+          - backendRefs:
+              - name: romm
+                port: 8080
+      public:
+        forceRename: romm
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: Game & ROM Library

@@ -35,6 +35,7 @@ while IFS= read -r cluster_directory; do
         {
           "cluster": strenv(CLUSTER),
           "name": .metadata.name,
+          "privateAccess": (.metadata.labels."gateway.excloo.dev/private-access" // ""),
           "publicAccess": (
             .metadata.labels."gateway.excloo.dev/public-access" // ""
           )
@@ -59,7 +60,9 @@ yq eval -N -o=json -I=0 '
 yq eval -N -o=json -I=0 '
   select(.kind == "PrivateDNSRecord") |
   {
+    "cluster": (filename | split("/") | .[-1] | split("-") | .[0]),
     "hostname": .spec.hostname,
+    "namespace": .metadata.namespace,
     "source": ("PrivateDNSRecord/" + .metadata.namespace + "/" + .metadata.name)
   }
 ' "${manifest_directory}"/*.yaml | jq -s '.' >"${private_dns_file}"
@@ -111,6 +114,15 @@ jq -e \
         .source
       )
     ) as $missing_public_namespace_labels |
+    (
+      $route_inventory |
+      map(select((.parentRefs | index("private")) != null) |
+        . as $route |
+        select($namespaces[0] | any(
+          .cluster == $route.cluster and .name == $route.namespace and
+          .privateAccess == "true"
+        ) | not) | .source)
+    ) as $missing_private_namespace_labels |
     ($inventory | map(select(missing_required)) | map(.source)) as $missing |
     ($inventory | map(select(invalid_url)) | map(.source)) as $invalid |
     (
@@ -130,9 +142,13 @@ jq -e \
       map(.source)
     ) as $missing_pocket_id_routes |
     (
-      [$inventory[] | select(.cluster == "mbk") | .hostnames[]] as $hostnames |
       $private_dns[0] |
-      map(select(.hostname as $hostname | $hostnames | index($hostname) | not)) |
+      map(select(. as $dns | $route_inventory | any(
+        .cluster == $dns.cluster and
+        .namespace == $dns.namespace and
+        (.parentRefs | index("private")) != null and
+        (.hostnames | index($dns.hostname)) != null
+      ) | not)) |
       map(.source)
     ) as $missing_private_dns_routes |
     ($inventory | map(.cluster) | unique) as $clusters |
@@ -146,6 +162,8 @@ jq -e \
       error("public-tunnel route missing Cloudflare proxy annotation: " + ($missing_tunnel_proxy_annotations | join(", ")))
     elif ($unexpected_public_route_labels | length) > 0 then
       error("non-public route has public-access label: " + ($unexpected_public_route_labels | join(", ")))
+    elif ($missing_private_namespace_labels | length) > 0 then
+      error("private route namespace missing private-access label: " + ($missing_private_namespace_labels | join(", ")))
     elif ($missing | length) > 0 then
       error("missing service metadata: " + ($missing | join(", ")))
     elif ($invalid | length) > 0 then
@@ -157,7 +175,7 @@ jq -e \
     elif ($missing_pocket_id_routes | length) > 0 then
       error("Pocket ID launch URL has no enabled route: " + ($missing_pocket_id_routes | join(", ")))
     elif ($missing_private_dns_routes | length) > 0 then
-      error("private DNS hostname has no enabled mbk route: " + ($missing_private_dns_routes | join(", ")))
+      error("private DNS hostname has no matching private route: " + ($missing_private_dns_routes | join(", ")))
     else
       true
     end

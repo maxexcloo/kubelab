@@ -142,7 +142,7 @@ spec:
         globalMounts:
           - path: /tmp
     route:
-      main:
+      private:
         annotations:
           gethomepage.dev/description: Application Dashboard
           gethomepage.dev/enabled: "true"

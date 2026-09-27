@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: redlib-www-private
+  namespace: redlib
+  labels:
+    app.kubernetes.io/name: redlib
+spec:
+  hostnames:
+    - www.reddit.excloo.com
+  parentRefs:
+    - name: private
+      namespace: networking
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            hostname: reddit.excloo.com
+            scheme: https
+            statusCode: 301
