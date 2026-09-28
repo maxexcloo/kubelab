@@ -110,7 +110,7 @@ class PrivateDNSComparisonTests(unittest.TestCase):
         action["via"] = "100.64.0.2"
         self.assertFalse(evaluate(self.expression, self.data))
 
-    def test_ipv4_only_update_clears_existing_ipv6_target(self):
+    def test_ipv4_only_update_omits_ipv6_target(self):
         resource = composition_resource(
             "platform/automation/private-dns/composition/composition.yaml", "control-d-rule"
         )
@@ -120,7 +120,7 @@ class PrivateDNSComparisonTests(unittest.TestCase):
         )
         self.data["payload"]["body"]["ipv6Enabled"] = False
         result = evaluate(expression, self.data)
-        self.assertEqual(result["via_v6"], "")
+        self.assertNotIn("via_v6", result)
         self.assertEqual(result["via"], self.data["payload"]["body"]["ipv4"])
         self.data["payload"]["body"]["ipv6Enabled"] = True
         self.assertEqual(evaluate(expression, self.data)["via_v6"], self.data["payload"]["body"]["ipv6"])

@@ -84,9 +84,8 @@ spec:
                           do: 2,
                           hostnames: [.payload.body.hostname],
                           status: 1,
-                          via: .payload.body.ipv4,
-                          via_v6: (if .payload.body.ipv6Enabled then .payload.body.ipv6 else "" end)
-                        }
+                          via: .payload.body.ipv4
+                        } + (if .payload.body.ipv6Enabled then {via_v6: .payload.body.ipv6} else {} end)
                       method: PUT
                       url: .payload.baseUrl
                   payload:
