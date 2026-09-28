@@ -67,7 +67,7 @@ spec:
                             if $wanted.ipv6Enabled then
                               .action.via_v6 == "{{ private-dns-target-ipv6:crossplane-system:address }}"
                             else
-                              (.action.via_v6 // "") == ""
+                              .action.via_v6 == "::"
                             end
                           )
                       ] | length) == 1
@@ -90,8 +90,9 @@ spec:
                           do: 2,
                           hostnames: [.payload.body.hostname],
                           status: 1,
-                          via: .payload.body.ipv4
-                        } + (if .payload.body.ipv6Enabled then {via_v6: .payload.body.ipv6} else {} end)
+                          via: .payload.body.ipv4,
+                          via_v6: (if .payload.body.ipv6Enabled then .payload.body.ipv6 else "::" end)
+                        }
                       method: POST
                       url: .payload.baseUrl
                     - action: OBSERVE
@@ -102,8 +103,9 @@ spec:
                           do: 2,
                           hostnames: [.payload.body.hostname],
                           status: 1,
-                          via: .payload.body.ipv4
-                        } + (if .payload.body.ipv6Enabled then {via_v6: .payload.body.ipv6} else {} end)
+                          via: .payload.body.ipv4,
+                          via_v6: (if .payload.body.ipv6Enabled then .payload.body.ipv6 else "::" end)
+                        }
                       method: PUT
                       url: .payload.baseUrl
                   payload:

@@ -98,19 +98,19 @@ class PrivateDNSComparisonTests(unittest.TestCase):
                 data["response"]["body"]["body"]["rules"] = replacement
                 self.assertFalse(evaluate(self.expression, data))
 
-    def test_ipv4_only_rule_requires_no_ipv6_target(self):
+    def test_ipv4_only_rule_requires_blocked_ipv6_target(self):
         self.data["payload"]["body"]["ipv6Enabled"] = False
         action = self.data["response"]["body"]["body"]["rules"][0]["action"]
         self.assertFalse(evaluate(self.expression, self.data))
-        for empty in [None, ""]:
-            action["via_v6"] = empty
-            self.assertTrue(evaluate(self.expression, self.data))
-        del action["via_v6"]
+        for incorrect in [None, "", "2606:4700::1"]:
+            action["via_v6"] = incorrect
+            self.assertFalse(evaluate(self.expression, self.data))
+        action["via_v6"] = "::"
         self.assertTrue(evaluate(self.expression, self.data))
         action["via"] = "100.64.0.2"
         self.assertFalse(evaluate(self.expression, self.data))
 
-    def test_ipv4_only_update_omits_ipv6_target(self):
+    def test_ipv4_only_update_blocks_public_ipv6_fallback(self):
         resource = composition_resource(
             "platform/automation/private-dns/composition/composition.yaml", "control-d-rule"
         )
@@ -120,7 +120,7 @@ class PrivateDNSComparisonTests(unittest.TestCase):
         )
         self.data["payload"]["body"]["ipv6Enabled"] = False
         result = evaluate(expression, self.data)
-        self.assertNotIn("via_v6", result)
+        self.assertEqual(result["via_v6"], "::")
         self.assertEqual(result["via"], self.data["payload"]["body"]["ipv4"])
         self.data["payload"]["body"]["ipv6Enabled"] = True
         self.assertEqual(evaluate(expression, self.data)["via_v6"], self.data["payload"]["body"]["ipv6"])
@@ -154,7 +154,7 @@ class PrivateDNSComparisonTests(unittest.TestCase):
             created = evaluate(mappings["CREATE"]["body"], self.data)
             updated = evaluate(mappings["UPDATE"]["body"], self.data)
             self.assertEqual(created, updated)
-            self.assertEqual("via_v6" in created, enabled)
+            self.assertEqual(created["via_v6"], self.data["payload"]["body"]["ipv6"] if enabled else "::")
             self.assertEqual(created["hostnames"], ["reader.example.com"])
 
     def test_api_error_is_out_of_sync(self):

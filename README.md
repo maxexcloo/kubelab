@@ -204,7 +204,8 @@ Control D implementation and default to the existing private-services profile
 from `private.<cluster>.excloo.dev`; `spec.target` only sets the public CNAME in
 the default composition. The new Control D-only claims set `spec.ipv6Enabled:
 false` because both Traefik Services are IPv4-only. These rules return a Tailscale
-A record without an AAAA target. The default remains `true` for existing claims;
+A record and `::` for AAAA. Omitting the IPv6 target allows Control D to return
+the public AAAA record, which would send IPv6 clients through Cloudflare. The default remains `true` for existing claims;
 this rollout does not change their DNS rules. Private IPv6 requires a separate
 cluster dual-stack migration before enabling it for these claims.
 
@@ -220,7 +221,7 @@ For rollout, use two Git revisions: first reconcile and verify private routes
 and certificates, then add the Control D claims. Sydney also needs a populated
 `Control D` password in its cluster vault before the claims can reconcile. Check
 each hostname against its cluster's Tailscale IPv4 address with `curl --resolve`,
-then verify the A answer and absence of an AAAA answer through the profile and
+then verify the private A answer and `::` AAAA answer through the profile and
 test normal HTTPS access. Confirm public DNS still points through Cloudflare.
 For rollback, disable the new Control D rules before removing private routes;
 orphan-on-delete means removing claims alone does not remove the overrides.
