@@ -125,6 +125,38 @@ class PrivateDNSComparisonTests(unittest.TestCase):
         self.data["payload"]["body"]["ipv6Enabled"] = True
         self.assertEqual(evaluate(expression, self.data)["via_v6"], self.data["payload"]["body"]["ipv6"])
 
+    def test_missing_rule_is_created_only_after_successful_listing(self):
+        resource = composition_resource(
+            "platform/automation/private-dns/composition/composition.yaml", "control-d-rule"
+        )
+        expression = resource["spec"]["forProvider"]["isRemovedCheck"]["logic"]
+        self.data["response"]["body"]["success"] = True
+        self.assertFalse(evaluate(expression, self.data))
+        self.data["response"]["body"]["body"]["rules"] = []
+        self.assertTrue(evaluate(expression, self.data))
+        for response in [
+            {"statusCode": 403, "body": {"success": False}},
+            {"statusCode": 200, "body": {"success": False, "body": {"rules": []}}},
+            {"statusCode": 200, "body": {"success": True, "body": {}}},
+        ]:
+            self.data["response"] = response
+            self.assertFalse(evaluate(expression, self.data))
+
+    def test_create_and_update_use_matching_bodies_and_distinct_methods(self):
+        resource = composition_resource(
+            "platform/automation/private-dns/composition/composition.yaml", "control-d-rule"
+        )
+        mappings = {m["action"]: m for m in resource["spec"]["forProvider"]["mappings"]}
+        self.assertEqual(mappings["CREATE"]["method"], "POST")
+        self.assertEqual(mappings["UPDATE"]["method"], "PUT")
+        for enabled in [False, True]:
+            self.data["payload"]["body"]["ipv6Enabled"] = enabled
+            created = evaluate(mappings["CREATE"]["body"], self.data)
+            updated = evaluate(mappings["UPDATE"]["body"], self.data)
+            self.assertEqual(created, updated)
+            self.assertEqual("via_v6" in created, enabled)
+            self.assertEqual(created["hostnames"], ["reader.example.com"])
+
     def test_api_error_is_out_of_sync(self):
         self.data["response"] = {"statusCode": 403, "body": {"error": "forbidden"}}
         self.assertFalse(evaluate(self.expression, self.data))

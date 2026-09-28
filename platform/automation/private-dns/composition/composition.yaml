@@ -75,7 +75,25 @@ spec:
                   headers:
                     Content-Type: [application/json]
                     User-Agent: [kubelab-crossplane/1.0]
+                  isRemovedCheck:
+                    logic: |-
+                      .payload.body.hostname as $hostname |
+                      .response.statusCode == 200
+                      and .response.body.success == true
+                      and (.response.body.body.rules | type) == "array"
+                      and ([.response.body.body.rules[]? | select(.PK == $hostname)] | length) == 0
+                    type: CUSTOM
                   mappings:
+                    - action: CREATE
+                      body: |-
+                        {
+                          do: 2,
+                          hostnames: [.payload.body.hostname],
+                          status: 1,
+                          via: .payload.body.ipv4
+                        } + (if .payload.body.ipv6Enabled then {via_v6: .payload.body.ipv6} else {} end)
+                      method: POST
+                      url: .payload.baseUrl
                     - action: OBSERVE
                       url: .payload.baseUrl
                     - action: UPDATE
