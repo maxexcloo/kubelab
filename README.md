@@ -31,7 +31,8 @@ Netboot and Syncthing remain storage-local TrueNAS applications.
 
 ## Operations
 
-Install the pinned tools and hooks through [Mise](https://mise.jdx.dev/):
+Install jq (`brew install jq` on macOS), then install the remaining pinned tools
+and hooks through [Mise](https://mise.jdx.dev/):
 
 ```shell
 mise trust
