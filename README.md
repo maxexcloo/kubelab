@@ -109,8 +109,9 @@ workload and app-integration health. Failed stages retry after 30 seconds;
 dependency checks retry after five seconds.
 
 Shared policy lives in `platform/bootstrap/flux-reconciliation`. Flux is the
-routine deployer; CI only validates. Checks cover manifest schemas, service
-metadata, secret reconciliation and focused external-API fixtures. Render changed
+routine deployer; CI only validates. Checks render each Kustomize target once into a temporary directory shared by
+manifest-schema and service-metadata validation. They also cover secret
+reconciliation and focused external-API fixtures. Render changed
 Helm charts separately; schema checks do not validate their generated workloads.
 
 ### Resources

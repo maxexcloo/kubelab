@@ -9,16 +9,14 @@ cleanup() {
 
 trap cleanup EXIT
 
-manifest_directory="${temporary_directory}/manifests"
+manifest_directory="${1:?Usage: check_manifests.sh <manifest-directory>}"
 schema_directory="${temporary_directory}/schemas"
-target_file="${temporary_directory}/targets"
 schema_cache_directory=".cache/kubeconform"
 remote_schema_cache_directory="${schema_cache_directory}/remote"
 # Validate the cluster API; schema publication can lag newer kubectl releases.
 kubernetes_version="1.36.4"
 crd_catalog_revision="ad3b08c5045129d7bb1eeffd8e61719b2c8dd1e2"
 mkdir -p \
-  "${manifest_directory}" \
   "${remote_schema_cache_directory}" \
   "${schema_directory}"
 
@@ -60,18 +58,10 @@ kubeconform_flags=(
   -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/${crd_catalog_revision}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
 )
 
-while IFS= read -r cluster_directory; do
-  printf '%s\n' "${cluster_directory}"
-  kustomize build "${cluster_directory}" |
-    yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization") | .spec.path' -
-done < <(find clusters -mindepth 1 -maxdepth 1 -type d | sort) | sort -u >"${target_file}"
-
-manifest_index=0
-while IFS= read -r target; do
-  target="${target#./}"
-  kustomize build "${target}" >"${manifest_directory}/${manifest_index}.yaml"
-  manifest_index=$((manifest_index + 1))
-done <"${target_file}"
+manifest_files=()
+while IFS= read -r manifest_file; do
+  manifest_files+=("${manifest_file}")
+done < <(find "${manifest_directory}" -type f -name '*.yaml' | sort)
 
 while IFS=$'\t' read -r xrd_group xrd_kind xrd_version; do
   mkdir -p "${schema_directory}/${xrd_group}"
@@ -106,7 +96,7 @@ while IFS=$'\t' read -r xrd_group xrd_kind xrd_version; do
       .required = (((.required // []) + ["apiVersion", "kind", "metadata"]) | unique) |
       .additionalProperties = false |
       ."$schema" = "https://json-schema.org/draft/2020-12/schema"
-    ' "${manifest_directory}"/*.yaml >"${schema_directory}/${xrd_group}/${xrd_resource_kind}_${xrd_version}.json"
+    ' "${manifest_files[@]}" >"${schema_directory}/${xrd_group}/${xrd_resource_kind}_${xrd_version}.json"
 done < <(
   # shellcheck disable=SC2016
   yq eval -N -r '
@@ -117,7 +107,7 @@ done < <(
     select(.served == true) |
     [$group, $kind, .name] |
     @tsv
-  ' "${manifest_directory}"/*.yaml | sort -u
+  ' "${manifest_files[@]}" | sort -u
 )
 
 kubeconform "${kubeconform_flags[@]}" "${manifest_directory}"

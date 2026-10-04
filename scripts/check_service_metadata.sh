@@ -9,8 +9,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-manifest_directory="${temporary_directory}/manifests"
-mkdir -p "${manifest_directory}"
+manifest_directory="${1:?Usage: check_service_metadata.sh <manifest-directory>}"
 
 inventory_file="${temporary_directory}/inventory.json"
 namespace_file="${temporary_directory}/namespaces.json"
@@ -19,17 +18,17 @@ pocket_id_file="${temporary_directory}/pocket-id.json"
 private_dns_file="${temporary_directory}/private-dns.json"
 route_file="${temporary_directory}/routes.json"
 
-scripts/render_service_inventory.sh >"${inventory_file}"
-scripts/render_service_inventory.sh --all-routes >"${route_file}"
+scripts/render_service_inventory.sh --manifest-directory "${manifest_directory}" >"${inventory_file}"
+scripts/render_service_inventory.sh --manifest-directory "${manifest_directory}" --all-routes >"${route_file}"
 
 : >"${namespace_lines_file}"
+: >"${private_dns_file}"
+manifest_files=()
 while IFS= read -r cluster_directory; do
   cluster="${cluster_directory##*/}"
-  manifest_index=0
   while IFS= read -r target; do
-    manifest_file="${manifest_directory}/${cluster}-${manifest_index}.yaml"
-    kustomize build "${target}" >"${manifest_file}"
-    manifest_index=$((manifest_index + 1))
+    manifest_file="${manifest_directory}/${target#./}.yaml"
+    manifest_files+=("${manifest_file}")
     CLUSTER="${cluster}" yq eval -N -o=json -I=0 '
         select(.kind == "Namespace") |
         {
@@ -41,9 +40,17 @@ while IFS= read -r cluster_directory; do
           )
         }
       ' "${manifest_file}" | sed '/^null$/d; /^$/d' >>"${namespace_lines_file}"
+    CLUSTER="${cluster}" yq eval -N -o=json -I=0 '
+      select(.kind == "PrivateDNSRecord") |
+      {
+        "cluster": strenv(CLUSTER),
+        "hostname": .spec.hostname,
+        "namespace": .metadata.namespace,
+        "source": ("PrivateDNSRecord/" + .metadata.namespace + "/" + .metadata.name)
+      }
+    ' "${manifest_file}" | sed '/^null$/d; /^$/d' >>"${private_dns_file}"
   done < <(
-    kustomize build "clusters/${cluster}" |
-      yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .spec.sourceRef.name == "flux-system") | .spec.path' - |
+    yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .spec.sourceRef.name == "flux-system") | .spec.path' "${manifest_directory}/clusters/${cluster}.yaml" |
       sort -u
   )
 done < <(find clusters -mindepth 1 -maxdepth 1 -type d | sort)
@@ -55,17 +62,7 @@ yq eval -N -o=json -I=0 '
     "launchURL": .spec.client.launchURL,
     "source": ("PocketIDClient/" + .metadata.namespace + "/" + .metadata.name)
   }
-' "${manifest_directory}"/*.yaml | jq -s '.' >"${pocket_id_file}"
-
-yq eval -N -o=json -I=0 '
-  select(.kind == "PrivateDNSRecord") |
-  {
-    "cluster": (filename | split("/") | .[-1] | split("-") | .[0]),
-    "hostname": .spec.hostname,
-    "namespace": .metadata.namespace,
-    "source": ("PrivateDNSRecord/" + .metadata.namespace + "/" + .metadata.name)
-  }
-' "${manifest_directory}"/*.yaml | jq -s '.' >"${private_dns_file}"
+' "${manifest_files[@]}" | jq -s '.' >"${pocket_id_file}"
 
 jq -e \
   --slurpfile namespaces "${namespace_file}" \
@@ -142,7 +139,7 @@ jq -e \
       map(.source)
     ) as $missing_pocket_id_routes |
     (
-      $private_dns[0] |
+      $private_dns |
       map(select(. as $dns | $route_inventory | any(
         .cluster == $dns.cluster and
         .namespace == $dns.namespace and

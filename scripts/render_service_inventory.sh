@@ -4,15 +4,20 @@ set -euo pipefail
 all_routes=false
 clusters=()
 include_static=false
+manifest_directory=""
 
 usage() {
-  echo "Usage: $0 [--all-routes] [--include-static] [cluster ...]" >&2
+  echo "Usage: $0 [--all-routes] [--include-static] [--manifest-directory directory] [cluster ...]" >&2
 }
 
 while (($# > 0)); do
   case "$1" in
     --all-routes)
       all_routes=true
+      ;;
+    --manifest-directory)
+      manifest_directory="${2:?--manifest-directory requires a directory}"
+      shift
       ;;
     --include-static)
       include_static=true
@@ -42,6 +47,11 @@ cleanup() {
 
 trap cleanup EXIT
 
+if [[ -z "${manifest_directory}" ]]; then
+  manifest_directory="${temporary_directory}/manifests"
+  scripts/render_manifests.sh "${manifest_directory}" "${clusters[@]}"
+fi
+
 inventory_file="${temporary_directory}/inventory.jsonl"
 : >"${inventory_file}"
 
@@ -52,8 +62,7 @@ for cluster in "${clusters[@]}"; do
   fi
   for target in "apps/overlays/${cluster}" "clusters/${cluster}/platform"; do
     # shellcheck disable=SC2016
-    kustomize build "${target}" |
-      ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -r '
+    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -r '
         (
           (
             select(.kind == "HTTPRoute") |
@@ -130,7 +139,7 @@ for cluster in "${clusters[@]}"; do
         } |
         select(.source != null) |
         @json
-      ' - | sed '/^null$/d; /^$/d' >>"${inventory_file}"
+      ' "${manifest_directory}/${target}.yaml" | sed '/^null$/d; /^$/d' >>"${inventory_file}"
   done
 done
 

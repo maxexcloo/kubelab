@@ -69,8 +69,11 @@ run = """
 actionlint .github/workflows/*.yaml
 prettier --check .
 shellcheck scripts/*.sh
-scripts/check_manifests.sh
-scripts/check_service_metadata.sh
+manifest_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-check.XXXXXX")"
+trap 'rm -rf -- "${manifest_directory:?}"' EXIT
+scripts/render_manifests.sh "$manifest_directory"
+scripts/check_manifests.sh "$manifest_directory"
+scripts/check_service_metadata.sh "$manifest_directory"
 python -m unittest discover -s tests -p 'test_*.py'
 """
 
