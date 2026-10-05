@@ -34,7 +34,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/usetrmnl/larapaper
-              tag: 0.42.0@sha256:2e0bd58aff9feaa082fc5e19aab6b91144ff2dab91939c8c610d72e2264d5a9e
+              tag: 0.43.1@sha256:e70656dc6eb5780e0371b19a755fb080c4e9dbdc5a98cc8300c0e8e20c6437db
             probes:
               readiness:
                 custom: true

@@ -33,7 +33,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/rustmailer/bichon
-              tag: 2.0.3@sha256:fa6a04db651a43c734c1f92eb48c48c78eaf23c0d387356dfc6041abdf73587a
+              tag: 2.1.0@sha256:197bf942c70a73e8d984ec3b450c17b69a9d5f5bd3a8f3ee042670b86a0b611f
             probes:
               liveness:
                 custom: true
