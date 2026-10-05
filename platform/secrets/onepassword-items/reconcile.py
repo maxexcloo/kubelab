@@ -28,8 +28,9 @@ def request(url, *, token, body=None, context=None, method="GET"):
             content = response.read()
             return None if not content else json.loads(content)
     except urllib.error.HTTPError as error:
-        detail = error.read().decode(errors="replace")
-        raise RuntimeError(f"{method} {url} returned {error.code}: {detail}") from error
+        # Connect error bodies can echo submitted credentials.
+        error.close()
+        raise RuntimeError(f"{method} {url} returned {error.code}") from error
     except urllib.error.URLError as error:
         raise RuntimeError(f"{method} {url} failed: {error.reason}") from error
 
@@ -127,6 +128,8 @@ def applications_ready():
     )
     return (
         ready
+        and not resource.get("spec", {}).get("suspend", False)
+        and not source.get("spec", {}).get("suspend", False)
         and status.get("observedGeneration") == metadata.get("generation")
         and bool(source_revision)
         and status.get("lastAppliedRevision") == source_revision
@@ -334,7 +337,7 @@ def update_eventually(path, item):
         try:
             return connect(path, body=item, method="PUT")
         except RuntimeError as error:
-            if " returned 404:" not in str(error) or attempt == 6:
+            if not str(error).endswith(" returned 404") or attempt == 6:
                 raise
             time.sleep(attempt * 5)
 

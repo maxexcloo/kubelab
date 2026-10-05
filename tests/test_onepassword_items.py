@@ -7,6 +7,7 @@ import copy
 import importlib.util
 import io
 import unittest
+import urllib.error
 from pathlib import Path
 from unittest.mock import patch
 
@@ -33,6 +34,32 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_http_errors_do_not_expose_response_credentials(self):
+        error = urllib.error.HTTPError(
+            "http://connect/v1/items", 400, "Bad Request", {},
+            io.BytesIO(b'{"password": "private-value"}'),
+        )
+        with patch.object(RECONCILER.urllib.request, "urlopen", side_effect=error):
+            with self.assertRaisesRegex(RuntimeError, "returned 400$") as caught:
+                RECONCILER.request("http://connect/v1/items", token="private-token")
+        self.assertNotIn("private-value", str(caught.exception))
+        self.assertTrue(error.closed)
+
+    def test_eventual_update_retries_only_not_found(self):
+        for code in [400, 404]:
+            with self.subTest(code=code), patch.object(
+                RECONCILER, "connect",
+                side_effect=[RuntimeError(f"PUT http://connect returned {code}"), {}],
+            ) as connect, patch.object(RECONCILER.time, "sleep") as sleep:
+                if code == 404:
+                    self.assertEqual(RECONCILER.update_eventually("/items/item", {}), {})
+                    self.assertEqual(connect.call_count, 2)
+                    sleep.assert_called_once_with(5)
+                else:
+                    with self.assertRaises(RuntimeError):
+                        RECONCILER.update_eventually("/items/item", {})
+                    sleep.assert_not_called()
+
     def test_category_replacement_preserves_credentials_before_removing_original(self):
         original = {
             "category": "SERVER",
@@ -178,6 +205,10 @@ class ReconcilerTests(unittest.TestCase):
             lambda path: source if "gitrepositories" in path else application
         )
         self.assertTrue(RECONCILER.applications_ready())
+        for resource in [application, source]:
+            resource.setdefault("spec", {})["suspend"] = True
+            self.assertFalse(RECONCILER.applications_ready())
+            resource["spec"]["suspend"] = False
         source["status"]["artifact"]["revision"] = "main@sha1:new"
         self.assertFalse(RECONCILER.applications_ready())
         source["status"]["artifact"]["revision"] = "main@sha1:current"

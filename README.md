@@ -70,7 +70,7 @@ its `mbk` monitoring configuration and reconcile after the automation APIs exist
 
 After `homelab` provisions the substrate, run `mise run bootstrap syd` with a
 matching kubeconfig context. The task confirms the context and API endpoint,
-installs Cilium, injects the provisioned 1Password Connect credentials and token,
+installs Cilium, validates and injects the provisioned 1Password Connect credentials and token,
 and starts Flux. Check progress with `mise run status syd`.
 
 Connect credentials are the only secrets injected outside reconciliation.
@@ -285,7 +285,8 @@ Crossplane defaults to orphan-on-delete; ExternalDNS is upsert-only. Removing a
 declaration retains its external bucket, key, identity client, DNS record or WAF
 rule. The 1Password reconciler archives unreferenced items tagged only `Kubelab`
 after apps reconcile the current Git revision. Restore archived items before
-restoring workloads. It never modifies `Homelab` items; external resource cleanup
+restoring workloads. Archival pauses when the apps Kustomization or its Git source
+is suspended. It never modifies `Homelab` items; external resource cleanup
 remains manual.
 
 Pocket ID automation updates existing clients. Restore its database and the app
