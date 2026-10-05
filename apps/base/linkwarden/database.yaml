@@ -4,7 +4,7 @@ metadata:
   name: linkwarden-database
   namespace: linkwarden
 spec:
-  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie@sha256:0fae0cb527912426a889ec0b21b9733e5b76fdc6ad8909914a6e8a6c8ba4f64b
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie@sha256:37ade18dbdddba430858c72725aceeec66f33fa5333e82ea1df4942f6c1c83a3
   instances: 1
   bootstrap:
     initdb:
