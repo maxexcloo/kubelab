@@ -22,6 +22,6 @@ jobs:
       - name: Set up tools
         uses: jdx/mise-action@v5
         with:
-          version: 2026.10.1
+          version: 2026.10.3
       - name: Run hooks
         run: mise run prek

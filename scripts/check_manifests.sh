@@ -15,7 +15,7 @@ schema_cache_directory=".cache/kubeconform"
 remote_schema_cache_directory="${schema_cache_directory}/remote"
 # Validate the cluster API; schema publication can lag newer kubectl releases.
 kubernetes_version="1.36.4"
-crd_catalog_revision="ad3b08c5045129d7bb1eeffd8e61719b2c8dd1e2"
+crd_catalog_revision="4c8dc296d32b06d15ccde9668ff136c951f4d539"
 mkdir -p \
   "${remote_schema_cache_directory}" \
   "${schema_directory}"
