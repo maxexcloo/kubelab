@@ -197,41 +197,26 @@ class PrivateDNSCompositionTests(unittest.TestCase):
 
 
 class CloudflareZoneTests(unittest.TestCase):
-    def test_zone_lookup_preserves_the_id_on_api_errors(self):
+    def test_zone_lookup_requires_one_successful_matching_result(self):
         resource = composition_resource(
             "platform/automation/cloudflare/composition.yaml", "zone"
         )
-        mapping = resource["spec"]["forProvider"]["secretInjectionConfigs"][0]["keyMappings"][0]
-        self.assertEqual(mapping["missingFieldStrategy"], "preserve")
-        expression = mapping["responseJQ"]
-        self.assertEqual(evaluate(expression, {
-            "statusCode": 200, "body": {"success": True, "result": [{"id": "zone-id"}]},
-        }), "zone-id")
+        expression = resource["spec"]["forProvider"]["expectedResponseCheck"]["logic"]
+        data = {
+            "payload": {"body": {"zoneName": "example.com"}},
+            "response": {"statusCode": 200, "body": {
+                "success": True, "result": [{"id": "zone-id", "name": "example.com"}],
+            }},
+        }
+        self.assertTrue(evaluate(expression, data))
         for response in [
             {"statusCode": 500, "body": {"success": False, "result": None}},
             {"statusCode": 200, "body": {"success": True, "result": []}},
-            {"statusCode": 200, "body": {"success": True, "result": [{"id": "a"}, {"id": "b"}]}},
+            {"statusCode": 200, "body": {"success": True, "result": [{"name": "other.com"}]}},
+            {"statusCode": 200, "body": {"success": True, "result": [{"name": "example.com"}] * 2}},
         ]:
             with self.subTest(response=response):
-                self.assertIsNone(evaluate(expression, response))
-
-    def test_waf_uses_the_namespace_scoped_zone_id(self):
-        resource = composition_resource(
-            "platform/automation/cloudflare/composition.yaml", "waf", base=False
-        )
-        patches = [p for p in resource["patches"]
-                   if p["toFieldPath"].endswith(".url")]
-        self.assertEqual({p["toFieldPath"] for p in patches}, {
-            f"spec.forProvider.mappings[{i}].url" for i in range(3)
-        })
-        for patch in patches:
-            expression = patch["combine"]["string"]["fmt"] % ("redlib", "redlib")
-            # The provider substitutes Secrets in the expression before running jq.
-            expression = expression.replace("{{ redlib-zone:redlib:zone-id }}", "zone-id")
-            self.assertEqual(evaluate(expression, {}),
-                             "https://api.cloudflare.com/client/v4/zones/zone-id/"
-                             "rulesets/phases/http_request_firewall_custom/entrypoint")
-
+                self.assertFalse(evaluate(expression, dict(data, response=response)))
 
 
 class B2ComparisonTests(unittest.TestCase):
