@@ -106,9 +106,8 @@ spec:
                         and $bucket.defaultServerSideEncryption.isClientAuthorizedToRead == true
                         and $bucket.defaultServerSideEncryption.value.algorithm == "AES256"
                         and $bucket.defaultServerSideEncryption.value.mode == "SSE-B2"
-                        and $bucket.lifecycleRules == [{
+                        and ($bucket.lifecycleRules | map(with_entries(select(.value != null)))) == [{
                           "daysFromHidingToDeleting": 1,
-                          "daysFromUploadingToHiding": null,
                           "fileNamePrefix": ""
                         }]
                       )

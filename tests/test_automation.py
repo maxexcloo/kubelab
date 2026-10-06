@@ -220,6 +220,32 @@ class CloudflareZoneTests(unittest.TestCase):
 
 
 class B2ComparisonTests(unittest.TestCase):
+    def test_bucket_lifecycle_accepts_null_api_defaults_but_detects_changes(self):
+        resource = composition_resource(
+            "platform/automation/b2/composition.yaml", "bucket"
+        )
+        expression = resource["spec"]["forProvider"]["expectedResponseCheck"]["logic"]
+        rule = {"daysFromHidingToDeleting": 1, "fileNamePrefix": ""}
+        bucket = {
+            "bucketType": "allPrivate",
+            "defaultServerSideEncryption": {
+                "isClientAuthorizedToRead": True,
+                "value": {"algorithm": "AES256", "mode": "SSE-B2"},
+            },
+            "lifecycleRules": [rule],
+        }
+        for listed in [False, True]:
+            data = {"response": {"statusCode": 200, "body":
+                    {"buckets": [bucket]} if listed else bucket}}
+            with self.subTest(listed=listed):
+                self.assertTrue(evaluate(expression, data))
+                for key in ["daysFromUploadingToHiding", "daysFromStartingToCancelingUnfinishedLargeFiles"]:
+                    rule[key] = None
+                    self.assertTrue(evaluate(expression, data))
+                    rule[key] = 2
+                    self.assertFalse(evaluate(expression, data))
+                    del rule[key]
+
     @classmethod
     def setUpClass(cls):
         cls.resource = composition_resource(
