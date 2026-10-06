@@ -24,7 +24,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/cedya77/aiometadata
-              tag: 3.0.0@sha256:28c23a346baa363a05c7827a4e15644119cdbe5209cb032806621d3a1c056ab8
+              tag: 3.4.1@sha256:9bff687d7f213e401475951cb0be882eeec45d919e0659a2a7dc58d9b329c67e
             env:
               DATABASE_URI: sqlite://addon/data/db.sqlite
               HOST_NAME: https://aiometadata.excloo.com
