@@ -89,10 +89,10 @@ spec:
         namespaced: true
       resources:
         limits:
-          memory: 512Mi
+          memory: 1Gi
         requests:
           cpu: 50m
-          memory: 128Mi
+          memory: 256Mi
       sidecar:
         dashboards:
           enabled: false
@@ -147,7 +147,6 @@ spec:
     syncJob:
       enabled: false
     victoria-metrics-operator:
-      watchNamespaces: [observability, observability-node]
       crds:
         cleanup:
           enabled: false
