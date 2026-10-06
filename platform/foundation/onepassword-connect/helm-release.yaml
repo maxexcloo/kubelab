@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: onepassword
         namespace: flux-system
-      version: 2.4.1
+      version: 2.4.2
   dependsOn:
     - name: external-secrets
       namespace: external-secrets
