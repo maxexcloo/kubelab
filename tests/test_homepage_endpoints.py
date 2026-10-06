@@ -39,6 +39,19 @@ class HomepageEndpointsTests(unittest.TestCase):
             subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
             self.assertEqual(output.stat().st_mtime_ns, timestamp)
 
+    def test_invalid_yaml_preserves_previous_configuration(self):
+        with tempfile.TemporaryDirectory() as directory:
+            template = Path(directory) / "source.yaml"
+            output = Path(directory) / "services.yaml"
+            template.write_text("services: [broken YAML\n")
+            output.write_text("previous configuration\n")
+            result = subprocess.run(
+                ["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)],
+                capture_output=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(output.read_text(), "previous configuration\n")
+
     def test_invalid_references_preserve_previous_configuration(self):
         with tempfile.TemporaryDirectory() as directory:
             template = Path(directory) / "source.yaml"

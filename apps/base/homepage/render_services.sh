@@ -25,7 +25,7 @@ if [ -z "$homelab_directory" ]; then
   mkdir -p "$homelab_directory/data"
   wget -q -T 30 -O "$temporary_directory/revision.json" \
     https://api.github.com/repos/maxexcloo/homelab/commits/main
-  revision=$(yq -p=json -e -r '.sha' "$temporary_directory/revision.json")
+  revision=$(yq -e -r '.sha' "$temporary_directory/revision.json")
   case "$revision" in
     *[!a-f0-9]* | '') echo 'Invalid Homelab revision' >&2; exit 1 ;;
   esac
@@ -39,7 +39,8 @@ fi
 domain=$(yq -e -r '.domains.infrastructure' "$homelab_directory/data/domains.yaml")
 cp "$template" "$temporary_directory/services.yaml"
 yq -r '.. | select(tag == "!!str") | select(test("^homelab://"))' \
-  "$template" | sort -u > "$temporary_directory/references"
+  "$template" > "$temporary_directory/references-unsorted"
+sort -u "$temporary_directory/references-unsorted" > "$temporary_directory/references"
 
 while IFS= read -r reference; do
   remainder=${reference#homelab://}

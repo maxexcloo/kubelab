@@ -31,7 +31,7 @@ Netboot and Syncthing remain storage-local TrueNAS applications.
 
 ## Operations
 
-Install jq (`brew install jq` on macOS), then install the remaining pinned tools
+Install jq and wget (`brew install jq wget` on macOS), then install the remaining pinned tools
 and hooks through [Mise](https://mise.jdx.dev/):
 
 ```shell
@@ -279,10 +279,14 @@ for self-checks.
 `scripts/render_service_inventory.sh` emits normalised route metadata as JSON;
 `--include-static` adds Homepage's external monitored services.
 After a validated push to `main`, CI dispatches `homelab-fly` with that commit
-SHA to refresh Gatus. Configure `FLY_DEPLOY_TOKEN` here with Actions write access
-only to `maxexcloo/homelab-fly`; the default repository token cannot dispatch
-another repository's workflow. Install the receiving Fly workflow before enabling
-this dispatch. Rendering uses Git configuration and needs no cluster credentials.
+SHA to refresh Gatus. The standard 1Password Action loads `GH_WORKFLOW_TOKEN`
+from `op://Homelab/GitHub Actions/workflow-token`, using the repository's
+`OP_SERVICE_ACCOUNT_TOKEN` bootstrap secret with read access to that vault.
+The GitHub token needs Actions write access only to `maxexcloo/homelab-fly`;
+rotate it in 1Password, without copying it into repository secrets. The default
+repository token cannot dispatch another repository's workflow. Install the
+receiving Fly workflow before enabling this dispatch. Rendering uses Git
+configuration and needs no cluster credentials.
 
 ## Secrets & External Automation
 
