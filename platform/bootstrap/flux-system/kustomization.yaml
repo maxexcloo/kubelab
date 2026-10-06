@@ -17,6 +17,8 @@ patches:
                 resources:
                   limits:
                     cpu: null
+                  requests:
+                    memory: 128Mi
     target:
       kind: Deployment
       labelSelector: app.kubernetes.io/part-of=flux

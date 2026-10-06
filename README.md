@@ -115,16 +115,31 @@ Helm charts separately; schema checks do not validate their generated workloads.
 
 ### Resources
 
-CPU requests reserve scheduling capacity; CPU limits cap execution. Flux and
-Crossplane can burst without CPU limits. Memory limits remain enabled;
-Crossplane package runtimes request 128 MiB and allow 512 MiB.
+Requests guide scheduling; CPU requests also control sharing under contention.
+They do not preallocate RAM or cap CPU bursts. Keep CPU limits off trusted
+workloads unless isolation needs a specific cap. Helm chart defaults can add
+limits even when a value is omitted; check the rendered workload.
 
-Sydney uses smaller CPU requests for lightly loaded services to leave room for
-rolling upgrades. Revisit these as sustained usage grows. Diagnose
-`Insufficient cpu` using node allocations and pending Pod events; diagnose
-`OOMKilled` using container memory usage and limits. VictoriaMetrics and kubelet
-statistics provide utilisation data; `kubectl top` requires a Metrics API that
-is not installed here.
+Size requests from normal busy-period usage and memory limits above observed
+startup and workload peaks. Allow room for Chromium rendering, image processing
+and rolling upgrades. Keep existing headroom until VictoriaMetrics has a
+representative week of container usage; do not lower limits merely to reduce the
+sum of configured ceilings. Existing database budgets need workload history
+before introducing caps. Bound application concurrency when overlapping work,
+rather than a single operation, causes the peak.
+
+Distinguish `Insufficient cpu` scheduling failures, CPU throttling, container
+memory-limit stalls or `OOMKilled`, and actual node `MemoryPressure`. A container
+can stall at its limit while the node has free RAM. Check kubelet memory-limit
+events and pressure alongside usage; a healthy Pod or open TCP port alone does
+not establish application health. Kubernetes HTTP probes should use supported
+application health endpoints where available.
+
+VictoriaMetrics collects kubelet container and node metrics with seven-day
+retention. Its operator watches the cluster so node discovery and cross-namespace
+scrapes work, and manages collector RBAC. Sydney keeps smaller CPU requests to
+leave scheduling room for upgrades. `kubectl top` requires a Metrics API that is
+not installed here; use VictoriaMetrics or kubelet statistics instead.
 
 ### Upgrades
 

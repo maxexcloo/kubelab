@@ -66,6 +66,7 @@ spec:
         type: RuntimeDefault
     resources:
       limits:
+        cpu: null
         memory: 1Gi
       requests:
         cpu: 20m
