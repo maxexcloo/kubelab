@@ -31,17 +31,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Load workflow credential
-        id: credential
-        uses: 1password/load-secrets-action@v5
-        with:
-          export-env: false
-        env:
-          GH_WORKFLOW_TOKEN: op://Homelab/GitHub Actions/workflow-token
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
       - name: Deploy the validated inventory
         env:
-          GH_TOKEN: ${{ steps.credential.outputs.GH_WORKFLOW_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_FLY_DEPLOY_TOKEN }}
           KUBELAB_REVISION: ${{ github.sha }}
         run: |
           gh workflow run deploy.yaml --repo maxexcloo/homelab-fly --ref main \
