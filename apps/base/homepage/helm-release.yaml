@@ -78,6 +78,42 @@ spec:
               capabilities:
                 drop:
                   - ALL
+        initContainers:
+          endpoints:
+            restartPolicy: Always
+            command:
+              - /bin/sh
+              - /scripts/render_services.sh
+              - --watch
+              - /source/services.yaml
+              - /output/services.yaml
+            image:
+              repository: docker.io/mikefarah/yq
+              tag: 4.54.1
+            probes:
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  periodSeconds: 5
+                  exec:
+                    command:
+                      - /bin/sh
+                      - -c
+                      - test -s /output/services.yaml
+            resources:
+              limits:
+                memory: 64Mi
+              requests:
+                cpu: 5m
+                memory: 16Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
         serviceAccount:
           identifier: homepage
     defaultPodOptions:
@@ -124,9 +160,6 @@ spec:
               - path: /app/config/kubernetes.yaml
                 readOnly: true
                 subPath: kubernetes.yaml
-              - path: /app/config/services.yaml
-                readOnly: true
-                subPath: services.yaml
               - path: /app/config/settings.yaml
                 readOnly: true
                 subPath: settings.yaml
@@ -135,8 +168,28 @@ spec:
                 subPath: widgets.yaml
       config-directory:
         type: emptyDir
-        globalMounts:
-          - path: /app/config
+        advancedMounts:
+          homepage:
+            endpoints:
+              - path: /output
+            homepage:
+              - path: /app/config
+      endpoint-scripts:
+        name: homepage-endpoints
+        type: configMap
+        advancedMounts:
+          homepage:
+            endpoints:
+              - path: /scripts
+                readOnly: true
+      endpoint-source:
+        name: homepage
+        type: configMap
+        advancedMounts:
+          homepage:
+            endpoints:
+              - path: /source
+                readOnly: true
       temporary:
         type: emptyDir
         globalMounts:

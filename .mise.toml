@@ -76,7 +76,7 @@ description = "Check project files and configuration"
 run = """
 actionlint .github/workflows/*.yaml
 prettier --check .
-shellcheck scripts/*.sh
+shellcheck scripts/*.sh apps/base/homepage/*.sh
 manifest_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-check.XXXXXX")"
 trap 'rm -rf -- "${manifest_directory:?}"' EXIT
 scripts/render_manifests.sh "$manifest_directory"

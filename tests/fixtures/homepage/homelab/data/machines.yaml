@@ -1,0 +1,16 @@
+machines:
+  mbk:
+    gateway:
+      management_port: 443
+    hass:
+      management_port: 443
+    kimbap:
+      hostname: storage
+      management_port: 8444
+      services:
+        netboot:
+          port: 31010
+          scheme: http
+        syncthing:
+          port: 20910
+          scheme: http

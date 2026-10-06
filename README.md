@@ -176,6 +176,24 @@ Companion caches, search services and Redlib's `ctrld` DNS proxy belong to their
 apps. Stateful or migration-owning single replicas use recreate updates;
 stateless Cloudflared and Redlib use rolling updates.
 
+Homepage's external machine URLs use `homelab://<network>/<machine>/<service>`
+references, with optional trailing paths. `management` selects the machine's
+HTTPS `management_port`; other services select `services.<name>.scheme` and
+`services.<name>.port`. The hostname and infrastructure domain also come from
+Homelab. Keep presentation and `siteMonitor` opt-ins here, and addresses and ports
+in Homelab's machine inventory.
+
+`apps/base/homepage/render_services.sh` resolves these references for both Homepage
+and the static service inventory consumed by Gatus. Set `HOMELAB_DIRECTORY` to
+use a local or pinned checkout. Otherwise it downloads the two public inventory
+files from a single Homelab commit. A native sidecar runs the same script every
+five minutes, atomically replaces `services.yaml` only when it changes, and keeps
+the last valid file on failure. New Pods wait for their first successful fetch;
+running Pods retain their configuration during GitHub outages. No credentials or
+Terraform state are required; widget-secret placeholders remain untouched.
+To roll back, revert the Homepage helper and volume changes together with its
+URL references, restoring the static `services.yaml` ConfigMap mount.
+
 Homepage discovers its local cluster and adds shared external services and
 bookmarks. Static services opt into health checks with `siteMonitor`; `href`
 alone is navigation only. Home Assistant add-on ingress links remain navigation

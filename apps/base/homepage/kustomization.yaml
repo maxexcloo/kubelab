@@ -17,3 +17,9 @@ configMapGenerator:
         homepage.excloo.dev/rendered-sha256: b2a02ba177a8ad1a0de2b9405b7a44199f875135f01bfe5a3b4bc14c987ab982
       labels:
         app.kubernetes.io/name: homepage
+  - name: homepage-endpoints
+    namespace: homepage
+    files:
+      - render_services.sh
+    options:
+      disableNameSuffixHash: true

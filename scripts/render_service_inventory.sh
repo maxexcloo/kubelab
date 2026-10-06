@@ -144,8 +144,11 @@ for cluster in "${clusters[@]}"; do
 done
 
 if [[ "${include_static}" == true ]]; then
-  yq -r '.data."services.yaml"' apps/base/homepage/config-map.yaml |
-    yq -o=json '.' - |
+  yq -r '.data."services.yaml"' apps/base/homepage/config-map.yaml >"${temporary_directory}/services-source.yaml"
+  sh apps/base/homepage/render_services.sh \
+    "${temporary_directory}/services-source.yaml" "${temporary_directory}/services.yaml" \
+    "${HOMELAB_DIRECTORY:-}"
+  yq -o=json '.' "${temporary_directory}/services.yaml" |
     jq -c '
       .[] |
       to_entries[] as $group |

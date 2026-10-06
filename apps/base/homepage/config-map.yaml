@@ -109,77 +109,77 @@ data:
     - Home Automation:
         - ESPHome:
             description: ESP Device Builder
-            href: https://hass.mbk.excloo.net/5c53de3b_esphome
+            href: homelab://mbk/hass/management/5c53de3b_esphome
             icon: esphome
             weight: 0
         - ESPresense:
             description: Room Presence
-            href: https://hass.mbk.excloo.net/f32ea98b_espresense-companion
+            href: homelab://mbk/hass/management/f32ea98b_espresense-companion
             icon: espressif
             weight: 0
         - Home Assistant:
             description: Smart Home & Automations
-            href: https://hass.mbk.excloo.net
+            href: homelab://mbk/hass/management
             icon: home-assistant
-            siteMonitor: https://hass.mbk.excloo.net
+            siteMonitor: homelab://mbk/hass/management
             weight: -100
             widget:
               hideErrors: true
               key: "{{HOMEPAGE_VAR_HOME_ASSISTANT_KEY}}"
               type: homeassistant
-              url: https://hass.mbk.excloo.net
+              url: homelab://mbk/hass/management
         - Home Assistant Matter Hub:
             description: Matter Bridge
-            href: https://hass.mbk.excloo.net/3fd9e6b0_hamh
+            href: homelab://mbk/hass/management/3fd9e6b0_hamh
             icon: sh-home-assistant-matter-hub
             weight: 0
         - Studio Code Server:
             description: Browser IDE
-            href: https://hass.mbk.excloo.net/a0d7b954_vscode
+            href: homelab://mbk/hass/management/a0d7b954_vscode
             icon: visual-studio-code
             weight: 0
         - Zigbee2MQTT:
             description: Zigbee Coordinator
-            href: https://hass.mbk.excloo.net/45df7312_zigbee2mqtt
+            href: homelab://mbk/hass/management/45df7312_zigbee2mqtt
             icon: zigbee2mqtt
             weight: 0
     - Infrastructure:
         - Netboot:
             description: Network Boot Server
-            href: http://kimbap.mbk.excloo.net:31010
+            href: homelab://mbk/kimbap/netboot
             icon: netbootxyz
-            siteMonitor: http://kimbap.mbk.excloo.net:31010
+            siteMonitor: homelab://mbk/kimbap/netboot
             weight: 0
         - Syncthing:
             description: File Synchronisation
-            href: http://kimbap.mbk.excloo.net:20910
+            href: homelab://mbk/kimbap/syncthing
             icon: syncthing
-            siteMonitor: http://kimbap.mbk.excloo.net:20910
+            siteMonitor: homelab://mbk/kimbap/syncthing
             weight: 0
         - TrueNAS:
             description: Storage Appliance
-            href: https://kimbap.mbk.excloo.net:8443
+            href: homelab://mbk/kimbap/management
             icon: truenas
-            siteMonitor: https://kimbap.mbk.excloo.net:8443
+            siteMonitor: homelab://mbk/kimbap/management
             weight: -100
             widget:
               enablePools: true
               hideErrors: true
               key: "{{HOMEPAGE_VAR_TRUENAS_KEY}}"
               type: truenas
-              url: https://kimbap.mbk.excloo.net:8443
+              url: homelab://mbk/kimbap/management
               version: 2
         - UniFi:
             description: Network Controller
-            href: https://gateway.mbk.excloo.net
+            href: homelab://mbk/gateway/management
             icon: unifi
-            siteMonitor: https://gateway.mbk.excloo.net
+            siteMonitor: homelab://mbk/gateway/management
             weight: -100
             widget:
               hideErrors: true
               key: "{{HOMEPAGE_VAR_UNIFI_KEY}}"
               type: unifi
-              url: https://gateway.mbk.excloo.net
+              url: homelab://mbk/gateway/management
     - Operations:
         - Gatus:
             description: Health Monitoring & Status Page
