@@ -40,6 +40,15 @@ spec:
                   payload:
                     baseUrl: https://api.cloudflare.com/client/v4/zones
                     body: "{}"
+                  secretInjectionConfigs:
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: if .statusCode == 200 and .body.success == true and (.body.result | length) == 1 then .body.result[0].id else null end
+                          secretKey: zone-id
+                      secretRef:
+                        name: cloudflare-zone
+                        namespace: default
+                      setOwnerReference: true
                 providerConfigRef:
                   kind: ClusterProviderConfig
                   name: cloudflare-waf
@@ -55,14 +64,17 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: metadata.namespace
-              - type: ToCompositeFieldPath
-                fromFieldPath: status.response.body
-                toFieldPath: status.zone
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name
                 transforms:
-                  - type: convert
-                    convert:
-                      format: json
-                      toType: object
+                  - type: string
+                    string:
+                      fmt: "%s-zone"
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.zoneName
                 toFieldPath: spec.forProvider.payload.body
@@ -176,14 +188,15 @@ spec:
                     string:
                       fmt: .body.result.rules[]? | select(.ref == "%s") | .expression | @json | .[1:-1]
                       type: Format
-              - type: FromCompositeFieldPath
-                fromFieldPath: status.zone.result[0].id
+              - type: CombineFromComposite
                 toFieldPath: spec.forProvider.payload.baseUrl
-                transforms:
-                  - type: string
-                    string:
-                      fmt: https://api.cloudflare.com/client/v4/zones/%s/rulesets/phases/http_request_firewall_custom/entrypoint
-                      type: Format
+                combine:
+                  strategy: string
+                  string:
+                    fmt: https://api.cloudflare.com/client/v4/zones/{{ %s-zone:%s:zone-id }}/rulesets/phases/http_request_firewall_custom/entrypoint
+                  variables:
+                    - fromFieldPath: metadata.name
+                    - fromFieldPath: metadata.namespace
               - type: CombineFromComposite
                 combine:
                   strategy: string

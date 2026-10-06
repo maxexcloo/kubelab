@@ -52,9 +52,3 @@ spec:
                   minLength: 1
                   type: string
               required: [rule, zoneName]
-            status:
-              type: object
-              properties:
-                zone:
-                  type: object
-                  x-kubernetes-preserve-unknown-fields: true

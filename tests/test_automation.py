@@ -196,6 +196,37 @@ class PrivateDNSCompositionTests(unittest.TestCase):
                 })
 
 
+class CloudflareZoneTests(unittest.TestCase):
+    def test_zone_lookup_preserves_the_id_on_api_errors(self):
+        resource = composition_resource(
+            "platform/automation/cloudflare/composition.yaml", "zone"
+        )
+        mapping = resource["spec"]["forProvider"]["secretInjectionConfigs"][0]["keyMappings"][0]
+        self.assertEqual(mapping["missingFieldStrategy"], "preserve")
+        expression = mapping["responseJQ"]
+        self.assertEqual(evaluate(expression, {
+            "statusCode": 200, "body": {"success": True, "result": [{"id": "zone-id"}]},
+        }), "zone-id")
+        for response in [
+            {"statusCode": 500, "body": {"success": False, "result": None}},
+            {"statusCode": 200, "body": {"success": True, "result": []}},
+            {"statusCode": 200, "body": {"success": True, "result": [{"id": "a"}, {"id": "b"}]}},
+        ]:
+            with self.subTest(response=response):
+                self.assertIsNone(evaluate(expression, response))
+
+    def test_waf_uses_the_namespace_scoped_zone_id(self):
+        resource = composition_resource(
+            "platform/automation/cloudflare/composition.yaml", "waf", base=False
+        )
+        patch = next(p for p in resource["patches"]
+                     if p["toFieldPath"] == "spec.forProvider.payload.baseUrl")
+        self.assertEqual(patch["combine"]["string"]["fmt"] % ("redlib", "redlib"),
+                         "https://api.cloudflare.com/client/v4/zones/"
+                         "{{ redlib-zone:redlib:zone-id }}/rulesets/phases/"
+                         "http_request_firewall_custom/entrypoint")
+
+
 class B2ComparisonTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
