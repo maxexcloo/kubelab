@@ -7,6 +7,6 @@ spec:
   client:
     callbackURLs: [https://budget.excloo.com/openid/callback]
     description: Personal Finance
-    id: actual-budget
+    id: actual-budget-au-truenas
     launchURL: https://budget.excloo.com
     name: Actual Budget

@@ -8,6 +8,6 @@ spec:
   client:
     callbackURLs: [https://books.excloo.com/oauth2-callback]
     description: Digital Library
-    id: bookorbit
+    id: bookorbit-au-truenas
     launchURL: https://books.excloo.com
     name: BookOrbit

@@ -10,6 +10,6 @@ spec:
       - https://photos.excloo.com/auth/login
       - https://photos.excloo.com/user-settings
     description: Photo Manager
-    id: immich
+    id: immich-au-truenas
     launchURL: https://photos.excloo.com
     name: Immich

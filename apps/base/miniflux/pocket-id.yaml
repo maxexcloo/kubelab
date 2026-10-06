@@ -7,6 +7,6 @@ spec:
   client:
     callbackURLs: [https://reader.excloo.com/oauth2/oidc/callback]
     description: RSS Reader
-    id: miniflux
+    id: miniflux-au-truenas
     launchURL: https://reader.excloo.com
     name: Miniflux

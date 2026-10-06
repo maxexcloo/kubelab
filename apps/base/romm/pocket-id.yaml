@@ -7,6 +7,6 @@ spec:
   client:
     callbackURLs: [https://games.excloo.com/api/oauth/openid]
     description: Game & ROM Library
-    id: romm
+    id: romm-au-truenas
     launchURL: https://games.excloo.com
     name: RoMM

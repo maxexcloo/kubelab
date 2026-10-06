@@ -8,6 +8,6 @@ spec:
   client:
     callbackURLs: [https://shelf.excloo.com/api/auth/oidc/callback]
     description: Book Search & Downloads
-    id: shelfmark
+    id: shelfmark-au-truenas
     launchURL: https://shelf.excloo.com
     name: Shelfmark
