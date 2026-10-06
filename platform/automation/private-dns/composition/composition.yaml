@@ -30,7 +30,7 @@ spec:
                     recordType: CNAME
                     targets: [private.mbk.excloo.dev]
                     providerSpecific:
-                      - name: external-dns.kubernetes.io/cloudflare-proxied
+                      - name: cloudflare/proxied
                         value: "false"
             patches:
               - type: FromCompositeFieldPath
