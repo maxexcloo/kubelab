@@ -18,3 +18,9 @@ spec:
       - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
         paths:
           - /var/mnt/local-path-provisioner
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 10m
+        memory: 128Mi

@@ -92,7 +92,7 @@ spec:
           memory: 1Gi
         requests:
           cpu: 50m
-          memory: 256Mi
+          memory: 512Mi
       sidecar:
         dashboards:
           enabled: false
@@ -130,10 +130,10 @@ spec:
       enabled: true
       resources:
         limits:
-          memory: 128Mi
+          memory: 256Mi
         requests:
           cpu: 20m
-          memory: 32Mi
+          memory: 128Mi
     kubeApiServer:
       enabled: true
     kubeControllerManager:
@@ -207,7 +207,7 @@ spec:
             memory: 1Gi
           requests:
             cpu: 50m
-            memory: 256Mi
+            memory: 384Mi
     vmalert:
       enabled: false
     vmsingle:
@@ -220,7 +220,7 @@ spec:
             memory: 1Gi
           requests:
             cpu: 100m
-            memory: 256Mi
+            memory: 512Mi
         storage:
           accessModes: [ReadWriteOnce]
           storageClassName: local-path

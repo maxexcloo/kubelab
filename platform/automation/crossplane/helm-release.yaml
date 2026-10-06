@@ -29,7 +29,7 @@ spec:
         memory: 512Mi
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 384Mi
     resourcesRBACManager:
       limits:
         cpu: null

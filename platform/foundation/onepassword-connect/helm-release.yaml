@@ -26,8 +26,16 @@ spec:
       api:
         resources:
           limits:
-            memory: 128Mi
+            memory: 256Mi
           requests:
             cpu: 5m
+            memory: 64Mi
+      sync:
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            cpu: 5m
+            memory: 64Mi
     operator:
       create: false

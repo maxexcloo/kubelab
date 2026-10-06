@@ -20,6 +20,12 @@ spec:
       server: 10.4.0.3
       mountOptions:
         - nfsvers=4.2
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 10m
+        memory: 128Mi
     storageClass:
       accessModes: ReadWriteMany
       name: truenas-nfs

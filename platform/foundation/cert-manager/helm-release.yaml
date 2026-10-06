@@ -28,7 +28,7 @@ spec:
           memory: 256Mi
         requests:
           cpu: 10m
-          memory: 64Mi
+          memory: 128Mi
     config:
       apiVersion: controller.config.cert-manager.io/v1alpha1
       kind: ControllerConfiguration
@@ -42,11 +42,11 @@ spec:
         memory: 256Mi
       requests:
         cpu: 20m
-        memory: 64Mi
+        memory: 128Mi
     webhook:
       resources:
         limits:
-          memory: 128Mi
+          memory: 256Mi
         requests:
           cpu: 10m
-          memory: 32Mi
+          memory: 128Mi
