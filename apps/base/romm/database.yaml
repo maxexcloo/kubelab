@@ -12,6 +12,12 @@ spec:
       owner: romm
       secret:
         name: romm-database
+  resources:
+    limits:
+      memory: 2Gi
+    requests:
+      cpu: 100m
+      memory: 512Mi
   storage:
     size: 10Gi
     storageClass: local-path

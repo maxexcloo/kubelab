@@ -122,10 +122,16 @@ limits even when a value is omitted; check the rendered workload.
 
 Size requests from normal busy-period usage and memory limits above observed
 startup and workload peaks. Allow room for Chromium rendering, image processing
-and rolling upgrades. Keep existing headroom until VictoriaMetrics has a
-representative week of container usage; do not lower limits merely to reduce the
-sum of configured ceilings. Existing database budgets need workload history
-before introducing caps. Bound application concurrency when overlapping work,
+and rolling upgrades. Use upstream guidance and conservative workload estimates when history is
+limited, then refine them with a representative week of VictoriaMetrics data.
+Do not lower limits merely to reduce the sum of configured ceilings.
+
+Small PostgreSQL instances request 100m CPU and 512Mi memory with a 2Gi memory
+limit, retaining PostgreSQL's default 128MB shared buffers. These are initial
+homelab estimates, not upstream sizing defaults. CloudNativePG recommends
+Guaranteed QoS for dedicated database workloads; these shared-node instances
+use Burstable QoS to allow CPU bursts without reserving whole cores per database.
+Tailscale proxy resources use the operator's native `ProxyClass` API. Bound application concurrency when overlapping work,
 rather than a single operation, causes the peak.
 
 Distinguish `Insufficient cpu` scheduling failures, CPU throttling, container

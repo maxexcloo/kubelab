@@ -12,6 +12,12 @@ spec:
       owner: miniflux
       secret:
         name: miniflux-database
+  resources:
+    limits:
+      memory: 2Gi
+    requests:
+      cpu: 100m
+      memory: 512Mi
   storage:
     size: 5Gi
     storageClass: local-path
