@@ -17,6 +17,13 @@ spec:
       ports:
         - port: 3000
           protocol: TCP
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmagent
+      ports:
+        - port: 3000
+          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/instance: victoria-metrics-k8s-stack

@@ -204,10 +204,10 @@ spec:
           cluster: _
         resources:
           limits:
-            memory: 256Mi
+            memory: 1Gi
           requests:
             cpu: 50m
-            memory: 64Mi
+            memory: 256Mi
     vmalert:
       enabled: false
     vmsingle:
