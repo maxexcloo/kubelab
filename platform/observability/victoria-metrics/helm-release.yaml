@@ -68,9 +68,6 @@ spec:
       deploymentStrategy:
         rollingUpdate: null
         type: Recreate
-      extraEmptyDirMounts:
-        - name: tmp
-          mountPath: /tmp
       grafana.ini:
         analytics:
           check_for_updates: false
