@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: external-dns
         namespace: flux-system
-      version: 1.22.0
+      version: 1.23.0
   values:
     labelFilter: gateway.excloo.dev/public-access=true
     logFormat: json
@@ -32,6 +32,7 @@ spec:
     extraArgs:
       cloudflare-dns-records-per-page: "5000"
       cloudflare-record-comment: Kubelab ExternalDNS Managed
+      enable-legacy-annotation-prefix: "true"
     provider:
       name: cloudflare
     resources:
