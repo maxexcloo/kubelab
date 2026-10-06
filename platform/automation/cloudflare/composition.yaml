@@ -142,7 +142,6 @@ spec:
                       method: PUT
                       url: .payload.baseUrl
                   payload:
-                    baseUrl: https://api.cloudflare.com/client/v4/zones/pending/rulesets/phases/http_request_firewall_custom/entrypoint
                     body: '{"action":"block","description":"placeholder","enabled":true,"expression":"false","ref":"placeholder"}'
                   # The provider masks literal JSON strings, so escape the returned expression.
                   secretInjectionConfigs:
@@ -189,11 +188,29 @@ spec:
                       fmt: .body.result.rules[]? | select(.ref == "%s") | .expression | @json | .[1:-1]
                       type: Format
               - type: CombineFromComposite
-                toFieldPath: spec.forProvider.payload.baseUrl
+                toFieldPath: spec.forProvider.mappings[0].url
                 combine:
                   strategy: string
                   string:
-                    fmt: https://api.cloudflare.com/client/v4/zones/{{ %s-zone:%s:zone-id }}/rulesets/phases/http_request_firewall_custom/entrypoint
+                    fmt: '"https://api.cloudflare.com/client/v4/zones/{{ %s-zone:%s:zone-id }}/rulesets/phases/http_request_firewall_custom/entrypoint"'
+                  variables:
+                    - fromFieldPath: metadata.name
+                    - fromFieldPath: metadata.namespace
+              - type: CombineFromComposite
+                toFieldPath: spec.forProvider.mappings[1].url
+                combine:
+                  strategy: string
+                  string:
+                    fmt: '"https://api.cloudflare.com/client/v4/zones/{{ %s-zone:%s:zone-id }}/rulesets/phases/http_request_firewall_custom/entrypoint"'
+                  variables:
+                    - fromFieldPath: metadata.name
+                    - fromFieldPath: metadata.namespace
+              - type: CombineFromComposite
+                toFieldPath: spec.forProvider.mappings[2].url
+                combine:
+                  strategy: string
+                  string:
+                    fmt: '"https://api.cloudflare.com/client/v4/zones/{{ %s-zone:%s:zone-id }}/rulesets/phases/http_request_firewall_custom/entrypoint"'
                   variables:
                     - fromFieldPath: metadata.name
                     - fromFieldPath: metadata.namespace

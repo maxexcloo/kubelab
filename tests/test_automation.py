@@ -219,12 +219,19 @@ class CloudflareZoneTests(unittest.TestCase):
         resource = composition_resource(
             "platform/automation/cloudflare/composition.yaml", "waf", base=False
         )
-        patch = next(p for p in resource["patches"]
-                     if p["toFieldPath"] == "spec.forProvider.payload.baseUrl")
-        self.assertEqual(patch["combine"]["string"]["fmt"] % ("redlib", "redlib"),
-                         "https://api.cloudflare.com/client/v4/zones/"
-                         "{{ redlib-zone:redlib:zone-id }}/rulesets/phases/"
-                         "http_request_firewall_custom/entrypoint")
+        patches = [p for p in resource["patches"]
+                   if p["toFieldPath"].endswith(".url")]
+        self.assertEqual({p["toFieldPath"] for p in patches}, {
+            f"spec.forProvider.mappings[{i}].url" for i in range(3)
+        })
+        for patch in patches:
+            expression = patch["combine"]["string"]["fmt"] % ("redlib", "redlib")
+            # The provider substitutes Secrets in the expression before running jq.
+            expression = expression.replace("{{ redlib-zone:redlib:zone-id }}", "zone-id")
+            self.assertEqual(evaluate(expression, {}),
+                             "https://api.cloudflare.com/client/v4/zones/zone-id/"
+                             "rulesets/phases/http_request_firewall_custom/entrypoint")
+
 
 
 class B2ComparisonTests(unittest.TestCase):
