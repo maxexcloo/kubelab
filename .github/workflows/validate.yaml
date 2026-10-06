@@ -25,3 +25,16 @@ jobs:
           version: 2026.10.3
       - name: Run hooks
         run: mise run prek
+  monitoring:
+    name: Refresh external monitoring
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy the validated inventory
+        env:
+          GH_TOKEN: ${{ secrets.FLY_DEPLOY_TOKEN }}
+          KUBELAB_REVISION: ${{ github.sha }}
+        run: |
+          gh workflow run deploy.yaml --repo maxexcloo/homelab-fly --ref main \
+            --field deployment=gatus-fly --field kubelab_revision="$KUBELAB_REVISION"

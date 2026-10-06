@@ -235,6 +235,11 @@ for self-checks.
 
 `scripts/render_service_inventory.sh` emits normalised route metadata as JSON;
 `--include-static` adds Homepage's external monitored services.
+After a validated push to `main`, CI dispatches `homelab-fly` with that commit
+SHA to refresh Gatus. Configure `FLY_DEPLOY_TOKEN` here with Actions write access
+only to `maxexcloo/homelab-fly`; the default repository token cannot dispatch
+another repository's workflow. Install the receiving Fly workflow before enabling
+this dispatch. Rendering uses Git configuration and needs no cluster credentials.
 
 ## Secrets & External Automation
 
