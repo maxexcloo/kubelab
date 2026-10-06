@@ -42,7 +42,8 @@ spec:
                 spec:
                   periodSeconds: 10
                   timeoutSeconds: 5
-                  tcpSocket:
+                  httpGet:
+                    path: /up
                     port: 8080
               startup:
                 custom: true
@@ -51,14 +52,15 @@ spec:
                   failureThreshold: 60
                   periodSeconds: 10
                   timeoutSeconds: 5
-                  tcpSocket:
+                  httpGet:
+                    path: /up
                     port: 8080
             resources:
               limits:
-                memory: 512Mi
+                memory: 2Gi
               requests:
                 cpu: 20m
-                memory: 128Mi
+                memory: 512Mi
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
