@@ -13,8 +13,8 @@ manifest_directory="${1:?Usage: check_manifests.sh <manifest-directory>}"
 schema_directory="${temporary_directory}/schemas"
 schema_cache_directory=".cache/kubeconform"
 remote_schema_cache_directory="${schema_cache_directory}/remote"
-# Validate the cluster API; schema publication can lag newer kubectl releases.
-kubernetes_version="1.36.4"
+# Keep validation aligned with the deployed cluster API.
+kubernetes_version="1.37.1"
 crd_catalog_revision="4c8dc296d32b06d15ccde9668ff136c951f4d539"
 mkdir -p \
   "${remote_schema_cache_directory}" \
