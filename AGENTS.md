@@ -74,7 +74,6 @@ and Prek hooks by ID. Workflows start with `name`, `on`, `permissions`,
 - Run `mise run check` before handoff.
 - Render changed Helm charts and use small response fixtures for changed API
   comparisons; avoid adding a general validation framework.
-- Run `mise run prek` after changing hooks or workflows.
 
 ## Git History
 

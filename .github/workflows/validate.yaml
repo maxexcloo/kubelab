@@ -24,7 +24,7 @@ jobs:
         with:
           version: 2026.10.3
       - name: Run hooks
-        run: mise run prek
+        run: mise run check
   monitoring:
     name: Refresh external monitoring
     needs: validate

@@ -64,6 +64,14 @@ arg "[application]"
 
 # Development
 [tasks.check]
+description = "Run all repository checks"
+run = "prek run --all-files"
+
+[tasks.fmt]
+description = "Format project files"
+run = "prettier --write ."
+
+[tasks.validate]
 description = "Check project files and configuration"
 run = """
 actionlint .github/workflows/*.yaml
@@ -76,14 +84,6 @@ scripts/check_manifests.sh "$manifest_directory"
 scripts/check_service_metadata.sh "$manifest_directory"
 python -m unittest discover -s tests -p 'test_*.py'
 """
-
-[tasks.fmt]
-description = "Format project files"
-run = "prettier --write ."
-
-[tasks.prek]
-description = "Run all repository hooks"
-run = "prek run --all-files"
 
 # Setup
 [tasks.setup]

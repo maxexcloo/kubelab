@@ -46,7 +46,6 @@ mise run check
 | `mise run check`                          | Validate manifests, metadata, formatting, scripts and secret reconciliation |
 | `mise run deploy <cluster> [component]`   | Fetch Git and reconcile Flux entry points or a named stage                  |
 | `mise run fmt`                            | Format project files                                                        |
-| `mise run prek`                           | Run all Git hooks                                                           |
 | `mise run setup`                          | Install tools and Git hooks                                                 |
 | `mise run status <cluster> [application]` | Show reconciliation status or watch one app upgrade                         |
 
