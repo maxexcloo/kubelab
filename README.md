@@ -162,7 +162,12 @@ apps. Stateful or migration-owning single replicas use recreate updates;
 stateless Cloudflared and Redlib use rolling updates.
 
 Homepage discovers its local cluster and adds shared external services and
-bookmarks. Optional widget credentials come from the cluster's `Homepage` item;
+bookmarks. Static services opt into health checks with `siteMonitor`; `href`
+alone is navigation only. Home Assistant add-on ingress links remain navigation
+only because the shared login page does not establish add-on health. Give an
+add-on its own monitor only when a dedicated endpoint checks that service.
+Services are not deduplicated by hostname: different ports or paths can expose
+independent services. Optional widget credentials come from the cluster's `Homepage` item;
 missing values hide only that widget. It is served at `home.excloo.com` and
 `homepage.mbk.excloo.dev` on `mbk`, and `homepage.syd.excloo.dev` on `syd`.
 

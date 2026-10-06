@@ -111,13 +111,11 @@ data:
             description: ESP Device Builder
             href: https://hass.mbk.excloo.net/5c53de3b_esphome
             icon: esphome
-            siteMonitor: https://hass.mbk.excloo.net/5c53de3b_esphome
             weight: 0
         - ESPresense:
             description: Room Presence
             href: https://hass.mbk.excloo.net/f32ea98b_espresense-companion
             icon: espressif
-            siteMonitor: https://hass.mbk.excloo.net/f32ea98b_espresense-companion
             weight: 0
         - Home Assistant:
             description: Smart Home & Automations
@@ -134,19 +132,16 @@ data:
             description: Matter Bridge
             href: https://hass.mbk.excloo.net/3fd9e6b0_hamh
             icon: sh-home-assistant-matter-hub
-            siteMonitor: https://hass.mbk.excloo.net/3fd9e6b0_hamh
             weight: 0
         - Studio Code Server:
             description: Browser IDE
             href: https://hass.mbk.excloo.net/a0d7b954_vscode
             icon: visual-studio-code
-            siteMonitor: https://hass.mbk.excloo.net/a0d7b954_vscode
             weight: 0
         - Zigbee2MQTT:
             description: Zigbee Coordinator
             href: https://hass.mbk.excloo.net/45df7312_zigbee2mqtt
             icon: zigbee2mqtt
-            siteMonitor: https://hass.mbk.excloo.net/45df7312_zigbee2mqtt
             weight: 0
     - Infrastructure:
         - Netboot:
