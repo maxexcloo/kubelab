@@ -356,7 +356,9 @@ of node-local databases must use an independently maintained backup or snapshot.
 
 RoMM mounts `truenas/games/roms` and `truenas/games/bios` through subpaths of its
 retained `games` volume. Its configuration, resources and user assets remain on
-`truenas-nvme/romm`; PostgreSQL remains node-local. Library sorting is a one-off
+`truenas-nvme/romm` through explicit `config`, `resources` and `assets` subpaths;
+no legacy library mount directories are kept on NVMe. Archived source trees live
+in `truenas/games/legacy`. PostgreSQL remains node-local. Library sorting is a one-off
 maintenance operation, with no ingest or client-export pipeline.
 
 Bifrost 2 performs irreversible migrations. Before upgrading from Bifrost 1,

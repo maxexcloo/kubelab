@@ -163,7 +163,12 @@ spec:
         advancedMounts:
           romm:
             romm:
-              - path: /romm
+              - path: /romm/assets
+                subPath: assets
+              - path: /romm/config
+                subPath: config
+              - path: /romm/resources
+                subPath: resources
       games:
         existingClaim: games
         type: persistentVolumeClaim
