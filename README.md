@@ -354,6 +354,11 @@ CloudNativePG databases. Storage snapshots and off-site replication belong to
 Existing `backup` PVCs and dumps are retained, but no longer refreshed. Recovery
 of node-local databases must use an independently maintained backup or snapshot.
 
+RoMM mounts `truenas/games/roms` and `truenas/games/bios` through subpaths of its
+retained `games` volume. Its configuration, resources and user assets remain on
+`truenas-nvme/romm`; PostgreSQL remains node-local. Library sorting is a one-off
+maintenance operation, with no ingest or client-export pipeline.
+
 Bifrost 2 performs irreversible migrations. Before upgrading from Bifrost 1,
 stop the app and back up its retained volume; follow the upstream
 [migration guide](https://docs.getbifrost.ai/migration-guides/v2.0.0).

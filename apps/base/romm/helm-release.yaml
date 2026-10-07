@@ -164,6 +164,16 @@ spec:
           romm:
             romm:
               - path: /romm
+      games:
+        existingClaim: games
+        type: persistentVolumeClaim
+        advancedMounts:
+          romm:
+            romm:
+              - path: /romm/library/roms
+                subPath: roms
+              - path: /romm/library/bios
+                subPath: bios
       nginx-configuration:
         type: emptyDir
         advancedMounts:
