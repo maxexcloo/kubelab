@@ -1,1 +1,23 @@
-/* Use Homepage’s native styling. */
+:root {
+  --homepage-card-bg: rgba(0, 0, 0, 0.15);
+  --homepage-card-radius: 15px;
+}
+html,
+body {
+  -webkit-font-smoothing: auto;
+  font-size: 110%;
+  text-rendering: auto;
+}
+.bookmark > a,
+.service-card,
+.service-container {
+  background: var(--homepage-card-bg) !important;
+  border-radius: var(--homepage-card-radius);
+  box-shadow: none !important;
+}
+.service-card {
+  transition: none;
+}
+.service-block {
+  background: transparent !important;
+}
