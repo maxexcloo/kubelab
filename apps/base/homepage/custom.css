@@ -5,8 +5,14 @@
 html,
 body {
   -webkit-font-smoothing: auto !important;
-  font-size: 110% !important;
   text-rendering: auto !important;
+}
+html {
+  font-size: 112.5% !important;
+}
+body {
+  font-family: system-ui, sans-serif;
+  font-size: inherit !important;
 }
 .rounded,
 .rounded-md {
@@ -30,6 +36,9 @@ body {
 }
 .service-container:empty {
   min-height: 3.25rem;
+}
+.service-description {
+  font-weight: 400;
 }
 .k8s-status > div,
 .site-monitor-status > div {

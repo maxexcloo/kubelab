@@ -196,7 +196,8 @@ first, then names sort alphabetically; annotated widget cards use `gethomepage.d
 Display names use product branding for apps, uppercase cluster qualifiers for
 cluster-specific tools, and network-prefixed names for machines. Homepage uses
 translucent rounded cards and enlarged text, with native widget spacing and card
-heights. Legacy font rendering preserves text weight. Native status labels show
+heights. System UI fonts, a single enlarged base size and normal-weight descriptions
+improve readability on standard-density displays. Native status labels show
 HTTP response times in milliseconds; local Kubernetes cards also label Pod status.
 These labels use native tabs at the card's top edge, with widget statistics inside
 the same card.
