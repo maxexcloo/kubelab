@@ -36,7 +36,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: controldns/ctrld
-              tag: 1.5.7@sha256:85d4f083103541c114d55b80b0a14dfc0a2411b3ee227b2e15be29562b4dc4f6
+              tag: 1.5.8@sha256:18e92bb7918844ddba83acd7b1b6935e050563d0d339509f61e09bbdcdd12c35
             resources:
               limits:
                 memory: 128Mi
