@@ -275,7 +275,7 @@ for self-checks.
 `--include-static` adds Homepage's external monitored services.
 After a validated push to `main`, CI dispatches `homelab-fly` with that commit
 SHA to refresh Gatus. Store a GitHub token in the repository Actions secret
-`GITHUB_FLY_DEPLOY_TOKEN`, with Actions write access only to
+`HOMELAB_FLY_DEPLOY_TOKEN`, with Actions write access only to
 `maxexcloo/homelab-fly`. This is a GitHub workflow-dispatch credential, not a Fly
 API token. The default repository token cannot dispatch another repository's
 workflow. Install the receiving Fly workflow before enabling this dispatch.

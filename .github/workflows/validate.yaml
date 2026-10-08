@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Deploy the validated inventory
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_FLY_DEPLOY_TOKEN }}
+          GH_TOKEN: ${{ secrets.HOMELAB_FLY_DEPLOY_TOKEN }}
           KUBELAB_REVISION: ${{ github.sha }}
         run: |
           gh workflow run deploy.yaml --repo maxexcloo/homelab-fly --ref main \
