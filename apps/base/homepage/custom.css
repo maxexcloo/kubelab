@@ -4,9 +4,13 @@
 }
 html,
 body {
-  -webkit-font-smoothing: auto;
-  font-size: 110%;
-  text-rendering: auto;
+  -webkit-font-smoothing: auto !important;
+  font-size: 110% !important;
+  text-rendering: auto !important;
+}
+.rounded,
+.rounded-md {
+  border-radius: var(--homepage-card-radius) !important;
 }
 .bookmark > a,
 .service-card,
@@ -16,7 +20,7 @@ body {
   box-shadow: none !important;
 }
 .service-card {
-  transition: none;
+  transition: none !important;
 }
 .service-block {
   background: transparent !important;

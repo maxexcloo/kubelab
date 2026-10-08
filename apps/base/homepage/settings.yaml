@@ -4,7 +4,7 @@ disableCollapse: true
 disableIndexing: true
 headerStyle: clean
 hideVersion: true
-statusStyle: dot
+statusStyle: basic
 theme: dark
 title: Homepage
 background:

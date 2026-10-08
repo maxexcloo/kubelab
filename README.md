@@ -193,8 +193,8 @@ first, then names sort alphabetically; annotated widget cards use `gethomepage.d
 Display names use product branding for apps, uppercase cluster qualifiers for
 cluster-specific tools, and network-prefixed names for machines. Homepage uses
 translucent rounded cards and enlarged text, with native widget spacing and card
-heights. Native status dots show URL availability; local Kubernetes cards also
-show Pod status.
+heights. Legacy font rendering preserves text weight. Native `UP`/`DOWN` labels
+show URL availability; local Kubernetes cards also label Pod status.
 Application routes declare URL checks in their annotations for consistent checks
 across clusters. Provider bookmarks, host console links and Home Assistant ingress
 shortcuts are navigation, not independent service-health checks. Machine cards use
