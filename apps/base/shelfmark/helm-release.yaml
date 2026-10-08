@@ -34,7 +34,6 @@ spec:
               CONFIG_DIR: /config
               DIRECT_DOWNLOAD_ENABLED: "true"
               DIRECT_DOWNLOAD_LANGUAGE_FROM_PATH: "true"
-              EXT_BYPASSER_URL: http://byparr.byparr.svc.cluster.local:8191
               FLASK_PORT: "3000"
               GOOGLEBOOKS_ENABLED: "true"
               HARDCOVER_ENABLED: "true"
@@ -48,7 +47,7 @@ spec:
               SESSION_COOKIE_SECURE: "true"
               TZ: Australia/Sydney
               USE_CF_BYPASS: "true"
-              USING_EXTERNAL_BYPASSER: "true"
+              USING_EXTERNAL_BYPASSER: "false"
               WELIB_MIRROR_URLS: ""
               ZLIB_MIRROR_URLS: https://z-lib.sk
             envFrom:
