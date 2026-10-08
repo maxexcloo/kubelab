@@ -16,7 +16,7 @@ map(
   with(select($cluster != strenv(HOMEPAGE_CLUSTER)); del(.app, .namespace, .showStats)) |
   .description = ((.description // "") | sub(" · (\$\{HOMEPAGE_LOCATION\}|" + ($cluster | upcase) + ")$"; "")) |
   with(select(.group != $route.serverGroup);
-    .description = ([.description, ($cluster | upcase)] | map(select(. != "")) | join(" - "))) |
+    .description = ([.description, ($cluster | upcase)] | map(select(. != "")) | join(" • "))) |
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
   .siteMonitor = (.siteMonitor // .href) |

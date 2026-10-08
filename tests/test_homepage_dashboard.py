@@ -111,7 +111,7 @@ class HomepageDashboardTests(unittest.TestCase):
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
-        self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager - SYD")
+        self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • SYD")
         self.assertEqual(groups["syd-hsp"][0]["Library"]["description"], "Photo Manager")
         widget = self.services()["Library"]["widget"]
         self.assertEqual(widget["key"], "{{HOMEPAGE_FILE_IMMICH_KEY}}")
@@ -124,7 +124,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Library", self.services())
         groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
-        self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager - MBK")
+        self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • MBK")
         self.assertIn("Library", groups["mbk-taco"][0])
         self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"])
 
@@ -161,7 +161,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertIn("ESPHome", groups["Smart Home"])
         self.assertIn("Home Assistant", groups["Smart Home"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
-        self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations - HASS (MBK)")
+        self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • HASS (MBK)")
         self.assertEqual(groups["Infrastructure"]["Syncthing"]["widget"], groups["mbk-storage"]["Syncthing"]["widget"])
         storage = groups["mbk-storage"]
         self.assertEqual(list(storage), ["Beszel", "Cloudflare Tunnel", "Syncthing", "Tailscale", "TrueNAS", "Netboot"])
