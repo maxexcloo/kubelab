@@ -11,6 +11,7 @@ html {
   font-size: 112.5% !important;
 }
 body {
+  -webkit-text-stroke-width: 0.15px;
   font-family: system-ui, sans-serif;
   font-size: inherit !important;
 }
