@@ -36,5 +36,5 @@ jobs:
           GH_TOKEN: ${{ secrets.HOMELAB_FLY_DEPLOY_TOKEN }}
           KUBELAB_REVISION: ${{ github.sha }}
         run: |
-          gh workflow run deploy.yaml --repo maxexcloo/homelab-fly --ref main \
+          gh workflow run deploy.yaml --repo maxexcloo/flylab --ref main \
             --field deployment=gatus-fly --field kubelab_revision="$KUBELAB_REVISION"
