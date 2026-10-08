@@ -57,7 +57,7 @@ load(strenv(INFRASTRUCTURE)) as $infra |
     "group": $machine.group,
     "description": {"beszel": "System Monitoring", "cloudflared": "Cloudflare Tunnel", "tailscale": "VPN"}[.type],
     "icon": {"beszel": "beszel", "cloudflared": "cloudflare", "tailscale": "tailscale"}[.type],
-    "href": {"beszel": .url, "cloudflared": ("https://one.dash.cloudflare.com/" + .accountid + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .tunnelid), "tailscale": ("https://login.tailscale.com/admin/machines/" + .deviceid)}[.type],
+    "href": {"beszel": (.url + "/system/" + .systemId), "cloudflared": ("https://one.dash.cloudflare.com/" + .accountid + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .tunnelid), "tailscale": ("https://login.tailscale.com/admin/machines/" + .deviceid)}[.type],
     "widget": $widget
   }
 ] as $monitoring |

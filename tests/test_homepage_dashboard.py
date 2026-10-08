@@ -171,6 +171,7 @@ class HomepageDashboardTests(unittest.TestCase):
         node = groups["mbk-taco"]
         self.assertEqual(list(node), ["Beszel", "Cloudflare Tunnel", "Tailscale"])
         self.assertEqual(node["Beszel"]["widget"]["systemId"], "mbk-taco")
+        self.assertEqual(node["Beszel"]["href"], "https://beszel.example.net/system/mbk-taco")
         self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
         self.assertEqual(node["Cloudflare Tunnel"]["widget"]["tunnelid"], "cluster-tunnel")
         self.assertEqual(node["Tailscale"]["widget"]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
