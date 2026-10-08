@@ -10,23 +10,23 @@ spec:
   refreshInterval: 1h
   data:
     - remoteRef:
-        key: Excloo ID
+        key: Pocket ID
         property: api-key-resend
       secretKey: api-key-resend
     - remoteRef:
-        key: Excloo ID
+        key: Pocket ID
         property: database-password
       secretKey: database-password
     - remoteRef:
-        key: Excloo ID
+        key: Pocket ID
         property: database-username
       secretKey: database-username
     - remoteRef:
-        key: Excloo ID
+        key: Pocket ID
         property: encryption-key
       secretKey: encryption-key
     - remoteRef:
-        key: Excloo ID
+        key: Pocket ID
         property: static-api-key
       secretKey: static-api-key
   secretStoreRef:
@@ -55,11 +55,11 @@ spec:
   refreshInterval: 1h
   data:
     - remoteRef:
-        key: Excloo ID
+        key: Pocket ID
         property: database-password
       secretKey: password
     - remoteRef:
-        key: Excloo ID
+        key: Pocket ID
         property: database-username
       secretKey: username
   secretStoreRef:
@@ -177,4 +177,4 @@ metadata:
   name: resend
   namespace: pocket-id
 spec:
-  displayName: Excloo ID
+  displayName: Pocket ID

@@ -25,7 +25,7 @@ spec:
           client_id: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_ID}
           client_secret: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
           enabled: true
-          name: Excloo ID
+          name: Pocket ID
           scopes: openid profile email
           token_url: https://id.excloo.com/api/oidc/token
           use_pkce: true

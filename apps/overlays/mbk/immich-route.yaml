@@ -11,6 +11,8 @@ metadata:
     gethomepage.dev/href: https://photos.excloo.com
     gethomepage.dev/icon: immich
     gethomepage.dev/name: Immich
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=immich,app.kubernetes.io/name=server
+    gethomepage.dev/siteMonitor: https://photos.excloo.com
     gethomepage.dev/weight: "-100"
     gethomepage.dev/widget.hideErrors: "true"
     gethomepage.dev/widget.key: "{{HOMEPAGE_FILE_IMMICH_KEY}}"

@@ -134,6 +134,7 @@ spec:
           gethomepage.dev/href: https://aiometadata.excloo.com
           gethomepage.dev/icon: sh-aiometadata
           gethomepage.dev/name: AIOMetadata
+          gethomepage.dev/siteMonitor: https://aiometadata.excloo.com
         hostnames:
           - aiometadata.excloo.com
         labels:

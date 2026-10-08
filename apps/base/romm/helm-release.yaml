@@ -27,7 +27,7 @@ spec:
               DB_QUERY_JSON: '{"sslmode":"require"}'
               HASHEOUS_API_ENABLED: "true"
               OIDC_ENABLED: "true"
-              OIDC_PROVIDER: Excloo ID
+              OIDC_PROVIDER: Pocket ID
               OIDC_REDIRECT_URI: https://games.excloo.com/api/oauth/openid
               OIDC_SERVER_APPLICATION_URL: https://id.excloo.com
               OIDC_SERVER_METADATA_URL: https://id.excloo.com/.well-known/openid-configuration
@@ -213,6 +213,7 @@ spec:
           gethomepage.dev/href: https://games.excloo.com
           gethomepage.dev/icon: romm
           gethomepage.dev/name: RoMM
+          gethomepage.dev/siteMonitor: https://games.excloo.com
           gethomepage.dev/weight: "-100"
           gethomepage.dev/widget.hideErrors: "true"
           gethomepage.dev/widget.type: romm

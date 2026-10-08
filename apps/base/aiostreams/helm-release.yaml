@@ -94,6 +94,7 @@ spec:
           gethomepage.dev/href: https://aiostreams.excloo.com
           gethomepage.dev/icon: sh-aiostreams
           gethomepage.dev/name: AIOStreams
+          gethomepage.dev/siteMonitor: https://aiostreams.excloo.com/api/v1/health
         hostnames:
           - aiostreams.excloo.com
         labels:

@@ -24,7 +24,7 @@ spec:
             env:
               ALLOW_OWN_ACCOUNT_EDIT: "true"
               ANALYTICS_DISABLED: "true"
-              APP_NAME: Excloo ID
+              APP_NAME: Pocket ID
               APP_URL: https://id.excloo.com
               EMAILS_VERIFIED: "true"
               FILE_BACKEND: database
@@ -132,7 +132,8 @@ spec:
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/href: https://id.excloo.com
           gethomepage.dev/icon: pocket-id
-          gethomepage.dev/name: Excloo ID
+          gethomepage.dev/name: Pocket ID
+          gethomepage.dev/siteMonitor: https://id.excloo.com
         hostnames:
           - id.excloo.com
         labels:

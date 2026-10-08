@@ -127,6 +127,7 @@ spec:
         gethomepage.dev/href: https://chat.excloo.com
         gethomepage.dev/icon: sh-open-webui
         gethomepage.dev/name: Open WebUI
+        gethomepage.dev/siteMonitor: https://chat.excloo.com
       parentRefs:
         - name: private
           namespace: networking
@@ -138,7 +139,7 @@ spec:
         clientExistingSecretKey: OAUTH_CLIENT_SECRET
         clientIdExistingSecretKey: OAUTH_CLIENT_ID
         enabled: true
-        providerName: Excloo ID
+        providerName: Pocket ID
         providerUrl: https://id.excloo.com/.well-known/openid-configuration
         scopes: openid email profile
     startupProbe:

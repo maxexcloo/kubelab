@@ -108,6 +108,7 @@ spec:
           gethomepage.dev/href: https://budget.excloo.com
           gethomepage.dev/icon: actual-budget
           gethomepage.dev/name: Actual Budget
+          gethomepage.dev/siteMonitor: https://budget.excloo.com
         hostnames:
           - budget.excloo.com
         labels:

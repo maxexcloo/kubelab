@@ -4,9 +4,10 @@ disableCollapse: true
 disableIndexing: true
 headerStyle: clean
 hideVersion: true
-statusStyle: dot
+statusStyle: basic
 theme: dark
 title: Homepage
+useEqualHeights: true
 background:
   brightness: 50
   image: /images/background.jpg

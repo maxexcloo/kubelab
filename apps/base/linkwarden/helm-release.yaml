@@ -28,7 +28,7 @@ spec:
             env:
               BASE_URL: https://links.excloo.com
               EMAIL_FROM: linkwarden@excloo.dev
-              KEYCLOAK_CUSTOM_NAME: Excloo ID
+              KEYCLOAK_CUSTOM_NAME: Pocket ID
               KEYCLOAK_ISSUER: https://id.excloo.com
               MEILI_HOST: http://linkwarden-meilisearch:7700
               NEXTAUTH_INTERNAL_URL: http://localhost:3000/api/v1/auth
@@ -177,6 +177,8 @@ spec:
           gethomepage.dev/href: https://links.excloo.com
           gethomepage.dev/icon: linkwarden
           gethomepage.dev/name: Linkwarden
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=linkwarden,app.kubernetes.io/controller=linkwarden
+          gethomepage.dev/siteMonitor: https://links.excloo.com
           gethomepage.dev/weight: "-100"
           gethomepage.dev/widget.hideErrors: "true"
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_LINKWARDEN_KEY}}" }}'

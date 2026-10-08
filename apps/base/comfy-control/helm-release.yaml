@@ -106,6 +106,7 @@ spec:
           gethomepage.dev/href: https://comfy-control.excloo.com
           gethomepage.dev/icon: comfyui
           gethomepage.dev/name: Comfy Control
+          gethomepage.dev/siteMonitor: https://comfy-control.excloo.com
         hostnames:
           - comfy-control.excloo.com
         labels:

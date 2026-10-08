@@ -105,6 +105,7 @@ spec:
           gethomepage.dev/href: https://bichon.excloo.com
           gethomepage.dev/icon: sh-bichon
           gethomepage.dev/name: Bichon
+          gethomepage.dev/siteMonitor: https://bichon.excloo.com
         hostnames:
           - bichon.excloo.com
         labels:

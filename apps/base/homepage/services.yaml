@@ -4,7 +4,7 @@
         href: homelab://mbk/hass/management/5c53de3b_esphome
         icon: esphome
         weight: 0
-    - ESPresense:
+    - ESPresense Companion:
         description: Room Presence
         href: homelab://mbk/hass/management/f32ea98b_espresense-companion
         icon: espressif
@@ -36,7 +36,7 @@
         icon: zigbee2mqtt
         weight: 0
 - Infrastructure:
-    - Netboot:
+    - netboot.xyz:
         description: Network Boot Server
         href: homelab://mbk/kimbap/netboot
         icon: netbootxyz

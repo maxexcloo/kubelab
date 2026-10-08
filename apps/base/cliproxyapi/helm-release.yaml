@@ -111,6 +111,7 @@ spec:
           gethomepage.dev/href: https://cliproxy.excloo.com/management.html
           gethomepage.dev/icon: https://avatars.githubusercontent.com/u/233033915
           gethomepage.dev/name: CLI Proxy API
+          gethomepage.dev/siteMonitor: https://cliproxy.excloo.com/management.html
         hostnames:
           - cliproxy.excloo.com
         labels:

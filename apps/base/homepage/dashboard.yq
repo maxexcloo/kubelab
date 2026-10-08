@@ -8,7 +8,7 @@ map(
   with_entries(.key |= sub("^gethomepage.dev/"; "")) |
   del(.enabled, .instance, .pod-selector, .app, .namespace, .showStats) |
   .name as $name |
-  .name = ($name + ([""] + ($repeated_names | map(select(. == $name)) | map(. = " (" + $cluster + ")")) | .[-1])) |
+  .name = ($name + ([""] + ($repeated_names | map(select(. == $name)) | map(. = " (" + ($cluster | upcase) + ")")) | .[-1])) |
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
   .siteMonitor = (.siteMonitor // .href) |

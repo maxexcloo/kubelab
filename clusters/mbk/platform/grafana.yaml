@@ -9,7 +9,8 @@ metadata:
     gethomepage.dev/group: Operations
     gethomepage.dev/href: https://grafana.excloo.com
     gethomepage.dev/icon: grafana
-    gethomepage.dev/name: Grafana
+    gethomepage.dev/name: Grafana (MBK)
+    gethomepage.dev/siteMonitor: https://grafana.excloo.com
     gethomepage.dev/weight: "-100"
     gethomepage.dev/widget.hideErrors: "true"
     gethomepage.dev/widget.password: "{{HOMEPAGE_FILE_GRAFANA_MBK_PASSWORD}}"

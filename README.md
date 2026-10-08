@@ -168,8 +168,8 @@ undo database changes.
 | Storage             | Local Path Provisioner and the `truenas-nfs` NFS subdirectory provisioner    |
 
 `mbk` runs Actual Budget, AIOMetadata, AIOStreams, Beszel, Beszel Agent, Bichon,
-Bifrost, BookOrbit, Byparr, CLIProxyAPI, Comfy Control, Homepage, Immich,
-Larapaper, Linkwarden, Miniflux, Open WebUI, OpenSpeedTest, Papra, Pocket ID,
+Bifrost, BookOrbit, Byparr, CLI Proxy API, Comfy Control, Homepage, Immich,
+LaraPaper, Linkwarden, Miniflux, Open WebUI, OpenSpeedTest, Papra, Pocket ID,
 RoMM, Shelfmark and Windmill. `syd` runs Anisette, Beszel Agent, OpenSpeedTest
 and Redlib.
 
@@ -185,9 +185,22 @@ other clusters' `gethomepage.dev` annotations from Git every five minutes using
 the route extraction shared with Gatus. Apps keep the same metadata and widget
 configuration when moved between clusters. Remote cards use URL health checks;
 Headlamp provides live Pod inspection. Git describes desired placement, so remote
-cards can briefly differ while Flux reconciles. Duplicate remote names gain a
-cluster suffix. Within each group, cards with widgets come first, then names sort
-alphabetically; annotated widget cards use `gethomepage.dev/weight: "-100"`.
+cards can briefly differ while Flux reconciles. Duplicate remote names gain an
+uppercase cluster suffix. Cluster-specific tools use explicit names such as
+`Headlamp (MBK)` and `Headlamp (SYD)`. Within each group, cards with widgets come
+first, then names sort alphabetically; annotated widget cards use `gethomepage.dev/weight: "-100"`.
+
+Display names use product branding for apps, uppercase cluster qualifiers for
+cluster-specific tools, and network-prefixed names for machines. Homepage uses
+its native card styling and equal-height rows. Status labels show
+URL availability (`UP`/`DOWN`); local Kubernetes cards also show Pod status.
+Application routes declare URL checks in their annotations for consistent checks
+across clusters. Provider bookmarks, host console links and Home Assistant ingress
+shortcuts are navigation, not independent service-health checks. Machine cards use
+lowercase names such as `mbk-bento` and `syd-hsp`, with standard platform icons where
+available; their widgets report host, mesh and tunnel state. Switching native tabs
+mounts the visible widgets and fetches their data; configuration changes trigger Homepage's
+normal automatic reload.
 
 External links use `homelab://<network>/<machine>/<service>` references, optionally
 followed by a path. Homelab owns hostnames, domains and ports: `management` uses
@@ -215,7 +228,9 @@ External Secrets supplies mounted files from MBK's 1Password vault. Homepage use
 native `HOMEPAGE_FILE_*` references, so credentials never enter generated config.
 Beszel and local Grafana reuse their existing items. Only Homepage can read
 the widget credentials; the renderer reads the non-secret inventory and preserves
-credential placeholders.
+credential placeholders. Homepage 2.4.0 cannot use Beszel v2 through string-valued
+Kubernetes widget annotations; its overview remains unavailable, while generated
+per-machine widgets use numeric versions and work.
 Fill these fields in the `Homepage` item through each service's supported UI:
 
 | Fields                                         | Purpose                                                             |
@@ -231,7 +246,9 @@ Fill these fields in the `Homepage` item through each service's supported UI:
 | `truenas-key`                                  | TrueNAS API key                                                     |
 | `unifi-key`                                    | UniFi API key                                                       |
 
-Empty fields keep links usable and widget errors hidden. Secret files refresh
+Widget-first ordering includes configured widgets even when credentials are
+empty or their API is unavailable. Empty fields keep links usable and widget
+errors hidden. Secret files refresh
 hourly and Homepage reads updates without a restart. If an app's credential source changes vault, update its ExternalSecret
 reference; placement alone does not move dashboard credentials. Existing unused
 1Password fields are preserved. `siteMonitor` explicitly enables URL checks;

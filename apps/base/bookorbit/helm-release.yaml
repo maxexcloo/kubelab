@@ -122,6 +122,7 @@ spec:
           gethomepage.dev/href: https://books.excloo.com
           gethomepage.dev/icon: bookorbit
           gethomepage.dev/name: BookOrbit
+          gethomepage.dev/siteMonitor: https://books.excloo.com
         hostnames:
           - books.excloo.com
         labels:

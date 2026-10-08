@@ -9,10 +9,12 @@ load(strenv(INFRASTRUCTURE)) as $infra |
   $infra.tailscale[$name] as $device |
   $infra.cloudflare.tunnels[$machine.cluster // $name] as $tunnel |
   {
-    "name": ($hostname + " (" + $network + ")"),
+    "name": ($network + "-" + $hostname),
     "group": "Machines",
-    "description": $machine.platform,
-    "icon": "mdi-server",
+    "description": ({"bazzite": "Bazzite", "macos": "macOS", "nanokvm": "NanoKVM",
+      "steamos": "SteamOS", "talos": "Talos Linux", "ucore": "uCore"}[$machine.platform] // $machine.platform),
+    "icon": ({"bazzite": "linux", "macos": "apple", "steamos": "steam",
+      "talos": "talos", "ucore": "linux"}[$machine.platform] // "mdi-server"),
     "reference": $management,
     "href": ([null] + ([$tunnel] | map(select(. != null)) | map("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .)) +
       ([$machine] | map(select(.beszel == true)) | map(strenv(HOMEPAGE_BESZEL_URL))) +

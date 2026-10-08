@@ -146,7 +146,7 @@ class ReconcilerTests(unittest.TestCase):
             "id": "existing-id",
             "sections": [],
             "tags": ["Homelab"],
-            "title": "Excloo ID",
+            "title": "Pocket ID",
         }
         calls = []
 
@@ -175,7 +175,7 @@ class ReconcilerTests(unittest.TestCase):
             self.addCleanup(setattr, RECONCILER, name, value)
         RECONCILER.applications_ready = lambda: False
         RECONCILER.connect = connect
-        RECONCILER.discover_items = lambda: {"Excloo ID": desired}
+        RECONCILER.discover_items = lambda: {"Pocket ID": desired}
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()

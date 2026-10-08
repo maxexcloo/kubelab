@@ -25,7 +25,7 @@ spec:
               BASE_URL: https://reader.excloo.com
               CREATE_ADMIN: "1"
               OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://id.excloo.com
-              OAUTH2_OIDC_PROVIDER_NAME: Excloo ID
+              OAUTH2_OIDC_PROVIDER_NAME: Pocket ID
               OAUTH2_PROVIDER: oidc
               OAUTH2_REDIRECT_URL: https://reader.excloo.com/oauth2/oidc/callback
               OAUTH2_USER_CREATION: "1"
@@ -94,6 +94,7 @@ spec:
           gethomepage.dev/href: https://reader.excloo.com
           gethomepage.dev/icon: miniflux
           gethomepage.dev/name: Miniflux
+          gethomepage.dev/siteMonitor: https://reader.excloo.com
           gethomepage.dev/weight: "-100"
           gethomepage.dev/widget.hideErrors: "true"
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_MINIFLUX_KEY}}" }}'

@@ -9,7 +9,8 @@ metadata:
     gethomepage.dev/group: Infrastructure
     gethomepage.dev/href: https://headlamp.syd.excloo.dev
     gethomepage.dev/icon: headlamp
-    gethomepage.dev/name: Headlamp
+    gethomepage.dev/name: Headlamp (SYD)
+    gethomepage.dev/siteMonitor: https://headlamp.syd.excloo.dev
   labels:
     app.kubernetes.io/name: headlamp
 spec:

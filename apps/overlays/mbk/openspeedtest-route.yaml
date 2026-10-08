@@ -9,7 +9,7 @@ metadata:
     gethomepage.dev/group: Infrastructure
     gethomepage.dev/href: https://speed.mbk.excloo.dev
     gethomepage.dev/icon: openspeedtest
-    gethomepage.dev/name: OpenSpeedTest
+    gethomepage.dev/name: OpenSpeedTest (MBK)
     gethomepage.dev/siteMonitor: https://speed.mbk.excloo.dev
   labels:
     app.kubernetes.io/name: openspeedtest

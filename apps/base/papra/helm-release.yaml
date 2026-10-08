@@ -129,6 +129,7 @@ spec:
           gethomepage.dev/href: https://papra.excloo.com
           gethomepage.dev/icon: papra
           gethomepage.dev/name: Papra
+          gethomepage.dev/siteMonitor: https://papra.excloo.com
         hostnames:
           - papra.excloo.com
         labels:
