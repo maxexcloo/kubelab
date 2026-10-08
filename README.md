@@ -238,7 +238,8 @@ groups are derived automatically; `settings.yaml` supplies presentation choices.
 
 External Secrets supplies mounted files from MBK's 1Password vault. Homepage uses
 native `HOMEPAGE_FILE_*` references, so credentials never enter generated config.
-Beszel and local Grafana reuse their existing items. Only Homepage can read
+Beszel reuses its existing item. Both Grafana widget logins live in the `Homepage`
+item with explicit cluster prefixes. Only Homepage can read
 the widget credentials; the renderer reads the non-secret inventory and preserves
 credential placeholders. Native widgets remain visible when credentials are missing
 or their API is unavailable, using Homepage's default error display. An empty
@@ -252,7 +253,8 @@ service's supported UI. The widgets are already configured:
 | Fields                                         | Purpose                                                             |
 | ---------------------------------------------- | ------------------------------------------------------------------- |
 | `cloudflare-api-token`                         | API token with Cloudflare Tunnel Read permission                    |
-| `grafana-syd-username`, `grafana-syd-password` | Sydney Grafana dashboard login                                      |
+| `grafana-mbk-password`, `grafana-mbk-username` | MBK Grafana dashboard login                                         |
+| `grafana-syd-password`, `grafana-syd-username` | SYD Grafana dashboard login                                         |
 | `home-assistant-access-token`                  | Home Assistant long-lived access token                              |
 | `immich-api-key`                               | Immich API key                                                      |
 | `linkwarden-access-token`                      | Linkwarden access token                                             |
