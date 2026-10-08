@@ -231,7 +231,10 @@ does not need access to the private Flylab repository.
 External links use `homelab://<network>/<machine>/<service>` references, optionally
 followed by a path. Homelab owns hostnames, domains and ports: `management` uses
 the HTTPS management port and named services use their declared scheme and port.
-Machines with Tailscale explicitly disabled use their inventory LAN address.
+HTTP links use the preferred host published by Homelab: machine DNS, Tailscale
+IPv4, UniFi local DNS, then LAN/public IP. HTTPS links retain the certificate
+hostname. Missing snapshots retain the canonical hostname; Homepage never probes
+addresses to choose a link.
 Optional `services.<name>.homepage` metadata declares a card’s `name`,
 `description`, `icon` and category `group` (default: Servers). Endpoints and host
 groups derive from the owning machine. NanoKVM and SLZB-06M use this inventory

@@ -88,8 +88,9 @@ while IFS= read -r reference; do
   case "$port" in *[!0-9]* | '') echo "Invalid endpoint port: $reference" >&2; exit 1 ;; esac
   [ "$port" -ge 1 ] && [ "$port" -le 65535 ]
   authority="$hostname.$network.$domain"
-  if [ "$(yq '.tailscale.enabled' "$temporary_directory/machine.yaml")" = false ]; then
-    authority=$(yq -e -r '.interfaces[0].address // .private_ipv4' "$temporary_directory/machine.yaml")
+  if [ "$scheme" = http ] && [ -n "${HOMELAB_INFRASTRUCTURE_FILE:-}" ]; then
+    published_host=$(MACHINE="$machine" yq -r '.hosts[strenv(MACHINE)] // ""' "$HOMELAB_INFRASTRUCTURE_FILE")
+    [ -z "$published_host" ] || authority="$published_host"
   fi
   case "$scheme:$port" in http:80 | https:443) ;; *) authority="$authority:$port" ;; esac
   REFERENCE="$reference" ENDPOINT="$scheme://$authority$suffix" yq \
