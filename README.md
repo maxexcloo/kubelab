@@ -446,8 +446,8 @@ route is needed for polling.
 
 Browser settings persist as authenticated AES-256-GCM ciphertext in
 `/data/settings.json` on the app’s 1Gi NFS claim. Back up this file and its
-1Password encryption key together. Actual’s rebuildable budget cache is separate
-and is not encrypted by the settings encryption. The last 20 run results and
+1Password encryption key together. Actual’s rebuildable budget cache uses local pod storage at `/tmp/actual-cache`,
+not NFS, and is not encrypted by the settings encryption. The last 20 run results and
 queue are in memory and reset on restart. Automatic full-history backfills
 recover older gaps after outages or interrupted imports without a cursor database.
 

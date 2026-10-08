@@ -1,6 +1,6 @@
 version: 1
 actual:
-  cacheDirectory: /data/actual-cache
+  cacheDirectory: /tmp/actual-cache
   serverUrl: http://actual-budget.actual-budget.svc.cluster.local:5006
 mappings: []
 schedule:
