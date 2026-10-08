@@ -34,7 +34,7 @@ spec:
                     port: 3000
                     httpHeaders:
                       - name: Host
-                        value: homepage.mbk.excloo.dev
+                        value: alias.invalid
               readiness:
                 custom: true
                 enabled: true
@@ -44,7 +44,7 @@ spec:
                     port: 3000
                     httpHeaders:
                       - name: Host
-                        value: homepage.mbk.excloo.dev
+                        value: alias.invalid
               startup:
                 custom: true
                 enabled: true
@@ -56,7 +56,7 @@ spec:
                     port: 3000
                     httpHeaders:
                       - name: Host
-                        value: homepage.mbk.excloo.dev
+                        value: alias.invalid
             resources:
               limits:
                 memory: 512Mi
@@ -70,7 +70,7 @@ spec:
                 drop:
                   - ALL
             env:
-              HOMEPAGE_ALLOWED_HOSTS: app.invalid,homepage.mbk.excloo.dev
+              HOMEPAGE_ALLOWED_HOSTS: app.invalid,alias.invalid
               HOMEPAGE_FILE_BESZEL_PASSWORD: /secrets/beszel-password
               HOMEPAGE_FILE_BESZEL_USERNAME: /secrets/beszel-username
               HOMEPAGE_FILE_CLOUDFLARE_KEY: /secrets/cloudflare-key

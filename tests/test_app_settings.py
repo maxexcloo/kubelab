@@ -26,16 +26,19 @@ class AppSettingsTests(unittest.TestCase):
             for route in routes:
                 if "hostnames" not in route:
                     continue
-                with self.subTest(app=settings.parent.name), tempfile.TemporaryDirectory() as directory:
-                    app = Path(directory) / settings.parent.name
-                    shutil.copytree(settings.parent, app)
-                    old = route["hostnames"][0]
-                    route["hostnames"][0] = "renamed.example.test"
-                    (app / settings.name).write_text(json.dumps(resource))
-                    output = subprocess.check_output(["kustomize", "build", str(app)], text=True)
-                    self.assertIn("renamed.example.test", output)
-                    self.assertNotIn(old, output)
-                    self.assertNotIn("app.invalid", output)
+                for index, old in enumerate(list(route["hostnames"])):
+                    with self.subTest(app=settings.parent.name, hostname=old), tempfile.TemporaryDirectory() as directory:
+                        app = Path(directory) / settings.parent.name
+                        shutil.copytree(settings.parent, app)
+                        route["hostnames"][index] = "renamed.example.test"
+                        (app / settings.name).write_text(json.dumps(resource))
+                        output = subprocess.check_output(["kustomize", "build", str(app)], text=True)
+                        self.assertIn("renamed.example.test", output)
+                        self.assertNotIn(old, output)
+                        self.assertNotIn("app.invalid", output)
+                        self.assertNotIn("alias.invalid", output)
+                    route["hostnames"][index] = old
+
 
 
 if __name__ == "__main__":
