@@ -23,6 +23,7 @@ def route(name, **annotations):
         "kind": "HTTPRoute",
         "metadata": {
             "name": name.lower(),
+            "namespace": name.lower(),
             "annotations": {
                 "gethomepage.dev/enabled": "true",
                 "gethomepage.dev/group": "Applications",
@@ -79,16 +80,17 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         services = self.services()
         self.assertIn("Remote", services)
-        self.assertEqual(services["Remote"]["description"], "SYD")
+        self.assertEqual(services["Remote"]["description"], "")
         self.assertEqual(services["Syncthing"]["description"], "File Synchronisation")
         self.assertIn("Shared", services)
-        self.assertNotIn("Local", services)
+        self.assertIn("Local", services)
         self.assertNotIn("Hidden", services)
         self.assertNotIn("mbk-bento", services)
         self.assertNotIn("mbk-kimbap", services)
         self.assertNotIn("mbk-hass", services)
         self.assertNotIn("mbk-gateway", services)
         self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")
+        self.assertEqual(list(read_yaml(self.output / "settings.yaml")["layout"])[-1], "Providers")
 
     def test_helm_widget_and_moving_an_app_between_clusters(self):
         annotations = route("Library", group="Media", **{
@@ -108,7 +110,9 @@ class HomepageDashboardTests(unittest.TestCase):
         self.write_routes("syd", [resource])
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(self.services()["Library"]["description"], "Photo Manager · SYD")
+        groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
+        self.assertEqual(groups["Media"][0]["Library"]["description"], "syd-hsp - Photo Manager")
+        self.assertEqual(groups["syd-hsp"][0]["Library"]["description"], "Photo Manager")
         widget = self.services()["Library"]["widget"]
         self.assertEqual(widget["key"], "{{HOMEPAGE_FILE_IMMICH_KEY}}")
         self.assertEqual(widget["headers"], {"X-Example": "value"})
@@ -118,7 +122,10 @@ class HomepageDashboardTests(unittest.TestCase):
         self.write_routes("syd", [route("Remote")])
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertNotIn("Library", self.services())
+        self.assertIn("Library", self.services())
+        groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
+        self.assertEqual(groups["Media"][0]["Library"]["description"], "mbk-taco - Photo Manager")
+        self.assertIn("Library", groups["mbk-taco"][0])
         self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"])
 
     def test_native_machine_widgets_use_homelab_identities(self):
@@ -152,8 +159,12 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertNotIn("mbk-personal", groups)
         self.assertIn("Netboot", groups["Infrastructure"])
         self.assertIn("ESPHome", groups["Smart Home"])
+        self.assertIn("Home Assistant", groups["Smart Home"])
+        self.assertEqual(groups["Smart Home"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
+        self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "mbk-hass - Smart Home & Automations")
+        self.assertEqual(groups["Infrastructure"]["Syncthing"]["widget"], groups["mbk-storage"]["Syncthing"]["widget"])
         storage = groups["mbk-storage"]
-        self.assertEqual(list(storage), ["Beszel", "Cloudflare Tunnel", "Tailscale", "TrueNAS"])
+        self.assertEqual(list(storage), ["Beszel", "Cloudflare Tunnel", "Syncthing", "Tailscale", "TrueNAS", "Netboot"])
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])
@@ -178,6 +189,48 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
 
+    def test_management_metadata_is_reusable_and_does_not_change_other_cards(self):
+        import shutil
+
+        homelab = self.directory / "homelab"
+        shutil.copytree(HOMELAB, homelab)
+        path = homelab / "data/machines.yaml"
+        # Standard YAML aliases share presentation while each host owns its endpoint.
+        with path.open("a") as inventory:
+            inventory.write("""  lab:
+    first:
+      beszel: true
+      management_port: 9090
+      platform: ucore
+      type: server
+      management: &panel
+        name: Example Console
+        description: Host Administration
+        icon: example-console
+    second:
+      hostname: renamed
+      management_port: 9443
+      platform: bazzite
+      type: server
+      management: *panel
+""")
+        beszel = route("Beszel")
+        beszel["metadata"]["namespace"] = "beszel"
+        self.write_routes("mbk", [beszel])
+        result = self.render(HOMELAB_DIRECTORY=str(homelab))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        groups = {name: {key: value for card in cards for key, value in card.items()}
+                  for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
+        for host, endpoint in [("first", "first.lab.example.net:9090"), ("renamed", "renamed.lab.example.net:9443")]:
+            panel = groups[f"lab-{host}"]["Example Console"]
+            self.assertEqual(panel["href"], f"https://{endpoint}")
+            self.assertEqual(panel["description"], "Host Administration")
+            self.assertEqual(panel["icon"], "example-console")
+        self.assertEqual(groups["lab-first"]["Beszel"]["icon"], "beszel")
+        self.assertEqual(groups["lab-first"]["Beszel"]["description"], "System Monitoring")
+        self.assertEqual(groups["Infrastructure"]["Netboot"]["href"], "http://storage.mbk.example.net:31010")
+        self.assertEqual(groups["mbk-storage"]["TrueNAS"]["widget"]["type"], "truenas")
+
     def test_cluster_tools_follow_inventory_hosts_without_name_suffixes(self):
         import shutil
 
@@ -185,6 +238,7 @@ class HomepageDashboardTests(unittest.TestCase):
         shutil.copytree(HOMELAB, homelab)
         path = homelab / "data/machines.yaml"
         inventory = read_yaml(path)
+        del inventory["machines"]["mbk"]["taco"]
         inventory["machines"]["mbk"]["node"] = {"cluster": "mbk", "hostname": "renamed", "type": "vm"}
         inventory["machines"]["syd"] = {"node": {"cluster": "syd", "type": "vm"}}
         path.write_text(json.dumps(inventory))

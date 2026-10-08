@@ -62,11 +62,13 @@ yq '
   [load(strenv(HOMELAB_MACHINES)).machines | to_entries[] | .key as $network |
     .value | to_entries[] | select(.value.cluster != null) |
     {"cluster": .value.cluster, "host": ($network + "-" + (.value.hostname // .key))}] as $hosts |
-  with(.[] | select(.annotations."gethomepage.dev/group" == "Servers");
+  with(.[];
     .cluster as $cluster |
     ($hosts | map(select(.cluster == $cluster))) as $matches |
     with(select(($matches | length) != 1); error("Expected one inventory host for cluster " + $cluster)) |
-    .annotations."gethomepage.dev/group" = $matches[0].host)
+    .serverGroup = $matches[0].host |
+    with(select(.annotations."gethomepage.dev/group" == "Servers");
+      .annotations."gethomepage.dev/group" = .serverGroup))
 ' "$temporary_directory/inventory.yaml" > "$temporary_directory/inventory.yaml.next"
 mv "$temporary_directory/inventory.yaml.next" "$temporary_directory/inventory.yaml"
 
@@ -93,7 +95,7 @@ INVENTORY="$temporary_directory/inventory.yaml" \
       .value | to_entries[] | select(.value.type != null) |
       ($network + "-" + (.value.hostname // .key))] as $host_groups |
     ((load(strenv(INVENTORY)) | map(.annotations."gethomepage.dev/group")) +
-      (load(strenv(SERVICES)) | map(keys | .[])) + ["Providers"] | unique | sort) as $groups |
+      (load(strenv(SERVICES)) | map(keys | .[])) | unique | sort | map(select(. != "Providers"))) + ["Providers"] as $groups |
     .layout = ($groups[] as $group ireduce ({};
       .[$group] = ({"columns": 2, "style": "row",
         "tab": (["Services"] + ($host_groups | map(select(. == $group) | "Servers")) | .[-1])} * ($preferences[$group] // {}))))

@@ -1,4 +1,4 @@
-gateway: true
+gateway: false
 ingress: false
 mode: cluster
 traefik: false

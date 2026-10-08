@@ -24,3 +24,12 @@ machines:
         syncthing:
           port: 20910
           scheme: http
+    taco:
+      cluster: mbk
+      platform: talos
+      type: vm
+  syd:
+    hsp:
+      cluster: syd
+      platform: talos
+      type: vm

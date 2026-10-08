@@ -9,7 +9,6 @@ metadata:
     gethomepage.dev/group: Servers
     gethomepage.dev/href: https://headlamp.syd.excloo.dev
     gethomepage.dev/icon: headlamp
-    gethomepage.dev/instance: inventory
     gethomepage.dev/name: Headlamp
     gethomepage.dev/siteMonitor: https://headlamp.syd.excloo.dev
   labels:

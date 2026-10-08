@@ -53,7 +53,7 @@ while IFS= read -r reference; do
     *[!a-z0-9/-]* | */ | /* | *//*) echo "Invalid endpoint reference: $reference" >&2; exit 1 ;;
   esac
   NETWORK="$network" MACHINE="$machine" yq -e \
-    '.machines[strenv(NETWORK)][strenv(MACHINE)]' \
+    'explode(.) | .machines[strenv(NETWORK)][strenv(MACHINE)]' \
     "$homelab_directory/data/machines.yaml" > "$temporary_directory/machine.yaml"
   hostname=$(MACHINE="$machine" yq -r '.hostname // strenv(MACHINE)' "$temporary_directory/machine.yaml")
   if [ "$service" = management ]; then

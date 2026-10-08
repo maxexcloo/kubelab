@@ -1,5 +1,7 @@
-map(select(.cluster != strenv(HOMEPAGE_CLUSTER) or .annotations."gethomepage.dev/instance" == "inventory")) |
 map(
+  ([.] +
+    ([.] | map(select(.annotations."gethomepage.dev/group" != .serverGroup) |
+      . + {"annotations": (.annotations + {"gethomepage.dev/group": .serverGroup})}))) | .[] |
   . as $route |
   .cluster as $cluster |
   .annotations |
@@ -13,16 +15,17 @@ map(
   del(."pod-selector") |
   with(select($cluster != strenv(HOMEPAGE_CLUSTER)); del(.app, .namespace, .showStats)) |
   .description = ((.description // "") | sub(" · (\$\{HOMEPAGE_LOCATION\}|" + ($cluster | upcase) + ")$"; "")) |
-  .description = ([.description, ($cluster | upcase)] | map(select(. != "")) | join(" · ")) |
+  with(select(.group != $route.serverGroup);
+    .description = ([$route.serverGroup, .description] | map(select(. != "")) | join(" - "))) |
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
   .siteMonitor = (.siteMonitor // .href) |
   .weight = ((.weight // "0") | from_yaml)
-) as $remote |
+) as $applications |
 [load(strenv(SERVICES)) | .[] | to_entries | .[] |
   .key as $group | .value[] | to_entries | .[] |
   .value + {"group": $group, "name": .key}] as $external |
-($remote + $external) |
+($external + $applications) | unique_by(.group + "/" + .name) |
 sort_by(.group, .weight // 0, .name) |
 group_by(.group) |
 map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})

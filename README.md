@@ -183,32 +183,31 @@ stateless Cloudflared and Redlib use rolling updates.
 ### Homepage
 
 Homepage runs once on `mbk`, at `home.excloo.com` and
-`homepage.mbk.excloo.dev`. Local application HTTPRoutes use native discovery.
-A sidecar reads other clusters' `gethomepage.dev` annotations from Git every
-five minutes using the route extraction shared with Gatus. Remote cards use URL
-health checks; Headlamp provides live Pod inspection. Git describes desired
-placement, so cards can briefly differ while Flux reconciles.
+`homepage.mbk.excloo.dev`. Its sidecar reads all clusters' `gethomepage.dev`
+annotations from Git every five minutes using the route extraction shared with
+Gatus. The same annotations supply category cards and host copies. Kubernetes
+route discovery is disabled to prevent duplicates; local cards retain native
+`app`, `namespace` and Pod selectors for live Kubernetes statistics. Remote cards
+use URL health checks; Headlamp provides live Pod inspection. Git describes
+desired placement, so cards can briefly differ while Flux reconciles.
 
-Services are grouped by purpose. Infrastructure and Smart Home add-ons appear on
-the Services tab. Appliance consoles and host monitoring appear on Servers under
-canonical inventory names such as `mbk-kimbap` and `syd-hsp`. Only machines with a
-`type` participate in host discovery, matching Homelab's Tailscale tagging rule;
-personal devices without a type are excluded. Cards retain their product names
-and icons. Beszel descriptions identify the host platform. Within each group,
-widgets come first, then names sort alphabetically; annotated widget cards use
-`gethomepage.dev/weight: "-100"`.
+Services appear in their category on Services and under their inventory host on
+Servers. Home Assistant and its add-ons use Smart Home; Infrastructure also
+appears on Services. Host groups use canonical inventory names such as
+`mbk-kimbap` and `syd-hsp`. Only machines with a `type` participate in host
+discovery, matching Homelab's Tailscale tagging rule; untyped personal devices
+are excluded. Cards retain product names and icons. Beszel subtitles read
+`System Monitoring`. Widget cards come first, then names sort alphabetically;
+annotated widgets use `gethomepage.dev/weight: "-100"`.
 
-Cluster tools declare `gethomepage.dev/group: Servers` and
-`gethomepage.dev/instance: inventory`. The existing renderer resolves their group
-from Homelab's `cluster` assignment, rather than embedding a hostname or cluster
-suffix in the card name. Homepage's instance selector excludes these routes from
-native discovery to avoid duplicates; rendered local tools retain native `app`
-and `namespace` fields for Pod statistics. Other local apps remain natively
-discovered. Each cluster currently has one inventory node; a missing or ambiguous
-mapping fails the refresh and preserves the previous configuration. App subtitles
-include the uppercase cluster name. Flux supplies `HOMEPAGE_LOCATION` to local
-application route annotations; ConfigMaps are excluded from substitution to
-preserve mounted scripts and app configuration.
+Cluster tools that belong only under their host declare
+`gethomepage.dev/group: Servers`. The renderer resolves all Kubernetes services'
+hosts from Homelab's `cluster` assignment. Each cluster currently has one
+inventory node; missing or ambiguous mappings fail the refresh and preserve the
+previous configuration. Category subtitles use `host - description`; server
+copies omit the host. Existing cluster suffixes in annotations are normalised
+by the renderer. A host's dedicated monitoring card takes precedence over a
+same-named app copy, so Beszel appears once per host with its native host widget.
 
 Homepage uses translucent rounded cards and enlarged system UI text, with native
 widget spacing and card heights. HTTP response times appear in milliseconds;
@@ -220,9 +219,11 @@ External links use `homelab://<network>/<machine>/<service>` references, optiona
 followed by a path. Homelab owns hostnames, domains and ports: `management` uses
 the HTTPS management port and named services use their declared scheme and port.
 Only declared management endpoints produce console links, and an existing
-appliance card prevents duplication. Services retain their configured category;
-only the `Servers` category resolves links into host groups. Provider bookmarks
-come from Homelab's `data/providers.yaml`.
+appliance card prevents duplication. Optional Homelab `management` metadata
+supplies the panel's `name`, `description` and `icon`; without it, the link uses
+the machine identity and platform. Shared panel metadata uses ordinary YAML
+anchors. Both category and host cards share widget settings and credential
+references. Provider bookmarks come from Homelab's `data/providers.yaml`.
 
 Homelab publishes non-secret Cloudflare account/tunnel IDs and Tailscale device
 IDs in each cluster vault's `Infrastructure Inventory` item. A separate
@@ -243,7 +244,8 @@ access. It retains valid configuration during outages, validates each refresh
 and replaces changed files atomically. It uses pinned upstream yq and Flux CLI
 images without installing packages at startup. Content-named ConfigMaps trigger
 updates for checked-in configuration and scripts. Layout groups are derived
-automatically; `settings.yaml` supplies presentation choices.
+automatically; `settings.yaml` supplies presentation choices. Providers is always
+the final group on the Services tab.
 
 External Secrets supplies mounted files from MBK's 1Password vault. Homepage uses
 native `HOMEPAGE_FILE_*` references, so credentials never enter generated config.

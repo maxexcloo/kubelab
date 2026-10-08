@@ -9,7 +9,6 @@ metadata:
     gethomepage.dev/group: Servers
     gethomepage.dev/href: https://grafana.excloo.com
     gethomepage.dev/icon: grafana
-    gethomepage.dev/instance: inventory
     gethomepage.dev/name: Grafana
     gethomepage.dev/siteMonitor: https://grafana.excloo.com
     gethomepage.dev/weight: "-100"
