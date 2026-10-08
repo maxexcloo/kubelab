@@ -94,12 +94,11 @@ class HomepageDashboardTests(unittest.TestCase):
 
     def test_helm_widget_and_moving_an_app_between_clusters(self):
         annotations = route("Library", group="Media", **{
-            "description": "Photo Manager · ${HOMEPAGE_LOCATION}",
+            "description": "Photo Manager",
             "widget.type": "immich",
             "widget.key": '{{ "{{HOMEPAGE_FILE_IMMICH_KEY}}" }}',
             "widget.version": "2",
             "widget.headers.X-Example": "value",
-            "weight": "-100",
         })["metadata"]["annotations"]
         resource = {
             "apiVersion": "helm.toolkit.fluxcd.io/v2",
@@ -112,7 +111,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
         self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • SYD")
-        self.assertEqual(groups["syd-hsp"][0]["Library"]["description"], "Photo Manager")
+        self.assertEqual(groups["Cluster: SYD"][0]["Library"]["description"], "Photo Manager")
         widget = self.services()["Library"]["widget"]
         self.assertEqual(widget["key"], "{{HOMEPAGE_FILE_IMMICH_KEY}}")
         self.assertEqual(widget["headers"], {"X-Example": "value"})
@@ -125,7 +124,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertIn("Library", self.services())
         groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
         self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • MBK")
-        self.assertIn("Library", groups["mbk-taco"][0])
+        self.assertIn("Library", groups["Cluster: MBK"][0])
         self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"])
 
     def test_native_machine_widgets_use_homelab_identities(self):
@@ -169,11 +168,11 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])
         node = groups["mbk-taco"]
-        self.assertEqual(list(node), ["Beszel", "Cloudflare Tunnel", "Tailscale"])
+        self.assertEqual(list(node), ["Beszel", "Tailscale"])
         self.assertEqual(node["Beszel"]["widget"]["systemId"], "mbk-taco")
         self.assertEqual(node["Beszel"]["href"], "https://beszel.example.net/system/mbk-taco")
         self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
-        self.assertEqual(node["Cloudflare Tunnel"]["widget"]["tunnelid"], "cluster-tunnel")
+        self.assertEqual(groups["Cluster: MBK"]["Cloudflare Tunnel"]["widget"]["tunnelid"], "cluster-tunnel")
         self.assertEqual(node["Tailscale"]["widget"]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
         self.assertEqual(node["Tailscale"]["href"], "https://login.tailscale.com/admin/machines/node-device")
         self.assertEqual(node["Beszel"]["widget"]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")
@@ -232,7 +231,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(groups["Infrastructure"]["Netboot"]["href"], "http://storage.mbk.example.net:31010")
         self.assertEqual(groups["mbk-storage"]["TrueNAS"]["widget"]["type"], "truenas")
 
-    def test_cluster_tools_follow_inventory_hosts_without_name_suffixes(self):
+    def test_cluster_tools_support_multiple_nodes_without_inventing_placement(self):
         import shutil
 
         homelab = self.directory / "homelab"
@@ -250,19 +249,19 @@ class HomepageDashboardTests(unittest.TestCase):
         result = self.render(HOMELAB_DIRECTORY=str(homelab))
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
-        local = groups["mbk-renamed"][0]["Headlamp"]
-        remote = groups["syd-node"][0]["Headlamp"]
+        local = groups["Cluster: MBK"][0]["Headlamp"]
+        remote = groups["Cluster: SYD"][0]["Headlamp"]
         self.assertEqual(local["namespace"], "headlamp")
         self.assertEqual(local["app"], "headlamp")
         self.assertNotIn("namespace", remote)
         layout = read_yaml(self.output / "settings.yaml")["layout"]
-        self.assertEqual(layout["mbk-renamed"]["tab"], "Servers")
-        self.assertEqual(layout["syd-node"]["tab"], "Servers")
+        self.assertEqual(layout["Cluster: MBK"]["tab"], "Servers")
+        self.assertEqual(layout["Cluster: SYD"]["tab"], "Servers")
         self.assertNotIn("Servers", layout)
         before = (self.output / "services.yaml").read_bytes()
         inventory["machines"]["mbk"]["extra"] = {"cluster": "mbk", "type": "vm"}
         path.write_text(json.dumps(inventory))
-        self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
+        self.assertEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
 
     def test_unchanged_refresh_and_invalid_input_preserve_files(self):

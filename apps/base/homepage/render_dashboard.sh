@@ -55,18 +55,10 @@ yq ea -p=json -o=yaml '[.] | map(select(.annotations."gethomepage.dev/enabled" =
   "$temporary_directory/routes.json" > "$temporary_directory/inventory.yaml"
 yq -e 'length > 0' "$temporary_directory/inventory.yaml" >/dev/null
 
-# Cluster tools use their inventory host, without copying hostnames into routes.
-# A cluster currently has one inventory node; ambiguity must not silently move cards.
-# shellcheck disable=SC2016
+# Cluster services belong to the cluster, independently of node count or placement.
 yq '
-  [load(strenv(HOMELAB_MACHINES)).machines | to_entries[] | .key as $network |
-    .value | to_entries[] | select(.value.cluster != null) |
-    {"cluster": .value.cluster, "host": ($network + "-" + (.value.hostname // .key))}] as $hosts |
   with(.[];
-    .cluster as $cluster |
-    ($hosts | map(select(.cluster == $cluster))) as $matches |
-    with(select(($matches | length) != 1); error("Expected one inventory host for cluster " + $cluster)) |
-    .serverGroup = $matches[0].host |
+    .serverGroup = ("Cluster: " + (.cluster | upcase)) |
     with(select(.annotations."gethomepage.dev/group" == "Servers");
       .annotations."gethomepage.dev/group" = .serverGroup))
 ' "$temporary_directory/inventory.yaml" > "$temporary_directory/inventory.yaml.next"
@@ -98,7 +90,7 @@ INVENTORY="$temporary_directory/inventory.yaml" \
       (load(strenv(SERVICES)) | map(keys | .[])) | unique | sort | map(select(. != "Providers"))) + ["Providers"] as $groups |
     .layout = ($groups[] as $group ireduce ({};
       .[$group] = ({"columns": 2, "style": "row",
-        "tab": (["Services"] + ($host_groups | map(select(. == $group) | "Servers")) | .[-1])} * ($preferences[$group] // {}))))
+        "tab": (["Services"] + ($host_groups | map(select(. == $group) | "Servers")) + ([$group] | map(select((. // "") | test("^Cluster: ")) | "Servers")) | .[-1])} * ($preferences[$group] // {}))))
   ' "$source_directory/settings.yaml" > "$temporary_directory/config/settings.yaml"
 
 # Validate the entire refresh before publishing any files. Settings is last so

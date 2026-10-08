@@ -18,7 +18,7 @@ load(strenv(INFRASTRUCTURE)) as $infra |
   ($machine.hostname // $name) as $hostname |
   ("homelab://" + $network + "/" + $name + "/management") as $management |
   $infra.tailscale[$name] as $device |
-  $infra.cloudflare.tunnels[$machine.cluster // $name] as $tunnel |
+  $infra.cloudflare.tunnels[$name] as $tunnel |
   {
     "name": ($network + "-" + $hostname),
     "group": ($network + "-" + $hostname),
@@ -64,7 +64,16 @@ load(strenv(INFRASTRUCTURE)) as $infra |
     "widget": $widget
   }
 ] as $monitoring |
-($existing + $management + $monitoring) |
+[($inventory | .[] | keys | .[]) ] as $machine_names |
+[($infra.cloudflare.tunnels // {}) | to_entries[] |
+  .key as $name | select($machine_names | any_c(. == $name) | not) |
+  {"name": "Cloudflare Tunnel", "group": ("Cluster: " + ($name | upcase)),
+   "description": "Cloudflare Tunnel", "icon": "cloudflare",
+   "href": ("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .value),
+   "widget": {"type": "cloudflared", "accountid": $infra.cloudflare.account_id,
+     "tunnelid": .value, "key": "{{HOMEPAGE_FILE_CLOUDFLARE_KEY}}"}}
+] as $cluster_tunnels |
+($existing + $management + $monitoring + $cluster_tunnels) |
 map(del(.reference) | .weight = 0 | with(select(.widget != null or (.widgets | length > 0)); .weight = -100)) |
 sort_by(.group, .weight, .name) | group_by(.group) |
 map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})
