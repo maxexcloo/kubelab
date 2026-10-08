@@ -126,11 +126,6 @@ and rolling upgrades. Use upstream guidance and conservative workload estimates 
 limited, then refine them with a representative week of VictoriaMetrics data.
 Do not lower limits merely to reduce the sum of configured ceilings.
 
-Small PostgreSQL instances request 100m CPU and 512Mi memory with a 2Gi memory
-limit, retaining PostgreSQL's default 128MB shared buffers. These are initial
-homelab estimates, not upstream sizing defaults. CloudNativePG recommends
-Guaranteed QoS for dedicated database workloads; these shared-node instances
-use Burstable QoS to allow CPU bursts without reserving whole cores per database.
 Tailscale proxy resources use the operator's native `ProxyClass` API. Bound application concurrency when overlapping work,
 rather than a single operation, causes the peak.
 
@@ -350,9 +345,7 @@ for local recovery access.
 under `/mnt/truenas-nvme/clusters/mbk`; allow-listed standalone datasets use
 retained static volumes. `taco` holds active node-local volumes, including
 CloudNativePG databases. Storage snapshots and off-site replication belong to
-`homelab`; this repository does not schedule database backups or restores.
-Existing `backup` PVCs and dumps are retained, but no longer refreshed. Recovery
-of node-local databases must use an independently maintained backup or snapshot.
+`homelab`.
 
 RoMM mounts `truenas/games/roms` and `truenas/games/bios` through subpaths of its
 retained `games` volume. Its configuration, resources and user assets remain on
