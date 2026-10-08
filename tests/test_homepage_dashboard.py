@@ -116,7 +116,7 @@ class HomepageDashboardTests(unittest.TestCase):
         widget = self.services()["Library"]["widget"]
         self.assertEqual(widget["key"], "{{HOMEPAGE_FILE_IMMICH_KEY}}")
         self.assertEqual(widget["headers"], {"X-Example": "value"})
-        self.assertEqual(widget["version"], "2")
+        self.assertEqual(widget["version"], 2)
         self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"])
         self.write_routes("mbk", [resource])
         self.write_routes("syd", [route("Remote")])

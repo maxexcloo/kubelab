@@ -19,6 +19,7 @@ map(
     .description = ([.description, ($cluster | upcase)] | map(select(. != "")) | join(" • "))) |
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
+  with(select(.widget.version != null); .widget.version |= from_yaml) |
   .siteMonitor = (.siteMonitor // .href) |
   .weight = ((.weight // "0") | from_yaml)
 ) as $applications |

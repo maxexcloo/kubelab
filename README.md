@@ -250,7 +250,8 @@ Native widget fields match the legacy dashboard, including TrueNAS pool rows.
 Application routes declare URL checks in their annotations. Provider bookmarks,
 host console links and Home Assistant ingress shortcuts are navigation links.
 Home Assistant add-ons with only an authenticated ingress link cannot supply
-native widgets; ESPHome and Zigbee2MQTT need dedicated API endpoints first.
+native widgets. ESPHome needs a direct dashboard API endpoint; Homepage has no
+native Zigbee2MQTT widget.
 
 The sidecar reads public Git snapshots without credentials or infrastructure API
 access. It retains valid configuration during outages, validates each refresh
@@ -267,9 +268,9 @@ item with explicit cluster prefixes. Only Homepage can read
 the widget credentials; the renderer reads the non-secret inventory and preserves
 credential placeholders. Native widgets remain visible when credentials are missing
 or their API is unavailable, using Homepage's default error display. An empty
-widget container reserves one row while readings load. Homepage 2.4.0's
-incompatible annotation-based Beszel overview is omitted; per-machine Beszel
-widgets use the supported numeric version setting.
+widget container reserves one row while readings load. Beszel shows an overview
+on Services and host readings on Servers. Widget version annotations are parsed
+as YAML so native widgets receive numeric API versions where required.
 
 Populate the fields below in the `Homepage` item using credentials from each
 service's supported UI. The widgets are already configured:
