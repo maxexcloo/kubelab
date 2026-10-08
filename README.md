@@ -225,8 +225,9 @@ local Kubernetes cards also show Pod status. Switching native tabs mounts the
 visible widgets and fetches their data. Configuration changes trigger Homepage's
 normal automatic reload.
 
-Flylab links use `flylab://<application>` and resolve the single certificate
-hostname in that app’s `deployment.toml`; Gatus uses this source.
+Public links can use `homelab-dns://<CNAME-target>` to resolve a single hostname
+from Homelab’s DNS declarations. Gatus uses its Fly app’s CNAME target; Homepage
+does not need access to the private Flylab repository.
 External links use `homelab://<network>/<machine>/<service>` references, optionally
 followed by a path. Homelab owns hostnames, domains and ports: `management` uses
 the HTTPS management port and named services use their declared scheme and port.

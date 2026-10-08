@@ -29,7 +29,6 @@ class ServiceInventoryTests(unittest.TestCase):
             env = dict(
                 os.environ,
                 HOMELAB_DIRECTORY=str(ROOT / "tests/fixtures/homepage/homelab"),
-                FLYLAB_DIRECTORY=str(ROOT / "tests/fixtures/homepage/flylab"),
                 BUILD_LOG=str(log),
                 PATH=f"{commands}:{os.environ['PATH']}",
                 REAL_KUSTOMIZE=shutil.which("kustomize"),
@@ -49,8 +48,7 @@ class ServiceInventoryTests(unittest.TestCase):
                 command = ["scripts/render_service_inventory.sh", *options]
                 expected = subprocess.check_output(
                     command, cwd=ROOT,
-                    env=dict(os.environ, HOMELAB_DIRECTORY=env["HOMELAB_DIRECTORY"],
-                             FLYLAB_DIRECTORY=env["FLYLAB_DIRECTORY"]),
+                    env=dict(os.environ, HOMELAB_DIRECTORY=env["HOMELAB_DIRECTORY"]),
                 )
                 actual = subprocess.check_output(
                     [*command, "--manifest-directory", str(manifests)],

@@ -67,7 +67,7 @@
 - Operations:
     - Gatus:
         description: Health Monitoring & Status Page • Fly
-        href: &gatus flylab://gatus
+        href: &gatus homelab-dns://excloo-gatus.fly.dev
         icon: gatus
         siteMonitor: *gatus
         widget:

@@ -59,7 +59,6 @@ class HomepageDashboardTests(unittest.TestCase):
             ["sh", str(APP / "render_dashboard.sh"), str(APP), str(self.output)],
             env=os.environ | {
                 "HOMELAB_DIRECTORY": str(HOMELAB),
-                "FLYLAB_DIRECTORY": str(HOMELAB.parent / "flylab"),
                 "KUBELAB_DIRECTORY": str(self.directory),
                 "HOMEPAGE_CLUSTER": "mbk",
             } | environment,

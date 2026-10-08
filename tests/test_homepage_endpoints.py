@@ -1,7 +1,6 @@
 """Exercise Homepage's endpoint contract without fetching live inventory."""
 
 import json
-import os
 import shutil
 import subprocess
 import tempfile
@@ -27,13 +26,12 @@ class HomepageEndpointsTests(unittest.TestCase):
                     "key": "{{HOMEPAGE_FILE_TRUENAS_KEY}}",
                 },
                 "link": "homelab://mbk/hass/management/add-on",
-                "fly": "flylab://gatus",
+                "fly": "homelab-dns://excloo-gatus.fly.dev",
                 "console": "homelab://mbk/nanokvm/console",
                 "local_console": "homelab://mbk/slzb-06m/console",
                 "other_service": "homelab://mbk/kimbap/netboot",
             }))
-            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True,
-                           env=os.environ | {"FLYLAB_DIRECTORY": str(FIXTURE.parent / "flylab")})
+            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
             result = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
             self.assertEqual(result["href"], "https://storage.mbk.example.net:8444")
             self.assertEqual(result["href"], result["siteMonitor"])
@@ -51,8 +49,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                 "description": "Example provider", "href": "https://provider.example.com", "icon": "example"
             }]}]}])
             timestamp = output.stat().st_mtime_ns
-            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True,
-                           env=os.environ | {"FLYLAB_DIRECTORY": str(FIXTURE.parent / "flylab")})
+            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
             self.assertEqual(output.stat().st_mtime_ns, timestamp)
 
     def test_inventory_cards_follow_metadata_and_addresses(self):
@@ -96,7 +93,8 @@ class HomepageEndpointsTests(unittest.TestCase):
             template = Path(directory) / "source.yaml"
             output = Path(directory) / "services.yaml"
             output.write_text("previous configuration\n")
-            for reference in ["homelab://mbk/missing/management", "homelab://mbk/kimbap/missing"]:
+            for reference in ["homelab://mbk/missing/management", "homelab://mbk/kimbap/missing",
+                              "homelab-dns://missing.fly.dev"]:
                 with self.subTest(reference=reference):
                     template.write_text(json.dumps({"href": reference}))
                     result = subprocess.run(
