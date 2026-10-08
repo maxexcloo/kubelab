@@ -3,6 +3,8 @@ kind: Certificate
 metadata:
   name: redlib-www
   namespace: networking
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   secretName: redlib-www
   dnsNames:
