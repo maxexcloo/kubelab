@@ -27,17 +27,10 @@ load(strenv(INFRASTRUCTURE)) as $infra |
         "username": "{{HOMEPAGE_FILE_BESZEL_USERNAME}}",
         "password": "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}",
         "fields": ["status", "cpu", "memory", "network"], "hideErrors": true
-      })) +
-      ([$device] | map(select(. != null)) | map({
-        "type": "tailscale", "deviceid": ., "key": "{{HOMEPAGE_FILE_TAILSCALE_KEY}}", "hideErrors": true
-      })) +
-      ([$tunnel] | map(select(. != null)) | map({
-        "type": "cloudflared", "accountid": $infra.cloudflare.account_id, "tunnelid": .,
-        "key": "{{HOMEPAGE_FILE_CLOUDFLARE_KEY}}", "hideErrors": true
       }))
     )
   } |
-  select($machine.management_port != null or (.widgets | length > 0))
+  select($machine.management_port != null or $device != null or $tunnel != null or (.widgets | length > 0))
 ] as $machines |
 ($existing | map(. as $card |
   ($machines | map(select(.reference == $card.href)) | .[0].widgets // []) as $widgets |

@@ -139,8 +139,11 @@ application health endpoints where available.
 VictoriaMetrics collects kubelet container and node metrics with seven-day
 retention. Its operator watches the cluster so node discovery and cross-namespace
 scrapes work, and manages collector RBAC. Sydney keeps smaller CPU requests to
-leave scheduling room for upgrades. `kubectl top` requires a Metrics API that is
-not installed here; use VictoriaMetrics or kubelet statistics instead.
+leave scheduling room for upgrades. Metrics Server supplies the Kubernetes Metrics
+API on both clusters for Homepage, Headlamp and `kubectl top`. Its API serving
+certificate is issued and rotated by cert-manager. Kubelet collection uses
+`--kubelet-insecure-tls` because Talos currently serves self-signed certificates
+without IP SANs; requests remain authenticated over TLS.
 
 ### Upgrades
 
@@ -201,7 +204,7 @@ Application routes declare URL checks in their annotations for consistent checks
 across clusters. Provider bookmarks, host console links and Home Assistant ingress
 shortcuts are navigation, not independent service-health checks. Machine cards use
 lowercase names such as `mbk-bento` and `syd-hsp`, with standard platform icons where
-available; their widgets report host, mesh and tunnel state. Switching native tabs
+available; their Beszel widgets report host statistics. Switching native tabs
 mounts the visible widgets and fetches their data; configuration changes trigger Homepage's
 normal automatic reload.
 
@@ -215,8 +218,10 @@ IDs in each cluster vault's `Infrastructure Inventory` item. A separate
 ExternalSecret mounts this snapshot only into the renderer. Homelab refreshes it
 on infrastructure apply; the renderer never accesses state or discovers provider
 identities itself. Hosts marked `beszel: true` use native Beszel system-name
-lookup. Machine widgets join existing appliance cards where possible, covering
-Talos and other operating systems without duplicate cards or hardcoded IDs.
+lookup. Beszel's endpoint comes from its app namespace's route annotations.
+Machine widgets join existing appliance cards where possible, covering Talos and
+other operating systems without duplicate cards or hardcoded IDs. Cloudflare and
+Tailscale identities still supply machine navigation links.
 Home Assistant add-ons with only an authenticated ingress link remain navigation
 links; ESPHome and
 Zigbee2MQTT need dedicated API endpoints before their native widgets can work.
@@ -231,10 +236,15 @@ External Secrets supplies mounted files from MBK's 1Password vault. Homepage use
 native `HOMEPAGE_FILE_*` references, so credentials never enter generated config.
 Beszel and local Grafana reuse their existing items. Only Homepage can read
 the widget credentials; the renderer reads the non-secret inventory and preserves
-credential placeholders. Homepage 2.4.0 cannot use Beszel v2 through string-valued
-Kubernetes widget annotations; its overview remains unavailable, while generated
-per-machine widgets use numeric versions and work.
-Fill these fields in the `Homepage` item through each service's supported UI:
+credential placeholders. Only working widgets are declared: Beszel per-machine
+statistics, Gatus, local Grafana and RoMM. Widgets with missing credentials are
+omitted so their loading placeholders do not appear and then collapse. Homepage
+2.4.0's incompatible annotation-based Beszel overview is also omitted.
+
+The existing fields below remain in the `Homepage` item. Fill them through each
+service's supported UI, then add that service's native widget configuration beside
+its route or in Homepage's external services configuration. Filling a field alone
+does not enable a widget:
 
 | Fields                                         | Purpose                                                             |
 | ---------------------------------------------- | ------------------------------------------------------------------- |

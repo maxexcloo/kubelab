@@ -14,12 +14,7 @@
         href: homelab://mbk/hass/management
         icon: home-assistant
         siteMonitor: homelab://mbk/hass/management
-        weight: -100
-        widget:
-          hideErrors: true
-          key: "{{HOMEPAGE_FILE_HOME_ASSISTANT_KEY}}"
-          type: homeassistant
-          url: homelab://mbk/hass/management
+        weight: 0
     - Home Assistant Matter Hub:
         description: Matter Bridge
         href: homelab://mbk/hass/management/3fd9e6b0_hamh
@@ -47,36 +42,19 @@
         href: homelab://mbk/kimbap/syncthing
         icon: syncthing
         siteMonitor: homelab://mbk/kimbap/syncthing
-        weight: -100
-        widget:
-          hideErrors: true
-          key: "{{HOMEPAGE_FILE_SYNCTHING_KEY}}"
-          type: syncthing
-          url: homelab://mbk/kimbap/syncthing
+        weight: 0
     - TrueNAS:
         description: Storage Appliance
         href: homelab://mbk/kimbap/management
         icon: truenas
         siteMonitor: homelab://mbk/kimbap/management
-        weight: -100
-        widget:
-          enablePools: true
-          hideErrors: true
-          key: "{{HOMEPAGE_FILE_TRUENAS_KEY}}"
-          type: truenas
-          url: homelab://mbk/kimbap/management
-          version: 2
+        weight: 0
     - UniFi:
         description: Network Controller
         href: homelab://mbk/gateway/management
         icon: unifi
         siteMonitor: homelab://mbk/gateway/management
-        weight: -100
-        widget:
-          hideErrors: true
-          key: "{{HOMEPAGE_FILE_UNIFI_KEY}}"
-          type: unifi
-          url: homelab://mbk/gateway/management
+        weight: 0
 - Operations:
     - Gatus:
         description: Health Monitoring & Status Page

@@ -88,7 +88,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertNotIn("mbk-kimbap", services)
         self.assertNotIn("mbk-hass", services)
         self.assertNotIn("mbk-gateway", services)
-        self.assertEqual(services["TrueNAS"]["widget"]["key"], "{{HOMEPAGE_FILE_TRUENAS_KEY}}")
+        self.assertNotIn("widget", services["TrueNAS"])
 
     def test_helm_widget_and_moving_an_app_between_clusters(self):
         annotations = route("Library", group="Media", **{
@@ -135,22 +135,22 @@ class HomepageDashboardTests(unittest.TestCase):
             "cloudflare": {"account_id": "account", "tunnels": {"kimbap": "storage-tunnel", "mbk": "cluster-tunnel"}},
             "tailscale": {"kimbap": "storage-device", "taco": "node-device"},
         }))
-        self.write_routes("mbk", [route("Beszel", **{
-            "widget.type": "beszel", "widget.url": "https://beszel.example.net",
-        })])
+        beszel = route("Beszel")
+        beszel["metadata"]["namespace"] = "beszel"
+        self.write_routes("mbk", [beszel])
         result = self.render(HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities))
         self.assertEqual(result.returncode, 0, result.stderr)
         services = self.services()
         self.assertNotIn("mbk-kimbap", services)
         self.assertNotIn("mbk-sensor", services)
-        self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")
+        self.assertNotIn("widget", services["TrueNAS"])
         self.assertEqual([widget["type"] for widget in services["TrueNAS"]["widgets"]],
-                         ["beszel", "tailscale", "cloudflared"])
+                         ["beszel"])
         node = services["mbk-taco"]
         self.assertEqual(node["widgets"][0]["systemId"], "mbk-taco")
-        self.assertEqual(node["widgets"][1]["deviceid"], "node-device")
-        self.assertEqual(node["widgets"][2]["tunnelid"], "cluster-tunnel")
-        self.assertEqual(node["widgets"][1]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
+        self.assertEqual(len(node["widgets"]), 1)
+        self.assertEqual(node["href"], "https://login.tailscale.com/admin/machines/node-device")
+        self.assertEqual(node["widgets"][0]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")
         self.assertEqual(node["weight"], -100)
         self.assertEqual(node["icon"], "talos")
         self.assertEqual(services["mbk-bento"]["weight"], 0)
