@@ -22,15 +22,8 @@ kubelab_directory=${KUBELAB_DIRECTORY:-}
 export HOMEPAGE_CLUSTER="${HOMEPAGE_CLUSTER:-mbk}"
 
 if [ -z "$kubelab_directory" ]; then
-  wget -q -T 30 -O "$temporary_directory/revision.json" \
-    https://api.github.com/repos/maxexcloo/kubelab/commits/main
-  revision=$(yq -e -r '.sha' "$temporary_directory/revision.json")
-  case "$revision" in
-    *[!a-f0-9]* | '') echo 'Invalid Kubelab revision' >&2; exit 1 ;;
-  esac
-  [ "${#revision}" -eq 40 ]
   wget -q -T 30 -O "$temporary_directory/kubelab.tar.gz" \
-    "https://codeload.github.com/maxexcloo/kubelab/tar.gz/$revision"
+    https://codeload.github.com/maxexcloo/kubelab/tar.gz/refs/heads/main
   kubelab_directory="$temporary_directory/kubelab"
   mkdir "$kubelab_directory"
   tar -xzf "$temporary_directory/kubelab.tar.gz" -C "$kubelab_directory" --strip-components=1

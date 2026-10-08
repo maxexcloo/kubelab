@@ -22,18 +22,10 @@ trap 'rm -rf "$temporary_directory"' EXIT
 
 if [ -z "$homelab_directory" ]; then
   homelab_directory="$temporary_directory/homelab"
-  mkdir -p "$homelab_directory/data"
-  wget -q -T 30 -O "$temporary_directory/revision.json" \
-    https://api.github.com/repos/maxexcloo/homelab/commits/main
-  revision=$(yq -e -r '.sha' "$temporary_directory/revision.json")
-  case "$revision" in
-    *[!a-f0-9]* | '') echo 'Invalid Homelab revision' >&2; exit 1 ;;
-  esac
-  [ "${#revision}" -eq 40 ]
-  for file in domains machines providers; do
-    wget -q -T 30 -O "$homelab_directory/data/$file.yaml" \
-      "https://raw.githubusercontent.com/maxexcloo/homelab/$revision/data/$file.yaml"
-  done
+  mkdir -p "$homelab_directory"
+  wget -q -T 30 -O "$temporary_directory/homelab.tar.gz" \
+    https://codeload.github.com/maxexcloo/homelab/tar.gz/refs/heads/main
+  tar -xzf "$temporary_directory/homelab.tar.gz" -C "$homelab_directory" --strip-components=1
 fi
 
 domain=$(yq -e -r '.domains.infrastructure' "$homelab_directory/data/domains.yaml")
