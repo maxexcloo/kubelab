@@ -34,6 +34,31 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_field_sort_preserves_values_ids_sections_and_native_fields(self):
+        fields = [
+            {"id": "username", "purpose": "USERNAME", "value": "max@example.net"},
+            {"id": "z", "label": "Zulu", "value": "keep-z"},
+            {"id": "password", "purpose": "PASSWORD", "value": "keep-password"},
+            {"id": "website", "label": "URL", "value": "https://example.net"},
+            {"id": "b", "label": "beta", "section": {"id": "other"}, "value": "keep-b"},
+            {"id": "a", "label": "alpha", "value": "keep-a"},
+            {"id": "c", "label": "Alpha", "section": {"id": "other"}, "value": "keep-c"},
+            {"id": "notesPlain", "value": "keep-notes"},
+        ]
+        original = copy.deepcopy(fields)
+        RECONCILER.sort_fields(fields)
+        self.assertEqual(
+            [field["id"] for field in fields],
+            ["username", "a", "password", "website", "c", "z", "b", "notesPlain"],
+        )
+        self.assertEqual(
+            {field["id"]: field for field in fields},
+            {field["id"]: field for field in original},
+        )
+        first = copy.deepcopy(fields)
+        RECONCILER.sort_fields(fields)
+        self.assertEqual(fields, first)
+
     def test_http_errors_do_not_expose_response_credentials(self):
         error = urllib.error.HTTPError(
             "http://connect/v1/items", 400, "Bad Request", {},
@@ -424,10 +449,10 @@ class ReconcilerTests(unittest.TestCase):
             [field["label"] for field in result["fields"]],
             [
                 "password",
-                "token",
                 "api-key",
                 "database-password",
                 "database-username",
+                "token",
                 "username",
             ],
         )

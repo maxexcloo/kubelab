@@ -248,16 +248,16 @@ service's supported UI. The widgets are already configured:
 
 | Fields                                         | Purpose                                                             |
 | ---------------------------------------------- | ------------------------------------------------------------------- |
-| `cloudflare-key`                               | API token with Cloudflare Tunnel Read permission                    |
+| `cloudflare-api-token`                         | API token with Cloudflare Tunnel Read permission                    |
 | `grafana-syd-username`, `grafana-syd-password` | Sydney Grafana dashboard login                                      |
-| `home-assistant-key`                           | Home Assistant long-lived access token                              |
-| `immich-key`                                   | Immich API key                                                      |
-| `linkwarden-key`                               | Linkwarden access token                                             |
-| `miniflux-key`                                 | Miniflux API key                                                    |
-| `syncthing-key`                                | Syncthing API key                                                   |
-| `tailscale-key`                                | Tailscale API token with device read access, not a registration key |
-| `truenas-key`                                  | TrueNAS API key                                                     |
-| `unifi-key`                                    | UniFi API key                                                       |
+| `home-assistant-access-token`                  | Home Assistant long-lived access token                              |
+| `immich-api-key`                               | Immich API key                                                      |
+| `linkwarden-access-token`                      | Linkwarden access token                                             |
+| `miniflux-api-key`                             | Miniflux API key                                                    |
+| `syncthing-api-key`                            | Syncthing API key                                                   |
+| `tailscale-api-token`                          | Tailscale API token with device read access, not a registration key |
+| `truenas-api-key`                              | TrueNAS API key                                                     |
+| `unifi-api-key`                                | UniFi API key                                                       |
 
 Widget-first ordering includes configured widgets even when credentials are
 empty or their API is unavailable. Links remain usable and widget errors stay
@@ -358,7 +358,10 @@ values are rejected.
 vault (`Cluster: MBK` or `Cluster: SYD`). The vault supplies cluster scope, so item
 titles omit the matching Homepage cluster suffix. Only declared internal credentials are generated; non-empty operator
 values are preserved except fields explicitly declared as constants. Existing
-credentials, tags, URLs and field order are preserved. Category changes replace
+credentials, tags, URLs and field sections are preserved. Custom fields sort
+alphabetically within each section; 1Password retains its built-in login fields.
+New application login defaults use `max@excloo.com`; existing service accounts
+must be renamed through their supported interfaces before updating stored logins. Category changes replace
 the item; duplicate titles stop reconciliation before any writes. Credentials,
 kubeconfigs and rendered Secrets stay out of Git.
 Application administrators use upstream setup flows; no job provisions accounts

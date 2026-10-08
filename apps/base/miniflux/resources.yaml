@@ -5,7 +5,7 @@ metadata:
   namespace: miniflux
   annotations:
     onepassword.excloo.dev/constants: '{"database-username":"miniflux"}'
-    onepassword.excloo.dev/defaults: '{"username":"admin"}'
+    onepassword.excloo.dev/defaults: '{"username":"max@excloo.com"}'
     onepassword.excloo.dev/generate-fields: database-password,password
 spec:
   refreshInterval: 1h

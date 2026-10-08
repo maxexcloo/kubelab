@@ -4,7 +4,7 @@ metadata:
   name: beszel
   namespace: beszel
   annotations:
-    onepassword.excloo.dev/defaults: '{"username":"admin@excloo.com"}'
+    onepassword.excloo.dev/defaults: '{"username":"max@excloo.com"}'
     onepassword.excloo.dev/generate-fields: password
 spec:
   refreshInterval: 1h

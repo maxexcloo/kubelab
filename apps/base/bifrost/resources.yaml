@@ -4,7 +4,7 @@ metadata:
   name: bifrost
   namespace: bifrost
   annotations:
-    onepassword.excloo.dev/defaults: '{"username":"admin"}'
+    onepassword.excloo.dev/defaults: '{"username":"max@excloo.com"}'
     onepassword.excloo.dev/generate-fields: api-key,encryption-key,password
 spec:
   refreshInterval: 1h

@@ -4,7 +4,7 @@ metadata:
   name: comfy-control
   namespace: comfy-control
   annotations:
-    onepassword.excloo.dev/defaults: '{"username":"admin"}'
+    onepassword.excloo.dev/defaults: '{"username":"max@excloo.com"}'
     onepassword.excloo.dev/generate-fields: api-key-control,control-secret-key,password
 spec:
   refreshInterval: 1h

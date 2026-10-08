@@ -4,7 +4,7 @@ metadata:
   name: homepage
   namespace: homepage
   annotations:
-    onepassword.excloo.dev/defaults: '{"cloudflare-key":"","grafana-syd-password":"","grafana-syd-username":"","home-assistant-key":"","immich-key":"","linkwarden-key":"","miniflux-key":"","syncthing-key":"","tailscale-key":"","truenas-key":"","unifi-key":""}'
+    onepassword.excloo.dev/defaults: '{"cloudflare-api-token":"","grafana-syd-password":"","grafana-syd-username":"","home-assistant-access-token":"","immich-api-key":"","linkwarden-access-token":"","miniflux-api-key":"","syncthing-api-key":"","tailscale-api-token":"","truenas-api-key":"","unifi-api-key":""}'
 spec:
   refreshInterval: 1h
   data:
@@ -18,7 +18,7 @@ spec:
       secretKey: beszel-username
     - remoteRef:
         key: Homepage
-        property: cloudflare-key
+        property: cloudflare-api-token
       secretKey: cloudflare-key
     - remoteRef:
         key: Grafana
@@ -38,35 +38,35 @@ spec:
       secretKey: grafana-syd-username
     - remoteRef:
         key: Homepage
-        property: home-assistant-key
+        property: home-assistant-access-token
       secretKey: home-assistant-key
     - remoteRef:
         key: Homepage
-        property: immich-key
+        property: immich-api-key
       secretKey: immich-key
     - remoteRef:
         key: Homepage
-        property: linkwarden-key
+        property: linkwarden-access-token
       secretKey: linkwarden-key
     - remoteRef:
         key: Homepage
-        property: miniflux-key
+        property: miniflux-api-key
       secretKey: miniflux-key
     - remoteRef:
         key: Homepage
-        property: syncthing-key
+        property: syncthing-api-key
       secretKey: syncthing-key
     - remoteRef:
         key: Homepage
-        property: tailscale-key
+        property: tailscale-api-token
       secretKey: tailscale-key
     - remoteRef:
         key: Homepage
-        property: truenas-key
+        property: truenas-api-key
       secretKey: truenas-key
     - remoteRef:
         key: Homepage
-        property: unifi-key
+        property: unifi-api-key
       secretKey: unifi-key
   secretStoreRef:
     kind: ClusterSecretStore

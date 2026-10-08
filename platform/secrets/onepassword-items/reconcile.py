@@ -245,6 +245,25 @@ def field_label(field):
     return field.get("label") or field.get("id")
 
 
+def sort_fields(fields):
+    sections = {}
+    for index, field in enumerate(fields):
+        if (
+            field.get("purpose")
+            or field.get("id") == "notesPlain"
+            or field_label(field).casefold() in {"password", "url", "username"}
+        ):
+            continue
+        sections.setdefault((field.get("section") or {}).get("id"), []).append(index)
+    for indices in sections.values():
+        ordered = sorted(
+            (fields[index] for index in indices),
+            key=lambda field: field_label(field).casefold(),
+        )
+        for index, field in zip(indices, ordered):
+            fields[index] = field
+
+
 def generated_field(label, *, value=None):
     native = label in {"password", "username"}
     field = {
@@ -316,6 +335,7 @@ def normalise_item(current, title, desired, vault_id):
                 field["purpose"] = label.upper()
             else:
                 field.pop("purpose", None)
+    sort_fields(fields)
     return current
 
 
