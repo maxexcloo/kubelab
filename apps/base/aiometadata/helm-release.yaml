@@ -128,7 +128,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Stremio Metadata
+          gethomepage.dev/description: Stremio Metadata · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://aiometadata.excloo.com

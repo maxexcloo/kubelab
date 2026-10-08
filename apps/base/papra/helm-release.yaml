@@ -123,7 +123,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Document Management
+          gethomepage.dev/description: Document Management · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://papra.excloo.com

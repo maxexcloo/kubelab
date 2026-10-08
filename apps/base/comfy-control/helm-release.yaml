@@ -100,7 +100,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: ComfyUI Control & Proxy
+          gethomepage.dev/description: ComfyUI Control & Proxy · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/href: https://comfy-control.excloo.com

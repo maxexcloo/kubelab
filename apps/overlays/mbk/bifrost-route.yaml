@@ -4,7 +4,7 @@ metadata:
   name: bifrost
   namespace: bifrost
   annotations:
-    gethomepage.dev/description: LLM Gateway
+    gethomepage.dev/description: LLM Gateway · ${HOMEPAGE_LOCATION}
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Artificial Intelligence
     gethomepage.dev/href: https://bifrost.excloo.com

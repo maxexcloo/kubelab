@@ -116,7 +116,7 @@ spec:
         forceRename: bookorbit
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Digital Library
+          gethomepage.dev/description: Digital Library · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://books.excloo.com

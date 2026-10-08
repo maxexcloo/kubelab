@@ -86,7 +86,7 @@ spec:
       public:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-          gethomepage.dev/description: Anisette Server
+          gethomepage.dev/description: Anisette Server · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/href: https://anisette.excloo.com

@@ -222,7 +222,10 @@ identities itself. Hosts marked `beszel: true` use native Beszel system-name
 lookup. Beszel's endpoint comes from its app namespace's route annotations.
 Machine widgets join existing appliance cards where possible, covering Talos and
 other operating systems without duplicate cards or hardcoded IDs. Cloudflare and
-Tailscale identities still supply machine navigation links.
+Tailscale identities still supply machine navigation links. App subtitles include
+the uppercase cluster name; external service subtitles use `Host (CLUSTER)` from Homelab inventory.
+Flux supplies `HOMEPAGE_LOCATION` to application route annotations. ConfigMaps
+are excluded from substitution to preserve mounted scripts and app configuration.
 Home Assistant add-ons with only an authenticated ingress link remain navigation
 links; ESPHome and
 Zigbee2MQTT need dedicated API endpoints before their native widgets can work.

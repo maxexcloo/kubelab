@@ -146,7 +146,7 @@ spec:
         forceRename: redlib
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Reddit Frontend
+          gethomepage.dev/description: Reddit Frontend · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://reddit.excloo.com

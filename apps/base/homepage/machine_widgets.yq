@@ -1,7 +1,12 @@
+.machines as $inventory |
 load(strenv(TEMPLATE)) as $groups |
 load(strenv(INFRASTRUCTURE)) as $infra |
 [$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
-  .value + {"name": .key, "group": $group}] as $existing |
+  .value + {"name": .key, "group": $group} |
+  with(select(.href | test("^homelab://"));
+    (.href | sub("^homelab://"; "") | split("/")) as $reference |
+    (($inventory[$reference[0]][$reference[1]].hostname // $reference[1]) | split("") | .[0] |= upcase | join("")) as $hostname |
+    .description = ([.description // "", ($hostname + " (" + ($reference[0] | upcase) + ")")] | map(select(. != "")) | join(" · ")))] as $existing |
 [.machines | to_entries[] | .key as $network | .value | to_entries[] |
   .key as $name | .value as $machine |
   ($machine.hostname // $name) as $hostname |

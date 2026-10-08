@@ -171,7 +171,7 @@ spec:
       public:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Bookmark Manager
+          gethomepage.dev/description: Bookmark Manager · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://links.excloo.com

@@ -121,7 +121,7 @@ spec:
       hostnames:
         - chat.excloo.com
       annotations:
-        gethomepage.dev/description: AI Chat
+        gethomepage.dev/description: AI Chat · ${HOMEPAGE_LOCATION}
         gethomepage.dev/enabled: "true"
         gethomepage.dev/group: Artificial Intelligence
         gethomepage.dev/href: https://chat.excloo.com

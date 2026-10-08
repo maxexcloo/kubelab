@@ -32,6 +32,15 @@ resources:
   - windmill-route.yaml
 patches:
   - patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: _
+        annotations:
+          kustomize.toolkit.fluxcd.io/substitute: disabled
+    target:
+      kind: ConfigMap
+  - patch: |-
       - op: add
         path: /spec/cluster
         value: mbk

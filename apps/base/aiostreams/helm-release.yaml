@@ -88,7 +88,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Stremio Aggregator
+          gethomepage.dev/description: Stremio Aggregator · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://aiostreams.excloo.com

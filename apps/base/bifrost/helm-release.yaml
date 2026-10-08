@@ -29,7 +29,7 @@ spec:
           custom_provider_config:
             base_provider_type: openai
           keys:
-            - name: comfy-control
+            - name: Comfy Control
               models: ["*"]
               value: env.COMFY_CONTROL_API_KEY
               weight: 1

@@ -79,6 +79,8 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         services = self.services()
         self.assertIn("Remote", services)
+        self.assertEqual(services["Remote"]["description"], "SYD")
+        self.assertEqual(services["Syncthing"]["description"], "File Synchronisation · Storage (MBK)")
         self.assertIn("Shared (SYD)", services)
         self.assertNotIn("Local", services)
         self.assertNotIn("Shared", services)
@@ -92,6 +94,7 @@ class HomepageDashboardTests(unittest.TestCase):
 
     def test_helm_widget_and_moving_an_app_between_clusters(self):
         annotations = route("Library", group="Media", **{
+            "description": "Photo Manager · ${HOMEPAGE_LOCATION}",
             "widget.type": "immich",
             "widget.key": '{{ "{{HOMEPAGE_FILE_IMMICH_KEY}}" }}',
             "widget.version": "2",
@@ -107,6 +110,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.write_routes("syd", [resource])
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.services()["Library"]["description"], "Photo Manager · SYD")
         widget = self.services()["Library"]["widget"]
         self.assertEqual(widget["key"], "{{HOMEPAGE_FILE_IMMICH_KEY}}")
         self.assertEqual(widget["headers"], {"X-Example": "value"})

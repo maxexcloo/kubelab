@@ -5,7 +5,7 @@ metadata:
   namespace: immich
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-    gethomepage.dev/description: Photo Manager
+    gethomepage.dev/description: Photo Manager · ${HOMEPAGE_LOCATION}
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Media
     gethomepage.dev/href: https://photos.excloo.com

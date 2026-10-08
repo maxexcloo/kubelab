@@ -4,7 +4,7 @@ metadata:
   name: grafana
   namespace: observability
   annotations:
-    gethomepage.dev/description: Infrastructure Observability
+    gethomepage.dev/description: Infrastructure Observability · SYD
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Operations
     gethomepage.dev/href: https://grafana.syd.excloo.dev

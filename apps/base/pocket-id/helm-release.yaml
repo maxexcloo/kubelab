@@ -127,7 +127,7 @@ spec:
         forceRename: pocket-id
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: OIDC Provider
+          gethomepage.dev/description: OIDC Provider · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/href: https://id.excloo.com

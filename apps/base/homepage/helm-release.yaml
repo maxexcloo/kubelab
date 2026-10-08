@@ -226,7 +226,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Application Dashboard
+          gethomepage.dev/description: Application Dashboard · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://home.excloo.com

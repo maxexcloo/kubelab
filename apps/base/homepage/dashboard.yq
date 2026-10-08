@@ -7,6 +7,8 @@ map(
   with_entries(select(.key | test("^gethomepage.dev/"))) |
   with_entries(.key |= sub("^gethomepage.dev/"; "")) |
   del(.enabled, .instance, .pod-selector, .app, .namespace, .showStats) |
+  .description = ((.description // "") | sub(" · (\$\{HOMEPAGE_LOCATION\}|" + ($cluster | upcase) + ")$"; "")) |
+  .description = ([.description, ($cluster | upcase)] | map(select(. != "")) | join(" · ")) |
   .name as $name |
   .name = ($name + ([""] + ($repeated_names | map(select(. == $name)) | map(. = " (" + ($cluster | upcase) + ")")) | .[-1])) |
   to_entries | .[] as $field ireduce ({};

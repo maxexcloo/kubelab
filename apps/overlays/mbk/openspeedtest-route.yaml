@@ -4,7 +4,7 @@ metadata:
   name: openspeedtest
   namespace: openspeedtest
   annotations:
-    gethomepage.dev/description: Network Speed Test
+    gethomepage.dev/description: Network Speed Test · ${HOMEPAGE_LOCATION}
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Infrastructure
     gethomepage.dev/href: https://speed.mbk.excloo.dev

@@ -110,7 +110,7 @@ spec:
         forceRename: larapaper
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: TRMNL Server
+          gethomepage.dev/description: TRMNL Server · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://larapaper.excloo.com

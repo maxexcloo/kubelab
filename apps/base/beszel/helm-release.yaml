@@ -106,7 +106,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: System Monitoring
+          gethomepage.dev/description: System Monitoring · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Operations
           gethomepage.dev/href: https://beszel.excloo.com

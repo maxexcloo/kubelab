@@ -102,7 +102,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Personal Finance
+          gethomepage.dev/description: Personal Finance · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://budget.excloo.com

@@ -6,3 +6,6 @@ spec:
   path: ./apps/overlays/mbk
   dependsOn:
     - name: automation
+  postBuild:
+    substitute:
+      HOMEPAGE_LOCATION: MBK

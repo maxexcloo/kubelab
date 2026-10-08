@@ -105,7 +105,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Subscription Proxy
+          gethomepage.dev/description: Subscription Proxy · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/href: https://cliproxy.excloo.com/management.html

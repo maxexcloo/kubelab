@@ -207,7 +207,7 @@ spec:
         forceRename: romm
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Game & ROM Library
+          gethomepage.dev/description: Game & ROM Library · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://games.excloo.com

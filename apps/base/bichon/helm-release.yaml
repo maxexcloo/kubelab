@@ -99,7 +99,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Email Archiving
+          gethomepage.dev/description: Email Archiving · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Operations
           gethomepage.dev/href: https://bichon.excloo.com

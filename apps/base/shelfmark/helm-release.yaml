@@ -132,7 +132,7 @@ spec:
         forceRename: shelfmark
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Book Search & Downloads
+          gethomepage.dev/description: Book Search & Downloads · ${HOMEPAGE_LOCATION}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://shelf.excloo.com
