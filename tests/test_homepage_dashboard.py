@@ -81,12 +81,10 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertIn("Remote", services)
         self.assertEqual(services["Remote"]["description"], "SYD")
         self.assertEqual(services["Syncthing"]["description"], "File Synchronisation")
-        self.assertIn("Shared (SYD)", services)
+        self.assertIn("Shared", services)
         self.assertNotIn("Local", services)
-        self.assertNotIn("Shared", services)
         self.assertNotIn("Hidden", services)
-        self.assertEqual(services["mbk-bento"]["href"], "https://bento.mbk.example.net:9090")
-        self.assertNotIn("siteMonitor", services["mbk-bento"])
+        self.assertNotIn("mbk-bento", services)
         self.assertNotIn("mbk-kimbap", services)
         self.assertNotIn("mbk-hass", services)
         self.assertNotIn("mbk-gateway", services)
@@ -131,13 +129,14 @@ class HomepageDashboardTests(unittest.TestCase):
         path = homelab / "data/machines.yaml"
         inventory = read_yaml(path)
         inventory["machines"]["mbk"]["kimbap"]["beszel"] = True
+        inventory["machines"]["mbk"]["personal"] = {"platform": "macos", "management_port": 443}
         inventory["machines"]["mbk"]["sensor"] = {"platform": "slzb"}
-        inventory["machines"]["mbk"]["taco"] = {"beszel": True, "cluster": "mbk", "platform": "talos"}
+        inventory["machines"]["mbk"]["taco"] = {"beszel": True, "cluster": "mbk", "platform": "talos", "type": "vm"}
         path.write_text(json.dumps(inventory))
         identities = self.directory / "infrastructure.json"
         identities.write_text(json.dumps({
             "cloudflare": {"account_id": "account", "tunnels": {"kimbap": "storage-tunnel", "mbk": "cluster-tunnel"}},
-            "tailscale": {"kimbap": "storage-device", "taco": "node-device"},
+            "tailscale": {"kimbap": "storage-device", "taco": "node-device", "personal": "personal-device"},
         }))
         beszel = route("Beszel")
         beszel["metadata"]["namespace"] = "beszel"
@@ -150,12 +149,15 @@ class HomepageDashboardTests(unittest.TestCase):
         groups = {name: {key: value for card in cards for key, value in card.items()}
                   for group in read_yaml(self.output / "services.yaml")
                   for name, cards in group.items()}
-        storage = groups["Storage (MBK)"]
-        self.assertEqual(list(storage), ["Beszel", "Cloudflare Tunnel", "Syncthing", "Tailscale", "TrueNAS", "netboot.xyz"])
+        self.assertNotIn("mbk-personal", groups)
+        self.assertIn("Netboot", groups["Infrastructure"])
+        self.assertIn("ESPHome", groups["Smart Home"])
+        storage = groups["mbk-storage"]
+        self.assertEqual(list(storage), ["Beszel", "Cloudflare Tunnel", "Tailscale", "TrueNAS"])
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])
-        node = groups["Taco (MBK)"]
+        node = groups["mbk-taco"]
         self.assertEqual(list(node), ["Beszel", "Cloudflare Tunnel", "Tailscale"])
         self.assertEqual(node["Beszel"]["widget"]["systemId"], "mbk-taco")
         self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
@@ -165,15 +167,47 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(node["Beszel"]["widget"]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")
         self.assertEqual(node["Beszel"]["widget"]["fields"], ["status", "cpu", "memory", "network"])
         self.assertEqual(node["Beszel"]["weight"], -100)
-        self.assertEqual(node["Beszel"]["icon"], "talos")
-        self.assertEqual(services["mbk-bento"]["weight"], 0)
+        self.assertEqual(node["Beszel"]["icon"], "beszel")
         layout = read_yaml(self.output / "settings.yaml")["layout"]
-        for group in ["HASS (MBK)", "Storage (MBK)", "Taco (MBK)"]:
+        for group in ["mbk-storage", "mbk-taco"]:
             self.assertEqual(layout[group]["tab"], "Servers")
-        self.assertEqual(layout["Operations"]["tab"], "Services")
+        for group in ["Infrastructure", "Operations", "Smart Home"]:
+            self.assertEqual(layout[group]["tab"], "Services")
         before = (self.output / "services.yaml").read_bytes()
         identities.write_text("{broken json")
         self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities)).returncode, 0)
+        self.assertEqual((self.output / "services.yaml").read_bytes(), before)
+
+    def test_cluster_tools_follow_inventory_hosts_without_name_suffixes(self):
+        import shutil
+
+        homelab = self.directory / "homelab"
+        shutil.copytree(HOMELAB, homelab)
+        path = homelab / "data/machines.yaml"
+        inventory = read_yaml(path)
+        inventory["machines"]["mbk"]["node"] = {"cluster": "mbk", "hostname": "renamed", "type": "vm"}
+        inventory["machines"]["syd"] = {"node": {"cluster": "syd", "type": "vm"}}
+        path.write_text(json.dumps(inventory))
+        for cluster in ("mbk", "syd"):
+            tool = route("Headlamp", group="Servers", instance="inventory")
+            tool["metadata"]["namespace"] = "headlamp"
+            self.write_routes(cluster, [tool])
+        result = self.render(HOMELAB_DIRECTORY=str(homelab))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
+        local = groups["mbk-renamed"][0]["Headlamp"]
+        remote = groups["syd-node"][0]["Headlamp"]
+        self.assertEqual(local["namespace"], "headlamp")
+        self.assertEqual(local["app"], "headlamp")
+        self.assertNotIn("namespace", remote)
+        layout = read_yaml(self.output / "settings.yaml")["layout"]
+        self.assertEqual(layout["mbk-renamed"]["tab"], "Servers")
+        self.assertEqual(layout["syd-node"]["tab"], "Servers")
+        self.assertNotIn("Servers", layout)
+        before = (self.output / "services.yaml").read_bytes()
+        inventory["machines"]["mbk"]["extra"] = {"cluster": "mbk", "type": "vm"}
+        path.write_text(json.dumps(inventory))
+        self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
 
     def test_unchanged_refresh_and_invalid_input_preserve_files(self):

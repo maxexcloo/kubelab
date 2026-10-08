@@ -6,9 +6,10 @@ metadata:
   annotations:
     gethomepage.dev/description: Network Speed Test · ${HOMEPAGE_LOCATION}
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Infrastructure
+    gethomepage.dev/group: Servers
     gethomepage.dev/href: https://speed.mbk.excloo.dev
     gethomepage.dev/icon: openspeedtest
+    gethomepage.dev/instance: inventory
     gethomepage.dev/name: OpenSpeedTest
     gethomepage.dev/siteMonitor: https://speed.mbk.excloo.dev
   labels:

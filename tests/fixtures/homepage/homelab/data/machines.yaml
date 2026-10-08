@@ -1,7 +1,6 @@
 machines:
   mbk:
     bento:
-      management_port: 9090
       platform: ucore
       type: server
     gateway:

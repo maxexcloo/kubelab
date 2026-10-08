@@ -33,4 +33,8 @@ layout:
   Infrastructure:
     columns: 2
     style: row
-    tab: Servers
+    tab: Services
+  Smart Home:
+    columns: 4
+    style: row
+    tab: Services

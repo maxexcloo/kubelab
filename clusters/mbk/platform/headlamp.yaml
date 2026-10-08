@@ -6,9 +6,10 @@ metadata:
   annotations:
     gethomepage.dev/description: Kubernetes Dashboard · MBK
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Infrastructure
+    gethomepage.dev/group: Servers
     gethomepage.dev/href: https://headlamp.mbk.excloo.dev
     gethomepage.dev/icon: headlamp
+    gethomepage.dev/instance: inventory
     gethomepage.dev/name: Headlamp
     gethomepage.dev/siteMonitor: https://headlamp.mbk.excloo.dev
   labels:

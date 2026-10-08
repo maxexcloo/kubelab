@@ -3,30 +3,26 @@ load(strenv(TEMPLATE)) as $groups |
 load(strenv(INFRASTRUCTURE)) as $infra |
 [$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
   .value + {"name": .key, "group": $group} |
-  with(select(.href | test("^homelab://"));
+  with(select(.group == "Servers" and (.href | test("^homelab://")));
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
-    ($inventory[$reference[0]][$reference[1]].hostname // $reference[1]) as $host |
-    ($inventory[$reference[0]][$reference[1]].display_name // ($host | split("") | .[0] |= upcase | join(""))) as $hostname |
-    .group = ($hostname + " (" + ($reference[0] | upcase) + ")"))] as $existing |
+    .group = ($reference[0] + "-" + ($inventory[$reference[0]][$reference[1]].hostname // $reference[1])))] as $existing |
 [.machines | to_entries[] | .key as $network | .value | to_entries[] |
   .key as $name | .value as $machine |
+  select($machine.type != null) |
   ($machine.hostname // $name) as $hostname |
-  ($machine.display_name // ($hostname | split("") | .[0] |= upcase | join(""))) as $display_name |
   ("homelab://" + $network + "/" + $name + "/management") as $management |
   $infra.tailscale[$name] as $device |
   $infra.cloudflare.tunnels[$machine.cluster // $name] as $tunnel |
   {
     "name": ($network + "-" + $hostname),
-    "group": ($display_name + " (" + ($network | upcase) + ")"),
+    "group": ($network + "-" + $hostname),
     "description": ({"bazzite": "Bazzite", "haos": "Home Assistant OS", "macos": "macOS", "nanokvm": "NanoKVM",
       "steamos": "SteamOS", "talos": "Talos Linux", "truenas": "TrueNAS", "ucore": "uCore", "unifi": "UniFi"}[$machine.platform] // $machine.platform),
     "icon": ({"bazzite": "linux", "haos": "home-assistant", "macos": "apple", "steamos": "steam",
       "talos": "talos", "truenas": "truenas", "ucore": "linux", "unifi": "unifi"}[$machine.platform] // "mdi-server"),
     "reference": $management,
-    "href": ([null] + ([$tunnel] | map(select(. != null)) | map("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .)) +
-      ([$machine] | map(select(.beszel == true)) | map(strenv(HOMEPAGE_BESZEL_URL))) +
-      ([$device] | map(select(. != null)) | map("https://login.tailscale.com/admin/machines/" + .)) +
-      ([$machine] | map(select(.management_port != null)) | map($management)) | .[-1]),
+    "href": $management,
+    "management": ($machine.management_port != null),
     "widgets": (
       ([$machine] | map(select(.beszel == true and strenv(HOMEPAGE_BESZEL_URL) != "")) | map({
         "type": "beszel", "url": strenv(HOMEPAGE_BESZEL_URL), "version": 2,
@@ -46,13 +42,13 @@ load(strenv(INFRASTRUCTURE)) as $infra |
   } |
   select($machine.management_port != null or $device != null or $tunnel != null or (.widgets | length > 0))
 ] as $machines |
-($machines | map(select(.href == .reference) | select(.reference as $reference | $existing | any_c(.href == $reference) | not)) | map(del(.widgets))) as $management |
+($machines | map(select(.management) | select(.reference as $reference | $existing | any_c(.href == $reference) | not)) | map(del(.management, .widgets))) as $management |
 [$machines[] | . as $machine | .widgets[] | . as $widget |
   {
     "name": {"beszel": "Beszel", "cloudflared": "Cloudflare Tunnel", "tailscale": "Tailscale"}[.type],
     "group": $machine.group,
     "description": {"beszel": ($machine.description + " · System Monitoring"), "cloudflared": "Cloudflare Tunnel", "tailscale": "VPN"}[.type],
-    "icon": {"beszel": $machine.icon, "cloudflared": "cloudflare", "tailscale": "tailscale"}[.type],
+    "icon": {"beszel": "beszel", "cloudflared": "cloudflare", "tailscale": "tailscale"}[.type],
     "href": {"beszel": .url, "cloudflared": ("https://one.dash.cloudflare.com/" + .accountid + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .tunnelid), "tailscale": ("https://login.tailscale.com/admin/machines/" + .deviceid)}[.type],
     "widget": $widget
   }

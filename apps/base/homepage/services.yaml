@@ -1,4 +1,4 @@
-- Home Automation:
+- Smart Home:
     - ESPHome:
         description: ESP Device Builder
         href: homelab://mbk/hass/management/5c53de3b_esphome
@@ -9,16 +9,6 @@
         href: homelab://mbk/hass/management/f32ea98b_espresense-companion
         icon: espressif
         weight: 0
-    - Home Assistant:
-        description: Smart Home & Automations
-        href: homelab://mbk/hass/management
-        icon: home-assistant
-        siteMonitor: homelab://mbk/hass/management
-        weight: -100
-        widget:
-          key: "{{HOMEPAGE_FILE_HOME_ASSISTANT_KEY}}"
-          type: homeassistant
-          url: homelab://mbk/hass/management
     - Home Assistant Matter Hub:
         description: Matter Bridge
         href: homelab://mbk/hass/management/3fd9e6b0_hamh
@@ -35,7 +25,7 @@
         icon: zigbee2mqtt
         weight: 0
 - Infrastructure:
-    - netboot.xyz:
+    - Netboot:
         description: Network Boot Server
         href: homelab://mbk/kimbap/netboot
         icon: netbootxyz
@@ -51,6 +41,17 @@
           key: "{{HOMEPAGE_FILE_SYNCTHING_KEY}}"
           type: syncthing
           url: homelab://mbk/kimbap/syncthing
+- Servers:
+    - Home Assistant:
+        description: Smart Home & Automations
+        href: homelab://mbk/hass/management
+        icon: home-assistant
+        siteMonitor: homelab://mbk/hass/management
+        weight: -100
+        widget:
+          key: "{{HOMEPAGE_FILE_HOME_ASSISTANT_KEY}}"
+          type: homeassistant
+          url: homelab://mbk/hass/management
     - TrueNAS:
         description: Storage Appliance
         href: homelab://mbk/kimbap/management

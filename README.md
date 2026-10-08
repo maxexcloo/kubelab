@@ -183,62 +183,67 @@ stateless Cloudflared and Redlib use rolling updates.
 ### Homepage
 
 Homepage runs once on `mbk`, at `home.excloo.com` and
-`homepage.mbk.excloo.dev`. Local HTTPRoutes use native discovery. A sidecar reads
-other clusters' `gethomepage.dev` annotations from Git every five minutes using
-the route extraction shared with Gatus. Apps keep the same metadata and widget
-configuration when moved between clusters. Remote cards use URL health checks;
-Headlamp provides live Pod inspection. Git describes desired placement, so remote
-cards can briefly differ while Flux reconciles. Duplicate remote names gain an
-uppercase cluster suffix. Cluster-specific tools use explicit names such as
-`Headlamp (MBK)` and `Headlamp (SYD)`. Within each group, cards with widgets come
-first, then names sort alphabetically; annotated widget cards use `gethomepage.dev/weight: "-100"`.
+`homepage.mbk.excloo.dev`. Local application HTTPRoutes use native discovery.
+A sidecar reads other clusters' `gethomepage.dev` annotations from Git every
+five minutes using the route extraction shared with Gatus. Remote cards use URL
+health checks; Headlamp provides live Pod inspection. Git describes desired
+placement, so cards can briefly differ while Flux reconciles.
 
-Display names use product branding for apps, uppercase cluster qualifiers for
-cluster-specific tools, and network-prefixed names for machines. Homepage uses
-translucent rounded cards and enlarged text, with native widget spacing and card
-heights. System UI fonts, a single enlarged base size and normal-weight descriptions
-improve readability on standard-density displays. Native status labels show
-HTTP response times in milliseconds; local Kubernetes cards also label Pod status.
-These labels use native tabs at the card's top edge, with widget statistics inside
-the same card.
-Application routes declare URL checks in their annotations for consistent checks
-across clusters. Provider bookmarks, host console links and Home Assistant ingress
-shortcuts are navigation, not independent service-health checks. Machine cards use
-lowercase names such as `mbk-bento` and `syd-hsp`, with standard platform icons where
-available; their Beszel widgets report host statistics. Switching native tabs
-mounts the visible widgets and fetches their data; configuration changes trigger Homepage's
+Services are grouped by purpose. Infrastructure and Smart Home add-ons appear on
+the Services tab. Appliance consoles and host monitoring appear on Servers under
+canonical inventory names such as `mbk-kimbap` and `syd-hsp`. Only machines with a
+`type` participate in host discovery, matching Homelab's Tailscale tagging rule;
+personal devices without a type are excluded. Cards retain their product names
+and icons. Beszel descriptions identify the host platform. Within each group,
+widgets come first, then names sort alphabetically; annotated widget cards use
+`gethomepage.dev/weight: "-100"`.
+
+Cluster tools declare `gethomepage.dev/group: Servers` and
+`gethomepage.dev/instance: inventory`. The existing renderer resolves their group
+from Homelab's `cluster` assignment, rather than embedding a hostname or cluster
+suffix in the card name. Homepage's instance selector excludes these routes from
+native discovery to avoid duplicates; rendered local tools retain native `app`
+and `namespace` fields for Pod statistics. Other local apps remain natively
+discovered. Each cluster currently has one inventory node; a missing or ambiguous
+mapping fails the refresh and preserves the previous configuration. App subtitles
+include the uppercase cluster name. Flux supplies `HOMEPAGE_LOCATION` to local
+application route annotations; ConfigMaps are excluded from substitution to
+preserve mounted scripts and app configuration.
+
+Homepage uses translucent rounded cards and enlarged system UI text, with native
+widget spacing and card heights. HTTP response times appear in milliseconds;
+local Kubernetes cards also show Pod status. Switching native tabs mounts the
+visible widgets and fetches their data. Configuration changes trigger Homepage's
 normal automatic reload.
 
 External links use `homelab://<network>/<machine>/<service>` references, optionally
 followed by a path. Homelab owns hostnames, domains and ports: `management` uses
 the HTTPS management port and named services use their declared scheme and port.
-Machines with management endpoints receive links unless an existing card already
-covers that endpoint. Provider bookmarks come from Homelab's `data/providers.yaml`.
+Only declared management endpoints produce console links, and an existing
+appliance card prevents duplication. Services retain their configured category;
+only the `Servers` category resolves links into host groups. Provider bookmarks
+come from Homelab's `data/providers.yaml`.
+
 Homelab publishes non-secret Cloudflare account/tunnel IDs and Tailscale device
 IDs in each cluster vault's `Infrastructure Inventory` item. A separate
 ExternalSecret mounts this snapshot only into the renderer. Homelab refreshes it
 on infrastructure apply; the renderer never accesses state or discovers provider
 identities itself. Hosts marked `beszel: true` use native Beszel system-name
 lookup. Beszel's endpoint comes from its app namespace's route annotations.
-The Servers tab groups cards by host, using inventory display names and locations.
-App, Beszel, Cloudflare Tunnel and Tailscale widgets have separate cards within
-each host section, sorted widget-first then alphabetically. Native widget fields
-match the legacy dashboard, including TrueNAS pool rows. Existing management
-links prevent duplicate appliance cards; machines without a management endpoint
-can still have monitoring cards. Cloudflare and
-Tailscale identities still supply machine navigation links. App subtitles include
-the uppercase cluster name; host section names use `Host (CLUSTER)` from Homelab inventory.
-Flux supplies `HOMEPAGE_LOCATION` to application route annotations. ConfigMaps
-are excluded from substitution to preserve mounted scripts and app configuration.
-Home Assistant add-ons with only an authenticated ingress link remain navigation
-links; ESPHome and
-Zigbee2MQTT need dedicated API endpoints before their native widgets can work.
+Beszel, Cloudflare Tunnel and Tailscale have separate cards under each host.
+Native widget fields match the legacy dashboard, including TrueNAS pool rows.
+
+Application routes declare URL checks in their annotations. Provider bookmarks,
+host console links and Home Assistant ingress shortcuts are navigation links.
+Home Assistant add-ons with only an authenticated ingress link cannot supply
+native widgets; ESPHome and Zigbee2MQTT need dedicated API endpoints first.
 
 The sidecar reads public Git snapshots without credentials or infrastructure API
 access. It retains valid configuration during outages, validates each refresh
 and replaces changed files atomically. It uses pinned upstream yq and Flux CLI
-images without installing packages at startup. Content-named ConfigMaps trigger updates for checked-in configuration and scripts. Layout
-groups are derived automatically; `settings.yaml` supplies presentation choices.
+images without installing packages at startup. Content-named ConfigMaps trigger
+updates for checked-in configuration and scripts. Layout groups are derived
+automatically; `settings.yaml` supplies presentation choices.
 
 External Secrets supplies mounted files from MBK's 1Password vault. Homepage uses
 native `HOMEPAGE_FILE_*` references, so credentials never enter generated config.
