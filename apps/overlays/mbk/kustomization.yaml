@@ -9,7 +9,6 @@ resources:
   - ../../base/bichon
   - ../../base/bifrost
   - ../../base/bookorbit
-  - ../../base/byparr
   - ../../base/cliproxyapi
   - ../../base/comfy-control
   - ../../base/homepage

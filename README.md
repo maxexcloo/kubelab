@@ -171,7 +171,7 @@ undo database changes.
 | Storage             | Local Path Provisioner and the `truenas-nfs` NFS subdirectory provisioner    |
 
 `mbk` runs Actual Budget, AIOMetadata, AIOStreams, Beszel, Beszel Agent, Bichon,
-Bifrost, BookOrbit, Byparr, CLI Proxy API, Comfy Control, Homepage, Immich,
+Bifrost, BookOrbit, CLI Proxy API, Comfy Control, Homepage, Immich,
 LaraPaper, Linkwarden, Miniflux, Open WebUI, OpenSpeedTest, Papra, Pocket ID,
 RoMM, Shelfmark and Windmill. `syd` runs Anisette, Beszel Agent, OpenSpeedTest
 and Redlib.
