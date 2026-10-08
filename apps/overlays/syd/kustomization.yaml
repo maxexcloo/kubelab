@@ -7,6 +7,7 @@ resources:
   - ../../base/redlib
   - openspeedtest-route.yaml
 patches:
+  - path: beszel-agent.yaml
   - patch: |-
       apiVersion: v1
       kind: ConfigMap

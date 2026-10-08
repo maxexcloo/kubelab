@@ -27,7 +27,9 @@ spec:
               tag: 3.4.1@sha256:9bff687d7f213e401475951cb0be882eeec45d919e0659a2a7dc58d9b329c67e
             env:
               DATABASE_URI: sqlite://addon/data/db.sqlite
+              ENABLE_CACHE_WARMING: "false"
               HOST_NAME: https://aiometadata.excloo.com
+              MAL_WARMUP_ENABLED: "false"
               REDIS_URL: redis://localhost:6379
             envFrom:
               - secretRef:
@@ -71,7 +73,16 @@ spec:
               pullPolicy: IfNotPresent
               repository: docker.io/library/redis
               tag: 8.10.2@sha256:2c2dff791878316e3b083188be0d578423b24813cdda5de0e80ea4f7b3e6bfd6
-            args: [redis-server, --appendonly, "no", --save, ""]
+            args:
+              - redis-server
+              - --appendonly
+              - "no"
+              - --save
+              - ""
+              - --maxmemory
+              - 192mb
+              - --maxmemory-policy
+              - volatile-lfu
             probes:
               liveness:
                 custom: true

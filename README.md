@@ -180,6 +180,16 @@ Companion caches, search services and Redlib's `ctrld` DNS proxy belong to their
 apps. Stateful or migration-owning single replicas use recreate updates;
 stateless Cloudflared and Redlib use rolling updates.
 
+AIOMetadata caches requests on demand. Essential and popular background warming
+are disabled because provider keys belong to saved user configurations rather
+than the instance. MAL background warming is also disabled while the Jikan API
+is unreachable; user-requested MAL lookups still depend on that API. Redis uses a
+192 MiB cache ceiling within its 256 MiB container limit and evicts expiring cache
+entries with `volatile-lfu`, preserving non-expiring operational keys.
+AIOStreams fetches its commit-pinned templates at startup or on manual refresh;
+only their regex and SEL sources refresh hourly. Its startup probe allows two
+minutes before liveness checks begin.
+
 ### Homepage
 
 Homepage runs once on `mbk`, at `home.excloo.com` and
@@ -291,9 +301,16 @@ HOMELAB_DIRECTORY=../homelab KUBELAB_DIRECTORY="$PWD" mise exec -- \
 
 Beszel agents run on every node, retain their identity in host storage and
 register by outbound WebSocket. The `mbk` agent uses the local hub Service;
-`syd` uses its private HTTPS route. Use VictoriaMetrics for Pod metrics,
+`syd` uses its private HTTPS route. Agent network totals include only the node's
+primary interface (`ens2` on `mbk`, `eth0` on `syd`), excluding Cilium and Tailscale
+interfaces to avoid counting the same traffic again. Use VictoriaMetrics for Pod metrics,
 VictoriaLogs/Grafana for logs, and Headlamp or `kubectl` for live inspection.
 Workload/Flux notification delivery is not configured.
+
+Beszel's login-location emails are disabled for users and superusers in its saved
+authentication settings. SMTP uses the app's managed Resend key; update the saved
+SMTP password after rotating it. These settings are maintained through Beszel's
+administration interface, not a reconciliation job.
 
 ## Networking & Ingress
 
@@ -413,7 +430,11 @@ per namespace. Restore an existing key from 1Password if its local Secret is los
 B2 cannot return a previously issued secret key.
 
 Beszel's `object-storage-*` fields live in its `Beszel` item. Configure backups
-manually in Beszel's Backups screen; no job configures the app or runs its backups.
+manually in Beszel's Backups screen; no repository job configures the app or runs
+its backups. Beszel's built-in weekly schedule retains three backups in
+`excloo-mbk-beszel`. After changing the bucket or rotating its key, update the
+saved backup settings from the item and verify a new backup; publishing new
+credentials does not update Beszel's saved configuration.
 
 ### Deletion & Recovery
 
