@@ -25,3 +25,8 @@ body {
 .service-block {
   background: transparent !important;
 }
+.k8s-status > div,
+.site-monitor-status > div {
+  font-size: 0.7rem;
+  font-weight: 800;
+}
