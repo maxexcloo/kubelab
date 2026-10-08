@@ -173,7 +173,7 @@ undo database changes.
 `mbk` runs Actual Budget, AIOMetadata, AIOStreams, Beszel, Beszel Agent, Bichon,
 Bifrost, BookOrbit, CLI Proxy API, Comfy Control, Homepage, Immich,
 LaraPaper, Linkwarden, Miniflux, Open WebUI, OpenSpeedTest, Papra, Pocket ID,
-RoMM, Shelfmark and Windmill. `syd` runs Anisette, Beszel Agent, OpenSpeedTest
+RoMM and Shelfmark. `syd` runs Anisette, Beszel Agent, OpenSpeedTest
 and Redlib.
 
 Companion caches, search services and Redlib's `ctrld` DNS proxy belong to their

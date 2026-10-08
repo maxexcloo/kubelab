@@ -22,14 +22,12 @@ resources:
   - ../../base/pocket-id
   - ../../base/romm
   - ../../base/shelfmark
-  - ../../base/windmill
   - bifrost-route.yaml
   - homepage-private-dns.yaml
   - immich-private-dns.yaml
   - immich-private-route.yaml
   - immich-route.yaml
   - openspeedtest-route.yaml
-  - windmill-route.yaml
 patches:
   - patch: |-
       apiVersion: v1
@@ -49,13 +47,3 @@ patches:
       kind: ResendKey
       version: v1alpha1
   - path: beszel-agent.yaml
-  - patch: |-
-      apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      metadata:
-        name: windmill
-        namespace: windmill
-      spec:
-        values:
-          windmill:
-            baseDomain: windmill.mbk.excloo.dev
