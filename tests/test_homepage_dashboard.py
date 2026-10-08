@@ -143,9 +143,9 @@ class HomepageDashboardTests(unittest.TestCase):
         services = self.services()
         self.assertNotIn("mbk-kimbap", services)
         self.assertNotIn("mbk-sensor", services)
-        self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")
+        self.assertNotIn("widget", services["TrueNAS"])
         self.assertEqual([widget["type"] for widget in services["TrueNAS"]["widgets"]],
-                         ["beszel", "tailscale", "cloudflared"])
+                         ["truenas", "beszel", "tailscale", "cloudflared"])
         node = services["mbk-taco"]
         self.assertEqual(node["widgets"][0]["systemId"], "mbk-taco")
         self.assertEqual(node["widgets"][1]["deviceid"], "node-device")

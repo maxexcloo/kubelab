@@ -41,7 +41,7 @@ load(strenv(INFRASTRUCTURE)) as $infra |
 ] as $machines |
 ($existing | map(. as $card |
   ($machines | map(select(.reference == $card.href)) | .[0].widgets // []) as $widgets |
-  with(select($widgets | length > 0); .widgets = ((.widgets // []) + $widgets)))) as $merged |
+  with(select($widgets | length > 0); .widgets = (([.widget] | map(select(. != null))) + (.widgets // []) + $widgets) | del(.widget)))) as $merged |
 ($machines | map(select(.reference as $reference | $existing | any_c(.href == $reference) | not))) as $additional |
 ($merged + $additional) |
 map(del(.reference) | .weight = 0 | with(select(.widget != null or (.widgets | length > 0)); .weight = -100)) |
