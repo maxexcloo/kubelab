@@ -32,9 +32,9 @@ machines:
           port: 80
           scheme: http
           homepage:
-            name: NanoKVM
             description: Remote Console & Power Control
             icon: sipeed
+            name: NanoKVM
     slzb-06m:
       platform: slzb
       type: appliance
@@ -45,9 +45,9 @@ machines:
           port: 80
           scheme: http
           homepage:
-            name: SLZB-06M
             description: Zigbee Ethernet Adapter
             icon: zigbee
+            name: SLZB-06M
       tailscale:
         enabled: false
     taco:
