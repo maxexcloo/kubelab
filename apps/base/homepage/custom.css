@@ -30,18 +30,3 @@ body {
   font-size: 0.7rem;
   font-weight: 600;
 }
-.service-title-text {
-  min-width: 0;
-}
-.service-tags {
-  position: static;
-  align-self: center;
-  flex-direction: column;
-  gap: 0.125rem;
-  margin: 0.25rem 0.5rem;
-}
-.k8s-status,
-.site-monitor-status {
-  background: transparent;
-  padding: 0 0.25rem;
-}

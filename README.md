@@ -195,7 +195,8 @@ cluster-specific tools, and network-prefixed names for machines. Homepage uses
 translucent rounded cards and enlarged text, with native widget spacing and card
 heights. Legacy font rendering preserves text weight. Native status labels show
 HTTP response times in milliseconds; local Kubernetes cards also label Pod status.
-These labels sit beside the title, with widget statistics inside the same card.
+These labels use native tabs at the card's top edge, with widget statistics inside
+the same card.
 Application routes declare URL checks in their annotations for consistent checks
 across clusters. Provider bookmarks, host console links and Home Assistant ingress
 shortcuts are navigation, not independent service-health checks. Machine cards use
