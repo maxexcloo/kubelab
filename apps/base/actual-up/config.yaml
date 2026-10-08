@@ -1,0 +1,17 @@
+version: 1
+actual:
+  cacheDirectory: /data/actual-cache
+  serverUrl: http://actual-budget.actual-budget.svc.cluster.local:5006
+mappings: []
+schedule:
+  enabled: true
+  backfillCron: "0 3 * * *"
+  cron: "*/15 * * * *"
+  lookbackDays: 30
+  timezone: Australia/Sydney
+server:
+  host: 0.0.0.0
+  port: 3000
+  publicUrl: https://actual-up.mbk.excloo.dev
+up:
+  connections: []

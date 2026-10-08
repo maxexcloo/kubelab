@@ -179,7 +179,7 @@ undo database changes.
 | Secrets             | External Secrets backed by cluster-local 1Password Connect                   |
 | Storage             | Local Path Provisioner and the `truenas-nfs` NFS subdirectory provisioner    |
 
-`mbk` runs Actual Budget, AIOMetadata, AIOStreams, Beszel, Beszel Agent, Bichon,
+`mbk` runs Actual Budget, Actual Up, AIOMetadata, AIOStreams, Beszel, Beszel Agent, Bichon,
 Bifrost, BookOrbit, CLI Proxy API, Comfy Control, Homepage, Immich,
 LaraPaper, Linkwarden, Miniflux, Open WebUI, OpenSpeedTest, Papra, Pocket ID,
 RoMM and Shelfmark. `syd` runs Anisette, Beszel Agent, OpenSpeedTest
@@ -412,6 +412,44 @@ Secret `name` and `key`. Gatus resolves the referenced ExternalSecret through
 Routes can set `monitoring.excloo.dev/alerts: "false"` to suppress external
 monitoring alerts while retaining checks. Omitting it enables alerts; other
 values are rejected.
+
+### Actual Up
+
+`actual-up` runs on `mbk` as a single-replica app with a private route at
+`https://actual-up.mbk.excloo.dev`. The separate `actual-up` repository builds and
+publishes its image; this repository owns its configuration and deployment.
+The public `ghcr.io/maxexcloo/actual-up` image is pinned by version and digest.
+Upstream setup happens in the browser after deployment.
+The image supports anonymous pulls, so no registry credential is required.
+
+The `Actual Up` item in `Cluster: MBK` supplies generated `encryption-key` and
+`password` fields and default `username`. External Secrets injects these as
+`ACTUAL_UP_ENCRYPTION_KEY`, `ACTUAL_UP_PASSWORD` and `ACTUAL_UP_USERNAME`.
+The app uses a normal sign-in page. Roll the app after rotating its login.
+Preserve the encryption key with the encrypted settings backup; replacing it
+without re-encryption makes saved credentials unreadable.
+
+`apps/base/actual-up/config.yaml` starts with no keys or mappings and automatic
+sync enabled. On the **Connections** page, enter the Actual server, budget sync
+ID and session token (or password), add Up API keys, then connect accounts.
+API keys and Actual credentials are checked and encrypted in the app; no
+per-account ExternalSecret edits or restarts are needed. The app has no access
+to 1Password itself. Existing upstream fields in 1Password are preserved but
+are no longer consumed by this deployment.
+
+Saving a mapping backfills its history. Full backfills also run on startup and
+nightly at 03:00, with recent transactions synced every 15 minutes. Set
+`schedule.enabled: false` to preview first. Map a shared bank account once,
+selecting both partners’ keys in fallback order. Only Actual Up pods are
+additionally permitted through Actual Budget’s ingress policy. No public webhook
+route is needed for polling.
+
+Browser settings persist as authenticated AES-256-GCM ciphertext in
+`/data/settings.json` on the app’s 1Gi NFS claim. Back up this file and its
+1Password encryption key together. Actual’s rebuildable budget cache is separate
+and is not encrypted by the settings encryption. The last 20 run results and
+queue are in memory and reset on restart. Automatic full-history backfills
+recover older gaps after outages or interrupted imports without a cursor database.
 
 ## Secrets & External Automation
 

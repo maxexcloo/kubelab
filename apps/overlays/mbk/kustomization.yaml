@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base/actual-budget
+  - ../../base/actual-up
   - ../../base/aiometadata
   - ../../base/aiostreams
   - ../../base/beszel
@@ -44,6 +45,30 @@ patches:
       kind: ResendKey
       version: v1alpha1
   - path: beszel-agent.yaml
+  - patch: |-
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: actual-budget
+        namespace: actual-budget
+      spec:
+        ingress:
+          - from:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: networking
+                podSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: traefik
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: actual-up
+                podSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: actual-up
+            ports:
+              - port: 5006
+                protocol: TCP
 replacements:
   - source:
       kind: HTTPRoute

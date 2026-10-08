@@ -1,0 +1,127 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: actual-up
+  namespace: actual-up
+spec:
+  interval: 30m
+  releaseName: actual-up
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.2.1
+  values:
+    controllers:
+      actual-up:
+        replicas: 1
+        strategy: Recreate
+        containers:
+          actual-up:
+            env:
+              ACTUAL_UP_CONFIG: /config/config.yaml
+              TZ: Australia/Sydney
+            envFrom:
+              - secretRef:
+                  name: actual-up
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/maxexcloo/actual-up
+              tag: 0.2.2@sha256:4cd894a557351a265f19b1d1fd3d1c0786ac57aecaef0a5dcbd7a2b935bdf830
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /livez
+                    port: 3000
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /readyz
+                    port: 3000
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 60
+                  httpGet:
+                    path: /readyz
+                    port: 3000
+                  periodSeconds: 5
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 25m
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 120
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: actual-up
+    persistence:
+      cache:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /data
+      configuration:
+        name: actual-up-config
+        type: configMap
+        globalMounts:
+          - path: /config
+            readOnly: true
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    route:
+      private:
+        annotations:
+          gethomepage.dev/description: Up to Actual Sync
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/href: https://actual-up.mbk.excloo.dev
+          gethomepage.dev/icon: actual-budget
+          gethomepage.dev/name: Actual Up
+          gethomepage.dev/siteMonitor: https://actual-up.mbk.excloo.dev/livez
+        hostnames:
+          - actual-up.mbk.excloo.dev
+        labels:
+          app.kubernetes.io/name: actual-up
+        parentRefs:
+          - name: private
+            namespace: networking
+    service:
+      actual-up:
+        controller: actual-up
+        ports:
+          http:
+            port: 3000
+            protocol: HTTP

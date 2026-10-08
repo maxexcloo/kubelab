@@ -1,0 +1,82 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: actual-up
+  namespace: actual-up
+  annotations:
+    onepassword.excloo.dev/defaults: '{"username":"max@excloo.com"}'
+    onepassword.excloo.dev/generate-fields: encryption-key,password
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Actual Up
+        property: password
+      secretKey: ACTUAL_UP_PASSWORD
+    - remoteRef:
+        key: Actual Up
+        property: username
+      secretKey: ACTUAL_UP_USERNAME
+    - remoteRef:
+        key: Actual Up
+        property: encryption-key
+      secretKey: ACTUAL_UP_ENCRYPTION_KEY
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: actual-up
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: actual-up
+  labels:
+    app.kubernetes.io/name: actual-up
+    gateway.excloo.dev/private-access: "true"
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: actual-up
+  namespace: actual-up
+  labels:
+    app.kubernetes.io/name: actual-up
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 3000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: actual-up
+  policyTypes:
+    - Ingress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: actual-up
+  annotations:
+    k8s-sigs.io/nfs-directory-gid: "1000"
+    k8s-sigs.io/nfs-directory-mode: "0700"
+    k8s-sigs.io/nfs-directory-uid: "1000"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: truenas-nfs
