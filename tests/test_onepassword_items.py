@@ -175,7 +175,7 @@ class ReconcilerTests(unittest.TestCase):
             self.addCleanup(setattr, RECONCILER, name, value)
         RECONCILER.applications_ready = lambda: False
         RECONCILER.connect = connect
-        RECONCILER.discover_items = lambda: {"Pocket ID": desired}
+        RECONCILER.discover_items = lambda cluster=None: {"Pocket ID": desired}
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
@@ -329,6 +329,26 @@ class ReconcilerTests(unittest.TestCase):
             {"https://headlamp.mbk.excloo.dev"},
         )
 
+    def test_discovery_omits_only_the_current_vault_cluster_suffix(self):
+        routes = [
+            {
+                "metadata": {
+                    "annotations": {
+                        "gethomepage.dev/enabled": "true",
+                        "gethomepage.dev/href": "https://example.net",
+                        "gethomepage.dev/name": name,
+                    },
+                    "name": "route",
+                    "namespace": "application",
+                },
+            }
+            for name in ["Headlamp (SYD)", "Grafana (syd)", "Example (Other)"]
+        ]
+        with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda path:
+                          routes if "httproutes" in path else []):
+            desired = RECONCILER.discover_items("SYD")
+        self.assertEqual(set(desired), {"Headlamp", "Grafana", "Example (Other)"})
+
     def test_homelab_tag_defines_external_ownership(self):
         self.assertTrue(RECONCILER.externally_owned({"tags": ["Homelab"]}))
         self.assertFalse(RECONCILER.externally_owned({"tags": ["Kubelab"]}))
@@ -356,7 +376,7 @@ class ReconcilerTests(unittest.TestCase):
             self.addCleanup(setattr, RECONCILER, name, value)
         RECONCILER.applications_ready = lambda: False
         RECONCILER.connect = connect
-        RECONCILER.discover_items = lambda: {}
+        RECONCILER.discover_items = lambda cluster=None: {}
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()

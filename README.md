@@ -356,7 +356,8 @@ values are rejected.
 ## Secrets & External Automation
 
 1Password is the root of trust. Each app uses a display-named item in its cluster
-vault. Only declared internal credentials are generated; non-empty operator
+vault (`Cluster: MBK` or `Cluster: SYD`). The vault supplies cluster scope, so item
+titles omit the matching Homepage cluster suffix. Only declared internal credentials are generated; non-empty operator
 values are preserved except fields explicitly declared as constants. Existing
 credentials, tags, URLs and field order are preserved. Category changes replace
 the item; duplicate titles stop reconciliation before any writes. Credentials,

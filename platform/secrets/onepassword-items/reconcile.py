@@ -144,7 +144,7 @@ def is_dry_run():
     return os.environ.get("DRY_RUN", "false") == "true"
 
 
-def discover_items():
+def discover_items(cluster=None):
     desired = {}
     resources = kubernetes_list(
         "/apis/external-secrets.io/v1/externalsecrets"
@@ -215,6 +215,8 @@ def discover_items():
         title = route_annotations.get("gethomepage.dev/name")
         if not title or not urls:
             continue
+        if cluster and title.casefold().endswith(f" ({cluster.casefold()})"):
+            title = title[:-(len(cluster) + 3)]
         item = desired.setdefault(title, new_item())
         item["login"] = True
         item["namespaces"].add(namespace)
@@ -348,7 +350,9 @@ def main():
     if len(vaults) != 1:
         raise RuntimeError(f"Connect token must expose exactly one vault; found {len(vaults)}")
     vault_id = vaults[0]["id"]
-    desired = discover_items()
+    vault_name = vaults[0].get("name", "")
+    prefix, _, cluster = vault_name.partition(":")
+    desired = discover_items(cluster.strip() if prefix.casefold() == "cluster" else None)
     summaries = connect(f"/vaults/{vault_id}/items")
     active = {}
     for summary in summaries:
