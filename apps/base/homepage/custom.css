@@ -25,6 +25,9 @@ body {
 .service-container {
   background: transparent !important;
 }
+.service-container:empty {
+  min-height: 3.25rem;
+}
 .k8s-status > div,
 .site-monitor-status > div {
   font-size: 0.7rem;
