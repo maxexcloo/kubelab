@@ -179,6 +179,10 @@ spec:
           gethomepage.dev/name: Linkwarden
           gethomepage.dev/pod-selector: app.kubernetes.io/name=linkwarden,app.kubernetes.io/controller=linkwarden
           gethomepage.dev/siteMonitor: https://links.excloo.com
+          gethomepage.dev/weight: "-100"
+          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_LINKWARDEN_KEY}}" }}'
+          gethomepage.dev/widget.type: linkwarden
+          gethomepage.dev/widget.url: https://links.excloo.com
         hostnames:
           - links.excloo.com
         labels:

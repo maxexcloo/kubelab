@@ -88,7 +88,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertNotIn("mbk-kimbap", services)
         self.assertNotIn("mbk-hass", services)
         self.assertNotIn("mbk-gateway", services)
-        self.assertNotIn("widget", services["TrueNAS"])
+        self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")
 
     def test_helm_widget_and_moving_an_app_between_clusters(self):
         annotations = route("Library", group="Media", **{
@@ -143,12 +143,14 @@ class HomepageDashboardTests(unittest.TestCase):
         services = self.services()
         self.assertNotIn("mbk-kimbap", services)
         self.assertNotIn("mbk-sensor", services)
-        self.assertNotIn("widget", services["TrueNAS"])
+        self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")
         self.assertEqual([widget["type"] for widget in services["TrueNAS"]["widgets"]],
-                         ["beszel"])
+                         ["beszel", "tailscale", "cloudflared"])
         node = services["mbk-taco"]
         self.assertEqual(node["widgets"][0]["systemId"], "mbk-taco")
-        self.assertEqual(len(node["widgets"]), 1)
+        self.assertEqual(node["widgets"][1]["deviceid"], "node-device")
+        self.assertEqual(node["widgets"][2]["tunnelid"], "cluster-tunnel")
+        self.assertEqual(node["widgets"][1]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
         self.assertEqual(node["href"], "https://login.tailscale.com/admin/machines/node-device")
         self.assertEqual(node["widgets"][0]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")
         self.assertEqual(node["weight"], -100)

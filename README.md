@@ -236,15 +236,14 @@ External Secrets supplies mounted files from MBK's 1Password vault. Homepage use
 native `HOMEPAGE_FILE_*` references, so credentials never enter generated config.
 Beszel and local Grafana reuse their existing items. Only Homepage can read
 the widget credentials; the renderer reads the non-secret inventory and preserves
-credential placeholders. Only working widgets are declared: Beszel per-machine
-statistics, Gatus, local Grafana and RoMM. Widgets with missing credentials are
-omitted so their loading placeholders do not appear and then collapse. Homepage
-2.4.0's incompatible annotation-based Beszel overview is also omitted.
+credential placeholders. Native widgets remain visible when credentials are missing
+or their API is unavailable, using Homepage's default error display. An empty
+widget container reserves one row while readings load. Homepage 2.4.0's
+incompatible annotation-based Beszel overview is omitted; per-machine Beszel
+widgets use the supported numeric version setting.
 
-The existing fields below remain in the `Homepage` item. Fill them through each
-service's supported UI, then add that service's native widget configuration beside
-its route or in Homepage's external services configuration. Filling a field alone
-does not enable a widget:
+Populate the fields below in the `Homepage` item using credentials from each
+service's supported UI. The widgets are already configured:
 
 | Fields                                         | Purpose                                                             |
 | ---------------------------------------------- | ------------------------------------------------------------------- |
@@ -260,9 +259,8 @@ does not enable a widget:
 | `unifi-key`                                    | UniFi API key                                                       |
 
 Widget-first ordering includes configured widgets even when credentials are
-empty or their API is unavailable. Empty fields keep links usable and widget
-errors hidden. Secret files refresh
-hourly and Homepage reads updates without a restart. If an app's credential source changes vault, update its ExternalSecret
+empty or their API is unavailable. Links remain usable and widget errors stay
+visible. Secret files refresh hourly and Homepage reads updates without a restart. If an app's credential source changes vault, update its ExternalSecret
 reference; placement alone does not move dashboard credentials. Existing unused
 1Password fields are preserved. `siteMonitor` explicitly enables URL checks;
 navigation links alone do not imply service health.

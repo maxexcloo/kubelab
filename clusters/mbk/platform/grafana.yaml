@@ -12,7 +12,6 @@ metadata:
     gethomepage.dev/name: Grafana (MBK)
     gethomepage.dev/siteMonitor: https://grafana.excloo.com
     gethomepage.dev/weight: "-100"
-    gethomepage.dev/widget.hideErrors: "true"
     gethomepage.dev/widget.password: "{{HOMEPAGE_FILE_GRAFANA_MBK_PASSWORD}}"
     gethomepage.dev/widget.type: grafana
     gethomepage.dev/widget.url: https://grafana.excloo.com
