@@ -6,7 +6,7 @@ load(strenv(INFRASTRUCTURE)) as $infra |
   with(select(.href | test("^homelab://"));
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
     ($inventory[$reference[0]][$reference[1]].hostname // $reference[1]) as $host |
-    ({"hass": "HASS"}[$host] // ($host | split("") | .[0] |= upcase | join(""))) as $hostname |
+    ($inventory[$reference[0]][$reference[1]].display_name // ($host | split("") | .[0] |= upcase | join(""))) as $hostname |
     .description = ([.description // "", ($hostname + " (" + ($reference[0] | upcase) + ")")] | map(select(. != "")) | join(" · ")))] as $existing |
 [.machines | to_entries[] | .key as $network | .value | to_entries[] |
   .key as $name | .value as $machine |

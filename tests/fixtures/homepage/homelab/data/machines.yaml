@@ -9,6 +9,7 @@ machines:
       platform: unifi
       type: router
     hass:
+      display_name: HASS
       management_port: 443
       platform: haos
       type: appliance
