@@ -15,7 +15,7 @@ schema_cache_directory=".cache/kubeconform"
 remote_schema_cache_directory="${schema_cache_directory}/remote"
 # Keep validation aligned with the deployed cluster API.
 kubernetes_version="1.37.1"
-crd_catalog_revision="4c8dc296d32b06d15ccde9668ff136c951f4d539"
+crd_catalog_revision="fd90051867733c60d32d16450556e9cd18459aef"
 mkdir -p \
   "${remote_schema_cache_directory}" \
   "${schema_directory}"
