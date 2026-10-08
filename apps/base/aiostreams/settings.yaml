@@ -1,0 +1,31 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - aiostreams.excloo.com
+        annotations:
+          gethomepage.dev/description: Stremio Aggregator
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/path: /api/v1/health
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: sh-aiostreams
+          gethomepage.dev/name: AIOStreams
+    controllers:
+      aiostreams:
+        containers:
+          aiostreams:
+            env:
+              DATABASE_URI: sqlite://./data/db.sqlite
+              FEATURED_TEMPLATE_IDS: tamtaro.complete,Vidhin05.english-template
+              PORT: "30375"
+              SEL_SYNC_ACCESS: all
+              TEMPLATE_REFRESH_INTERVAL: "0"
+              TEMPLATE_URLS: '["https://raw.githubusercontent.com/Tam-Taro/SEL-Filtering-and-Sorting/3d88238868dd2d2df65dc65bca6f9180e1898a4c/Tamtaro-All-Templates-for-AIOStreams.json", "https://raw.githubusercontent.com/Vidhin05/Releases-Regex/b75a607fbb96fee63a44c30f403d1e6399d9c8fe/all-templates.json"]'
+              WHITELISTED_SYNC_REFRESH_INTERVAL: "3600"

@@ -3,84 +3,73 @@
         description: ESP Device Builder
         href: homelab://mbk/hass/management/5c53de3b_esphome
         icon: esphome
-        weight: 0
     - ESPresense Companion:
         description: Room Presence
         href: homelab://mbk/hass/management/f32ea98b_espresense-companion
         icon: espressif
-        weight: 0
     - Home Assistant:
         description: Smart Home & Automations
-        href: homelab://mbk/hass/management
+        href: &home_assistant homelab://mbk/hass/management
         icon: home-assistant
-        siteMonitor: homelab://mbk/hass/management
-        weight: -100
+        siteMonitor: *home_assistant
         widget:
           key: "{{HOMEPAGE_FILE_HOME_ASSISTANT_KEY}}"
           type: homeassistant
-          url: homelab://mbk/hass/management
+          url: *home_assistant
     - Home Assistant Matter Hub:
         description: Matter Bridge
         href: homelab://mbk/hass/management/3fd9e6b0_hamh
         icon: sh-home-assistant-matter-hub
-        weight: 0
     - Studio Code Server:
         description: Browser IDE
         href: homelab://mbk/hass/management/a0d7b954_vscode
         icon: visual-studio-code
-        weight: 0
     - Zigbee2MQTT:
         description: Zigbee Coordinator
         href: homelab://mbk/hass/management/45df7312_zigbee2mqtt
         icon: zigbee2mqtt
-        weight: 0
 - Infrastructure:
     - Netboot:
         description: Network Boot Server
-        href: homelab://mbk/kimbap/netboot
+        href: &netboot homelab://mbk/kimbap/netboot
         icon: netbootxyz
-        siteMonitor: homelab://mbk/kimbap/netboot
-        weight: 0
+        siteMonitor: *netboot
     - Syncthing:
         description: File Synchronisation
-        href: homelab://mbk/kimbap/syncthing
+        href: &syncthing homelab://mbk/kimbap/syncthing
         icon: syncthing
-        siteMonitor: homelab://mbk/kimbap/syncthing
-        weight: -100
+        siteMonitor: *syncthing
         widget:
           key: "{{HOMEPAGE_FILE_SYNCTHING_KEY}}"
           type: syncthing
-          url: homelab://mbk/kimbap/syncthing
+          url: *syncthing
 - Servers:
     - TrueNAS:
         description: Storage Appliance
-        href: homelab://mbk/kimbap/management
+        href: &truenas homelab://mbk/kimbap/management
         icon: truenas
-        siteMonitor: homelab://mbk/kimbap/management
-        weight: -100
+        siteMonitor: *truenas
         widget:
           enablePools: true
           key: "{{HOMEPAGE_FILE_TRUENAS_KEY}}"
           type: truenas
-          url: homelab://mbk/kimbap/management
+          url: *truenas
           version: 2
     - UniFi:
         description: Network Controller
-        href: homelab://mbk/gateway/management
+        href: &unifi homelab://mbk/gateway/management
         icon: unifi
-        siteMonitor: homelab://mbk/gateway/management
-        weight: -100
+        siteMonitor: *unifi
         widget:
           key: "{{HOMEPAGE_FILE_UNIFI_KEY}}"
           type: unifi
-          url: homelab://mbk/gateway/management
+          url: *unifi
 - Operations:
     - Gatus:
         description: Health Monitoring & Status Page • Fly
-        href: https://status.excloo.com
+        href: &gatus https://status.excloo.com
         icon: gatus
-        siteMonitor: https://status.excloo.com
-        weight: -100
+        siteMonitor: *gatus
         widget:
           type: gatus
-          url: https://status.excloo.com
+          url: *gatus

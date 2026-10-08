@@ -49,7 +49,7 @@ spec:
       - name: OAUTH_CODE_CHALLENGE_METHOD
         value: S256
       - name: OPENID_REDIRECT_URI
-        value: https://chat.excloo.com/oauth/oidc/callback
+        value: https://app.invalid/oauth/oidc/callback
       - name: PYTHONDONTWRITEBYTECODE
         value: "1"
       - name: TZ
@@ -75,7 +75,7 @@ spec:
             key: WEBUI_SECRET_KEY
             name: open-webui
       - name: WEBUI_URL
-        value: https://chat.excloo.com
+        value: https://app.invalid
     image:
       pullPolicy: IfNotPresent
       repository: ghcr.io/open-webui/open-webui
@@ -118,16 +118,8 @@ spec:
     route:
       apiVersion: gateway.networking.k8s.io/v1
       enabled: true
-      hostnames:
-        - chat.excloo.com
       annotations:
-        gethomepage.dev/description: AI Chat · ${HOMEPAGE_LOCATION}
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Artificial Intelligence
-        gethomepage.dev/href: https://chat.excloo.com
-        gethomepage.dev/icon: sh-open-webui
-        gethomepage.dev/name: Open WebUI
-        gethomepage.dev/siteMonitor: https://chat.excloo.com
+        gethomepage.dev/href: https://app.invalid
       parentRefs:
         - name: private
           namespace: networking
@@ -140,7 +132,7 @@ spec:
         clientIdExistingSecretKey: OAUTH_CLIENT_ID
         enabled: true
         providerName: Pocket ID
-        providerUrl: https://id.excloo.com/.well-known/openid-configuration
+        providerUrl: https://identity.invalid/.well-known/openid-configuration
         scopes: openid email profile
     startupProbe:
       failureThreshold: 30

@@ -25,14 +25,6 @@ spec:
               pullPolicy: IfNotPresent
               repository: ghcr.io/bookorbit/bookorbit
               tag: 3.3.0@sha256:4c2a1b957a3c8aeb9f59bb27a7d8efb18fa42c758afed3dcfc62620c5bcd1831
-            env:
-              APP_DATA_PATH: /data
-              APP_URL: https://books.excloo.com
-              BOOK_DOCK_PATH: /books-drop
-              CLIENT_URL: https://books.excloo.com
-              LIBRARY_BROWSE_ROOT: /books
-              PORT: "3000"
-              TZ: Australia/Sydney
             envFrom:
               - secretRef:
                   name: bookorbit
@@ -67,6 +59,9 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              APP_URL: https://app.invalid
+              CLIENT_URL: https://app.invalid
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
@@ -102,7 +97,7 @@ spec:
     route:
       private:
         hostnames:
-          - books.excloo.com
+          - app.invalid
         labels:
           app.kubernetes.io/name: bookorbit
         parentRefs:
@@ -116,15 +111,7 @@ spec:
         forceRename: bookorbit
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Digital Library · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/href: https://books.excloo.com
-          gethomepage.dev/icon: bookorbit
-          gethomepage.dev/name: BookOrbit
-          gethomepage.dev/siteMonitor: https://books.excloo.com
-        hostnames:
-          - books.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: bookorbit
           gateway.excloo.dev/public-access: "true"

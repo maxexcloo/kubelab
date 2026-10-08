@@ -5,8 +5,9 @@ metadata:
   namespace: romm
 spec:
   client:
-    callbackURLs: [https://games.excloo.com/api/oauth/openid]
+    callbackURLs:
+      - https://app.invalid/api/oauth/openid
     description: Game & ROM Library
     id: romm-au-truenas
-    launchURL: https://games.excloo.com
+    launchURL: https://app.invalid
     name: RoMM

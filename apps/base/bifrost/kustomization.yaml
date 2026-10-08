@@ -5,3 +5,26 @@ resources:
   - private-dns.yaml
   - resources.yaml
   - source.yaml
+  - route.yaml
+replacements:
+  - source:
+      kind: HTTPRoute
+      name: bifrost
+      namespace: bifrost
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: bifrost
+          namespace: bifrost
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PrivateDNSRecord
+          name: bifrost
+          namespace: bifrost
+        fieldPaths:
+          - spec.hostname

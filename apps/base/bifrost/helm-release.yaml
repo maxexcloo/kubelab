@@ -30,7 +30,8 @@ spec:
             base_provider_type: openai
           keys:
             - name: Comfy Control
-              models: ["*"]
+              models:
+                - "*"
               value: env.COMFY_CONTROL_API_KEY
               weight: 1
           network_config:

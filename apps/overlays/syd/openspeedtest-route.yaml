@@ -4,13 +4,13 @@ metadata:
   name: openspeedtest
   namespace: openspeedtest
   annotations:
-    gethomepage.dev/description: Network Speed Test · ${HOMEPAGE_LOCATION}
+    gethomepage.dev/description: Network Speed Test
     gethomepage.dev/enabled: "true"
+    monitoring.excloo.dev/enabled: "true"
     gethomepage.dev/group: Servers
-    gethomepage.dev/href: https://speed.syd.excloo.dev
+    gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: openspeedtest
     gethomepage.dev/name: OpenSpeedTest
-    gethomepage.dev/siteMonitor: https://speed.syd.excloo.dev
   labels:
     app.kubernetes.io/name: openspeedtest
 spec:

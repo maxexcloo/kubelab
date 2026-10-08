@@ -5,3 +5,38 @@ resources:
   - pocket-id.yaml
   - private-dns.yaml
   - resources.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: papra
+      namespace: papra
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: papra
+          namespace: papra
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: papra
+          namespace: papra
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: papra
+          namespace: papra
+        fieldPaths:
+          - spec.values.controllers.papra.containers.papra.env.APP_BASE_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

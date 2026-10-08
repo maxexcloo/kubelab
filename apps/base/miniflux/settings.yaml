@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: miniflux
+  namespace: miniflux
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - reader.excloo.com
+        annotations:
+          gethomepage.dev/description: RSS Reader
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/icon: miniflux
+          gethomepage.dev/name: Miniflux
+    controllers:
+      miniflux:
+        containers:
+          miniflux:
+            env:
+              CREATE_ADMIN: "1"
+              OAUTH2_OIDC_PROVIDER_NAME: Pocket ID
+              OAUTH2_PROVIDER: oidc
+              OAUTH2_USER_CREATION: "1"
+              RUN_MIGRATIONS: "1"
+              TZ: Australia/Sydney

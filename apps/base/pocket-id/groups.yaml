@@ -4,15 +4,22 @@ metadata:
   name: pocket-id-group-all-services
   namespace: pocket-id
 spec:
-  managementPolicies: [Create, LateInitialize, Observe, Update]
+  managementPolicies:
+    - Create
+    - LateInitialize
+    - Observe
+    - Update
   forProvider:
     expectedResponseCheck:
       logic: .payload.body as $wanted | ((.response.body.name == $wanted.name and .response.body.friendlyName == $wanted.friendlyName) or any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName))
       type: CUSTOM
     headers:
-      Content-Type: [application/json]
-      User-Agent: [kubelab-crossplane/1.0]
-      X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
+      Content-Type:
+        - application/json
+      User-Agent:
+        - kubelab-crossplane/1.0
+      X-API-Key:
+        - "{{ pocket-id:pocket-id:STATIC_API_KEY }}"
     mappings:
       - action: CREATE
         body: .payload.body
@@ -44,15 +51,21 @@ metadata:
   name: pocket-id-group-all-services-details
   namespace: pocket-id
 spec:
-  managementPolicies: [LateInitialize, Observe, Update]
+  managementPolicies:
+    - LateInitialize
+    - Observe
+    - Update
   forProvider:
     expectedResponseCheck:
       logic: .payload.body as $wanted | ((.response.body.name == $wanted.name and .response.body.friendlyName == $wanted.friendlyName) or any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName))
       type: CUSTOM
     headers:
-      Content-Type: [application/json]
-      User-Agent: [kubelab-crossplane/1.0]
-      X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
+      Content-Type:
+        - application/json
+      User-Agent:
+        - kubelab-crossplane/1.0
+      X-API-Key:
+        - "{{ pocket-id:pocket-id:STATIC_API_KEY }}"
     mappings:
       - action: OBSERVE
         url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
@@ -73,15 +86,22 @@ metadata:
   name: pocket-id-group-books
   namespace: pocket-id
 spec:
-  managementPolicies: [Create, LateInitialize, Observe, Update]
+  managementPolicies:
+    - Create
+    - LateInitialize
+    - Observe
+    - Update
   forProvider:
     expectedResponseCheck:
       logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
       type: CUSTOM
     headers:
-      Content-Type: [application/json]
-      User-Agent: [kubelab-crossplane/1.0]
-      X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
+      Content-Type:
+        - application/json
+      User-Agent:
+        - kubelab-crossplane/1.0
+      X-API-Key:
+        - "{{ pocket-id:pocket-id:STATIC_API_KEY }}"
     mappings:
       - action: CREATE
         body: .payload.body
@@ -113,15 +133,21 @@ metadata:
   name: pocket-id-group-books-details
   namespace: pocket-id
 spec:
-  managementPolicies: [LateInitialize, Observe, Update]
+  managementPolicies:
+    - LateInitialize
+    - Observe
+    - Update
   forProvider:
     expectedResponseCheck:
       logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
       type: CUSTOM
     headers:
-      Content-Type: [application/json]
-      User-Agent: [kubelab-crossplane/1.0]
-      X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
+      Content-Type:
+        - application/json
+      User-Agent:
+        - kubelab-crossplane/1.0
+      X-API-Key:
+        - "{{ pocket-id:pocket-id:STATIC_API_KEY }}"
     mappings:
       - action: OBSERVE
         url: .payload.baseUrl + "?pagination%5Blimit%5D=100"

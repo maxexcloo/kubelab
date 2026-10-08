@@ -14,14 +14,17 @@ map(
     with(select(."pod-selector" != null); .podSelector = ."pod-selector")) |
   del(."pod-selector") |
   with(select($cluster != strenv(HOMEPAGE_CLUSTER)); del(.app, .namespace, .showStats)) |
-  .description = ((.description // "") | sub(" · (\$\{HOMEPAGE_LOCATION\}|" + ($cluster | upcase) + ")$"; "")) |
+  .description = (.description // "") |
   with(select(.group != $route.serverGroup);
     .description = ([.description, ($cluster | upcase)] | map(select(. != "")) | join(" • "))) |
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
   with(select(.widget.version != null); .widget.version |= from_yaml) |
-  .siteMonitor = (.siteMonitor // .href) |
-  .weight = ((.weight // "0") | from_yaml)
+  .siteMonitor = (.siteMonitor // $route.annotations."monitoring.excloo.dev/url" // .href) |
+  with(select($route.annotations."monitoring.excloo.dev/path" != null);
+    .siteMonitor = ("https://" + $route.hostnames[0] + $route.annotations."monitoring.excloo.dev/path")) |
+  .weight = 0 |
+  with(select(.widget != null or (.widgets | length > 0)); .weight = -100)
 ) as $applications |
 [load(strenv(SERVICES)) | .[] | to_entries | .[] |
   .key as $group | .value[] | to_entries | .[] |

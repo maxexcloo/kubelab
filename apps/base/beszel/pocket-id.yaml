@@ -5,9 +5,10 @@ metadata:
   namespace: beszel
 spec:
   client:
-    callbackURLs: [https://beszel.excloo.com/api/oauth2-redirect]
+    callbackURLs:
+      - https://app.invalid/api/oauth2-redirect
     description: System Monitoring
     id: beszel-au-truenas
-    launchURL: https://beszel.excloo.com
+    launchURL: https://app.invalid
     name: Beszel
     pkceEnabled: true

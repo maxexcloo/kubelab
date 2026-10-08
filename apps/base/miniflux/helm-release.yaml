@@ -21,16 +21,6 @@ spec:
         strategy: Recreate
         containers:
           miniflux:
-            env:
-              BASE_URL: https://reader.excloo.com
-              CREATE_ADMIN: "1"
-              OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://id.excloo.com
-              OAUTH2_OIDC_PROVIDER_NAME: Pocket ID
-              OAUTH2_PROVIDER: oidc
-              OAUTH2_REDIRECT_URL: https://reader.excloo.com/oauth2/oidc/callback
-              OAUTH2_USER_CREATION: "1"
-              RUN_MIGRATIONS: "1"
-              TZ: Australia/Sydney
             envFrom:
               - secretRef:
                   name: miniflux
@@ -70,6 +60,10 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              BASE_URL: https://app.invalid
+              OAUTH2_REDIRECT_URL: https://app.invalid/oauth2/oidc/callback
+              OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://identity.invalid
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
@@ -88,19 +82,10 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: RSS Reader · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://reader.excloo.com
-          gethomepage.dev/icon: miniflux
-          gethomepage.dev/name: Miniflux
-          gethomepage.dev/siteMonitor: https://reader.excloo.com
-          gethomepage.dev/weight: "-100"
+          gethomepage.dev/href: https://app.invalid
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_MINIFLUX_KEY}}" }}'
           gethomepage.dev/widget.type: miniflux
-          gethomepage.dev/widget.url: https://reader.excloo.com
-        hostnames:
-          - reader.excloo.com
+          gethomepage.dev/widget.url: https://app.invalid
         labels:
           app.kubernetes.io/name: miniflux
         parentRefs:

@@ -4,4 +4,4 @@ metadata:
   name: open-webui
   namespace: open-webui
 spec:
-  hostname: chat.excloo.com
+  hostname: app.invalid

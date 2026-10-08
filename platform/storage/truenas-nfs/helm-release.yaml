@@ -17,7 +17,7 @@ spec:
   values:
     nfs:
       path: /mnt/truenas-nvme/clusters/mbk
-      server: 10.4.0.3
+      server: storage.invalid
       mountOptions:
         - nfsvers=4.2
     resources:

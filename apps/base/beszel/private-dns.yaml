@@ -4,4 +4,4 @@ metadata:
   name: beszel
   namespace: beszel
 spec:
-  hostname: beszel.excloo.com
+  hostname: app.invalid

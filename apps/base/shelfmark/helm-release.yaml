@@ -25,31 +25,6 @@ spec:
               pullPolicy: IfNotPresent
               repository: ghcr.io/calibrain/shelfmark
               tag: v1.4.0@sha256:4ef757349c3c7a7d90ba95b1e2a46ce4dd460a4776efbcf2aa1b1c476e7d5de5
-            env:
-              AA_BASE_URL: auto
-              AA_MIRROR_URLS: https://annas-archive.pk,https://annas-archive.gd,https://annas-archive.gl
-              AUTH_METHOD: oidc
-              BOOKS_OUTPUT_MODE: folder
-              CALIBRE_WEB_URL: https://books.excloo.com
-              CONFIG_DIR: /config
-              DIRECT_DOWNLOAD_ENABLED: "true"
-              DIRECT_DOWNLOAD_LANGUAGE_FROM_PATH: "true"
-              FLASK_PORT: "3000"
-              GOOGLEBOOKS_ENABLED: "true"
-              HARDCOVER_ENABLED: "true"
-              INGEST_DIR: /books
-              LIBGEN_MIRROR_URLS: https://libgen.vg,https://libgen.la,https://libgen.bz,https://libgen.gl,https://libgen.li
-              OIDC_BUTTON_LABEL: Pocket ID
-              OIDC_DISCOVERY_URL: https://id.excloo.com/.well-known/openid-configuration
-              OPENLIBRARY_ENABLED: "true"
-              PGID: "568"
-              PUID: "568"
-              SESSION_COOKIE_SECURE: "true"
-              TZ: Australia/Sydney
-              USE_CF_BYPASS: "true"
-              USING_EXTERNAL_BYPASSER: "false"
-              WELIB_MIRROR_URLS: ""
-              ZLIB_MIRROR_URLS: https://z-lib.sk
             envFrom:
               - secretRef:
                   name: shelfmark
@@ -84,6 +59,8 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              OIDC_DISCOVERY_URL: https://identity.invalid/.well-known/openid-configuration
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
@@ -118,7 +95,7 @@ spec:
     route:
       private:
         hostnames:
-          - shelf.excloo.com
+          - app.invalid
         labels:
           app.kubernetes.io/name: shelfmark
         parentRefs:
@@ -132,15 +109,7 @@ spec:
         forceRename: shelfmark
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Book Search & Downloads · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/href: https://shelf.excloo.com
-          gethomepage.dev/icon: shelfmark
-          gethomepage.dev/name: Shelfmark
-          gethomepage.dev/siteMonitor: https://shelf.excloo.com
-        hostnames:
-          - shelf.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: shelfmark
           gateway.excloo.dev/public-access: "true"

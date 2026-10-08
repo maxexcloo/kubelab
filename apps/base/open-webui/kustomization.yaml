@@ -7,3 +7,39 @@ resources:
   - resources.yaml
   - service-account.yaml
   - source.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: open-webui
+      namespace: open-webui
+      fieldPath: spec.values.route.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: open-webui
+          namespace: open-webui
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: open-webui
+          namespace: open-webui
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: open-webui
+          namespace: open-webui
+        fieldPaths:
+          - spec.values.extraEnvVars.12.value
+          - spec.values.extraEnvVars.5.value
+          - spec.values.route.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

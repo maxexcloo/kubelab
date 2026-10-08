@@ -6,8 +6,9 @@ metadata:
 spec:
   accessPolicy: books
   client:
-    callbackURLs: [https://books.excloo.com/oauth2-callback]
+    callbackURLs:
+      - https://app.invalid/oauth2-callback
     description: Digital Library
     id: bookorbit-au-truenas
-    launchURL: https://books.excloo.com
+    launchURL: https://app.invalid
     name: BookOrbit

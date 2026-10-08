@@ -21,30 +21,6 @@ spec:
         strategy: Recreate
         containers:
           papra:
-            env:
-              AI_DEFAULT_MODEL: openrouter://openrouter/auto
-              AI_IS_ENABLED: "true"
-              APP_BASE_URL: https://papra.excloo.com
-              AUTO_TAGGING_ENABLED: "true"
-              AUTO_TAGGING_MODEL: openrouter://openrouter/auto
-              BETTER_AUTH_TELEMETRY: "0"
-              CLIENT_BASE_URL: http://localhost:1221
-              DATABASE_URL: file:/app/app-data/db/db.sqlite
-              DOCUMENT_STORAGE_DRIVER: filesystem
-              DOCUMENT_STORAGE_FILESYSTEM_ROOT: /app/app-data/documents
-              EMAILS_DRY_RUN: "true"
-              HOME: /tmp
-              INGESTION_FOLDER_ERROR_FOLDER_PATH: /app/ingestion/ingestion-error
-              INGESTION_FOLDER_IS_ENABLED: "true"
-              INGESTION_FOLDER_POST_PROCESSING_MOVE_FOLDER_PATH: /app/ingestion/ingestion-done
-              INGESTION_FOLDER_ROOT: ./ingestion
-              INGESTION_FOLDER_ROOT_PATH: /app/ingestion
-              IS_FREE_PLAN_UNLIMITED: "true"
-              PAPRA_CONFIG_DIR: ./app-data
-              PORT: "21221"
-              PROCESS_MODE: all
-              SERVER_SERVE_PUBLIC_DIR: "true"
-              TZ: Australia/Sydney
             envFrom:
               - secretRef:
                   name: papra
@@ -92,6 +68,8 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              APP_BASE_URL: https://app.invalid
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
@@ -123,15 +101,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Document Management · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://papra.excloo.com
-          gethomepage.dev/icon: papra
-          gethomepage.dev/name: Papra
-          gethomepage.dev/siteMonitor: https://papra.excloo.com
-        hostnames:
-          - papra.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: papra
         parentRefs:

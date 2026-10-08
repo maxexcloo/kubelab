@@ -6,3 +6,40 @@ resources:
   - pocket-id.yaml
   - private-dns.yaml
   - resources.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: miniflux
+      namespace: miniflux
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: miniflux
+          namespace: miniflux
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: miniflux
+          namespace: miniflux
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: miniflux
+          namespace: miniflux
+        fieldPaths:
+          - spec.values.controllers.miniflux.containers.miniflux.env.BASE_URL
+          - spec.values.controllers.miniflux.containers.miniflux.env.OAUTH2_REDIRECT_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+          - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
+        options:
+          delimiter: /
+          index: 2

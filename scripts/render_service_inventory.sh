@@ -67,7 +67,7 @@ for cluster in "${clusters[@]}"; do
       ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -p=json -o=yaml -r '
         select(
           strenv(ALL_ROUTES) == "true" or
-          .annotations."gethomepage.dev/enabled" == "true"
+          .annotations."monitoring.excloo.dev/enabled" == "true"
         ) |
         {
           "alerts": (.annotations."monitoring.excloo.dev/alerts" // "true"),
@@ -77,16 +77,16 @@ for cluster in "${clusters[@]}"; do
             ""
           ),
           "description": (.annotations."gethomepage.dev/description" // ""),
-          "group": (.annotations."gethomepage.dev/group" // ""),
+          "group": (.annotations."gethomepage.dev/group" // "Services"),
+          "headers": ((.annotations."monitoring.excloo.dev/headers" // "{}") | from_json),
           "hostnames": .hostnames,
           "href": (.annotations."gethomepage.dev/href" // ""),
           "icon": (.annotations."gethomepage.dev/icon" // ""),
           "monitor": (
-            .annotations."gethomepage.dev/siteMonitor" //
-            .annotations."gethomepage.dev/href" //
-            ""
+            .annotations."monitoring.excloo.dev/url" //
+            ("https://" + (.hostnames[0] // "") + (.annotations."monitoring.excloo.dev/path" // ""))
           ),
-          "name": (.annotations."gethomepage.dev/name" // ""),
+          "name": (.annotations."monitoring.excloo.dev/name" // .annotations."gethomepage.dev/name" // (.source | split("/") | .[2])),
           "namespace": .namespace,
           "parentRefs": .parentRefs,
           "publicAccess": (.labels."gateway.excloo.dev/public-access" // ""),

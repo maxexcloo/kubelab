@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: immich
 spec:
   hostnames:
-    - photos.excloo.com
+    - app.invalid
   parentRefs:
     - name: private
       namespace: networking

@@ -45,7 +45,7 @@ spec:
       data:
         ADMIN_PASSWORD: "{{ .password }}"
         ADMIN_USERNAME: "{{ .username }}"
-        DATABASE_URL: 'postgres://{{ index . "database-username" | urlquery }}:{{ index . "database-password" | urlquery }}@miniflux-database-rw:5432/miniflux?sslmode=require'
+        DATABASE_URL: postgres://{{ index . "database-username" | urlquery }}:{{ index . "database-password" | urlquery }}@miniflux-database-rw:5432/miniflux?sslmode=require
         OAUTH2_CLIENT_ID: "{{ .OAUTH2_CLIENT_ID }}"
         OAUTH2_CLIENT_SECRET: "{{ .OAUTH2_CLIENT_SECRET }}"
 ---

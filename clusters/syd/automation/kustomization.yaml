@@ -4,18 +4,5 @@ resources:
   - ../../../platform/automation/b2
   - ../../../platform/automation/cloudflare
   - ../../../platform/automation/private-dns
-patches:
-  - patch: |-
-      - op: replace
-        path: /spec/forProvider/payload/baseUrl
-        value: https://cloudflare-dns.com/dns-query?name=private.syd.excloo.dev&type=A
-    target:
-      kind: Request
-      name: private-dns-target-ipv4
-  - patch: |-
-      - op: replace
-        path: /spec/forProvider/payload/baseUrl
-        value: https://cloudflare-dns.com/dns-query?name=private.syd.excloo.dev&type=AAAA
-    target:
-      kind: Request
-      name: private-dns-target-ipv6
+components:
+  - ../settings

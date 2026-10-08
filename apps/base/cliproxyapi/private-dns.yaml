@@ -4,4 +4,4 @@ metadata:
   name: cliproxyapi
   namespace: cliproxyapi
 spec:
-  hostname: cliproxy.excloo.com
+  hostname: app.invalid

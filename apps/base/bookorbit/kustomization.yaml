@@ -8,3 +8,45 @@ resources:
   - private-dns.yaml
   - resources.yaml
   - storage.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: bookorbit
+      namespace: bookorbit
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: bookorbit
+          namespace: bookorbit
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: bookorbit
+          namespace: bookorbit
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: bookorbit
+          namespace: bookorbit
+        fieldPaths:
+          - spec.values.route.private.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: bookorbit
+          namespace: bookorbit
+        fieldPaths:
+          - spec.values.controllers.bookorbit.containers.bookorbit.env.APP_URL
+          - spec.values.controllers.bookorbit.containers.bookorbit.env.CLIENT_URL
+          - spec.values.route.public.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

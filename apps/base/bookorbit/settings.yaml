@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bookorbit
+  namespace: bookorbit
+spec:
+  values:
+    route:
+      public:
+        hostnames:
+          - books.excloo.com
+        annotations:
+          gethomepage.dev/description: Digital Library
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: bookorbit
+          gethomepage.dev/name: BookOrbit
+    controllers:
+      bookorbit:
+        containers:
+          bookorbit:
+            env:
+              APP_DATA_PATH: /data
+              BOOK_DOCK_PATH: /books-drop
+              LIBRARY_BROWSE_ROOT: /books
+              PORT: "3000"
+              TZ: Australia/Sydney

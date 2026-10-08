@@ -19,7 +19,7 @@ spec:
       - action: OBSERVE
         url: .payload.baseUrl
     payload:
-      baseUrl: https://cloudflare-dns.com/dns-query?name=private.mbk.excloo.dev&type=A
+      baseUrl: https://cloudflare-dns.com/dns-query?name=app.invalid&type=A
       body: "{}"
     secretInjectionConfigs:
       - keyMappings:
@@ -55,7 +55,7 @@ spec:
       - action: OBSERVE
         url: .payload.baseUrl
     payload:
-      baseUrl: https://cloudflare-dns.com/dns-query?name=private.mbk.excloo.dev&type=AAAA
+      baseUrl: https://cloudflare-dns.com/dns-query?name=app.invalid&type=AAAA
       body: "{}"
     secretInjectionConfigs:
       - keyMappings:

@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: beszel
+  namespace: beszel
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - beszel.excloo.com
+        annotations:
+          gethomepage.dev/description: System Monitoring
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Operations
+          gethomepage.dev/icon: beszel
+          gethomepage.dev/name: Beszel
+    controllers:
+      beszel:
+        containers:
+          beszel:
+            env:
+              TZ: Australia/Sydney
+              USER_CREATION: "true"

@@ -6,6 +6,3 @@ spec:
   path: ./apps/overlays/syd
   dependsOn:
     - name: automation
-  postBuild:
-    substitute:
-      HOMEPAGE_LOCATION: SYD

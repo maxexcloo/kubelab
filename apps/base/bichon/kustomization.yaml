@@ -4,3 +4,29 @@ resources:
   - helm-release.yaml
   - private-dns.yaml
   - resources.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: bichon
+      namespace: bichon
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: bichon
+          namespace: bichon
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: HelmRelease
+          name: bichon
+          namespace: bichon
+        fieldPaths:
+          - spec.values.controllers.bichon.containers.bichon.env.BICHON_CORS_ORIGINS
+          - spec.values.controllers.bichon.containers.bichon.env.BICHON_PUBLIC_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

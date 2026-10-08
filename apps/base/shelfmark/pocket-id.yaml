@@ -6,8 +6,9 @@ metadata:
 spec:
   accessPolicy: books
   client:
-    callbackURLs: [https://shelf.excloo.com/api/auth/oidc/callback]
+    callbackURLs:
+      - https://app.invalid/api/auth/oidc/callback
     description: Book Search & Downloads
     id: shelfmark-au-truenas
-    launchURL: https://shelf.excloo.com
+    launchURL: https://app.invalid
     name: Shelfmark

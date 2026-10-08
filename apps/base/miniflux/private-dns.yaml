@@ -4,4 +4,4 @@ metadata:
   name: miniflux
   namespace: miniflux
 spec:
-  hostname: reader.excloo.com
+  hostname: app.invalid

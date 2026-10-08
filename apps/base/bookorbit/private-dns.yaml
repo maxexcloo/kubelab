@@ -4,7 +4,7 @@ metadata:
   name: bookorbit
   namespace: bookorbit
 spec:
-  hostname: books.excloo.com
+  hostname: app.invalid
   ipv6Enabled: false
   crossplane:
     compositionRef:

@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cliproxyapi
+  namespace: cliproxyapi
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - cliproxy.excloo.com
+        annotations:
+          gethomepage.dev/description: Subscription Proxy
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/path: /management.html
+          gethomepage.dev/group: Artificial Intelligence
+          gethomepage.dev/icon: https://avatars.githubusercontent.com/u/233033915
+          gethomepage.dev/name: CLI Proxy API
+    controllers:
+      cliproxyapi:
+        containers:
+          cliproxyapi:
+            env:
+              TZ: Australia/Sydney

@@ -4,24 +4,23 @@ metadata:
   name: grafana
   namespace: observability
   annotations:
-    gethomepage.dev/description: Infrastructure Observability · SYD
+    gethomepage.dev/description: Infrastructure Observability
     gethomepage.dev/enabled: "true"
+    monitoring.excloo.dev/enabled: "true"
     gethomepage.dev/group: Servers
-    gethomepage.dev/href: https://grafana.syd.excloo.dev
+    gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: grafana
     gethomepage.dev/name: Grafana
-    gethomepage.dev/siteMonitor: https://grafana.syd.excloo.dev
-    gethomepage.dev/weight: "-100"
     gethomepage.dev/widget.password: "{{HOMEPAGE_FILE_GRAFANA_SYD_PASSWORD}}"
     gethomepage.dev/widget.type: grafana
-    gethomepage.dev/widget.url: https://grafana.syd.excloo.dev
+    gethomepage.dev/widget.url: https://app.invalid
     gethomepage.dev/widget.username: "{{HOMEPAGE_FILE_GRAFANA_SYD_USERNAME}}"
     gethomepage.dev/widget.version: "2"
   labels:
     app.kubernetes.io/name: grafana
 spec:
   hostnames:
-    - grafana.syd.excloo.dev
+    - app.invalid
   parentRefs:
     - name: private
       namespace: networking

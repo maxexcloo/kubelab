@@ -84,6 +84,6 @@ spec:
     - nfsvers=4.2
   nfs:
     path: /mnt/truenas-nvme/bichon
-    server: 10.4.0.3
+    server: storage.invalid
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""

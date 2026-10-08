@@ -22,13 +22,16 @@ spec:
         namespace: flux-system
       version: 1.23.0
   values:
-    domainFilters: [excloo.com]
+    domainFilters:
+      - excloo.com
     labelFilter: gateway.excloo.dev/private-dns=true
     logFormat: json
-    managedRecordTypes: [CNAME]
+    managedRecordTypes:
+      - CNAME
     policy: upsert-only
     registry: noop
-    sources: [crd]
+    sources:
+      - crd
     triggerLoopOnEvent: true
     env:
       - name: CF_API_TOKEN

@@ -22,7 +22,7 @@ spec:
               type: object
               properties:
                 controlDProfileID:
-                  default: 653224sydwhf
+                  default: profile-placeholder
                   maxLength: 128
                   minLength: 1
                   pattern: ^[A-Za-z0-9_-]+$
@@ -36,7 +36,7 @@ spec:
                   default: true
                   type: boolean
                 target:
-                  default: private.mbk.excloo.dev
+                  default: app.invalid
                   format: hostname
                   maxLength: 253
                   minLength: 1

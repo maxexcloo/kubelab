@@ -4,4 +4,4 @@ metadata:
   name: actual-budget
   namespace: actual-budget
 spec:
-  hostname: budget.excloo.com
+  hostname: app.invalid

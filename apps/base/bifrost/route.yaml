@@ -4,13 +4,14 @@ metadata:
   name: bifrost
   namespace: bifrost
   annotations:
-    gethomepage.dev/description: LLM Gateway · ${HOMEPAGE_LOCATION}
+    gethomepage.dev/description: LLM Gateway
     gethomepage.dev/enabled: "true"
+    monitoring.excloo.dev/enabled: "true"
+    monitoring.excloo.dev/path: /health
     gethomepage.dev/group: Artificial Intelligence
-    gethomepage.dev/href: https://bifrost.excloo.com
+    gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: https://cdn.jsdelivr.net/gh/maximhq/bifrost/ui/public/bifrost-icon-dark.webp
     gethomepage.dev/name: Bifrost
-    gethomepage.dev/siteMonitor: https://bifrost.excloo.com/health
   labels:
     app.kubernetes.io/name: bifrost
 spec:

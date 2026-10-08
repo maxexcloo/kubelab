@@ -4,4 +4,4 @@ metadata:
   name: bichon
   namespace: bichon
 spec:
-  hostname: bichon.excloo.com
+  hostname: app.invalid

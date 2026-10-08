@@ -8,3 +8,46 @@ resources:
   - private-dns.yaml
   - resources.yaml
   - storage.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: linkwarden
+      namespace: linkwarden
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: linkwarden
+          namespace: linkwarden
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: linkwarden
+          namespace: linkwarden
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: linkwarden
+          namespace: linkwarden
+        fieldPaths:
+          - spec.values.route.private.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: linkwarden
+          namespace: linkwarden
+        fieldPaths:
+          - spec.values.controllers.linkwarden.containers.linkwarden.env.BASE_URL
+          - spec.values.controllers.linkwarden.containers.linkwarden.env.NEXTAUTH_URL
+          - spec.values.route.public.annotations.[gethomepage.dev/href]
+          - spec.values.route.public.annotations.[gethomepage.dev/widget.url]
+        options:
+          delimiter: /
+          index: 2

@@ -95,6 +95,7 @@ spec:
                   - ALL
             env:
               REDLIB_DEFAULT_SUBSCRIPTIONS: '{{ join "+" .Values.subscriptions }}'
+              REDLIB_FULL_URL: https://app.invalid
         rollingUpdate:
           maxSurge: 1
           maxUnavailable: 0
@@ -125,7 +126,7 @@ spec:
     route:
       private:
         hostnames:
-          - reddit.excloo.com
+          - app.invalid
         labels:
           app.kubernetes.io/name: redlib
         parentRefs:
@@ -139,16 +140,8 @@ spec:
         forceRename: redlib
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Reddit Frontend · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://reddit.excloo.com
-          gethomepage.dev/icon: redlib
-          gethomepage.dev/name: Redlib
-          gethomepage.dev/siteMonitor: https://reddit.excloo.com
+          gethomepage.dev/href: https://app.invalid
           monitoring.excloo.dev/alerts: "false"
-        hostnames:
-          - reddit.excloo.com
         labels:
           app.kubernetes.io/name: redlib
           gateway.excloo.dev/public-access: "true"

@@ -1,0 +1,27 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: aiometadata
+  namespace: aiometadata
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - aiometadata.excloo.com
+        annotations:
+          gethomepage.dev/description: Stremio Metadata
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: sh-aiometadata
+          gethomepage.dev/name: AIOMetadata
+    controllers:
+      aiometadata:
+        containers:
+          aiometadata:
+            env:
+              DATABASE_URI: sqlite://addon/data/db.sqlite
+              ENABLE_CACHE_WARMING: "false"
+              MAL_WARMUP_ENABLED: "false"
+              REDIS_URL: redis://localhost:6379

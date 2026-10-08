@@ -1,0 +1,62 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+components:
+  - ../../../platform/settings
+resources:
+  - settings.yaml
+replacements:
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-syd
+      fieldPath: data.private_dns_host
+    targets:
+      - select:
+          kind: ConfigMap
+          name: cluster-settings-syd
+        fieldPaths:
+          - data.private_dns_lookup
+        options:
+          delimiter: name=
+          index: 1
+      - select:
+          kind: CompositeResourceDefinition
+          name: privatednsrecords.automation.excloo.dev
+        fieldPaths:
+          - spec.versions.0.schema.openAPIV3Schema.properties.spec.properties.target.default
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-syd
+      fieldPath: data.private_dns_lookup
+    targets:
+      - select:
+          kind: Request
+          name: private-dns-target-ipv[46]
+        fieldPaths:
+          - spec.forProvider.payload.baseUrl
+        options:
+          delimiter: "&"
+          index: 0
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-syd
+      fieldPath: data.grafana_host
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: grafana
+        fieldPaths:
+          - spec.hostnames.0
+      - select:
+          kind: PrivateDNSRecord
+          name: grafana
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: grafana
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2

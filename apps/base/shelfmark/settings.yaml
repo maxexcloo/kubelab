@@ -1,0 +1,46 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: shelfmark
+  namespace: shelfmark
+spec:
+  values:
+    route:
+      public:
+        hostnames:
+          - shelf.excloo.com
+        annotations:
+          gethomepage.dev/description: Book Search & Downloads
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: shelfmark
+          gethomepage.dev/name: Shelfmark
+    controllers:
+      shelfmark:
+        containers:
+          shelfmark:
+            env:
+              AA_BASE_URL: auto
+              AA_MIRROR_URLS: https://annas-archive.pk,https://annas-archive.gd,https://annas-archive.gl
+              AUTH_METHOD: oidc
+              BOOKS_OUTPUT_MODE: folder
+              CALIBRE_WEB_URL: https://books.excloo.com
+              CONFIG_DIR: /config
+              DIRECT_DOWNLOAD_ENABLED: "true"
+              DIRECT_DOWNLOAD_LANGUAGE_FROM_PATH: "true"
+              FLASK_PORT: "3000"
+              GOOGLEBOOKS_ENABLED: "true"
+              HARDCOVER_ENABLED: "true"
+              INGEST_DIR: /books
+              LIBGEN_MIRROR_URLS: https://libgen.vg,https://libgen.la,https://libgen.bz,https://libgen.gl,https://libgen.li
+              OIDC_BUTTON_LABEL: Pocket ID
+              OPENLIBRARY_ENABLED: "true"
+              PGID: "568"
+              PUID: "568"
+              SESSION_COOKIE_SECURE: "true"
+              TZ: Australia/Sydney
+              USE_CF_BYPASS: "true"
+              USING_EXTERNAL_BYPASSER: "false"
+              WELIB_MIRROR_URLS: ""
+              ZLIB_MIRROR_URLS: https://z-lib.sk

@@ -4,13 +4,13 @@ metadata:
   name: headlamp
   namespace: headlamp
   annotations:
-    gethomepage.dev/description: Kubernetes Dashboard · SYD
+    gethomepage.dev/description: Kubernetes Dashboard
     gethomepage.dev/enabled: "true"
+    monitoring.excloo.dev/enabled: "true"
     gethomepage.dev/group: Servers
-    gethomepage.dev/href: https://headlamp.syd.excloo.dev
+    gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: headlamp
     gethomepage.dev/name: Headlamp
-    gethomepage.dev/siteMonitor: https://headlamp.syd.excloo.dev
   labels:
     app.kubernetes.io/name: headlamp
 spec:

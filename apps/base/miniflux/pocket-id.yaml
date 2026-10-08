@@ -5,8 +5,9 @@ metadata:
   namespace: miniflux
 spec:
   client:
-    callbackURLs: [https://reader.excloo.com/oauth2/oidc/callback]
+    callbackURLs:
+      - https://app.invalid/oauth2/oidc/callback
     description: RSS Reader
     id: miniflux-au-truenas
-    launchURL: https://reader.excloo.com
+    launchURL: https://app.invalid
     name: Miniflux

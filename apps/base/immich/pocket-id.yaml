@@ -7,9 +7,9 @@ spec:
   client:
     callbackURLs:
       - app.immich:///oauth-callback
-      - https://photos.excloo.com/auth/login
-      - https://photos.excloo.com/user-settings
+      - https://app.invalid/auth/login
+      - https://app.invalid/user-settings
     description: Photo Manager
     id: immich-au-truenas
-    launchURL: https://photos.excloo.com
+    launchURL: https://app.invalid
     name: Immich

@@ -9,3 +9,39 @@ resources:
   - resources.yaml
   - source.yaml
   - storage.yaml
+  - route.yaml
+  - private-dns.yaml
+replacements:
+  - source:
+      kind: HTTPRoute
+      name: immich
+      namespace: immich
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: immich
+          namespace: immich
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+          - metadata.annotations.[gethomepage.dev/widget.url]
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PrivateDNSRecord
+          name: immich
+          namespace: immich
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: immich
+          namespace: immich
+        fieldPaths:
+          - spec.client.callbackURLs.1
+          - spec.client.callbackURLs.2
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2

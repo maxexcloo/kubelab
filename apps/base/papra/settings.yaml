@@ -1,0 +1,45 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: papra
+  namespace: papra
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - papra.excloo.com
+        annotations:
+          gethomepage.dev/description: Document Management
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/icon: papra
+          gethomepage.dev/name: Papra
+    controllers:
+      papra:
+        containers:
+          papra:
+            env:
+              AI_DEFAULT_MODEL: openrouter://openrouter/auto
+              AI_IS_ENABLED: "true"
+              AUTO_TAGGING_ENABLED: "true"
+              AUTO_TAGGING_MODEL: openrouter://openrouter/auto
+              BETTER_AUTH_TELEMETRY: "0"
+              CLIENT_BASE_URL: http://localhost:1221
+              DATABASE_URL: file:/app/app-data/db/db.sqlite
+              DOCUMENT_STORAGE_DRIVER: filesystem
+              DOCUMENT_STORAGE_FILESYSTEM_ROOT: /app/app-data/documents
+              EMAILS_DRY_RUN: "true"
+              HOME: /tmp
+              INGESTION_FOLDER_ERROR_FOLDER_PATH: /app/ingestion/ingestion-error
+              INGESTION_FOLDER_IS_ENABLED: "true"
+              INGESTION_FOLDER_POST_PROCESSING_MOVE_FOLDER_PATH: /app/ingestion/ingestion-done
+              INGESTION_FOLDER_ROOT: ./ingestion
+              INGESTION_FOLDER_ROOT_PATH: /app/ingestion
+              IS_FREE_PLAN_UNLIMITED: "true"
+              PAPRA_CONFIG_DIR: ./app-data
+              PORT: "21221"
+              PROCESS_MODE: all
+              SERVER_SERVE_PUBLIC_DIR: "true"
+              TZ: Australia/Sydney

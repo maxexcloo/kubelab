@@ -41,7 +41,7 @@ spec:
     - nfsvers=4.2
   nfs:
     path: /mnt/truenas/icloud-photos
-    server: 10.4.0.3
+    server: storage.invalid
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
 ---
@@ -60,6 +60,6 @@ spec:
     - nfsvers=4.2
   nfs:
     path: /mnt/truenas-nvme/immich
-    server: 10.4.0.3
+    server: storage.invalid
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""

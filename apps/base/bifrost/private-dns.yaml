@@ -4,4 +4,4 @@ metadata:
   name: bifrost
   namespace: bifrost
 spec:
-  hostname: bifrost.excloo.com
+  hostname: app.invalid

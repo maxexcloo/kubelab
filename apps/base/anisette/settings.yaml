@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: anisette
+  namespace: anisette
+spec:
+  values:
+    route:
+      public:
+        hostnames:
+          - anisette.excloo.com
+        annotations:
+          gethomepage.dev/description: Anisette Server
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/icon: si-apple-#ffffff
+          gethomepage.dev/name: Anisette
+    controllers:
+      anisette:
+        containers:
+          anisette:
+            env:
+              XDG_RUNTIME_DIR: /tmp

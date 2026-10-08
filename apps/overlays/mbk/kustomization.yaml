@@ -22,11 +22,8 @@ resources:
   - ../../base/pocket-id
   - ../../base/romm
   - ../../base/shelfmark
-  - bifrost-route.yaml
   - homepage-private-dns.yaml
-  - immich-private-dns.yaml
   - immich-private-route.yaml
-  - immich-route.yaml
   - openspeedtest-route.yaml
 patches:
   - patch: |-
@@ -47,3 +44,32 @@ patches:
       kind: ResendKey
       version: v1alpha1
   - path: beszel-agent.yaml
+replacements:
+  - source:
+      kind: HTTPRoute
+      name: openspeedtest
+      namespace: openspeedtest
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: openspeedtest
+          namespace: openspeedtest
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: HTTPRoute
+      name: immich
+      namespace: immich
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: immich-private
+        fieldPaths:
+          - spec.hostnames.0
+components:
+  - ../../../clusters/mbk/settings

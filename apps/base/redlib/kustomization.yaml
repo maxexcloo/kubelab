@@ -9,3 +9,71 @@ resources:
   - resources.yaml
 patches:
   - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: redlib
+      namespace: redlib
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: redlib-www-private
+          namespace: redlib
+        fieldPaths:
+          - spec.hostnames.0
+        options:
+          delimiter: www.
+          index: 1
+      - select:
+          kind: HTTPRoute
+          name: redlib-www-private
+          namespace: redlib
+        fieldPaths:
+          - spec.rules.0.filters.0.requestRedirect.hostname
+      - select:
+          kind: CloudflareWAFPolicy
+          name: redlib
+          namespace: redlib
+        fieldPaths:
+          - spec.rule.expression
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PrivateDNSRecord
+          name: redlib
+          namespace: redlib
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: HTTPRoute
+          name: redlib-www
+          namespace: redlib
+        fieldPaths:
+          - spec.hostnames.0
+        options:
+          delimiter: www.
+          index: 1
+      - select:
+          kind: HTTPRoute
+          name: redlib-www
+          namespace: redlib
+        fieldPaths:
+          - spec.rules.0.filters.0.requestRedirect.hostname
+      - select:
+          kind: HelmRelease
+          name: redlib
+          namespace: redlib
+        fieldPaths:
+          - spec.values.route.private.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: redlib
+          namespace: redlib
+        fieldPaths:
+          - spec.values.controllers.redlib.containers.redlib.env.REDLIB_FULL_URL
+          - spec.values.route.public.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

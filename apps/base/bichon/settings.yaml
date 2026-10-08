@@ -1,0 +1,26 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bichon
+  namespace: bichon
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - bichon.excloo.com
+        annotations:
+          gethomepage.dev/description: Email Archiving
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Operations
+          gethomepage.dev/icon: sh-bichon
+          gethomepage.dev/name: Bichon
+    controllers:
+      bichon:
+        containers:
+          bichon:
+            env:
+              BICHON_HTTP_PORT: "15630"
+              BICHON_ROOT_DIR: /data/bichon-data
+              TZ: Australia/Sydney

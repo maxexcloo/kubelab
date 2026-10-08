@@ -21,15 +21,6 @@ spec:
         strategy: Recreate
         containers:
           actual-budget:
-            env:
-              ACTUAL_HOSTNAME: 0.0.0.0
-              ACTUAL_OPENID_DISCOVERY_URL: https://id.excloo.com/.well-known/openid-configuration
-              ACTUAL_OPENID_SERVER_HOSTNAME: https://budget.excloo.com
-              ACTUAL_PORT: "5006"
-              ACTUAL_SERVER_FILES: /data/server-files
-              ACTUAL_USER_CREATION_MODE: login
-              ACTUAL_USER_FILES: /data/user-files
-              TZ: Australia/Sydney
             envFrom:
               - secretRef:
                   name: actual-budget
@@ -77,6 +68,9 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              ACTUAL_OPENID_SERVER_HOSTNAME: https://app.invalid
+              ACTUAL_OPENID_DISCOVERY_URL: https://identity.invalid/.well-known/openid-configuration
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
@@ -102,15 +96,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Personal Finance · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://budget.excloo.com
-          gethomepage.dev/icon: actual-budget
-          gethomepage.dev/name: Actual Budget
-          gethomepage.dev/siteMonitor: https://budget.excloo.com
-        hostnames:
-          - budget.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: actual-budget
         parentRefs:

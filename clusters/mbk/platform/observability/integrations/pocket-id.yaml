@@ -5,10 +5,11 @@ metadata:
   namespace: observability
 spec:
   client:
-    callbackURLs: [https://grafana.excloo.com/login/generic_oauth]
+    callbackURLs:
+      - https://app.invalid/login/generic_oauth
     description: Infrastructure Observability
     id: grafana-au-truenas
-    launchURL: https://grafana.excloo.com
+    launchURL: https://app.invalid
     name: Grafana
     pkceEnabled: true
 ---

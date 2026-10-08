@@ -21,8 +21,6 @@ spec:
         strategy: Recreate
         containers:
           cliproxyapi:
-            env:
-              TZ: Australia/Sydney
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/eceasy/cli-proxy-api
@@ -105,15 +103,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Subscription Proxy · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Artificial Intelligence
-          gethomepage.dev/href: https://cliproxy.excloo.com/management.html
-          gethomepage.dev/icon: https://avatars.githubusercontent.com/u/233033915
-          gethomepage.dev/name: CLI Proxy API
-          gethomepage.dev/siteMonitor: https://cliproxy.excloo.com/management.html
-        hostnames:
-          - cliproxy.excloo.com
+          gethomepage.dev/href: https://app.invalid/management.html
         labels:
           app.kubernetes.io/name: cliproxyapi
         parentRefs:

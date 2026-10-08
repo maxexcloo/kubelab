@@ -5,9 +5,10 @@ metadata:
   namespace: papra
 spec:
   client:
-    callbackURLs: [https://papra.excloo.com/api/auth/oauth2/callback/pocket-id]
+    callbackURLs:
+      - https://app.invalid/api/auth/oauth2/callback/pocket-id
     description: Document Management
     id: papra-au-truenas
-    launchURL: https://papra.excloo.com
+    launchURL: https://app.invalid
     name: Papra
     pkceEnabled: true

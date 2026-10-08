@@ -4,7 +4,7 @@ metadata:
   name: pocket-id
   namespace: pocket-id
 spec:
-  hostname: id.excloo.com
+  hostname: app.invalid
   ipv6Enabled: false
   crossplane:
     compositionRef:

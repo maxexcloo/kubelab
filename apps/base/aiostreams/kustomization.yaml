@@ -4,3 +4,28 @@ resources:
   - helm-release.yaml
   - private-dns.yaml
   - resources.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: aiostreams
+      namespace: aiostreams
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: aiostreams
+          namespace: aiostreams
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: HelmRelease
+          name: aiostreams
+          namespace: aiostreams
+        fieldPaths:
+          - spec.values.controllers.aiostreams.containers.aiostreams.env.BASE_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

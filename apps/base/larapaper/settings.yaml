@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: larapaper
+  namespace: larapaper
+spec:
+  values:
+    route:
+      public:
+        hostnames:
+          - larapaper.excloo.com
+        annotations:
+          gethomepage.dev/description: TRMNL Server
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/icon: sh-trmnl
+          gethomepage.dev/name: LaraPaper
+    controllers:
+      larapaper:
+        containers:
+          larapaper:
+            env:
+              APP_TIMEZONE: Australia/Sydney
+              DB_DATABASE: database/storage/database.sqlite
+              FORCE_HTTPS: "1"
+              PHP_OPCACHE_ENABLE: "1"
+              REGISTRATION_ENABLED: "0"

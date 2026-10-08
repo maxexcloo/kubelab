@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - budget.excloo.com
+        annotations:
+          gethomepage.dev/description: Personal Finance
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/icon: actual-budget
+          gethomepage.dev/name: Actual Budget
+    controllers:
+      actual-budget:
+        containers:
+          actual-budget:
+            env:
+              ACTUAL_HOSTNAME: 0.0.0.0
+              ACTUAL_PORT: "5006"
+              ACTUAL_SERVER_FILES: /data/server-files
+              ACTUAL_USER_CREATION_MODE: login
+              ACTUAL_USER_FILES: /data/user-files
+              TZ: Australia/Sydney

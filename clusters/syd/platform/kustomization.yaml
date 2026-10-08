@@ -29,3 +29,37 @@ patches:
   - path: tailscale.yaml
   - path: traefik-gateway.yaml
   - path: traefik.yaml
+replacements:
+  - source:
+      kind: HTTPRoute
+      name: headlamp
+      namespace: headlamp
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: HTTPRoute
+      name: grafana
+      namespace: observability
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: grafana
+          namespace: observability
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+          - metadata.annotations.[gethomepage.dev/widget.url]
+        options:
+          delimiter: /
+          index: 2
+components:
+  - ../settings

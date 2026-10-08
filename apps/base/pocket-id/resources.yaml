@@ -38,7 +38,7 @@ spec:
     template:
       engineVersion: v2
       data:
-        DB_CONNECTION_STRING: 'postgresql://{{ index . "database-username" | urlquery }}:{{ index . "database-password" | urlquery }}@pocket-id-database-rw:5432/pocket-id?sslmode=require'
+        DB_CONNECTION_STRING: postgresql://{{ index . "database-username" | urlquery }}:{{ index . "database-password" | urlquery }}@pocket-id-database-rw:5432/pocket-id?sslmode=require
         ENCRYPTION_KEY: '{{ index . "encryption-key" }}'
         SMTP_PASSWORD: '{{ index . "api-key-resend" }}'
         STATIC_API_KEY: '{{ index . "static-api-key" }}'

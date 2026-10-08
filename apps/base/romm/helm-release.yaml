@@ -22,21 +22,6 @@ spec:
         containers:
           romm:
             env:
-              DB_HOST: romm-database-rw
-              DB_PORT: "5432"
-              DB_QUERY_JSON: '{"sslmode":"require"}'
-              HASHEOUS_API_ENABLED: "true"
-              OIDC_ENABLED: "true"
-              OIDC_PROVIDER: Pocket ID
-              OIDC_REDIRECT_URI: https://games.excloo.com/api/oauth/openid
-              OIDC_SERVER_APPLICATION_URL: https://id.excloo.com
-              OIDC_SERVER_METADATA_URL: https://id.excloo.com/.well-known/openid-configuration
-              PLAYMATCH_API_ENABLED: "true"
-              REDIS_HOST: localhost
-              ROMM_BASE_URL: https://games.excloo.com
-              ROMM_DB_DRIVER: postgresql
-              SCAN_TIMEOUT: "86400"
-              TZ: Australia/Sydney
               DB_PASSWD:
                 valueFrom:
                   secretKeyRef:
@@ -47,6 +32,10 @@ spec:
                   secretKeyRef:
                     key: username
                     name: romm-database
+              OIDC_REDIRECT_URI: https://app.invalid/api/oauth/openid
+              ROMM_BASE_URL: https://app.invalid
+              OIDC_SERVER_APPLICATION_URL: https://identity.invalid
+              OIDC_SERVER_METADATA_URL: https://identity.invalid/.well-known/openid-configuration
             envFrom:
               - secretRef:
                   name: romm
@@ -104,7 +93,7 @@ spec:
             args:
               - valkey-server
               - --appendonly
-              - "no"
+              - no
               - --save
               - ""
             image:
@@ -193,7 +182,7 @@ spec:
     route:
       private:
         hostnames:
-          - games.excloo.com
+          - app.invalid
         labels:
           app.kubernetes.io/name: romm
         parentRefs:
@@ -207,18 +196,9 @@ spec:
         forceRename: romm
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Game & ROM Library · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/href: https://games.excloo.com
-          gethomepage.dev/icon: romm
-          gethomepage.dev/name: RoMM
-          gethomepage.dev/siteMonitor: https://games.excloo.com
-          gethomepage.dev/weight: "-100"
+          gethomepage.dev/href: https://app.invalid
           gethomepage.dev/widget.type: romm
-          gethomepage.dev/widget.url: https://games.excloo.com
-        hostnames:
-          - games.excloo.com
+          gethomepage.dev/widget.url: https://app.invalid
         labels:
           app.kubernetes.io/name: romm
           gateway.excloo.dev/public-access: "true"

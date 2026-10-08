@@ -21,8 +21,6 @@ spec:
         strategy: Recreate
         containers:
           anisette:
-            env:
-              XDG_RUNTIME_DIR: /tmp
             image:
               pullPolicy: IfNotPresent
               repository: dadoum/anisette-v3-server
@@ -86,15 +84,7 @@ spec:
       public:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-          gethomepage.dev/description: Anisette Server · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Infrastructure
-          gethomepage.dev/href: https://anisette.excloo.com
-          gethomepage.dev/icon: si-apple-#ffffff
-          gethomepage.dev/name: Anisette
-          gethomepage.dev/siteMonitor: https://anisette.excloo.com
-        hostnames:
-          - anisette.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: anisette
           gateway.excloo.dev/public-access: "true"

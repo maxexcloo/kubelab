@@ -25,15 +25,6 @@ spec:
               pullPolicy: IfNotPresent
               repository: ghcr.io/viren070/aiostreams
               tag: v2.35.9@sha256:a749e0c52563b3d8fd7ac0ea829212c96f900394e8968275de7932c1e59fdac6
-            env:
-              BASE_URL: https://aiostreams.excloo.com
-              DATABASE_URI: sqlite://./data/db.sqlite
-              FEATURED_TEMPLATE_IDS: tamtaro.complete,Vidhin05.english-template
-              PORT: "30375"
-              SEL_SYNC_ACCESS: all
-              TEMPLATE_REFRESH_INTERVAL: "0"
-              TEMPLATE_URLS: '["https://raw.githubusercontent.com/Tam-Taro/SEL-Filtering-and-Sorting/3d88238868dd2d2df65dc65bca6f9180e1898a4c/Tamtaro-All-Templates-for-AIOStreams.json", "https://raw.githubusercontent.com/Vidhin05/Releases-Regex/b75a607fbb96fee63a44c30f403d1e6399d9c8fe/all-templates.json"]'
-              WHITELISTED_SYNC_REFRESH_INTERVAL: "3600"
             envFrom:
               - secretRef:
                   name: aiostreams
@@ -71,6 +62,8 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              BASE_URL: https://app.invalid
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
@@ -96,15 +89,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Stremio Aggregator · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/href: https://aiostreams.excloo.com
-          gethomepage.dev/icon: sh-aiostreams
-          gethomepage.dev/name: AIOStreams
-          gethomepage.dev/siteMonitor: https://aiostreams.excloo.com/api/v1/health
-        hostnames:
-          - aiostreams.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: aiostreams
         parentRefs:

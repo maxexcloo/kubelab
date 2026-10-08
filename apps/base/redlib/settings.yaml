@@ -12,7 +12,6 @@ spec:
             env:
               REDLIB_DEFAULT_REMOVE_DEFAULT_FEEDS: on
               REDLIB_DEFAULT_USE_HLS: on
-              REDLIB_FULL_URL: https://reddit.excloo.com
               REDLIB_ROBOTS_DISABLE_INDEXING: on
     subscriptions:
       - anime_titties
@@ -117,3 +116,15 @@ spec:
       - wled
       - zfs
       - zigbee
+    route:
+      public:
+        hostnames:
+          - reddit.excloo.com
+        annotations:
+          gethomepage.dev/description: Reddit Frontend
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/headers: '{"x-gatus-token":{"name":"redlib","key":"monitoring-token"}}'
+          gethomepage.dev/group: Applications
+          gethomepage.dev/icon: redlib
+          gethomepage.dev/name: Redlib

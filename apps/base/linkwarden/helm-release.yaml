@@ -25,20 +25,6 @@ spec:
               pullPolicy: IfNotPresent
               repository: ghcr.io/linkwarden/linkwarden
               tag: v2.16.3@sha256:0664c28a039bda8ffa6663389e8536b2fc717219e329f85b83faca7efed3b144
-            env:
-              BASE_URL: https://links.excloo.com
-              EMAIL_FROM: linkwarden@excloo.dev
-              KEYCLOAK_CUSTOM_NAME: Pocket ID
-              KEYCLOAK_ISSUER: https://id.excloo.com
-              MEILI_HOST: http://linkwarden-meilisearch:7700
-              NEXTAUTH_INTERNAL_URL: http://localhost:3000/api/v1/auth
-              NEXTAUTH_URL: https://links.excloo.com/api/v1/auth
-              NEXT_PUBLIC_EMAIL_PROVIDER: "true"
-              NEXT_PUBLIC_KEYCLOAK_ENABLED: "true"
-              OPENROUTER_MODEL: openrouter/auto
-              PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
-              PORT: "3000"
-              TZ: Australia/Sydney
             envFrom:
               - secretRef:
                   name: linkwarden
@@ -71,6 +57,10 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              BASE_URL: https://app.invalid
+              NEXTAUTH_URL: https://app.invalid/api/v1/auth
+              KEYCLOAK_ISSUER: https://identity.invalid
       meilisearch:
         strategy: Recreate
         containers:
@@ -80,11 +70,6 @@ spec:
               repository: docker.io/getmeili/meilisearch
               tag: v1.54.3@sha256:e68913ab7d6f5b159529e472cfd362ce3c741fafd3c127961b2142abbe41b3c9
             env:
-              MEILI_HTTP_ADDR: 0.0.0.0:7700
-              MEILI_NO_ANALYTICS: "true"
-              MEILI_SERVER_PROVIDER: docker
-              MEILI_UPGRADE_DB: "true"
-              TZ: Australia/Sydney
               MEILI_MASTER_KEY:
                 valueFrom:
                   secretKeyRef:
@@ -157,7 +142,7 @@ spec:
     route:
       private:
         hostnames:
-          - links.excloo.com
+          - app.invalid
           - linkwarden.mbk.excloo.dev
         labels:
           app.kubernetes.io/name: linkwarden
@@ -171,20 +156,11 @@ spec:
       public:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: Bookmark Manager · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://links.excloo.com
-          gethomepage.dev/icon: linkwarden
-          gethomepage.dev/name: Linkwarden
+          gethomepage.dev/href: https://app.invalid
           gethomepage.dev/pod-selector: app.kubernetes.io/name=linkwarden,app.kubernetes.io/controller=linkwarden
-          gethomepage.dev/siteMonitor: https://links.excloo.com
-          gethomepage.dev/weight: "-100"
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_LINKWARDEN_KEY}}" }}'
           gethomepage.dev/widget.type: linkwarden
-          gethomepage.dev/widget.url: https://links.excloo.com
-        hostnames:
-          - links.excloo.com
+          gethomepage.dev/widget.url: https://app.invalid
         labels:
           app.kubernetes.io/name: linkwarden
           gateway.excloo.dev/public-access: "true"

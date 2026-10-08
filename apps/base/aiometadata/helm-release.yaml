@@ -25,12 +25,6 @@ spec:
               pullPolicy: IfNotPresent
               repository: ghcr.io/cedya77/aiometadata
               tag: 3.4.1@sha256:9bff687d7f213e401475951cb0be882eeec45d919e0659a2a7dc58d9b329c67e
-            env:
-              DATABASE_URI: sqlite://addon/data/db.sqlite
-              ENABLE_CACHE_WARMING: "false"
-              HOST_NAME: https://aiometadata.excloo.com
-              MAL_WARMUP_ENABLED: "false"
-              REDIS_URL: redis://localhost:6379
             envFrom:
               - secretRef:
                   name: aiometadata
@@ -68,6 +62,8 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              HOST_NAME: https://app.invalid
           redis:
             image:
               pullPolicy: IfNotPresent
@@ -76,7 +72,7 @@ spec:
             args:
               - redis-server
               - --appendonly
-              - "no"
+              - no
               - --save
               - ""
               - --maxmemory
@@ -139,15 +135,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Stremio Metadata · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/href: https://aiometadata.excloo.com
-          gethomepage.dev/icon: sh-aiometadata
-          gethomepage.dev/name: AIOMetadata
-          gethomepage.dev/siteMonitor: https://aiometadata.excloo.com
-        hostnames:
-          - aiometadata.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: aiometadata
         parentRefs:

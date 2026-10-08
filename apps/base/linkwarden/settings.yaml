@@ -1,0 +1,42 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: linkwarden
+  namespace: linkwarden
+spec:
+  values:
+    route:
+      public:
+        hostnames:
+          - links.excloo.com
+        annotations:
+          gethomepage.dev/description: Bookmark Manager
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Applications
+          gethomepage.dev/icon: linkwarden
+          gethomepage.dev/name: Linkwarden
+    controllers:
+      linkwarden:
+        containers:
+          linkwarden:
+            env:
+              EMAIL_FROM: linkwarden@excloo.dev
+              KEYCLOAK_CUSTOM_NAME: Pocket ID
+              MEILI_HOST: http://linkwarden-meilisearch:7700
+              NEXTAUTH_INTERNAL_URL: http://localhost:3000/api/v1/auth
+              NEXT_PUBLIC_EMAIL_PROVIDER: "true"
+              NEXT_PUBLIC_KEYCLOAK_ENABLED: "true"
+              OPENROUTER_MODEL: openrouter/auto
+              PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+              PORT: "3000"
+              TZ: Australia/Sydney
+      meilisearch:
+        containers:
+          meilisearch:
+            env:
+              MEILI_HTTP_ADDR: 0.0.0.0:7700
+              MEILI_NO_ANALYTICS: "true"
+              MEILI_SERVER_PROVIDER: docker
+              MEILI_UPGRADE_DB: "true"
+              TZ: Australia/Sydney

@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: comfy-control
+  namespace: comfy-control
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - comfy-control.excloo.com
+        annotations:
+          gethomepage.dev/description: ComfyUI Control & Proxy
+          gethomepage.dev/enabled: "true"
+          monitoring.excloo.dev/enabled: "true"
+          gethomepage.dev/group: Artificial Intelligence
+          gethomepage.dev/icon: comfyui
+          gethomepage.dev/name: Comfy Control
+    controllers:
+      comfy-control:
+        containers:
+          comfy-control:
+            env:
+              CLIPROXY_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+              CONTROL_DATABASE: /data/comfy-control.db
+              HOME: /tmp
+              PYTHONDONTWRITEBYTECODE: "1"
+              TZ: Australia/Sydney
+              WORKER_IMAGE: ghcr.io/maxexcloo/comfy-control:sha-2809207-worker@sha256:1580e7e5cbf3f0766212f21ae7a7a1dede7bdc028297cd53a10fe170a892c469

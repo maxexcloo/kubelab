@@ -4,3 +4,34 @@ resources:
   - helm-release.yaml
   - private-dns.yaml
   - resources.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: larapaper
+      namespace: larapaper
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: larapaper
+          namespace: larapaper
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: HelmRelease
+          name: larapaper
+          namespace: larapaper
+        fieldPaths:
+          - spec.values.route.private.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: larapaper
+          namespace: larapaper
+        fieldPaths:
+          - spec.values.controllers.larapaper.containers.larapaper.env.APP_URL
+          - spec.values.route.public.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

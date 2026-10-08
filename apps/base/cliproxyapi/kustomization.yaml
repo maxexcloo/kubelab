@@ -4,3 +4,27 @@ resources:
   - helm-release.yaml
   - private-dns.yaml
   - resources.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: cliproxyapi
+      namespace: cliproxyapi
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: cliproxyapi
+          namespace: cliproxyapi
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: HelmRelease
+          name: cliproxyapi
+          namespace: cliproxyapi
+        fieldPaths:
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

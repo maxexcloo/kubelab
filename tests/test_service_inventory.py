@@ -64,6 +64,19 @@ class ServiceInventoryTests(unittest.TestCase):
             )
             self.assertEqual(log.read_text().splitlines(), builds)
 
+            # Dashboard visibility must not change external monitoring membership.
+            original_inventory = subprocess.check_output(
+                ["scripts/render_service_inventory.sh", "--manifest-directory", str(manifests)],
+                cwd=ROOT, env=env,
+            )
+            for path in manifests.rglob("*.yaml"):
+                subprocess.run(["yq", "-i", '(.. | select(tag == "!!map" and has("gethomepage.dev/enabled")))."gethomepage.dev/enabled" = "false"', str(path)], check=True)
+            hidden_inventory = subprocess.check_output(
+                ["scripts/render_service_inventory.sh", "--manifest-directory", str(manifests)],
+                cwd=ROOT, env=env,
+            )
+            self.assertEqual(json.loads(original_inventory), json.loads(hidden_inventory))
+
             # A broken access label in the snapshot must still fail validation.
             source = manifests / "apps/overlays/mbk.yaml"
             subprocess.run(

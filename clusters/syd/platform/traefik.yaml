@@ -33,7 +33,8 @@ spec:
       additionalServices:
         direct:
           spec:
-            externalIPs: [10.20.0.4]
+            externalIPs:
+              - 10.20.0.4
             type: ClusterIP
       annotations:
         tailscale.com/expose: "true"

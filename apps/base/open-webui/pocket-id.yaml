@@ -5,9 +5,10 @@ metadata:
   namespace: open-webui
 spec:
   client:
-    callbackURLs: [https://chat.excloo.com/oauth/oidc/callback]
+    callbackURLs:
+      - https://app.invalid/oauth/oidc/callback
     description: AI Chat
     id: open-webui-au-truenas
-    launchURL: https://chat.excloo.com
+    launchURL: https://app.invalid
     name: Open WebUI
     pkceEnabled: true

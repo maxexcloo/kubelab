@@ -3,3 +3,21 @@ kind: Kustomization
 resources:
   - helm-release.yaml
   - resources.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: anisette
+      namespace: anisette
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+          name: anisette
+          namespace: anisette
+        fieldPaths:
+          - spec.values.route.public.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

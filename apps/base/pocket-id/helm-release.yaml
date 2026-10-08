@@ -21,24 +21,6 @@ spec:
         strategy: Recreate
         containers:
           pocket-id:
-            env:
-              ALLOW_OWN_ACCOUNT_EDIT: "true"
-              ANALYTICS_DISABLED: "true"
-              APP_NAME: Pocket ID
-              APP_URL: https://id.excloo.com
-              EMAILS_VERIFIED: "true"
-              FILE_BACKEND: database
-              REQUIRE_USER_EMAIL: "true"
-              SMTP_FROM: pocket-id@excloo.dev
-              SMTP_HOST: smtp.resend.com
-              SMTP_PORT: "465"
-              SMTP_TLS: tls
-              SMTP_USER: resend
-              TRUST_PROXY: "true"
-              UI_CONFIG_DISABLED: "true"
-              VERSION_CHECK_DISABLED: "true"
-              WEBAUTHN_ALLOW_SYNCED_PASSKEYS: "true"
-              WEBAUTHN_USER_VERIFICATION: required
             envFrom:
               - secretRef:
                   name: pocket-id
@@ -95,6 +77,8 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              APP_URL: https://app.invalid
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
@@ -113,7 +97,7 @@ spec:
     route:
       private:
         hostnames:
-          - id.excloo.com
+          - app.invalid
         labels:
           app.kubernetes.io/name: pocket-id
         parentRefs:
@@ -127,21 +111,15 @@ spec:
         forceRename: pocket-id
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: OIDC Provider · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Infrastructure
-          gethomepage.dev/href: https://id.excloo.com
-          gethomepage.dev/icon: pocket-id
-          gethomepage.dev/name: Pocket ID
-          gethomepage.dev/siteMonitor: https://id.excloo.com
-        hostnames:
-          - id.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: pocket-id
           gateway.excloo.dev/public-access: "true"
         parentRefs:
           - name: public-tunnel
             namespace: networking
+        hostnames:
+          - identity.invalid
     service:
       pocket-id:
         controller: pocket-id

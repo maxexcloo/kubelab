@@ -4,4 +4,4 @@ metadata:
   name: comfy-control
   namespace: comfy-control
 spec:
-  hostname: comfy-control.excloo.com
+  hostname: app.invalid

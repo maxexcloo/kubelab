@@ -21,12 +21,6 @@ spec:
         strategy: Recreate
         containers:
           bichon:
-            env:
-              BICHON_CORS_ORIGINS: https://bichon.excloo.com
-              BICHON_HTTP_PORT: "15630"
-              BICHON_PUBLIC_URL: https://bichon.excloo.com
-              BICHON_ROOT_DIR: /data/bichon-data
-              TZ: Australia/Sydney
             envFrom:
               - secretRef:
                   name: bichon
@@ -74,6 +68,9 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              BICHON_CORS_ORIGINS: https://app.invalid
+              BICHON_PUBLIC_URL: https://app.invalid
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
@@ -99,15 +96,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Email Archiving · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Operations
-          gethomepage.dev/href: https://bichon.excloo.com
-          gethomepage.dev/icon: sh-bichon
-          gethomepage.dev/name: Bichon
-          gethomepage.dev/siteMonitor: https://bichon.excloo.com
-        hostnames:
-          - bichon.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: bichon
         parentRefs:

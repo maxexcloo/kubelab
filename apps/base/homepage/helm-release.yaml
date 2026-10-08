@@ -20,25 +20,6 @@ spec:
       homepage:
         containers:
           homepage:
-            env:
-              HOMEPAGE_ALLOWED_HOSTS: home.excloo.com,homepage.mbk.excloo.dev
-              HOMEPAGE_FILE_BESZEL_PASSWORD: /secrets/beszel-password
-              HOMEPAGE_FILE_BESZEL_USERNAME: /secrets/beszel-username
-              HOMEPAGE_FILE_CLOUDFLARE_KEY: /secrets/cloudflare-key
-              HOMEPAGE_FILE_GRAFANA_MBK_PASSWORD: /secrets/grafana-mbk-password
-              HOMEPAGE_FILE_GRAFANA_MBK_USERNAME: /secrets/grafana-mbk-username
-              HOMEPAGE_FILE_GRAFANA_SYD_PASSWORD: /secrets/grafana-syd-password
-              HOMEPAGE_FILE_GRAFANA_SYD_USERNAME: /secrets/grafana-syd-username
-              HOMEPAGE_FILE_HOME_ASSISTANT_KEY: /secrets/home-assistant-key
-              HOMEPAGE_FILE_IMMICH_KEY: /secrets/immich-key
-              HOMEPAGE_FILE_LINKWARDEN_KEY: /secrets/linkwarden-key
-              HOMEPAGE_FILE_MINIFLUX_KEY: /secrets/miniflux-key
-              HOMEPAGE_FILE_SYNCTHING_KEY: /secrets/syncthing-key
-              HOMEPAGE_FILE_TAILSCALE_KEY: /secrets/tailscale-key
-              HOMEPAGE_FILE_TRUENAS_KEY: /secrets/truenas-key
-              HOMEPAGE_FILE_UNIFI_KEY: /secrets/unifi-key
-              PGID: "1000"
-              PUID: "1000"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/gethomepage/homepage
@@ -88,6 +69,23 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              HOMEPAGE_ALLOWED_HOSTS: app.invalid,homepage.mbk.excloo.dev
+              HOMEPAGE_FILE_BESZEL_PASSWORD: /secrets/beszel-password
+              HOMEPAGE_FILE_BESZEL_USERNAME: /secrets/beszel-username
+              HOMEPAGE_FILE_CLOUDFLARE_KEY: /secrets/cloudflare-key
+              HOMEPAGE_FILE_GRAFANA_MBK_PASSWORD: /secrets/grafana-mbk-password
+              HOMEPAGE_FILE_GRAFANA_MBK_USERNAME: /secrets/grafana-mbk-username
+              HOMEPAGE_FILE_GRAFANA_SYD_PASSWORD: /secrets/grafana-syd-password
+              HOMEPAGE_FILE_GRAFANA_SYD_USERNAME: /secrets/grafana-syd-username
+              HOMEPAGE_FILE_HOME_ASSISTANT_KEY: /secrets/home-assistant-key
+              HOMEPAGE_FILE_IMMICH_KEY: /secrets/immich-key
+              HOMEPAGE_FILE_LINKWARDEN_KEY: /secrets/linkwarden-key
+              HOMEPAGE_FILE_MINIFLUX_KEY: /secrets/miniflux-key
+              HOMEPAGE_FILE_SYNCTHING_KEY: /secrets/syncthing-key
+              HOMEPAGE_FILE_TAILSCALE_KEY: /secrets/tailscale-key
+              HOMEPAGE_FILE_TRUENAS_KEY: /secrets/truenas-key
+              HOMEPAGE_FILE_UNIFI_KEY: /secrets/unifi-key
         initContainers:
           bootstrap:
             command:
@@ -226,16 +224,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Application Dashboard · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://home.excloo.com
-          gethomepage.dev/icon: homepage
-          gethomepage.dev/name: Homepage
-          gethomepage.dev/siteMonitor: https://home.excloo.com
-        hostnames:
-          - home.excloo.com
-          - homepage.mbk.excloo.dev
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: homepage
         parentRefs:

@@ -21,13 +21,6 @@ spec:
         strategy: Recreate
         containers:
           larapaper:
-            env:
-              APP_TIMEZONE: Australia/Sydney
-              APP_URL: https://larapaper.excloo.com
-              DB_DATABASE: database/storage/database.sqlite
-              FORCE_HTTPS: "1"
-              PHP_OPCACHE_ENABLE: "1"
-              REGISTRATION_ENABLED: "0"
             envFrom:
               - secretRef:
                   name: larapaper
@@ -66,6 +59,8 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              APP_URL: https://app.invalid
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:
@@ -96,7 +91,7 @@ spec:
     route:
       private:
         hostnames:
-          - larapaper.excloo.com
+          - app.invalid
         labels:
           app.kubernetes.io/name: larapaper
         parentRefs:
@@ -110,15 +105,7 @@ spec:
         forceRename: larapaper
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-          gethomepage.dev/description: TRMNL Server · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://larapaper.excloo.com
-          gethomepage.dev/icon: sh-trmnl
-          gethomepage.dev/name: LaraPaper
-          gethomepage.dev/siteMonitor: https://larapaper.excloo.com
-        hostnames:
-          - larapaper.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: larapaper
           gateway.excloo.dev/public-access: "true"

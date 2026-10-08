@@ -28,7 +28,7 @@ spec:
                   - dnsName: placeholder.excloo.com
                     recordTTL: 300
                     recordType: CNAME
-                    targets: [private.mbk.excloo.dev]
+                    targets: [placeholder.invalid]
                     providerSpecific:
                       - name: cloudflare/proxied
                         value: "false"

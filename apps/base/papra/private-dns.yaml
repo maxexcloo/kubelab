@@ -4,4 +4,4 @@ metadata:
   name: papra
   namespace: papra
 spec:
-  hostname: papra.excloo.com
+  hostname: app.invalid

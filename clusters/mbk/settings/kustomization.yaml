@@ -1,0 +1,106 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+components:
+  - ../../../platform/settings
+resources:
+  - settings.yaml
+replacements:
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-mbk
+      fieldPath: data.private_dns_host
+    targets:
+      - select:
+          kind: ConfigMap
+          name: cluster-settings-mbk
+        fieldPaths:
+          - data.private_dns_lookup
+        options:
+          delimiter: name=
+          index: 1
+      - select:
+          kind: CompositeResourceDefinition
+          name: privatednsrecords.automation.excloo.dev
+        fieldPaths:
+          - spec.versions.0.schema.openAPIV3Schema.properties.spec.properties.target.default
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-mbk
+      fieldPath: data.private_dns_lookup
+    targets:
+      - select:
+          kind: Request
+          name: private-dns-target-ipv[46]
+        fieldPaths:
+          - spec.forProvider.payload.baseUrl
+        options:
+          delimiter: "&"
+          index: 0
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-mbk
+      fieldPath: data.grafana_host
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: grafana
+        fieldPaths:
+          - spec.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: victoria-metrics-k8s-stack
+        fieldPaths:
+          - spec.values.grafana.[grafana.ini].server.domain
+      - select:
+          kind: HelmRelease
+          name: victoria-metrics-k8s-stack
+        fieldPaths:
+          - spec.values.grafana.[grafana.ini].server.root_url
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PrivateDNSRecord
+          name: grafana
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: grafana
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-mbk
+      fieldPath: data.nfs_server
+    targets:
+      - select:
+          kind: PersistentVolume
+          name: .*
+        fieldPaths:
+          - spec.nfs.server
+      - select:
+          kind: HelmRelease
+          name: nfs-subdir-external-provisioner
+        fieldPaths:
+          - spec.values.nfs.server
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.identity_host
+    targets:
+      - select:
+          kind: HelmRelease
+          name: victoria-metrics-k8s-stack
+          namespace: observability
+        fieldPaths:
+          - spec.values.grafana.[grafana.ini].[auth.generic_oauth].api_url
+          - spec.values.grafana.[grafana.ini].[auth.generic_oauth].auth_url
+          - spec.values.grafana.[grafana.ini].[auth.generic_oauth].token_url
+        options:
+          delimiter: /
+          index: 2

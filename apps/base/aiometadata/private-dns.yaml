@@ -4,4 +4,4 @@ metadata:
   name: aiometadata
   namespace: aiometadata
 spec:
-  hostname: aiometadata.excloo.com
+  hostname: app.invalid

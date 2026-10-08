@@ -64,16 +64,6 @@ yq eval -N -o=json -I=0 '
   }
 ' "${manifest_files[@]}" | jq -s '.' >"${pocket_id_file}"
 
-# Match Homepage's native weight-then-name ordering in every cluster.
-CLUSTER='' yq -N -o=json -I=0 --from-file apps/base/homepage/service_routes.yq "${manifest_files[@]}" |
-  jq -s -e '
-    map(select(.annotations."gethomepage.dev/enabled" == "true")) |
-    map(select(
-      (.annotations."gethomepage.dev/weight" // "0") !=
-      (if (.annotations | keys | any(test("^gethomepage\\.dev/widgets?\\."))) then "-100" else "0" end)
-    ) | .source) |
-    if length == 0 then true else error("Homepage widget ordering: " + join(", ")) end
-  ' >/dev/null
 
 jq -e \
   --slurpfile namespaces "${namespace_file}" \
@@ -85,9 +75,8 @@ jq -e \
     def tunnel_route:
       .parentRefs | any(. == "public-tunnel");
     def missing_required:
-      [.description, .group, .href, .icon, .monitor, .name] | any(. == "");
+      [.monitor, .name] | any(. == "");
     def invalid_url:
-      (.href | test("^https?://[^[:space:]]+$") | not) or
       (.monitor | test("^https?://[^[:space:]]+$") | not);
     def url_hostname:
       try capture("^https?://(?<hostname>[^/:]+)").hostname catch "";
@@ -135,7 +124,7 @@ jq -e \
     ($inventory | map(select(invalid_url)) | map(.source)) as $invalid |
     (
       $inventory |
-      map(select((.href | url_hostname) as $hostname | (.hostnames | index($hostname)) == null)) |
+      map(select((.monitor | url_hostname) as $hostname | (.hostnames | index($hostname)) == null)) |
       map(.source)
     ) as $hostname_mismatches |
     (

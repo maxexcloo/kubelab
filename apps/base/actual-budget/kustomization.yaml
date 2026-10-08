@@ -5,3 +5,38 @@ resources:
   - pocket-id.yaml
   - private-dns.yaml
   - resources.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: actual-budget
+      namespace: actual-budget
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: actual-budget
+          namespace: actual-budget
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: actual-budget
+          namespace: actual-budget
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: actual-budget
+          namespace: actual-budget
+        fieldPaths:
+          - spec.values.controllers.actual-budget.containers.actual-budget.env.ACTUAL_OPENID_SERVER_HOSTNAME
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

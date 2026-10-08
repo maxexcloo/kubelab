@@ -21,13 +21,6 @@ spec:
         strategy: Recreate
         containers:
           comfy-control:
-            env:
-              CLIPROXY_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-              CONTROL_DATABASE: /data/comfy-control.db
-              HOME: /tmp
-              PYTHONDONTWRITEBYTECODE: "1"
-              TZ: Australia/Sydney
-              WORKER_IMAGE: ghcr.io/maxexcloo/comfy-control:sha-2809207-worker@sha256:1580e7e5cbf3f0766212f21ae7a7a1dede7bdc028297cd53a10fe170a892c469
             envFrom:
               - secretRef:
                   name: comfy-control
@@ -100,15 +93,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: ComfyUI Control & Proxy · ${HOMEPAGE_LOCATION}
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Artificial Intelligence
-          gethomepage.dev/href: https://comfy-control.excloo.com
-          gethomepage.dev/icon: comfyui
-          gethomepage.dev/name: Comfy Control
-          gethomepage.dev/siteMonitor: https://comfy-control.excloo.com
-        hostnames:
-          - comfy-control.excloo.com
+          gethomepage.dev/href: https://app.invalid
         labels:
           app.kubernetes.io/name: comfy-control
         parentRefs:

@@ -6,3 +6,34 @@ resources:
   - helm-release.yaml
   - private-dns.yaml
   - resources.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: pocket-id
+      namespace: pocket-id
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: pocket-id
+          namespace: pocket-id
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: HelmRelease
+          name: pocket-id
+          namespace: pocket-id
+        fieldPaths:
+          - spec.values.route.private.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: pocket-id
+          namespace: pocket-id
+        fieldPaths:
+          - spec.values.controllers.pocket-id.containers.pocket-id.env.APP_URL
+          - spec.values.route.public.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

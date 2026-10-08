@@ -52,7 +52,14 @@ mise run check
 ### Application Changes
 
 Keep Helm releases and supporting resources in `apps/base/<application>` and
-include them through `apps/overlays/<cluster>`. Keep differences in overlays;
+include them through `apps/overlays/<cluster>`. Each app’s `settings.yaml` is a native
+HelmRelease patch containing its hostname, presentation and editable environment
+settings. Homepage uses `release-settings.yaml` because its own application
+already calls its layout file `settings.yaml`. Deployment wiring and derived
+URLs stay in `helm-release.yaml`. Kustomize replacements carry the canonical
+hostname into routes, app URLs, DNS and identity callbacks; `app.invalid` marks
+replacement targets, not another setting to edit. Standalone routes keep their
+canonical hostname in `route.yaml` or their cluster route file. Keep differences in overlays;
 do not copy application bases. Larger apps separate secrets and storage into
 `external-secrets.yaml` and `storage.yaml`. Keep substantial app settings in their
 native configuration file beside the app; keep small environment blocks inline.
@@ -203,24 +210,14 @@ route discovery is disabled to prevent duplicates; local cards retain native
 use URL health checks; Headlamp provides live Pod inspection. Git describes
 desired placement, so cards can briefly differ while Flux reconciles.
 
-Services appear in their category on Services and under their inventory host on
-Servers. Home Assistant and its add-ons use Smart Home; Infrastructure also
-appears on Services. Host groups use canonical inventory names such as
-`mbk-kimbap` and `syd-hsp`. Only machines with a `type` participate in host
-discovery, matching Homelab's Tailscale tagging rule; untyped personal devices
-are excluded. Cards retain product names and icons. Beszel subtitles read
-`System Monitoring`. Widget cards come first, then names sort alphabetically;
-annotated widgets use `gethomepage.dev/weight: "-100"`.
-
-Cluster tools that belong only under their host declare
-`gethomepage.dev/group: Servers`. The renderer resolves all Kubernetes services'
-hosts from Homelab's `cluster` assignment. Each cluster currently has one
-inventory node; missing or ambiguous mappings fail the refresh and preserve the
-previous configuration. Category subtitles end with the location: `MBK` or `SYD`
-for cluster apps, an inventory display name such as `HASS (MBK)` for machine
-services, and `Fly` for Gatus. Server copies omit the location. Existing cluster suffixes in annotations are normalised
-by the renderer. A host's dedicated monitoring card takes precedence over a
-same-named app copy, so Beszel appears once per host with its native host widget.
+Services appear in their category on Services and under `Cluster: MBK` or
+`Cluster: SYD` on Servers. Machine services remain under their inventory host.
+Cluster groups describe ownership, not Pod placement, and support any node count.
+Cluster tools with `gethomepage.dev/group: Servers` appear only in their cluster
+group. Cluster tunnel widgets belong to the cluster; host monitoring belongs to
+the machine. Only typed inventory machines receive host cards.
+Category subtitles include location; server copies omit it. Widget cards come
+first, followed by alphabetical names.
 
 Homepage uses translucent rounded cards and enlarged system UI text, with native
 widget spacing and card heights. HTTP response times appear in milliseconds;
@@ -327,6 +324,15 @@ tunnel credentials and DNS for services outside Kubernetes.
 | Internal      | `private`       | Cluster Tailscale wildcard    | None             |
 | Tunnel public | `public-tunnel` | `tunnel.<cluster>.excloo.dev` | Required         |
 
+Cluster values live in `clusters/<cluster>/settings/settings.yaml`; shared site
+settings live in `platform/settings/settings.yaml`. Native Kustomize components
+apply them to each reconciliation boundary. These ConfigMaps are marked local
+configuration and are not deployed. The NFS endpoint is an explicit storage-network
+contract; it must match Homelab’s storage interface, not its management address.
+Pocket ID’s hostname is the site-wide `identity_host` setting because both
+apps and platform consumers use it. Its app settings contain its other preferences. Control D profile selection, private gateway targets and Grafana hostnames no
+longer live as environment-specific defaults inside controller implementations.
+
 Public namespaces and HTTPRoutes require `gateway.excloo.dev/public-access: "true"`.
 Tunnel routes also require
 `external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"`. Private routes are
@@ -377,7 +383,8 @@ renewals. DNS-01 follows `homelab`'s CNAME delegation and uses public resolvers
 for self-checks.
 
 `scripts/render_service_inventory.sh` emits normalised route metadata as JSON;
-`--include-static` adds Homepage's external monitored services.
+Gatus reads machine-service checks directly from Homelab; dashboard configuration
+is not a monitoring input.
 After a validated push to `main`, CI dispatches `flylab` with that commit
 SHA to refresh Gatus. Store a GitHub token in the repository Actions secret
 `HOMELAB_FLY_DEPLOY_TOKEN`, with Actions write access only to
@@ -385,6 +392,12 @@ SHA to refresh Gatus. Store a GitHub token in the repository Actions secret
 API token. The default repository token cannot dispatch another repository's
 workflow. Install the receiving Fly workflow before enabling this dispatch.
 Rendering uses Git configuration and needs no cluster credentials.
+Routes opt into checks with `monitoring.excloo.dev/enabled: "true"`, independently
+of dashboard visibility. The primary hostname supplies the HTTPS probe URL;
+`monitoring.excloo.dev/path` changes its path. Explicit header Secret references
+use `monitoring.excloo.dev/headers`, a JSON map from header name to namespace-local
+Secret `name` and `key`. Gatus resolves the referenced ExternalSecret through
+1Password in GitHub Actions; it no longer parses WAF expressions.
 Routes can set `monitoring.excloo.dev/alerts: "false"` to suppress external
 monitoring alerts while retaining checks. Omitting it enables alerts; other
 values are rejected.

@@ -24,3 +24,21 @@ patches:
     target:
       kind: HelmRelease
       name: openspeedtest
+replacements:
+  - source:
+      kind: HTTPRoute
+      name: openspeedtest
+      namespace: openspeedtest
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: openspeedtest
+          namespace: openspeedtest
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+components:
+  - ../../../clusters/syd/settings
