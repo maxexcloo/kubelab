@@ -21,9 +21,12 @@ body {
 .service-card {
   transition: none !important;
 }
-.service-block,
-.service-container {
+.service-block {
   background: transparent !important;
+}
+.service-container {
+  background: var(--homepage-card-bg) !important;
+  border-radius: var(--homepage-card-radius);
 }
 .service-container:empty {
   min-height: 3.25rem;
