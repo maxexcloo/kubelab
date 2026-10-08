@@ -16,7 +16,8 @@ def read_yaml(path):
 
 class AppSettingsTests(unittest.TestCase):
     def test_hostname_changes_reach_all_consumers(self):
-        for settings in sorted((ROOT / "apps/base").glob("*/settings.yaml")):
+        settings_files = sorted((ROOT / "apps/base").glob("*/*settings.yaml"))
+        for settings in settings_files:
             resource = read_yaml(settings)
             if not isinstance(resource, dict) or resource.get("kind") != "HelmRelease":
                 continue

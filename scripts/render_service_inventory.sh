@@ -3,11 +3,10 @@ set -euo pipefail
 
 all_routes=false
 clusters=()
-include_static=false
 manifest_directory=""
 
 usage() {
-  echo "Usage: $0 [--all-routes] [--include-static] [--manifest-directory directory] [cluster ...]" >&2
+  echo "Usage: $0 [--all-routes] [--manifest-directory directory] [cluster ...]" >&2
 }
 
 while (($# > 0)); do
@@ -18,9 +17,6 @@ while (($# > 0)); do
     --manifest-directory)
       manifest_directory="${2:?--manifest-directory requires a directory}"
       shift
-      ;;
-    --include-static)
-      include_static=true
       ;;
     -*)
       usage
@@ -98,35 +94,5 @@ for cluster in "${clusters[@]}"; do
       ' - | sed '/^null$/d; /^$/d' >>"${inventory_file}"
   done
 done
-
-if [[ "${include_static}" == true ]]; then
-  sh apps/base/homepage/render_services.sh \
-    apps/base/homepage/services.yaml "${temporary_directory}/services.yaml" \
-    "${HOMELAB_DIRECTORY:-}"
-  yq -o=json '.' "${temporary_directory}/services.yaml" |
-    jq -c '
-      .[] |
-      to_entries[] as $group |
-      $group.value[] |
-      to_entries[] |
-      select(.value.siteMonitor != null) |
-      {
-        cluster: null,
-        cloudflareProxied: "",
-        description: (.value.description // ""),
-        group: $group.key,
-        hostnames: [],
-        href: (.value.href // ""),
-        icon: (.value.icon // ""),
-        monitor: .value.siteMonitor,
-        name: .key,
-        namespace: null,
-        parentRefs: [],
-        publicAccess: "",
-        source: ("Homepage/services/" + $group.key + "/" + .key),
-        type: "homepage"
-      }
-    ' >>"${inventory_file}"
-fi
 
 jq -s 'sort_by(.cluster // "", .group, .name, .source)' "${inventory_file}"

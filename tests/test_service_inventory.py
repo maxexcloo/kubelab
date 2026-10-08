@@ -44,7 +44,7 @@ class ServiceInventoryTests(unittest.TestCase):
                 self.assertIn(f"build clusters/{cluster}", builds)
                 self.assertIn(f"build apps/overlays/{cluster}", builds)
 
-            for options in ([], ["--all-routes"], ["--include-static"], ["syd"]):
+            for options in ([], ["--all-routes"], ["syd"]):
                 command = ["scripts/render_service_inventory.sh", *options]
                 expected = subprocess.check_output(
                     command, cwd=ROOT,
