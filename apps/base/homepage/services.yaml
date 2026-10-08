@@ -67,7 +67,7 @@
 - Operations:
     - Gatus:
         description: Health Monitoring & Status Page • Fly
-        href: &gatus https://status.excloo.com
+        href: &gatus flylab://gatus
         icon: gatus
         siteMonitor: *gatus
         widget:

@@ -225,9 +225,16 @@ local Kubernetes cards also show Pod status. Switching native tabs mounts the
 visible widgets and fetches their data. Configuration changes trigger Homepage's
 normal automatic reload.
 
+Flylab links use `flylab://<application>` and resolve the single certificate
+hostname in that app’s `deployment.toml`; Gatus uses this source.
 External links use `homelab://<network>/<machine>/<service>` references, optionally
 followed by a path. Homelab owns hostnames, domains and ports: `management` uses
 the HTTPS management port and named services use their declared scheme and port.
+Machines with Tailscale explicitly disabled use their inventory LAN address.
+Optional `services.<name>.homepage` metadata declares a card’s `name`,
+`description`, `icon` and category `group` (default: Servers). Endpoints and host
+groups derive from the owning machine. NanoKVM and SLZB-06M use this inventory
+metadata for their HTTP consoles.
 Only declared management endpoints produce console links, and an existing
 appliance card prevents duplication. Optional Homelab `management` metadata
 supplies the panel's `name`, `description` and `icon`; without it, the link uses

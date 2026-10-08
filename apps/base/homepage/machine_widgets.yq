@@ -1,8 +1,14 @@
 .machines as $inventory |
 load(strenv(TEMPLATE)) as $groups |
 load(strenv(INFRASTRUCTURE)) as $infra |
-[$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
-  .value + {"name": .key, "group": $group} |
+(([$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
+  .value + {"name": .key, "group": $group}] +
+ [.machines | to_entries[] | .key as $network | .value | to_entries[] |
+  .key as $machine | .value | select(.type != null) |
+  (.services // {}) | to_entries[] | select(.value.homepage != null) |
+  .value.homepage + {"group": (.value.homepage.group // "Servers"),
+    "href": ("homelab://" + $network + "/" + $machine + "/" + .key)}]) |
+[.[] |
   (., (select(.group != "Servers" and (.href | test("^homelab://"))) | . + {"group": "Servers"})) |
   with(select(.href | test("^homelab://"));
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
@@ -11,7 +17,7 @@ load(strenv(INFRASTRUCTURE)) as $infra |
       (($inventory[$reference[0]][$reference[1]].hostname // $reference[1]) | split("") | .[0] |= upcase | join(""))) as $display_name |
     with(select(.group != "Servers");
       .description = (.description + " • " + $display_name + " (" + ($reference[0] | upcase) + ")")) |
-    with(select(.group == "Servers"); .group = $host))] as $existing |
+    with(select(.group == "Servers"); .group = $host))]) as $existing |
 [.machines | to_entries[] | .key as $network | .value | to_entries[] |
   .key as $name | .value as $machine |
   select($machine.type != null) |

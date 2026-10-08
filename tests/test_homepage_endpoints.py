@@ -1,6 +1,8 @@
 """Exercise Homepage's endpoint contract without fetching live inventory."""
 
 import json
+import os
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -25,9 +27,13 @@ class HomepageEndpointsTests(unittest.TestCase):
                     "key": "{{HOMEPAGE_FILE_TRUENAS_KEY}}",
                 },
                 "link": "homelab://mbk/hass/management/add-on",
+                "fly": "flylab://gatus",
+                "console": "homelab://mbk/nanokvm/console",
+                "local_console": "homelab://mbk/slzb-06m/console",
                 "other_service": "homelab://mbk/kimbap/netboot",
             }))
-            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
+            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True,
+                           env=os.environ | {"FLYLAB_DIRECTORY": str(FIXTURE.parent / "flylab")})
             result = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
             self.assertEqual(result["href"], "https://storage.mbk.example.net:8444")
             self.assertEqual(result["href"], result["siteMonitor"])
@@ -35,6 +41,9 @@ class HomepageEndpointsTests(unittest.TestCase):
             self.assertEqual(result["widget"]["key"], "{{HOMEPAGE_FILE_TRUENAS_KEY}}")
             self.assertEqual(result["link"], "https://hass.mbk.example.net/add-on")
             self.assertEqual(result["other_service"], "http://storage.mbk.example.net:31010")
+            self.assertEqual(result["fly"], "https://status.example.net")
+            self.assertEqual(result["console"], "http://nanokvm.mbk.example.net")
+            self.assertEqual(result["local_console"], "http://192.0.2.6")
             bookmarks = json.loads(subprocess.check_output([
                 "yq", "-o=json", ".", str(Path(directory) / "bookmarks.yaml")
             ]))
@@ -42,8 +51,32 @@ class HomepageEndpointsTests(unittest.TestCase):
                 "description": "Example provider", "href": "https://provider.example.com", "icon": "example"
             }]}]}])
             timestamp = output.stat().st_mtime_ns
-            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
+            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True,
+                           env=os.environ | {"FLYLAB_DIRECTORY": str(FIXTURE.parent / "flylab")})
             self.assertEqual(output.stat().st_mtime_ns, timestamp)
+
+    def test_inventory_cards_follow_metadata_and_addresses(self):
+        with tempfile.TemporaryDirectory() as directory:
+            homelab = Path(directory) / "homelab"
+            shutil.copytree(FIXTURE, homelab)
+            inventory_path = homelab / "data/machines.yaml"
+            inventory = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(inventory_path)]))
+            machine = inventory["machines"]["mbk"]["slzb-06m"]
+            machine["hostname"] = "coordinator"
+            machine["interfaces"][0]["address"] = "192.0.2.9"
+            machine["services"]["console"]["homepage"]["name"] = "Adapter Console"
+            inventory_path.write_text(json.dumps(inventory))
+            template = Path(directory) / "source.yaml"
+            template.write_text("[]\n")
+            output = Path(directory) / "services.yaml"
+            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True)
+            groups = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
+            cards = {name: entries for group in groups for name, entries in group.items()}
+            adapter = cards["mbk-coordinator"][0]["Adapter Console"]
+            self.assertEqual(adapter["href"], "http://192.0.2.9")
+            self.assertEqual(adapter["icon"], "zigbee")
+            self.assertEqual(adapter["description"], "Zigbee Ethernet Adapter")
+            self.assertEqual(cards["mbk-nanokvm"][0]["NanoKVM"]["href"], "http://nanokvm.mbk.example.net")
 
     def test_invalid_yaml_preserves_previous_configuration(self):
         with tempfile.TemporaryDirectory() as directory:

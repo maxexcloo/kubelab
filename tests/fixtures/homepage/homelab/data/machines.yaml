@@ -24,6 +24,32 @@ machines:
         syncthing:
           port: 20910
           scheme: http
+    nanokvm:
+      platform: nanokvm
+      type: appliance
+      services:
+        console:
+          port: 80
+          scheme: http
+          homepage:
+            name: NanoKVM
+            description: Remote Console & Power Control
+            icon: sipeed
+    slzb-06m:
+      platform: slzb
+      type: appliance
+      interfaces:
+        - address: 192.0.2.6
+      services:
+        console:
+          port: 80
+          scheme: http
+          homepage:
+            name: SLZB-06M
+            description: Zigbee Ethernet Adapter
+            icon: zigbee
+      tailscale:
+        enabled: false
     taco:
       cluster: mbk
       platform: talos

@@ -37,6 +37,27 @@ if [ "$(yq 'tag' "$template")" = '!!seq' ]; then
     yq --from-file "$(dirname "$0")/machine_widgets.yq" \
     "$homelab_directory/data/machines.yaml" > "$temporary_directory/services.yaml"
 fi
+# Flylab's deployment certificates own each application's public hostname.
+yq -r '.. | select(tag == "!!str") | select(test("^flylab://"))' \
+  "$temporary_directory/services.yaml" | sort -u > "$temporary_directory/fly-references"
+while IFS= read -r reference; do
+  application=${reference#flylab://}
+  case "$application" in '' | *[!a-z0-9-]*) echo "Invalid Flylab reference: $reference" >&2; exit 1 ;; esac
+  deployment="$temporary_directory/deployment.toml"
+  if [ -n "${FLYLAB_DIRECTORY:-}" ]; then
+    cp "$FLYLAB_DIRECTORY/$application/deployment.toml" "$deployment"
+  else
+    wget -q -T 30 -O "$deployment" \
+      "https://raw.githubusercontent.com/maxexcloo/flylab/main/$application/deployment.toml"
+  fi
+  yq -e -p toml -o yaml '.certificates | length == 1' "$deployment" >/dev/null
+  hostname=$(yq -e -r -p toml -o yaml '.certificates[0]' "$deployment")
+  REFERENCE="$reference" ENDPOINT="https://$hostname" yq \
+    '(.. | select(tag == "!!str" and . == strenv(REFERENCE))) = strenv(ENDPOINT)' \
+    "$temporary_directory/services.yaml" > "$temporary_directory/next.yaml"
+  mv "$temporary_directory/next.yaml" "$temporary_directory/services.yaml"
+done < "$temporary_directory/fly-references"
+
 yq -r '.. | select(tag == "!!str") | select(test("^homelab://"))' \
   "$temporary_directory/services.yaml" > "$temporary_directory/references-unsorted"
 sort -u "$temporary_directory/references-unsorted" > "$temporary_directory/references"
@@ -67,6 +88,9 @@ while IFS= read -r reference; do
   case "$port" in *[!0-9]* | '') echo "Invalid endpoint port: $reference" >&2; exit 1 ;; esac
   [ "$port" -ge 1 ] && [ "$port" -le 65535 ]
   authority="$hostname.$network.$domain"
+  if [ "$(yq '.tailscale.enabled' "$temporary_directory/machine.yaml")" = false ]; then
+    authority=$(yq -e -r '.interfaces[0].address // .private_ipv4' "$temporary_directory/machine.yaml")
+  fi
   case "$scheme:$port" in http:80 | https:443) ;; *) authority="$authority:$port" ;; esac
   REFERENCE="$reference" ENDPOINT="$scheme://$authority$suffix" yq \
     '(.. | select(tag == "!!str" and . == strenv(REFERENCE))) = strenv(ENDPOINT)' \
