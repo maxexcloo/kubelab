@@ -38,16 +38,10 @@ body {
   min-height: 3.25rem;
 }
 .service-description {
-  color: #e2e8f0;
-  font-size: 0.875rem;
   font-weight: 400;
 }
 .k8s-status > div,
 .site-monitor-status > div {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
-}
-.k8s-status > .text-emerald-500\/80,
-.site-monitor-status > .text-emerald-500\/80 {
-  color: #34d399;
 }
