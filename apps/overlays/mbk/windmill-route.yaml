@@ -4,7 +4,7 @@ metadata:
   name: windmill
   namespace: windmill
   annotations:
-    gethomepage.dev/description: Developer Platform and Workflow Engine · ${HOMEPAGE_LOCATION}
+    gethomepage.dev/description: Developer Platform & Workflow Engine · ${HOMEPAGE_LOCATION}
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Applications
     gethomepage.dev/href: https://windmill.mbk.excloo.dev
