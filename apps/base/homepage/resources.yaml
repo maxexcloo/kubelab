@@ -4,7 +4,7 @@ metadata:
   name: homepage
   namespace: homepage
   annotations:
-    onepassword.excloo.dev/defaults: '{"grafana-syd-password":"","grafana-syd-username":"","home-assistant-key":"","immich-key":"","linkwarden-key":"","miniflux-key":"","syncthing-key":"","truenas-key":"","unifi-key":""}'
+    onepassword.excloo.dev/defaults: '{"cloudflare-key":"","grafana-syd-password":"","grafana-syd-username":"","home-assistant-key":"","immich-key":"","linkwarden-key":"","miniflux-key":"","syncthing-key":"","tailscale-key":"","truenas-key":"","unifi-key":""}'
 spec:
   refreshInterval: 1h
   data:
@@ -16,6 +16,10 @@ spec:
         key: Beszel
         property: username
       secretKey: beszel-username
+    - remoteRef:
+        key: Homepage
+        property: cloudflare-key
+      secretKey: cloudflare-key
     - remoteRef:
         key: Grafana
         property: password
@@ -54,6 +58,10 @@ spec:
       secretKey: syncthing-key
     - remoteRef:
         key: Homepage
+        property: tailscale-key
+      secretKey: tailscale-key
+    - remoteRef:
+        key: Homepage
         property: truenas-key
       secretKey: truenas-key
     - remoteRef:
@@ -66,6 +74,25 @@ spec:
   target:
     creationPolicy: Owner
     name: homepage
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: homepage-infrastructure
+  namespace: homepage
+spec:
+  refreshInterval: 1h
+  data:
+    - remoteRef:
+        key: Infrastructure Inventory
+        property: notesPlain
+      secretKey: inventory.json
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword
+  target:
+    creationPolicy: Owner
+    name: homepage-infrastructure
 ---
 apiVersion: v1
 kind: Namespace

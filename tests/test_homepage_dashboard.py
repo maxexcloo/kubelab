@@ -119,6 +119,45 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertNotIn("Library", self.services())
         self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"])
 
+    def test_native_machine_widgets_use_homelab_identities(self):
+        import shutil
+
+        homelab = self.directory / "homelab"
+        shutil.copytree(HOMELAB, homelab)
+        path = homelab / "data/machines.yaml"
+        inventory = read_yaml(path)
+        inventory["machines"]["mbk"]["kimbap"]["beszel"] = True
+        inventory["machines"]["mbk"]["sensor"] = {"platform": "slzb"}
+        inventory["machines"]["mbk"]["taco"] = {"beszel": True, "cluster": "mbk", "platform": "talos"}
+        path.write_text(json.dumps(inventory))
+        identities = self.directory / "infrastructure.json"
+        identities.write_text(json.dumps({
+            "cloudflare": {"account_id": "account", "tunnels": {"kimbap": "storage-tunnel", "mbk": "cluster-tunnel"}},
+            "tailscale": {"kimbap": "storage-device", "taco": "node-device"},
+        }))
+        self.write_routes("mbk", [route("Beszel", **{
+            "widget.type": "beszel", "widget.url": "https://beszel.example.net",
+        })])
+        result = self.render(HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        services = self.services()
+        self.assertNotIn("kimbap (mbk)", services)
+        self.assertNotIn("sensor (mbk)", services)
+        self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")
+        self.assertEqual([widget["type"] for widget in services["TrueNAS"]["widgets"]],
+                         ["beszel", "tailscale", "cloudflared"])
+        node = services["taco (mbk)"]
+        self.assertEqual(node["widgets"][0]["systemId"], "mbk-taco")
+        self.assertEqual(node["widgets"][1]["deviceid"], "node-device")
+        self.assertEqual(node["widgets"][2]["tunnelid"], "cluster-tunnel")
+        self.assertEqual(node["widgets"][1]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
+        self.assertEqual(node["weight"], -100)
+        self.assertEqual(services["bento (mbk)"]["weight"], 0)
+        before = (self.output / "services.yaml").read_bytes()
+        identities.write_text("{broken json")
+        self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities)).returncode, 0)
+        self.assertEqual((self.output / "services.yaml").read_bytes(), before)
+
     def test_unchanged_refresh_and_invalid_input_preserve_files(self):
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)

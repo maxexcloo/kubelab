@@ -1,0 +1,47 @@
+load(strenv(TEMPLATE)) as $groups |
+load(strenv(INFRASTRUCTURE)) as $infra |
+[$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
+  .value + {"name": .key, "group": $group}] as $existing |
+[.machines | to_entries[] | .key as $network | .value | to_entries[] |
+  .key as $name | .value as $machine |
+  ($machine.hostname // $name) as $hostname |
+  ("homelab://" + $network + "/" + $name + "/management") as $management |
+  $infra.tailscale[$name] as $device |
+  $infra.cloudflare.tunnels[$machine.cluster // $name] as $tunnel |
+  {
+    "name": ($hostname + " (" + $network + ")"),
+    "group": "Machines",
+    "description": $machine.platform,
+    "icon": "mdi-server",
+    "reference": $management,
+    "href": ([null] + ([$tunnel] | map(select(. != null)) | map("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .)) +
+      ([$machine] | map(select(.beszel == true)) | map(strenv(HOMEPAGE_BESZEL_URL))) +
+      ([$device] | map(select(. != null)) | map("https://login.tailscale.com/admin/machines/" + .)) +
+      ([$machine] | map(select(.management_port != null)) | map($management)) | .[-1]),
+    "widgets": (
+      ([$machine] | map(select(.beszel == true and strenv(HOMEPAGE_BESZEL_URL) != "")) | map({
+        "type": "beszel", "url": strenv(HOMEPAGE_BESZEL_URL), "version": 2,
+        "systemId": ($network + "-" + $hostname),
+        "username": "{{HOMEPAGE_FILE_BESZEL_USERNAME}}",
+        "password": "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}",
+        "fields": ["status", "cpu", "memory", "network"], "hideErrors": true
+      })) +
+      ([$device] | map(select(. != null)) | map({
+        "type": "tailscale", "deviceid": ., "key": "{{HOMEPAGE_FILE_TAILSCALE_KEY}}", "hideErrors": true
+      })) +
+      ([$tunnel] | map(select(. != null)) | map({
+        "type": "cloudflared", "accountid": $infra.cloudflare.account_id, "tunnelid": .,
+        "key": "{{HOMEPAGE_FILE_CLOUDFLARE_KEY}}", "hideErrors": true
+      }))
+    )
+  } |
+  select($machine.management_port != null or (.widgets | length > 0))
+] as $machines |
+($existing | map(. as $card |
+  ($machines | map(select(.reference == $card.href)) | .[0].widgets // []) as $widgets |
+  with(select($widgets | length > 0); .widgets = ((.widgets // []) + $widgets)))) as $merged |
+($machines | map(select(.reference as $reference | $existing | any_c(.href == $reference) | not))) as $additional |
+($merged + $additional) |
+map(del(.reference) | .weight = 0 | with(select(.widget != null or (.widgets | length > 0)); .weight = -100)) |
+sort_by(.group, .weight, .name) | group_by(.group) |
+map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})

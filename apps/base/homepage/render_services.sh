@@ -39,24 +39,11 @@ fi
 domain=$(yq -e -r '.domains.infrastructure' "$homelab_directory/data/domains.yaml")
 cp "$template" "$temporary_directory/services.yaml"
 if [ "$(yq 'tag' "$template")" = '!!seq' ]; then
-  # shellcheck disable=SC2016
-  TEMPLATE="$template" yq '
-    [load(strenv(TEMPLATE)) | .. | select(tag == "!!map" and has("href")) | .href] as $existing |
-    [.machines | to_entries[] | .key as $network | .value | to_entries[] |
-      .key as $machine |
-      {"name": ($machine + " (" + $network + ")"), "type": .value.type,
-        "port": .value.management_port, "description": (.value.platform + " management"),
-        "href": ("homelab://" + $network + "/" + $machine + "/management"),
-        "icon": "mdi-server", "weight": 0}] |
-    map(select(.type != null and .port != null)) |
-    map(select(.href as $href | $existing | contains([$href]) | not)) |
-    map(.name as $name | del(.name, .port, .type) | {($name): .}) |
-    [{"Machines": .}] | map(select(.Machines | length > 0))
-  ' "$homelab_directory/data/machines.yaml" > "$temporary_directory/machines.yaml"
-  # shellcheck disable=SC2016
-  yq ea '. as $groups ireduce ([]; . + $groups)' \
-    "$temporary_directory/services.yaml" "$temporary_directory/machines.yaml" > "$temporary_directory/combined.yaml"
-  mv "$temporary_directory/combined.yaml" "$temporary_directory/services.yaml"
+  printf '{}\n' > "$temporary_directory/infrastructure.json"
+  TEMPLATE="$template" INFRASTRUCTURE="${HOMELAB_INFRASTRUCTURE_FILE:-$temporary_directory/infrastructure.json}" \
+    HOMEPAGE_BESZEL_URL="${HOMEPAGE_BESZEL_URL:-}" \
+    yq --from-file "$(dirname "$0")/machine_widgets.yq" \
+    "$homelab_directory/data/machines.yaml" > "$temporary_directory/services.yaml"
 fi
 yq -r '.. | select(tag == "!!str") | select(test("^homelab://"))' \
   "$temporary_directory/services.yaml" > "$temporary_directory/references-unsorted"

@@ -30,6 +30,7 @@ configMapGenerator:
       - render_dashboard.sh
       - render_services.sh
       - dashboard.yq
+      - machine_widgets.yq
       - service_routes.yq
 configurations:
   - name-reference.yaml

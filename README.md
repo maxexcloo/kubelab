@@ -194,10 +194,13 @@ followed by a path. Homelab owns hostnames, domains and ports: `management` uses
 the HTTPS management port and named services use their declared scheme and port.
 Machines with management endpoints receive links unless an existing card already
 covers that endpoint. Provider bookmarks come from Homelab's `data/providers.yaml`.
-Beszel's native overview covers the monitored fleet, including non-Talos hosts.
-Cloudflare and Tailscale remain provider links. Per-machine widgets for those
-providers require device or tunnel IDs, which belong in Homelab's infrastructure
-outputs rather than a second discovery implementation here.
+Homelab publishes non-secret Cloudflare account/tunnel IDs and Tailscale device
+IDs in each cluster vault's `Infrastructure Inventory` item. A separate
+ExternalSecret mounts this snapshot only into the renderer. Homelab refreshes it
+on infrastructure apply; the renderer never accesses state or discovers provider
+identities itself. Hosts marked `beszel: true` use native Beszel system-name
+lookup. Machine widgets join existing appliance cards where possible, covering
+Talos and other operating systems without duplicate cards or hardcoded IDs.
 Home Assistant add-ons with only an authenticated ingress link remain navigation
 links; ESPHome and
 Zigbee2MQTT need dedicated API endpoints before their native widgets can work.
@@ -211,19 +214,22 @@ groups are derived automatically; `settings.yaml` supplies presentation choices.
 External Secrets supplies mounted files from MBK's 1Password vault. Homepage uses
 native `HOMEPAGE_FILE_*` references, so credentials never enter generated config.
 Beszel and local Grafana reuse their existing items. Only Homepage can read
-the mounted credentials; the renderer preserves placeholders.
+the widget credentials; the renderer reads the non-secret inventory and preserves
+credential placeholders.
 Fill these fields in the `Homepage` item through each service's supported UI:
 
-| Fields                                         | Purpose                                |
-| ---------------------------------------------- | -------------------------------------- |
-| `grafana-syd-username`, `grafana-syd-password` | Sydney Grafana dashboard login         |
-| `home-assistant-key`                           | Home Assistant long-lived access token |
-| `immich-key`                                   | Immich API key                         |
-| `linkwarden-key`                               | Linkwarden access token                |
-| `miniflux-key`                                 | Miniflux API key                       |
-| `syncthing-key`                                | Syncthing API key                      |
-| `truenas-key`                                  | TrueNAS API key                        |
-| `unifi-key`                                    | UniFi API key                          |
+| Fields                                         | Purpose                                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------- |
+| `cloudflare-key`                               | API token with Cloudflare Tunnel Read permission                    |
+| `grafana-syd-username`, `grafana-syd-password` | Sydney Grafana dashboard login                                      |
+| `home-assistant-key`                           | Home Assistant long-lived access token                              |
+| `immich-key`                                   | Immich API key                                                      |
+| `linkwarden-key`                               | Linkwarden access token                                             |
+| `miniflux-key`                                 | Miniflux API key                                                    |
+| `syncthing-key`                                | Syncthing API key                                                   |
+| `tailscale-key`                                | Tailscale API token with device read access, not a registration key |
+| `truenas-key`                                  | TrueNAS API key                                                     |
+| `unifi-key`                                    | UniFi API key                                                       |
 
 Empty fields keep links usable and widget errors hidden. Secret files refresh
 hourly and Homepage reads updates without a restart. If an app's credential source changes vault, update its ExternalSecret

@@ -53,7 +53,8 @@ yq ea -p=json -o=yaml '[.] | map(select(.annotations."gethomepage.dev/enabled" =
 yq -e 'length > 0' "$temporary_directory/inventory.yaml" >/dev/null
 
 mkdir "$temporary_directory/config"
-sh "$script_directory/render_services.sh" "$source_directory/services.yaml" \
+HOMEPAGE_BESZEL_URL=$(yq -r 'map(select(.annotations."gethomepage.dev/widget.type" == "beszel")) | .[0].annotations."gethomepage.dev/widget.url" // ""' "$temporary_directory/inventory.yaml") \
+  sh "$script_directory/render_services.sh" "$source_directory/services.yaml" \
   "$temporary_directory/config/services.yaml" "${HOMELAB_DIRECTORY:-}"
 SERVICES="$temporary_directory/config/services.yaml" \
   yq --from-file "$script_directory/dashboard.yq" "$temporary_directory/inventory.yaml" \

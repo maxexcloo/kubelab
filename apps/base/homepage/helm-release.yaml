@@ -24,6 +24,7 @@ spec:
               HOMEPAGE_ALLOWED_HOSTS: home.excloo.com,homepage.mbk.excloo.dev
               HOMEPAGE_FILE_BESZEL_PASSWORD: /secrets/beszel-password
               HOMEPAGE_FILE_BESZEL_USERNAME: /secrets/beszel-username
+              HOMEPAGE_FILE_CLOUDFLARE_KEY: /secrets/cloudflare-key
               HOMEPAGE_FILE_GRAFANA_MBK_PASSWORD: /secrets/grafana-mbk-password
               HOMEPAGE_FILE_GRAFANA_MBK_USERNAME: /secrets/grafana-mbk-username
               HOMEPAGE_FILE_GRAFANA_SYD_PASSWORD: /secrets/grafana-syd-password
@@ -33,6 +34,7 @@ spec:
               HOMEPAGE_FILE_LINKWARDEN_KEY: /secrets/linkwarden-key
               HOMEPAGE_FILE_MINIFLUX_KEY: /secrets/miniflux-key
               HOMEPAGE_FILE_SYNCTHING_KEY: /secrets/syncthing-key
+              HOMEPAGE_FILE_TAILSCALE_KEY: /secrets/tailscale-key
               HOMEPAGE_FILE_TRUENAS_KEY: /secrets/truenas-key
               HOMEPAGE_FILE_UNIFI_KEY: /secrets/unifi-key
               PGID: "1000"
@@ -110,6 +112,7 @@ spec:
               - /source
               - /output
             env:
+              HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
               HOMEPAGE_CLUSTER: mbk
               KUBECTL: /tools/kubectl
             image:
@@ -190,6 +193,14 @@ spec:
           homepage:
             endpoints:
               - path: /source
+                readOnly: true
+      infrastructure:
+        name: homepage-infrastructure
+        type: secret
+        advancedMounts:
+          homepage:
+            endpoints:
+              - path: /infrastructure
                 readOnly: true
       secrets:
         name: homepage
