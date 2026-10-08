@@ -129,12 +129,6 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/component: backup
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/component: restore
-        - podSelector:
-            matchLabels:
               app.kubernetes.io/controller: pocket-id
               app.kubernetes.io/instance: pocket-id
               app.kubernetes.io/name: pocket-id
@@ -153,23 +147,6 @@ spec:
       cnpg.io/cluster: pocket-id-database
   policyTypes:
     - Ingress
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: backup
-  namespace: pocket-id
-  annotations:
-    k8s-sigs.io/nfs-directory-gid: "568"
-    k8s-sigs.io/nfs-directory-mode: "0770"
-    k8s-sigs.io/nfs-directory-uid: "568"
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 10Gi
-  storageClassName: truenas-nfs
 ---
 apiVersion: automation.excloo.dev/v1alpha1
 kind: ResendKey

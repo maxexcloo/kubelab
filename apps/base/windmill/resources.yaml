@@ -77,9 +77,6 @@ spec:
   ingress:
     - from:
         - podSelector:
-            matchLabels:
-              app.kubernetes.io/component: backup
-        - podSelector:
             matchExpressions:
               - key: app.kubernetes.io/name
                 operator: In
@@ -126,23 +123,6 @@ spec:
       app.kubernetes.io/name: windmill-extra
   policyTypes:
     - Ingress
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: backup
-  namespace: windmill
-  annotations:
-    k8s-sigs.io/nfs-directory-gid: "26"
-    k8s-sigs.io/nfs-directory-mode: "0700"
-    k8s-sigs.io/nfs-directory-uid: "26"
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: truenas-nfs
 ---
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret

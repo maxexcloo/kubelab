@@ -47,9 +47,6 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/component: backup
-        - podSelector:
-            matchLabels:
               app.kubernetes.io/name: bookorbit
       ports:
         - port: 5432

@@ -48,9 +48,6 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/component: backup
-        - podSelector:
-            matchLabels:
               app.kubernetes.io/instance: immich
               app.kubernetes.io/name: server
       ports:
