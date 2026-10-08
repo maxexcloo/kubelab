@@ -56,8 +56,10 @@ include them through `apps/overlays/<cluster>`. Keep differences in overlays;
 do not copy application bases. Larger apps separate secrets and storage into
 `external-secrets.yaml` and `storage.yaml`. Keep substantial app settings in their
 native configuration file beside the app; keep small environment blocks inline.
-Redlib uses `redlib.toml`, with a content-named ConfigMap that triggers a rollout
-when its configuration changes. Automation packages separate their API
+Redlib uses `apps/base/redlib/settings.yaml`, a native HelmRelease values patch.
+Edit its YAML subscription list and environment settings there; the chart joins
+subscriptions into Redlib’s native environment variable and Flux rolls out the
+change. No generated application config or startup adapter is required. Automation packages separate their API
 schema (`definition.yaml`) from implementation (`composition.yaml`).
 Select each cluster's external automation in
 `clusters/<cluster>/automation` and keep app-specific identity, DNS and WAF

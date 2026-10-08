@@ -7,10 +7,5 @@ resources:
   - private-redirect.yaml
   - redirect.yaml
   - resources.yaml
-configMapGenerator:
-  - name: redlib-config
-    namespace: redlib
-    files:
-      - redlib.toml
-configurations:
-  - name-reference.yaml
+patches:
+  - path: settings.yaml

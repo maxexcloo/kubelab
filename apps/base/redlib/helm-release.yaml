@@ -55,7 +55,6 @@ spec:
                 drop:
                   - ALL
           redlib:
-            workingDir: /etc/redlib
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/redlib
@@ -94,6 +93,8 @@ spec:
               capabilities:
                 drop:
                   - ALL
+            env:
+              REDLIB_DEFAULT_SUBSCRIPTIONS: '{{ join "+" .Values.subscriptions }}'
         rollingUpdate:
           maxSurge: 1
           maxUnavailable: 0
@@ -111,14 +112,6 @@ spec:
     global:
       nameOverride: redlib
     persistence:
-      config:
-        name: redlib-config
-        type: configMap
-        advancedMounts:
-          redlib:
-            redlib:
-              - path: /etc/redlib
-                readOnly: true
       controld:
         type: emptyDir
         advancedMounts:
