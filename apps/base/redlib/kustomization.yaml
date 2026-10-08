@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - certificate.yaml
   - cloudflare.yaml
   - helm-release.yaml
   - private-dns.yaml
@@ -16,6 +17,15 @@ replacements:
       namespace: redlib
       fieldPath: spec.values.route.public.hostnames.0
     targets:
+      - select:
+          kind: Certificate
+          name: redlib-www
+          namespace: networking
+        fieldPaths:
+          - spec.dnsNames.0
+        options:
+          delimiter: www.
+          index: 1
       - select:
           kind: HTTPRoute
           name: redlib-www-private

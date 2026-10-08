@@ -8,7 +8,7 @@ metadata:
 spec:
   secretName: redlib-www
   dnsNames:
-    - www.reddit.excloo.com
+    - www.app.invalid
   issuerRef:
     kind: ClusterIssuer
     name: letsencrypt-dns01
