@@ -214,8 +214,9 @@ Cluster tools that belong only under their host declare
 `gethomepage.dev/group: Servers`. The renderer resolves all Kubernetes services'
 hosts from Homelab's `cluster` assignment. Each cluster currently has one
 inventory node; missing or ambiguous mappings fail the refresh and preserve the
-previous configuration. Category subtitles use `host - description`; server
-copies omit the host. Existing cluster suffixes in annotations are normalised
+previous configuration. Category subtitles end with the location: `MBK` or `SYD`
+for cluster apps, an inventory display name such as `HASS (MBK)` for machine
+services, and `Fly` for Gatus. Server copies omit the location. Existing cluster suffixes in annotations are normalised
 by the renderer. A host's dedicated monitoring card takes precedence over a
 same-named app copy, so Beszel appears once per host with its native host widget.
 

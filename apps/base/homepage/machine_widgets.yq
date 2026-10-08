@@ -7,7 +7,10 @@ load(strenv(INFRASTRUCTURE)) as $infra |
   with(select(.href | test("^homelab://"));
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
     ($reference[0] + "-" + ($inventory[$reference[0]][$reference[1]].hostname // $reference[1])) as $host |
-    with(select(.group != "Servers"); .description = ($host + " - " + .description)) |
+    ($inventory[$reference[0]][$reference[1]].display_name //
+      (($inventory[$reference[0]][$reference[1]].hostname // $reference[1]) | split("") | .[0] |= upcase | join(""))) as $display_name |
+    with(select(.group != "Servers");
+      .description = (.description + " - " + $display_name + " (" + ($reference[0] | upcase) + ")")) |
     with(select(.group == "Servers"); .group = $host))] as $existing |
 [.machines | to_entries[] | .key as $network | .value | to_entries[] |
   .key as $name | .value as $machine |

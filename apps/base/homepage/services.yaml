@@ -76,7 +76,7 @@
           url: homelab://mbk/gateway/management
 - Operations:
     - Gatus:
-        description: Health Monitoring & Status Page
+        description: Health Monitoring & Status Page - Fly
         href: https://status.excloo.com
         icon: gatus
         siteMonitor: https://status.excloo.com
