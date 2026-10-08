@@ -64,6 +64,17 @@ yq eval -N -o=json -I=0 '
   }
 ' "${manifest_files[@]}" | jq -s '.' >"${pocket_id_file}"
 
+# Match Homepage's native weight-then-name ordering in every cluster.
+CLUSTER='' yq -N -o=json -I=0 --from-file apps/base/homepage/service_routes.yq "${manifest_files[@]}" |
+  jq -s -e '
+    map(select(.annotations."gethomepage.dev/enabled" == "true")) |
+    map(select(
+      (.annotations."gethomepage.dev/weight" // "0") !=
+      (if (.annotations | keys | any(test("^gethomepage\\.dev/widgets?\\."))) then "-100" else "0" end)
+    ) | .source) |
+    if length == 0 then true else error("Homepage widget ordering: " + join(", ")) end
+  ' >/dev/null
+
 jq -e \
   --slurpfile namespaces "${namespace_file}" \
   --slurpfile pocket_id "${pocket_id_file}" \

@@ -22,13 +22,21 @@ spec:
           homepage:
             env:
               HOMEPAGE_ALLOWED_HOSTS: home.excloo.com,homepage.mbk.excloo.dev
-              HOMEPAGE_VAR_CLUSTER: mbk
+              HOMEPAGE_FILE_BESZEL_PASSWORD: /secrets/beszel-password
+              HOMEPAGE_FILE_BESZEL_USERNAME: /secrets/beszel-username
+              HOMEPAGE_FILE_GRAFANA_MBK_PASSWORD: /secrets/grafana-mbk-password
+              HOMEPAGE_FILE_GRAFANA_MBK_USERNAME: /secrets/grafana-mbk-username
+              HOMEPAGE_FILE_GRAFANA_SYD_PASSWORD: /secrets/grafana-syd-password
+              HOMEPAGE_FILE_GRAFANA_SYD_USERNAME: /secrets/grafana-syd-username
+              HOMEPAGE_FILE_HOME_ASSISTANT_KEY: /secrets/home-assistant-key
+              HOMEPAGE_FILE_IMMICH_KEY: /secrets/immich-key
+              HOMEPAGE_FILE_LINKWARDEN_KEY: /secrets/linkwarden-key
+              HOMEPAGE_FILE_MINIFLUX_KEY: /secrets/miniflux-key
+              HOMEPAGE_FILE_SYNCTHING_KEY: /secrets/syncthing-key
+              HOMEPAGE_FILE_TRUENAS_KEY: /secrets/truenas-key
+              HOMEPAGE_FILE_UNIFI_KEY: /secrets/unifi-key
               PGID: "1000"
               PUID: "1000"
-            envFrom:
-              - secretRef:
-                  name: homepage
-                  optional: true
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/gethomepage/homepage
@@ -79,14 +87,31 @@ spec:
                 drop:
                   - ALL
         initContainers:
+          bootstrap:
+            command:
+              - /bin/cp
+              - /usr/local/bin/kubectl
+              - /tools/kubectl
+            image:
+              repository: ghcr.io/fluxcd/flux-cli
+              tag: v2.9.6
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
           endpoints:
             restartPolicy: Always
             command:
               - /bin/sh
-              - /scripts/render_services.sh
+              - /scripts/render_dashboard.sh
               - --watch
-              - /source/services.yaml
-              - /output/services.yaml
+              - /source
+              - /output
+            env:
+              HOMEPAGE_CLUSTER: mbk
+              KUBECTL: /tools/kubectl
             image:
               repository: docker.io/mikefarah/yq
               tag: 4.54.1
@@ -101,10 +126,10 @@ spec:
                     command:
                       - /bin/sh
                       - -c
-                      - test -s /output/services.yaml && test -s /output/bookmarks.yaml
+                      - test -s /output/settings.yaml
             resources:
               limits:
-                memory: 64Mi
+                memory: 256Mi
               requests:
                 cpu: 5m
                 memory: 16Mi
@@ -142,27 +167,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /app/.next/cache
-      config:
-        name: homepage
-        type: configMap
-        advancedMounts:
-          homepage:
-            homepage:
-              - path: /app/config/custom.css
-                readOnly: true
-                subPath: custom.css
-              - path: /app/config/docker.yaml
-                readOnly: true
-                subPath: docker.yaml
-              - path: /app/config/kubernetes.yaml
-                readOnly: true
-                subPath: kubernetes.yaml
-              - path: /app/config/settings.yaml
-                readOnly: true
-                subPath: settings.yaml
-              - path: /app/config/widgets.yaml
-                readOnly: true
-                subPath: widgets.yaml
       config-directory:
         type: emptyDir
         advancedMounts:
@@ -187,10 +191,27 @@ spec:
             endpoints:
               - path: /source
                 readOnly: true
+      secrets:
+        name: homepage
+        type: secret
+        advancedMounts:
+          homepage:
+            homepage:
+              - path: /secrets
+                readOnly: true
       temporary:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      tools:
+        type: emptyDir
+        advancedMounts:
+          homepage:
+            bootstrap:
+              - path: /tools
+            endpoints:
+              - path: /tools
+                readOnly: true
     route:
       private:
         annotations:

@@ -3,15 +3,10 @@ kind: Kustomization
 resources:
   - ../../base/anisette
   - ../../base/beszel-agent
-  - ../../base/homepage
   - ../../base/openspeedtest
   - ../../base/redlib
   - openspeedtest-route.yaml
 patches:
-  - path: homepage.yaml
-    target:
-      kind: HelmRelease
-      name: homepage
   - patch: |-
       - op: replace
         path: /spec/values/resources/requests/cpu

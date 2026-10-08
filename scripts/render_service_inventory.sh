@@ -62,54 +62,9 @@ for cluster in "${clusters[@]}"; do
   fi
   for target in "apps/overlays/${cluster}" "clusters/${cluster}/platform"; do
     # shellcheck disable=SC2016
-    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -r '
-        (
-          (
-            select(.kind == "HTTPRoute") |
-            {
-              "annotations": (.metadata.annotations // {}),
-              "hostnames": (.spec.hostnames // []),
-              "labels": (.metadata.labels // {}),
-              "namespace": .metadata.namespace,
-              "parentRefs": ((.spec.parentRefs // []) | map(.name)),
-              "source": ("HTTPRoute/" + .metadata.namespace + "/" + .metadata.name)
-            }
-          ),
-          (
-            select(.kind == "HelmRelease" and .spec.values.route.apiVersion == null) |
-            .metadata as $metadata |
-            (.spec.values.route // {} | to_entries[]) |
-            select(.value.enabled != false) |
-            {
-              "annotations": (.value.annotations // {}),
-              "hostnames": (.value.hostnames // []),
-              "labels": (.value.labels // {}),
-              "namespace": $metadata.namespace,
-              "parentRefs": ((.value.parentRefs // []) | map(.name)),
-              "source": (
-                "HelmRelease/" + $metadata.namespace + "/" + $metadata.name +
-                "/route/" + .key
-              )
-            }
-          ),
-          (
-            select(
-              .kind == "HelmRelease" and
-              .spec.values.route.apiVersion != null and
-              .spec.values.route.enabled != false
-            ) |
-            {
-              "annotations": (.spec.values.route.annotations // {}),
-              "hostnames": (.spec.values.route.hostnames // []),
-              "labels": (.spec.values.route.labels // {}),
-              "namespace": .metadata.namespace,
-              "parentRefs": ((.spec.values.route.parentRefs // []) | map(.name)),
-              "source": (
-                "HelmRelease/" + .metadata.namespace + "/" + .metadata.name + "/route"
-              )
-            }
-          )
-        ) |
+    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -o=json -I=0 --from-file apps/base/homepage/service_routes.yq \
+      "${manifest_directory}/${target}.yaml" |
+      ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -p=json -o=yaml -r '
         select(
           strenv(ALL_ROUTES) == "true" or
           .annotations."gethomepage.dev/enabled" == "true"
@@ -140,14 +95,13 @@ for cluster in "${clusters[@]}"; do
         } |
         select(.source != null) |
         @json
-      ' "${manifest_directory}/${target}.yaml" | sed '/^null$/d; /^$/d' >>"${inventory_file}"
+      ' - | sed '/^null$/d; /^$/d' >>"${inventory_file}"
   done
 done
 
 if [[ "${include_static}" == true ]]; then
-  yq -r '.data."services.yaml"' apps/base/homepage/config-map.yaml >"${temporary_directory}/services-source.yaml"
   sh apps/base/homepage/render_services.sh \
-    "${temporary_directory}/services-source.yaml" "${temporary_directory}/services.yaml" \
+    apps/base/homepage/services.yaml "${temporary_directory}/services.yaml" \
     "${HOMELAB_DIRECTORY:-}"
   yq -o=json '.' "${temporary_directory}/services.yaml" |
     jq -c '

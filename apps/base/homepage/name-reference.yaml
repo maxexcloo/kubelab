@@ -1,0 +1,13 @@
+nameReference:
+  - kind: ConfigMap
+    version: v1
+    fieldSpecs:
+      - kind: HelmRelease
+        group: helm.toolkit.fluxcd.io
+        path: spec/values/persistence/background/name
+      - kind: HelmRelease
+        group: helm.toolkit.fluxcd.io
+        path: spec/values/persistence/endpoint-scripts/name
+      - kind: HelmRelease
+        group: helm.toolkit.fluxcd.io
+        path: spec/values/persistence/endpoint-source/name

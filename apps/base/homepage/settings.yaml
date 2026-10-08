@@ -1,0 +1,45 @@
+cardBlur: xs
+color: slate
+disableCollapse: true
+disableIndexing: true
+headerStyle: clean
+hideVersion: true
+statusStyle: dot
+theme: dark
+title: Homepage
+background:
+  brightness: 50
+  image: /images/background.jpg
+layout:
+  Applications:
+    columns: 4
+    style: row
+    tab: Services
+  Artificial Intelligence:
+    columns: 2
+    style: row
+    tab: Services
+  Media:
+    columns: 4
+    style: row
+    tab: Services
+  Operations:
+    columns: 2
+    style: row
+    tab: Services
+  Providers:
+    columns: 2
+    style: row
+    tab: Services
+  Home Automation:
+    columns: 4
+    style: row
+    tab: Servers
+  Infrastructure:
+    columns: 2
+    style: row
+    tab: Servers
+  Machines:
+    columns: 2
+    style: row
+    tab: Servers

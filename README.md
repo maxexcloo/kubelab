@@ -170,41 +170,73 @@ undo database changes.
 `mbk` runs Actual Budget, AIOMetadata, AIOStreams, Beszel, Beszel Agent, Bichon,
 Bifrost, BookOrbit, Byparr, CLIProxyAPI, Comfy Control, Homepage, Immich,
 Larapaper, Linkwarden, Miniflux, Open WebUI, OpenSpeedTest, Papra, Pocket ID,
-RoMM, Shelfmark and Windmill. `syd` runs Anisette, Beszel Agent, Homepage,
-OpenSpeedTest and Redlib.
+RoMM, Shelfmark and Windmill. `syd` runs Anisette, Beszel Agent, OpenSpeedTest
+and Redlib.
 
 Companion caches, search services and Redlib's `ctrld` DNS proxy belong to their
 apps. Stateful or migration-owning single replicas use recreate updates;
 stateless Cloudflared and Redlib use rolling updates.
 
-Homepage's external machine URLs use `homelab://<network>/<machine>/<service>`
-references, with optional trailing paths. `management` selects the machine's
-HTTPS `management_port`; other services select `services.<name>.scheme` and
-`services.<name>.port`. The hostname and infrastructure domain also come from
-Homelab. Keep presentation and `siteMonitor` opt-ins here, and addresses and ports
-in Homelab's machine inventory.
+### Homepage
 
-`apps/base/homepage/render_services.sh` resolves these references for both Homepage
-and the static service inventory consumed by Gatus. Set `HOMELAB_DIRECTORY` to
-use a local or pinned checkout. Otherwise it downloads the public machine, domain and provider inventory
-files from a single Homelab commit. A native sidecar runs the same script every
-five minutes, atomically replaces each generated file only when it changes, and keeps
-the last valid configuration on failure. Provider bookmarks are rendered from
-Homelab's `data/providers.yaml` alongside `services.yaml`. New Pods wait for their first successful fetch;
-running Pods retain their configuration during GitHub outages. No credentials or
-Terraform state are required; widget-secret placeholders remain untouched.
-To roll back, revert the Homepage helper and volume changes together with its
-URL references, restoring the static `services.yaml` ConfigMap mount.
+Homepage runs once on `mbk`, at `home.excloo.com` and
+`homepage.mbk.excloo.dev`. Local HTTPRoutes use native discovery. A sidecar reads
+other clusters' `gethomepage.dev` annotations from Git every five minutes using
+the route extraction shared with Gatus. Apps keep the same metadata and widget
+configuration when moved between clusters. Remote cards use URL health checks;
+Headlamp provides live Pod inspection. Git describes desired placement, so remote
+cards can briefly differ while Flux reconciles. Duplicate remote names gain a
+cluster suffix. Within each group, cards with widgets come first, then names sort
+alphabetically; annotated widget cards use `gethomepage.dev/weight: "-100"`.
 
-Homepage discovers its local cluster and adds shared external services and
-bookmarks. Static services opt into health checks with `siteMonitor`; `href`
-alone is navigation only. Home Assistant add-on ingress links remain navigation
-only because the shared login page does not establish add-on health. Give an
-add-on its own monitor only when a dedicated endpoint checks that service.
-Services are not deduplicated by hostname: different ports or paths can expose
-independent services. Optional widget credentials come from the cluster's `Homepage` item;
-missing values hide only that widget. It is served at `home.excloo.com` and
-`homepage.mbk.excloo.dev` on `mbk`, and `homepage.syd.excloo.dev` on `syd`.
+External links use `homelab://<network>/<machine>/<service>` references, optionally
+followed by a path. Homelab owns hostnames, domains and ports: `management` uses
+the HTTPS management port and named services use their declared scheme and port.
+Machines with management endpoints receive links unless an existing card already
+covers that endpoint. Provider bookmarks come from Homelab's `data/providers.yaml`.
+Beszel's native overview covers the monitored fleet, including non-Talos hosts.
+Cloudflare and Tailscale remain provider links. Per-machine widgets for those
+providers require device or tunnel IDs, which belong in Homelab's infrastructure
+outputs rather than a second discovery implementation here.
+Home Assistant add-ons with only an authenticated ingress link remain navigation
+links; ESPHome and
+Zigbee2MQTT need dedicated API endpoints before their native widgets can work.
+
+The sidecar reads public Git snapshots without credentials or infrastructure API
+access. It retains valid configuration during outages, validates each refresh
+and replaces changed files atomically. It uses pinned upstream yq and Flux CLI
+images without installing packages at startup. Content-named ConfigMaps trigger updates for checked-in configuration and scripts. Layout
+groups are derived automatically; `settings.yaml` supplies presentation choices.
+
+External Secrets supplies mounted files from MBK's 1Password vault. Homepage uses
+native `HOMEPAGE_FILE_*` references, so credentials never enter generated config.
+Beszel and local Grafana reuse their existing items. Only Homepage can read
+the mounted credentials; the renderer preserves placeholders.
+Fill these fields in the `Homepage` item through each service's supported UI:
+
+| Fields                                         | Purpose                                |
+| ---------------------------------------------- | -------------------------------------- |
+| `grafana-syd-username`, `grafana-syd-password` | Sydney Grafana dashboard login         |
+| `home-assistant-key`                           | Home Assistant long-lived access token |
+| `immich-key`                                   | Immich API key                         |
+| `linkwarden-key`                               | Linkwarden access token                |
+| `miniflux-key`                                 | Miniflux API key                       |
+| `syncthing-key`                                | Syncthing API key                      |
+| `truenas-key`                                  | TrueNAS API key                        |
+| `unifi-key`                                    | UniFi API key                          |
+
+Empty fields keep links usable and widget errors hidden. Secret files refresh
+hourly and Homepage reads updates without a restart. If an app's credential source changes vault, update its ExternalSecret
+reference; placement alone does not move dashboard credentials. Existing unused
+1Password fields are preserved. `siteMonitor` explicitly enables URL checks;
+navigation links alone do not imply service health.
+
+For an offline preview using local checkouts:
+
+```shell
+HOMELAB_DIRECTORY=../homelab KUBELAB_DIRECTORY="$PWD" mise exec -- \
+  sh apps/base/homepage/render_dashboard.sh apps/base/homepage /tmp/homepage-preview
+```
 
 Beszel agents run on every node, retain their identity in host storage and
 register by outbound WebSocket. The `mbk` agent uses the local hub Service;

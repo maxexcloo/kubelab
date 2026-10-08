@@ -22,7 +22,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                 "siteMonitor": "homelab://mbk/kimbap/management",
                 "widget": {
                     "url": "homelab://mbk/kimbap/management",
-                    "key": "{{HOMEPAGE_VAR_TRUENAS_KEY}}",
+                    "key": "{{HOMEPAGE_FILE_TRUENAS_KEY}}",
                 },
                 "link": "homelab://mbk/hass/management/add-on",
                 "other_service": "homelab://mbk/kimbap/netboot",
@@ -32,7 +32,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             self.assertEqual(result["href"], "https://storage.mbk.example.net:8444")
             self.assertEqual(result["href"], result["siteMonitor"])
             self.assertEqual(result["href"], result["widget"]["url"])
-            self.assertEqual(result["widget"]["key"], "{{HOMEPAGE_VAR_TRUENAS_KEY}}")
+            self.assertEqual(result["widget"]["key"], "{{HOMEPAGE_FILE_TRUENAS_KEY}}")
             self.assertEqual(result["link"], "https://hass.mbk.example.net/add-on")
             self.assertEqual(result["other_service"], "http://storage.mbk.example.net:31010")
             bookmarks = json.loads(subprocess.check_output([

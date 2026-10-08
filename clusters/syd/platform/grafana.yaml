@@ -10,6 +10,13 @@ metadata:
     gethomepage.dev/href: https://grafana.syd.excloo.dev
     gethomepage.dev/icon: grafana
     gethomepage.dev/name: Grafana
+    gethomepage.dev/weight: "-100"
+    gethomepage.dev/widget.hideErrors: "true"
+    gethomepage.dev/widget.password: "{{HOMEPAGE_FILE_GRAFANA_SYD_PASSWORD}}"
+    gethomepage.dev/widget.type: grafana
+    gethomepage.dev/widget.url: https://grafana.syd.excloo.dev
+    gethomepage.dev/widget.username: "{{HOMEPAGE_FILE_GRAFANA_SYD_USERNAME}}"
+    gethomepage.dev/widget.version: "2"
   labels:
     app.kubernetes.io/name: grafana
 spec:

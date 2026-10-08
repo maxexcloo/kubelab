@@ -13,7 +13,7 @@ metadata:
     gethomepage.dev/name: Immich
     gethomepage.dev/weight: "-100"
     gethomepage.dev/widget.hideErrors: "true"
-    gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_IMMICH_KEY}}"
+    gethomepage.dev/widget.key: "{{HOMEPAGE_FILE_IMMICH_KEY}}"
     gethomepage.dev/widget.type: immich
     gethomepage.dev/widget.url: https://photos.excloo.com
     gethomepage.dev/widget.version: "2"

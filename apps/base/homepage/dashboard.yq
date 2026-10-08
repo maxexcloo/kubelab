@@ -1,0 +1,23 @@
+. as $inventory |
+($inventory | group_by(.annotations."gethomepage.dev/name") | map(select(length > 1)) | map(.[0].annotations."gethomepage.dev/name")) as $repeated_names |
+map(select(.cluster != strenv(HOMEPAGE_CLUSTER))) |
+map(
+  .cluster as $cluster |
+  .annotations |
+  with_entries(select(.key | test("^gethomepage.dev/"))) |
+  with_entries(.key |= sub("^gethomepage.dev/"; "")) |
+  del(.enabled, .instance, .pod-selector, .app, .namespace, .showStats) |
+  .name as $name |
+  .name = ($name + ([""] + ($repeated_names | map(select(. == $name)) | map(. = " (" + $cluster + ")")) | .[-1])) |
+  to_entries | .[] as $field ireduce ({};
+    setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
+  .siteMonitor = (.siteMonitor // .href) |
+  .weight = ((.weight // "0") | from_yaml)
+) as $remote |
+[load(strenv(SERVICES)) | .[] | to_entries | .[] |
+  .key as $group | .value[] | to_entries | .[] |
+  .value + {"group": $group, "name": .key}] as $external |
+($remote + $external) |
+sort_by(.group, .weight // 0, .name) |
+group_by(.group) |
+map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})

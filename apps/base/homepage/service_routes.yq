@@ -1,0 +1,50 @@
+(
+  (
+    select(.kind == "HTTPRoute") |
+    {
+      "cluster": strenv(CLUSTER),
+      "annotations": (.metadata.annotations // {}),
+      "hostnames": (.spec.hostnames // []),
+      "labels": (.metadata.labels // {}),
+      "namespace": .metadata.namespace,
+      "parentRefs": ((.spec.parentRefs // []) | map(.name)),
+      "source": ("HTTPRoute/" + .metadata.namespace + "/" + .metadata.name)
+    }
+  ),
+  (
+    select(.kind == "HelmRelease" and .spec.values.route.apiVersion == null) |
+    .metadata as $metadata |
+    (.spec.values.route // {} | to_entries[]) |
+    select(.value.enabled != false) |
+    {
+      "cluster": strenv(CLUSTER),
+      "annotations": (.value.annotations // {}),
+      "hostnames": (.value.hostnames // []),
+      "labels": (.value.labels // {}),
+      "namespace": $metadata.namespace,
+      "parentRefs": ((.value.parentRefs // []) | map(.name)),
+      "source": (
+        "HelmRelease/" + $metadata.namespace + "/" + $metadata.name +
+        "/route/" + .key
+      )
+    }
+  ),
+  (
+    select(
+      .kind == "HelmRelease" and
+      .spec.values.route.apiVersion != null and
+      .spec.values.route.enabled != false
+    ) |
+    {
+      "cluster": strenv(CLUSTER),
+      "annotations": (.spec.values.route.annotations // {}),
+      "hostnames": (.spec.values.route.hostnames // []),
+      "labels": (.spec.values.route.labels // {}),
+      "namespace": .metadata.namespace,
+      "parentRefs": ((.spec.values.route.parentRefs // []) | map(.name)),
+      "source": (
+        "HelmRelease/" + .metadata.namespace + "/" + .metadata.name + "/route"
+      )
+    }
+  )
+)

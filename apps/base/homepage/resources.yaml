@@ -4,30 +4,68 @@ metadata:
   name: homepage
   namespace: homepage
   annotations:
-    onepassword.excloo.dev/defaults: '{"beszel-password":"","beszel-username":"admin@excloo.com","home-assistant-key":"","immich-key":"","linkwarden-key":"","miniflux-key":"","tailscale-key":"","truenas-key":"","unifi-key":""}'
+    onepassword.excloo.dev/defaults: '{"grafana-syd-password":"","grafana-syd-username":"","home-assistant-key":"","immich-key":"","linkwarden-key":"","miniflux-key":"","syncthing-key":"","truenas-key":"","unifi-key":""}'
 spec:
   refreshInterval: 1h
-  dataFrom:
-    - extract:
+  data:
+    - remoteRef:
+        key: Beszel
+        property: password
+      secretKey: beszel-password
+    - remoteRef:
+        key: Beszel
+        property: username
+      secretKey: beszel-username
+    - remoteRef:
+        key: Grafana
+        property: password
+      secretKey: grafana-mbk-password
+    - remoteRef:
+        key: Grafana
+        property: username
+      secretKey: grafana-mbk-username
+    - remoteRef:
         key: Homepage
+        property: grafana-syd-password
+      secretKey: grafana-syd-password
+    - remoteRef:
+        key: Homepage
+        property: grafana-syd-username
+      secretKey: grafana-syd-username
+    - remoteRef:
+        key: Homepage
+        property: home-assistant-key
+      secretKey: home-assistant-key
+    - remoteRef:
+        key: Homepage
+        property: immich-key
+      secretKey: immich-key
+    - remoteRef:
+        key: Homepage
+        property: linkwarden-key
+      secretKey: linkwarden-key
+    - remoteRef:
+        key: Homepage
+        property: miniflux-key
+      secretKey: miniflux-key
+    - remoteRef:
+        key: Homepage
+        property: syncthing-key
+      secretKey: syncthing-key
+    - remoteRef:
+        key: Homepage
+        property: truenas-key
+      secretKey: truenas-key
+    - remoteRef:
+        key: Homepage
+        property: unifi-key
+      secretKey: unifi-key
   secretStoreRef:
     kind: ClusterSecretStore
     name: onepassword
   target:
     creationPolicy: Owner
     name: homepage
-    template:
-      engineVersion: v2
-      data:
-        HOMEPAGE_VAR_BESZEL_PASSWORD: '{{ index . "beszel-password" }}'
-        HOMEPAGE_VAR_BESZEL_USERNAME: '{{ index . "beszel-username" }}'
-        HOMEPAGE_VAR_HOME_ASSISTANT_KEY: '{{ index . "home-assistant-key" }}'
-        HOMEPAGE_VAR_IMMICH_KEY: '{{ index . "immich-key" }}'
-        HOMEPAGE_VAR_LINKWARDEN_KEY: '{{ index . "linkwarden-key" }}'
-        HOMEPAGE_VAR_MINIFLUX_KEY: '{{ index . "miniflux-key" }}'
-        HOMEPAGE_VAR_TAILSCALE_KEY: '{{ index . "tailscale-key" }}'
-        HOMEPAGE_VAR_TRUENAS_KEY: '{{ index . "truenas-key" }}'
-        HOMEPAGE_VAR_UNIFI_KEY: '{{ index . "unifi-key" }}'
 ---
 apiVersion: v1
 kind: Namespace

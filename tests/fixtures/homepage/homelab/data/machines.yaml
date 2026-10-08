@@ -1,12 +1,22 @@
 machines:
   mbk:
+    bento:
+      management_port: 9090
+      platform: ucore
+      type: server
     gateway:
       management_port: 443
+      platform: unifi
+      type: router
     hass:
       management_port: 443
+      platform: haos
+      type: appliance
     kimbap:
       hostname: storage
       management_port: 8444
+      platform: truenas
+      type: storage
       services:
         netboot:
           port: 31010
