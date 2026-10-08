@@ -55,6 +55,9 @@ class ServiceInventoryTests(unittest.TestCase):
                     cwd=ROOT, env=env,
                 )
                 self.assertEqual(json.loads(actual), json.loads(expected))
+                redlib = [entry for entry in json.loads(actual) if entry["name"] == "Redlib"]
+                self.assertEqual(len(redlib), 1)
+                self.assertEqual(redlib[0]["alerts"], "false")
             subprocess.run(
                 ["scripts/check_service_metadata.sh", str(manifests)],
                 cwd=ROOT, env=env, check=True,

@@ -101,7 +101,7 @@ spec:
                     command:
                       - /bin/sh
                       - -c
-                      - test -s /output/services.yaml
+                      - test -s /output/services.yaml && test -s /output/bookmarks.yaml
             resources:
               limits:
                 memory: 64Mi
@@ -148,9 +148,6 @@ spec:
         advancedMounts:
           homepage:
             homepage:
-              - path: /app/config/bookmarks.yaml
-                readOnly: true
-                subPath: bookmarks.yaml
               - path: /app/config/custom.css
                 readOnly: true
                 subPath: custom.css

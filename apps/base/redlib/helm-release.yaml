@@ -153,6 +153,7 @@ spec:
           gethomepage.dev/icon: redlib
           gethomepage.dev/name: Redlib
           gethomepage.dev/siteMonitor: https://reddit.excloo.com
+          monitoring.excloo.dev/alerts: "false"
         hostnames:
           - reddit.excloo.com
         labels:

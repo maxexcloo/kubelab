@@ -186,10 +186,11 @@ in Homelab's machine inventory.
 
 `apps/base/homepage/render_services.sh` resolves these references for both Homepage
 and the static service inventory consumed by Gatus. Set `HOMELAB_DIRECTORY` to
-use a local or pinned checkout. Otherwise it downloads the two public inventory
+use a local or pinned checkout. Otherwise it downloads the public machine, domain and provider inventory
 files from a single Homelab commit. A native sidecar runs the same script every
-five minutes, atomically replaces `services.yaml` only when it changes, and keeps
-the last valid file on failure. New Pods wait for their first successful fetch;
+five minutes, atomically replaces each generated file only when it changes, and keeps
+the last valid configuration on failure. Provider bookmarks are rendered from
+Homelab's `data/providers.yaml` alongside `services.yaml`. New Pods wait for their first successful fetch;
 running Pods retain their configuration during GitHub outages. No credentials or
 Terraform state are required; widget-secret placeholders remain untouched.
 To roll back, revert the Homepage helper and volume changes together with its
@@ -280,6 +281,9 @@ SHA to refresh Gatus. Store a GitHub token in the repository Actions secret
 API token. The default repository token cannot dispatch another repository's
 workflow. Install the receiving Fly workflow before enabling this dispatch.
 Rendering uses Git configuration and needs no cluster credentials.
+Routes can set `monitoring.excloo.dev/alerts: "false"` to suppress external
+monitoring alerts while retaining checks. Omitting it enables alerts; other
+values are rejected.
 
 ## Secrets & External Automation
 

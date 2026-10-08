@@ -115,6 +115,7 @@ for cluster in "${clusters[@]}"; do
           .annotations."gethomepage.dev/enabled" == "true"
         ) |
         {
+          "alerts": (.annotations."monitoring.excloo.dev/alerts" // "true"),
           "cluster": strenv(CLUSTER),
           "cloudflareProxied": (
             .annotations."external-dns.alpha.kubernetes.io/cloudflare-proxied" //

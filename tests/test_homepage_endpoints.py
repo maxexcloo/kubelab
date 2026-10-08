@@ -35,6 +35,12 @@ class HomepageEndpointsTests(unittest.TestCase):
             self.assertEqual(result["widget"]["key"], "{{HOMEPAGE_VAR_TRUENAS_KEY}}")
             self.assertEqual(result["link"], "https://hass.mbk.example.net/add-on")
             self.assertEqual(result["other_service"], "http://storage.mbk.example.net:31010")
+            bookmarks = json.loads(subprocess.check_output([
+                "yq", "-o=json", ".", str(Path(directory) / "bookmarks.yaml")
+            ]))
+            self.assertEqual(bookmarks, [{"Providers": [{"Example": [{
+                "description": "Example provider", "href": "https://provider.example.com", "icon": "example"
+            }]}]}])
             timestamp = output.stat().st_mtime_ns
             subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
             self.assertEqual(output.stat().st_mtime_ns, timestamp)

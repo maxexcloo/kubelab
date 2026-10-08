@@ -161,6 +161,8 @@ jq -e \
       error("non-public route has public-access label: " + ($unexpected_public_route_labels | join(", ")))
     elif ($missing_private_namespace_labels | length) > 0 then
       error("private route namespace missing private-access label: " + ($missing_private_namespace_labels | join(", ")))
+    elif ($inventory | any(.alerts != "true" and .alerts != "false")) then
+      error("monitoring alerts must be true or false")
     elif ($missing | length) > 0 then
       error("missing service metadata: " + ($missing | join(", ")))
     elif ($invalid | length) > 0 then
