@@ -220,10 +220,14 @@ ExternalSecret mounts this snapshot only into the renderer. Homelab refreshes it
 on infrastructure apply; the renderer never accesses state or discovers provider
 identities itself. Hosts marked `beszel: true` use native Beszel system-name
 lookup. Beszel's endpoint comes from its app namespace's route annotations.
-Machine widgets join existing appliance cards where possible, covering Talos and
-other operating systems without duplicate cards or hardcoded IDs. Cloudflare and
+The Servers tab groups cards by host, using inventory display names and locations.
+App, Beszel, Cloudflare Tunnel and Tailscale widgets have separate cards within
+each host section, sorted widget-first then alphabetically. Native widget fields
+match the legacy dashboard, including TrueNAS pool rows. Existing management
+links prevent duplicate appliance cards; machines without a management endpoint
+can still have monitoring cards. Cloudflare and
 Tailscale identities still supply machine navigation links. App subtitles include
-the uppercase cluster name; external service subtitles use `Host (CLUSTER)` from Homelab inventory.
+the uppercase cluster name; host section names use `Host (CLUSTER)` from Homelab inventory.
 Flux supplies `HOMEPAGE_LOCATION` to application route annotations. ConfigMaps
 are excluded from substitution to preserve mounted scripts and app configuration.
 Home Assistant add-ons with only an authenticated ingress link remain navigation
