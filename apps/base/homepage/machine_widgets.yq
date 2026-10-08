@@ -18,10 +18,10 @@ load(strenv(INFRASTRUCTURE)) as $infra |
   {
     "name": ($network + "-" + $hostname),
     "group": ($display_name + " (" + ($network | upcase) + ")"),
-    "description": ({"bazzite": "Bazzite", "macos": "macOS", "nanokvm": "NanoKVM",
-      "steamos": "SteamOS", "talos": "Talos Linux", "ucore": "uCore"}[$machine.platform] // $machine.platform),
-    "icon": ({"bazzite": "linux", "macos": "apple", "steamos": "steam",
-      "talos": "talos", "ucore": "linux"}[$machine.platform] // "mdi-server"),
+    "description": ({"bazzite": "Bazzite", "haos": "Home Assistant OS", "macos": "macOS", "nanokvm": "NanoKVM",
+      "steamos": "SteamOS", "talos": "Talos Linux", "truenas": "TrueNAS", "ucore": "uCore", "unifi": "UniFi"}[$machine.platform] // $machine.platform),
+    "icon": ({"bazzite": "linux", "haos": "home-assistant", "macos": "apple", "steamos": "steam",
+      "talos": "talos", "truenas": "truenas", "ucore": "linux", "unifi": "unifi"}[$machine.platform] // "mdi-server"),
     "reference": $management,
     "href": ([null] + ([$tunnel] | map(select(. != null)) | map("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .)) +
       ([$machine] | map(select(.beszel == true)) | map(strenv(HOMEPAGE_BESZEL_URL))) +
