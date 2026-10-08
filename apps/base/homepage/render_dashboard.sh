@@ -49,6 +49,7 @@ mkdir "$temporary_directory/config"
 HOMEPAGE_BESZEL_URL=$(yq -r 'map(select(.namespace == "beszel")) | .[0].annotations."gethomepage.dev/href" // ""' "$temporary_directory/inventory.yaml") \
   sh "$script_directory/render_services.sh" "$source_directory/services.yaml" \
   "$temporary_directory/config/services.yaml" "${HOMELAB_DIRECTORY:-}"
+cp "$temporary_directory/config/services.yaml" "$temporary_directory/external-services.yaml"
 SERVICES="$temporary_directory/config/services.yaml" \
   yq --from-file "$script_directory/dashboard.yq" "$temporary_directory/inventory.yaml" \
   > "$temporary_directory/config/services.yaml.next"
@@ -60,14 +61,16 @@ done
 
 # Native Homepage layout preferences override defaults for discovered groups.
 # shellcheck disable=SC2016
-INVENTORY="$temporary_directory/inventory.yaml" \
+EXTERNAL_SERVICES="$temporary_directory/external-services.yaml" \
+  INVENTORY="$temporary_directory/inventory.yaml" \
   SERVICES="$temporary_directory/config/services.yaml" \
   yq '
     .layout as $preferences |
+    (load(strenv(EXTERNAL_SERVICES)) | map(keys | .[])) as $external_groups |
     ((load(strenv(INVENTORY)) | map(.annotations."gethomepage.dev/group")) +
       (load(strenv(SERVICES)) | map(keys | .[])) + ["Providers"] | unique | sort) as $groups |
     .layout = ($groups[] as $group ireduce ({};
-      .[$group] = ({"columns": 2, "style": "row", "tab": "Services"} * ($preferences[$group] // {}))))
+      .[$group] = ({"columns": 2, "style": "row", "tab": (["Services"] + ($external_groups | map(select(. == $group) | "Servers")) | .[-1])} * ($preferences[$group] // {}))))
   ' "$source_directory/settings.yaml" > "$temporary_directory/config/settings.yaml"
 
 # Validate the entire refresh before publishing any files. Settings is last so

@@ -80,7 +80,7 @@ class HomepageDashboardTests(unittest.TestCase):
         services = self.services()
         self.assertIn("Remote", services)
         self.assertEqual(services["Remote"]["description"], "SYD")
-        self.assertEqual(services["Syncthing"]["description"], "File Synchronisation · Storage (MBK)")
+        self.assertEqual(services["Syncthing"]["description"], "File Synchronisation")
         self.assertIn("Shared (SYD)", services)
         self.assertNotIn("Local", services)
         self.assertNotIn("Shared", services)
@@ -147,19 +147,30 @@ class HomepageDashboardTests(unittest.TestCase):
         services = self.services()
         self.assertNotIn("mbk-kimbap", services)
         self.assertNotIn("mbk-sensor", services)
-        self.assertNotIn("widget", services["TrueNAS"])
-        self.assertEqual([widget["type"] for widget in services["TrueNAS"]["widgets"]],
-                         ["truenas", "beszel", "tailscale", "cloudflared"])
-        node = services["mbk-taco"]
-        self.assertEqual(node["widgets"][0]["systemId"], "mbk-taco")
-        self.assertEqual(node["widgets"][1]["deviceid"], "node-device")
-        self.assertEqual(node["widgets"][2]["tunnelid"], "cluster-tunnel")
-        self.assertEqual(node["widgets"][1]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
-        self.assertEqual(node["href"], "https://login.tailscale.com/admin/machines/node-device")
-        self.assertEqual(node["widgets"][0]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")
-        self.assertEqual(node["weight"], -100)
-        self.assertEqual(node["icon"], "talos")
+        groups = {name: {key: value for card in cards for key, value in card.items()}
+                  for group in read_yaml(self.output / "services.yaml")
+                  for name, cards in group.items()}
+        storage = groups["Storage (MBK)"]
+        self.assertEqual(list(storage), ["Beszel", "Cloudflare Tunnel", "Syncthing", "Tailscale", "TrueNAS", "netboot.xyz"])
+        self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
+        self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
+        self.assertNotIn("widgets", storage["TrueNAS"])
+        node = groups["Taco (MBK)"]
+        self.assertEqual(list(node), ["Beszel", "Cloudflare Tunnel", "Tailscale"])
+        self.assertEqual(node["Beszel"]["widget"]["systemId"], "mbk-taco")
+        self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
+        self.assertEqual(node["Cloudflare Tunnel"]["widget"]["tunnelid"], "cluster-tunnel")
+        self.assertEqual(node["Tailscale"]["widget"]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
+        self.assertEqual(node["Tailscale"]["href"], "https://login.tailscale.com/admin/machines/node-device")
+        self.assertEqual(node["Beszel"]["widget"]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")
+        self.assertEqual(node["Beszel"]["widget"]["fields"], ["status", "cpu", "memory", "network"])
+        self.assertEqual(node["Beszel"]["weight"], -100)
+        self.assertEqual(node["Beszel"]["icon"], "talos")
         self.assertEqual(services["mbk-bento"]["weight"], 0)
+        layout = read_yaml(self.output / "settings.yaml")["layout"]
+        for group in ["HASS (MBK)", "Storage (MBK)", "Taco (MBK)"]:
+            self.assertEqual(layout[group]["tab"], "Servers")
+        self.assertEqual(layout["Operations"]["tab"], "Services")
         before = (self.output / "services.yaml").read_bytes()
         identities.write_text("{broken json")
         self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities)).returncode, 0)

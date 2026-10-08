@@ -30,15 +30,7 @@ layout:
     columns: 2
     style: row
     tab: Services
-  Home Automation:
-    columns: 4
-    style: row
-    tab: Servers
   Infrastructure:
-    columns: 2
-    style: row
-    tab: Servers
-  Machines:
     columns: 2
     style: row
     tab: Servers

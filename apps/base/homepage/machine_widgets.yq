@@ -7,16 +7,17 @@ load(strenv(INFRASTRUCTURE)) as $infra |
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
     ($inventory[$reference[0]][$reference[1]].hostname // $reference[1]) as $host |
     ($inventory[$reference[0]][$reference[1]].display_name // ($host | split("") | .[0] |= upcase | join(""))) as $hostname |
-    .description = ([.description // "", ($hostname + " (" + ($reference[0] | upcase) + ")")] | map(select(. != "")) | join(" · ")))] as $existing |
+    .group = ($hostname + " (" + ($reference[0] | upcase) + ")"))] as $existing |
 [.machines | to_entries[] | .key as $network | .value | to_entries[] |
   .key as $name | .value as $machine |
   ($machine.hostname // $name) as $hostname |
+  ($machine.display_name // ($hostname | split("") | .[0] |= upcase | join(""))) as $display_name |
   ("homelab://" + $network + "/" + $name + "/management") as $management |
   $infra.tailscale[$name] as $device |
   $infra.cloudflare.tunnels[$machine.cluster // $name] as $tunnel |
   {
     "name": ($network + "-" + $hostname),
-    "group": "Machines",
+    "group": ($display_name + " (" + ($network | upcase) + ")"),
     "description": ({"bazzite": "Bazzite", "macos": "macOS", "nanokvm": "NanoKVM",
       "steamos": "SteamOS", "talos": "Talos Linux", "ucore": "uCore"}[$machine.platform] // $machine.platform),
     "icon": ({"bazzite": "linux", "macos": "apple", "steamos": "steam",
@@ -45,11 +46,18 @@ load(strenv(INFRASTRUCTURE)) as $infra |
   } |
   select($machine.management_port != null or $device != null or $tunnel != null or (.widgets | length > 0))
 ] as $machines |
-($existing | map(. as $card |
-  ($machines | map(select(.reference == $card.href)) | .[0].widgets // []) as $widgets |
-  with(select($widgets | length > 0); .widgets = (([.widget] | map(select(. != null))) + (.widgets // []) + $widgets) | del(.widget)))) as $merged |
-($machines | map(select(.reference as $reference | $existing | any_c(.href == $reference) | not))) as $additional |
-($merged + $additional) |
+($machines | map(select(.href == .reference) | select(.reference as $reference | $existing | any_c(.href == $reference) | not)) | map(del(.widgets))) as $management |
+[$machines[] | . as $machine | .widgets[] | . as $widget |
+  {
+    "name": {"beszel": "Beszel", "cloudflared": "Cloudflare Tunnel", "tailscale": "Tailscale"}[.type],
+    "group": $machine.group,
+    "description": {"beszel": ($machine.description + " · System Monitoring"), "cloudflared": "Cloudflare Tunnel", "tailscale": "VPN"}[.type],
+    "icon": {"beszel": $machine.icon, "cloudflared": "cloudflare", "tailscale": "tailscale"}[.type],
+    "href": {"beszel": .url, "cloudflared": ("https://one.dash.cloudflare.com/" + .accountid + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .tunnelid), "tailscale": ("https://login.tailscale.com/admin/machines/" + .deviceid)}[.type],
+    "widget": $widget
+  }
+] as $monitoring |
+($existing + $management + $monitoring) |
 map(del(.reference) | .weight = 0 | with(select(.widget != null or (.widgets | length > 0)); .weight = -100)) |
 sort_by(.group, .weight, .name) | group_by(.group) |
 map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})
