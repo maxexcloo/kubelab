@@ -1,0 +1,121 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: sidestore-vpn
+  namespace: sidestore-vpn
+spec:
+  interval: 30m
+  releaseName: sidestore-vpn
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.2.1
+  values:
+    controllers:
+      sidestore-vpn:
+        strategy: Recreate
+        initContainers:
+          forwarding:
+            command:
+              - sysctl
+            args:
+              - -w
+              - net.ipv4.ip_forward=1
+            image:
+              repository: ghcr.io/tailscale/tailscale
+              tag: v1.102.4
+            securityContext:
+              privileged: true
+        containers:
+          reflector:
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/xddxdd/sidestore-vpn
+              tag: latest@sha256:077de9af996cae9d63803715f2eb54596d6e48a37069f9b15656990459c4c9d4
+            resources:
+              limits:
+                memory: 32Mi
+              requests:
+                cpu: 5m
+                memory: 8Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                add:
+                  - NET_ADMIN
+                drop:
+                  - ALL
+          tailscale:
+            env:
+              TS_AUTHKEY:
+                valueFrom:
+                  secretKeyRef:
+                    key: TS_AUTHKEY
+                    name: sidestore-vpn
+              TS_DEBUG_FIREWALL_MODE: nftables
+              TS_ENABLE_HEALTH_CHECK: "true"
+              TS_EXTRA_ARGS: --snat-subnet-routes=false
+              TS_HOSTNAME: sidestore-vpn-mbk
+              TS_KUBE_SECRET: ""
+              TS_LOCAL_ADDR_PORT: 0.0.0.0:9002
+              TS_ROUTES: 10.7.0.1/32
+              TS_STATE_DIR: /var/lib/tailscale
+              TS_USERSPACE: "false"
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/tailscale/tailscale
+              tag: v1.102.4
+            probes:
+              readiness:
+                enabled: true
+                path: /healthz
+                port: 9002
+                type: HTTP
+            resources:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 10m
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                add:
+                  - NET_ADMIN
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsGroup: 0
+        runAsUser: 0
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: sidestore-vpn
+    persistence:
+      state:
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        storageClass: local-path
+        type: persistentVolumeClaim
+        advancedMounts:
+          sidestore-vpn:
+            tailscale:
+              - path: /var/lib/tailscale
+      tun:
+        hostPath: /dev/net/tun
+        hostPathType: CharDevice
+        type: hostPath
+        advancedMounts:
+          sidestore-vpn:
+            reflector:
+              - path: /dev/net/tun
+            tailscale:
+              - path: /dev/net/tun

@@ -182,7 +182,7 @@ undo database changes.
 `mbk` runs Actual Budget, Actual Up, AIOMetadata, AIOStreams, Beszel, Beszel Agent, Bichon,
 Bifrost, BookOrbit, CLI Proxy API, Comfy Control, Homepage, Immich,
 LaraPaper, Linkwarden, Miniflux, Open WebUI, OpenSpeedTest, Papra, Pocket ID,
-RoMM and Shelfmark. `syd` runs Anisette, Beszel Agent, OpenSpeedTest
+RoMM, Shelfmark and SideStore VPN. `syd` runs Anisette, Beszel Agent, OpenSpeedTest
 and Redlib.
 
 Companion caches, search services and Redlib's `ctrld` DNS proxy belong to their
@@ -442,6 +442,27 @@ Browser settings persist as authenticated AES-256-GCM ciphertext in
 not NFS, and is not encrypted by the settings encryption. The last 20 run results and
 queue are in memory and reset on restart. Automatic full-history backfills
 recover older gaps after outages or interrupted imports without a cursor database.
+
+### SideStore VPN
+
+SideStore VPN runs on `mbk` with its own Tailscale identity,
+`sidestore-vpn-mbk`. It advertises only `10.7.0.1/32`, with subnet NAT disabled
+so the reflector can return packets to the requesting iOS device. Approve this
+route on that device in the Tailscale admin console; no LAN route or exit node
+is needed. The `SideStore VPN` item in `Cluster: MBK` supplies its `auth-key`.
+Tailscale state persists on a local-path volume. Replace an expired registration
+key before rebuilding a lost identity; existing authenticated state survives key
+expiry. The upstream reflector has no versioned releases, so its image is pinned
+by digest; the separate Tailscale container uses a stable release.
+
+On iOS, connect to Wi-Fi, enable Tailscale and turn off LocalDevVPN. In current
+SideStore builds, open **Settings → Connection Config**, keep **Use Local VPN**
+enabled and set **User Configuration → Device IP** to `10.7.0.1`. This selects
+the reflector instead of the automatically discovered tunnel peer. Leave
+**RemotePair Port** at its default. Check device reachability and refresh an app
+in SideStore to verify the complete path. Older fixed-address SideStore builds
+do not need the Device IP override. Pairing and Anisette setup remain SideStore
+prerequisites.
 
 ## Secrets & External Automation
 

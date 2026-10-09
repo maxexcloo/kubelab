@@ -23,6 +23,7 @@ resources:
   - ../../base/pocket-id
   - ../../base/romm
   - ../../base/shelfmark
+  - ../../base/sidestore-vpn
   - homepage-private-dns.yaml
   - immich-private-route.yaml
   - openspeedtest-route.yaml
