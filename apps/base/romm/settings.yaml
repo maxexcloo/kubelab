@@ -21,14 +21,22 @@ spec:
         containers:
           romm:
             env:
+              CSDB_API_ENABLED: "true"
               DB_HOST: romm-database-rw
               DB_PORT: "5432"
               DB_QUERY_JSON: '{"sslmode":"require"}'
+              DEMOZOO_API_ENABLED: "true"
+              FLASHPOINT_API_ENABLED: "true"
               HASHEOUS_API_ENABLED: "true"
+              HLTB_API_ENABLED: "true"
+              LAUNCHBOX_API_ENABLED: "true"
               OIDC_ENABLED: "true"
               OIDC_PROVIDER: Pocket ID
               PLAYMATCH_API_ENABLED: "true"
+              POUET_API_ENABLED: "true"
               REDIS_HOST: localhost
               ROMM_DB_DRIVER: postgresql
               SCAN_TIMEOUT: "86400"
+              STEAM_API_ENABLED: "true"
+              TGDB_API_ENABLED: "true"
               TZ: Australia/Sydney
