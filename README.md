@@ -449,7 +449,11 @@ SideStore VPN runs on `mbk` with its own Tailscale identity,
 `sidestore-vpn-mbk`. It advertises only `10.7.0.1/32`, with subnet NAT disabled
 so the reflector can return packets to the requesting iOS device. Approve this
 route on that device in the Tailscale admin console; no LAN route or exit node
-is needed. The `SideStore VPN` item in `Cluster: MBK` supplies its `auth-key`.
+is needed. Homelab's tailnet policy must also allow traffic from `10.7.0.1/32`
+to the iOS devices' owners (`group:admin`). Reflection preserves ports, so this
+return traffic is a new connection rather than an ordinary connection reply.
+Without that grant, route approval alone does not make SideStore work.
+The `SideStore VPN` item in `Cluster: MBK` supplies its `auth-key`.
 Tailscale state persists on a local-path volume. Replace an expired registration
 key before rebuilding a lost identity; existing authenticated state survives key
 expiry. The upstream reflector has no versioned releases, so its image is pinned
