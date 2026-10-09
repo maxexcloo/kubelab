@@ -24,20 +24,6 @@ spec:
       encryptionKeySecret:
         key: encryption-key
         name: bifrost
-      providers:
-        Comfy Control:
-          custom_provider_config:
-            base_provider_type: openai
-          keys:
-            - name: Comfy Control
-              models:
-                - "*"
-              value: env.COMFY_CONTROL_API_KEY
-              weight: 1
-          network_config:
-            allow_private_network: true
-            base_url: http://comfy-control.comfy-control.svc.cluster.local:8000
-            default_request_timeout_in_seconds: 1200
     env:
       - name: BIFROST_API_KEY
         valueFrom:
