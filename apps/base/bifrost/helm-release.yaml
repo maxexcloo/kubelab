@@ -42,6 +42,15 @@ spec:
             name: bifrost
       - name: PATH
         value: /opt/mcp:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - name: UNIFI_NETWORK_API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: UNIFI_NETWORK_API_KEY
+            name: bifrost
+      - name: UNIFI_NETWORK_HOST
+        value: gateway.mbk.excloo.net
+      - name: UNIFI_NETWORK_VERIFY_SSL
+        value: "true"
       - name: UV_CACHE_DIR
         value: /app/data/uv-cache
       - name: UV_LINK_MODE

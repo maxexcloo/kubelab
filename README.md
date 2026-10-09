@@ -211,6 +211,11 @@ Python STDIO connections use `/opt/mcp/uvx` with a pinned package version. Inclu
 `PATH`, `UV_CACHE_DIR`, `UV_LINK_MODE`, `UV_PYTHON`, `UV_PYTHON_DOWNLOADS` and
 `UV_PYTHON_INSTALL_DIR` in the connection's environment allowlist, alongside its
 credential variables. HTTP MCP connections need no local runtime.
+UniFi Network uses the `api-key-unifi` field in the cluster's `Bifrost` 1Password
+item for inventory and supported Integration API tools. The reconciler creates
+this field empty when missing and preserves supplied keys; UniFi issues the key.
+Legacy tools requiring a local admin session remain unavailable with API-key-only
+authentication.
 
 ### Homepage
 
