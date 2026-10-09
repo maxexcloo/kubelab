@@ -40,10 +40,62 @@ spec:
           secretKeyRef:
             key: COMFY_CONTROL_API_KEY
             name: bifrost
+      - name: PATH
+        value: /opt/mcp:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - name: UV_CACHE_DIR
+        value: /app/data/uv-cache
+      - name: UV_LINK_MODE
+        value: copy
+      - name: UV_PYTHON
+        value: 3.13.16
+      - name: UV_PYTHON_DOWNLOADS
+        value: never
+      - name: UV_PYTHON_INSTALL_DIR
+        value: /opt/mcp/python
     image:
       pullPolicy: IfNotPresent
       repository: docker.io/maximhq/bifrost
       tag: v2.2.6
+    initContainers:
+      - name: install-uv
+        image: ghcr.io/astral-sh/uv:0.12.24-alpine3.23
+        command:
+          - cp
+        args:
+          - /usr/local/bin/uv
+          - /usr/local/bin/uvx
+          - /opt/mcp/
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+          - name: mcp-runtime
+            mountPath: /opt/mcp
+      - name: install-python
+        image: ghcr.io/astral-sh/uv:0.12.24-alpine3.23
+        command:
+          - uv
+        args:
+          - python
+          - install
+          - --install-dir
+          - /opt/mcp/python
+          - 3.13.16
+        env:
+          - name: UV_CACHE_DIR
+            value: /tmp/uv-cache
+          - name: UV_PYTHON_BIN_DIR
+            value: /opt/mcp
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+          - name: mcp-runtime
+            mountPath: /opt/mcp
     podSecurityContext:
       fsGroup: 1000
       fsGroupChangePolicy: OnRootMismatch
@@ -74,3 +126,10 @@ spec:
       persistence:
         enabled: true
         existingClaim: data
+    volumeMounts:
+      - name: mcp-runtime
+        mountPath: /opt/mcp
+    volumes:
+      - name: mcp-runtime
+        emptyDir:
+          sizeLimit: 512Mi

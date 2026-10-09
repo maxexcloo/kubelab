@@ -199,6 +199,19 @@ AIOStreams fetches its commit-pinned templates at startup or on manual refresh;
 only their regex and SEL sources refresh hourly. Its startup probe allows two
 minutes before liveness checks begin.
 
+### Bifrost
+
+Providers and MCP connections are managed through Bifrost's native interface and
+persist in its configuration database. The official Bifrost image uses native Helm
+init containers with the official Astral image to supply pinned `uv`, `uvx` and
+Python in a shared pod-local volume. Python package caches persist on the existing
+data volume. No custom image or startup wrapper is required.
+
+Python STDIO connections use `/opt/mcp/uvx` with a pinned package version. Include
+`PATH`, `UV_CACHE_DIR`, `UV_LINK_MODE`, `UV_PYTHON`, `UV_PYTHON_DOWNLOADS` and
+`UV_PYTHON_INSTALL_DIR` in the connection's environment allowlist, alongside its
+credential variables. HTTP MCP connections need no local runtime.
+
 ### Homepage
 
 Homepage runs once on `mbk`, at `home.excloo.com` and
