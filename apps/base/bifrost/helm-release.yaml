@@ -25,7 +25,7 @@ spec:
         key: encryption-key
         name: bifrost
       providers:
-        comfy-control:
+        Comfy Control:
           custom_provider_config:
             base_provider_type: openai
           keys:
