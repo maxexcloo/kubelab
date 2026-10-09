@@ -7,8 +7,6 @@ spec:
   values:
     route:
       private:
-        hostnames:
-          - beszel.excloo.com
         annotations:
           gethomepage.dev/description: System Monitoring
           gethomepage.dev/enabled: "true"

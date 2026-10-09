@@ -110,6 +110,8 @@ spec:
           gethomepage.dev/widget.url: https://app.invalid
           gethomepage.dev/widget.username: '{{ "{{HOMEPAGE_FILE_BESZEL_USERNAME}}" }}'
           gethomepage.dev/widget.version: "2"
+        hostnames:
+          - app.invalid
         labels:
           app.kubernetes.io/name: beszel
         parentRefs:

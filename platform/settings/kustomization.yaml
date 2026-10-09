@@ -6,6 +6,44 @@ replacements:
   - source:
       kind: ConfigMap
       name: shared-settings
+      fieldPath: data.beszel_host
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: beszel
+          namespace: beszel
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: beszel
+          namespace: beszel
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: beszel
+          namespace: beszel
+        fieldPaths:
+          - spec.values.controllers.beszel.containers.beszel.env.APP_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+          - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: beszel
+          namespace: beszel
+        fieldPaths:
+          - spec.values.route.private.hostnames.0
+  - source:
+      kind: ConfigMap
+      name: shared-settings
       fieldPath: data.control_d_profile
     targets:
       - select:

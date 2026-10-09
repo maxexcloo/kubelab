@@ -26,6 +26,20 @@ patches:
       name: openspeedtest
 replacements:
   - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.beszel_host
+    targets:
+      - select:
+          kind: DaemonSet
+          name: beszel-agent
+          namespace: beszel-agent
+        fieldPaths:
+          - spec.template.spec.containers.[name=beszel-agent].env.[name=HUB_URL].value
+        options:
+          delimiter: /
+          index: 2
+  - source:
       kind: HTTPRoute
       name: openspeedtest
       namespace: openspeedtest

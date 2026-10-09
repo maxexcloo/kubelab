@@ -25,7 +25,7 @@ spec:
             - name: DISABLE_SSH
               value: "true"
             - name: HUB_URL
-              value: https://beszel.excloo.com
+              value: https://app.invalid
             - name: KEY
               value: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPkxnKuxsVqSVZVXQ3OGHjZZFMAAclU/xLrEDdwOyRt+
             - name: LISTEN
