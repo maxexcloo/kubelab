@@ -446,7 +446,7 @@ recover older gaps after outages or interrupted imports without a cursor databas
 ### SideStore VPN
 
 SideStore VPN runs on `mbk` with its own Tailscale identity,
-`sidestore-vpn-mbk`. It advertises only `10.7.0.1/32`, with subnet NAT disabled
+`sidestore-vpn`. It advertises only `10.7.0.1/32`, with subnet NAT disabled
 so the reflector can return packets to the requesting iOS device. Approve this
 route on that device in the Tailscale admin console; no LAN route or exit node
 is needed. Homelab's tailnet policy must also allow traffic from `10.7.0.1/32`
