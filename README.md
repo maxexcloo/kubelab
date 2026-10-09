@@ -228,25 +228,15 @@ normal automatic reload.
 Public links can use `homelab-dns://<CNAME-target>` to resolve a single hostname
 from Homelab’s DNS declarations. Gatus uses its Fly app’s CNAME target; Homepage
 does not need access to the private Flylab repository.
-External links use `homelab://<network>/<machine>/<service>` references, optionally
-followed by a path. Homelab owns hostnames, domains and ports: `management` uses
-the HTTPS management port and named services use their declared scheme and port.
-HTTP links use the preferred host published by Homelab: machine DNS, Tailscale
-IPv4, UniFi local DNS, then LAN/public IP. HTTPS links retain the certificate
-hostname. Missing snapshots retain the canonical hostname; Homepage never probes
-addresses to choose a link.
-Optional `services.<name>.homepage` metadata declares a card’s `name`,
-`description`, `icon` and category `group` (default: Servers). Endpoints and host
-groups derive from the owning machine. NanoKVM and SLZB-06M use this inventory
-metadata for their HTTP consoles.
-Only declared management endpoints produce console links, and an existing
-appliance card prevents duplication. Optional Homelab `management` metadata
-supplies the panel's `name`, `description` and `icon`; without it, the link uses
-the machine identity and platform. Shared panel metadata uses ordinary YAML
-anchors. Both category and host cards share widget settings and credential
-references. Provider bookmarks and Cloudflare/Tailscale card metadata and widget
-settings come from Homelab's `data/providers.yaml`; provider identities are added
-from the infrastructure snapshot.
+External links use `homelab://<network>/<machine>/<service>`, optionally followed
+by a path. Homelab owns hostnames, domains and each service's `name`, `scheme` and
+`port`; management consoles use `services.management`. HTTP links use the preferred
+host in Homelab's infrastructure snapshot; HTTPS links retain the certificate
+hostname. Missing snapshots retain the canonical hostname.
+Optional service `homepage` metadata supplies `description`, `icon` and `group`
+(default: Servers). Existing appliance cards prevent duplicate management links.
+Provider bookmarks and Cloudflare/Tailscale widget settings come from Homelab's
+`data/providers.yaml`; provider identities come from the infrastructure snapshot.
 
 Homelab publishes non-secret Cloudflare account/tunnel IDs and Tailscale device
 IDs in each cluster vault's `Infrastructure Inventory` item. A separate

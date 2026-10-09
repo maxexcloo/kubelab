@@ -4,20 +4,28 @@ machines:
       platform: ucore
       type: server
     gateway:
-      management_port: 443
       platform: unifi
       type: router
+      services:
+        management:
+          port: 443
+          scheme: https
     hass:
       display_name: HASS
-      management_port: 443
       platform: haos
       type: appliance
+      services:
+        management:
+          port: 443
+          scheme: https
     kimbap:
       hostname: storage
-      management_port: 8444
       platform: truenas
       type: storage
       services:
+        management:
+          port: 8444
+          scheme: https
         netboot:
           port: 31010
           scheme: http
@@ -29,12 +37,12 @@ machines:
       type: appliance
       services:
         console:
+          name: NanoKVM
           port: 80
           scheme: http
           homepage:
             description: Remote Console & Power Control
             icon: sipeed
-            name: NanoKVM
     slzb-06m:
       platform: slzb
       type: appliance
@@ -42,12 +50,12 @@ machines:
         - address: 192.0.2.6
       services:
         console:
+          name: SLZB-06M
           port: 80
           scheme: http
           homepage:
             description: Zigbee Ethernet Adapter
             icon: zigbee
-            name: SLZB-06M
       tailscale:
         enabled: false
     taco:

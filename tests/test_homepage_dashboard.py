@@ -135,7 +135,7 @@ class HomepageDashboardTests(unittest.TestCase):
         path = homelab / "data/machines.yaml"
         inventory = read_yaml(path)
         inventory["machines"]["mbk"]["kimbap"]["beszel"] = True
-        inventory["machines"]["mbk"]["personal"] = {"platform": "macos", "management_port": 443}
+        inventory["machines"]["mbk"]["personal"] = {"platform": "macos", "services": {"management": {"port": 443, "scheme": "https"}}}
         inventory["machines"]["mbk"]["sensor"] = {"platform": "slzb"}
         inventory["machines"]["mbk"]["taco"] = {"beszel": True, "cluster": "mbk", "platform": "talos", "type": "vm"}
         path.write_text(json.dumps(inventory))
@@ -204,30 +204,38 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
 
-    def test_management_metadata_is_reusable_and_does_not_change_other_cards(self):
+    def test_management_services_share_schema_and_do_not_change_other_cards(self):
         import shutil
 
         homelab = self.directory / "homelab"
         shutil.copytree(HOMELAB, homelab)
         path = homelab / "data/machines.yaml"
-        # Standard YAML aliases share presentation while each host owns its endpoint.
         with path.open("a") as inventory:
             inventory.write("""  lab:
     first:
       beszel: true
-      management_port: 9090
       platform: ucore
       type: server
-      management: &panel
-        name: Example Console
-        description: Host Administration
-        icon: example-console
+      services:
+        management:
+          name: Example Console
+          port: 9090
+          scheme: https
+          homepage:
+            description: Host Administration
+            icon: example-console
     second:
       hostname: renamed
-      management_port: 9443
       platform: bazzite
       type: server
-      management: *panel
+      services:
+        management:
+          name: Example Console
+          port: 9443
+          scheme: https
+          homepage:
+            description: Host Administration
+            icon: example-console
 """)
         beszel = route("Beszel")
         beszel["metadata"]["namespace"] = "beszel"

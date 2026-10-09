@@ -8,8 +8,8 @@ load(strenv(PROVIDERS)).providers as $providers |
   .value + {"name": .key, "group": $group}] +
  [.machines | to_entries[] | .key as $network | .value | to_entries[] |
   .key as $machine | .value | select(.type != null) |
-  (.services // {}) | to_entries[] | select(.value.homepage != null) |
-  .value.homepage + {"group": (.value.homepage.group // "Servers"),
+  (.services // {}) | to_entries[] | select(.key != "management" and .value.homepage != null) |
+  .value.homepage + {"name": (.value.name // .key), "group": (.value.homepage.group // "Servers"),
     "href": ("homelab://" + $network + "/" + $machine + "/" + .key)}]) |
 [.[] |
   (., (select(.group != "Servers" and (.href | test("^homelab://"))) | . + {"group": "Servers"})) |
@@ -35,10 +35,10 @@ load(strenv(PROVIDERS)).providers as $providers |
       "steamos": "SteamOS", "talos": "Talos Linux", "truenas": "TrueNAS", "ucore": "uCore", "unifi": "UniFi"}[$machine.platform] // $machine.platform),
     "icon": ({"bazzite": "linux", "haos": "home-assistant", "macos": "apple", "steamos": "steam",
       "talos": "talos", "truenas": "truenas", "ucore": "linux", "unifi": "unifi"}[$machine.platform] // "mdi-server"),
-    "panel": ($machine.management // {}),
+    "panel": ($machine.services.management // {}),
     "reference": $management,
     "href": $management,
-    "management": ($machine.management_port != null),
+    "management": ($machine.services.management != null),
     "widgets": (
       ([$machine] | map(select(.beszel == true and strenv(HOMEPAGE_BESZEL_URL) != "")) | map({
         "type": "beszel", "url": strenv(HOMEPAGE_BESZEL_URL), "version": 2,
@@ -55,12 +55,12 @@ load(strenv(PROVIDERS)).providers as $providers |
       }))
     )
   } |
-  select($machine.management_port != null or $device != null or $tunnel != null or (.widgets | length > 0))
+  select($machine.services.management != null or $device != null or $tunnel != null or (.widgets | length > 0))
 ] as $machines |
 ($machines | map(select(.management) | select(.reference as $reference | $existing | any_c(.href == $reference) | not)) |
   map(.name = (.panel.name // .name) |
-    .description = (.panel.description // .description) |
-    .icon = (.panel.icon // .icon) |
+    .description = (.panel.homepage.description // .description) |
+    .icon = (.panel.homepage.icon // .icon) |
     del(.management, .panel, .widgets))) as $management |
 [$machines[] | . as $machine | .widgets[] | . as $widget |
   {"beszel": {"description": "System Monitoring", "icon": "beszel", "name": "Beszel"},

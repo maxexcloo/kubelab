@@ -78,13 +78,8 @@ while IFS= read -r reference; do
     'explode(.) | .machines[strenv(NETWORK)][strenv(MACHINE)]' \
     "$homelab_directory/data/machines.yaml" > "$temporary_directory/machine.yaml"
   hostname=$(MACHINE="$machine" yq -r '.hostname // strenv(MACHINE)' "$temporary_directory/machine.yaml")
-  if [ "$service" = management ]; then
-    scheme=https
-    port=$(yq -e -r '.management_port' "$temporary_directory/machine.yaml")
-  else
-    scheme=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].scheme' "$temporary_directory/machine.yaml")
-    port=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].port' "$temporary_directory/machine.yaml")
-  fi
+  scheme=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].scheme' "$temporary_directory/machine.yaml")
+  port=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].port' "$temporary_directory/machine.yaml")
   case "$scheme" in http | https) ;; *) echo "Invalid endpoint scheme: $reference" >&2; exit 1 ;; esac
   case "$port" in *[!0-9]* | '') echo "Invalid endpoint port: $reference" >&2; exit 1 ;; esac
   [ "$port" -ge 1 ] && [ "$port" -le 65535 ]

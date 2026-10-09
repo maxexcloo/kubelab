@@ -62,7 +62,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             machine = inventory["machines"]["mbk"]["slzb-06m"]
             machine["hostname"] = "coordinator"
             machine["interfaces"][0]["address"] = "192.0.2.9"
-            machine["services"]["console"]["homepage"]["name"] = "Adapter Console"
+            machine["services"]["console"]["name"] = "Adapter Console"
             inventory_path.write_text(json.dumps(inventory))
             template = Path(directory) / "source.yaml"
             template.write_text("[]\n")
