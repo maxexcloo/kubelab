@@ -19,22 +19,22 @@ jobs:
         uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Set up tools
+      - name: Set Up Tools
         uses: jdx/mise-action@v5
         with:
           version: 2026.10.4
-      - name: Run hooks
+      - name: Run Hooks
         run: mise run check
   monitoring:
-    name: Refresh external monitoring
-    needs: validate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Refresh External Monitoring
+    needs: validate
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy the validated inventory
+      - name: Deploy The Validated Inventory
         env:
           GH_TOKEN: ${{ secrets.HOMELAB_FLY_DEPLOY_TOKEN }}
           KUBELAB_REVISION: ${{ github.sha }}
         run: |
-          gh workflow run deploy.yaml --repo maxexcloo/flylab --ref main \
-            --field deployment=gatus-fly --field kubelab_revision="$KUBELAB_REVISION"
+          gh workflow run deploy.yaml --field deployment=gatus-fly \
+            --field kubelab_revision="$KUBELAB_REVISION" --ref main --repo maxexcloo/flylab

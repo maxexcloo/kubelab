@@ -62,8 +62,8 @@ spec:
                   - ALL
             env:
               BASE_URL: https://app.invalid
-              OAUTH2_REDIRECT_URL: https://app.invalid/oauth2/oidc/callback
               OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://identity.invalid
+              OAUTH2_REDIRECT_URL: https://app.invalid/oauth2/oidc/callback
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:

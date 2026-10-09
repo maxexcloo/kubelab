@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: Personal Finance
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/icon: actual-budget
           gethomepage.dev/name: Actual Budget
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       actual-budget:
         containers:

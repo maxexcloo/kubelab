@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: Game & ROM Library
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Media
           gethomepage.dev/icon: romm
           gethomepage.dev/name: RoMM
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       romm:
         containers:

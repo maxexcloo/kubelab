@@ -22,7 +22,7 @@ repos:
   - repo: local
     hooks:
       - id: project-check
-        name: Check project source
+        name: Check Project Source
         entry: mise run validate
         files: ^(\.github/workflows/.*\.yaml|\.gitignore|\.mise\.toml|\.pre-commit-config\.yaml|\.prettierignore|\.sourceignore|AGENTS\.md|README\.md|apps/|clusters/|platform/|renovate\.json|scripts/|tests/)
         language: system

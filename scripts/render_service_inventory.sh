@@ -32,13 +32,13 @@ done
 if ((${#clusters[@]} == 0)); then
   while IFS= read -r cluster_directory; do
     clusters+=("${cluster_directory##*/}")
-  done < <(find clusters -mindepth 1 -maxdepth 1 -type d | sort)
+  done < <(find clusters -maxdepth 1 -mindepth 1 -type d | sort)
 fi
 
 temporary_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-service-inventory.XXXXXX")"
 
 cleanup() {
-  rm -rf -- "${temporary_directory:?}"
+  rm -fr -- "${temporary_directory:?}"
 }
 
 trap cleanup EXIT
@@ -58,9 +58,9 @@ for cluster in "${clusters[@]}"; do
   fi
   for target in "apps/overlays/${cluster}" "clusters/${cluster}/platform"; do
     # shellcheck disable=SC2016
-    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -o=json -I=0 --from-file apps/base/homepage/service_routes.yq \
+    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval --from-file apps/base/homepage/service_routes.yq -I=0 -N -o=json \
       "${manifest_directory}/${target}.yaml" |
-      ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -p=json -o=yaml -r '
+      ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -o=yaml -p=json -r '
         select(
           strenv(ALL_ROUTES) == "true" or
           .annotations."monitoring.excloo.dev/enabled" == "true"

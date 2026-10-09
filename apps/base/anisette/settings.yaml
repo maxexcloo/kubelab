@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: Anisette Server
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/icon: si-apple-#ffffff
           gethomepage.dev/name: Anisette
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       anisette:
         containers:

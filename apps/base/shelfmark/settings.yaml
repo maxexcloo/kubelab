@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: Book Search & Downloads
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Media
           gethomepage.dev/icon: shelfmark
           gethomepage.dev/name: Shelfmark
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       shelfmark:
         containers:

@@ -6,11 +6,11 @@ metadata:
   annotations:
     gethomepage.dev/description: Network Speed Test
     gethomepage.dev/enabled: "true"
-    monitoring.excloo.dev/enabled: "true"
     gethomepage.dev/group: Servers
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: openspeedtest
     gethomepage.dev/name: OpenSpeedTest
+    monitoring.excloo.dev/enabled: "true"
   labels:
     app.kubernetes.io/name: openspeedtest
 spec:

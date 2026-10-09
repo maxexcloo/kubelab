@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: Bookmark Manager
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/icon: linkwarden
           gethomepage.dev/name: Linkwarden
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       linkwarden:
         containers:

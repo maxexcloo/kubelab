@@ -4,7 +4,7 @@ set -euo pipefail
 temporary_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-manifests.XXXXXX")"
 
 cleanup() {
-  rm -rf -- "${temporary_directory:?}"
+  rm -fr -- "${temporary_directory:?}"
 }
 
 trap cleanup EXIT
@@ -34,10 +34,10 @@ if [[ ! -s "${provider_http_schema_file}" ]]; then
   curl \
     --fail \
     --location \
-    --silent \
     --show-error \
+    --silent \
     "https://raw.githubusercontent.com/crossplane-contrib/provider-http/${provider_http_version}/package/crds/http.m.crossplane.io_requests.yaml" |
-    yq -o=json -I=2 '
+    yq -I=2 -o=json '
       .spec.versions[] |
       select(.name == "v1alpha2") |
       .schema.openAPIV3Schema |
@@ -47,15 +47,15 @@ if [[ ! -s "${provider_http_schema_file}" ]]; then
 fi
 
 kubeconform_flags=(
-  -kubernetes-version "${kubernetes_version}"
-  -skip "ClusterProviderConfig,CustomResourceDefinition"
-  -strict
-  -summary
   -cache "${remote_schema_cache_directory}"
+  -kubernetes-version "${kubernetes_version}"
   -schema-location "${schema_directory}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location "${provider_http_schema_root}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location default
   -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/${crd_catalog_revision}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
+  -skip "ClusterProviderConfig,CustomResourceDefinition"
+  -strict
+  -summary
 )
 
 manifest_files=()
@@ -70,7 +70,7 @@ while IFS=$'\t' read -r xrd_group xrd_kind xrd_version; do
   KUBELAB_XRD_GROUP="${xrd_group}" \
     KUBELAB_XRD_KIND="${xrd_kind}" \
     KUBELAB_XRD_VERSION="${xrd_version}" \
-    yq eval-all -o=json -I=2 '
+    yq eval-all -I=2 -o=json '
       [select(
         .apiVersion == "apiextensions.crossplane.io/v2" and
         .kind == "CompositeResourceDefinition" and

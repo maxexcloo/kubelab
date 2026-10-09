@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: ComfyUI Control & Proxy
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/icon: comfyui
           gethomepage.dev/name: Comfy Control
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       comfy-control:
         containers:

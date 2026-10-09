@@ -69,8 +69,8 @@ spec:
                 drop:
                   - ALL
             env:
-              ACTUAL_OPENID_SERVER_HOSTNAME: https://app.invalid
               ACTUAL_OPENID_DISCOVERY_URL: https://identity.invalid/.well-known/openid-configuration
+              ACTUAL_OPENID_SERVER_HOSTNAME: https://app.invalid
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:

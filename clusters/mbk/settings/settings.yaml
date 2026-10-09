@@ -6,7 +6,7 @@ metadata:
     config.kubernetes.io/local-config: "true"
 data:
   grafana_host: grafana.excloo.com
+  nfs_server: 10.4.0.3
   private_dns_host: private.mbk.excloo.dev
   # Derived from private_dns_host by Kustomize.
   private_dns_lookup: https://cloudflare-dns.com/dns-query?name=app.invalid
-  nfs_server: 10.4.0.3

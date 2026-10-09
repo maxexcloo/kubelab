@@ -59,8 +59,8 @@ spec:
                   - ALL
             env:
               BASE_URL: https://app.invalid
-              NEXTAUTH_URL: https://app.invalid/api/v1/auth
               KEYCLOAK_ISSUER: https://identity.invalid
+              NEXTAUTH_URL: https://app.invalid/api/v1/auth
       meilisearch:
         strategy: Recreate
         containers:

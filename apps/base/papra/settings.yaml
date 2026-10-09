@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: Document Management
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/icon: papra
           gethomepage.dev/name: Papra
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       papra:
         containers:

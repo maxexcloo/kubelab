@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: TRMNL Server
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/icon: sh-trmnl
           gethomepage.dev/name: LaraPaper
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       larapaper:
         containers:

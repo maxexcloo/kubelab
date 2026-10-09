@@ -22,6 +22,10 @@ spec:
         containers:
           romm:
             env:
+              OIDC_REDIRECT_URI: https://app.invalid/api/oauth/openid
+              OIDC_SERVER_APPLICATION_URL: https://identity.invalid
+              OIDC_SERVER_METADATA_URL: https://identity.invalid/.well-known/openid-configuration
+              ROMM_BASE_URL: https://app.invalid
               DB_PASSWD:
                 valueFrom:
                   secretKeyRef:
@@ -32,10 +36,6 @@ spec:
                   secretKeyRef:
                     key: username
                     name: romm-database
-              OIDC_REDIRECT_URI: https://app.invalid/api/oauth/openid
-              ROMM_BASE_URL: https://app.invalid
-              OIDC_SERVER_APPLICATION_URL: https://identity.invalid
-              OIDC_SERVER_METADATA_URL: https://identity.invalid/.well-known/openid-configuration
             envFrom:
               - secretRef:
                   name: romm

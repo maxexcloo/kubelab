@@ -6,11 +6,11 @@ metadata:
   annotations:
     gethomepage.dev/description: Kubernetes Dashboard
     gethomepage.dev/enabled: "true"
-    monitoring.excloo.dev/enabled: "true"
     gethomepage.dev/group: Servers
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: headlamp
     gethomepage.dev/name: Headlamp
+    monitoring.excloo.dev/enabled: "true"
   labels:
     app.kubernetes.io/name: headlamp
 spec:

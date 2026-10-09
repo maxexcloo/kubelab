@@ -18,8 +18,8 @@ fi
 kubectl --context "${cluster}" apply \
   --field-manager=kubelab-bootstrap \
   --force-conflicts \
-  --server-side \
-  --kustomize "${cluster_dir}/flux-system"
+  --kustomize "${cluster_dir}/flux-system" \
+  --server-side
 kubectl --context "${cluster}" -n flux-system wait deployment --all \
   --for=condition=Available \
   --timeout=5m

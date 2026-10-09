@@ -53,11 +53,6 @@ spec:
                   - ALL
           tailscale:
             env:
-              TS_AUTHKEY:
-                valueFrom:
-                  secretKeyRef:
-                    key: TS_AUTHKEY
-                    name: sidestore-vpn
               TS_DEBUG_FIREWALL_MODE: nftables
               TS_ENABLE_HEALTH_CHECK: "true"
               TS_EXTRA_ARGS: --snat-subnet-routes=false
@@ -67,6 +62,11 @@ spec:
               TS_ROUTES: 10.7.0.1/32
               TS_STATE_DIR: /var/lib/tailscale
               TS_USERSPACE: "false"
+              TS_AUTHKEY:
+                valueFrom:
+                  secretKeyRef:
+                    key: TS_AUTHKEY
+                    name: sidestore-vpn
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/tailscale/tailscale

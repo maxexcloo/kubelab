@@ -4,7 +4,7 @@ set -euo pipefail
 temporary_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-service-metadata.XXXXXX")"
 
 cleanup() {
-  rm -rf -- "${temporary_directory:?}"
+  rm -fr -- "${temporary_directory:?}"
 }
 
 trap cleanup EXIT
@@ -19,7 +19,7 @@ private_dns_file="${temporary_directory}/private-dns.json"
 route_file="${temporary_directory}/routes.json"
 
 scripts/render_service_inventory.sh --manifest-directory "${manifest_directory}" >"${inventory_file}"
-scripts/render_service_inventory.sh --manifest-directory "${manifest_directory}" --all-routes >"${route_file}"
+scripts/render_service_inventory.sh --all-routes --manifest-directory "${manifest_directory}" >"${route_file}"
 
 : >"${namespace_lines_file}"
 : >"${private_dns_file}"
@@ -29,7 +29,7 @@ while IFS= read -r cluster_directory; do
   while IFS= read -r target; do
     manifest_file="${manifest_directory}/${target#./}.yaml"
     manifest_files+=("${manifest_file}")
-    CLUSTER="${cluster}" yq eval -N -o=json -I=0 '
+    CLUSTER="${cluster}" yq eval -I=0 -N -o=json '
         select(.kind == "Namespace") |
         {
           "cluster": strenv(CLUSTER),
@@ -40,7 +40,7 @@ while IFS= read -r cluster_directory; do
           )
         }
       ' "${manifest_file}" | sed '/^null$/d; /^$/d' >>"${namespace_lines_file}"
-    CLUSTER="${cluster}" yq eval -N -o=json -I=0 '
+    CLUSTER="${cluster}" yq eval -I=0 -N -o=json '
       select(.kind == "PrivateDNSRecord") |
       {
         "cluster": strenv(CLUSTER),
@@ -53,10 +53,10 @@ while IFS= read -r cluster_directory; do
     yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .spec.sourceRef.name == "flux-system") | .spec.path' "${manifest_directory}/clusters/${cluster}.yaml" |
       sort -u
   )
-done < <(find clusters -mindepth 1 -maxdepth 1 -type d | sort)
+done < <(find clusters -maxdepth 1 -mindepth 1 -type d | sort)
 jq -s 'unique_by(.cluster, .name)' "${namespace_lines_file}" >"${namespace_file}"
 
-yq eval -N -o=json -I=0 '
+yq eval -I=0 -N -o=json '
   select(.kind == "PocketIDClient") |
   {
     "launchURL": .spec.client.launchURL,

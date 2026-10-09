@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: Email Archiving
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Operations
           gethomepage.dev/icon: sh-bichon
           gethomepage.dev/name: Bichon
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       bichon:
         containers:

@@ -10,10 +10,10 @@ spec:
         annotations:
           gethomepage.dev/description: OIDC Provider
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/icon: pocket-id
           gethomepage.dev/name: Pocket ID
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       pocket-id:
         containers:

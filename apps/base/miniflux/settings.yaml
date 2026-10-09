@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: RSS Reader
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/icon: miniflux
           gethomepage.dev/name: Miniflux
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       miniflux:
         containers:

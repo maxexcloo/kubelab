@@ -7,7 +7,6 @@ metadata:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
     gethomepage.dev/description: Photo Manager
     gethomepage.dev/enabled: "true"
-    monitoring.excloo.dev/enabled: "true"
     gethomepage.dev/group: Media
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: immich
@@ -17,6 +16,7 @@ metadata:
     gethomepage.dev/widget.type: immich
     gethomepage.dev/widget.url: https://app.invalid
     gethomepage.dev/widget.version: "2"
+    monitoring.excloo.dev/enabled: "true"
   labels:
     app.kubernetes.io/name: immich
     gateway.excloo.dev/public-access: "true"

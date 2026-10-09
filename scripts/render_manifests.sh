@@ -7,7 +7,7 @@ clusters=("$@")
 if ((${#clusters[@]} == 0)); then
   while IFS= read -r cluster_directory; do
     clusters+=("${cluster_directory##*/}")
-  done < <(find clusters -mindepth 1 -maxdepth 1 -type d | sort)
+  done < <(find clusters -maxdepth 1 -mindepth 1 -type d | sort)
 fi
 
 for cluster in "${clusters[@]}"; do

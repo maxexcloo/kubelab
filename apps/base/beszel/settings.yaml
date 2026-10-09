@@ -12,10 +12,10 @@ spec:
         annotations:
           gethomepage.dev/description: System Monitoring
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Operations
           gethomepage.dev/icon: beszel
           gethomepage.dev/name: Beszel
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       beszel:
         containers:

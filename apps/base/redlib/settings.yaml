@@ -123,8 +123,8 @@ spec:
         annotations:
           gethomepage.dev/description: Reddit Frontend
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
-          monitoring.excloo.dev/headers: '{"x-gatus-token":{"name":"redlib","key":"monitoring-token"}}'
           gethomepage.dev/group: Applications
           gethomepage.dev/icon: redlib
           gethomepage.dev/name: Redlib
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/headers: '{"x-gatus-token":{"name":"redlib","key":"monitoring-token"}}'

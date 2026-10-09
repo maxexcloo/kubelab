@@ -19,7 +19,7 @@ fi
 api_server="$(kubectl --context "${cluster}" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
 echo "Cluster: ${cluster}"
 echo "API server: ${api_server}"
-read -r -p "Bootstrap Cilium on cluster '${cluster}'? [y/N] " confirmation
+read -p "Bootstrap Cilium on cluster '${cluster}'? [y/N] " -r confirmation
 if [[ ! "${confirmation}" =~ ^[Yy]$ ]]; then
   echo "Cancelled."
   exit 1

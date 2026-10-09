@@ -18,12 +18,12 @@ template=${1:?Usage: render_services.sh template output [homelab-directory]}
 output=${2:?Usage: render_services.sh template output [homelab-directory]}
 homelab_directory=${3:-}
 temporary_directory=$(mktemp -d)
-trap 'rm -rf "$temporary_directory"' EXIT
+trap 'rm -fr "$temporary_directory"' EXIT
 
 if [ -z "$homelab_directory" ]; then
   homelab_directory="$temporary_directory/homelab"
   mkdir -p "$homelab_directory"
-  wget -q -T 30 -O "$temporary_directory/homelab.tar.gz" \
+  wget -O "$temporary_directory/homelab.tar.gz" -q -T 30 \
     https://codeload.github.com/maxexcloo/homelab/tar.gz/refs/heads/main
   tar -xzf "$temporary_directory/homelab.tar.gz" -C "$homelab_directory" --strip-components=1
 fi

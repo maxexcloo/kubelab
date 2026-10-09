@@ -14,7 +14,7 @@ yq = "4.54.1"
 
 # Bootstrap
 [tasks.bootstrap]
-description = "Bootstrap a cluster in dependency order"
+description = "Bootstrap A Cluster In Dependency Order"
 run = 'echo "Cluster $usage_cluster bootstrap submitted. Check progress with: mise run status $usage_cluster"'
 usage = 'arg "<cluster>"'
 depends = [
@@ -24,23 +24,23 @@ depends = [
 ]
 
 [tasks.bootstrap-cilium]
-description = "Bootstrap Cilium networking for a cluster"
+description = "Bootstrap Cilium Networking For A Cluster"
 interactive = true
 run = "scripts/bootstrap_cilium.sh"
 
 [tasks.bootstrap-flux]
-description = "Bootstrap Flux reconciliation for a cluster"
+description = "Bootstrap Flux Reconciliation For A Cluster"
 run = "scripts/bootstrap_flux.sh"
 wait_for = ["bootstrap-secrets"]
 
 [tasks.bootstrap-secrets]
-description = "Bootstrap 1Password Connect credentials"
+description = "Bootstrap 1Password Connect Credentials"
 run = "scripts/bootstrap_cluster_secrets.sh"
 wait_for = ["bootstrap-cilium"]
 
 # Deploy
 [tasks.deploy]
-description = "Reconcile a cluster or Flux component from Git"
+description = "Reconcile A Cluster Or Flux Component From Git"
 run = 'flux --context "$usage_cluster" reconcile kustomization "${usage_component:-flux-system}" --with-source'
 usage = '''
 arg "<cluster>"
@@ -48,7 +48,7 @@ arg "[component]"
 '''
 
 [tasks.status]
-description = "Show cluster reconciliation or watch an application's Helm release"
+description = "Show Cluster Reconciliation Or Watch An Application's Helm Release"
 run = '''
 if [ -n "${usage_application:-}" ]; then
   flux --context "$usage_cluster" get helmreleases "$usage_application" --namespace "$usage_application" --watch
@@ -64,30 +64,30 @@ arg "[application]"
 
 # Development
 [tasks.check]
-description = "Run all repository checks"
+description = "Run All Repository Checks"
 run = "prek run --all-files"
 
 [tasks.fmt]
-description = "Format project files"
+description = "Format Project Files"
 run = "prettier --write ."
 
 [tasks.validate]
-description = "Check project files and configuration"
+description = "Check Project Files & Configuration"
 run = """
 actionlint .github/workflows/*.yaml
 prettier --check .
 shellcheck scripts/*.sh apps/base/homepage/*.sh
 manifest_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-check.XXXXXX")"
-trap 'rm -rf -- "${manifest_directory:?}"' EXIT
+trap 'rm -fr -- "${manifest_directory:?}"' EXIT
 scripts/render_manifests.sh "$manifest_directory"
 scripts/check_manifests.sh "$manifest_directory"
 scripts/check_service_metadata.sh "$manifest_directory"
-python -m unittest discover -s tests -p 'test_*.py'
+python -m unittest discover -p 'test_*.py' -s tests
 """
 
 # Setup
 [tasks.setup]
-description = "Install tools and Git hooks"
+description = "Install Tools & Git Hooks"
 run = """
 mise install
 prek install

@@ -17,12 +17,12 @@ source_directory=${1:?Usage: render_dashboard.sh source-directory output-directo
 output_directory=${2:?Usage: render_dashboard.sh source-directory output-directory}
 script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 temporary_directory=$(mktemp -d)
-trap 'rm -rf "$temporary_directory"' EXIT
+trap 'rm -fr "$temporary_directory"' EXIT
 kubelab_directory=${KUBELAB_DIRECTORY:-}
 export HOMEPAGE_CLUSTER="${HOMEPAGE_CLUSTER:-mbk}"
 
 if [ -z "$kubelab_directory" ]; then
-  wget -q -T 30 -O "$temporary_directory/kubelab.tar.gz" \
+  wget -O "$temporary_directory/kubelab.tar.gz" -q -T 30 \
     https://codeload.github.com/maxexcloo/kubelab/tar.gz/refs/heads/main
   kubelab_directory="$temporary_directory/kubelab"
   mkdir "$kubelab_directory"
@@ -31,7 +31,7 @@ fi
 
 homelab_directory=${HOMELAB_DIRECTORY:-}
 if [ -z "$homelab_directory" ]; then
-  wget -q -T 30 -O "$temporary_directory/homelab.tar.gz" \
+  wget -O "$temporary_directory/homelab.tar.gz" -q -T 30 \
     https://codeload.github.com/maxexcloo/homelab/tar.gz/refs/heads/main
   homelab_directory="$temporary_directory/homelab"
   mkdir "$homelab_directory"
@@ -47,7 +47,7 @@ for overlay in "$kubelab_directory"/apps/overlays/*; do
   cluster=${overlay##*/}
   for target in "$overlay" "$kubelab_directory/clusters/$cluster/platform"; do
     "${KUBECTL:-kubectl}" kustomize "$target" > "$temporary_directory/manifests.yaml"
-    CLUSTER="$cluster" yq -N -o=json -I=0 --from-file "$script_directory/service_routes.yq" \
+    CLUSTER="$cluster" yq --from-file "$script_directory/service_routes.yq" -I=0 -N -o=json \
       "$temporary_directory/manifests.yaml" >> "$temporary_directory/routes.json"
   done
 done

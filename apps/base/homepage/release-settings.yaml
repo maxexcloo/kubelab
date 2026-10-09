@@ -13,10 +13,10 @@ spec:
         annotations:
           gethomepage.dev/description: Application Dashboard
           gethomepage.dev/enabled: "true"
-          monitoring.excloo.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/icon: homepage
           gethomepage.dev/name: Homepage
+          monitoring.excloo.dev/enabled: "true"
     controllers:
       homepage:
         containers:
