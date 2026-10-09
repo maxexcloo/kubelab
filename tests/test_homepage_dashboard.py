@@ -218,24 +218,22 @@ class HomepageDashboardTests(unittest.TestCase):
       type: server
       services:
         management:
+          description: Host Administration
+          icon: example-console
           name: Example Console
           port: 9090
           scheme: https
-          homepage:
-            description: Host Administration
-            icon: example-console
     second:
       hostname: renamed
       platform: bazzite
       type: server
       services:
         management:
+          description: Host Administration
+          icon: example-console
           name: Example Console
           port: 9443
           scheme: https
-          homepage:
-            description: Host Administration
-            icon: example-console
 """)
         beszel = route("Beszel")
         beszel["metadata"]["namespace"] = "beszel"

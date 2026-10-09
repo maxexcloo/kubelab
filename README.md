@@ -233,8 +233,8 @@ by a path. Homelab owns hostnames, domains and each service's `name`, `scheme` a
 `port`; management consoles use `services.management`. HTTP links use the preferred
 host in Homelab's infrastructure snapshot; HTTPS links retain the certificate
 hostname. Missing snapshots retain the canonical hostname.
-Optional service `homepage` metadata supplies `description`, `icon` and `group`
-(default: Servers). Existing appliance cards prevent duplicate management links.
+Services with `description`, `icon` or `group` metadata produce Homepage cards
+(default group: Servers). Existing appliance cards prevent duplicate management links.
 Provider bookmarks and Cloudflare/Tailscale widget settings come from Homelab's
 `data/providers.yaml`; provider identities come from the infrastructure snapshot.
 

@@ -11,7 +11,7 @@ machines:
           port: 443
           scheme: https
     hass:
-      display_name: HASS
+      name: HASS
       platform: haos
       type: appliance
       services:
@@ -37,12 +37,11 @@ machines:
       type: appliance
       services:
         console:
+          description: Remote Console & Power Control
+          icon: sipeed
           name: NanoKVM
           port: 80
           scheme: http
-          homepage:
-            description: Remote Console & Power Control
-            icon: sipeed
     slzb-06m:
       platform: slzb
       type: appliance
@@ -50,12 +49,11 @@ machines:
         - address: 192.0.2.6
       services:
         console:
+          description: Zigbee Ethernet Adapter
+          icon: zigbee
           name: SLZB-06M
           port: 80
           scheme: http
-          homepage:
-            description: Zigbee Ethernet Adapter
-            icon: zigbee
       tailscale:
         enabled: false
     taco:
