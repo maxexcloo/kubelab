@@ -33,6 +33,7 @@ cp "$template" "$temporary_directory/services.yaml"
 if [ "$(yq 'tag' "$template")" = '!!seq' ]; then
   printf '{}\n' > "$temporary_directory/infrastructure.json"
   TEMPLATE="$template" INFRASTRUCTURE="${HOMELAB_INFRASTRUCTURE_FILE:-$temporary_directory/infrastructure.json}" \
+    PROVIDERS="$homelab_directory/data/providers.yaml" \
     HOMEPAGE_BESZEL_URL="${HOMEPAGE_BESZEL_URL:-}" \
     yq --from-file "$(dirname "$0")/machine_widgets.yq" \
     "$homelab_directory/data/machines.yaml" > "$temporary_directory/services.yaml"

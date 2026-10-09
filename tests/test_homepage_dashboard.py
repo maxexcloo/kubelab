@@ -139,6 +139,21 @@ class HomepageDashboardTests(unittest.TestCase):
         inventory["machines"]["mbk"]["sensor"] = {"platform": "slzb"}
         inventory["machines"]["mbk"]["taco"] = {"beszel": True, "cluster": "mbk", "platform": "talos", "type": "vm"}
         path.write_text(json.dumps(inventory))
+        providers_path = homelab / "data/providers.yaml"
+        providers = read_yaml(providers_path)
+        providers["providers"].update({
+            "Cloudflare": {"homepage": {
+                "description": "Cloudflare Tunnel", "icon": "cloudflare", "name": "Cloudflare Tunnel",
+                "widget": {"type": "cloudflared", "key": "{{HOMEPAGE_FILE_CLOUDFLARE_KEY}}"},
+            }},
+            "Tailscale": {"homepage": {
+                "description": "VPN", "icon": "tailscale", "name": "Tailscale",
+                "widget": {"type": "tailscale", "key": "{{HOMEPAGE_FILE_TAILSCALE_KEY}}"},
+            }},
+        })
+        for name in ("Cloudflare", "Tailscale"):
+            providers["providers"][name].update({"description": name, "icon": name.lower(), "url": f"https://{name.lower()}.example.net"})
+        providers_path.write_text(json.dumps(providers))
         identities = self.directory / "infrastructure.json"
         identities.write_text(json.dumps({
             "cloudflare": {"account_id": "account", "tunnels": {"kimbap": "storage-tunnel", "mbk": "cluster-tunnel"}},

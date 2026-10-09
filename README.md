@@ -244,7 +244,9 @@ appliance card prevents duplication. Optional Homelab `management` metadata
 supplies the panel's `name`, `description` and `icon`; without it, the link uses
 the machine identity and platform. Shared panel metadata uses ordinary YAML
 anchors. Both category and host cards share widget settings and credential
-references. Provider bookmarks come from Homelab's `data/providers.yaml`.
+references. Provider bookmarks and Cloudflare/Tailscale card metadata and widget
+settings come from Homelab's `data/providers.yaml`; provider identities are added
+from the infrastructure snapshot.
 
 Homelab publishes non-secret Cloudflare account/tunnel IDs and Tailscale device
 IDs in each cluster vault's `Infrastructure Inventory` item. A separate
