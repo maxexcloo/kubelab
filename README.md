@@ -216,6 +216,10 @@ item for inventory and supported Integration API tools. The reconciler creates
 this field empty when missing and preserves supplied keys; UniFi issues the key.
 Legacy tools requiring a local admin session remain unavailable with API-key-only
 authentication.
+Pi, Antigravity, Codex and OpenCode connect to `https://bifrost.excloo.com/mcp`
+using Bifrost's MCP-only `Agents` virtual key, stored as `api-key-mcp` in the same
+1Password item. Manage upstream servers centrally in Bifrost; client files keep
+only their native HTTP connection settings.
 
 ### Homepage
 
