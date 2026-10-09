@@ -27,7 +27,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/comfy-control
-              tag: sha-2809207-control@sha256:68f011a2bfe560cfc19c50446db1d727ef8ae25c3d4ed4a3f3820dd586c21841
+              tag: sha-ba5cbc9-control@sha256:74bf6cda62a7456b0503b3ce4b880135dfceb9b8214a19a473a759a5e80b77aa
             probes:
               liveness:
                 custom: true
