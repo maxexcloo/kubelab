@@ -14,8 +14,6 @@ Kubernetes is unavailable.
 - Treat `README.md` as authoritative for current workload ownership and
   `homelab` configuration as authoritative for substrate implementation
   details.
-- Use Australian English in project-owned prose and identifiers.
-- Use `.yaml`, not `.yml`, for project-owned YAML.
 - Omit trailing slashes from project-owned base URLs.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
@@ -48,36 +46,24 @@ patch. Use standard Kustomize replacements for derived hostnames and URLs.
 Keep root Markdown limited to `AGENTS.md` and `README.md`. Keep maintained
 project documentation in `README.md`; do not add a `docs/` tree.
 
-## Sorting Convention
+## Sorting Exceptions
 
-Use conventional Kubernetes field and resource ordering. In other unordered
-mappings, sort single-line values before objects, alphabetically within each;
-keep list-item identifiers first. Preserve dependency, routing and procedural
-order. Keep project-owned YAML free of blank separator lines.
-
-Sort Mise tools and tasks within lifecycle sections, Renovate rules by description,
-and Prek hooks by ID. Workflows start with `name`, `on`, `permissions`,
-`concurrency`, then configuration and jobs. Sort unordered prose lists and tables.
+Use conventional Kubernetes field and resource ordering. Keep project-owned
+YAML free of blank separator lines.
 
 ## Style
 
-- Prefer plain, direct Kubernetes manifests and upstream charts over abstractions
-  and generic pipelines.
 - Add scheduled jobs or automatic deletion only when explicitly requested.
 - Use supported app configuration interfaces; leave unsupported settings manual.
 - Keep comments local and specific; document only material operational behaviour
   in `README.md`.
-- Keep check orchestration single-layered so the same validator is not run both
-  directly and through a nested task in one path.
 
 ## Verification
 
-- Run `mise run check` before handoff.
 - Render changed Helm charts and use small response fixtures for changed API
   comparisons; avoid adding a general validation framework.
 
 ## Git History
 
-Git history is the work log. Use small, imperative commit subjects. Keep a
-decision or ownership transfer separate from its implementation when review of
-that decision is useful.
+Keep a decision or ownership transfer separate from its implementation when
+review of that decision is useful.
