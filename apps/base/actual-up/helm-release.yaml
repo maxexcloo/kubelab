@@ -24,6 +24,7 @@ spec:
           actual-up:
             env:
               ACTUAL_UP_CONFIG: /config/config.yaml
+              ACTUAL_UP_PUBLIC_URL: https://app.invalid
               TZ: Australia/Sydney
             envFrom:
               - secretRef:
@@ -31,7 +32,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/actual-up
-              tag: sha-89f7ea6c2a1cf86654585d49360be63e421dbf39@sha256:31d2339b9c55956b3c19f786054bc0173066aec6fbae7f7fa8a4df093d9ed9eb
+              tag: sha-ea8f9adbeab6a30be12aa916d9dc4971a953ded5@sha256:be0971ac51632304ecb22c1b3507b42eb0aaac35e4860ec1d1c252b541ec1f43
             probes:
               liveness:
                 custom: true
@@ -107,12 +108,12 @@ spec:
           gethomepage.dev/description: Up to Actual Sync
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://actual-up.mbk.excloo.dev
+          gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: actual-budget
           gethomepage.dev/name: Actual Up
-          gethomepage.dev/siteMonitor: https://actual-up.mbk.excloo.dev/livez
+          gethomepage.dev/siteMonitor: https://app.invalid/livez
         hostnames:
-          - actual-up.mbk.excloo.dev
+          - app.invalid
         labels:
           app.kubernetes.io/name: actual-up
         parentRefs:

@@ -10,3 +10,23 @@ configMapGenerator:
       - config.yaml
 configurations:
   - kustomizeconfig.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: actual-up
+      namespace: actual-up
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+          name: actual-up
+          namespace: actual-up
+        fieldPaths:
+          - spec.values.controllers.actual-up.containers.actual-up.env.ACTUAL_UP_PUBLIC_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+          - spec.values.route.private.annotations.[gethomepage.dev/siteMonitor]
+        options:
+          delimiter: /
+          index: 2

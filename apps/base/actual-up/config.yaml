@@ -12,6 +12,5 @@ schedule:
 server:
   host: 0.0.0.0
   port: 3000
-  publicUrl: https://actual-up.mbk.excloo.dev
 up:
   connections: []
