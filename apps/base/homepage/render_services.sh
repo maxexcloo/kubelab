@@ -97,7 +97,7 @@ done < "$temporary_directory/references"
 
 # Keep Homepage's provider bookmarks in the shared Homelab inventory.
 yq -e '.providers | length > 0' "$homelab_directory/data/providers.yaml" >/dev/null
-yq '.providers | to_entries | map({(.key): [{"description": .value.description, "href": .value.url, "icon": .value.icon}]}) | [{"Providers": .}]' \
+yq '.providers | to_entries | map({(.value.name): [{"description": .value.description, "href": .value.url, "icon": .value.icon}]}) | [{"Providers": .}]' \
   "$homelab_directory/data/providers.yaml" > "$temporary_directory/bookmarks.yaml"
 
 # Rename on the destination filesystem so readers never see a partial update.

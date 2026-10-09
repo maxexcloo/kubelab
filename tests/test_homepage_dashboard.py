@@ -142,17 +142,17 @@ class HomepageDashboardTests(unittest.TestCase):
         providers_path = homelab / "data/providers.yaml"
         providers = read_yaml(providers_path)
         providers["providers"].update({
-            "Cloudflare": {"homepage": {
+            "cloudflare": {"homepage": {
                 "description": "Cloudflare Tunnel", "icon": "cloudflare", "name": "Cloudflare Tunnel",
                 "widget": {"type": "cloudflared", "key": "{{HOMEPAGE_FILE_CLOUDFLARE_KEY}}"},
             }},
-            "Tailscale": {"homepage": {
+            "tailscale": {"homepage": {
                 "description": "VPN", "icon": "tailscale", "name": "Tailscale",
                 "widget": {"type": "tailscale", "key": "{{HOMEPAGE_FILE_TAILSCALE_KEY}}"},
             }},
         })
         for name in ("Cloudflare", "Tailscale"):
-            providers["providers"][name].update({"description": name, "icon": name.lower(), "url": f"https://{name.lower()}.example.net"})
+            providers["providers"][name.lower()].update({"name": name, "description": name, "icon": name.lower(), "url": f"https://{name.lower()}.example.net"})
         providers_path.write_text(json.dumps(providers))
         identities = self.directory / "infrastructure.json"
         identities.write_text(json.dumps({

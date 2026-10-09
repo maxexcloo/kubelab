@@ -1,5 +1,6 @@
 providers:
-  Example:
+  example:
     description: Example provider
     icon: example
+    name: Example
     url: https://provider.example.com
