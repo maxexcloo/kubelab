@@ -1,5 +1,7 @@
 #!/bin/sh
 set -eu
+: "${HOMEPAGE_CLUSTER:?HOMEPAGE_CLUSTER is required}"
+export HOMEPAGE_CLUSTER
 
 if [ "${1:-}" = --watch ]; then
   shift
@@ -19,7 +21,6 @@ script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
 kubelab_directory=${KUBELAB_DIRECTORY:-}
-export HOMEPAGE_CLUSTER="${HOMEPAGE_CLUSTER:-mbk}"
 
 if [ -z "$kubelab_directory" ]; then
   wget -O "$temporary_directory/kubelab.tar.gz" -q -T 30 \

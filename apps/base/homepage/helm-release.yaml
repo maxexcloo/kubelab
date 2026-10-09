@@ -111,7 +111,6 @@ spec:
               - /output
             env:
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
-              HOMEPAGE_CLUSTER: mbk
               KUBECTL: /tools/kubectl
             image:
               repository: docker.io/mikefarah/yq
