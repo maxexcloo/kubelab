@@ -26,4 +26,4 @@ spec:
               HOME: /tmp
               PYTHONDONTWRITEBYTECODE: "1"
               TZ: Australia/Sydney
-              WORKER_IMAGE: ghcr.io/maxexcloo/comfy-control:sha-e86e503-worker@sha256:eed7a4f5d2ccea4d9f0bbef54981cf1d5e21d5faa89bcf2c6113278d87d44fb7
+              WORKER_IMAGE: ghcr.io/maxexcloo/comfy-control:sha-19f9314-worker@sha256:c85c64ec1596289bbe913b8be14a18d643637ce2a4a58f685c12ac1297fc0328
