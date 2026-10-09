@@ -2,8 +2,8 @@
 load(strenv(TEMPLATE)) as $groups |
 load(strenv(INFRASTRUCTURE)) as $infra |
 load(strenv(PROVIDERS)).providers as $providers |
-($providers.cloudflare.homepage // {}) as $cloudflare |
-($providers.tailscale.homepage // {}) as $tailscale |
+($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"])) as $cloudflare |
+($providers.tailscale // {} | pick(["description", "icon", "name", "widget"])) as $tailscale |
 (([$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
   .value + {"name": .key, "group": $group}] +
  [.machines | to_entries[] | .key as $network | .value | to_entries[] |

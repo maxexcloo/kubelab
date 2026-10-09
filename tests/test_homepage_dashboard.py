@@ -142,14 +142,14 @@ class HomepageDashboardTests(unittest.TestCase):
         providers_path = homelab / "data/providers.yaml"
         providers = read_yaml(providers_path)
         providers["providers"].update({
-            "cloudflare": {"homepage": {
+            "cloudflare": {
                 "description": "Cloudflare Tunnel", "icon": "cloudflare", "name": "Cloudflare Tunnel",
                 "widget": {"type": "cloudflared", "key": "{{HOMEPAGE_FILE_CLOUDFLARE_KEY}}"},
-            }},
-            "tailscale": {"homepage": {
+            },
+            "tailscale": {
                 "description": "VPN", "icon": "tailscale", "name": "Tailscale",
                 "widget": {"type": "tailscale", "key": "{{HOMEPAGE_FILE_TAILSCALE_KEY}}"},
-            }},
+            },
         })
         for name in ("Cloudflare", "Tailscale"):
             providers["providers"][name.lower()].update({"name": name, "description": name, "icon": name.lower(), "url": f"https://{name.lower()}.example.net"})
@@ -178,7 +178,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • HASS (MBK)")
         self.assertEqual(groups["Infrastructure"]["Syncthing"]["widget"], groups["mbk-storage"]["Syncthing"]["widget"])
         storage = groups["mbk-storage"]
-        self.assertEqual(list(storage), ["Beszel", "Cloudflare Tunnel", "Syncthing", "Tailscale", "TrueNAS", "Netboot"])
+        self.assertEqual(list(storage), ["Beszel", "Cloudflare", "Syncthing", "Tailscale", "TrueNAS", "Netboot"])
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])
@@ -187,7 +187,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(node["Beszel"]["widget"]["systemId"], "mbk-taco")
         self.assertEqual(node["Beszel"]["href"], "https://beszel.example.net/system/mbk-taco")
         self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
-        self.assertEqual(groups["Cluster: MBK"]["Cloudflare Tunnel"]["widget"]["tunnelid"], "cluster-tunnel")
+        self.assertEqual(groups["Cluster: MBK"]["Cloudflare"]["widget"]["tunnelid"], "cluster-tunnel")
         self.assertEqual(node["Tailscale"]["widget"]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
         self.assertEqual(node["Tailscale"]["href"], "https://login.tailscale.com/admin/machines/node-device")
         self.assertEqual(node["Beszel"]["widget"]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")
