@@ -6,6 +6,8 @@ metadata:
 spec:
   interval: 30m
   releaseName: romm
+  # Allow the initial 5.4 database migration to finish before Helm times out.
+  timeout: 40m
   chart:
     spec:
       chart: app-template
@@ -42,18 +44,18 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/rommapp/romm
-              tag: 5.3.1@sha256:0d66b4ea152a237c7f24b95e87459f46d3c596a7c0b35a82f26bc971487278b3
+              tag: 5.4.0@sha256:03295f95a6290e752641f9553ac4198b0e5b71b879d57f7b2371b98f608feb54
             probes:
               liveness:
                 custom: true
                 enabled: true
                 spec:
-                  failureThreshold: 3
+                  failureThreshold: 10
                   httpGet:
                     path: /api/heartbeat
                     port: 8080
                   periodSeconds: 30
-                  timeoutSeconds: 10
+                  timeoutSeconds: 30
               readiness:
                 custom: true
                 enabled: true
@@ -68,7 +70,8 @@ spec:
                 custom: true
                 enabled: true
                 spec:
-                  failureThreshold: 60
+                  # Large-library migrations can take 20 minutes on first start.
+                  failureThreshold: 360
                   httpGet:
                     path: /api/heartbeat
                     port: 8080

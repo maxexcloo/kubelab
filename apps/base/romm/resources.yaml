@@ -67,3 +67,11 @@ spec:
       cnpg.io/cluster: romm-database
   policyTypes:
     - Ingress
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: ResendKey
+metadata:
+  name: resend
+  namespace: romm
+spec:
+  displayName: RoMM

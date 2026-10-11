@@ -21,11 +21,18 @@ spec:
         containers:
           romm:
             env:
+              # Retain audit events and avoid automatic cleanup jobs.
+              AUDIT_LOG_RETENTION_DAYS: "0"
               CSDB_API_ENABLED: "true"
               DB_HOST: romm-database-rw
               DB_PORT: "5432"
               DB_QUERY_JSON: '{"sslmode":"require"}'
               DEMOZOO_API_ENABLED: "true"
+              DEVICE_INSTALL_REQUEST_TTL_DAYS: "0"
+              ENABLE_SCHEDULED_CLEANUP_NETPLAY: "false"
+              ENABLE_SCHEDULED_CLEANUP_SYNC_SESSIONS: "false"
+              ENABLE_SCHEDULED_CLEANUP_UPLOAD_TMP: "false"
+              ENABLE_SCHEDULED_CLEANUP_ZIP_CACHE: "false"
               FLASHPOINT_API_ENABLED: "true"
               HASHEOUS_API_ENABLED: "true"
               HLTB_API_ENABLED: "true"
@@ -36,7 +43,13 @@ spec:
               POUET_API_ENABLED: "true"
               REDIS_HOST: localhost
               ROMM_DB_DRIVER: postgresql
-              SCAN_TIMEOUT: "86400"
+              # The initial full-library scan ran for almost two days.
+              SCAN_TIMEOUT: "604800"
+              SMTP_FROM: romm@excloo.dev
+              SMTP_HOST: smtp.resend.com
+              SMTP_PORT: "465"
+              SMTP_SECURITY: tls
+              SMTP_USERNAME: resend
               STEAM_API_ENABLED: "true"
               TGDB_API_ENABLED: "true"
               TZ: Australia/Sydney
