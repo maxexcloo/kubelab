@@ -27,6 +27,19 @@ spec:
   volumeName: immich-library
 ---
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: valkey-data
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+  storageClassName: local-path
+---
+apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: immich-icloud-photos

@@ -10,29 +10,33 @@ spec:
     kind: OCIRepository
     name: immich
     namespace: flux-system
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: apps
+              kind: Deployment
+              name: immich-server
+              version: v1
+            patch: |-
+              - op: replace
+                path: /spec/template/spec/containers/0/readinessProbe
+                value:
+                  exec:
+                    command:
+                      - node
+                      - /health/readiness.cjs
+                  failureThreshold: 3
+                  periodSeconds: 10
+                  timeoutSeconds: 5
   values:
     controllers:
       main:
         containers:
           main:
             env:
-              DB_DATABASE_NAME: immich
-              DB_HOSTNAME: immich-database-rw
-              DB_PORT: "5432"
-              DB_SSL_MODE: require
-              DB_VECTOR_EXTENSION: vectorchord
               IMMICH_LOG_FORMAT: json
               TZ: Australia/Sydney
-              DB_PASSWORD:
-                valueFrom:
-                  secretKeyRef:
-                    key: password
-                    name: immich-database
-              DB_USERNAME:
-                valueFrom:
-                  secretKeyRef:
-                    key: username
-                    name: immich-database
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
@@ -79,21 +83,44 @@ spec:
         main:
           containers:
             main:
+              env:
+                DB_DATABASE_NAME: immich
+                DB_HOSTNAME: immich-database-rw
+                DB_PORT: "5432"
+                DB_SSL_MODE: require
+                DB_VECTOR_EXTENSION: vectorchord
+                DB_PASSWORD:
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: immich-database
+                DB_USERNAME:
+                  valueFrom:
+                    secretKeyRef:
+                      key: username
+                      name: immich-database
               image:
                 repository: ghcr.io/immich-app/immich-server
                 tag: v3.3.1@sha256:db996e352359771c6a3db121a0ed8761516b22f727fc092a0f46dcfef82c1bc1
               resources:
                 limits:
-                  memory: 4Gi
+                  memory: 8Gi
                 requests:
-                  cpu: 100m
-                  memory: 1536Mi
+                  cpu: 500m
+                  memory: 3Gi
       persistence:
         cli:
           enabled: true
           type: emptyDir
           globalMounts:
             - path: /.config
+        health:
+          enabled: true
+          name: immich-health
+          type: configMap
+          globalMounts:
+            - path: /health
+              readOnly: true
         icloud-photos:
           enabled: true
           existingClaim: icloud-photos
@@ -112,12 +139,21 @@ spec:
         main:
           containers:
             main:
+              args:
+                - --appendfsync
+                - everysec
+                - --appendonly
+                - "yes"
               image:
                 repository: docker.io/valkey/valkey
                 tag: 9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
               resources:
                 limits:
-                  memory: 512Mi
+                  memory: 2Gi
                 requests:
-                  cpu: 20m
-                  memory: 128Mi
+                  cpu: 100m
+                  memory: 512Mi
+      persistence:
+        data:
+          existingClaim: valkey-data
+          type: persistentVolumeClaim
