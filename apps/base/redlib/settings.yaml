@@ -11,6 +11,7 @@ spec:
           redlib:
             env:
               REDLIB_DEFAULT_REMOVE_DEFAULT_FEEDS: on
+              REDLIB_DEFAULT_SHOW_NSFW: on
               REDLIB_DEFAULT_USE_HLS: on
               REDLIB_ROBOTS_DISABLE_INDEXING: on
     subscriptions:
