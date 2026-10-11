@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-      version: 5.2.1
+      version: 5.3.0
   values:
     controllers:
       sidestore-vpn:
@@ -28,7 +28,7 @@ spec:
               - net.ipv4.ip_forward=1
             image:
               repository: ghcr.io/tailscale/tailscale
-              tag: v1.102.4
+              tag: v1.102.5
             securityContext:
               privileged: true
         containers:
@@ -70,7 +70,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/tailscale/tailscale
-              tag: v1.102.4
+              tag: v1.102.5
             probes:
               readiness:
                 enabled: true
