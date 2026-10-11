@@ -10,25 +10,6 @@ spec:
     kind: OCIRepository
     name: immich
     namespace: flux-system
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              group: apps
-              kind: Deployment
-              name: immich-server
-              version: v1
-            patch: |-
-              - op: replace
-                path: /spec/template/spec/containers/0/readinessProbe
-                value:
-                  exec:
-                    command:
-                      - node
-                      - /health/readiness.cjs
-                  failureThreshold: 3
-                  periodSeconds: 10
-                  timeoutSeconds: 5
   values:
     controllers:
       main:
@@ -114,13 +95,6 @@ spec:
           type: emptyDir
           globalMounts:
             - path: /.config
-        health:
-          enabled: true
-          name: immich-health
-          type: configMap
-          globalMounts:
-            - path: /health
-              readOnly: true
         icloud-photos:
           enabled: true
           existingClaim: icloud-photos

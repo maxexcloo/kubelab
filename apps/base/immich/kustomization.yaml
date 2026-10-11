@@ -11,13 +11,6 @@ resources:
   - storage.yaml
   - route.yaml
   - private-dns.yaml
-configMapGenerator:
-  - name: immich-health
-    namespace: immich
-    files:
-      - readiness.cjs
-generatorOptions:
-  disableNameSuffixHash: true
 replacements:
   - source:
       kind: HTTPRoute
