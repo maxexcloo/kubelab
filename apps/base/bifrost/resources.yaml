@@ -19,10 +19,6 @@ spec:
       secretKey: CLIPROXY_API_KEY
     - remoteRef:
         key: Bifrost
-        property: api-key-comfy-control
-      secretKey: COMFY_CONTROL_API_KEY
-    - remoteRef:
-        key: Bifrost
         property: api-key-unifi
       secretKey: UNIFI_NETWORK_API_KEY
     - remoteRef:

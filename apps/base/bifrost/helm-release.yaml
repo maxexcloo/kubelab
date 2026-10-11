@@ -35,11 +35,6 @@ spec:
           secretKeyRef:
             key: CLIPROXY_API_KEY
             name: bifrost
-      - name: COMFY_CONTROL_API_KEY
-        valueFrom:
-          secretKeyRef:
-            key: COMFY_CONTROL_API_KEY
-            name: bifrost
       - name: PATH
         value: /opt/mcp:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - name: UNIFI_NETWORK_API_KEY

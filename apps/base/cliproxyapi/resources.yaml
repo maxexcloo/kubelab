@@ -68,12 +68,6 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: bifrost
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: comfy-control
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: comfy-control
       ports:
         - port: 8317
           protocol: TCP
