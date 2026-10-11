@@ -43,8 +43,7 @@ spec:
               POUET_API_ENABLED: "true"
               REDIS_HOST: localhost
               ROMM_DB_DRIVER: postgresql
-              # The initial full-library scan ran for almost two days.
-              SCAN_TIMEOUT: "604800"
+              SCAN_TIMEOUT: "86400"
               SMTP_FROM: romm@excloo.dev
               SMTP_HOST: smtp.resend.com
               SMTP_PORT: "465"

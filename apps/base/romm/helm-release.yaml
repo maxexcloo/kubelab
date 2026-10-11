@@ -6,8 +6,6 @@ metadata:
 spec:
   interval: 30m
   releaseName: romm
-  # Allow the initial 5.4 database migration to finish before Helm times out.
-  timeout: 40m
   chart:
     spec:
       chart: app-template
@@ -50,12 +48,12 @@ spec:
                 custom: true
                 enabled: true
                 spec:
-                  failureThreshold: 10
+                  failureThreshold: 3
                   httpGet:
                     path: /api/heartbeat
                     port: 8080
                   periodSeconds: 30
-                  timeoutSeconds: 30
+                  timeoutSeconds: 10
               readiness:
                 custom: true
                 enabled: true
@@ -70,8 +68,7 @@ spec:
                 custom: true
                 enabled: true
                 spec:
-                  # Large-library migrations can take 20 minutes on first start.
-                  failureThreshold: 360
+                  failureThreshold: 60
                   httpGet:
                     path: /api/heartbeat
                     port: 8080
