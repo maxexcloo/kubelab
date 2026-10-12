@@ -64,12 +64,6 @@ spec:
               app.kubernetes.io/name: traefik
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: bifrost
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: bifrost
-        - namespaceSelector:
-            matchLabels:
               kubernetes.io/metadata.name: litellm
           podSelector:
             matchLabels:

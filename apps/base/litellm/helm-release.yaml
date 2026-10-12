@@ -89,6 +89,7 @@ spec:
         type: RuntimeDefault
     proxy_config:
       general_settings:
+        disable_env_credential_login: true
         master_key: os.environ/LITELLM_MASTER_KEY
       litellm_settings:
         callbacks:
@@ -157,7 +158,6 @@ spec:
             api_base: https://opencode.ai/zen/v1
             api_key: os.environ/OPENCODE_ZEN_API_KEY_2
             model: openai/*
-        # OpenRouter is disabled in the current gateway; its key remains in 1Password.
         - model_name: xiaomi-mimo/*
           litellm_params:
             api_base: https://api.xiaomimimo.com/v1
