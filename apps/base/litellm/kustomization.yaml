@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - database.yaml
   - external-secrets.yaml
+  - heiss-mcp.yaml
   - helm-release.yaml
   - pocket-id.yaml
   - private-dns.yaml

@@ -100,11 +100,30 @@ spec:
       general_settings:
         disable_env_credential_login: true
         master_key: os.environ/LITELLM_MASTER_KEY
+        require_key_mcp_access_defined: true
       litellm_settings:
         callbacks:
           - hooks.callback
         request_timeout: 300
       mcp_servers:
+        heiss:
+          allow_all_keys: true
+          auth_type: bearer_token
+          auth_value: os.environ/HEISS_MCP_API_KEY
+          server_id: heiss
+          transport: http
+          url: http://heiss-mcp:1338/mcp
+          extra_headers:
+            - X-Bento-User-Id
+        heiss_x:
+          allow_all_keys: false
+          auth_type: bearer_token
+          auth_value: os.environ/HEISS_X_MCP_API_KEY
+          server_id: heiss-x
+          transport: http
+          url: http://heiss-mcp:1338/mcp
+          extra_headers:
+            - X-Bento-User-Id
         home_assistant:
           server_id: home-assistant
           transport: http
