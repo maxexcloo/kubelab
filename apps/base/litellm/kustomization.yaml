@@ -7,6 +7,7 @@ resources:
   - helm-release.yaml
   - pocket-id.yaml
   - private-dns.yaml
+  - public-route.yaml
   - resources.yaml
   - route.yaml
   - source.yaml
@@ -34,6 +35,12 @@ replacements:
         options:
           delimiter: /
           index: 2
+      - select:
+          kind: HTTPRoute
+          name: litellm-public
+          namespace: litellm
+        fieldPaths:
+          - spec.hostnames.0
       - select:
           kind: HelmRelease
           name: litellm

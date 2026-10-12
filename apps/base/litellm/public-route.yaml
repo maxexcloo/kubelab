@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: litellm-public
+  namespace: litellm
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+  labels:
+    app.kubernetes.io/name: litellm
+    gateway.excloo.dev/public-access: "true"
+spec:
+  hostnames:
+    - app.invalid
+  parentRefs:
+    - name: public-tunnel
+      namespace: networking
+  rules:
+    - backendRefs:
+        - name: heiss-mcp
+          port: 1338
+      matches:
+        - path:
+            type: PathPrefix
+            value: /results
+    - backendRefs:
+        - name: litellm
+          port: 4000
