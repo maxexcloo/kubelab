@@ -89,12 +89,6 @@
       "matchUpdateTypes": ["patch", "pin", "digest"]
     },
     {
-      "description": "Order Anisette releases by year and month",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["dadoum/anisette-v3-server"],
-      "versioning": "regex:^(?<minor>\\d{2})-(?<major>\\d{4})$"
-    },
-    {
       "description": "Read 1Password CLI releases from the official update feed",
       "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)$",
       "matchDepNames": ["1password-cli"],
