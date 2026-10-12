@@ -88,10 +88,10 @@ spec:
                   timeoutSeconds: 5
             resources:
               limits:
-                memory: 1Gi
+                memory: 4Gi
               requests:
                 cpu: 100m
-                memory: 256Mi
+                memory: 1Gi
             securityContext: *security
           gateway:
             image: *image

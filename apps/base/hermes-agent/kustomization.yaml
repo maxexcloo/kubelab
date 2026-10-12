@@ -12,6 +12,7 @@ configMapGenerator:
     files:
       - config.yaml
       - initialise.py
+      - mono-large.yaml
 generatorOptions:
   disableNameSuffixHash: true
 replacements:

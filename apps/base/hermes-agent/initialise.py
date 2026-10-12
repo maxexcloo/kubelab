@@ -11,6 +11,11 @@ state.mkdir(parents=True, exist_ok=True)
 for name in ("home", "logs", "memories", "sessions", "skills", "workspace"):
     (state / name).mkdir(exist_ok=True)
 
+# Refresh the repository-owned theme while preserving native user settings.
+themes = state / "dashboard-themes"
+themes.mkdir(exist_ok=True)
+shutil.copyfile("/config/mono-large.yaml", themes / "mono-large.yaml")
+
 # Keep native dashboard and CLI configuration edits across pod replacements.
 for source, destination in (
     (Path("/config/config.yaml"), state / "config.yaml"),

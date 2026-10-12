@@ -1,0 +1,30 @@
+name: mono-large
+label: Mono (Large)
+description: Dark neutrals with larger system text.
+palette:
+  background: "#0e0e0e"
+  midground: "#eaeaea"
+  noiseOpacity: 0
+  warmGlow: rgba(154,154,154,0.15)
+  foreground:
+    alpha: 0
+    hex: "#ffffff"
+typography:
+  baseSize: 18px
+  lineHeight: "1.65"
+layout:
+  density: spacious
+  radius: "0"
+colorOverrides:
+  border: "#404040"
+  card: "#141414"
+  cardForeground: "#eaeaea"
+  input: "#404040"
+  muted: "#1e1e1e"
+  mutedForeground: "#b3b3b3"
+  popover: "#181818"
+  popoverForeground: "#eaeaea"
+  primary: "#eaeaea"
+  primaryForeground: "#0e0e0e"
+  secondary: "#262626"
+  secondaryForeground: "#c8c8c8"
