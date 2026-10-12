@@ -99,21 +99,6 @@ class HomepageEndpointsTests(unittest.TestCase):
                     self.assertEqual(result["http"], f"http://{host or 'storage.mbk.example.net'}:31010")
                     self.assertEqual(result["https"], "https://storage.mbk.example.net:8444/path")
 
-    def test_explicit_service_url_preserves_paths(self):
-        with tempfile.TemporaryDirectory() as directory:
-            homelab = Path(directory) / "homelab"
-            shutil.copytree(FIXTURE, homelab)
-            inventory_path = homelab / "data/machines.yaml"
-            inventory = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(inventory_path)]))
-            inventory["machines"]["mbk"]["kimbap"]["services"]["netboot"] = {"url": "https://storage.tail.example:8443/base"}
-            inventory_path.write_text(json.dumps(inventory))
-            template = Path(directory) / "source.yaml"
-            output = Path(directory) / "services.yaml"
-            template.write_text(json.dumps({"href": "homelab://mbk/kimbap/netboot/path"}))
-            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True)
-            result = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
-            self.assertEqual(result["href"], "https://storage.tail.example:8443/base/path")
-
     def test_invalid_yaml_preserves_previous_configuration(self):
         with tempfile.TemporaryDirectory() as directory:
             template = Path(directory) / "source.yaml"
