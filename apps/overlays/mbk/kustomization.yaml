@@ -8,7 +8,6 @@ resources:
   - ../../base/beszel
   - ../../base/beszel-agent
   - ../../base/bichon
-  - ../../base/bifrost
   - ../../base/bookorbit
   - ../../base/cliproxyapi
   - ../../base/hermes-agent
@@ -16,6 +15,7 @@ resources:
   - ../../base/immich
   - ../../base/larapaper
   - ../../base/linkwarden
+  - ../../base/litellm
   - ../../base/miniflux
   - ../../base/open-webui
   - ../../base/openspeedtest

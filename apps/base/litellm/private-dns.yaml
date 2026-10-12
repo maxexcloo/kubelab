@@ -1,7 +1,7 @@
 apiVersion: automation.excloo.dev/v1alpha1
 kind: PrivateDNSRecord
 metadata:
-  name: bifrost
-  namespace: bifrost
+  name: litellm
+  namespace: litellm
 spec:
   hostname: app.invalid

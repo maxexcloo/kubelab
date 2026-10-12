@@ -1,26 +1,26 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: bifrost
-  namespace: bifrost
+  name: litellm
+  namespace: litellm
   annotations:
-    gethomepage.dev/description: LLM Gateway
+    gethomepage.dev/description: LLM & MCP Gateway
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Artificial Intelligence
     gethomepage.dev/href: https://app.invalid
-    gethomepage.dev/icon: https://cdn.jsdelivr.net/gh/maximhq/bifrost/ui/public/bifrost-icon-dark.webp
-    gethomepage.dev/name: Bifrost
+    gethomepage.dev/icon: litellm
+    gethomepage.dev/name: LiteLLM
     monitoring.excloo.dev/enabled: "true"
-    monitoring.excloo.dev/path: /health
+    monitoring.excloo.dev/path: /health/liveliness
   labels:
-    app.kubernetes.io/name: bifrost
+    app.kubernetes.io/name: litellm
 spec:
   hostnames:
-    - bifrost.excloo.com
+    - litellm.excloo.com
   parentRefs:
     - name: private
       namespace: networking
   rules:
     - backendRefs:
-        - name: bifrost
-          port: 8080
+        - name: litellm
+          port: 4000
