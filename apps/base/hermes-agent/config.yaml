@@ -1,11 +1,18 @@
 dashboard:
   font: system-sans
   theme: mono-large
+display:
+  skin: mono
 model:
   api_key: ${OPENAI_API_KEY}
   base_url: ${OPENAI_BASE_URL}
   default: CLI Proxy API/gpt-6.1-sol
-  provider: custom
+  provider: custom:bifrost
+providers:
+  bifrost:
+    name: Bifrost
+    api_key_env: OPENAI_API_KEY
+    base_url: ${OPENAI_BASE_URL}
 terminal:
   backend: local
   cwd: /opt/data/workspace
