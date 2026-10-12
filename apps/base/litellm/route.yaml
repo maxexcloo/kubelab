@@ -8,7 +8,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Artificial Intelligence
     gethomepage.dev/href: https://app.invalid
-    gethomepage.dev/icon: litellm
+    gethomepage.dev/icon: https://app.invalid/ui/favicon.ico
     gethomepage.dev/name: LiteLLM
     monitoring.excloo.dev/enabled: "true"
     monitoring.excloo.dev/path: /health/liveliness
