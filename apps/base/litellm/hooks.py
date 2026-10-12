@@ -16,7 +16,7 @@ def deployments():
 
 class ModelCatalogue(CustomLogger):
     async def async_pre_call_hook(self, user_api_key_dict, cache, data, call_type):
-        if "model" not in data:
+        if call_type in {"call_mcp_tool", "list_mcp_tools"} or "model" not in data:
             return data
         try:
             return await catalogue.translate(
