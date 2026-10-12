@@ -32,7 +32,7 @@ spec:
             env: &environment
               HERMES_HOME: /opt/data
               HOME: /opt/data
-              OPENAI_BASE_URL: http://bifrost.bifrost.svc.cluster.local:8080/v1
+              OPENAI_BASE_URL: http://litellm.litellm.svc.cluster.local:4000/v1
               TZ: Australia/Sydney
             envFrom:
               - secretRef:
