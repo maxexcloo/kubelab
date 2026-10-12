@@ -1,7 +1,0 @@
-apiVersion: automation.excloo.dev/v1alpha1
-kind: PrivateDNSRecord
-metadata:
-  name: hermes-agent
-  namespace: hermes-agent
-spec:
-  hostname: app.invalid

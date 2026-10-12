@@ -27,12 +27,6 @@ spec:
               app.kubernetes.io/name: traefik
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: hermes-agent
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: hermes-agent
-        - namespaceSelector:
-            matchLabels:
               kubernetes.io/metadata.name: open-webui
           podSelector:
             matchLabels:
