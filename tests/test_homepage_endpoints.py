@@ -63,6 +63,8 @@ class HomepageEndpointsTests(unittest.TestCase):
             machine["hostname"] = "coordinator"
             machine["interfaces"][0]["address"] = "192.0.2.9"
             machine["services"]["console"]["name"] = "Adapter Console"
+            machine["services"]["console"]["group"] = "Infrastructure"
+            machine["services"]["console"]["siteMonitor"] = "http://192.0.2.9/status"
             inventory_path.write_text(json.dumps(inventory))
             template = Path(directory) / "source.yaml"
             template.write_text("[]\n")
@@ -72,9 +74,12 @@ class HomepageEndpointsTests(unittest.TestCase):
             cards = {name: entries for group in groups for name, entries in group.items()}
             adapter = cards["mbk-coordinator"][0]["Adapter Console"]
             self.assertEqual(adapter["href"], "http://coordinator.mbk.example.net")
+            self.assertEqual(adapter["siteMonitor"], "http://192.0.2.9/status")
+            self.assertEqual(cards["Infrastructure"][0]["Adapter Console"]["siteMonitor"], adapter["siteMonitor"])
             self.assertEqual(adapter["icon"], "zigbee")
             self.assertEqual(adapter["description"], "Zigbee Ethernet Adapter")
             self.assertEqual(cards["mbk-nanokvm"][0]["NanoKVM"]["href"], "http://nanokvm.mbk.example.net")
+            self.assertEqual(cards["mbk-nanokvm"][0]["NanoKVM"]["siteMonitor"], "http://nanokvm.mbk.example.net")
 
     def test_published_hosts_apply_only_to_http(self):
         with tempfile.TemporaryDirectory() as directory:

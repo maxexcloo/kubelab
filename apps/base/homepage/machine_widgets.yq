@@ -10,7 +10,8 @@ load(strenv(PROVIDERS)).providers as $providers |
   .key as $machine | .value | select(.type != null) |
   (.services // {}) | to_entries[] | select(.key != "management" and (.value.description != null or .value.icon != null or .value.group != null)) |
   {"description": .value.description, "icon": .value.icon, "name": (.value.name // .key), "group": (.value.group // "Servers"),
-    "href": ("homelab://" + $network + "/" + $machine + "/" + .key)}]) |
+    "href": ("homelab://" + $network + "/" + $machine + "/" + .key),
+    "siteMonitor": (.value.siteMonitor // ("homelab://" + $network + "/" + $machine + "/" + .key))}]) |
 [.[] |
   (., (select(.group != "Servers" and (.href | test("^homelab://"))) | . + {"group": "Servers"})) |
   with(select(.href | test("^homelab://"));
@@ -38,6 +39,7 @@ load(strenv(PROVIDERS)).providers as $providers |
     "panel": ($machine.services.management // {}),
     "reference": $management,
     "href": $management,
+    "siteMonitor": ($machine.services.management.siteMonitor // $management),
     "management": ($machine.services.management != null),
     "widgets": (
       ([$machine] | map(select(.beszel == true and strenv(HOMEPAGE_BESZEL_URL) != "")) | map({
