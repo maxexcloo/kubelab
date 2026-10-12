@@ -1,0 +1,187 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: hermes-agent
+  namespace: hermes-agent
+spec:
+  interval: 30m
+  releaseName: hermes-agent
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.3.0
+  values:
+    controllers:
+      hermes-agent:
+        replicas: 1
+        strategy: Recreate
+        initContainers:
+          initialise:
+            image: &image
+              pullPolicy: IfNotPresent
+              repository: docker.io/nousresearch/hermes-agent
+              tag: v0.21.6
+            command:
+              - /opt/hermes/.venv/bin/python
+              - /config/initialise.py
+            env: &environment
+              HERMES_HOME: /opt/data
+              HOME: /opt/data
+              OPENAI_BASE_URL: http://bifrost.bifrost.svc.cluster.local:8080/v1
+              TZ: Australia/Sydney
+            envFrom:
+              - secretRef:
+                  name: hermes-agent
+            resources:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 100m
+                memory: 256Mi
+            securityContext: &security
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+        containers:
+          dashboard:
+            image: *image
+            command:
+              - /opt/hermes/.venv/bin/hermes
+            args:
+              - dashboard
+              - --host
+              - 0.0.0.0
+              - --no-open
+              - --port
+              - "9119"
+            env:
+              <<: *environment
+              HERMES_DASHBOARD_PUBLIC_URL: https://app.invalid
+            envFrom:
+              - secretRef:
+                  name: hermes-agent
+            probes:
+              liveness: &dashboard-probe
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /api/status
+                    port: 9119
+                  timeoutSeconds: 5
+              readiness: *dashboard-probe
+              startup:
+                <<: *dashboard-probe
+                spec:
+                  failureThreshold: 60
+                  httpGet:
+                    path: /api/status
+                    port: 9119
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+            resources:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 100m
+                memory: 256Mi
+            securityContext: *security
+          gateway:
+            image: *image
+            command:
+              - /opt/hermes/.venv/bin/hermes
+            args:
+              - gateway
+              - run
+              - --no-supervise
+            env:
+              <<: *environment
+              API_SERVER_ENABLED: "true"
+              API_SERVER_HOST: 127.0.0.1
+              HERMES_GATEWAY_EXTERNAL_SUPERVISOR: "true"
+            envFrom:
+              - secretRef:
+                  name: hermes-agent
+            probes:
+              liveness: &gateway-probe
+                custom: true
+                enabled: true
+                spec:
+                  exec:
+                    command:
+                      - /opt/hermes/.venv/bin/python
+                      - -c
+                      - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8642/health', timeout=5)"
+                  timeoutSeconds: 10
+              readiness: *gateway-probe
+              startup:
+                <<: *gateway-probe
+                spec:
+                  failureThreshold: 60
+                  exec:
+                    command:
+                      - /opt/hermes/.venv/bin/python
+                      - -c
+                      - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8642/health', timeout=5)"
+                  periodSeconds: 5
+                  timeoutSeconds: 10
+            resources:
+              limits:
+                memory: 4Gi
+              requests:
+                cpu: 250m
+                memory: 2Gi
+            securityContext: *security
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      # The pod's pause process reaps orphaned tool subprocesses.
+      shareProcessNamespace: true
+      securityContext:
+        fsGroup: 10000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 10000
+        runAsNonRoot: true
+        runAsUser: 10000
+        seccompProfile:
+          type: RuntimeDefault
+    global:
+      nameOverride: hermes-agent
+    persistence:
+      config:
+        name: hermes-agent
+        type: configMap
+        globalMounts:
+          - path: /config
+            readOnly: true
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /opt/data
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    route:
+      private:
+        annotations:
+          gethomepage.dev/href: https://app.invalid
+        labels:
+          app.kubernetes.io/name: hermes-agent
+        parentRefs:
+          - name: private
+            namespace: networking
+    service:
+      hermes-agent:
+        controller: hermes-agent
+        ports:
+          http:
+            port: 9119
+            protocol: HTTP

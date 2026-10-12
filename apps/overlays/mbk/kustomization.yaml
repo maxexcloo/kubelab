@@ -11,6 +11,7 @@ resources:
   - ../../base/bifrost
   - ../../base/bookorbit
   - ../../base/cliproxyapi
+  - ../../base/hermes-agent
   - ../../base/homepage
   - ../../base/immich
   - ../../base/larapaper
