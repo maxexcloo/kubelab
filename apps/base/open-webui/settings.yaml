@@ -12,6 +12,6 @@ spec:
         gethomepage.dev/description: AI Chat
         gethomepage.dev/enabled: "true"
         gethomepage.dev/group: Artificial Intelligence
-        gethomepage.dev/icon: sh-open-webui
+        gethomepage.dev/icon: open-webui-light
         gethomepage.dev/name: Open WebUI
         monitoring.excloo.dev/enabled: "true"

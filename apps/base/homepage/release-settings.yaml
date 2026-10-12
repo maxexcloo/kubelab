@@ -14,7 +14,7 @@ spec:
           gethomepage.dev/description: Application Dashboard
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/icon: homepage
+          gethomepage.dev/icon: sh-homepage-light
           gethomepage.dev/name: Homepage
           monitoring.excloo.dev/enabled: "true"
     controllers:

@@ -13,7 +13,7 @@ spec:
           gethomepage.dev/description: Document Management
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/icon: papra
+          gethomepage.dev/icon: sh-papra-light
           gethomepage.dev/name: Papra
           monitoring.excloo.dev/enabled: "true"
     controllers:

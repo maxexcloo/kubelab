@@ -11,7 +11,7 @@ spec:
           gethomepage.dev/description: System Monitoring
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Operations
-          gethomepage.dev/icon: beszel
+          gethomepage.dev/icon: beszel-light
           gethomepage.dev/name: Beszel
           monitoring.excloo.dev/enabled: "true"
     controllers:

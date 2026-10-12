@@ -13,7 +13,7 @@ spec:
           gethomepage.dev/description: Book Search & Downloads
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/icon: shelfmark
+          gethomepage.dev/icon: sh-shelfmark-light
           gethomepage.dev/name: Shelfmark
           monitoring.excloo.dev/enabled: "true"
     controllers:

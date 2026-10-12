@@ -193,7 +193,7 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(node["Beszel"]["widget"]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")
         self.assertEqual(node["Beszel"]["widget"]["fields"], ["status", "cpu", "memory", "network"])
         self.assertEqual(node["Beszel"]["weight"], -100)
-        self.assertEqual(node["Beszel"]["icon"], "beszel")
+        self.assertEqual(node["Beszel"]["icon"], "beszel-light")
         layout = read_yaml(self.output / "settings.yaml")["layout"]
         for group in ["mbk-storage", "mbk-taco"]:
             self.assertEqual(layout[group]["tab"], "Servers")
@@ -247,7 +247,7 @@ class HomepageDashboardTests(unittest.TestCase):
             self.assertEqual(panel["href"], f"https://{endpoint}")
             self.assertEqual(panel["description"], "Host Administration")
             self.assertEqual(panel["icon"], "example-console")
-        self.assertEqual(groups["lab-first"]["Beszel"]["icon"], "beszel")
+        self.assertEqual(groups["lab-first"]["Beszel"]["icon"], "beszel-light")
         self.assertEqual(groups["lab-first"]["Beszel"]["description"], "System Monitoring")
         self.assertEqual(groups["Infrastructure"]["Netboot"]["href"], "http://storage.mbk.example.net:31010")
         self.assertEqual(groups["mbk-storage"]["TrueNAS"]["widget"]["type"], "truenas")

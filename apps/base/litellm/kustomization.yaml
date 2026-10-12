@@ -30,7 +30,6 @@ replacements:
           namespace: litellm
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
-          - metadata.annotations.[gethomepage.dev/icon]
         options:
           delimiter: /
           index: 2

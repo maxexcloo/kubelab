@@ -109,7 +109,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
-          gethomepage.dev/icon: actual-budget
+          gethomepage.dev/icon: sh-actual-budget-light
           gethomepage.dev/name: Actual Up
           gethomepage.dev/siteMonitor: https://app.invalid/livez
         hostnames:

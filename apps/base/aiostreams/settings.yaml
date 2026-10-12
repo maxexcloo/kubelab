@@ -13,7 +13,7 @@ spec:
           gethomepage.dev/description: Stremio Aggregator
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/icon: sh-aiostreams
+          gethomepage.dev/icon: sh-aiostreams-light
           gethomepage.dev/name: AIOStreams
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /api/v1/health
