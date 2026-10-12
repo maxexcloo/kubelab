@@ -28,8 +28,8 @@ class HomepageEndpointsTests(unittest.TestCase):
                 },
                 "link": "homelab://mbk/hass/management/add-on",
                 "fly": "homelab-dns://excloo-gatus.fly.dev",
-                "console": "homelab://mbk/nanokvm/console",
-                "local_console": "homelab://mbk/slzb-06m/console",
+                "console": "homelab://mbk/nanokvm/management",
+                "local_console": "homelab://mbk/slzb-06m/management",
                 "other_service": "homelab://mbk/kimbap/netboot",
             }))
             subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
@@ -62,9 +62,10 @@ class HomepageEndpointsTests(unittest.TestCase):
             machine = inventory["machines"]["mbk"]["slzb-06m"]
             machine["hostname"] = "coordinator"
             machine["interfaces"][0]["address"] = "192.0.2.9"
-            machine["services"]["console"]["name"] = "Adapter Console"
-            machine["services"]["console"]["group"] = "Infrastructure"
-            machine["services"]["console"]["siteMonitor"] = "http://192.0.2.9/status"
+            machine["services"]["diagnostics"] = dict(machine["services"]["management"])
+            machine["services"]["diagnostics"]["name"] = "Adapter Console"
+            machine["services"]["diagnostics"]["group"] = "Infrastructure"
+            machine["services"]["diagnostics"]["siteMonitor"] = "http://192.0.2.9/status"
             inventory_path.write_text(json.dumps(inventory))
             template = Path(directory) / "source.yaml"
             template.write_text("[]\n")

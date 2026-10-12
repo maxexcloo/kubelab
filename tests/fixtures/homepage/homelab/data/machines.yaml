@@ -36,7 +36,7 @@ machines:
       platform: nanokvm
       type: appliance
       services:
-        console:
+        management:
           description: Remote Console & Power Control
           icon: sipeed
           name: NanoKVM
@@ -48,7 +48,7 @@ machines:
       interfaces:
         - address: 192.0.2.6
       services:
-        console:
+        management:
           description: Zigbee Ethernet Adapter
           icon: zigbee
           name: SLZB-06M
