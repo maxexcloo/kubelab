@@ -42,7 +42,6 @@ spec:
       STORE_MODEL_IN_DB: "True"
       TZ: Australia/Sydney
       UNIFI_NETWORK_HOST: gateway.mbk.excloo.net
-      UNIFI_NETWORK_VERIFY_SSL: "true"
       UV_CACHE_DIR: /tmp/uv-cache
       UV_LINK_MODE: copy
       UV_PYTHON: /app/.venv/bin/python
@@ -76,10 +75,10 @@ spec:
           enabled: true
       resources:
         limits:
-          memory: 1Gi
+          memory: 2Gi
         requests:
           cpu: 100m
-          memory: 256Mi
+          memory: 512Mi
     podSecurityContext:
       fsGroup: 1000
       fsGroupChangePolicy: OnRootMismatch
@@ -111,7 +110,7 @@ spec:
             PATH: os.environ/PATH
             UNIFI_NETWORK_API_KEY: os.environ/UNIFI_NETWORK_API_KEY
             UNIFI_NETWORK_HOST: os.environ/UNIFI_NETWORK_HOST
-            UNIFI_NETWORK_VERIFY_SSL: os.environ/UNIFI_NETWORK_VERIFY_SSL
+            UNIFI_NETWORK_VERIFY_SSL: "true"
             UV_CACHE_DIR: os.environ/UV_CACHE_DIR
             UV_LINK_MODE: os.environ/UV_LINK_MODE
             UV_PYTHON: os.environ/UV_PYTHON
