@@ -77,19 +77,23 @@ while IFS= read -r reference; do
   NETWORK="$network" MACHINE="$machine" yq -e \
     'explode(.) | .machines[strenv(NETWORK)][strenv(MACHINE)]' \
     "$homelab_directory/data/machines.yaml" > "$temporary_directory/machine.yaml"
-  hostname=$(MACHINE="$machine" yq -r '.hostname // strenv(MACHINE)' "$temporary_directory/machine.yaml")
-  scheme=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].scheme' "$temporary_directory/machine.yaml")
-  port=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].port' "$temporary_directory/machine.yaml")
-  case "$scheme" in http | https) ;; *) echo "Invalid endpoint scheme: $reference" >&2; exit 1 ;; esac
-  case "$port" in *[!0-9]* | '') echo "Invalid endpoint port: $reference" >&2; exit 1 ;; esac
-  [ "$port" -ge 1 ] && [ "$port" -le 65535 ]
-  authority="$hostname.$network.$domain"
-  if [ "$scheme" = http ] && [ -n "${HOMELAB_INFRASTRUCTURE_FILE:-}" ]; then
-    published_host=$(MACHINE="$machine" yq -r '.hosts[strenv(MACHINE)] // ""' "$HOMELAB_INFRASTRUCTURE_FILE")
-    [ -z "$published_host" ] || authority="$published_host"
+  base_url=$(SERVICE="$service" yq -r '.services[strenv(SERVICE)].url // ""' "$temporary_directory/machine.yaml")
+  if [ -z "$base_url" ]; then
+    hostname=$(MACHINE="$machine" yq -r '.hostname // strenv(MACHINE)' "$temporary_directory/machine.yaml")
+    scheme=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].scheme' "$temporary_directory/machine.yaml")
+    port=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].port' "$temporary_directory/machine.yaml")
+    case "$scheme" in http | https) ;; *) echo "Invalid endpoint scheme: $reference" >&2; exit 1 ;; esac
+    case "$port" in *[!0-9]* | '') echo "Invalid endpoint port: $reference" >&2; exit 1 ;; esac
+    [ "$port" -ge 1 ] && [ "$port" -le 65535 ]
+    authority="$hostname.$network.$domain"
+    if [ "$scheme" = http ] && [ -n "${HOMELAB_INFRASTRUCTURE_FILE:-}" ]; then
+      published_host=$(MACHINE="$machine" yq -r '.hosts[strenv(MACHINE)] // ""' "$HOMELAB_INFRASTRUCTURE_FILE")
+      [ -z "$published_host" ] || authority="$published_host"
+    fi
+    case "$scheme:$port" in http:80 | https:443) ;; *) authority="$authority:$port" ;; esac
+    base_url="$scheme://$authority"
   fi
-  case "$scheme:$port" in http:80 | https:443) ;; *) authority="$authority:$port" ;; esac
-  REFERENCE="$reference" ENDPOINT="$scheme://$authority$suffix" yq \
+  REFERENCE="$reference" ENDPOINT="${base_url%/}$suffix" yq \
     '(.. | select(tag == "!!str" and . == strenv(REFERENCE))) = strenv(ENDPOINT)' \
     "$temporary_directory/services.yaml" > "$temporary_directory/next.yaml"
   mv "$temporary_directory/next.yaml" "$temporary_directory/services.yaml"
