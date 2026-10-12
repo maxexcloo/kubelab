@@ -1,0 +1,14 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: aiometadata
+  namespace: aiometadata
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/api/auth/oidc/callback
+    description: Stremio Metadata
+    id: aiometadata-au-truenas
+    launchURL: https://app.invalid
+    name: AIOMetadata
+    pkceEnabled: true

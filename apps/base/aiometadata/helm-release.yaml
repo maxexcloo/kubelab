@@ -64,6 +64,7 @@ spec:
                   - ALL
             env:
               HOST_NAME: https://app.invalid
+              OIDC_ISSUER: https://identity.invalid
           redis:
             image:
               pullPolicy: IfNotPresent

@@ -10,6 +10,14 @@ spec:
   data:
     - remoteRef:
         key: AIOMetadata
+        property: oidc-client-id
+      secretKey: OIDC_CLIENT_ID
+    - remoteRef:
+        key: AIOMetadata
+        property: oidc-client-secret
+      secretKey: OIDC_CLIENT_SECRET
+    - remoteRef:
+        key: AIOMetadata
         property: password
       secretKey: ADMIN_KEY
   secretStoreRef:

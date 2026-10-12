@@ -11,6 +11,14 @@ spec:
   data:
     - remoteRef:
         key: AIOStreams
+        property: oidc-client-id
+      secretKey: AIOSTREAMS_OIDC_CLIENT_ID
+    - remoteRef:
+        key: AIOStreams
+        property: oidc-client-secret
+      secretKey: AIOSTREAMS_OIDC_CLIENT_SECRET
+    - remoteRef:
+        key: AIOStreams
         property: password
       secretKey: PASSWORD
     - remoteRef:
@@ -30,6 +38,8 @@ spec:
     template:
       data:
         AIOSTREAMS_AUTH: "{{ .USERNAME }}:{{ .PASSWORD }}"
+        AIOSTREAMS_OIDC_CLIENT_ID: "{{ .AIOSTREAMS_OIDC_CLIENT_ID }}"
+        AIOSTREAMS_OIDC_CLIENT_SECRET: "{{ .AIOSTREAMS_OIDC_CLIENT_SECRET }}"
         SECRET_KEY: "{{ .SECRET_KEY }}"
 ---
 apiVersion: v1

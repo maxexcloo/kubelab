@@ -61,6 +61,7 @@ spec:
                   - ALL
             env:
               APP_URL: https://app.invalid
+              OIDC_ENDPOINT: https://identity.invalid
     defaultPodOptions:
       automountServiceAccountToken: false
       securityContext:

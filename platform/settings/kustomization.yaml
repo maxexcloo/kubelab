@@ -67,6 +67,33 @@ replacements:
           index: 2
       - select:
           kind: HelmRelease
+          name: aiometadata
+          namespace: aiometadata
+        fieldPaths:
+          - spec.values.controllers.aiometadata.containers.aiometadata.env.OIDC_ISSUER
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: aiostreams
+          namespace: aiostreams
+        fieldPaths:
+          - spec.values.controllers.aiostreams.containers.aiostreams.env.AIOSTREAMS_OIDC_ISSUER
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: larapaper
+          namespace: larapaper
+        fieldPaths:
+          - spec.values.controllers.larapaper.containers.larapaper.env.OIDC_ENDPOINT
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
           name: linkwarden
           namespace: linkwarden
         fieldPaths:

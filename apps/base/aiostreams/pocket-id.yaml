@@ -1,0 +1,14 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: aiostreams
+  namespace: aiostreams
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/api/v1/auth/oidc/callback
+    description: Stremio Aggregator
+    id: aiostreams-au-truenas
+    launchURL: https://app.invalid
+    name: AIOStreams
+    pkceEnabled: true

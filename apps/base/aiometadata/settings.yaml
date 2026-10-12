@@ -21,7 +21,10 @@ spec:
         containers:
           aiometadata:
             env:
+              AUTH_REQUIRE_SIGNIN: "false"
               DATABASE_URI: sqlite://addon/data/db.sqlite
               ENABLE_CACHE_WARMING: "false"
               MAL_WARMUP_ENABLED: "false"
+              OIDC_ENABLED: "true"
+              OIDC_GROUP_PERMISSIONS: all_services=admin
               REDIS_URL: redis://localhost:6379

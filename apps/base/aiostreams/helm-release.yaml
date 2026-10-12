@@ -63,6 +63,7 @@ spec:
                 drop:
                   - ALL
             env:
+              AIOSTREAMS_OIDC_ISSUER: https://identity.invalid
               BASE_URL: https://app.invalid
     defaultPodOptions:
       automountServiceAccountToken: false

@@ -24,5 +24,6 @@ spec:
               APP_TIMEZONE: Australia/Sydney
               DB_DATABASE: database/storage/database.sqlite
               FORCE_HTTPS: "1"
+              OIDC_ENABLED: "true"
               PHP_OPCACHE_ENABLE: "1"
               REGISTRATION_ENABLED: "0"

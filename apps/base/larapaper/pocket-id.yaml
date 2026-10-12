@@ -1,0 +1,13 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: larapaper
+  namespace: larapaper
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/auth/oidc/callback
+    description: TRMNL Server
+    id: larapaper-au-truenas
+    launchURL: https://app.invalid
+    name: LaraPaper
