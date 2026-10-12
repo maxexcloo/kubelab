@@ -16,6 +16,7 @@ resources:
   - ../../base/immich
   - ../../base/larapaper
   - ../../base/linkwarden
+  - ../../base/litellm
   - ../../base/miniflux
   - ../../base/open-webui
   - ../../base/openspeedtest

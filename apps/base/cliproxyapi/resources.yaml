@@ -68,6 +68,12 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: bifrost
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: litellm
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: litellm
       ports:
         - port: 8317
           protocol: TCP
