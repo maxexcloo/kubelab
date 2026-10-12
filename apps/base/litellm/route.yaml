@@ -22,5 +22,12 @@ spec:
       namespace: networking
   rules:
     - backendRefs:
+        - name: heiss-mcp
+          port: 1338
+      matches:
+        - path:
+            type: PathPrefix
+            value: /results
+    - backendRefs:
         - name: litellm
           port: 4000

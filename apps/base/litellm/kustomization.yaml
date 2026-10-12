@@ -6,7 +6,6 @@ resources:
   - heiss-mcp.yaml
   - helm-release.yaml
   - pocket-id.yaml
-  - private-dns.yaml
   - public-route.yaml
   - resources.yaml
   - route.yaml
@@ -60,9 +59,3 @@ replacements:
         options:
           delimiter: /
           index: 2
-      - select:
-          kind: PrivateDNSRecord
-          name: litellm
-          namespace: litellm
-        fieldPaths:
-          - spec.hostname
