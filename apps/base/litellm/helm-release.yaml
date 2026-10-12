@@ -33,10 +33,19 @@ spec:
     environmentSecrets:
       - litellm
     envVars:
+      GENERIC_AUTHORIZATION_ENDPOINT: https://identity.invalid/authorize
+      GENERIC_CLIENT_USE_PKCE: "true"
+      GENERIC_TOKEN_ENDPOINT: https://identity.invalid/api/oidc/token
+      GENERIC_USERINFO_ENDPOINT: https://identity.invalid/api/oidc/userinfo
+      GENERIC_USER_DISPLAY_NAME_ATTRIBUTE: name
+      GENERIC_USER_FIRST_NAME_ATTRIBUTE: given_name
+      GENERIC_USER_ID_ATTRIBUTE: sub
+      GENERIC_USER_LAST_NAME_ATTRIBUTE: family_name
       HOME: /tmp
       LITELLM_ENABLE_MCP_STDIO: "true"
       LITELLM_WORKER_STARTUP_HOOKS: hooks:install
       PATH: /opt/mcp:/app/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      PROXY_BASE_URL: https://app.invalid
       PYTHONDONTWRITEBYTECODE: "1"
       PYTHONPATH: /etc/litellm/extensions
       STORE_MODEL_IN_DB: "True"
@@ -122,7 +131,10 @@ spec:
             api_base: http://100.73.126.15:8000/v1
             api_key: os.environ/BENTO_API_KEY
             model: openai/qwen3.8-27b-fp8
-            max_parallel_requests: 4
+            max_parallel_requests: 8
+          model_info:
+            input_cost_per_token: 0
+            output_cost_per_token: 0
         - model_name: cli-proxy-api/*
           litellm_params:
             api_base: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317/v1

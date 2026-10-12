@@ -76,6 +76,17 @@ replacements:
           index: 2
       - select:
           kind: HelmRelease
+          name: litellm
+          namespace: litellm
+        fieldPaths:
+          - spec.values.envVars.GENERIC_AUTHORIZATION_ENDPOINT
+          - spec.values.envVars.GENERIC_TOKEN_ENDPOINT
+          - spec.values.envVars.GENERIC_USERINFO_ENDPOINT
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
           name: miniflux
           namespace: miniflux
         fieldPaths:

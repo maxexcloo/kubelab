@@ -4,6 +4,7 @@ resources:
   - database.yaml
   - external-secrets.yaml
   - helm-release.yaml
+  - pocket-id.yaml
   - private-dns.yaml
   - resources.yaml
   - route.yaml
@@ -30,6 +31,25 @@ replacements:
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
           - metadata.annotations.[gethomepage.dev/icon]
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: litellm
+          namespace: litellm
+        fieldPaths:
+          - spec.values.envVars.PROXY_BASE_URL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PocketIDClient
+          name: litellm
+          namespace: litellm
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
         options:
           delimiter: /
           index: 2

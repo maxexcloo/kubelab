@@ -1,0 +1,14 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: litellm
+  namespace: litellm
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/sso/callback
+    description: LLM & MCP Gateway
+    id: litellm-au-truenas
+    launchURL: https://app.invalid/ui/
+    name: LiteLLM
+    pkceEnabled: true
