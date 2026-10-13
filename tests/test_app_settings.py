@@ -28,7 +28,10 @@ class AppSettingsTests(unittest.TestCase):
                     continue
                 for index, old in enumerate(list(route["hostnames"])):
                     with self.subTest(app=settings.parent.name, hostname=old), tempfile.TemporaryDirectory() as directory:
-                        app = Path(directory) / settings.parent.name
+                        app = Path(directory) / "apps/base" / settings.parent.name
+                        app.parent.mkdir(parents=True)
+                        if settings.parent.name == "homepage":
+                            shutil.copytree(ROOT / "scripts/service-routes", Path(directory) / "scripts/service-routes")
                         shutil.copytree(settings.parent, app)
                         route["hostnames"][index] = "renamed.example.test"
                         (app / settings.name).write_text(json.dumps(resource))
@@ -42,7 +45,7 @@ class AppSettingsTests(unittest.TestCase):
     def test_shared_beszel_hostname_changes_reach_both_clusters(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ("apps", "clusters", "platform"):
+            for name in ("apps", "clusters", "platform", "scripts"):
                 shutil.copytree(ROOT / name, root / name)
             settings = root / "platform/settings/settings.yaml"
             resource = read_yaml(settings)

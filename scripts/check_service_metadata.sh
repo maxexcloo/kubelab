@@ -11,65 +11,38 @@ trap cleanup EXIT
 
 manifest_directory="${1:?Usage: check_service_metadata.sh <manifest-directory>}"
 
-inventory_file="${temporary_directory}/inventory.json"
-namespace_file="${temporary_directory}/namespaces.json"
-namespace_lines_file="${temporary_directory}/namespaces.jsonl"
-pocket_id_file="${temporary_directory}/pocket-id.json"
-private_dns_file="${temporary_directory}/private-dns.json"
+resources_file="${temporary_directory}/resources.jsonl"
 route_file="${temporary_directory}/routes.json"
-
-scripts/render_service_inventory.sh --manifest-directory "${manifest_directory}" >"${inventory_file}"
 scripts/render_service_inventory.sh --all-routes --manifest-directory "${manifest_directory}" >"${route_file}"
-
-: >"${namespace_lines_file}"
-: >"${private_dns_file}"
-manifest_files=()
+: >"${resources_file}"
 while IFS= read -r cluster_directory; do
   cluster="${cluster_directory##*/}"
   while IFS= read -r target; do
-    manifest_file="${manifest_directory}/${target#./}.yaml"
-    manifest_files+=("${manifest_file}")
     CLUSTER="${cluster}" yq eval -I=0 -N -o=json '
-        select(.kind == "Namespace") |
-        {
-          "cluster": strenv(CLUSTER),
-          "name": .metadata.name,
-          "privateAccess": (.metadata.labels."gateway.excloo.dev/private-access" // ""),
-          "publicAccess": (
-            .metadata.labels."gateway.excloo.dev/public-access" // ""
-          )
-        }
-      ' "${manifest_file}" | sed '/^null$/d; /^$/d' >>"${namespace_lines_file}"
-    CLUSTER="${cluster}" yq eval -I=0 -N -o=json '
-      select(.kind == "PrivateDNSRecord") |
-      {
-        "cluster": strenv(CLUSTER),
-        "hostname": .spec.hostname,
-        "namespace": .metadata.namespace,
-        "source": ("PrivateDNSRecord/" + .metadata.namespace + "/" + .metadata.name)
-      }
-    ' "${manifest_file}" | sed '/^null$/d; /^$/d' >>"${private_dns_file}"
+      select(.kind == "Namespace" or .kind == "PocketIDClient" or .kind == "PrivateDNSRecord") |
+      .cluster = strenv(CLUSTER)
+    ' "${manifest_directory}/${target#./}.yaml" | sed '/^null$/d; /^$/d' >>"${resources_file}"
   done < <(
     yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .spec.sourceRef.name == "flux-system") | .spec.path' "${manifest_directory}/clusters/${cluster}.yaml" |
       sort -u
   )
 done < <(find clusters -maxdepth 1 -mindepth 1 -type d | sort)
-jq -s 'unique_by(.cluster, .name)' "${namespace_lines_file}" >"${namespace_file}"
-
-yq eval -I=0 -N -o=json '
-  select(.kind == "PocketIDClient") |
-  {
-    "launchURL": .spec.client.launchURL,
-    "source": ("PocketIDClient/" + .metadata.namespace + "/" + .metadata.name)
-  }
-' "${manifest_files[@]}" | jq -s '.' >"${pocket_id_file}"
-
 
 jq -e \
-  --slurpfile namespaces "${namespace_file}" \
-  --slurpfile pocket_id "${pocket_id_file}" \
-  --slurpfile private_dns "${private_dns_file}" \
-  --slurpfile routes "${route_file}" '
+  --slurpfile resources "${resources_file}" '
+    ($resources | map(select(.kind == "Namespace") | {
+      cluster, name: .metadata.name,
+      privateAccess: (.metadata.labels."gateway.excloo.dev/private-access" // ""),
+      publicAccess: (.metadata.labels."gateway.excloo.dev/public-access" // "")
+    }) | unique_by(.cluster, .name)) as $namespaces |
+    ($resources | map(select(.kind == "PocketIDClient") | {
+      launchURL: .spec.client.launchURL,
+      source: ("PocketIDClient/" + .metadata.namespace + "/" + .metadata.name)
+    })) as $pocket_id |
+    ($resources | map(select(.kind == "PrivateDNSRecord") | {
+      cluster, hostname: .spec.hostname, namespace: .metadata.namespace,
+      source: ("PrivateDNSRecord/" + .metadata.namespace + "/" + .metadata.name)
+    })) as $private_dns |
     def public_route:
       .parentRefs | any(. == "public-direct" or . == "public-tunnel");
     def tunnel_route:
@@ -80,8 +53,8 @@ jq -e \
       (.monitor | test("^https?://[^[:space:]]+$") | not);
     def url_hostname:
       try capture("^https?://(?<hostname>[^/:]+)").hostname catch "";
-    . as $inventory |
-    $routes[0] as $route_inventory |
+    . as $route_inventory |
+    map(select(.monitoringEnabled)) as $inventory |
     (
       $route_inventory |
       map(select(public_route and .publicAccess != "true") | .source)
@@ -100,7 +73,7 @@ jq -e \
         select(public_route) |
         . as $route |
         select(
-          $namespaces[0] |
+          $namespaces |
           any(
             .cluster == $route.cluster and
             .name == $route.namespace and
@@ -115,7 +88,7 @@ jq -e \
       $route_inventory |
       map(select((.parentRefs | index("private")) != null) |
         . as $route |
-        select($namespaces[0] | any(
+        select($namespaces | any(
           .cluster == $route.cluster and .name == $route.namespace and
           .privateAccess == "true"
         ) | not) | .source)
@@ -134,7 +107,7 @@ jq -e \
       map(select(length > 1) | map(.source) | join(", "))
     ) as $duplicates |
     (
-      $pocket_id[0] |
+      $pocket_id |
       map(select(.launchURL as $url | $inventory | any(.href == $url) | not)) |
       map(.source)
     ) as $missing_pocket_id_routes |
@@ -178,4 +151,4 @@ jq -e \
     else
       true
     end
-  ' "${inventory_file}" >/dev/null
+  ' "${route_file}" >/dev/null

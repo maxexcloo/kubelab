@@ -18,6 +18,7 @@ fi
 source_directory=${1:?Usage: render_dashboard.sh source-directory output-directory}
 output_directory=${2:?Usage: render_dashboard.sh source-directory output-directory}
 script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+route_script=${HOMEPAGE_ROUTE_SCRIPT:-$script_directory/../../../scripts/service-routes/service_routes.yq}
 temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
 kubelab_directory=${KUBELAB_DIRECTORY:-}
@@ -63,7 +64,7 @@ for overlay in "$kubelab_directory"/apps/overlays/*; do
   cluster=${overlay##*/}
   for target in "$overlay" "$kubelab_directory/clusters/$cluster/platform"; do
     "${KUBECTL:-kubectl}" kustomize "$target" > "$temporary_directory/manifests.yaml"
-    CLUSTER="$cluster" yq --from-file "$script_directory/service_routes.yq" -I=0 -N -o=json \
+    CLUSTER="$cluster" yq --from-file "$route_script" -I=0 -N -o=json \
       "$temporary_directory/manifests.yaml" >> "$temporary_directory/routes.json"
   done
 done

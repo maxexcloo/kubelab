@@ -11,3 +11,6 @@ nameReference:
       - kind: HelmRelease
         group: helm.toolkit.fluxcd.io
         path: spec/values/persistence/endpoint-source/name
+      - kind: HelmRelease
+        group: helm.toolkit.fluxcd.io
+        path: spec/values/persistence/route-script/name

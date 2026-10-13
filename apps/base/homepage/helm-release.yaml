@@ -111,6 +111,7 @@ spec:
               - /output
             env:
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
+              HOMEPAGE_ROUTE_SCRIPT: /routes/service_routes.yq
               KUBECTL: /tools/kubectl
             image:
               repository: docker.io/mikefarah/yq
@@ -198,6 +199,14 @@ spec:
           homepage:
             endpoints:
               - path: /infrastructure
+                readOnly: true
+      route-script:
+        name: homepage-route-script
+        type: configMap
+        advancedMounts:
+          homepage:
+            endpoints:
+              - path: /routes
                 readOnly: true
       secrets:
         name: homepage

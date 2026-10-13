@@ -58,7 +58,7 @@ for cluster in "${clusters[@]}"; do
   fi
   for target in "apps/overlays/${cluster}" "clusters/${cluster}/platform"; do
     # shellcheck disable=SC2016
-    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval --from-file apps/base/homepage/service_routes.yq -I=0 -N -o=json \
+    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval --from-file scripts/service-routes/service_routes.yq -I=0 -N -o=json \
       "${manifest_directory}/${target}.yaml" |
       ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -o=yaml -p=json -r '
         select(
@@ -82,6 +82,7 @@ for cluster in "${clusters[@]}"; do
             .annotations."monitoring.excloo.dev/url" //
             ("https://" + (.hostnames[0] // "") + (.annotations."monitoring.excloo.dev/path" // ""))
           ),
+          "monitoringEnabled": (.annotations."monitoring.excloo.dev/enabled" == "true"),
           "name": (.annotations."monitoring.excloo.dev/name" // .annotations."gethomepage.dev/name" // (.source | split("/") | .[2])),
           "namespace": .namespace,
           "parentRefs": .parentRefs,
