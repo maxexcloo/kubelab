@@ -2,7 +2,7 @@
     - ESPHome:
         description: ESP Device Builder
         href: homelab://mbk/hass/management/5c53de3b_esphome
-        icon: esphome-light
+        icon: sh-esphome-light
     - ESPresense Companion:
         description: Room Presence
         href: homelab://mbk/hass/management/f32ea98b_espresense-companion
@@ -27,12 +27,12 @@
     - Zigbee2MQTT:
         description: Zigbee Coordinator
         href: homelab://mbk/hass/management/45df7312_zigbee2mqtt
-        icon: zigbee2mqtt-light
+        icon: sh-zigbee2mqtt-light
 - Infrastructure:
     - Netboot:
         description: Network Boot Server
         href: &netboot homelab://mbk/kimbap/netboot
-        icon: netbootxyz
+        icon: sh-netboot-xyz
         siteMonitor: *netboot
     - Syncthing:
         description: File Synchronisation
@@ -47,7 +47,7 @@
     - TrueNAS:
         description: Storage Appliance
         href: &truenas homelab://mbk/kimbap/management
-        icon: truenas
+        icon: sh-truenas-scale
         siteMonitor: *truenas
         widget:
           enablePools: true
@@ -58,7 +58,7 @@
     - UniFi:
         description: Network Controller
         href: &unifi homelab://mbk/gateway/management
-        icon: unifi
+        icon: sh-ubiquiti-unifi
         siteMonitor: *unifi
         widget:
           key: "{{HOMEPAGE_FILE_UNIFI_KEY}}"

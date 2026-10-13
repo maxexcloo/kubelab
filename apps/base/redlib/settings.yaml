@@ -125,7 +125,7 @@ spec:
           gethomepage.dev/description: Reddit Frontend
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/icon: redlib-light
+          gethomepage.dev/icon: sh-redlib-light
           gethomepage.dev/name: Redlib
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/headers: '{"x-gatus-token":{"name":"redlib","key":"monitoring-token"}}'
