@@ -84,6 +84,8 @@ class HomepageDashboardTests(unittest.TestCase):
         self.assertEqual(services["Syncthing"]["description"], "File Synchronisation")
         self.assertIn("Shared", services)
         self.assertIn("Local", services)
+        self.assertNotIn("siteMonitor", services["Local"])
+        self.assertEqual(services["Remote"]["siteMonitor"], services["Remote"]["href"])
         self.assertNotIn("Hidden", services)
         self.assertNotIn("mbk-bento", services)
         self.assertNotIn("mbk-kimbap", services)
