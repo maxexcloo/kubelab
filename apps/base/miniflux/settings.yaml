@@ -13,7 +13,7 @@ spec:
           gethomepage.dev/description: RSS Reader
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/icon: sh-miniflux-light
+          gethomepage.dev/icon: sh-miniflux
           gethomepage.dev/name: Miniflux
           monitoring.excloo.dev/enabled: "true"
     controllers:

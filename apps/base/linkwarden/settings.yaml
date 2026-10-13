@@ -13,7 +13,7 @@ spec:
           gethomepage.dev/description: Bookmark Manager
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/icon: sh-linkwarden-light
+          gethomepage.dev/icon: sh-linkwarden
           gethomepage.dev/name: Linkwarden
           monitoring.excloo.dev/enabled: "true"
     controllers:

@@ -13,7 +13,7 @@ spec:
           gethomepage.dev/description: Stremio Metadata
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/icon: sh-aiometadata-light
+          gethomepage.dev/icon: sh-aiometadata
           gethomepage.dev/name: AIOMetadata
           monitoring.excloo.dev/enabled: "true"
     controllers:

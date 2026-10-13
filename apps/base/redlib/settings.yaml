@@ -125,7 +125,7 @@ spec:
           gethomepage.dev/description: Reddit Frontend
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/icon: sh-redlib-light
+          gethomepage.dev/icon: sh-redlib
           gethomepage.dev/name: Redlib
           # Cloudflare challenges the unauthenticated monitor; Gatus checks it with a token.
           gethomepage.dev/siteMonitor: ""

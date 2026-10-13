@@ -13,7 +13,7 @@ spec:
           gethomepage.dev/description: Game & ROM Library
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/icon: sh-romm-light
+          gethomepage.dev/icon: sh-romm
           gethomepage.dev/name: RoMM
           monitoring.excloo.dev/enabled: "true"
     controllers:

@@ -2,7 +2,7 @@
     - ESPHome:
         description: ESP Device Builder
         href: homelab://mbk/hass/management/5c53de3b_esphome
-        icon: sh-esphome-light
+        icon: sh-esphome
     - ESPresense Companion:
         description: Room Presence
         href: homelab://mbk/hass/management/f32ea98b_espresense-companion
@@ -10,7 +10,7 @@
     - Home Assistant:
         description: Smart Home & Automations
         href: &home_assistant homelab://mbk/hass/management
-        icon: sh-home-assistant-light
+        icon: sh-home-assistant
         siteMonitor: *home_assistant
         widget:
           key: "{{HOMEPAGE_FILE_HOME_ASSISTANT_KEY}}"
@@ -19,15 +19,15 @@
     - Home Assistant Matter Hub:
         description: Matter Bridge
         href: homelab://mbk/hass/management/3fd9e6b0_hamh
-        icon: sh-home-assistant-matter-hub-light
+        icon: sh-home-assistant-matter-hub
     - Studio Code Server:
         description: Browser IDE
         href: homelab://mbk/hass/management/a0d7b954_vscode
-        icon: sh-visual-studio-code-light
+        icon: sh-visual-studio-code
     - Zigbee2MQTT:
         description: Zigbee Coordinator
         href: homelab://mbk/hass/management/45df7312_zigbee2mqtt
-        icon: sh-zigbee2mqtt-light
+        icon: sh-zigbee2mqtt
 - Infrastructure:
     - Netboot:
         description: Network Boot Server
@@ -37,7 +37,7 @@
     - Syncthing:
         description: File Synchronisation
         href: &syncthing homelab://mbk/kimbap/syncthing
-        icon: sh-syncthing-light
+        icon: sh-syncthing
         siteMonitor: *syncthing
         widget:
           key: "{{HOMEPAGE_FILE_SYNCTHING_KEY}}"
@@ -68,7 +68,7 @@
     - Gatus:
         description: Health Monitoring & Status Page • Fly
         href: &gatus homelab-dns://excloo-gatus.fly.dev
-        icon: sh-gatus-light
+        icon: sh-gatus
         siteMonitor: *gatus
         widget:
           type: gatus

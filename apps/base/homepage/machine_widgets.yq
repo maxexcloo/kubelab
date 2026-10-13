@@ -2,8 +2,8 @@
 load(strenv(TEMPLATE)) as $groups |
 load(strenv(INFRASTRUCTURE)) as $infra |
 load(strenv(PROVIDERS)).providers as $providers |
-($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare-light"}) as $cloudflare |
-($providers.tailscale // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-tailscale-light"}) as $tailscale |
+($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare"}) as $cloudflare |
+($providers.tailscale // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-tailscale"}) as $tailscale |
 (([$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
   .value + {"name": .key, "group": $group}] +
  [.machines | to_entries[] | .key as $network | .value | to_entries[] |
@@ -34,8 +34,8 @@ load(strenv(PROVIDERS)).providers as $providers |
     "group": ($network + "-" + $hostname),
     "description": ({"bazzite": "Bazzite", "haos": "Home Assistant OS", "macos": "macOS", "nanokvm": "NanoKVM",
       "steamos": "SteamOS", "talos": "Talos Linux", "truenas": "TrueNAS", "ucore": "uCore", "unifi": "UniFi"}[$machine.platform] // $machine.platform),
-    "icon": ({"bazzite": "sh-linux-light", "haos": "sh-home-assistant-light", "macos": "sh-apple-light", "steamos": "sh-steam-light",
-      "talos": "talos", "truenas": "sh-truenas-scale", "ucore": "sh-linux-light", "unifi": "sh-ubiquiti-unifi"}[$machine.platform] // "mdi-server"),
+    "icon": ({"bazzite": "sh-linux", "haos": "sh-home-assistant", "macos": "sh-apple", "steamos": "sh-steam",
+      "talos": "talos", "truenas": "sh-truenas-scale", "ucore": "sh-linux", "unifi": "sh-ubiquiti-unifi"}[$machine.platform] // "mdi-server"),
     "panel": ($machine.services.management // {}),
     "reference": $management,
     "href": $management,
@@ -43,7 +43,7 @@ load(strenv(PROVIDERS)).providers as $providers |
     "management": ($machine.services.management != null),
     "cards": (
       ([$machine] | map(select(.beszel == true and strenv(HOMEPAGE_BESZEL_URL) != "")) | map({
-        "description": "System Monitoring", "icon": "sh-beszel-light", "name": "Beszel",
+        "description": "System Monitoring", "icon": "sh-beszel", "name": "Beszel",
         "href": (strenv(HOMEPAGE_BESZEL_URL) + "/system/" + $network + "-" + $hostname),
         "widget": {
           "type": "beszel", "url": strenv(HOMEPAGE_BESZEL_URL), "version": 2,

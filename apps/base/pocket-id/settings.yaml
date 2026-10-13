@@ -11,7 +11,7 @@ spec:
           gethomepage.dev/description: OIDC Provider
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Infrastructure
-          gethomepage.dev/icon: sh-pocket-id-light
+          gethomepage.dev/icon: sh-pocket-id
           gethomepage.dev/name: Pocket ID
           monitoring.excloo.dev/enabled: "true"
     controllers:

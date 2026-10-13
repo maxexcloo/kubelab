@@ -9,7 +9,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Media
     gethomepage.dev/href: https://app.invalid
-    gethomepage.dev/icon: sh-immich-light
+    gethomepage.dev/icon: sh-immich
     gethomepage.dev/name: Immich
     gethomepage.dev/pod-selector: app.kubernetes.io/instance=immich,app.kubernetes.io/name=server
     gethomepage.dev/widget.key: "{{HOMEPAGE_FILE_IMMICH_KEY}}"

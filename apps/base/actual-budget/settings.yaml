@@ -13,7 +13,7 @@ spec:
           gethomepage.dev/description: Personal Finance
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/icon: sh-actual-budget-light
+          gethomepage.dev/icon: sh-actual-budget
           gethomepage.dev/name: Actual Budget
           monitoring.excloo.dev/enabled: "true"
     controllers:
