@@ -36,6 +36,7 @@ spec:
       - crackwatch
       - cscareerquestionsoce
       - datahoarder
+      - decomps
       - deepseek
       - docker
       - eink
@@ -95,7 +96,6 @@ spec:
       - selfhosted
       - sffpc
       - sideloaded
-      - singularity
       - solotravel
       - space
       - steamdeck
