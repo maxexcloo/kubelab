@@ -41,4 +41,5 @@ def install():
     # FastAPI matches routes in order; the discovered catalogue takes precedence.
     proxy_server.app.include_router(router)
     routes = proxy_server.app.router.routes
-    routes[:0] = [routes.pop() for _ in router.routes][::-1]
+    count = len(router.routes)
+    routes[:] = routes[-count:] + routes[:-count]
