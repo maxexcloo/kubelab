@@ -32,7 +32,7 @@
     - Netboot:
         description: Network Boot Server
         href: &netboot homelab://mbk/kimbap/netboot
-        icon: sh-netboot-xyz
+        icon: netboot
         siteMonitor: *netboot
     - Syncthing:
         description: File Synchronisation
