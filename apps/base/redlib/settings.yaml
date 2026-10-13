@@ -127,5 +127,7 @@ spec:
           gethomepage.dev/group: Applications
           gethomepage.dev/icon: sh-redlib-light
           gethomepage.dev/name: Redlib
+          # Cloudflare challenges the unauthenticated monitor; Gatus checks it with a token.
+          gethomepage.dev/siteMonitor: ""
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/headers: '{"x-gatus-token":{"name":"redlib","key":"monitoring-token"}}'
