@@ -2,7 +2,9 @@
 
 import json
 import os
+import shutil
 import subprocess
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -74,6 +76,79 @@ class HomepageDashboardTests(unittest.TestCase):
             for entry in entries
             for name, service in entry.items()
         }
+
+    def test_applied_revision_cache_and_failed_download_preserve_configuration(self):
+        revision_file = self.directory / "revision"
+        downloads = self.directory / "downloads"
+        archive = self.directory / "snapshot.tar.gz"
+        cache = self.directory / "cache"
+        commands = self.directory / "commands"
+        commands.mkdir()
+        kubectl = commands / "kubectl"
+        kubectl.write_text("""#!/bin/sh
+if [ "$1" = --namespace ]; then
+  cat "$REVISION_FIXTURE"
+else
+  exec "$REAL_KUBECTL" "$@"
+fi
+""")
+        wget = commands / "wget"
+        wget.write_text("""#!/bin/sh
+printf '%s\n' "$6" >> "$DOWNLOAD_FIXTURE"
+[ "${FAIL_DOWNLOAD:-false}" != true ] || exit 1
+cp "$ARCHIVE_FIXTURE" "$2"
+""")
+        for command in (kubectl, wget):
+            command.chmod(0o755)
+        environment = {
+            "ARCHIVE_FIXTURE": str(archive),
+            "DOWNLOAD_FIXTURE": str(downloads),
+            "HOMEPAGE_CACHE_DIRECTORY": str(cache),
+            "KUBECTL": str(kubectl),
+            "KUBELAB_DIRECTORY": "",
+            "PATH": str(commands) + os.pathsep + os.environ["PATH"],
+            "REAL_KUBECTL": shutil.which("kubectl"),
+            "REVISION_FIXTURE": str(revision_file),
+        }
+
+        def snapshot():
+            with tarfile.open(archive, "w:gz") as output:
+                for directory in ("apps", "clusters"):
+                    output.add(self.directory / directory, arcname="snapshot/" + directory)
+
+        first = "a" * 40
+        second = "b" * 40
+        revision_file.write_text("main@sha1:" + first)
+        snapshot()
+        result = self.render(**environment)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Local", self.services())
+        self.assertEqual(downloads.read_text().splitlines(), [
+            "https://codeload.github.com/maxexcloo/kubelab/tar.gz/" + first,
+        ])
+        self.write_routes("mbk", [route("Future")])
+        snapshot()
+        result = self.render(**environment)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Local", self.services())
+        self.assertNotIn("Future", self.services())
+        self.assertEqual(len(downloads.read_text().splitlines()), 1)
+        revision_file.write_text("main@sha1:" + second)
+        result = self.render(**environment)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Future", self.services())
+        self.assertNotIn("Local", self.services())
+        self.assertEqual(downloads.read_text().splitlines()[-1],
+                         "https://codeload.github.com/maxexcloo/kubelab/tar.gz/" + second)
+        before = {p.name: p.read_bytes() for p in self.output.iterdir()}
+        revision_file.write_text("main@sha1:" + "c" * 40)
+        self.assertNotEqual(self.render(**(environment | {"FAIL_DOWNLOAD": "true"})).returncode, 0)
+        self.assertEqual((cache / "revision").read_text().strip(), second)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.output.iterdir()})
+        revision_file.write_text("main@sha1:invalid")
+        self.assertNotEqual(self.render(**environment).returncode, 0)
+        self.assertEqual(len(downloads.read_text().splitlines()), 3)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.output.iterdir()})
 
     def test_remote_annotations_and_external_machines(self):
         result = self.render()

@@ -1,32 +1,12 @@
 #!/bin/sh
 set -eu
 
-if [ "${1:-}" = --watch ]; then
-  shift
-  trap 'exit 0' INT TERM
-  while true; do
-    if ! sh "$0" "$@"; then
-      echo 'Homelab endpoint refresh failed; retaining the last valid configuration' >&2
-    fi
-    sleep 300 &
-    wait $!
-  done
-fi
-
 # Render only non-secret Homelab endpoint references; Homepage owns widget secrets.
-template=${1:?Usage: render_services.sh template output [homelab-directory]}
-output=${2:?Usage: render_services.sh template output [homelab-directory]}
-homelab_directory=${3:-}
+template=${1:?Usage: render_services.sh template output homelab-directory}
+output=${2:?Usage: render_services.sh template output homelab-directory}
+homelab_directory=${3:?Usage: render_services.sh template output homelab-directory}
 temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
-
-if [ -z "$homelab_directory" ]; then
-  homelab_directory="$temporary_directory/homelab"
-  mkdir -p "$homelab_directory"
-  wget -O "$temporary_directory/homelab.tar.gz" -q -T 30 \
-    https://codeload.github.com/maxexcloo/homelab/tar.gz/refs/heads/main
-  tar -xzf "$temporary_directory/homelab.tar.gz" -C "$homelab_directory" --strip-components=1
-fi
 
 domain=$(yq -e -r '.domains.infrastructure' "$homelab_directory/data/domains.yaml")
 cp "$template" "$temporary_directory/services.yaml"

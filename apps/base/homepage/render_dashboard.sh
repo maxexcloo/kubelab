@@ -23,11 +23,26 @@ trap 'rm -fr "$temporary_directory"' EXIT
 kubelab_directory=${KUBELAB_DIRECTORY:-}
 
 if [ -z "$kubelab_directory" ]; then
-  wget -O "$temporary_directory/kubelab.tar.gz" -q -T 30 \
-    https://codeload.github.com/maxexcloo/kubelab/tar.gz/refs/heads/main
-  kubelab_directory="$temporary_directory/kubelab"
-  mkdir "$kubelab_directory"
-  tar -xzf "$temporary_directory/kubelab.tar.gz" -C "$kubelab_directory" --strip-components=1
+  # Follow the local cluster's applied configuration rather than newer Git commits.
+  revision=$("${KUBECTL:-kubectl}" --namespace flux-system get kustomization apps \
+    --output jsonpath='{.status.lastAppliedRevision}')
+  revision=${revision##*@sha1:}
+  case "$revision" in
+    *[!a-f0-9]* | '') echo 'Missing or invalid applied Flux revision' >&2; exit 1 ;;
+  esac
+  [ "${#revision}" -eq 40 ] || { echo 'Invalid applied Flux revision length' >&2; exit 1; }
+  cache_directory=${HOMEPAGE_CACHE_DIRECTORY:-/tmp/homepage}
+  kubelab_directory="$cache_directory/kubelab"
+  if [ ! -d "$kubelab_directory" ] || [ "$(cat "$cache_directory/revision" 2>/dev/null || true)" != "$revision" ]; then
+    wget -O "$temporary_directory/kubelab.tar.gz" -q -T 30 \
+      "https://codeload.github.com/maxexcloo/kubelab/tar.gz/$revision"
+    mkdir "$temporary_directory/kubelab"
+    tar -xzf "$temporary_directory/kubelab.tar.gz" -C "$temporary_directory/kubelab" --strip-components=1
+    mkdir -p "$cache_directory"
+    rm -fr "$kubelab_directory"
+    mv "$temporary_directory/kubelab" "$kubelab_directory"
+    printf '%s\n' "$revision" > "$cache_directory/revision"
+  fi
 fi
 
 homelab_directory=${HOMELAB_DIRECTORY:-}

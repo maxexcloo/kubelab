@@ -36,6 +36,14 @@ rules:
       - customresourcedefinitions/status
     verbs:
       - get
+  - apiGroups:
+      - kustomize.toolkit.fluxcd.io
+    resourceNames:
+      - apps
+    resources:
+      - kustomizations
+    verbs:
+      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
