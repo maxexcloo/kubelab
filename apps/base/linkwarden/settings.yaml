@@ -16,6 +16,7 @@ spec:
           gethomepage.dev/icon: sh-linkwarden
           gethomepage.dev/name: Linkwarden
           monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: Linkwarden
     controllers:
       linkwarden:
         containers:

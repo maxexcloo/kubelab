@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/icon: sh-openspeedtest
     gethomepage.dev/name: OpenSpeedTest
     monitoring.excloo.dev/enabled: "true"
+    onepassword.excloo.dev/item: OpenSpeedTest
   labels:
     app.kubernetes.io/name: openspeedtest
 spec:

@@ -16,6 +16,7 @@ spec:
           gethomepage.dev/icon: sh-shelfmark
           gethomepage.dev/name: Shelfmark
           monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: Shelfmark
     controllers:
       shelfmark:
         containers:

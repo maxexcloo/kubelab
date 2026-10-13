@@ -16,6 +16,7 @@ spec:
           gethomepage.dev/icon: sh-actual-budget
           gethomepage.dev/name: Actual Budget
           monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: Actual Budget
     controllers:
       actual-budget:
         containers:

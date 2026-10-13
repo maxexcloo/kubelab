@@ -240,7 +240,7 @@ class ReconcilerTests(unittest.TestCase):
         application["status"]["observedGeneration"] = 2
         self.assertFalse(RECONCILER.applications_ready())
 
-    def test_discovery_infers_owner_and_route_without_title_annotation(self):
+    def test_discovery_uses_secret_owner_and_explicit_route_item(self):
         resources = [
             {
                 "kind": "ExternalSecret",
@@ -276,7 +276,8 @@ class ReconcilerTests(unittest.TestCase):
                     "annotations": {
                         "gethomepage.dev/enabled": "true",
                         "gethomepage.dev/href": "https://comfy.excloo.com",
-                        "gethomepage.dev/name": "Comfy Control",
+                        "gethomepage.dev/name": "Renamed Dashboard Card",
+                        "onepassword.excloo.dev/item": "Comfy Control",
                     },
                     "name": "comfy-control",
                     "namespace": "comfy-control",
@@ -320,14 +321,15 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(desired["Homepage"]["namespaces"], {"homepage"})
         self.assertFalse(desired["Homepage"]["login"])
 
-    def test_discovery_seeds_only_homepage_routes(self):
+    def test_discovery_seeds_only_explicit_route_items(self):
         routes = [
             {
                 "metadata": {
                     "annotations": {
                         "gethomepage.dev/enabled": "true",
                         "gethomepage.dev/href": "https://headlamp.mbk.excloo.dev",
-                        "gethomepage.dev/name": "Headlamp",
+                        "gethomepage.dev/name": "Renamed Dashboard Card",
+                        "onepassword.excloo.dev/item": "Headlamp",
                     },
                     "name": "headlamp",
                     "namespace": "headlamp",
@@ -354,25 +356,66 @@ class ReconcilerTests(unittest.TestCase):
             {"https://headlamp.mbk.excloo.dev"},
         )
 
-    def test_discovery_omits_only_the_current_vault_cluster_suffix(self):
-        routes = [
-            {
-                "metadata": {
-                    "annotations": {
-                        "gethomepage.dev/enabled": "true",
-                        "gethomepage.dev/href": "https://example.net",
-                        "gethomepage.dev/name": name,
-                    },
-                    "name": "route",
-                    "namespace": "application",
+    def test_discovery_ignores_dashboard_visibility_names_and_cluster_suffixes(self):
+        route = {
+            "metadata": {
+                "annotations": {
+                    "gethomepage.dev/enabled": "false",
+                    "gethomepage.dev/name": "Headlamp (SYD)",
+                    "gethomepage.dev/href": "https://unrelated.example.net",
+                    "onepassword.excloo.dev/item": "Headlamp",
+                    "onepassword.excloo.dev/url": "https://headlamp.example.net/login",
                 },
-            }
-            for name in ["Headlamp (SYD)", "Grafana (syd)", "Example (Other)"]
-        ]
+                "name": "renamed-route",
+                "namespace": "headlamp",
+            },
+            "spec": {"hostnames": ["headlamp.example.net"]},
+        }
         with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda path:
-                          routes if "httproutes" in path else []):
-            desired = RECONCILER.discover_items("SYD")
-        self.assertEqual(set(desired), {"Headlamp", "Grafana", "Example (Other)"})
+                          [route] if "httproutes" in path else []):
+            desired = RECONCILER.discover_items()
+        self.assertEqual(set(desired), {"Headlamp"})
+        self.assertEqual(desired["Headlamp"]["urls"], {
+            "https://headlamp.example.net", "https://headlamp.example.net/login",
+        })
+
+    def test_secret_can_explicitly_share_another_items_login(self):
+        secret = {
+            "kind": "ExternalSecret",
+            "metadata": {
+                "annotations": {"onepassword.excloo.dev/login-item": "Dashboard"},
+                "name": "inventory", "namespace": "homepage",
+            },
+            "spec": {
+                "data": [{"remoteRef": {"key": "Inventory", "property": "notesPlain"}}],
+                "secretStoreRef": {"name": "onepassword"},
+            },
+        }
+        route = {
+            "metadata": {
+                "annotations": {"onepassword.excloo.dev/item": "Dashboard"},
+                "name": "homepage", "namespace": "homepage",
+            },
+            "spec": {"hostnames": ["home.example.net"]},
+        }
+        with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda path:
+                          [route] if "httproutes" in path else [secret]):
+            desired = RECONCILER.discover_items()
+            self.assertEqual(desired["Inventory"]["urls"], {"https://home.example.net"})
+            self.assertTrue(desired["Inventory"]["login"])
+            route["metadata"]["annotations"].clear()
+            with self.assertRaisesRegex(RuntimeError, "references missing login item"):
+                RECONCILER.discover_items()
+
+    def test_explicit_route_item_requires_a_url(self):
+        route = {"metadata": {
+            "annotations": {"onepassword.excloo.dev/item": "Application"},
+            "name": "application", "namespace": "application",
+        }}
+        with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda path:
+                          [route] if "httproutes" in path else []):
+            with self.assertRaisesRegex(RuntimeError, "has no URL"):
+                RECONCILER.discover_items()
 
     def test_homelab_tag_defines_external_ownership(self):
         self.assertTrue(RECONCILER.externally_owned({"tags": ["Homelab"]}))

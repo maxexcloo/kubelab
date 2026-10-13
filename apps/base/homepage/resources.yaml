@@ -80,6 +80,8 @@ kind: ExternalSecret
 metadata:
   name: homepage-infrastructure
   namespace: homepage
+  annotations:
+    onepassword.excloo.dev/login-item: Homepage
 spec:
   refreshInterval: 1h
   data:

@@ -16,6 +16,7 @@ spec:
           gethomepage.dev/icon: sh-trmnl
           gethomepage.dev/name: LaraPaper
           monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: LaraPaper
     controllers:
       larapaper:
         containers:

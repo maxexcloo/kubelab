@@ -25,6 +25,7 @@ replacements:
           namespace: cliproxyapi
         fieldPaths:
           - spec.values.route.private.annotations.[gethomepage.dev/href]
+          - spec.values.route.private.annotations.[onepassword.excloo.dev/url]
         options:
           delimiter: /
           index: 2

@@ -12,6 +12,8 @@ metadata:
     gethomepage.dev/name: LiteLLM
     monitoring.excloo.dev/enabled: "true"
     monitoring.excloo.dev/path: /health/liveliness
+    onepassword.excloo.dev/item: LiteLLM
+    onepassword.excloo.dev/url: https://app.invalid/ui/
   labels:
     app.kubernetes.io/name: litellm
 spec:

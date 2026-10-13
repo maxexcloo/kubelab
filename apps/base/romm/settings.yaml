@@ -16,6 +16,7 @@ spec:
           gethomepage.dev/icon: sh-romm
           gethomepage.dev/name: RoMM
           monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: RoMM
     controllers:
       romm:
         containers:

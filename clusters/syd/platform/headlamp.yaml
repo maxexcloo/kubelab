@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/icon: sh-headlamp
     gethomepage.dev/name: Headlamp
     monitoring.excloo.dev/enabled: "true"
+    onepassword.excloo.dev/item: Headlamp
   labels:
     app.kubernetes.io/name: headlamp
 spec:

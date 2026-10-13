@@ -15,3 +15,4 @@ spec:
         gethomepage.dev/icon: sh-open-webui
         gethomepage.dev/name: Open WebUI
         monitoring.excloo.dev/enabled: "true"
+        onepassword.excloo.dev/item: Open WebUI

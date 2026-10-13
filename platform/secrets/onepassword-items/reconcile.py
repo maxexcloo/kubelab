@@ -144,8 +144,9 @@ def is_dry_run():
     return os.environ.get("DRY_RUN", "false") == "true"
 
 
-def discover_items(cluster=None):
+def discover_items():
     desired = {}
+    login_items = {}
     resources = kubernetes_list(
         "/apis/external-secrets.io/v1/externalsecrets"
     ) + kubernetes_list("/apis/external-secrets.io/v1alpha1/pushsecrets")
@@ -197,47 +198,34 @@ def discover_items(cluster=None):
             if title == owner_title:
                 item["namespaces"].add(namespace)
                 merge_configuration(item, resource)
+                login_item = annotations(resource).get(f"{ANNOTATION_PREFIX}login-item")
+                if login_item:
+                    login_items[title] = login_item
             if field:
                 item["fields"].add(field)
     routes = kubernetes_list("/apis/gateway.networking.k8s.io/v1/httproutes")
-    routes_by_namespace = {}
+    # Route item names own credential identity independently of dashboard labels.
     for route in routes:
         namespace = route["metadata"]["namespace"]
         route_annotations = annotations(route)
-        if route_annotations.get("gethomepage.dev/enabled") != "true":
+        title = route_annotations.get(f"{ANNOTATION_PREFIX}item")
+        if not title:
             continue
-        urls = set()
-        homepage_url = route_annotations.get("gethomepage.dev/href")
-        if homepage_url:
-            urls.add(homepage_url)
-        for hostname in route.get("spec", {}).get("hostnames", []):
-            urls.add(f"https://{hostname}")
-        title = route_annotations.get("gethomepage.dev/name")
-        if not title or not urls:
-            continue
-        if cluster and title.casefold().endswith(f" ({cluster.casefold()})"):
-            title = title[:-(len(cluster) + 3)]
+        urls = {f"https://{hostname}" for hostname in route.get("spec", {}).get("hostnames", [])}
+        login_url = route_annotations.get(f"{ANNOTATION_PREFIX}url")
+        if login_url:
+            urls.add(login_url)
+        if not urls:
+            raise RuntimeError(f"1Password route {namespace}/{route['metadata']['name']} has no URL")
         item = desired.setdefault(title, new_item())
         item["login"] = True
         item["namespaces"].add(namespace)
         item["urls"].update(urls)
-        namespace_routes = routes_by_namespace.setdefault(namespace, [])
-        namespace_routes.append((route["metadata"]["name"], urls))
-    for title, item in desired.items():
-        for namespace in item["namespaces"]:
-            namespace_routes = routes_by_namespace.get(namespace, [])
-            matching_routes = [
-                urls
-                for name, urls in namespace_routes
-                if slug(name)
-                in {slug(title), f"{slug(title)}private", f"{slug(title)}public"}
-            ]
-            if matching_routes:
-                for urls in matching_routes:
-                    item["urls"].update(urls)
-            elif len(namespace_routes) == 1:
-                item["urls"].update(namespace_routes[0][1])
-        item["login"] = bool(item["urls"])
+    for title, login_item in login_items.items():
+        if login_item not in desired or not desired[login_item]["urls"]:
+            raise RuntimeError(f"1Password item {title} references missing login item {login_item}")
+        desired[title]["urls"].update(desired[login_item]["urls"])
+        desired[title]["login"] = True
     return desired
 
 
@@ -370,9 +358,7 @@ def main():
     if len(vaults) != 1:
         raise RuntimeError(f"Connect token must expose exactly one vault; found {len(vaults)}")
     vault_id = vaults[0]["id"]
-    vault_name = vaults[0].get("name", "")
-    prefix, _, cluster = vault_name.partition(":")
-    desired = discover_items(cluster.strip() if prefix.casefold() == "cluster" else None)
+    desired = discover_items()
     summaries = connect(f"/vaults/{vault_id}/items")
     active = {}
     for summary in summaries:

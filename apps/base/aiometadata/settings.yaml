@@ -16,6 +16,7 @@ spec:
           gethomepage.dev/icon: sh-aiometadata
           gethomepage.dev/name: AIOMetadata
           monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: AIOMetadata
     controllers:
       aiometadata:
         containers:

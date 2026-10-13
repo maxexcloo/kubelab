@@ -16,6 +16,7 @@ spec:
           gethomepage.dev/icon: miniflux-light
           gethomepage.dev/name: Miniflux
           monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: Miniflux
     controllers:
       miniflux:
         containers:
