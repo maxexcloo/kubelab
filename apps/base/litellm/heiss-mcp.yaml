@@ -20,7 +20,7 @@ metadata:
 addressType: IPv4
 endpoints:
   - addresses:
-      - 100.73.126.15
+      - 192.0.2.1
     conditions:
       ready: true
 ports:

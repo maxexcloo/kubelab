@@ -8,6 +8,39 @@ replacements:
   - source:
       kind: ConfigMap
       name: cluster-settings-mbk
+      fieldPath: data.bento_address
+    targets:
+      - select:
+          kind: EndpointSlice
+          name: heiss-mcp
+          namespace: litellm
+        fieldPaths:
+          - endpoints.0.addresses.0
+      - select:
+          kind: ConfigMap
+          name: cluster-settings-mbk
+        fieldPaths:
+          - data.bento_llm_authority
+        options:
+          delimiter: ":"
+          index: 0
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-mbk
+      fieldPath: data.bento_llm_authority
+    targets:
+      - select:
+          kind: HelmRelease
+          name: litellm
+          namespace: litellm
+        fieldPaths:
+          - spec.values.proxy_config.model_list.[model_name=bento/.*].litellm_params.api_base
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-mbk
       fieldPath: data.private_dns_host
     targets:
       - select:
@@ -88,6 +121,17 @@ replacements:
           name: nfs-subdir-external-provisioner
         fieldPaths:
           - spec.values.nfs.server
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-mbk
+      fieldPath: data.unifi_host
+    targets:
+      - select:
+          kind: HelmRelease
+          name: litellm
+          namespace: litellm
+        fieldPaths:
+          - spec.values.envVars.UNIFI_NETWORK_HOST
   - source:
       kind: ConfigMap
       name: shared-settings

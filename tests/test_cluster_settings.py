@@ -28,9 +28,11 @@ class ClusterSettingsTests(unittest.TestCase):
             cluster = root / "clusters/mbk/settings/settings.yaml"
             settings = read_yaml(cluster)
             settings["data"].update({
+                "bento_address": "192.0.2.15",
                 "grafana_host": "grafana.changed.example",
                 "nfs_server": "192.0.2.12",
                 "private_dns_host": "private.changed.example",
+                "unifi_host": "gateway.changed.example",
             })
             cluster.write_text(json.dumps(settings))
             output = root / "rendered"
@@ -43,6 +45,14 @@ class ClusterSettingsTests(unittest.TestCase):
                 resources.extend(json.loads(subprocess.check_output(["yq", "ea", "-o=json", "[.]", str(path)])))
             resources = [r for r in resources if r]
             self.assertFalse(any(r["metadata"]["name"].startswith(("cluster-settings-", "shared-settings")) for r in resources))
+            litellm = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "litellm")
+            values = litellm["spec"]["values"]
+            bento = next(d for d in values["proxy_config"]["model_list"] if d["model_name"].startswith("bento/"))
+            self.assertEqual(bento["litellm_params"]["api_base"], "http://192.0.2.15:8000/v1")
+            self.assertEqual(values["envVars"]["UNIFI_NETWORK_HOST"], "gateway.changed.example")
+            heiss = next(r for r in resources if r["kind"] == "EndpointSlice" and r["metadata"]["name"] == "heiss-mcp")
+            self.assertEqual(heiss["endpoints"][0]["addresses"], ["192.0.2.15"])
+            self.assertEqual(heiss["ports"][0]["port"], 1338)
             volumes = [r for r in resources if r["kind"] == "PersistentVolume" and "nfs" in r["spec"]]
             self.assertTrue(volumes)
             self.assertEqual({r["spec"]["nfs"]["server"] for r in volumes}, {"192.0.2.12"})

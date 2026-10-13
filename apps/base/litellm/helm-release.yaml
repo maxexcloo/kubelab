@@ -50,7 +50,7 @@ spec:
       PYTHONPATH: /etc/litellm/extensions
       STORE_MODEL_IN_DB: "True"
       TZ: Australia/Sydney
-      UNIFI_NETWORK_HOST: gateway.mbk.excloo.net
+      UNIFI_NETWORK_HOST: host.invalid
       UV_CACHE_DIR: /tmp/uv-cache
       UV_LINK_MODE: copy
       UV_PYTHON: /app/.venv/bin/python
@@ -147,7 +147,7 @@ spec:
       model_list:
         - model_name: bento/qwen3.8-27b-fp8
           litellm_params:
-            api_base: http://100.73.126.15:8000/v1
+            api_base: http://host.invalid:8000/v1
             api_key: os.environ/BENTO_API_KEY
             model: openai/qwen3.8-27b-fp8
             max_parallel_requests: 8
