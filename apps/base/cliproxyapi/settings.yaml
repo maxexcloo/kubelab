@@ -13,7 +13,7 @@ spec:
           gethomepage.dev/description: Subscription Proxy
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
-          gethomepage.dev/icon: https://avatars.githubusercontent.com/u/233033915
+          gethomepage.dev/icon: mdi-api-#ffffff
           gethomepage.dev/name: CLI Proxy API
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /management.html
