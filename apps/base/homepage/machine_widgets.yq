@@ -4,82 +4,82 @@ load(strenv(INFRASTRUCTURE)) as $infra |
 load(strenv(PROVIDERS)).providers as $providers |
 ($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare"}) as $cloudflare |
 ($providers.tailscale // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "tailscale-light"}) as $tailscale |
+{
+  "bazzite": {"description": "Bazzite", "icon": "sh-linux"},
+  "haos": {"description": "Home Assistant OS", "icon": "sh-home-assistant"},
+  "macos": {"description": "macOS", "icon": "sh-apple"},
+  "nanokvm": {"description": "NanoKVM", "icon": "mdi-server"},
+  "steamos": {"description": "SteamOS", "icon": "sh-steam"},
+  "talos": {"description": "Talos Linux", "icon": "talos"},
+  "truenas": {"description": "TrueNAS", "icon": "sh-truenas-scale"},
+  "ucore": {"description": "uCore", "icon": "sh-linux"},
+  "unifi": {"description": "UniFi", "icon": "sh-ubiquiti-unifi"}
+} as $platforms |
+# Keep inventory fields separate from the derived Homepage presentation.
+[$inventory | to_entries[] | .key as $network | .value | to_entries[] |
+  .key as $key | .value as $machine | ($machine.hostname // $key) as $hostname |
+  {
+    "key": $key, "network": $network, "machine": $machine,
+    "group": ($network + "-" + $hostname),
+    "display_name": ($machine.name // ($hostname | split("") | .[0] |= upcase | join(""))),
+    "reference": ("homelab://" + $network + "/" + $key + "/management")
+  }
+] as $hosts |
+($hosts[] as $host ireduce ({}; .[$host.network][$host.key] = $host)) as $host_index |
+# Service cards appear in their configured group and their owning host's group.
 (([$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
   .value + {"name": .key, "group": $group}] +
- [.machines | to_entries[] | .key as $network | .value | to_entries[] |
-  .key as $machine | .value | select(.type != null) |
-  (.services // {}) | to_entries[] | select(.key != "management" and (.value.description != null or .value.icon != null or .value.group != null)) |
+ [$hosts[] | select(.machine.type != null) | . as $host |
+  (.machine.services // {}) | to_entries[] |
+  select(.key != "management" and (.value.description != null or .value.icon != null or .value.group != null)) |
+  ("homelab://" + $host.network + "/" + $host.key + "/" + .key) as $reference |
   {"description": .value.description, "icon": .value.icon, "name": (.value.name // .key), "group": (.value.group // "Servers"),
-    "href": ("homelab://" + $network + "/" + $machine + "/" + .key),
-    "siteMonitor": (.value.siteMonitor // ("homelab://" + $network + "/" + $machine + "/" + .key))}]) |
+    "href": $reference, "siteMonitor": (.value.siteMonitor // $reference)}]) |
 [.[] |
   (., (select(.group != "Servers" and (.href | test("^homelab://"))) | . + {"group": "Servers"})) |
   with(select(.href | test("^homelab://"));
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
-    ($reference[0] + "-" + ($inventory[$reference[0]][$reference[1]].hostname // $reference[1])) as $host |
-    ($inventory[$reference[0]][$reference[1]].name //
-      (($inventory[$reference[0]][$reference[1]].hostname // $reference[1]) | split("") | .[0] |= upcase | join(""))) as $display_name |
+    $host_index[$reference[0]][$reference[1]] as $host |
     with(select(.group != "Servers");
-      .description = (.description + " • " + $display_name + " (" + ($reference[0] | upcase) + ")")) |
-    with(select(.group == "Servers"); .group = $host))]) as $existing |
-[.machines | to_entries[] | .key as $network | .value | to_entries[] |
-  .key as $name | .value as $machine |
-  select($machine.type != null) |
-  ($machine.hostname // $name) as $hostname |
-  ("homelab://" + $network + "/" + $name + "/management") as $management |
-  $infra.tailscale[$name] as $device |
-  $infra.cloudflare.tunnels[$name] as $tunnel |
+      .description = (.description + " • " + $host.display_name + " (" + ($host.network | upcase) + ")")) |
+    with(select(.group == "Servers"); .group = $host.group))]) as $existing |
+# Templates own their configured management cards, including app widgets.
+[$hosts[] | select(.machine.type != null and .machine.services.management != null) |
+  select(.reference as $reference | $existing | any_c(.href == $reference) | not) |
+  .machine.services.management as $panel | $platforms[.machine.platform] as $platform |
   {
-    "name": ($network + "-" + $hostname),
-    "group": ($network + "-" + $hostname),
-    "description": ({"bazzite": "Bazzite", "haos": "Home Assistant OS", "macos": "macOS", "nanokvm": "NanoKVM",
-      "steamos": "SteamOS", "talos": "Talos Linux", "truenas": "TrueNAS", "ucore": "uCore", "unifi": "UniFi"}[$machine.platform] // $machine.platform),
-    "icon": ({"bazzite": "sh-linux", "haos": "sh-home-assistant", "macos": "sh-apple", "steamos": "sh-steam",
-      "talos": "talos", "truenas": "sh-truenas-scale", "ucore": "sh-linux", "unifi": "sh-ubiquiti-unifi"}[$machine.platform] // "mdi-server"),
-    "panel": ($machine.services.management // {}),
-    "reference": $management,
-    "href": $management,
-    "siteMonitor": ($machine.services.management.siteMonitor // $management),
-    "management": ($machine.services.management != null),
-    "cards": (
-      ([$machine] | map(select(.beszel == true and strenv(HOMEPAGE_BESZEL_URL) != "")) | map({
-        "description": "System Monitoring", "icon": "sh-beszel", "name": "Beszel",
-        "href": (strenv(HOMEPAGE_BESZEL_URL) + "/system/" + $network + "-" + $hostname),
-        "widget": {
-          "type": "beszel", "url": strenv(HOMEPAGE_BESZEL_URL), "version": 2,
-          "systemId": ($network + "-" + $hostname),
-          "username": "{{HOMEPAGE_FILE_BESZEL_USERNAME}}",
-          "password": "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}",
-          "fields": ["status", "cpu", "memory", "network"]
-        }
-      })) +
-      ([$device] | map(select(. != null and $tailscale.widget != null)) | map($tailscale + {
-        "href": ("https://login.tailscale.com/admin/machines/" + $device),
-        "widget": ($tailscale.widget + {"deviceid": $device})
-      })) +
-      ([$tunnel] | map(select(. != null and $cloudflare.widget != null)) | map($cloudflare + {
-        "href": ("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + $tunnel),
-        "widget": ($cloudflare.widget + {"accountid": $infra.cloudflare.account_id, "tunnelid": $tunnel})
-      }))
-    )
-  } |
-  select(.management or (.cards | length > 0))
-] as $machines |
-($machines | map(select(.management) | select(.reference as $reference | $existing | any_c(.href == $reference) | not)) |
-  map(.name = (.panel.name // .name) |
-    .description = (.panel.description // .description) |
-    .icon = (.panel.icon // .icon) |
-    del(.management, .panel, .cards))) as $management |
-[$machines[] | .group as $group | .cards[] | . + {"group": $group}] as $monitoring |
-[($inventory | .[] | keys | .[]) ] as $machine_names |
+    "name": ($panel.name // .group), "group": .group,
+    "description": ($panel.description // $platform.description // .machine.platform),
+    "icon": ($panel.icon // $platform.icon // "mdi-server"),
+    "href": .reference, "siteMonitor": ($panel.siteMonitor // .reference)
+  }
+] as $management |
+[$hosts[] | select(.machine.type != null) | . as $host |
+  (([.machine] | map(select(.beszel == true and strenv(HOMEPAGE_BESZEL_URL) != "")) | map({
+    "description": "System Monitoring", "icon": "sh-beszel", "name": "Beszel",
+    "href": (strenv(HOMEPAGE_BESZEL_URL) + "/system/" + $host.group),
+    "widget": {
+      "type": "beszel", "url": strenv(HOMEPAGE_BESZEL_URL), "version": 2, "systemId": $host.group,
+      "username": "{{HOMEPAGE_FILE_BESZEL_USERNAME}}", "password": "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}",
+      "fields": ["status", "cpu", "memory", "network"]
+    }
+  })) +
+  ([$infra.tailscale[$host.key]] | map(select(. != null and $tailscale.widget != null)) | map(. as $device | $tailscale + {
+    "href": ("https://login.tailscale.com/admin/machines/" + $device),
+    "widget": ($tailscale.widget + {"deviceid": $device})
+  })) +
+  ([$infra.cloudflare.tunnels[$host.key]] | map(select(. != null and $cloudflare.widget != null)) | map(. as $tunnel | $cloudflare + {
+    "href": ("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + $tunnel),
+    "widget": ($cloudflare.widget + {"accountid": $infra.cloudflare.account_id, "tunnelid": $tunnel})
+  }))) | .[] | . + {"group": $host.group}
+] as $monitoring |
 [($infra.cloudflare.tunnels // {}) | to_entries[] | select($cloudflare.widget != null) |
-  .key as $name | select($machine_names | any_c(. == $name) | not) |
+  .key as $name | select($hosts | any_c(.key == $name) | not) |
   $cloudflare + {"group": ("Cluster: " + ($name | upcase)),
    "href": ("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .value),
-   "widget": ($cloudflare.widget + {"accountid": $infra.cloudflare.account_id,
-     "tunnelid": .value})}
+   "widget": ($cloudflare.widget + {"accountid": $infra.cloudflare.account_id, "tunnelid": .value})}
 ] as $cluster_tunnels |
 ($existing + $management + $monitoring + $cluster_tunnels) |
-map(del(.reference) | .weight = 0 | with(select(.widget != null or (.widgets | length > 0)); .weight = -100)) |
+map(.weight = 0 | with(select(.widget != null or (.widgets | length > 0)); .weight = -100)) |
 sort_by(.group, .weight, .name) | group_by(.group) |
 map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})

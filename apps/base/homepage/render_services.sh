@@ -8,72 +8,34 @@ homelab_directory=${3:?Usage: render_services.sh template output homelab-directo
 temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
 
-domain=$(yq -e -r '.domains.infrastructure' "$homelab_directory/data/domains.yaml")
+script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+printf '{}\n' > "$temporary_directory/infrastructure.json"
 cp "$template" "$temporary_directory/services.yaml"
 if [ "$(yq 'tag' "$template")" = '!!seq' ]; then
-  printf '{}\n' > "$temporary_directory/infrastructure.json"
   TEMPLATE="$template" INFRASTRUCTURE="${HOMELAB_INFRASTRUCTURE_FILE:-$temporary_directory/infrastructure.json}" \
     PROVIDERS="$homelab_directory/data/providers.yaml" \
     HOMEPAGE_BESZEL_URL="${HOMEPAGE_BESZEL_URL:-}" \
-    yq --from-file "$(dirname "$0")/machine_widgets.yq" \
+    yq --from-file "$script_directory/machine_widgets.yq" \
     "$homelab_directory/data/machines.yaml" > "$temporary_directory/services.yaml"
 fi
-# Resolve public service names from Homelab's authoritative DNS declarations.
-yq -r '.. | select(tag == "!!str") | select(test("^homelab-dns://"))' \
-  "$temporary_directory/services.yaml" | sort -u > "$temporary_directory/dns-references"
-while IFS= read -r reference; do
-  target=${reference#homelab-dns://}
+# Resolve inventory references in one pass, including nested widget URLs.
+printf '{}\n' > "$temporary_directory/dns.json"
+if yq -e '.. | select(tag == "!!str" and test("^homelab-dns://"))' \
+  "$temporary_directory/services.yaml" >/dev/null 2>&1; then
   # shellcheck disable=SC2016
-  TARGET="$target" yq ea -N -r '
+  yq ea -o=json '
     [. as $zone | .records[] |
-      select(.type == "CNAME" and .content == strenv(TARGET)) |
-      select(.name != "@" and (.name | contains("*") | not)) |
-      (.name + "." + $zone.name)] | unique |
-    select(length == 1) | .[0]
-  ' "$homelab_directory"/data/dns/*.yaml > "$temporary_directory/hostname"
-  hostname=$(cat "$temporary_directory/hostname")
-  [ -n "$hostname" ] || { echo "Missing or ambiguous DNS reference: $reference" >&2; exit 1; }
-  REFERENCE="$reference" ENDPOINT="https://$hostname" yq \
-    '(.. | select(tag == "!!str" and . == strenv(REFERENCE))) = strenv(ENDPOINT)' \
-    "$temporary_directory/services.yaml" > "$temporary_directory/next.yaml"
-  mv "$temporary_directory/next.yaml" "$temporary_directory/services.yaml"
-done < "$temporary_directory/dns-references"
-
-yq -r '.. | select(tag == "!!str") | select(test("^homelab://"))' \
-  "$temporary_directory/services.yaml" > "$temporary_directory/references-unsorted"
-sort -u "$temporary_directory/references-unsorted" > "$temporary_directory/references"
-
-while IFS= read -r reference; do
-  remainder=${reference#homelab://}
-  network=${remainder%%/*}
-  remainder=${remainder#*/}
-  machine=${remainder%%/*}
-  remainder=${remainder#*/}
-  service=${remainder%%/*}
-  suffix=${remainder#"$service"}
-  case "$network/$machine/$service" in
-    *[!a-z0-9/-]* | */ | /* | *//*) echo "Invalid endpoint reference: $reference" >&2; exit 1 ;;
-  esac
-  NETWORK="$network" MACHINE="$machine" yq -e \
-    'explode(.) | .machines[strenv(NETWORK)][strenv(MACHINE)]' \
-    "$homelab_directory/data/machines.yaml" > "$temporary_directory/machine.yaml"
-  hostname=$(MACHINE="$machine" yq -r '.hostname // strenv(MACHINE)' "$temporary_directory/machine.yaml")
-  scheme=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].scheme' "$temporary_directory/machine.yaml")
-  port=$(SERVICE="$service" yq -e -r '.services[strenv(SERVICE)].port' "$temporary_directory/machine.yaml")
-  case "$scheme" in http | https) ;; *) echo "Invalid endpoint scheme: $reference" >&2; exit 1 ;; esac
-  case "$port" in *[!0-9]* | '') echo "Invalid endpoint port: $reference" >&2; exit 1 ;; esac
-  [ "$port" -ge 1 ] && [ "$port" -le 65535 ]
-  authority="$hostname.$network.$domain"
-  if [ "$scheme" = http ] && [ -n "${HOMELAB_INFRASTRUCTURE_FILE:-}" ]; then
-    published_host=$(MACHINE="$machine" yq -r '.hosts[strenv(MACHINE)] // ""' "$HOMELAB_INFRASTRUCTURE_FILE")
-    [ -z "$published_host" ] || authority="$published_host"
-  fi
-  case "$scheme:$port" in http:80 | https:443) ;; *) authority="$authority:$port" ;; esac
-  REFERENCE="$reference" ENDPOINT="$scheme://$authority$suffix" yq \
-    '(.. | select(tag == "!!str" and . == strenv(REFERENCE))) = strenv(ENDPOINT)' \
-    "$temporary_directory/services.yaml" > "$temporary_directory/next.yaml"
-  mv "$temporary_directory/next.yaml" "$temporary_directory/services.yaml"
-done < "$temporary_directory/references"
+      select(.type == "CNAME" and .name != "@" and (.name | contains("*") | not)) |
+      {"target": .content, "hostname": (.name + "." + $zone.name)}] |
+    .[] as $record ireduce ({}; .[$record.target] += [$record.hostname])
+  ' "$homelab_directory"/data/dns/*.yaml > "$temporary_directory/dns.json"
+fi
+MACHINES="$homelab_directory/data/machines.yaml" DOMAINS="$homelab_directory/data/domains.yaml" \
+  INFRASTRUCTURE="${HOMELAB_INFRASTRUCTURE_FILE:-$temporary_directory/infrastructure.json}" \
+  DNS="$temporary_directory/dns.json" \
+  yq --from-file "$script_directory/resolve_endpoints.yq" \
+  "$temporary_directory/services.yaml" > "$temporary_directory/resolved.yaml"
+mv "$temporary_directory/resolved.yaml" "$temporary_directory/services.yaml"
 
 # Keep Homepage's provider bookmarks in the shared Homelab inventory.
 yq -e '.providers | length > 0' "$homelab_directory/data/providers.yaml" >/dev/null

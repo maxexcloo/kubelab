@@ -1,0 +1,31 @@
+(load(strenv(MACHINES)) | explode(.) | .machines) as $machines |
+load(strenv(DOMAINS)).domains.infrastructure as $domain |
+load(strenv(INFRASTRUCTURE)) as $infra |
+load(strenv(DNS)) as $dns |
+with(select($domain == null or $domain == false); error("Missing infrastructure domain")) |
+(.. | select(tag == "!!str" and test("^homelab-dns://"))) |= (
+  . as $reference | sub("^homelab-dns://"; "") as $target |
+  ($dns[$target] // [] | unique) as $hostnames |
+  with(select($hostnames | length != 1); error("Missing or ambiguous DNS reference: " + $reference)) |
+  "https://" + $hostnames[0]
+) |
+(.. | select(tag == "!!str" and test("^homelab://"))) |= (
+  . as $reference |
+  capture("^homelab://(?P<network>[a-z0-9-]+)/(?P<machine>[a-z0-9-]+)/(?P<service>[a-z0-9-]+)(?P<suffix>/.*)?$") as $parts |
+  $machines[$parts.network][$parts.machine] as $machine |
+  $machine.services[$parts.service] as $service |
+  with(select($parts.network == null or $machine == null or $service == null);
+    error("Missing or invalid endpoint reference: " + $reference)) |
+  ($service.port | to_string) as $port |
+  with(select(($service.scheme != "http" and $service.scheme != "https") or ($port | test("^[0-9]+$") | not));
+    error("Invalid endpoint scheme or port: " + $reference)) |
+  with(select(($port | to_number) < 1 or ($port | to_number) > 65535);
+    error("Invalid endpoint port: " + $reference)) |
+  {"authority": (($machine.hostname // $parts.machine) + "." + $parts.network + "." + $domain)} |
+  # Published Tailscale hosts are needed for HTTP; HTTPS keeps its certificate DNS.
+  with(select($service.scheme == "http" and ($infra.hosts[$parts.machine] // "") != "");
+    .authority = $infra.hosts[$parts.machine]) |
+  with(select(($service.scheme != "http" or $port != "80") and ($service.scheme != "https" or $port != "443"));
+    .authority += ":" + $port) |
+  $service.scheme + "://" + .authority + ($parts.suffix // "")
+)

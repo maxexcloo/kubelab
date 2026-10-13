@@ -27,10 +27,11 @@ configMapGenerator:
   - name: homepage-endpoints
     namespace: homepage
     files:
-      - render_dashboard.sh
-      - render_services.sh
       - dashboard.yq
       - machine_widgets.yq
+      - render_dashboard.sh
+      - render_services.sh
+      - resolve_endpoints.yq
       - service_routes.yq
 configurations:
   - name-reference.yaml

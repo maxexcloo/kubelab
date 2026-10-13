@@ -100,6 +100,48 @@ class HomepageEndpointsTests(unittest.TestCase):
                     self.assertEqual(result["http"], f"http://{host or 'storage.mbk.example.net'}:31010")
                     self.assertEqual(result["https"], "https://storage.mbk.example.net:8444/path")
 
+    def test_invalid_endpoint_settings_preserve_previous_configuration(self):
+        with tempfile.TemporaryDirectory() as directory:
+            homelab = Path(directory) / "homelab"
+            shutil.copytree(FIXTURE, homelab)
+            inventory_path = homelab / "data/machines.yaml"
+            inventory = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(inventory_path)]))
+            service = inventory["machines"]["mbk"]["kimbap"]["services"]["management"]
+            template = Path(directory) / "source.yaml"
+            output = Path(directory) / "services.yaml"
+            template.write_text(json.dumps({"href": "homelab://mbk/kimbap/management"}))
+            output.write_text("previous configuration\n")
+            for scheme, port in [("ftp", 443), ("https", 0), ("https", 65536),
+                                 ("https", "invalid"), ("https", 443.5)]:
+                with self.subTest(scheme=scheme, port=port):
+                    service.update({"port": port, "scheme": scheme})
+                    inventory_path.write_text(json.dumps(inventory))
+                    result = subprocess.run(
+                        ["sh", str(SCRIPT), str(template), str(output), str(homelab)],
+                        capture_output=True,
+                    )
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertEqual(output.read_text(), "previous configuration\n")
+
+    def test_ambiguous_dns_preserves_previous_configuration(self):
+        with tempfile.TemporaryDirectory() as directory:
+            homelab = Path(directory) / "homelab"
+            shutil.copytree(FIXTURE, homelab)
+            zone = homelab / "data/dns/example.net.yaml"
+            data = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(zone)]))
+            data["records"].append({"content": "excloo-gatus.fly.dev", "name": "other", "type": "CNAME"})
+            zone.write_text(json.dumps(data))
+            template = Path(directory) / "source.yaml"
+            output = Path(directory) / "services.yaml"
+            template.write_text(json.dumps({"href": "homelab-dns://excloo-gatus.fly.dev"}))
+            output.write_text("previous configuration\n")
+            result = subprocess.run(
+                ["sh", str(SCRIPT), str(template), str(output), str(homelab)],
+                capture_output=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(output.read_text(), "previous configuration\n")
+
     def test_invalid_yaml_preserves_previous_configuration(self):
         with tempfile.TemporaryDirectory() as directory:
             template = Path(directory) / "source.yaml"
