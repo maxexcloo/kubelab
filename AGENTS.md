@@ -53,6 +53,9 @@ near its owning configuration. Do not add a `docs/` tree.
 Use conventional Kubernetes field and resource ordering. Keep project-owned
 YAML free of blank separator lines.
 
+For Homepage service dashboards, put widgets before other peer cards and
+alphabetise within each group. Preserve deliberate grouping and workflow order.
+
 ## Style
 
 - Add scheduled jobs or automatic deletion only when explicitly requested.
