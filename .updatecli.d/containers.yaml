@@ -1,0 +1,1322 @@
+# yaml-language-server: $schema=https://www.updatecli.io/schema/latest/policy/manifest/config.json
+name: Update cloudflare/cloudflared In platform/networking/cloudflared/helm-release.yaml $.spec.values.controllers.cloudflared.containers.cloudflared
+pipelineid: update-cloudflare-cloudflared-in-platform-networking-cloudflared-helm-release-yaml-spec-values-controllers-cloudflared-containers-cloudflared
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: platform/networking/cloudflared/helm-release.yaml
+      key: $.spec.values.controllers.cloudflared.containers.cloudflared.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: platform/networking/cloudflared/helm-release.yaml
+      key: $.spec.values.controllers.cloudflared.containers.cloudflared.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update controldns/ctrld In apps/base/redlib/helm-release.yaml $.spec.values.controllers.redlib.containers.ctrld
+pipelineid: update-controldns-ctrld-in-apps-base-redlib-helm-release-yaml-spec-values-controllers-redlib-containers-ctrld
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/redlib/helm-release.yaml
+      key: $.spec.values.controllers.redlib.containers.ctrld.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/redlib/helm-release.yaml
+      key: $.spec.values.controllers.redlib.containers.ctrld.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/actualbudget/actual-server In apps/base/actual-budget/helm-release.yaml $.spec.values.controllers.actual-budget.containers.actual-budget
+pipelineid: update-docker-io-actualbudget-actual-server-in-apps-base-actual-budget-helm-release-yaml-spec-values-controllers-actual-budget-containers-actual-budget
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/actual-budget/helm-release.yaml
+      key: $.spec.values.controllers.actual-budget.containers.actual-budget.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/actual-budget/helm-release.yaml
+      key: $.spec.values.controllers.actual-budget.containers.actual-budget.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/eceasy/cli-proxy-api In apps/base/cliproxyapi/helm-release.yaml $.spec.values.controllers.cliproxyapi.containers.cliproxyapi
+pipelineid: update-docker-io-eceasy-cli-proxy-api-in-apps-base-cliproxyapi-helm-release-yaml-spec-values-controllers-cliproxyapi-containers-cliproxyapi
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/cliproxyapi/helm-release.yaml
+      key: $.spec.values.controllers.cliproxyapi.containers.cliproxyapi.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/cliproxyapi/helm-release.yaml
+      key: $.spec.values.controllers.cliproxyapi.containers.cliproxyapi.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/getmeili/meilisearch In apps/base/linkwarden/helm-release.yaml $.spec.values.controllers.meilisearch.containers.meilisearch
+pipelineid: update-docker-io-getmeili-meilisearch-in-apps-base-linkwarden-helm-release-yaml-spec-values-controllers-meilisearch-containers-meilisearch
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/linkwarden/helm-release.yaml
+      key: $.spec.values.controllers.meilisearch.containers.meilisearch.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/linkwarden/helm-release.yaml
+      key: $.spec.values.controllers.meilisearch.containers.meilisearch.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/library/nginx In apps/base/atvloadly/helm-release.yaml $.spec.values.controllers.atvloadly.containers.proxy
+pipelineid: update-docker-io-library-nginx-in-apps-base-atvloadly-helm-release-yaml-spec-values-controllers-atvloadly-containers-proxy
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/atvloadly/helm-release.yaml
+      key: $.spec.values.controllers.atvloadly.containers.proxy.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}\-alpine$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})\-alpine$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/atvloadly/helm-release.yaml
+      key: $.spec.values.controllers.atvloadly.containers.proxy.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/library/redis In apps/base/aiometadata/helm-release.yaml $.spec.values.controllers.aiometadata.containers.redis
+pipelineid: update-docker-io-library-redis-in-apps-base-aiometadata-helm-release-yaml-spec-values-controllers-aiometadata-containers-redis
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/aiometadata/helm-release.yaml
+      key: $.spec.values.controllers.aiometadata.containers.redis.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/aiometadata/helm-release.yaml
+      key: $.spec.values.controllers.aiometadata.containers.redis.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/mikefarah/yq In apps/base/homepage/helm-release.yaml $.spec.values.controllers.homepage.initContainers.endpoints
+pipelineid: update-docker-io-mikefarah-yq-in-apps-base-homepage-helm-release-yaml-spec-values-controllers-homepage-initcontainers-endpoints
+labels:
+  group: containers
+sources:
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/homepage/helm-release.yaml
+      key: $.spec.values.controllers.homepage.initContainers.endpoints.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: version
+    spec:
+      engine: yamlpath
+      file: apps/base/homepage/helm-release.yaml
+      key: $.spec.values.controllers.homepage.initContainers.endpoints.image.tag
+---
+name: Update docker.io/miniflux/miniflux In apps/base/miniflux/helm-release.yaml $.spec.values.controllers.miniflux.containers.miniflux
+pipelineid: update-docker-io-miniflux-miniflux-in-apps-base-miniflux-helm-release-yaml-spec-values-controllers-miniflux-containers-miniflux
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/miniflux/helm-release.yaml
+      key: $.spec.values.controllers.miniflux.containers.miniflux.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/miniflux/helm-release.yaml
+      key: $.spec.values.controllers.miniflux.containers.miniflux.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/rustmailer/bichon In apps/base/bichon/helm-release.yaml $.spec.values.controllers.bichon.containers.bichon
+pipelineid: update-docker-io-rustmailer-bichon-in-apps-base-bichon-helm-release-yaml-spec-values-controllers-bichon-containers-bichon
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/bichon/helm-release.yaml
+      key: $.spec.values.controllers.bichon.containers.bichon.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/bichon/helm-release.yaml
+      key: $.spec.values.controllers.bichon.containers.bichon.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/valkey/valkey In apps/base/immich/helm-release.yaml $.spec.values.valkey.controllers.main.containers.main
+pipelineid: update-docker-io-valkey-valkey-in-apps-base-immich-helm-release-yaml-spec-values-valkey-controllers-main-containers-main
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/immich/helm-release.yaml
+      key: $.spec.values.valkey.controllers.main.containers.main.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/immich/helm-release.yaml
+      key: $.spec.values.valkey.controllers.main.containers.main.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/valkey/valkey In apps/base/open-webui/helm-release.yaml $.spec.values.websocket.redis
+pipelineid: update-docker-io-valkey-valkey-in-apps-base-open-webui-helm-release-yaml-spec-values-websocket-redis
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/open-webui/helm-release.yaml
+      key: $.spec.values.websocket.redis.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/open-webui/helm-release.yaml
+      key: $.spec.values.websocket.redis.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update docker.io/valkey/valkey In apps/base/romm/helm-release.yaml $.spec.values.controllers.romm.containers.valkey
+pipelineid: update-docker-io-valkey-valkey-in-apps-base-romm-helm-release-yaml-spec-values-controllers-romm-containers-valkey
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/romm/helm-release.yaml
+      key: $.spec.values.controllers.romm.containers.valkey.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/romm/helm-release.yaml
+      key: $.spec.values.controllers.romm.containers.valkey.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/berriai/litellm In apps/base/litellm/helm-release.yaml $.spec.values
+pipelineid: update-ghcr-io-berriai-litellm-in-apps-base-litellm-helm-release-yaml-spec-values
+labels:
+  group: containers
+sources:
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/litellm/helm-release.yaml
+      key: $.spec.values.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: version
+    spec:
+      engine: yamlpath
+      file: apps/base/litellm/helm-release.yaml
+      key: $.spec.values.image.tag
+---
+name: Update ghcr.io/bookorbit/bookorbit In apps/base/bookorbit/helm-release.yaml $.spec.values.controllers.bookorbit.containers.bookorbit
+pipelineid: update-ghcr-io-bookorbit-bookorbit-in-apps-base-bookorbit-helm-release-yaml-spec-values-controllers-bookorbit-containers-bookorbit
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/bookorbit/helm-release.yaml
+      key: $.spec.values.controllers.bookorbit.containers.bookorbit.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/bookorbit/helm-release.yaml
+      key: $.spec.values.controllers.bookorbit.containers.bookorbit.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/calibrain/shelfmark In apps/base/shelfmark/helm-release.yaml $.spec.values.controllers.shelfmark.containers.shelfmark
+pipelineid: update-ghcr-io-calibrain-shelfmark-in-apps-base-shelfmark-helm-release-yaml-spec-values-controllers-shelfmark-containers-shelfmark
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/shelfmark/helm-release.yaml
+      key: $.spec.values.controllers.shelfmark.containers.shelfmark.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/shelfmark/helm-release.yaml
+      key: $.spec.values.controllers.shelfmark.containers.shelfmark.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/cedya77/aiometadata In apps/base/aiometadata/helm-release.yaml $.spec.values.controllers.aiometadata.containers.aiometadata
+pipelineid: update-ghcr-io-cedya77-aiometadata-in-apps-base-aiometadata-helm-release-yaml-spec-values-controllers-aiometadata-containers-aiometadata
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/aiometadata/helm-release.yaml
+      key: $.spec.values.controllers.aiometadata.containers.aiometadata.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/aiometadata/helm-release.yaml
+      key: $.spec.values.controllers.aiometadata.containers.aiometadata.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/cloudnative-pg/postgresql 18.6-minimal-trixie Digest
+pipelineid: update-database-ghcr-io-cloudnative-pg-postgresql-18-6-minimal-trixie
+labels:
+  group: containers
+sources:
+  version:
+    kind: dockerdigest
+    spec:
+      image: ghcr.io/cloudnative-pg/postgresql
+      tag: 18.6-minimal-trixie
+targets:
+  pin:
+    kind: file
+    sourceid: version
+    spec:
+      matchpattern: ((?:imageName|reference):\s+ghcr\.io/cloudnative\-pg/postgresql:18\.6\-minimal\-trixie@)sha256:[a-f0-9]{64}
+      replacepattern: ${1}{{ source "version" }}
+      files:
+        - apps/base/linkwarden/database.yaml
+        - apps/base/miniflux/database.yaml
+---
+name: Update ghcr.io/cloudnative-pg/postgresql 18.6-standard-trixie Digest
+pipelineid: update-database-ghcr-io-cloudnative-pg-postgresql-18-6-standard-trixie
+labels:
+  group: containers
+sources:
+  version:
+    kind: dockerdigest
+    spec:
+      image: ghcr.io/cloudnative-pg/postgresql
+      tag: 18.6-standard-trixie
+targets:
+  pin:
+    kind: file
+    sourceid: version
+    spec:
+      matchpattern: ((?:imageName|reference):\s+ghcr\.io/cloudnative\-pg/postgresql:18\.6\-standard\-trixie@)sha256:[a-f0-9]{64}
+      replacepattern: ${1}{{ source "version" }}
+      files:
+        - apps/base/bookorbit/database.yaml
+        - apps/base/immich/database.yaml
+        - apps/base/litellm/database.yaml
+        - apps/base/pocket-id/database.yaml
+        - apps/base/romm/database.yaml
+---
+name: Update ghcr.io/fluxcd/flux-cli In apps/base/homepage/helm-release.yaml $.spec.values.controllers.homepage.initContainers.bootstrap
+pipelineid: update-ghcr-io-fluxcd-flux-cli-in-apps-base-homepage-helm-release-yaml-spec-values-controllers-homepage-initcontainers-bootstrap
+labels:
+  group: containers
+sources:
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/homepage/helm-release.yaml
+      key: $.spec.values.controllers.homepage.initContainers.bootstrap.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: version
+    spec:
+      engine: yamlpath
+      file: apps/base/homepage/helm-release.yaml
+      key: $.spec.values.controllers.homepage.initContainers.bootstrap.image.tag
+---
+name: Update ghcr.io/gethomepage/homepage In apps/base/homepage/helm-release.yaml $.spec.values.controllers.homepage.containers.homepage
+pipelineid: update-ghcr-io-gethomepage-homepage-in-apps-base-homepage-helm-release-yaml-spec-values-controllers-homepage-containers-homepage
+labels:
+  group: containers
+sources:
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/homepage/helm-release.yaml
+      key: $.spec.values.controllers.homepage.containers.homepage.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: version
+    spec:
+      engine: yamlpath
+      file: apps/base/homepage/helm-release.yaml
+      key: $.spec.values.controllers.homepage.containers.homepage.image.tag
+---
+name: Update ghcr.io/henrygd/beszel/beszel In apps/base/beszel/helm-release.yaml $.spec.values.controllers.beszel.containers.beszel
+pipelineid: update-ghcr-io-henrygd-beszel-beszel-in-apps-base-beszel-helm-release-yaml-spec-values-controllers-beszel-containers-beszel
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/beszel/helm-release.yaml
+      key: $.spec.values.controllers.beszel.containers.beszel.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/beszel/helm-release.yaml
+      key: $.spec.values.controllers.beszel.containers.beszel.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/immich-app/immich-machine-learning In apps/base/immich/helm-release.yaml $.spec.values.machine-learning.controllers.main.containers.main
+pipelineid: update-ghcr-io-immich-app-immich-machine-learning-in-apps-base-immich-helm-release-yaml-spec-values-machine-learning-controllers-main-containers-main
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/immich/helm-release.yaml
+      key: $.spec.values.machine-learning.controllers.main.containers.main.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/immich/helm-release.yaml
+      key: $.spec.values.machine-learning.controllers.main.containers.main.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/immich-app/immich-server In apps/base/immich/helm-release.yaml $.spec.values.server.controllers.main.containers.main
+pipelineid: update-ghcr-io-immich-app-immich-server-in-apps-base-immich-helm-release-yaml-spec-values-server-controllers-main-containers-main
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/immich/helm-release.yaml
+      key: $.spec.values.server.controllers.main.containers.main.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/immich/helm-release.yaml
+      key: $.spec.values.server.controllers.main.containers.main.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/linkwarden/linkwarden In apps/base/linkwarden/helm-release.yaml $.spec.values.controllers.linkwarden.containers.linkwarden
+pipelineid: update-ghcr-io-linkwarden-linkwarden-in-apps-base-linkwarden-helm-release-yaml-spec-values-controllers-linkwarden-containers-linkwarden
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/linkwarden/helm-release.yaml
+      key: $.spec.values.controllers.linkwarden.containers.linkwarden.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/linkwarden/helm-release.yaml
+      key: $.spec.values.controllers.linkwarden.containers.linkwarden.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/maxexcloo/actual-up In apps/base/actual-up/helm-release.yaml $.spec.values.controllers.actual-up.containers.actual-up
+pipelineid: update-ghcr-io-maxexcloo-actual-up-in-apps-base-actual-up-helm-release-yaml-spec-values-controllers-actual-up-containers-actual-up
+labels:
+  group: containers
+sources:
+  current:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/actual-up/helm-release.yaml
+      key: $.spec.values.controllers.actual-up.containers.actual-up.image.tag
+    transformers:
+      - find: ^[^@]+
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "current" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/actual-up/helm-release.yaml
+      key: $.spec.values.controllers.actual-up.containers.actual-up.image.repository
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/actual-up/helm-release.yaml
+      key: $.spec.values.controllers.actual-up.containers.actual-up.image.tag
+    transformers:
+      - addprefix: '{{ source "current" }}@'
+---
+name: Update ghcr.io/maxexcloo/atvloadly In apps/base/atvloadly/helm-release.yaml $.spec.values.controllers.atvloadly.containers.atvloadly
+pipelineid: update-ghcr-io-maxexcloo-atvloadly-in-apps-base-atvloadly-helm-release-yaml-spec-values-controllers-atvloadly-containers-atvloadly
+labels:
+  group: containers
+sources:
+  current:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/atvloadly/helm-release.yaml
+      key: $.spec.values.controllers.atvloadly.containers.atvloadly.image.tag
+    transformers:
+      - find: ^[^@]+
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "current" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/atvloadly/helm-release.yaml
+      key: $.spec.values.controllers.atvloadly.containers.atvloadly.image.repository
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/atvloadly/helm-release.yaml
+      key: $.spec.values.controllers.atvloadly.containers.atvloadly.image.tag
+    transformers:
+      - addprefix: '{{ source "current" }}@'
+---
+name: Update ghcr.io/maxexcloo/redlib In apps/base/redlib/helm-release.yaml $.spec.values.controllers.redlib.containers.redlib
+pipelineid: update-ghcr-io-maxexcloo-redlib-in-apps-base-redlib-helm-release-yaml-spec-values-controllers-redlib-containers-redlib
+labels:
+  group: containers
+sources:
+  current:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/redlib/helm-release.yaml
+      key: $.spec.values.controllers.redlib.containers.redlib.image.tag
+    transformers:
+      - find: ^[^@]+
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "current" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/redlib/helm-release.yaml
+      key: $.spec.values.controllers.redlib.containers.redlib.image.repository
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/redlib/helm-release.yaml
+      key: $.spec.values.controllers.redlib.containers.redlib.image.tag
+    transformers:
+      - addprefix: '{{ source "current" }}@'
+---
+name: Update ghcr.io/open-webui/open-webui In apps/base/open-webui/helm-release.yaml $.spec.values
+pipelineid: update-ghcr-io-open-webui-open-webui-in-apps-base-open-webui-helm-release-yaml-spec-values
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/open-webui/helm-release.yaml
+      key: $.spec.values.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/open-webui/helm-release.yaml
+      key: $.spec.values.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/papra-hq/papra In apps/base/papra/helm-release.yaml $.spec.values.controllers.papra.containers.papra
+pipelineid: update-ghcr-io-papra-hq-papra-in-apps-base-papra-helm-release-yaml-spec-values-controllers-papra-containers-papra
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/papra/helm-release.yaml
+      key: $.spec.values.controllers.papra.containers.papra.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}\-rootless$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})\-rootless$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/papra/helm-release.yaml
+      key: $.spec.values.controllers.papra.containers.papra.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/pocket-id/pocket-id In apps/base/pocket-id/helm-release.yaml $.spec.values.controllers.pocket-id.containers.pocket-id
+pipelineid: update-ghcr-io-pocket-id-pocket-id-in-apps-base-pocket-id-helm-release-yaml-spec-values-controllers-pocket-id-containers-pocket-id
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/pocket-id/helm-release.yaml
+      key: $.spec.values.controllers.pocket-id.containers.pocket-id.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/pocket-id/helm-release.yaml
+      key: $.spec.values.controllers.pocket-id.containers.pocket-id.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/rommapp/romm In apps/base/romm/helm-release.yaml $.spec.values.controllers.romm.containers.romm
+pipelineid: update-ghcr-io-rommapp-romm-in-apps-base-romm-helm-release-yaml-spec-values-controllers-romm-containers-romm
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/romm/helm-release.yaml
+      key: $.spec.values.controllers.romm.containers.romm.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/romm/helm-release.yaml
+      key: $.spec.values.controllers.romm.containers.romm.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/tailscale/tailscale In apps/base/sidestore-vpn/helm-release.yaml $.spec.values.controllers.sidestore-vpn.containers.tailscale
+pipelineid: update-ghcr-io-tailscale-tailscale-in-apps-base-sidestore-vpn-helm-release-yaml-spec-values-controllers-sidestore-vpn-containers-tailscale
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/sidestore-vpn/helm-release.yaml
+      key: $.spec.values.controllers.sidestore-vpn.containers.tailscale.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/sidestore-vpn/helm-release.yaml
+      key: $.spec.values.controllers.sidestore-vpn.containers.tailscale.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/tailscale/tailscale In apps/base/sidestore-vpn/helm-release.yaml $.spec.values.controllers.sidestore-vpn.initContainers.forwarding
+pipelineid: update-ghcr-io-tailscale-tailscale-in-apps-base-sidestore-vpn-helm-release-yaml-spec-values-controllers-sidestore-vpn-initcontainers-forwarding
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/sidestore-vpn/helm-release.yaml
+      key: $.spec.values.controllers.sidestore-vpn.initContainers.forwarding.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/sidestore-vpn/helm-release.yaml
+      key: $.spec.values.controllers.sidestore-vpn.initContainers.forwarding.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/tensorchord/vchord-scratch pg18-v1.1.1 Digest
+pipelineid: update-database-ghcr-io-tensorchord-vchord-scratch-pg18-v1-1-1
+labels:
+  group: containers
+sources:
+  version:
+    kind: dockerdigest
+    spec:
+      image: ghcr.io/tensorchord/vchord-scratch
+      tag: pg18-v1.1.1
+targets:
+  pin:
+    kind: file
+    sourceid: version
+    spec:
+      matchpattern: ((?:imageName|reference):\s+ghcr\.io/tensorchord/vchord\-scratch:pg18\-v1\.1\.1@)sha256:[a-f0-9]{64}
+      replacepattern: ${1}{{ source "version" }}
+      files:
+        - apps/base/immich/database.yaml
+---
+name: Update ghcr.io/usetrmnl/larapaper In apps/base/larapaper/helm-release.yaml $.spec.values.controllers.larapaper.containers.larapaper
+pipelineid: update-ghcr-io-usetrmnl-larapaper-in-apps-base-larapaper-helm-release-yaml-spec-values-controllers-larapaper-containers-larapaper
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/larapaper/helm-release.yaml
+      key: $.spec.values.controllers.larapaper.containers.larapaper.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/larapaper/helm-release.yaml
+      key: $.spec.values.controllers.larapaper.containers.larapaper.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/viren070/aiostreams In apps/base/aiostreams/helm-release.yaml $.spec.values.controllers.aiostreams.containers.aiostreams
+pipelineid: update-ghcr-io-viren070-aiostreams-in-apps-base-aiostreams-helm-release-yaml-spec-values-controllers-aiostreams-containers-aiostreams
+labels:
+  group: containers
+sources:
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/aiostreams/helm-release.yaml
+      key: $.spec.values.controllers.aiostreams.containers.aiostreams.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/aiostreams/helm-release.yaml
+      key: $.spec.values.controllers.aiostreams.containers.aiostreams.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'
+---
+name: Update ghcr.io/xddxdd/sidestore-vpn In apps/base/sidestore-vpn/helm-release.yaml $.spec.values.controllers.sidestore-vpn.containers.reflector
+pipelineid: update-ghcr-io-xddxdd-sidestore-vpn-in-apps-base-sidestore-vpn-helm-release-yaml-spec-values-controllers-sidestore-vpn-containers-reflector
+labels:
+  group: containers
+sources:
+  current:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/sidestore-vpn/helm-release.yaml
+      key: $.spec.values.controllers.sidestore-vpn.containers.reflector.image.tag
+    transformers:
+      - find: ^[^@]+
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "current" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/sidestore-vpn/helm-release.yaml
+      key: $.spec.values.controllers.sidestore-vpn.containers.reflector.image.repository
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/sidestore-vpn/helm-release.yaml
+      key: $.spec.values.controllers.sidestore-vpn.containers.reflector.image.tag
+    transformers:
+      - addprefix: '{{ source "current" }}@'
+---
+name: Update openspeedtest/latest In apps/base/openspeedtest/helm-release.yaml $.spec.values
+pipelineid: update-openspeedtest-latest-in-apps-base-openspeedtest-helm-release-yaml-spec-values
+labels:
+  group: containers
+sources:
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/openspeedtest/helm-release.yaml
+      key: $.spec.values.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: version
+    spec:
+      engine: yamlpath
+      file: apps/base/openspeedtest/helm-release.yaml
+      key: $.spec.values.image.tag

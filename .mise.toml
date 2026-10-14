@@ -12,6 +12,8 @@ shellcheck = "0.11.0"
 updatecli = "0.122.1"
 yq = "4.54.1"
 
+# Bootstrap
+
 [tasks.bootstrap]
 description = "Bootstrap A Cluster In Dependency Order"
 run = 'echo "Cluster $usage_cluster bootstrap submitted. Check progress with: mise run status $usage_cluster"'
@@ -43,9 +45,7 @@ description = "Bootstrap 1Password Connect Credentials"
 run = "scripts/bootstrap_cluster_secrets.sh"
 wait_for = ["bootstrap-cilium"]
 
-[tasks.check]
-description = "Run All Repository Checks"
-run = "prek run --all-files"
+# Dependency Updates
 
 [tasks."dependencies:check"]
 description = "Preview Local Dependency Updates"
@@ -68,6 +68,8 @@ fi
 updatecli pipeline apply --config .updatecli.d --disable-changelog --disable-udash-report --unique-tmp-dir "$@"
 """
 
+# Deploy
+
 [tasks.deploy]
 description = "Reconcile A Cluster Or Flux Component From Git"
 run = 'flux --context "$usage_cluster" reconcile kustomization "${usage_component:-flux-system}" --with-source'
@@ -75,17 +77,6 @@ usage = '''
 arg "<cluster>"
 arg "[component]"
 '''
-
-[tasks.fmt]
-description = "Format Project Files"
-run = "prettier --write ."
-
-[tasks.setup]
-description = "Install Tools & Git Hooks"
-run = """
-mise install
-prek install
-"""
 
 [tasks.status]
 description = "Show Cluster Reconciliation Or Watch An Application's Helm Release"
@@ -102,6 +93,16 @@ arg "<cluster>"
 arg "[application]"
 '''
 
+# Development
+
+[tasks.check]
+description = "Run All Repository Checks"
+run = "prek run --all-files"
+
+[tasks.fmt]
+description = "Format Project Files"
+run = "prettier --write ."
+
 [tasks.validate]
 description = "Check Project Files & Configuration"
 run = """
@@ -115,4 +116,13 @@ scripts/render_manifests.sh "$manifest_directory"
 scripts/check_manifests.sh "$manifest_directory"
 scripts/check_service_metadata.sh "$manifest_directory"
 python -m unittest discover -p 'test_*.py' -s tests
+"""
+
+# Setup
+
+[tasks.setup]
+description = "Install Tools & Git Hooks"
+run = """
+mise install
+prek install
 """
