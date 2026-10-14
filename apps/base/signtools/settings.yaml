@@ -21,7 +21,7 @@ spec:
         containers:
           signtools:
             env:
-              BASIC_AUTH_ENABLE: "true"
+              BASIC_AUTH_ENABLE: "false"
               BUILDER_GITHUB_ENABLE: "true"
               BUILDER_GITHUB_ORG_NAME: maxexcloo
               BUILDER_GITHUB_REF: main
