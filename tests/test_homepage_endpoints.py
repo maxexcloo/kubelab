@@ -128,6 +128,32 @@ class HomepageEndpointsTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(output.read_text(), before)
 
+    def test_service_paths_share_a_hostname_without_losing_the_prefix(self):
+        with tempfile.TemporaryDirectory() as directory:
+            homelab = Path(directory) / "homelab"
+            shutil.copytree(FIXTURE, homelab)
+            inventory_path = homelab / "data/machines.yaml"
+            inventory = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(inventory_path)]))
+            service = inventory["machines"]["mbk"]["kimbap"]["services"]["management"]
+            template = Path(directory) / "source.yaml"
+            output = Path(directory) / "services.yaml"
+            template.write_text(json.dumps({"root": "homelab://mbk/kimbap/management",
+                                            "child": "homelab://mbk/kimbap/management/api/config"}))
+            for path in ["/files/", "/radiance/", "/files"]:
+                with self.subTest(path=path):
+                    service.update(hostname="ai.example.com", path=path, port=443, scheme="https")
+                    inventory_path.write_text(json.dumps(inventory))
+                    subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True)
+                    result = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
+                    self.assertEqual(result["root"], "https://ai.example.com" + path)
+                    self.assertEqual(result["child"], "https://ai.example.com" + path.rstrip("/") + "/api/config")
+            before = output.read_text()
+            service["path"] = "https://invalid.example/path"
+            inventory_path.write_text(json.dumps(inventory))
+            result = subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(output.read_text(), before)
+
     def test_invalid_endpoint_settings_preserve_previous_configuration(self):
         with tempfile.TemporaryDirectory() as directory:
             homelab = Path(directory) / "homelab"
