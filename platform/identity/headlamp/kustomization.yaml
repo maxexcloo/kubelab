@@ -6,4 +6,5 @@ resources:
   - helm-release.yaml
   - namespace.yaml
   - network-policy.yaml
+  - oidc-cluster-role-binding.yaml
   - service-account.yaml

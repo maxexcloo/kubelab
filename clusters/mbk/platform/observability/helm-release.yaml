@@ -5,35 +5,6 @@ metadata:
   namespace: observability
 spec:
   values:
-    grafana:
-      envValueFrom:
-        GF_AUTH_GENERIC_OAUTH_CLIENT_ID:
-          secretKeyRef:
-            key: oidc-client-id
-            name: grafana-oidc
-            optional: true
-        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
-          secretKeyRef:
-            key: oidc-client-secret
-            name: grafana-oidc
-            optional: true
-      grafana.ini:
-        auth.generic_oauth:
-          allow_sign_up: true
-          api_url: https://identity.invalid/api/oidc/userinfo
-          auth_url: https://identity.invalid/authorize
-          client_id: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_ID}
-          client_secret: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
-          enabled: true
-          name: Pocket ID
-          scopes: openid profile email
-          token_url: https://identity.invalid/api/oidc/token
-          use_pkce: true
-        server:
-          domain: app.invalid
-          root_url: https://app.invalid
-        users:
-          auto_assign_org_role: Admin
     vmagent:
       spec:
         externalLabels:

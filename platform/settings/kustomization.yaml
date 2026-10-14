@@ -54,6 +54,66 @@ replacements:
   - source:
       kind: ConfigMap
       name: shared-settings
+      fieldPath: data.grafana_syd_host
+    targets:
+      - select:
+          kind: PocketIDClient
+          name: grafana
+          namespace: observability
+        fieldPaths:
+          - spec.client.callbackURLs.1
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.headlamp_client_id
+    targets:
+      - select:
+          kind: HelmRelease
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.values.config.oidc.clientID
+      - select:
+          kind: PocketIDClient
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.client.id
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.headlamp_mbk_host
+    targets:
+      - select:
+          kind: PocketIDClient
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.headlamp_syd_host
+    targets:
+      - select:
+          kind: PocketIDClient
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.client.callbackURLs.1
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: ConfigMap
+      name: shared-settings
       fieldPath: data.identity_host
     targets:
       - select:
@@ -80,6 +140,15 @@ replacements:
           namespace: aiostreams
         fieldPaths:
           - spec.values.controllers.aiostreams.containers.aiostreams.env.AIOSTREAMS_OIDC_ISSUER
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.values.config.oidc.issuerURL
         options:
           delimiter: /
           index: 2
@@ -163,6 +232,17 @@ replacements:
           namespace: shelfmark
         fieldPaths:
           - spec.values.controllers.shelfmark.containers.shelfmark.env.OIDC_DISCOVERY_URL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: victoria-metrics-k8s-stack
+          namespace: observability
+        fieldPaths:
+          - spec.values.grafana.[grafana.ini].[auth.generic_oauth].api_url
+          - spec.values.grafana.[grafana.ini].[auth.generic_oauth].auth_url
+          - spec.values.grafana.[grafana.ini].[auth.generic_oauth].token_url
         options:
           delimiter: /
           index: 2

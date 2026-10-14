@@ -52,6 +52,7 @@ spec:
                       default: true
                       type: boolean
                     isPublic:
+                      description: Public clients are created automatically; confidential clients must already exist because their client secrets are managed separately.
                       default: false
                       type: boolean
                     launchURL:

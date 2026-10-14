@@ -1,0 +1,16 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: headlamp
+  namespace: headlamp
+spec:
+  client:
+    description: Kubernetes Dashboard
+    id: headlamp
+    isPublic: true
+    launchURL: https://mbk.invalid
+    name: Headlamp
+    pkceEnabled: true
+    callbackURLs:
+      - https://mbk.invalid/oidc-callback
+      - https://syd.invalid/oidc-callback

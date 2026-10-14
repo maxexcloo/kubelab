@@ -16,7 +16,7 @@ metadata:
     app.kubernetes.io/name: headlamp
 spec:
   hostnames:
-    - headlamp.mbk.excloo.dev
+    - app.invalid
   parentRefs:
     - name: private
       namespace: networking

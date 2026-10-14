@@ -22,6 +22,10 @@ class ClusterSettingsTests(unittest.TestCase):
                 shutil.copytree(ROOT / name, root / name)
             shared = root / "platform/settings/settings.yaml"
             settings = read_yaml(shared)
+            settings["data"]["grafana_syd_host"] = "grafana.syd.changed.example"
+            settings["data"]["headlamp_client_id"] = "headlamp-test"
+            settings["data"]["headlamp_mbk_host"] = "headlamp.mbk.changed.example"
+            settings["data"]["headlamp_syd_host"] = "headlamp.syd.changed.example"
             settings["data"]["identity_host"] = "id.changed.example"
             settings["data"]["control_d_profile"] = "test-profile"
             shared.write_text(json.dumps(settings))
@@ -58,6 +62,43 @@ class ClusterSettingsTests(unittest.TestCase):
             self.assertEqual({r["spec"]["nfs"]["server"] for r in volumes}, {"192.0.2.12"})
             grafana = [r for r in resources if r["kind"] == "PocketIDClient" and r["metadata"]["name"] == "grafana"]
             self.assertEqual(grafana[0]["spec"]["client"]["launchURL"], "https://grafana.changed.example")
+            self.assertEqual(grafana[0]["spec"]["client"]["callbackURLs"], [
+                "https://grafana.changed.example/login/generic_oauth",
+                "https://grafana.syd.changed.example/login/generic_oauth",
+            ])
+            grafana_releases = [r for r in resources if r["kind"] == "HelmRelease"
+                                and r["metadata"]["name"] == "victoria-metrics-k8s-stack"]
+            self.assertEqual(len(grafana_releases), 2)
+            self.assertEqual({r["spec"]["values"]["grafana"]["grafana.ini"]["server"]["root_url"]
+                              for r in grafana_releases}, {
+                "https://grafana.changed.example", "https://grafana.syd.changed.example",
+            })
+            for release in grafana_releases:
+                oauth = release["spec"]["values"]["grafana"]["grafana.ini"]["auth.generic_oauth"]
+                self.assertTrue(oauth["enabled"])
+                self.assertEqual(oauth["auth_url"], "https://id.changed.example/authorize")
+            headlamp_client = next(r for r in resources if r["kind"] == "PocketIDClient"
+                                   and r["metadata"]["name"] == "headlamp")["spec"]["client"]
+            self.assertEqual(headlamp_client["callbackURLs"], [
+                "https://headlamp.mbk.changed.example/oidc-callback",
+                "https://headlamp.syd.changed.example/oidc-callback",
+            ])
+            self.assertEqual(headlamp_client["launchURL"], "https://headlamp.mbk.changed.example")
+            self.assertEqual(headlamp_client["id"], "headlamp-test")
+            self.assertTrue(headlamp_client["isPublic"])
+            self.assertTrue(headlamp_client["pkceEnabled"])
+            headlamp_releases = [r for r in resources if r["kind"] == "HelmRelease"
+                                 and r["metadata"]["name"] == "headlamp"]
+            self.assertEqual(len(headlamp_releases), 2)
+            self.assertEqual({r["spec"]["values"]["config"]["oidc"]["callbackURL"]
+                              for r in headlamp_releases}, set(headlamp_client["callbackURLs"]))
+            for release in headlamp_releases:
+                oidc = release["spec"]["values"]["config"]["oidc"]
+                self.assertEqual(oidc["clientID"], headlamp_client["id"])
+                self.assertEqual(oidc["issuerURL"], "https://id.changed.example")
+                self.assertEqual(oidc["scopes"], "profile,email,groups")
+                self.assertTrue(oidc["usePKCE"])
+                self.assertFalse(oidc["secret"]["create"])
             defaults = [r["spec"]["versions"][0]["schema"]["openAPIV3Schema"]["properties"]["spec"]["properties"]["controlDProfileID"]["default"]
                         for r in resources if r["kind"] == "CompositeResourceDefinition" and r["metadata"]["name"] == "privatednsrecords.automation.excloo.dev"]
             self.assertEqual(set(defaults), {"test-profile"})

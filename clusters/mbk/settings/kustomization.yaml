@@ -142,16 +142,20 @@ replacements:
   - source:
       kind: ConfigMap
       name: shared-settings
-      fieldPath: data.identity_host
+      fieldPath: data.headlamp_mbk_host
     targets:
       - select:
-          kind: HelmRelease
-          name: victoria-metrics-k8s-stack
-          namespace: observability
+          kind: HTTPRoute
+          name: headlamp
+          namespace: headlamp
         fieldPaths:
-          - spec.values.grafana.[grafana.ini].[auth.generic_oauth].api_url
-          - spec.values.grafana.[grafana.ini].[auth.generic_oauth].auth_url
-          - spec.values.grafana.[grafana.ini].[auth.generic_oauth].token_url
+          - spec.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.values.config.oidc.callbackURL
         options:
           delimiter: /
           index: 2

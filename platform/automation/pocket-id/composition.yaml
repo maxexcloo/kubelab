@@ -46,6 +46,10 @@ spec:
                     User-Agent: [kubelab-crossplane/1.0]
                     X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
                   mappings:
+                    - action: CREATE
+                      body: .payload.body
+                      method: POST
+                      url: .payload.baseUrl
                     - action: OBSERVE
                       url: .payload.baseUrl + "/" + .payload.body.id
                     - action: UPDATE
@@ -62,6 +66,18 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: metadata.namespace
+              # Only public clients can be created without capturing a client secret.
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.client.isPublic
+                toFieldPath: spec.managementPolicies
+                transforms:
+                  - type: convert
+                    convert:
+                      toType: string
+                  - type: map
+                    map:
+                      "false": [LateInitialize, Observe, Update]
+                      "true": [Create, LateInitialize, Observe, Update]
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.client
                 toFieldPath: spec.forProvider.payload.body

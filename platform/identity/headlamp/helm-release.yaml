@@ -20,6 +20,14 @@ spec:
       create: false
     config:
       inCluster: true
+      oidc:
+        callbackURL: https://app.invalid/oidc-callback
+        clientID: headlamp
+        issuerURL: https://identity.invalid
+        scopes: profile,email,groups
+        usePKCE: true
+        secret:
+          create: false
     resources:
       limits:
         memory: 256Mi

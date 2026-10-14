@@ -46,14 +46,27 @@ replacements:
           index: 0
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
-      fieldPath: data.grafana_host
+      name: shared-settings
+      fieldPath: data.grafana_syd_host
     targets:
       - select:
           kind: HTTPRoute
           name: grafana
         fieldPaths:
           - spec.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: victoria-metrics-k8s-stack
+        fieldPaths:
+          - spec.values.grafana.[grafana.ini].server.domain
+      - select:
+          kind: HelmRelease
+          name: victoria-metrics-k8s-stack
+        fieldPaths:
+          - spec.values.grafana.[grafana.ini].server.root_url
+        options:
+          delimiter: /
+          index: 2
       - select:
           kind: PrivateDNSRecord
           name: grafana
@@ -65,6 +78,26 @@ replacements:
         fieldPaths:
           - spec.client.callbackURLs.0
           - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.headlamp_syd_host
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.values.config.oidc.callbackURL
         options:
           delimiter: /
           index: 2

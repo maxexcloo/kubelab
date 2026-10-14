@@ -38,6 +38,57 @@ def evaluate(expression, data):
     return json.loads(result.stdout)
 
 
+class PocketIDClientTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.resource = composition_resource(
+            "platform/automation/pocket-id/composition.yaml", "client", base=False
+        )
+        cls.parameters = cls.resource["base"]["spec"]["forProvider"]
+
+    def test_creation_retains_the_registered_client_id_and_callbacks(self):
+        client = {
+            "id": "headlamp", "name": "Headlamp", "isPublic": True,
+            "pkceEnabled": True,
+            "callbackURLs": ["https://dashboard.example/oidc-callback"],
+        }
+        mapping = next(m for m in self.parameters["mappings"] if m["action"] == "CREATE")
+        self.assertEqual(evaluate(mapping["body"], {"payload": {"body": client}}), client)
+
+    def test_only_public_clients_can_be_created_and_neither_kind_can_be_deleted(self):
+        patch = next(p for p in self.resource["patches"]
+                     if p.get("toFieldPath") == "spec.managementPolicies")
+        self.assertEqual(patch["fromFieldPath"], "spec.client.isPublic")
+        self.assertEqual(patch["transforms"][0]["convert"]["toType"], "string")
+        policies = patch["transforms"][1]["map"]
+        self.assertIn("Create", policies["true"])
+        self.assertNotIn("Create", policies["false"])
+        for value in policies.values():
+            self.assertIn("Observe", value)
+            self.assertIn("Update", value)
+            self.assertNotIn("Delete", value)
+
+    def test_public_client_response_detects_callback_and_pkce_drift(self):
+        client = {
+            "accessTokenDurationMinutes": 60,
+            "callbackURLs": ["https://dashboard.example/oidc-callback"],
+            "description": "Kubernetes Dashboard", "isGroupRestricted": True,
+            "isPublic": True, "launchURL": "https://dashboard.example",
+            "logoutCallbackURLs": [], "name": "Headlamp", "pkceEnabled": True,
+            "refreshTokenDurationMinutes": 43200,
+            "requiresPushedAuthorizationRequests": False,
+            "requiresReauthentication": False, "skipConsent": False,
+        }
+        data = {"payload": {"body": client},
+                "response": {"statusCode": 200, "body": dict(client, id="headlamp")}}
+        expression = self.parameters["expectedResponseCheck"]["logic"]
+        self.assertTrue(evaluate(expression, data))
+        for key, value in (("callbackURLs", []), ("pkceEnabled", False), ("isPublic", False)):
+            changed = copy.deepcopy(data)
+            changed["response"]["body"][key] = value
+            self.assertFalse(evaluate(expression, changed))
+
+
 class PrivateDNSComparisonTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
