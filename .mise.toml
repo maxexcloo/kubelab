@@ -1,4 +1,12 @@
 [tools]
+# 1password-cli = "latest"
+# gh = "latest"
+# helm = "latest"
+# kubectl = "latest"
+# prek = "latest"
+# python = "latest"
+# updatecli = "latest"
+# yq = "latest"
 1password-cli = "2.41.0"
 actionlint = "1.7.12"
 flux2 = "2.9.6"
@@ -13,21 +21,14 @@ updatecli = "0.122.1"
 yq = "4.54.1"
 
 # Bootstrap
-
 [tasks.bootstrap]
 description = "Bootstrap A Cluster In Dependency Order"
 run = 'echo "Cluster $usage_cluster bootstrap submitted. Check progress with: mise run status $usage_cluster"'
 usage = 'arg "<cluster>"'
 depends = [
-  { task = "bootstrap-cilium", args = [
-    "{{usage.cluster}}",
-  ] },
-  { task = "bootstrap-secrets", args = [
-    "{{usage.cluster}}",
-  ] },
-  { task = "bootstrap-flux", args = [
-    "{{usage.cluster}}",
-  ] },
+  { task = "bootstrap-cilium", args = ["{{usage.cluster}}"] },
+  { task = "bootstrap-secrets", args = ["{{usage.cluster}}"] },
+  { task = "bootstrap-flux", args = ["{{usage.cluster}}"] },
 ]
 
 [tasks.bootstrap-cilium]
@@ -46,7 +47,6 @@ run = "scripts/bootstrap_cluster_secrets.sh"
 wait_for = ["bootstrap-cilium"]
 
 # Dependency Updates
-
 [tasks."dependencies:check"]
 description = "Preview Local Dependency Updates"
 run = """
@@ -69,7 +69,6 @@ updatecli pipeline apply --config .updatecli.d --disable-changelog --disable-uda
 """
 
 # Deploy
-
 [tasks.deploy]
 description = "Reconcile A Cluster Or Flux Component From Git"
 run = 'flux --context "$usage_cluster" reconcile kustomization "${usage_component:-flux-system}" --with-source'
@@ -94,7 +93,6 @@ arg "[application]"
 '''
 
 # Development
-
 [tasks.check]
 description = "Run All Repository Checks"
 run = "prek run --all-files"
@@ -119,7 +117,6 @@ python -m unittest discover -p 'test_*.py' -s tests
 """
 
 # Setup
-
 [tasks.setup]
 description = "Install Tools & Git Hooks"
 run = """
