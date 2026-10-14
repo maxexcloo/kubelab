@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helm-release.yaml
+  - private-dns.yaml
+  - resources.yaml
+configMapGenerator:
+  - name: atvloadly-proxy
+    namespace: atvloadly
+    files:
+      - nginx.conf.template=proxy.conf.template
+configurations:
+  - name-reference.yaml
+patches:
+  - path: settings.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      name: atvloadly
+      namespace: atvloadly
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+          name: atvloadly
+          namespace: atvloadly
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: HelmRelease
+          name: atvloadly
+          namespace: atvloadly
+        fieldPaths:
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

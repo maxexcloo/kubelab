@@ -1,0 +1,26 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: atvloadly
+  namespace: atvloadly
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - atvloadly.excloo.com
+        annotations:
+          gethomepage.dev/description: Apple TV App Installation & Refresh
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-apple-tv
+          gethomepage.dev/name: Atvloadly
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/path: /
+    controllers:
+      atvloadly:
+        containers:
+          atvloadly:
+            env:
+              TZ: Australia/Sydney

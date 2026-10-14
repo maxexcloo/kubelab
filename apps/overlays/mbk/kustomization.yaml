@@ -5,6 +5,7 @@ resources:
   - ../../base/actual-up
   - ../../base/aiometadata
   - ../../base/aiostreams
+  - ../../base/atvloadly
   - ../../base/beszel
   - ../../base/beszel-agent
   - ../../base/bichon
@@ -44,6 +45,7 @@ patches:
       group: automation.excloo.dev
       kind: ResendKey
       version: v1alpha1
+  - path: atvloadly.yaml
   - path: beszel-agent.yaml
   - path: homepage.yaml
   - patch: |-

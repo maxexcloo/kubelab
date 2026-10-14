@@ -1,0 +1,144 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: atvloadly
+  namespace: atvloadly
+spec:
+  interval: 30m
+  releaseName: atvloadly
+  chart:
+    spec:
+      chart: app-template
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 5.3.0
+  values:
+    controllers:
+      atvloadly:
+        strategy: Recreate
+        containers:
+          atvloadly:
+            env:
+              SERVICE_PORT: "5533"
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/maxexcloo/atvloadly
+              tag: sha-0e8fa65d87697598dbb745f1f083dfcb7632b1a9@sha256:4d34bb9b3841140badaf20f69ffb391de84fa29d2d7534a48d4cf8e63204e186
+            probes:
+              liveness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    host: 127.0.0.1
+                    path: /
+                    port: 5533
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                custom: true
+                enabled: true
+                spec:
+                  httpGet:
+                    host: 127.0.0.1
+                    path: /
+                    port: 5533
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+              startup:
+                custom: true
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  httpGet:
+                    host: 127.0.0.1
+                    path: /
+                    port: 5533
+                  periodSeconds: 5
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 20m
+                memory: 128Mi
+            securityContext:
+              seccompProfile:
+                type: Unconfined
+          proxy:
+            args:
+              - nginx
+              - -c
+              - /tmp/nginx.conf
+              - -g
+              - daemon off;
+            env:
+              NGINX_ENVSUBST_OUTPUT_DIR: /tmp
+              NODE_IP:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.hostIP
+            image:
+              pullPolicy: IfNotPresent
+              repository: docker.io/library/nginx
+              tag: 1.29.3-alpine
+            resources:
+              limits:
+                memory: 128Mi
+              requests:
+                cpu: 5m
+                memory: 16Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              runAsGroup: 568
+              runAsNonRoot: true
+              runAsUser: 568
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+    global:
+      nameOverride: atvloadly
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        advancedMounts:
+          atvloadly:
+            atvloadly:
+              - path: /data
+      proxy-config:
+        name: atvloadly-proxy
+        type: configMap
+        advancedMounts:
+          atvloadly:
+            proxy:
+              - path: /etc/nginx/templates/nginx.conf.template
+                readOnly: true
+                subPath: nginx.conf.template
+      proxy-temporary:
+        type: emptyDir
+        advancedMounts:
+          atvloadly:
+            proxy:
+              - path: /tmp
+    route:
+      private:
+        labels:
+          app.kubernetes.io/name: atvloadly
+        parentRefs:
+          - name: private
+            namespace: networking
+    service:
+      atvloadly:
+        controller: atvloadly
+        ports:
+          http:
+            port: 5534
+            protocol: HTTP
