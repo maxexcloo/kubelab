@@ -24,6 +24,7 @@ resources:
   - ../../base/romm
   - ../../base/shelfmark
   - ../../base/sidestore-vpn
+  - ../../base/signtools
   - homepage-private-dns.yaml
   - immich-private-route.yaml
   - openspeedtest-route.yaml
