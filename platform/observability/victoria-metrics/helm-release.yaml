@@ -83,10 +83,15 @@ spec:
         analytics:
           check_for_updates: false
           reporting_enabled: false
+        auth:
+          disable_login_form: false
+        auth.basic:
+          enabled: true
         auth.generic_oauth:
           allow_sign_up: true
           api_url: https://identity.invalid/api/oidc/userinfo
           auth_url: https://identity.invalid/authorize
+          auto_login: false
           client_id: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_ID}
           client_secret: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
           enabled: true
