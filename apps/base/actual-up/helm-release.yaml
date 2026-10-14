@@ -32,7 +32,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/actual-up
-              tag: sha-b3bba36c3d25f53b29b8905f86f3ec0208a64b95@sha256:2a17667ec3b0916d06861c76f0391c60e7ddac0256bc057beee99551dc024566
+              tag: sha-b973c43df25b7f56c7f9d5566025c9dee6aa1939@sha256:63054f4520342a3114d242ae9626d5106f6dc0890528ebf0c533005604d6de70
             probes:
               liveness:
                 custom: true
