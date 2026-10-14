@@ -1,5 +1,5 @@
 [tools]
-1password-cli = "2.40.0"
+1password-cli = "2.41.0"
 actionlint = "1.7.12"
 flux2 = "2.9.6"
 helm = "4.3.0"
