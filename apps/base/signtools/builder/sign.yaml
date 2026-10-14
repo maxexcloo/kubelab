@@ -29,7 +29,7 @@ jobs:
           tags: tag:ephemeral
           version: 1.104.1
       - name: Check Private Connection
-        run: python3 builder/check_connection.py
+        run: curl --fail --show-error --silent "$SECRET_URL" >/dev/null
       - name: Check Out Signing Tools
         uses: actions/checkout@v7
         with:
