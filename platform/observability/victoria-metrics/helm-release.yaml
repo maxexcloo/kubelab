@@ -85,6 +85,8 @@ spec:
           reporting_enabled: false
         auth:
           disable_login_form: false
+          # Link password accounts to identities from the trusted Pocket ID provider.
+          oauth_allow_insecure_email_lookup: true
         auth.basic:
           enabled: true
         auth.generic_oauth:
