@@ -21,9 +21,11 @@ with(select($domain == null or $domain == false); error("Missing infrastructure 
     error("Invalid endpoint scheme or port: " + $reference)) |
   with(select(($port | to_number) < 1 or ($port | to_number) > 65535);
     error("Invalid endpoint port: " + $reference)) |
-  {"authority": (($machine.hostname // $parts.machine) + "." + $parts.network + "." + $domain)} |
+  with(select($service.hostname != null and ($service.hostname | test("^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$") | not));
+    error("Invalid service hostname: " + $reference)) |
+  {"authority": ($service.hostname // (($machine.hostname // $parts.machine) + "." + $parts.network + "." + $domain))} |
   # Published Tailscale hosts are needed for HTTP; HTTPS keeps its certificate DNS.
-  with(select($service.scheme == "http" and ($infra.hosts[$parts.machine] // "") != "");
+  with(select($service.hostname == null and $service.scheme == "http" and ($infra.hosts[$parts.machine] // "") != "");
     .authority = $infra.hosts[$parts.machine]) |
   with(select(($service.scheme != "http" or $port != "80") and ($service.scheme != "https" or $port != "443"));
     .authority += ":" + $port) |

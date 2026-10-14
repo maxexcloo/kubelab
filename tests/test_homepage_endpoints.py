@@ -100,6 +100,34 @@ class HomepageEndpointsTests(unittest.TestCase):
                     self.assertEqual(result["http"], f"http://{host or 'storage.mbk.example.net'}:31010")
                     self.assertEqual(result["https"], "https://storage.mbk.example.net:8444/path")
 
+    def test_service_hostname_overrides_machine_and_published_addresses(self):
+        with tempfile.TemporaryDirectory() as directory:
+            homelab = Path(directory) / "homelab"
+            shutil.copytree(FIXTURE, homelab)
+            inventory_path = homelab / "data/machines.yaml"
+            inventory = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(inventory_path)]))
+            service = inventory["machines"]["mbk"]["kimbap"]["services"]["management"]
+            template = Path(directory) / "source.yaml"
+            output = Path(directory) / "services.yaml"
+            published = Path(directory) / "infrastructure.json"
+            published.write_text(json.dumps({"hosts": {"kimbap": "100.64.0.9"}}))
+            template.write_text(json.dumps({"href": "homelab://mbk/kimbap/management/path"}))
+            for scheme, port in [("http", 80), ("https", 443), ("https", 8443)]:
+                with self.subTest(scheme=scheme, port=port):
+                    service.update(hostname="studio.example.com", port=port, scheme=scheme)
+                    inventory_path.write_text(json.dumps(inventory))
+                    subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)],
+                                   check=True, env=os.environ | {"HOMELAB_INFRASTRUCTURE_FILE": str(published)})
+                    result = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
+                    authority = "studio.example.com" + (":8443" if port == 8443 else "")
+                    self.assertEqual(result["href"], f"{scheme}://{authority}/path")
+            service["hostname"] = "https://invalid.example/path"
+            inventory_path.write_text(json.dumps(inventory))
+            before = output.read_text()
+            result = subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(output.read_text(), before)
+
     def test_invalid_endpoint_settings_preserve_previous_configuration(self):
         with tempfile.TemporaryDirectory() as directory:
             homelab = Path(directory) / "homelab"
