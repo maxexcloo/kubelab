@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://www.updatecli.io/schema/latest/policy/manifest/config.json
+name: Update ghcr.io/maxexcloo/atvloadly In apps/base/atvloadly/helm-release.yaml $.spec.values.controllers.atvloadly.containers.atvloadly
+pipelineid: update-ghcr-io-maxexcloo-atvloadly-in-apps-base-atvloadly-helm-release-yaml-spec-values-controllers-atvloadly-containers-atvloadly
+labels:
+  group: containers
+sources:
+  current:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/atvloadly/helm-release.yaml
+      key: $.spec.values.controllers.atvloadly.containers.atvloadly.image.tag
+    transformers:
+      - find: ^[^@]+
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "current" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/atvloadly/helm-release.yaml
+      key: $.spec.values.controllers.atvloadly.containers.atvloadly.image.repository
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/atvloadly/helm-release.yaml
+      key: $.spec.values.controllers.atvloadly.containers.atvloadly.image.tag
+    transformers:
+      - addprefix: '{{ source "current" }}@'

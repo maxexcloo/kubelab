@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://www.updatecli.io/schema/latest/policy/manifest/config.json
+name: Update openspeedtest/latest In apps/base/openspeedtest/helm-release.yaml $.spec.values
+pipelineid: update-openspeedtest-latest-in-apps-base-openspeedtest-helm-release-yaml-spec-values
+labels:
+  group: containers
+sources:
+  current:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/openspeedtest/helm-release.yaml
+      key: $.spec.values.image.tag
+    transformers:
+      - find: ^[^@]+
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/openspeedtest/helm-release.yaml
+      key: $.spec.values.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: version
+    spec:
+      engine: yamlpath
+      file: apps/base/openspeedtest/helm-release.yaml
+      key: $.spec.values.image.tag

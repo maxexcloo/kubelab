@@ -19,7 +19,7 @@ Kubernetes is unavailable.
 - Keep cluster differences in overlays; do not copy an entire application.
 - Pin tools, charts, images, and remote manifests to stable release versions.
   Use readable major tags such as `v7` for GitHub Actions, not commit SHAs.
-  Renovate proposes upgrades for manual review.
+  Updatecli previews upgrades locally for manual review.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Default Crossplane external resources to orphan-on-delete.
 - Do not change a live route without explicit approval and a reviewed plan.

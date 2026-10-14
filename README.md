@@ -47,7 +47,8 @@ Define settings once near their owner and use Kustomize replacements for derived
 values. Preserve native configuration formats and upstream interfaces. Keep
 substantial application configuration and executable code in their own files.
 
-Validate the changed configuration before committing. Render changed Helm charts
+Validate the changed configuration before committing. Local manifest rendering uses
+`kubectl kustomize` from the pinned kubectl tool. Render changed Helm charts
 separately: manifest checks cover Kustomize output, not chart-generated workloads.
 Review deletion and recovery behaviour before removing declarations or changing
 storage, secrets or external integrations.
@@ -77,8 +78,8 @@ delivery workflow. Flux performs routine cluster deployments.
 
 ## Updates & Recovery
 
-Use Renovate's dependency dashboard to review pending updates. Update schedules
-and grouping are configured in `renovate.json`; merges remain manual.
+Use `mise run dependencies:check` to preview local updates. Policies are configured
+in `.updatecli.d/`; changes and deployment remain manual.
 
 Check upstream migration requirements before upgrading. Preserve persistent data
 and the credentials needed to restore it. Reverting an image does not reverse a
@@ -89,3 +90,19 @@ external resources.
 ## Licence
 
 AGPL-3.0 — see [LICENSE](LICENSE).
+
+## Dependency Updates
+
+Mise installs the pinned Updatecli CLI. Run `mise run dependencies:check` locally
+to preview updates from `.updatecli.d/`. GitHub authentication uses the existing
+`gh` login; credentials stay in the command process.
+
+Review compatibility and major upgrades separately, then apply a selected group:
+
+```sh
+mise run dependencies:update --labels group:tools
+```
+
+Use the groups declared in the policy, review the Git diff and run the project
+checks before committing or deploying. Updatecli changes local files; it does
+not create issues, pull requests, commits or deployments. Hosted Renovate is disabled.

@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://www.updatecli.io/schema/latest/policy/manifest/config.json
+name: Update Database Image ghcr.io/tensorchord/vchord-scratch In apps/base/immich/database.yaml
+pipelineid: update-database-image-ghcr-io-tensorchord-vchord-scratch-in-apps-base-immich-database-yaml
+labels:
+  group: containers
+sources:
+  version:
+    kind: dockerdigest
+    spec:
+      image: ghcr.io/tensorchord/vchord-scratch
+      tag: pg18-v1.1.1
+targets:
+  pin:
+    kind: file
+    sourceid: version
+    spec:
+      file: apps/base/immich/database.yaml
+      matchpattern: ((?:imageName|reference):\s+ghcr\.io/tensorchord/vchord\-scratch:pg18\-v1\.1\.1@)sha256:[a-f0-9]{64}
+      replacepattern: ${1}{{ source "version" }}

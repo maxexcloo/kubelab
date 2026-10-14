@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://www.updatecli.io/schema/latest/policy/manifest/config.json
+name: Update ghcr.io/maxexcloo/actual-up In apps/base/actual-up/helm-release.yaml $.spec.values.controllers.actual-up.containers.actual-up
+pipelineid: update-ghcr-io-maxexcloo-actual-up-in-apps-base-actual-up-helm-release-yaml-spec-values-controllers-actual-up-containers-actual-up
+labels:
+  group: containers
+sources:
+  current:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/actual-up/helm-release.yaml
+      key: $.spec.values.controllers.actual-up.containers.actual-up.image.tag
+    transformers:
+      - find: ^[^@]+
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "current" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/actual-up/helm-release.yaml
+      key: $.spec.values.controllers.actual-up.containers.actual-up.image.repository
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/actual-up/helm-release.yaml
+      key: $.spec.values.controllers.actual-up.containers.actual-up.image.tag
+    transformers:
+      - addprefix: '{{ source "current" }}@'

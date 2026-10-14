@@ -18,12 +18,11 @@ repos:
     hooks:
       - id: check-github-workflows
         files: ^\.github/workflows/.*\.yaml$
-      - id: check-renovate
   - repo: local
     hooks:
       - id: project-check
         name: Check Project Source
         entry: mise run validate
-        files: ^(\.github/workflows/.*\.yaml|\.gitignore|\.mise\.toml|\.pre-commit-config\.yaml|\.prettierignore|\.sourceignore|AGENTS\.md|README\.md|apps/|clusters/|platform/|renovate\.json|scripts/|tests/)
+        files: ^(\.github/workflows/.*\.yaml|\.gitignore|\.mise\.toml|\.pre-commit-config\.yaml|\.prettierignore|\.sourceignore|AGENTS\.md|README\.md|apps/|clusters/|platform/|\.updatecli\.d/|scripts/|tests/)
         language: system
         pass_filenames: false

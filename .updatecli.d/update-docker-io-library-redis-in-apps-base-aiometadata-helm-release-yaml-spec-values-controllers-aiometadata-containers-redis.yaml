@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://www.updatecli.io/schema/latest/policy/manifest/config.json
+name: Update docker.io/library/redis In apps/base/aiometadata/helm-release.yaml $.spec.values.controllers.aiometadata.containers.redis
+pipelineid: update-docker-io-library-redis-in-apps-base-aiometadata-helm-release-yaml-spec-values-controllers-aiometadata-containers-redis
+labels:
+  group: containers
+sources:
+  current:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/aiometadata/helm-release.yaml
+      key: $.spec.values.controllers.aiometadata.containers.redis.image.tag
+    transformers:
+      - find: ^[^@]+
+  digest:
+    kind: dockerdigest
+    spec:
+      image: '{{ source "repository" }}'
+      tag: '{{ source "version" }}'
+  repository:
+    kind: yaml
+    spec:
+      engine: yamlpath
+      file: apps/base/aiometadata/helm-release.yaml
+      key: $.spec.values.controllers.aiometadata.containers.redis.image.repository
+  version:
+    kind: dockerimage
+    spec:
+      image: '{{ source "repository" }}'
+      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
+      versionfilter:
+        kind: regex/semver
+        pattern: "*"
+        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
+targets:
+  image:
+    kind: yaml
+    sourceid: digest
+    spec:
+      engine: yamlpath
+      file: apps/base/aiometadata/helm-release.yaml
+      key: $.spec.values.controllers.aiometadata.containers.redis.image.tag
+    transformers:
+      - addprefix: '{{ source "version" }}@'

@@ -5,22 +5,29 @@ flux2 = "2.9.6"
 helm = "4.3.0"
 kubeconform = "0.8.0"
 kubectl = "1.37.1"
-kustomize = "5.8.3"
 prek = "0.5.5"
 prettier = "3.9.10"
 python = "3.15.0"
 shellcheck = "0.11.0"
+updatecli = "0.122.1"
 yq = "4.54.1"
 
 # Bootstrap
+
 [tasks.bootstrap]
 description = "Bootstrap A Cluster In Dependency Order"
 run = 'echo "Cluster $usage_cluster bootstrap submitted. Check progress with: mise run status $usage_cluster"'
 usage = 'arg "<cluster>"'
 depends = [
-  { task = "bootstrap-cilium", args = ["{{usage.cluster}}"] },
-  { task = "bootstrap-secrets", args = ["{{usage.cluster}}"] },
-  { task = "bootstrap-flux", args = ["{{usage.cluster}}"] },
+  { task = "bootstrap-cilium", args = [
+    "{{usage.cluster}}",
+  ] },
+  { task = "bootstrap-secrets", args = [
+    "{{usage.cluster}}",
+  ] },
+  { task = "bootstrap-flux", args = [
+    "{{usage.cluster}}",
+  ] },
 ]
 
 [tasks.bootstrap-cilium]
@@ -74,6 +81,7 @@ run = "prettier --write ."
 [tasks.validate]
 description = "Check Project Files & Configuration"
 run = """
+updatecli manifest validate --config .updatecli.d --disable-templating --strict
 actionlint .github/workflows/*.yaml
 prettier --check .
 shellcheck scripts/*.sh apps/base/homepage/*.sh
@@ -91,4 +99,26 @@ description = "Install Tools & Git Hooks"
 run = """
 mise install
 prek install
+"""
+
+# Dependency Updates
+[tasks."dependencies:check"]
+description = "Preview Local Dependency Updates"
+run = """
+GITHUB_TOKEN="$(gh auth token)"
+export GITHUB_TOKEN
+updatecli pipeline diff --config .updatecli.d --disable-changelog --disable-udash-report --unique-tmp-dir
+"""
+
+[tasks."dependencies:update"]
+description = "Apply Reviewed Local Dependency Updates"
+usage = 'flag "--labels <labels>" help="Select Updatecli groups, such as group:tools"'
+run = """
+GITHUB_TOKEN="$(gh auth token)"
+export GITHUB_TOKEN
+set --
+if [ -n "${usage_labels:-}" ]; then
+  set -- --labels "$usage_labels"
+fi
+updatecli pipeline apply --config .updatecli.d --disable-changelog --disable-udash-report --unique-tmp-dir "$@"
 """

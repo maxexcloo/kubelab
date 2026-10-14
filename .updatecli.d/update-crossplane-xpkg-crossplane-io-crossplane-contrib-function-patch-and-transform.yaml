@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://www.updatecli.io/schema/latest/policy/manifest/config.json
+name: Update Crossplane xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform
+pipelineid: update-crossplane-xpkg-crossplane-io-crossplane-contrib-function-patch-and-transform
+labels:
+  group: platform
+sources:
+  version:
+    kind: dockerimage
+    spec:
+      image: xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform
+      versionfilter:
+        kind: semver
+        pattern: "*"
+targets:
+  pin:
+    kind: file
+    sourceid: version
+    spec:
+      file: platform/automation/crossplane/helm-release.yaml
+      matchpattern: (xpkg\.crossplane\.io/crossplane\-contrib/function\-patch\-and\-transform:)[^\s,\]]+
+      replacepattern: ${1}{{ source "version" }}
