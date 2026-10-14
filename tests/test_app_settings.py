@@ -35,12 +35,33 @@ class AppSettingsTests(unittest.TestCase):
                         shutil.copytree(settings.parent, app)
                         route["hostnames"][index] = "renamed.example.test"
                         (app / settings.name).write_text(json.dumps(resource))
-                        output = subprocess.check_output(["kustomize", "build", str(app)], text=True)
+                        output = subprocess.check_output(["kubectl", "kustomize", str(app)], text=True)
                         self.assertIn("renamed.example.test", output)
                         self.assertNotIn(old, output)
                         self.assertNotIn("app.invalid", output)
                         self.assertNotIn("alias.invalid", output)
                     route["hostnames"][index] = old
+
+    def test_nfs_server_changes_reach_all_persistent_volumes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("apps", "clusters", "platform", "scripts"):
+                shutil.copytree(ROOT / name, root / name)
+            settings = root / "clusters/mbk/settings/settings.yaml"
+            resource = read_yaml(settings)
+            resource["data"]["nfs_server"] = "192.0.2.7"
+            settings.write_text(json.dumps(resource))
+            output = subprocess.check_output(
+                ["kubectl", "kustomize", str(root / "apps/overlays/mbk")],
+                text=True,
+            )
+            servers = subprocess.check_output(
+                ["yq", "-N", "-r", 'select(.kind == "PersistentVolume") | .spec.nfs.server'],
+                input=output,
+                text=True,
+            ).splitlines()
+            self.assertTrue(servers)
+            self.assertEqual(set(servers), {"192.0.2.7"})
 
     def test_shared_beszel_hostname_changes_reach_both_clusters(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -54,7 +75,7 @@ class AppSettingsTests(unittest.TestCase):
             for cluster in ("mbk", "syd"):
                 with self.subTest(cluster=cluster):
                     output = subprocess.check_output(
-                        ["kustomize", "build", str(root / "apps/overlays" / cluster)],
+                        ["kubectl", "kustomize", str(root / "apps/overlays" / cluster)],
                         text=True,
                     )
                     documents = subprocess.check_output(

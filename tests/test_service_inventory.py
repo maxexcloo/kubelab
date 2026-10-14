@@ -20,10 +20,10 @@ class ServiceInventoryTests(unittest.TestCase):
             commands = temporary / "bin"
             commands.mkdir()
             log = temporary / "builds"
-            wrapper = commands / "kustomize"
+            wrapper = commands / "kubectl"
             wrapper.write_text(
                 '#!/bin/sh\nprintf "%s\\n" "$*" >> "$BUILD_LOG"\n'
-                'exec "$REAL_KUSTOMIZE" "$@"\n'
+                'exec "$REAL_KUBECTL" "$@"\n'
             )
             wrapper.chmod(0o755)
             env = dict(
@@ -31,7 +31,7 @@ class ServiceInventoryTests(unittest.TestCase):
                 HOMELAB_DIRECTORY=str(ROOT / "tests/fixtures/homepage/homelab"),
                 BUILD_LOG=str(log),
                 PATH=f"{commands}:{os.environ['PATH']}",
-                REAL_KUSTOMIZE=shutil.which("kustomize"),
+                REAL_KUBECTL=shutil.which("kubectl"),
             )
             subprocess.run(
                 ["scripts/render_manifests.sh", str(manifests)],
@@ -41,8 +41,8 @@ class ServiceInventoryTests(unittest.TestCase):
             self.assertTrue(builds)
             self.assertEqual(len(builds), len(set(builds)))
             for cluster in ("mbk", "syd"):
-                self.assertIn(f"build clusters/{cluster}", builds)
-                self.assertIn(f"build apps/overlays/{cluster}", builds)
+                self.assertIn(f"kustomize clusters/{cluster}", builds)
+                self.assertIn(f"kustomize apps/overlays/{cluster}", builds)
 
             for options in ([], ["--all-routes"], ["syd"]):
                 command = ["scripts/render_service_inventory.sh", *options]

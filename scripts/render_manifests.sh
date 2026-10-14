@@ -16,7 +16,7 @@ for cluster in "${clusters[@]}"; do
     exit 2
   fi
   mkdir -p "${manifest_directory}/clusters"
-  kustomize build "clusters/${cluster}" >"${manifest_directory}/clusters/${cluster}.yaml"
+  kubectl kustomize "clusters/${cluster}" >"${manifest_directory}/clusters/${cluster}.yaml"
 done
 
 yq eval -N -r '
@@ -28,6 +28,6 @@ yq eval -N -r '
     manifest_file="${manifest_directory}/${target}.yaml"
     if [[ ! -f "${manifest_file}" ]]; then
       mkdir -p "$(dirname "${manifest_file}")"
-      kustomize build "${target}" >"${manifest_file}"
+      kubectl kustomize "${target}" >"${manifest_file}"
     fi
   done

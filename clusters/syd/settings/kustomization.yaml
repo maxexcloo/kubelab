@@ -30,7 +30,15 @@ replacements:
     targets:
       - select:
           kind: Request
-          name: private-dns-target-ipv[46]
+          name: private-dns-target-ipv4
+        fieldPaths:
+          - spec.forProvider.payload.baseUrl
+        options:
+          delimiter: "&"
+          index: 0
+      - select:
+          kind: Request
+          name: private-dns-target-ipv6
         fieldPaths:
           - spec.forProvider.payload.baseUrl
         options:

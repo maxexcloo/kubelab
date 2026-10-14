@@ -165,7 +165,7 @@ class PrivateDNSComparisonTests(unittest.TestCase):
 class PrivateDNSCompositionTests(unittest.TestCase):
     def test_control_d_only_preserves_rule_without_public_dns_resource(self):
         rendered = subprocess.run(
-            ["kustomize", "build", ROOT / "platform/automation/private-dns/control-d-only"],
+            ["kubectl", "kustomize", ROOT / "platform/automation/private-dns/control-d-only"],
             check=True, capture_output=True, text=True,
         )
         composition = json.loads(subprocess.run(
@@ -183,7 +183,7 @@ class PrivateDNSCompositionTests(unittest.TestCase):
         for cluster in ["mbk", "syd"]:
             with self.subTest(cluster=cluster):
                 rendered = subprocess.run(
-                    ["kustomize", "build", ROOT / "clusters" / cluster / "automation"],
+                    ["kubectl", "kustomize", ROOT / "clusters" / cluster / "automation"],
                     check=True, capture_output=True, text=True,
                 )
                 result = subprocess.run(
