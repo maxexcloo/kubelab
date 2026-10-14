@@ -14,8 +14,9 @@ schema_directory="${temporary_directory}/schemas"
 schema_cache_directory=".cache/kubeconform"
 remote_schema_cache_directory="${schema_cache_directory}/remote"
 # Keep validation aligned with the deployed cluster API.
-kubernetes_version="1.37.1"
-crd_catalog_revision="fd90051867733c60d32d16450556e9cd18459aef"
+kubernetes_version="$(mise exec -- kubectl version --client -o json | yq -r '.clientVersion.gitVersion')"
+kubernetes_version="${kubernetes_version#v}"
+crd_catalog_revision="63669a570e231d4f1f8396d229a1de512bcf0a34"
 mkdir -p \
   "${remote_schema_cache_directory}" \
   "${schema_directory}"
@@ -46,11 +47,35 @@ if [[ ! -s "${provider_http_schema_file}" ]]; then
   mv "${provider_http_schema_temporary_file}" "${provider_http_schema_file}"
 fi
 
+# The catalogue may omit this CRD; use the chart that owns the deployed API.
+external_secrets_version="$(yq -r '.spec.chart.spec.version' platform/foundation/external-secrets/helm-release.yaml)"
+external_secrets_repository="$(yq -r '.spec.url' platform/foundation/external-secrets/source.yaml)"
+external_secrets_schema_root="${schema_cache_directory}/external-secrets-${external_secrets_version}"
+external_secrets_schema_directory="${external_secrets_schema_root}/external-secrets.io"
+external_secrets_schema_file="${external_secrets_schema_directory}/clustersecretstore_v1.json"
+mkdir -p "${external_secrets_schema_directory}"
+if [[ ! -s "${external_secrets_schema_file}" ]]; then
+  external_secrets_schema_temporary_file="${temporary_directory}/clustersecretstore_v1.json"
+  # shellcheck disable=SC2016
+  helm template schema-check external-secrets \
+    --repo "${external_secrets_repository}" \
+    --show-only templates/crds/clustersecretstore.yaml \
+    --version "${external_secrets_version}" |
+    yq --exit-status -I=2 -o=json '
+      .spec.versions[] |
+      select(.name == "v1") |
+      .schema.openAPIV3Schema |
+      ."$schema" = "https://json-schema.org/draft/2020-12/schema"
+    ' >"${external_secrets_schema_temporary_file}"
+  mv "${external_secrets_schema_temporary_file}" "${external_secrets_schema_file}"
+fi
+
 kubeconform_flags=(
   -cache "${remote_schema_cache_directory}"
   -kubernetes-version "${kubernetes_version}"
   -schema-location "${schema_directory}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location "${provider_http_schema_root}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
+  -schema-location "${external_secrets_schema_root}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location default
   -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/${crd_catalog_revision}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -skip "ClusterProviderConfig,CustomResourceDefinition"
