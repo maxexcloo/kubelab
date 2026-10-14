@@ -24,7 +24,7 @@ invariants and editing conventions.
 
 ## Setup
 
-Install jq, wget and [Mise](https://mise.jdx.dev/), then install the pinned tools
+Install jq, wget and [Mise](https://mise.jdx.dev/), then install the configured tools
 and Git hooks:
 
 ```shell
@@ -65,7 +65,7 @@ cluster and optionally a configured reconciliation component.
 | `mise run check`                          | Validate manifests, metadata, formatting, scripts and reconciliation |
 | `mise run deploy <cluster> [component]`   | Fetch Git and reconcile the entry point or selected component        |
 | `mise run fmt`                            | Format project files                                                 |
-| `mise run setup`                          | Install pinned tools and Git hooks                                   |
+| `mise run setup`                          | Install configured tools and Git hooks                               |
 | `mise run status <cluster> [application]` | Show reconciliation status or watch an application's Helm release    |
 
 Bootstrap is a separate operation after infrastructure provisioning; routine
