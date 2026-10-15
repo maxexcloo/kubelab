@@ -1,0 +1,7 @@
+nameReference:
+  - kind: ConfigMap
+    fieldSpecs:
+      - kind: HelmRelease
+        path: spec/values/persistence/public/name
+      - kind: HelmRelease
+        path: spec/values/persistence/server/name

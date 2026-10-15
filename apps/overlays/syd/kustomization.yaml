@@ -4,6 +4,7 @@ resources:
   - ../../base/beszel-agent
   - ../../base/openspeedtest
   - ../../base/redlib
+  - ../../base/redlib-multi
   - openspeedtest-route.yaml
 patches:
   - path: beszel-agent.yaml

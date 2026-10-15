@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Redlib Multi</title>
+    <link href="/style.css" rel="stylesheet" />
+    <script src="/app.mjs" type="module"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <a class="brand" href="/">r<span>+</span></a
+        ><span>REDLIB MULTI</span><span class="tag">Your Reddit, Together</span>
+      </header>
+      <section id="welcome" hidden>
+        <p class="eyebrow">A LITTLE LESS SCROLLING AROUND</p>
+        <h1>One link.<br />Your communities.</h1>
+        <p class="intro">
+          Gather your favourite subreddits into one Redlib feed. Keep a private
+          editing link and come back whenever your interests change.
+        </p>
+        <button id="create">
+          Create a List <span aria-hidden="true">↗</span>
+        </button>
+        <p class="hint">
+          No account needed. Anyone with your editing link can edit.
+        </p>
+      </section>
+      <section id="editor" hidden>
+        <div class="heading">
+          <div>
+            <p class="eyebrow">YOUR CURATED CORNER</p>
+            <h1>A good mix.</h1>
+          </div>
+          <span class="tag" id="count">0 Communities</span>
+        </div>
+        <section class="feed" aria-label="Combined Redlib Link">
+          <span class="eyebrow">YOUR REDLIB FEED</span
+          ><a id="feed" target="_blank" rel="noreferrer" hidden></a>
+          <p id="empty-feed">Add a community to build your feed.</p>
+          <button class="secondary" id="copy-feed" disabled>Copy Link</button>
+        </section>
+        <div class="toolbar">
+          <h2>Communities</h2>
+          <button class="text-button" id="copy-editor">
+            Copy Editing Link
+          </button>
+        </div>
+        <form id="add-form">
+          <label for="subreddits">Add Subreddits</label>
+          <div class="input-row">
+            <input
+              autocomplete="off"
+              id="subreddits"
+              name="subreddits"
+              placeholder="e.g. australia, sydney"
+              required
+            /><button id="add-button" type="submit">
+              Add <span aria-hidden="true">+</span>
+            </button>
+          </div>
+          <p class="hint">
+            Paste names, r/ links or a multi link. Always lowercase, sorted
+            &amp; deduplicated.
+          </p>
+        </form>
+        <label class="sr-only" for="filter">Filter Communities</label
+        ><input
+          id="filter"
+          placeholder="Filter your communities…"
+          type="search"
+        />
+        <p id="empty-list" class="empty">
+          Your next rabbit hole starts here.<br /><span
+            >Add a subreddit above to get started.</span
+          >
+        </p>
+        <ul id="communities" aria-label="Subreddits"></ul>
+        <p class="hint" id="save-state">Loading your list…</p>
+      </section>
+      <p aria-live="polite" id="status" role="status"></p>
+      <footer>
+        Less noise. More of what you like.<span>Made for Redlib ↗</span>
+      </footer>
+    </main>
+  </body>
+</html>
