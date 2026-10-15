@@ -97,8 +97,5 @@ python -m unittest discover -p 'test_*.py' -s tests
 
 # Setup
 [tasks.setup]
-description = "Install Tools & Git Hooks"
-run = """
-mise install
-prek install
-"""
+description = "Install Tools"
+run = "mise install"

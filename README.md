@@ -27,8 +27,7 @@ invariants and editing conventions.
 
 ## Setup
 
-Install jq, wget and [Mise](https://mise.jdx.dev/), then install the configured tools
-and Git hooks:
+Install jq, wget and [Mise](https://mise.jdx.dev/), then install the configured tools:
 
 ```shell
 mise trust
@@ -58,7 +57,7 @@ storage, secrets or external integrations.
 
 ## Deployment
 
-Push reviewed changes to `main`; Flux reconciles the repository automatically.
+Merge reviewed pull requests into `main`; Flux reconciles the repository automatically.
 Use the deployment task to fetch and reconcile immediately. Select an existing
 cluster and optionally a configured reconciliation component.
 
@@ -68,7 +67,7 @@ cluster and optionally a configured reconciliation component.
 | `mise run check`                          | Validate manifests, metadata, formatting, scripts and reconciliation |
 | `mise run deploy <cluster> [component]`   | Fetch Git and reconcile the entry point or selected component        |
 | `mise run fmt`                            | Format project files                                                 |
-| `mise run setup`                          | Install configured tools and Git hooks                               |
+| `mise run setup`                          | Install configured tools                                             |
 | `mise run status <cluster> [application]` | Show reconciliation status or watch an application's Helm release    |
 
 Bootstrap is a separate operation after infrastructure provisioning; routine
@@ -76,8 +75,9 @@ application upgrades do not require it. The deploy task waits for its selected
 reconciliation stage. Check the affected release and application separately to
 verify the workload has recovered and its important workflow works.
 
-CI validates changes and refreshes external monitoring through the configured
-delivery workflow. Flux performs routine cluster deployments.
+The only GitHub workflow refreshes external monitoring after a merge. Flux
+performs cluster deployments directly from `main`. Local checks remain available
+when needed; run `prek install` to enable optional commit hooks.
 
 ## Updates & Recovery
 
