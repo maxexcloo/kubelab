@@ -7,6 +7,7 @@ spec:
   secretName: wildcard
   dnsNames:
     - "*.excloo.com"
+    - "*.mini.excloo.com"
     - "*.syd.excloo.dev"
   issuerRef:
     kind: ClusterIssuer
