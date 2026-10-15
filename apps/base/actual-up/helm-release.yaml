@@ -1,91 +1,42 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: actual-up
-  namespace: actual-up
+  name: application
 spec:
-  interval: 30m
-  releaseName: actual-up
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      actual-up:
-        replicas: 1
-        strategy: Recreate
+      main:
         containers:
-          actual-up:
+          main:
             env:
               ACTUAL_UP_CONFIG: /config/config.yaml
               ACTUAL_UP_PUBLIC_URL: https://app.invalid
               TZ: Australia/Sydney
             envFrom:
               - secretRef:
-                  name: actual-up
+                  name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/actual-up
               tag: sha-b973c43df25b7f56c7f9d5566025c9dee6aa1939@sha256:63054f4520342a3114d242ae9626d5106f6dc0890528ebf0c533005604d6de70
             probes:
               liveness:
-                custom: true
-                enabled: true
-                spec:
-                  httpGet:
-                    path: /livez
-                    port: 3000
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  httpGet:
-                    path: /readyz
-                    port: 3000
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-              startup:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 60
-                  httpGet:
-                    path: /readyz
-                    port: 3000
-                  periodSeconds: 5
+                path: /livez
+              readiness: &ready
+                path: /readyz
+              startup: *ready
             resources:
               limits:
                 memory: 2Gi
               requests:
                 cpu: 25m
                 memory: 512Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
     defaultPodOptions:
-      automountServiceAccountToken: false
       terminationGracePeriodSeconds: 120
       securityContext:
         fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
         runAsGroup: 1000
-        runAsNonRoot: true
         runAsUser: 1000
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: actual-up
     persistence:
       cache:
         existingClaim: data
@@ -98,10 +49,6 @@ spec:
         globalMounts:
           - path: /config
             readOnly: true
-      temporary:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
     route:
       private:
         annotations:
@@ -114,16 +61,14 @@ spec:
           gethomepage.dev/siteMonitor: https://app.invalid/livez
           onepassword.excloo.dev/item: Actual Up
         hostnames:
-          - app.invalid
+          - actual-up.mbk.excloo.dev
         labels:
-          app.kubernetes.io/name: actual-up
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
     service:
-      actual-up:
-        controller: actual-up
+      main:
         ports:
           http:
             port: 3000
-            protocol: HTTP

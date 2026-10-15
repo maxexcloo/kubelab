@@ -1,0 +1,47 @@
+source:
+  kind: Namespace
+  fieldPath: metadata.name
+targets:
+  - &namespaced
+    select: { kind: B2ObjectStorage }
+    fieldPaths: [metadata.namespace]
+    options: { create: true }
+  - <<: *namespaced
+    select: { kind: CloudflareWAFPolicy }
+  - <<: *namespaced
+    select: { kind: Cluster }
+  - <<: *namespaced
+    select: { kind: ConfigMap }
+  - <<: *namespaced
+    select: { kind: CronJob }
+  - <<: *namespaced
+    select: { kind: DaemonSet }
+  - <<: *namespaced
+    select: { kind: Database }
+  - <<: *namespaced
+    select: { kind: EndpointSlice }
+  - <<: *namespaced
+    select: { kind: ExternalSecret }
+  - <<: *namespaced
+    select: { kind: HelmRelease }
+    fieldPaths: [metadata.name, metadata.namespace, spec.releaseName]
+  - <<: *namespaced
+    select: { kind: HTTPRoute }
+  - <<: *namespaced
+    select: { kind: Middleware }
+  - <<: *namespaced
+    select: { kind: NetworkPolicy }
+  - <<: *namespaced
+    select: { kind: PersistentVolumeClaim }
+  - <<: *namespaced
+    select: { kind: PocketIDClient }
+  - <<: *namespaced
+    select: { kind: PrivateDNSRecord }
+  - <<: *namespaced
+    select: { kind: Request }
+  - <<: *namespaced
+    select: { kind: ResendKey }
+  - <<: *namespaced
+    select: { kind: Service }
+  - <<: *namespaced
+    select: { kind: ServiceAccount }

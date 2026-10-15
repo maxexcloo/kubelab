@@ -43,8 +43,19 @@ integration logic; document the contract in its schema and compose standard
 resources underneath. Use Kustomize for composition and small patches. Use
 `configMapGenerator` only to mount checked-in app configuration, scripts or assets;
 do not use `secretGenerator`. Keep executable code in its own source file. Keep
-chart values in the upstream Flux `HelmRelease` or its native app-local settings
-patch. Use standard Kustomize replacements for derived hostnames and URLs.
+shared chart policy in native Kustomize components and app-specific values in the
+app's Flux `HelmRelease` patch; use overlay patches for cluster differences. The
+`app-namespace` component derives app-local namespaces and Flux release identity
+from the app's Namespace. The `application` component supplies standard probes,
+security and scratch storage. Use `main` for its primary controller,
+container and service; preserve deployed names and immutable selector labels.
+Override only app differences; native patch `null` removes an inherited setting.
+Specialised app-template workloads use the `workload` component without the
+application defaults. Keep
+databases, external secrets, integrations, namespaces, network policies and storage
+in files named for their purpose rather than mixed `resources.yaml` files. Use
+standard Kustomize replacements for derived hostnames and URLs. Homepage retains
+its existing configuration layout and probe timings.
 
 Keep root Markdown limited to `AGENTS.md` and `README.md`. Keep `README.md`
 focused on purpose and general usage; do not duplicate deployment inventories,
@@ -64,6 +75,9 @@ alphabetise within each group. Preserve deliberate grouping and workflow order.
 - Add scheduled jobs or automatic deletion only when explicitly requested.
 - Use supported app configuration interfaces; leave unsupported settings manual.
 - Keep comments local and specific to non-obvious behaviour.
+- Use 10-second probe intervals, 5-second timeouts and three consecutive failures;
+  allow 30 failures for startup. Preserve app-specific check mechanisms and
+  endpoints, and retain chart limitations or evidenced exceptions.
 
 ## Verification
 

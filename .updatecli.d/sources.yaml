@@ -39,7 +39,7 @@ targets:
     kind: file
     sourceid: version
     spec:
-      file: apps/base/aiostreams/settings.yaml
+      file: apps/base/aiostreams/helm-release.yaml
       matchpattern: (raw.githubusercontent.com/Tam\-Taro/SEL\-Filtering\-and\-Sorting/)[a-f0-9]{40}/
       replacepattern: ${1}{{ source "version" }}/
 ---
@@ -61,6 +61,6 @@ targets:
     kind: file
     sourceid: version
     spec:
-      file: apps/base/aiostreams/settings.yaml
+      file: apps/base/aiostreams/helm-release.yaml
       matchpattern: (raw.githubusercontent.com/Vidhin05/Releases\-Regex/)[a-f0-9]{40}/
       replacepattern: ${1}{{ source "version" }}/

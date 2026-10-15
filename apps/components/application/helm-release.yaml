@@ -1,0 +1,59 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        strategy: Recreate
+        containers:
+          main:
+            nameOverride: "{{ .Release.Name }}"
+            probes:
+              liveness:
+                enabled: true
+                path: /health
+                type: HTTP
+                spec:
+                  timeoutSeconds: 5
+              readiness:
+                enabled: true
+                path: /health
+                type: HTTP
+                spec:
+                  timeoutSeconds: 5
+              startup:
+                enabled: true
+                path: /health
+                type: HTTP
+                spec:
+                  failureThreshold: 30
+                  timeoutSeconds: 5
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 568
+        runAsNonRoot: true
+        runAsUser: 568
+        seccompProfile:
+          type: RuntimeDefault
+    persistence:
+      temporary:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    service:
+      main:
+        controller: main
+        forceRename: "{{ .Release.Name }}"
+        ports:
+          http:
+            protocol: HTTP

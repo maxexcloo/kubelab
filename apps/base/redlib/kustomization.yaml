@@ -3,18 +3,22 @@ kind: Kustomization
 resources:
   - certificate.yaml
   - cloudflare.yaml
-  - helm-release.yaml
+  - external-secrets.yaml
+  - namespace.yaml
+  - network-policy.yaml
   - private-dns.yaml
   - private-redirect.yaml
   - redirect.yaml
-  - resources.yaml
+components:
+  - ../../components/application
+  - ../../components/app-namespace
 patches:
-  - path: settings.yaml
+  - path: helm-release.yaml
+    target:
+      kind: HelmRelease
 replacements:
   - source:
       kind: HelmRelease
-      name: redlib
-      namespace: redlib
       fieldPath: spec.values.route.public.hostnames.0
     targets:
       - select:
@@ -29,7 +33,6 @@ replacements:
       - select:
           kind: HTTPRoute
           name: redlib-www-private
-          namespace: redlib
         fieldPaths:
           - spec.hostnames.0
         options:
@@ -38,13 +41,10 @@ replacements:
       - select:
           kind: HTTPRoute
           name: redlib-www-private
-          namespace: redlib
         fieldPaths:
           - spec.rules.0.filters.0.requestRedirect.hostname
       - select:
           kind: CloudflareWAFPolicy
-          name: redlib
-          namespace: redlib
         fieldPaths:
           - spec.rule.expression
         options:
@@ -52,14 +52,11 @@ replacements:
           index: 2
       - select:
           kind: PrivateDNSRecord
-          name: redlib
-          namespace: redlib
         fieldPaths:
           - spec.hostname
       - select:
           kind: HTTPRoute
           name: redlib-www
-          namespace: redlib
         fieldPaths:
           - spec.hostnames.0
         options:
@@ -68,21 +65,16 @@ replacements:
       - select:
           kind: HTTPRoute
           name: redlib-www
-          namespace: redlib
         fieldPaths:
           - spec.rules.0.filters.0.requestRedirect.hostname
       - select:
           kind: HelmRelease
-          name: redlib
-          namespace: redlib
         fieldPaths:
           - spec.values.route.private.hostnames.0
       - select:
           kind: HelmRelease
-          name: redlib
-          namespace: redlib
         fieldPaths:
-          - spec.values.controllers.redlib.containers.redlib.env.REDLIB_FULL_URL
+          - spec.values.controllers.main.containers.main.env.REDLIB_FULL_URL
           - spec.values.route.public.annotations.[gethomepage.dev/href]
         options:
           delimiter: /

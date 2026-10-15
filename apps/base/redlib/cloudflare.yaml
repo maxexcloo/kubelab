@@ -1,8 +1,7 @@
 apiVersion: automation.excloo.dev/v1alpha1
 kind: CloudflareWAFPolicy
 metadata:
-  name: redlib
-  namespace: redlib
+  name: application
 spec:
   rule:
     action: js_challenge

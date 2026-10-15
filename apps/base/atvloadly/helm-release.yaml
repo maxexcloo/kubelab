@@ -1,63 +1,36 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: atvloadly
-  namespace: atvloadly
+  name: application
 spec:
-  interval: 30m
-  releaseName: atvloadly
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      atvloadly:
+      main:
         strategy: Recreate
         containers:
-          atvloadly:
+          main:
+            nameOverride: "{{ .Release.Name }}"
             env:
               SERVICE_PORT: "5533"
+              TZ: Australia/Sydney
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/atvloadly
               tag: sha-0e8fa65d87697598dbb745f1f083dfcb7632b1a9@sha256:4a74ec5aa83982d8c3aafe522faf059600e2f7396db3b0ef1b7cb816fd8abdb4
             probes:
-              liveness:
+              liveness: &health
                 custom: true
                 enabled: true
-                spec:
+                spec: &health-spec
                   httpGet:
                     host: 127.0.0.1
                     path: /
                     port: 5533
-                  periodSeconds: 30
                   timeoutSeconds: 5
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  httpGet:
-                    host: 127.0.0.1
-                    path: /
-                    port: 5533
-                  periodSeconds: 10
-                  timeoutSeconds: 5
+              readiness: *health
               startup:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 30
-                  httpGet:
-                    host: 127.0.0.1
-                    path: /
-                    port: 5533
-                  periodSeconds: 5
+                <<: *health
+                spec: { <<: *health-spec, failureThreshold: 30 }
             resources:
               limits:
                 memory: 512Mi
@@ -100,24 +73,21 @@ spec:
                 drop:
                   - ALL
     defaultPodOptions:
-      automountServiceAccountToken: false
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
-    global:
-      nameOverride: atvloadly
     persistence:
       data:
         existingClaim: data
         type: persistentVolumeClaim
         advancedMounts:
-          atvloadly:
-            atvloadly:
+          main:
+            main:
               - path: /data
       proxy-config:
         name: atvloadly-proxy
         type: configMap
         advancedMounts:
-          atvloadly:
+          main:
             proxy:
               - path: /etc/nginx/templates/nginx.conf.template
                 readOnly: true
@@ -125,19 +95,31 @@ spec:
       proxy-temporary:
         type: emptyDir
         advancedMounts:
-          atvloadly:
+          main:
             proxy:
               - path: /tmp
     route:
       private:
+        annotations:
+          gethomepage.dev/description: Apple TV App Installation & Refresh
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: mdi-apple-#ffffff
+          gethomepage.dev/name: ATVLoadly
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/path: /
+        hostnames:
+          - atvloadly.excloo.com
         labels:
-          app.kubernetes.io/name: atvloadly
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
     service:
-      atvloadly:
-        controller: atvloadly
+      main:
+        controller: main
+        forceRename: "{{ .Release.Name }}"
         ports:
           http:
             port: 5534

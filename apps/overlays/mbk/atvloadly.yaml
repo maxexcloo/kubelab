@@ -9,7 +9,7 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: taco
     controllers:
-      atvloadly:
+      main:
         containers:
           proxy:
             env:

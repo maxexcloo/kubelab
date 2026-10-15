@@ -2,7 +2,6 @@ apiVersion: http.m.crossplane.io/v1alpha2
 kind: Request
 metadata:
   name: pocket-id-group-all-services
-  namespace: pocket-id
 spec:
   managementPolicies:
     - Create
@@ -49,7 +48,6 @@ apiVersion: http.m.crossplane.io/v1alpha2
 kind: Request
 metadata:
   name: pocket-id-group-all-services-details
-  namespace: pocket-id
 spec:
   managementPolicies:
     - LateInitialize
@@ -84,7 +82,6 @@ apiVersion: http.m.crossplane.io/v1alpha2
 kind: Request
 metadata:
   name: pocket-id-group-books
-  namespace: pocket-id
 spec:
   managementPolicies:
     - Create
@@ -131,7 +128,6 @@ apiVersion: http.m.crossplane.io/v1alpha2
 kind: Request
 metadata:
   name: pocket-id-group-books-details
-  namespace: pocket-id
 spec:
   managementPolicies:
     - LateInitialize

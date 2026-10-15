@@ -6,3 +6,5 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - source.yaml
+components:
+  - ../../components/helm-remediation

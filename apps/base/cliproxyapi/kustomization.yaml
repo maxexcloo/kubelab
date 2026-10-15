@@ -1,28 +1,31 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - helm-release.yaml
+  - external-secrets.yaml
+  - namespace.yaml
+  - network-policy.yaml
   - private-dns.yaml
-  - resources.yaml
+  - storage.yaml
+components:
+  - ../../components/application
+  - ../../../platform/backups/destination
+  - ../../../platform/backups/files
+  - ../../components/app-namespace
 patches:
-  - path: settings.yaml
+  - path: helm-release.yaml
+    target:
+      kind: HelmRelease
 replacements:
   - source:
       kind: HelmRelease
-      name: cliproxyapi
-      namespace: cliproxyapi
       fieldPath: spec.values.route.private.hostnames.0
     targets:
       - select:
           kind: PrivateDNSRecord
-          name: cliproxyapi
-          namespace: cliproxyapi
         fieldPaths:
           - spec.hostname
       - select:
           kind: HelmRelease
-          name: cliproxyapi
-          namespace: cliproxyapi
         fieldPaths:
           - spec.values.route.private.annotations.[gethomepage.dev/href]
           - spec.values.route.private.annotations.[onepassword.excloo.dev/url]

@@ -5,16 +5,16 @@ resources:
   - external-secrets.yaml
   - heiss-mcp.yaml
   - helm-release.yaml
+  - namespace.yaml
+  - network-policy.yaml
   - pocket-id.yaml
   - public-route.yaml
-  - resources.yaml
   - route.yaml
   - source.yaml
 configurations:
   - name-reference.yaml
 configMapGenerator:
   - name: litellm-extensions
-    namespace: litellm
     files:
       - catalogue.py
       - hooks.py
@@ -22,13 +22,11 @@ replacements:
   - source:
       kind: HTTPRoute
       name: litellm
-      namespace: litellm
       fieldPath: spec.hostnames.0
     targets:
       - select:
           kind: HTTPRoute
           name: litellm
-          namespace: litellm
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
           - metadata.annotations.[onepassword.excloo.dev/url]
@@ -38,13 +36,10 @@ replacements:
       - select:
           kind: HTTPRoute
           name: litellm-public
-          namespace: litellm
         fieldPaths:
           - spec.hostnames.0
       - select:
           kind: HelmRelease
-          name: litellm
-          namespace: litellm
         fieldPaths:
           - spec.values.envVars.PROXY_BASE_URL
         options:
@@ -52,11 +47,13 @@ replacements:
           index: 2
       - select:
           kind: PocketIDClient
-          name: litellm
-          namespace: litellm
         fieldPaths:
           - spec.client.callbackURLs.0
           - spec.client.launchURL
         options:
           delimiter: /
           index: 2
+components:
+  - ../../../platform/backups/destination
+  - ../../../platform/backups/postgres
+  - ../../components/app-namespace

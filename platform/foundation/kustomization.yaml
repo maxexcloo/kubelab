@@ -6,19 +6,5 @@ resources:
   - gateway-api
   - local-path-provisioner
   - onepassword-connect
-patches:
-  - patch: |-
-      apiVersion: helm.toolkit.fluxcd.io/v2
-      kind: HelmRelease
-      metadata:
-        name: _
-      spec:
-        install:
-          remediation:
-            retries: 3
-        upgrade:
-          remediation:
-            retries: 3
-    target:
-      group: helm.toolkit.fluxcd.io
-      kind: HelmRelease
+components:
+  - ../components/helm-remediation

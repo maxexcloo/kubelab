@@ -1,0 +1,75 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: file-backup
+spec:
+  # Offset file copies from PostgreSQL dumps to spread backup I/O.
+  schedule: "15 * * * *"
+  timeZone: Australia/Sydney
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 3300
+      backoffLimit: 1
+      template:
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          securityContext:
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: backup
+              image: docker.io/library/python:3.14.8-slim-trixie@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170
+              args:
+                - python
+                - /scripts/backup.py
+                - /source
+                - /backups/files
+              env:
+                - name: PYTHONDONTWRITEBYTECODE
+                  value: "1"
+              resources:
+                limits:
+                  memory: 512Mi
+                requests:
+                  cpu: 20m
+                  memory: 64Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: source
+                  mountPath: /source
+                  readOnly: true
+                - name: temporary
+                  mountPath: /tmp
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: backups
+            - name: scripts
+              configMap:
+                name: file-backup
+            - name: source
+              persistentVolumeClaim:
+                claimName: data
+                readOnly: true
+            - name: temporary
+              emptyDir: {}

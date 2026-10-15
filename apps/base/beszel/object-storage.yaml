@@ -2,7 +2,6 @@ apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: beszel-object-storage
-  namespace: beszel
   annotations:
     onepassword.excloo.dev/defaults: '{"object-storage-bucket":"excloo-mbk-beszel"}'
 spec:
@@ -22,8 +21,7 @@ spec:
 apiVersion: automation.excloo.dev/v1alpha1
 kind: B2ObjectStorage
 metadata:
-  name: beszel
-  namespace: beszel
+  name: application
 spec:
   displayName: Beszel
   keyName: kubelab-mbk-beszel

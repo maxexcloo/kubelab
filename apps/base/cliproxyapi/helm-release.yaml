@@ -1,89 +1,37 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: cliproxyapi
-  namespace: cliproxyapi
+  name: application
 spec:
-  interval: 30m
-  releaseName: cliproxyapi
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      cliproxyapi:
-        strategy: Recreate
+      main:
         containers:
-          cliproxyapi:
+          main:
+            env:
+              TZ: Australia/Sydney
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/eceasy/cli-proxy-api
               tag: v8.0.28@sha256:5de1679350c368fb031d46900da30d97c1e9e9a3b150fc4c4181e7e65022a09e
             probes:
-              liveness:
-                custom: true
-                enabled: true
-                spec:
-                  httpGet:
-                    path: /
-                    port: 8317
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  httpGet:
-                    path: /
-                    port: 8317
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-              startup:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 30
-                  httpGet:
-                    path: /
-                    port: 8317
-                  periodSeconds: 2
+              liveness: &health
+                path: /
+              readiness: *health
+              startup: *health
             resources:
               limits:
                 memory: 256Mi
               requests:
                 cpu: 10m
                 memory: 32Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
-    defaultPodOptions:
-      automountServiceAccountToken: false
-      securityContext:
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 568
-        runAsNonRoot: true
-        runAsUser: 568
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: cliproxyapi
     persistence:
       config:
-        name: cliproxyapi
+        name: "{{ .Release.Name }}"
         type: secret
         advancedMounts:
-          cliproxyapi:
-            cliproxyapi:
+          main:
+            main:
               - path: /CLIProxyAPI/config.yaml
                 readOnly: true
                 subPath: config.yaml
@@ -96,23 +44,28 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /CLIProxyAPI/static
-      temporary:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
     route:
       private:
         annotations:
+          gethomepage.dev/description: Subscription Proxy
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/href: https://app.invalid/management.html
+          gethomepage.dev/icon: mdi-api-#ffffff
+          gethomepage.dev/name: CLI Proxy API
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/path: /management.html
+          onepassword.excloo.dev/item: CLI Proxy API
+          onepassword.excloo.dev/url: https://app.invalid/management.html
+        hostnames:
+          - cliproxy.excloo.com
         labels:
-          app.kubernetes.io/name: cliproxyapi
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
     service:
-      cliproxyapi:
-        controller: cliproxyapi
+      main:
         ports:
           http:
             port: 8317
-            protocol: HTTP

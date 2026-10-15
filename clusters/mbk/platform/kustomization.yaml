@@ -5,6 +5,7 @@ resources:
   - ../../../platform/automation/crossplane
   - ../../../platform/databases/cloudnative-pg
   - ../../../platform/networking/external-dns-private
+  - ../../../platform/storage/truenas-backups
   - ../../../platform/storage/truenas-nfs
   - observability
   - certificate.yaml

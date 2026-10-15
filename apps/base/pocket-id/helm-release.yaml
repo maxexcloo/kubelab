@@ -1,129 +1,91 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: pocket-id
-  namespace: pocket-id
+  name: application
 spec:
-  interval: 30m
-  releaseName: pocket-id
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      pocket-id:
-        strategy: Recreate
+      main:
         containers:
-          pocket-id:
+          main:
+            env:
+              ALLOW_OWN_ACCOUNT_EDIT: "true"
+              ANALYTICS_DISABLED: "true"
+              APP_NAME: Pocket ID
+              APP_URL: https://app.invalid
+              EMAILS_VERIFIED: "true"
+              FILE_BACKEND: database
+              REQUIRE_USER_EMAIL: "true"
+              SMTP_FROM: pocket-id@excloo.dev
+              SMTP_HOST: smtp.resend.com
+              SMTP_PORT: "465"
+              SMTP_TLS: tls
+              SMTP_USER: resend
+              TRUST_PROXY: "true"
+              UI_CONFIG_DISABLED: "true"
+              VERSION_CHECK_DISABLED: "true"
+              WEBAUTHN_ALLOW_SYNCED_PASSKEYS: "true"
+              WEBAUTHN_USER_VERIFICATION: required
             envFrom:
               - secretRef:
-                  name: pocket-id
+                  name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/pocket-id/pocket-id
               tag: v2.18.0@sha256:323e7ef5bfacf7cf32f22f3d10ccdf48e0c97c94d67e7e40b0b996830deb5165
             probes:
-              liveness:
-                custom: true
-                enabled: true
-                spec:
-                  exec:
-                    command:
-                      - /app/pocket-id
-                      - healthcheck
-                  failureThreshold: 3
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  exec:
-                    command:
-                      - /app/pocket-id
-                      - healthcheck
-                  failureThreshold: 3
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-              startup:
-                custom: true
-                enabled: true
-                spec:
-                  exec:
-                    command:
-                      - /app/pocket-id
-                      - healthcheck
-                  failureThreshold: 30
-                  periodSeconds: 2
-                  timeoutSeconds: 5
+              liveness: &health
+                type: COMMAND
+                command:
+                  - /app/pocket-id
+                  - healthcheck
+              readiness: *health
+              startup: *health
             resources:
               limits:
                 memory: 512Mi
               requests:
                 cpu: 20m
                 memory: 128Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              runAsGroup: 568
-              runAsNonRoot: true
-              runAsUser: 568
-              capabilities:
-                drop:
-                  - ALL
-            env:
-              APP_URL: https://app.invalid
     defaultPodOptions:
-      automountServiceAccountToken: false
       securityContext:
-        runAsGroup: 568
-        runAsNonRoot: true
-        runAsUser: 568
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: pocket-id
-    persistence:
-      temporary:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
+        fsGroup: null
+        fsGroupChangePolicy: null
     route:
       private:
         hostnames:
           - app.invalid
         labels:
-          app.kubernetes.io/name: pocket-id
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
         rules:
           - backendRefs:
-              - name: pocket-id
+              - name: "{{ .Release.Name }}"
                 port: 1411
       public:
-        forceRename: pocket-id
+        forceRename: "{{ .Release.Name }}"
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+          gethomepage.dev/description: OIDC Provider
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-pocket-id
+          gethomepage.dev/name: Pocket ID
+          monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: Pocket ID
+        hostnames:
+          - identity.invalid
         labels:
-          app.kubernetes.io/name: pocket-id
+          app.kubernetes.io/name: "{{ .Release.Name }}"
           gateway.excloo.dev/public-access: "true"
         parentRefs:
           - name: public-tunnel
             namespace: networking
-        hostnames:
-          - identity.invalid
     service:
-      pocket-id:
-        controller: pocket-id
+      main:
         ports:
           http:
             port: 1411
-            protocol: HTTP

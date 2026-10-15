@@ -29,7 +29,7 @@ replacements:
           name: beszel
           namespace: beszel
         fieldPaths:
-          - spec.values.controllers.beszel.containers.beszel.env.APP_URL
+          - spec.values.controllers.main.containers.main.env.APP_URL
           - spec.values.route.private.annotations.[gethomepage.dev/href]
           - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
         options:
@@ -121,7 +121,7 @@ replacements:
           name: actual-budget
           namespace: actual-budget
         fieldPaths:
-          - spec.values.controllers.actual-budget.containers.actual-budget.env.ACTUAL_OPENID_DISCOVERY_URL
+          - spec.values.controllers.main.containers.main.env.ACTUAL_OPENID_DISCOVERY_URL
         options:
           delimiter: /
           index: 2
@@ -130,7 +130,7 @@ replacements:
           name: aiometadata
           namespace: aiometadata
         fieldPaths:
-          - spec.values.controllers.aiometadata.containers.aiometadata.env.OIDC_ISSUER
+          - spec.values.controllers.main.containers.main.env.OIDC_ISSUER
         options:
           delimiter: /
           index: 2
@@ -139,7 +139,7 @@ replacements:
           name: aiostreams
           namespace: aiostreams
         fieldPaths:
-          - spec.values.controllers.aiostreams.containers.aiostreams.env.AIOSTREAMS_OIDC_ISSUER
+          - spec.values.controllers.main.containers.main.env.AIOSTREAMS_OIDC_ISSUER
         options:
           delimiter: /
           index: 2
@@ -157,7 +157,7 @@ replacements:
           name: larapaper
           namespace: larapaper
         fieldPaths:
-          - spec.values.controllers.larapaper.containers.larapaper.env.OIDC_ENDPOINT
+          - spec.values.controllers.main.containers.main.env.OIDC_ENDPOINT
         options:
           delimiter: /
           index: 2
@@ -166,7 +166,7 @@ replacements:
           name: linkwarden
           namespace: linkwarden
         fieldPaths:
-          - spec.values.controllers.linkwarden.containers.linkwarden.env.KEYCLOAK_ISSUER
+          - spec.values.controllers.main.containers.main.env.KEYCLOAK_ISSUER
         options:
           delimiter: /
           index: 2
@@ -186,7 +186,7 @@ replacements:
           name: miniflux
           namespace: miniflux
         fieldPaths:
-          - spec.values.controllers.miniflux.containers.miniflux.env.OAUTH2_OIDC_DISCOVERY_ENDPOINT
+          - spec.values.controllers.main.containers.main.env.OAUTH2_OIDC_DISCOVERY_ENDPOINT
         options:
           delimiter: /
           index: 2
@@ -204,7 +204,7 @@ replacements:
           name: pocket-id
           namespace: pocket-id
         fieldPaths:
-          - spec.values.controllers.pocket-id.containers.pocket-id.env.APP_URL
+          - spec.values.controllers.main.containers.main.env.APP_URL
           - spec.values.route.public.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
@@ -221,8 +221,8 @@ replacements:
           name: romm
           namespace: romm
         fieldPaths:
-          - spec.values.controllers.romm.containers.romm.env.OIDC_SERVER_APPLICATION_URL
-          - spec.values.controllers.romm.containers.romm.env.OIDC_SERVER_METADATA_URL
+          - spec.values.controllers.main.containers.main.env.OIDC_SERVER_APPLICATION_URL
+          - spec.values.controllers.main.containers.main.env.OIDC_SERVER_METADATA_URL
         options:
           delimiter: /
           index: 2
@@ -231,7 +231,7 @@ replacements:
           name: shelfmark
           namespace: shelfmark
         fieldPaths:
-          - spec.values.controllers.shelfmark.containers.shelfmark.env.OIDC_DISCOVERY_URL
+          - spec.values.controllers.main.containers.main.env.OIDC_DISCOVERY_URL
         options:
           delimiter: /
           index: 2

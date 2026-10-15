@@ -1,0 +1,33 @@
+# This archive stays on its dedicated NFS export, like other large libraries.
+# Its index, blobs and metadata require a coordinated backup outside these jobs.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: retained-data
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ""
+  volumeName: bichon-data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: bichon-data
+  labels:
+    app.kubernetes.io/name: application
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 5Gi
+  mountOptions:
+    - nfsvers=4.2
+  nfs:
+    path: /mnt/truenas-nvme/bichon
+    server: storage.invalid
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""

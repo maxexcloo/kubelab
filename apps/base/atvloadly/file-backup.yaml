@@ -1,0 +1,13 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: file-backup
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsGroup: 0
+            runAsNonRoot: false
+            runAsUser: 0

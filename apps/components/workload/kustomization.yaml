@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - helm-release.yaml
+components:
+  - ../app-template
+# Match chart resource names to the namespace-derived Flux release name.
+replacements:
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.global.nameOverride
+        options:
+          create: true

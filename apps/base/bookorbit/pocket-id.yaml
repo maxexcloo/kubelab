@@ -1,8 +1,7 @@
 apiVersion: automation.excloo.dev/v1alpha1
 kind: PocketIDClient
 metadata:
-  name: bookorbit
-  namespace: bookorbit
+  name: application
 spec:
   accessPolicy: books
   client:
