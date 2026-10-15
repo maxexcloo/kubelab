@@ -10,6 +10,9 @@ This repository owns in-cluster controllers, workloads, routes, application DNS
 and app-scoped integrations. `homelab` owns the infrastructure needed to rebuild
 or reach a cluster while Kubernetes is unavailable.
 
+The shared `mini-apps` repository owns mini-app source and workload manifests.
+Kubelab selects its Flux entry point and supplies shared integration settings.
+
 Read the owning configuration for current placement, endpoints, storage and
 credentials. The README describes general workflows; `AGENTS.md` contains project
 invariants and editing conventions.

@@ -8,6 +8,9 @@ configuration records current deployment details. The separate `homelab`
 repository owns everything required to rebuild or reach a cluster while
 Kubernetes is unavailable.
 
+The `mini-apps` repository owns mini-app source and native workload manifests.
+Kubelab owns its Flux source, cluster selection and shared integration settings.
+
 ## Conventions
 
 - Read the owning configuration before changing architecture, ownership,
