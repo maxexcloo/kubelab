@@ -92,10 +92,20 @@ class BackupResourceTests(unittest.TestCase):
                 self.assertEqual(environment["PGDATABASE"]["value"], initdb["database"])
                 for name in ("PGPASSWORD", "PGUSER"):
                     self.assertEqual(environment[name]["valueFrom"]["secretKeyRef"]["name"], initdb["secret"]["name"])
+                if namespace == "litellm":
+                    continue
                 policy = self.resources[("NetworkPolicy", namespace, "postgres-backup")]["spec"]
                 self.assertEqual(policy["podSelector"]["matchLabels"]["cnpg.io/cluster"], cluster["metadata"]["name"])
                 selector = policy["ingress"][0]["from"][0]["podSelector"]["matchLabels"]
                 self.assertEqual(selector, job["spec"]["jobTemplate"]["spec"]["template"]["metadata"]["labels"])
+
+    def test_backups_preserve_the_existing_database_isolation_boundary(self):
+        # LiteLLM's migration hooks must retain their previously unrestricted access.
+        self.assertNotIn(("NetworkPolicy", "litellm", "postgres-backup"), self.resources)
+        for namespace in ("bookorbit", "immich", "linkwarden", "miniflux", "pocket-id", "romm"):
+            with self.subTest(namespace=namespace):
+                self.assertIn(("NetworkPolicy", namespace, namespace + "-database"), self.resources)
+                self.assertIn(("NetworkPolicy", namespace, "postgres-backup"), self.resources)
 
 
 if __name__ == "__main__":

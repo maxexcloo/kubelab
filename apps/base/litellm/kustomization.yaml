@@ -18,6 +18,11 @@ configMapGenerator:
     files:
       - catalogue.py
       - hooks.py
+patches:
+  - path: backup-network-policy.yaml
+    target:
+      kind: NetworkPolicy
+      name: postgres-backup
 replacements:
   - source:
       kind: HTTPRoute
