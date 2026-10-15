@@ -97,11 +97,20 @@ async function copy(text) {
   }
 }
 
-$("#create").addEventListener("click", () => {
-  const bytes = crypto.getRandomValues(new Uint8Array(24));
-  location.assign(
-    `/${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`,
-  );
+$("#list-name").addEventListener("input", () =>
+  $("#list-name").setCustomValidity(""),
+);
+$("#open-list").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = $("#list-name").value;
+  if (name === "health") {
+    $("#list-name").setCustomValidity(
+      "This name is reserved. Choose another list name.",
+    );
+    $("#list-name").reportValidity();
+    return;
+  }
+  location.assign(`/${name}`);
 });
 $("#copy-editor").addEventListener("click", () => copy(location.href));
 $("#copy-feed").addEventListener("click", () =>
@@ -131,6 +140,7 @@ if (!id) {
     "Use a single path containing letters, numbers, underscores or hyphens.",
   );
 } else {
+  $("#list-title").textContent = id;
   $("#editor").hidden = false;
   render();
   try {

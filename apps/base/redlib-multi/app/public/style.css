@@ -59,6 +59,7 @@ header .tag {
   white-space: nowrap;
 }
 h1 {
+  overflow-wrap: anywhere;
   font-family: Georgia, serif;
   font-size: clamp(44px, 8vw, 68px);
   font-weight: 400;

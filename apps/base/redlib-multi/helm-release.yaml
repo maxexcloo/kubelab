@@ -87,17 +87,15 @@ spec:
             readOnly: true
             subPath: server.mjs
     route:
-      public:
+      private:
         hostnames:
           - redlib.excloo.com
-        annotations:
-          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
         labels:
           app.kubernetes.io/name: redlib-multi
-          gateway.excloo.dev/public-access: "true"
         parentRefs:
-          - name: public-tunnel
+          - name: private
             namespace: networking
+            sectionName: websecure
     service:
       redlib-multi:
         controller: redlib-multi

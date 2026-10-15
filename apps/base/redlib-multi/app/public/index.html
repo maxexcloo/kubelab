@@ -18,21 +18,39 @@
         <p class="eyebrow">A LITTLE LESS SCROLLING AROUND</p>
         <h1>One link.<br />Your communities.</h1>
         <p class="intro">
-          Gather your favourite subreddits into one Redlib feed. Keep a private
-          editing link and come back whenever your interests change.
+          Gather your favourite subreddits into one Redlib feed. Give your list
+          a name and open its editing link whenever your interests change.
         </p>
-        <button id="create">
-          Create a List <span aria-hidden="true">↗</span>
-        </button>
+        <form id="open-list">
+          <label for="list-name">List Name</label>
+          <div class="input-row">
+            <input
+              autocomplete="off"
+              id="list-name"
+              maxlength="128"
+              pattern="[a-zA-Z0-9_-]+"
+              placeholder="e.g. australia-news"
+              required
+            />
+            <button type="submit">
+              Open List <span aria-hidden="true">↗</span>
+            </button>
+          </div>
+          <p class="hint">
+            Use letters, numbers, underscores or hyphens. Opening an existing
+            name loads its saved list.
+          </p>
+        </form>
         <p class="hint">
-          No account needed. Anyone with your editing link can edit.
+          Available on Tailscale. Anyone with access and your list name can
+          edit.
         </p>
       </section>
       <section id="editor" hidden>
         <div class="heading">
           <div>
             <p class="eyebrow">YOUR CURATED CORNER</p>
-            <h1>A good mix.</h1>
+            <h1 id="list-title">Your List</h1>
           </div>
           <span class="tag" id="count">0 Communities</span>
         </div>
