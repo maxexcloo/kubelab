@@ -3,6 +3,6 @@ kind: Kustomization
 metadata:
   name: observability-integrations
 spec:
-  path: ./clusters/mbk/platform/observability/integrations
+  path: ./clusters/syd/platform/observability/integrations
   dependsOn:
     - name: automation

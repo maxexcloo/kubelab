@@ -19,7 +19,7 @@ def read_yaml(path):
 
 class AppSettingsTests(unittest.TestCase):
     def test_owned_probe_timing_policy(self):
-        for cluster in ("mbk", "syd"):
+        for cluster in ("syd",):
             output = subprocess.check_output(
                 ["kubectl", "kustomize", str(ROOT / "apps/overlays" / cluster)], text=True
             )
@@ -92,28 +92,23 @@ class AppSettingsTests(unittest.TestCase):
                         self.assertNotIn("alias.invalid", output)
                     route["hostnames"][index] = old
 
-    def test_nfs_server_changes_reach_all_persistent_volumes(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            for name in ("apps", "clusters", "platform", "scripts"):
-                shutil.copytree(ROOT / name, root / name)
-            settings = root / "clusters/mbk/settings/settings.yaml"
-            resource = read_yaml(settings)
-            resource["data"]["nfs_server"] = "192.0.2.7"
-            settings.write_text(json.dumps(resource))
-            output = subprocess.check_output(
-                ["kubectl", "kustomize", str(root / "apps/overlays/mbk")],
-                text=True,
-            )
-            servers = subprocess.check_output(
-                ["yq", "-N", "-r", 'select(.kind == "PersistentVolume") | .spec.nfs.server'],
-                input=output,
-                text=True,
-            ).splitlines()
-            self.assertTrue(servers)
-            self.assertEqual(set(servers), {"192.0.2.7"})
+    def test_persistent_volumes_use_direct_kimbap_datasets(self):
+        output = subprocess.check_output(
+            ["kubectl", "kustomize", str(ROOT / "apps/overlays/syd")], text=True
+        )
+        documents = subprocess.check_output(
+            ["yq", "-I=0", "-N", "-o=json", "."], input=output, text=True
+        )
+        volumes = [item for item in map(json.loads, documents.splitlines())
+                   if item["kind"] == "PersistentVolume"]
+        self.assertTrue(volumes)
+        for volume in volumes:
+            self.assertNotIn("nfs", volume["spec"])
+            self.assertTrue(volume["spec"]["hostPath"]["path"].startswith("/var/mnt/datasets/"))
+            terms = volume["spec"]["nodeAffinity"]["required"]["nodeSelectorTerms"]
+            self.assertEqual(terms[0]["matchExpressions"][0]["values"], ["kimbap"])
 
-    def test_shared_beszel_hostname_changes_reach_both_clusters(self):
+    def test_shared_beszel_hostname_changes_reach_syd(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             for name in ("apps", "clusters", "platform", "scripts"):
@@ -122,7 +117,7 @@ class AppSettingsTests(unittest.TestCase):
             resource = read_yaml(settings)
             resource["data"]["beszel_host"] = "renamed.example.test"
             settings.write_text(json.dumps(resource))
-            for cluster in ("mbk", "syd"):
+            for cluster in ("syd",):
                 with self.subTest(cluster=cluster):
                     output = subprocess.check_output(
                         ["kubectl", "kustomize", str(root / "apps/overlays" / cluster)],
@@ -148,9 +143,6 @@ class AppSettingsTests(unittest.TestCase):
                         for item in container["env"]
                         if item["name"] == "HUB_URL"
                     )
-                    if cluster == "syd":
-                        self.assertEqual(hub_url, "https://renamed.example.test")
-                        continue
                     self.assertEqual(
                         hub_url, "http://beszel.beszel.svc.cluster.local:8090"
                     )

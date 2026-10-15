@@ -24,12 +24,11 @@ class ClusterSettingsTests(unittest.TestCase):
             settings = read_yaml(shared)
             settings["data"]["grafana_syd_host"] = "grafana.syd.changed.example"
             settings["data"]["headlamp_client_id"] = "headlamp-test"
-            settings["data"]["headlamp_mbk_host"] = "headlamp.mbk.changed.example"
             settings["data"]["headlamp_syd_host"] = "headlamp.syd.changed.example"
             settings["data"]["identity_host"] = "id.changed.example"
             settings["data"]["control_d_profile"] = "test-profile"
             shared.write_text(json.dumps(settings))
-            cluster = root / "clusters/mbk/settings/settings.yaml"
+            cluster = root / "clusters/syd/settings/settings.yaml"
             settings = read_yaml(cluster)
             settings["data"].update({
                 "bento_address": "192.0.2.15",
@@ -57,21 +56,20 @@ class ClusterSettingsTests(unittest.TestCase):
             heiss = next(r for r in resources if r["kind"] == "EndpointSlice" and r["metadata"]["name"] == "heiss-mcp")
             self.assertEqual(heiss["endpoints"][0]["addresses"], ["192.0.2.15"])
             self.assertEqual(heiss["ports"][0]["port"], 1338)
-            volumes = [r for r in resources if r["kind"] == "PersistentVolume" and "nfs" in r["spec"]]
+            volumes = [r for r in resources if r["kind"] == "PersistentVolume"]
             self.assertTrue(volumes)
-            self.assertEqual({r["spec"]["nfs"]["server"] for r in volumes}, {"192.0.2.12"})
+            self.assertFalse(any("nfs" in r["spec"] for r in volumes))
             grafana = [r for r in resources if r["kind"] == "PocketIDClient" and r["metadata"]["name"] == "grafana"]
             self.assertEqual(grafana[0]["spec"]["client"]["launchURL"], "https://grafana.changed.example")
             self.assertEqual(grafana[0]["spec"]["client"]["callbackURLs"], [
                 "https://grafana.changed.example/login/generic_oauth",
-                "https://grafana.syd.changed.example/login/generic_oauth",
             ])
             grafana_releases = [r for r in resources if r["kind"] == "HelmRelease"
                                 and r["metadata"]["name"] == "victoria-metrics-k8s-stack"]
-            self.assertEqual(len(grafana_releases), 2)
+            self.assertEqual(len(grafana_releases), 1)
             self.assertEqual({r["spec"]["values"]["grafana"]["grafana.ini"]["server"]["root_url"]
                               for r in grafana_releases}, {
-                "https://grafana.changed.example", "https://grafana.syd.changed.example",
+                "https://grafana.changed.example",
             })
             for release in grafana_releases:
                 oauth = release["spec"]["values"]["grafana"]["grafana.ini"]["auth.generic_oauth"]
@@ -80,16 +78,15 @@ class ClusterSettingsTests(unittest.TestCase):
             headlamp_client = next(r for r in resources if r["kind"] == "PocketIDClient"
                                    and r["metadata"]["name"] == "headlamp")["spec"]["client"]
             self.assertEqual(headlamp_client["callbackURLs"], [
-                "https://headlamp.mbk.changed.example/oidc-callback",
                 "https://headlamp.syd.changed.example/oidc-callback",
             ])
-            self.assertEqual(headlamp_client["launchURL"], "https://headlamp.mbk.changed.example")
+            self.assertEqual(headlamp_client["launchURL"], "https://headlamp.syd.changed.example")
             self.assertEqual(headlamp_client["id"], "headlamp-test")
             self.assertTrue(headlamp_client["isPublic"])
             self.assertTrue(headlamp_client["pkceEnabled"])
             headlamp_releases = [r for r in resources if r["kind"] == "HelmRelease"
                                  and r["metadata"]["name"] == "headlamp"]
-            self.assertEqual(len(headlamp_releases), 2)
+            self.assertEqual(len(headlamp_releases), 1)
             self.assertEqual({r["spec"]["values"]["config"]["oidc"]["callbackURL"]
                               for r in headlamp_releases}, set(headlamp_client["callbackURLs"]))
             for release in headlamp_releases:

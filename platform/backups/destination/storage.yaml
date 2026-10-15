@@ -3,14 +3,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: backups
   annotations:
-    k8s-sigs.io/nfs-directory-gid: "568"
-    k8s-sigs.io/nfs-directory-mode: "0770"
-    k8s-sigs.io/nfs-directory-uid: "568"
+    groupPattern: "568"
+    permPattern: "0770"
+    userPattern: "568"
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
-      # The provisioner retains this directory; the request does not impose a quota.
       storage: 10Gi
-  storageClassName: truenas-backups
+  storageClassName: local-backups

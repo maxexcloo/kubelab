@@ -3,28 +3,14 @@ kind: Kustomization
 resources:
   - ../../../platform
   - ../../../platform/automation/crossplane
+  - ../../../platform/databases/cloudnative-pg
   - ../../../platform/networking/external-dns-private
   - observability
   - certificate.yaml
-  - gateway-public-direct.yaml
   - grafana.yaml
+  - gateway-public-direct.yaml
   - headlamp.yaml
 patches:
-  - patch: |-
-      - op: add
-        path: /spec/listeners/1/tls/certificateRefs/-
-        value:
-          name: redlib-www
-    target:
-      kind: Gateway
-      name: private
-  - patch: |-
-      - op: replace
-        path: /spec/values/resources/requests/cpu
-        value: 10m
-    target:
-      kind: HelmRelease
-      name: headlamp
   - path: secret-store.yaml
   - path: tailscale.yaml
   - path: traefik-gateway.yaml
@@ -58,6 +44,37 @@ replacements:
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
           - metadata.annotations.[gethomepage.dev/widget.url]
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
+          name: victoria-metrics-k8s-stack
+          namespace: observability
+        fieldPaths:
+          - spec.values.grafana.[grafana.ini].server.domain
+      - select:
+          kind: HelmRelease
+          name: victoria-metrics-k8s-stack
+          namespace: observability
+        fieldPaths:
+          - spec.values.grafana.[grafana.ini].server.root_url
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PrivateDNSRecord
+          name: grafana
+          namespace: observability
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+          name: grafana
+          namespace: observability
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
         options:
           delimiter: /
           index: 2

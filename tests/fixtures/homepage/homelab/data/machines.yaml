@@ -57,7 +57,7 @@ machines:
       tailscale:
         enabled: false
     taco:
-      cluster: mbk
+      cluster: syd
       platform: talos
       type: vm
   syd:

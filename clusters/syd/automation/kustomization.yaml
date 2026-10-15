@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - ../../../platform/automation/b2
   - ../../../platform/automation/cloudflare
+  - ../../../platform/automation/pocket-id
   - ../../../platform/automation/private-dns
+  - ../../../platform/automation/resend
 components:
   - ../settings

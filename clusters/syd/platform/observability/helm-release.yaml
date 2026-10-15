@@ -5,37 +5,7 @@ metadata:
   namespace: observability
 spec:
   values:
-    grafana:
-      resources:
-        requests:
-          cpu: 25m
-    kube-state-metrics:
-      resources:
-        requests:
-          cpu: 10m
-    victoria-metrics-operator:
-      resources:
-        requests:
-          cpu: 20m
-    vlagent:
-      spec:
-        resources:
-          requests:
-            cpu: 20m
-    vlsingle:
-      spec:
-        resources:
-          requests:
-            cpu: 20m
     vmagent:
       spec:
         externalLabels:
           cluster: syd
-        resources:
-          requests:
-            cpu: 20m
-    vmsingle:
-      spec:
-        resources:
-          requests:
-            cpu: 25m

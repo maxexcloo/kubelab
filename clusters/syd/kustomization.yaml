@@ -5,6 +5,8 @@ resources:
   - apps.yaml
   - automation.yaml
   - flux-system
+  - headlamp-integrations.yaml
+  - observability-integrations.yaml
   - platform.yaml
 components:
   - ../../platform/bootstrap/flux-reconciliation

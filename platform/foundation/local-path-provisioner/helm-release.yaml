@@ -14,13 +14,43 @@ spec:
     helperImage:
       repository: docker.io/library/busybox
       tag: 1.38.0
-    nodePathMap:
-      - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
-        paths:
-          - /var/mnt/local-path-provisioner
+    nodePathMap: []
     resources:
       limits:
         memory: 256Mi
       requests:
         cpu: 10m
         memory: 128Mi
+    storageClass:
+      create: false
+    storageClassConfigs:
+      local-path:
+        nodePathMap:
+          - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+            paths:
+              - /var/mnt/local-path-provisioner
+        storageClass:
+          create: true
+          defaultClass: true
+          defaultVolumeType: hostPath
+          reclaimPolicy: Delete
+      local-backups:
+        nodePathMap:
+          - node: kimbap
+            paths:
+              - /var/mnt/datasets/truenas/clusters/mbk
+        storageClass:
+          create: true
+          defaultClass: false
+          defaultVolumeType: hostPath
+          groupPattern: "568"
+          permPattern: "0770"
+          reclaimPolicy: Retain
+          userPattern: "568"
+      atvloadly-local:
+        nodePathMap:
+          - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+            paths:
+              - /var/mnt/local-path-provisioner
+        storageClass:
+          create: false

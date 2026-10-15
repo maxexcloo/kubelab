@@ -54,20 +54,6 @@ replacements:
   - source:
       kind: ConfigMap
       name: shared-settings
-      fieldPath: data.grafana_syd_host
-    targets:
-      - select:
-          kind: PocketIDClient
-          name: grafana
-          namespace: observability
-        fieldPaths:
-          - spec.client.callbackURLs.1
-        options:
-          delimiter: /
-          index: 2
-  - source:
-      kind: ConfigMap
-      name: shared-settings
       fieldPath: data.headlamp_client_id
     targets:
       - select:
@@ -85,7 +71,7 @@ replacements:
   - source:
       kind: ConfigMap
       name: shared-settings
-      fieldPath: data.headlamp_mbk_host
+      fieldPath: data.headlamp_syd_host
     targets:
       - select:
           kind: PocketIDClient
@@ -94,20 +80,6 @@ replacements:
         fieldPaths:
           - spec.client.callbackURLs.0
           - spec.client.launchURL
-        options:
-          delimiter: /
-          index: 2
-  - source:
-      kind: ConfigMap
-      name: shared-settings
-      fieldPath: data.headlamp_syd_host
-    targets:
-      - select:
-          kind: PocketIDClient
-          name: headlamp
-          namespace: headlamp
-        fieldPaths:
-          - spec.client.callbackURLs.1
         options:
           delimiter: /
           index: 2

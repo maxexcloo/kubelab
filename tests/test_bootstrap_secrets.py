@@ -41,7 +41,7 @@ class BootstrapSecretTests(unittest.TestCase):
                 for executable in [op, kubectl]:
                     executable.chmod(0o755)
                 result = subprocess.run(
-                    ["bash", ROOT / "scripts/bootstrap_cluster_secrets.sh", "mbk"],
+                    ["bash", ROOT / "scripts/bootstrap_cluster_secrets.sh", "syd"],
                     capture_output=True, text=True,
                     env=os.environ | {
                         "KUBECTL_MARKER": str(marker),

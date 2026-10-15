@@ -8,9 +8,8 @@ spec:
     description: Kubernetes Dashboard
     id: headlamp
     isPublic: true
-    launchURL: https://mbk.invalid
+    launchURL: https://app.invalid
     name: Headlamp
     pkceEnabled: true
     callbackURLs:
-      - https://mbk.invalid/oidc-callback
-      - https://syd.invalid/oidc-callback
+      - https://app.invalid/oidc-callback

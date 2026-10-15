@@ -8,6 +8,6 @@ spec:
     operatorConfig:
       hostname: syd-operator
       defaultTags:
-        - tag:syd-operator
+        - tag:cluster-syd-operator
     proxyConfig:
-      defaultTags: tag:syd
+      defaultTags: tag:cluster-syd

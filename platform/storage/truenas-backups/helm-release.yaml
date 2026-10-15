@@ -8,7 +8,7 @@ spec:
   values:
     nfs:
       # Homelab must provision the HDD dataset and NFS export before deployment.
-      path: /mnt/truenas/clusters/mbk
+      path: /mnt/truenas/clusters/syd
     storageClass:
       name: truenas-backups
       provisionerName: cluster.local/truenas-backups

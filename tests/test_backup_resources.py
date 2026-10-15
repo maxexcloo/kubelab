@@ -12,7 +12,7 @@ class BackupResourceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         rendered = subprocess.check_output(
-            ["kubectl", "kustomize", str(ROOT / "apps/overlays/mbk")], text=True
+            ["kubectl", "kustomize", str(ROOT / "apps/overlays/syd")], text=True
         )
         documents = subprocess.check_output(
             ["yq", "-I=0", "-N", "-o=json", "."], input=rendered, text=True
@@ -22,26 +22,20 @@ class BackupResourceTests(unittest.TestCase):
             for item in map(json.loads, documents.splitlines())
         }
 
-    def test_backup_storage_uses_the_hdd_export_without_redirecting_app_data(self):
+    def test_backup_storage_uses_the_direct_hdd_dataset(self):
         rendered = subprocess.check_output(
-            ["kubectl", "kustomize", str(ROOT / "clusters/mbk/platform")], text=True
+            ["kubectl", "kustomize", str(ROOT / "platform/foundation")], text=True
         )
         documents = subprocess.check_output(
             ["yq", "-I=0", "-N", "-o=json", "."], input=rendered, text=True
         )
         releases = {item["metadata"]["name"]: item for item in
                     map(json.loads, documents.splitlines()) if item["kind"] == "HelmRelease"}
-        backups = releases["truenas-backups"]["spec"]["values"]
-        applications = releases["nfs-subdir-external-provisioner"]["spec"]["values"]
-        self.assertEqual(backups["nfs"]["path"], "/mnt/truenas/clusters/mbk")
-        self.assertEqual(applications["nfs"]["path"], "/mnt/truenas-nvme/clusters/mbk")
-        self.assertEqual(backups["nfs"]["server"], applications["nfs"]["server"])
-        self.assertNotEqual(backups["nfs"]["server"], "storage.invalid")
-        self.assertEqual(backups["storageClass"]["name"], "truenas-backups")
+        classes = releases["local-path-provisioner"]["spec"]["values"]["storageClassConfigs"]
+        backups = classes["local-backups"]
+        self.assertEqual(backups["nodePathMap"], [{"node": "kimbap", "paths": ["/var/mnt/datasets/truenas/clusters/mbk"]}])
         self.assertEqual(backups["storageClass"]["reclaimPolicy"], "Retain")
-        self.assertEqual(backups["storageClass"]["onDelete"], "retain")
-        self.assertNotEqual(backups["storageClass"]["provisionerName"],
-                            applications["storageClass"]["provisionerName"])
+        self.assertEqual(classes["local-path"]["nodePathMap"][0]["paths"], ["/var/mnt/local-path-provisioner"])
 
     def test_scripts_and_destinations_resolve_in_the_app_namespace(self):
         jobs = [item for item in self.resources.values() if item["kind"] == "CronJob"
@@ -58,7 +52,7 @@ class BackupResourceTests(unittest.TestCase):
                 self.assertIn(("ConfigMap", namespace, script), self.resources)
                 claim = volumes["backups"]["persistentVolumeClaim"]["claimName"]
                 destination = self.resources[("PersistentVolumeClaim", namespace, claim)]
-                self.assertEqual(destination["spec"]["storageClassName"], "truenas-backups")
+                self.assertEqual(destination["spec"]["storageClassName"], "local-backups")
                 for container in pod["containers"]:
                     for mount in container["volumeMounts"]:
                         volume = volumes[mount["name"]]
@@ -71,7 +65,7 @@ class BackupResourceTests(unittest.TestCase):
                                 volume["persistentVolumeClaim"]["claimName"],
                             ))
                             annotations = source["metadata"].get("annotations", {}) if source else {}
-                            uid = annotations.get("k8s-sigs.io/nfs-directory-uid")
+                            uid = annotations.get("local-path-provisioner/userPattern")
                             if uid is not None:
                                 self.assertEqual(pod["securityContext"]["runAsUser"], int(uid))
 

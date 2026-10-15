@@ -5,6 +5,11 @@ metadata:
   annotations:
     config.kubernetes.io/local-config: "true"
 data:
+  bento_address: 100.73.126.15
+  # The LLM service retains its configured port when the host address changes.
+  bento_llm_authority: host.invalid:8000
+  grafana_host: grafana.excloo.com
   private_dns_host: private.syd.excloo.dev
+  unifi_host: gateway.mbk.excloo.net
   # Derived from private_dns_host by Kustomize.
   private_dns_lookup: https://cloudflare-dns.com/dns-query?name=app.invalid

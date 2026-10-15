@@ -4,7 +4,7 @@ metadata:
   name: data
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 2Ti
@@ -17,7 +17,7 @@ metadata:
   name: games
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 4Ti
@@ -32,16 +32,22 @@ metadata:
     app.kubernetes.io/name: application
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   capacity:
     storage: 2Ti
-  mountOptions:
-    - nfsvers=4.2
-  nfs:
-    path: /mnt/truenas-nvme/romm
-    server: storage.invalid
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
+  hostPath:
+    path: /var/mnt/datasets/truenas-nvme/romm
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - kimbap
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -51,13 +57,19 @@ metadata:
     app.kubernetes.io/name: application
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   capacity:
     storage: 4Ti
-  mountOptions:
-    - nfsvers=4.2
-  nfs:
-    path: /mnt/truenas/games
-    server: storage.invalid
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
+  hostPath:
+    path: /var/mnt/datasets/truenas/games
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - kimbap

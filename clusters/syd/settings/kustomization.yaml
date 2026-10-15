@@ -8,6 +8,39 @@ replacements:
   - source:
       kind: ConfigMap
       name: cluster-settings-syd
+      fieldPath: data.bento_address
+    targets:
+      - select:
+          kind: EndpointSlice
+          name: heiss-mcp
+          namespace: litellm
+        fieldPaths:
+          - endpoints.0.addresses.0
+      - select:
+          kind: ConfigMap
+          name: cluster-settings-syd
+        fieldPaths:
+          - data.bento_llm_authority
+        options:
+          delimiter: ":"
+          index: 0
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-syd
+      fieldPath: data.bento_llm_authority
+    targets:
+      - select:
+          kind: HelmRelease
+          name: litellm
+          namespace: litellm
+        fieldPaths:
+          - spec.values.proxy_config.model_list.[model_name=bento/.*].litellm_params.api_base
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-syd
       fieldPath: data.private_dns_host
     targets:
       - select:
@@ -46,8 +79,8 @@ replacements:
           index: 0
   - source:
       kind: ConfigMap
-      name: shared-settings
-      fieldPath: data.grafana_syd_host
+      name: cluster-settings-syd
+      fieldPath: data.grafana_host
     targets:
       - select:
           kind: HTTPRoute
@@ -81,6 +114,17 @@ replacements:
         options:
           delimiter: /
           index: 2
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-syd
+      fieldPath: data.unifi_host
+    targets:
+      - select:
+          kind: HelmRelease
+          name: litellm
+          namespace: litellm
+        fieldPaths:
+          - spec.values.envVars.UNIFI_NETWORK_HOST
   - source:
       kind: ConfigMap
       name: shared-settings

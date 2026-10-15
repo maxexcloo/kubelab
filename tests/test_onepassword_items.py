@@ -327,14 +327,14 @@ class ReconcilerTests(unittest.TestCase):
                 "metadata": {
                     "annotations": {
                         "gethomepage.dev/enabled": "true",
-                        "gethomepage.dev/href": "https://headlamp.mbk.excloo.dev",
+                        "gethomepage.dev/href": "https://headlamp.syd.excloo.dev",
                         "gethomepage.dev/name": "Renamed Dashboard Card",
                         "onepassword.excloo.dev/item": "Headlamp",
                     },
                     "name": "headlamp",
                     "namespace": "headlamp",
                 },
-                "spec": {"hostnames": ["headlamp.mbk.excloo.dev"]},
+                "spec": {"hostnames": ["headlamp.syd.excloo.dev"]},
             },
             {
                 "metadata": {
@@ -353,7 +353,7 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(desired["Headlamp"]["namespaces"], {"headlamp"})
         self.assertEqual(
             desired["Headlamp"]["urls"],
-            {"https://headlamp.mbk.excloo.dev"},
+            {"https://headlamp.syd.excloo.dev"},
         )
 
     def test_discovery_ignores_dashboard_visibility_names_and_cluster_suffixes(self):

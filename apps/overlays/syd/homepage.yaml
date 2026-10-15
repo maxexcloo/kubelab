@@ -10,4 +10,4 @@ spec:
         initContainers:
           endpoints:
             env:
-              HOMEPAGE_CLUSTER: mbk
+              HOMEPAGE_CLUSTER: syd

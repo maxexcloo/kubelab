@@ -4,7 +4,7 @@ metadata:
   name: bookdrop
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
@@ -17,7 +17,7 @@ metadata:
   name: books
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
@@ -29,16 +29,16 @@ kind: PersistentVolumeClaim
 metadata:
   name: data
   annotations:
-    k8s-sigs.io/nfs-directory-gid: "568"
-    k8s-sigs.io/nfs-directory-mode: "0700"
-    k8s-sigs.io/nfs-directory-uid: "568"
+    groupPattern: "568"
+    permPattern: "0700"
+    userPattern: "568"
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: truenas-nfs
+  storageClassName: local-path
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -48,16 +48,22 @@ metadata:
     app.kubernetes.io/name: application
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   capacity:
     storage: 1Gi
-  mountOptions:
-    - nfsvers=4.2
-  nfs:
-    path: /mnt/truenas-nvme/bookorbit/bookdrop
-    server: storage.invalid
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
+  hostPath:
+    path: /var/mnt/datasets/truenas-nvme/bookorbit/bookdrop
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - kimbap
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -67,13 +73,19 @@ metadata:
     app.kubernetes.io/name: application
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   capacity:
     storage: 1Gi
-  mountOptions:
-    - nfsvers=4.2
-  nfs:
-    path: /mnt/truenas-nvme/bookorbit/books
-    server: storage.invalid
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
+  hostPath:
+    path: /var/mnt/datasets/truenas-nvme/bookorbit/books
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - kimbap

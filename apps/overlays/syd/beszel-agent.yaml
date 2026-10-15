@@ -9,5 +9,7 @@ spec:
       containers:
         - name: beszel-agent
           env:
+            - name: HUB_URL
+              value: http://beszel.beszel.svc.cluster.local:8090
             - name: NICS
-              value: eth0
+              value: ens2

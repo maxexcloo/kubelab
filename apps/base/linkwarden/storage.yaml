@@ -3,13 +3,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: data
   annotations:
-    k8s-sigs.io/nfs-directory-gid: "568"
-    k8s-sigs.io/nfs-directory-mode: "0770"
-    k8s-sigs.io/nfs-directory-uid: "568"
+    groupPattern: "568"
+    permPattern: "0770"
+    userPattern: "568"
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi
-  storageClassName: truenas-nfs
+  storageClassName: local-path

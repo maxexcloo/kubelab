@@ -231,7 +231,7 @@ class PrivateDNSCompositionTests(unittest.TestCase):
         )])
 
     def test_each_cluster_discovers_its_own_tailscale_addresses(self):
-        for cluster in ["mbk", "syd"]:
+        for cluster in ["syd"]:
             with self.subTest(cluster=cluster):
                 rendered = subprocess.run(
                     ["kubectl", "kustomize", ROOT / "clusters" / cluster / "automation"],

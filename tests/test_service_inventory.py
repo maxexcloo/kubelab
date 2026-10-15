@@ -40,7 +40,7 @@ class ServiceInventoryTests(unittest.TestCase):
             builds = log.read_text().splitlines()
             self.assertTrue(builds)
             self.assertEqual(len(builds), len(set(builds)))
-            for cluster in ("mbk", "syd"):
+            for cluster in ("syd",):
                 self.assertIn(f"kustomize clusters/{cluster}", builds)
                 self.assertIn(f"kustomize apps/overlays/{cluster}", builds)
 
@@ -78,7 +78,7 @@ class ServiceInventoryTests(unittest.TestCase):
             self.assertEqual(json.loads(original_inventory), json.loads(hidden_inventory))
 
             # A broken access label in the snapshot must still fail validation.
-            source = manifests / "apps/overlays/mbk.yaml"
+            source = manifests / "apps/overlays/syd.yaml"
             subprocess.run(
                 ["yq", "-i", 'del(.metadata.labels."gateway.excloo.dev/public-access")', str(source)],
                 check=True,
