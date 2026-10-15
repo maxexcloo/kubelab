@@ -46,6 +46,23 @@ class CatalogueTests(unittest.IsolatedAsyncioTestCase):
             "id": "deepseek-v4-pro", "owned_by": "deepseek", "name": "DeepSeek V4 Pro",
         }), "DeepSeek · DeepSeek V4 Pro")
 
+    def test_direct_provider_labels_have_two_tiers(self):
+        for prefix, model, expected in [
+            ("gemini", {"id": "gemini-pro", "normalized_name": "Gemini Pro", "owned_by": "google"},
+             "Gemini · Gemini Pro"),
+            ("venice", {"id": "gemma-4-uncensored", "owned_by": "venice.ai"},
+             "Venice · Gemma 4 Uncensored"),
+            ("xiaomi-mimo", {"id": "mimo-v2.6-pro", "owned_by": "xiaomi"},
+             "Xiaomi · MiMo V2.6 Pro"),
+        ]:
+            with self.subTest(prefix=prefix):
+                self.assertEqual(catalogue.display_name(prefix, model), expected)
+
+    def test_aggregator_labels_retain_the_model_publisher(self):
+        self.assertEqual(catalogue.display_name("openrouter", {
+            "id": "anthropic/claude-sonnet-4.6", "name": "Claude Sonnet 4.6", "owned_by": "openrouter",
+        }), "OpenRouter · Anthropic · Claude Sonnet 4.6")
+
     async def test_excluded_models_cannot_be_listed_or_called(self):
         models = [{"id": "grok-4.20-0309-non-reasoning", "owned_by": "xai"}]
         metadata = {"catalogue_excluded_models": ["cli-proxy-api/grok-4.20-0309-non-reasoning"]}
