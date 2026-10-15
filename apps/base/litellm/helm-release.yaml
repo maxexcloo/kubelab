@@ -191,6 +191,11 @@ spec:
             api_base: https://opencode.ai/zen/v1
             api_key: os.environ/OPENCODE_ZEN_API_KEY_2
             model: openai/*
+        - model_name: venice/*
+          litellm_params:
+            api_base: https://api.venice.ai/api/v1
+            api_key: os.environ/VENICE_API_KEY
+            model: openai/*
         - model_name: xiaomi-mimo/*
           litellm_params:
             api_base: https://api.xiaomimimo.com/v1
