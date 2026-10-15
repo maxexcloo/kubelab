@@ -7,7 +7,7 @@ spec:
   values:
     defaultPodOptions:
       nodeSelector:
-        kubernetes.io/hostname: taco
+        kubernetes.io/hostname: kimbap
     controllers:
       main:
         containers:
