@@ -1,7 +1,0 @@
-apiVersion: automation.excloo.dev/v1alpha1
-kind: PrivateDNSRecord
-metadata:
-  name: redlib-multi
-  namespace: redlib-multi
-spec:
-  hostname: app.invalid

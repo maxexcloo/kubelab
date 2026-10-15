@@ -3,7 +3,6 @@
 # gh = "latest"
 # helm = "latest"
 # kubectl = "latest"
-# node = "latest"
 # prek = "latest"
 # python = "latest"
 # updatecli = "latest"
@@ -94,8 +93,6 @@ scripts/render_manifests.sh "$manifest_directory"
 scripts/check_manifests.sh "$manifest_directory"
 scripts/check_service_metadata.sh "$manifest_directory"
 python -m unittest discover -p 'test_*.py' -s tests
-node --check apps/base/redlib-multi/app/public/app.mjs
-node --test apps/base/redlib-multi/app/test/*.test.mjs
 """
 
 # Setup

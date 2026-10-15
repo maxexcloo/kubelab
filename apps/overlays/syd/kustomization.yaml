@@ -2,9 +2,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base/beszel-agent
+  - ../../base/mini-apps
   - ../../base/openspeedtest
   - ../../base/redlib
-  - ../../base/redlib-multi
   - openspeedtest-route.yaml
 patches:
   - path: beszel-agent.yaml
@@ -25,6 +25,21 @@ patches:
       kind: HelmRelease
       name: openspeedtest
 replacements:
+  - source:
+      kind: HelmRelease
+      name: redlib
+      namespace: redlib
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: Kustomization
+          name: mini-apps
+          namespace: flux-system
+        fieldPaths:
+          - spec.postBuild.substitute.REDLIB_URL
+        options:
+          delimiter: /
+          index: 2
   - source:
       kind: ConfigMap
       name: shared-settings

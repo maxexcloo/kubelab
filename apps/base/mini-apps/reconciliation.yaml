@@ -1,0 +1,20 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: mini-apps
+  namespace: flux-system
+spec:
+  interval: 1m
+  path: ./clusters/syd
+  prune: true
+  suspend: true
+  timeout: 5m
+  wait: true
+  dependsOn:
+    - name: automation
+  postBuild:
+    substitute:
+      REDLIB_URL: https://app.invalid
+  sourceRef:
+    kind: GitRepository
+    name: mini-apps
