@@ -9,6 +9,13 @@ resources:
   - source.yaml
 patches:
   - path: settings.yaml
+configurations:
+  - name-reference.yaml
+configMapGenerator:
+  - name: open-webui-tool-images
+    namespace: open-webui
+    files:
+      - tool-images.py
 replacements:
   - source:
       kind: HelmRelease

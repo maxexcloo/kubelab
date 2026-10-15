@@ -37,6 +37,24 @@ spec:
         requests:
           cpu: 20m
           memory: 64Mi
+    extraInitContainers:
+      - name: prepare-tool-images
+        image: ghcr.io/open-webui/open-webui:v0.12.2@sha256:10e6a78ba2d172493460a9e8a92c496aaa7a64dc4d26d622a2e95e0c736081c9
+        command:
+          - python
+          - /patch/tool-images.py
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+          - name: tool-image-patch
+            mountPath: /patch
+            readOnly: true
+          - name: tool-image-runtime
+            mountPath: /patched
     extraEnvVars:
       - name: DEFAULT_USER_ROLE
         value: user
@@ -149,12 +167,21 @@ spec:
       enabled: false
     volumeMounts:
       container:
+        - mountPath: /app/backend/open_webui/utils/middleware.py
+          name: tool-image-runtime
+          readOnly: true
+          subPath: middleware.py
         - mountPath: /tmp
           name: temporary
       initContainer:
         - mountPath: /tmp
           name: temporary
     volumes:
+      - name: tool-image-patch
+        configMap:
+          name: open-webui-tool-images
+      - name: tool-image-runtime
+        emptyDir: {}
       - name: temporary
         emptyDir: {}
     websocket:
