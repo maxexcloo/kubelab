@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base/actual-budget
-  - ../../base/actual-up
   - ../../base/aiometadata
   - ../../base/aiostreams
   - ../../base/atvloadly
@@ -16,6 +15,7 @@ resources:
   - ../../base/larapaper
   - ../../base/linkwarden
   - ../../base/litellm
+  - ../../base/mini-apps
   - ../../base/miniflux
   - ../../base/open-webui
   - ../../base/openspeedtest
@@ -29,6 +29,14 @@ resources:
   - immich-private-route.yaml
   - openspeedtest-route.yaml
 patches:
+  - patch: |-
+      - op: replace
+        path: /spec/path
+        value: ./clusters/mbk
+    target:
+      kind: Kustomization
+      name: mini-apps
+      namespace: flux-system
   - patch: |-
       apiVersion: v1
       kind: ConfigMap
