@@ -150,6 +150,36 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(len(downloads.read_text().splitlines()), 3)
         self.assertEqual(before, {p.name: p.read_bytes() for p in self.output.iterdir()})
 
+    def test_mini_apps_follow_cluster_selection_and_homepage_annotations(self):
+        mini_apps = self.directory / "mini-apps"
+        for cluster, name in (("mbk", "Budget"), ("syd", "Feeds")):
+            directory = mini_apps / "clusters" / cluster
+            directory.mkdir(parents=True)
+            (directory / "kustomization.yaml").write_text("resources: [app.yaml]\n")
+            (directory / "app.yaml").write_text(json.dumps(route(name)))
+            source = {
+                "apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository",
+                "metadata": {"name": "mini-apps", "namespace": "flux-system"},
+                "spec": {"url": "https://github.com/example/mini-apps.git", "ref": {"branch": "deploy"}},
+            }
+            selection = {
+                "apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization",
+                "metadata": {"name": "mini-apps", "namespace": "flux-system"},
+                "spec": {"path": f"./clusters/{cluster}"},
+            }
+            self.write_routes(cluster, [route("Existing"), selection, source])
+        result = self.render(MINI_APPS_DIRECTORY=str(mini_apps))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        services = self.services()
+        self.assertIn("Budget", services)
+        self.assertIn("Feeds", services)
+        self.assertIn("Existing", services)
+        self.assertEqual(services["Feeds"]["href"], "https://feeds.example.net")
+        before = (self.output / "services.yaml").read_bytes()
+        (mini_apps / "clusters/syd/app.yaml").unlink()
+        self.assertNotEqual(self.render(MINI_APPS_DIRECTORY=str(mini_apps)).returncode, 0)
+        self.assertEqual((self.output / "services.yaml").read_bytes(), before)
+
     def test_remote_annotations_and_external_machines(self):
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)

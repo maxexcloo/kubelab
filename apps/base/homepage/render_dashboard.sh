@@ -59,6 +59,7 @@ export HOMELAB_MACHINES="$homelab_directory/data/machines.yaml"
 # Use the same rendered route annotations as external monitoring. Never execute
 # scripts from the downloaded checkout or connect to another cluster's API.
 : > "$temporary_directory/routes.json"
+mini_apps_directory=${MINI_APPS_DIRECTORY:-}
 for overlay in "$kubelab_directory"/apps/overlays/*; do
   [ -d "$overlay" ] || continue
   cluster=${overlay##*/}
@@ -66,6 +67,36 @@ for overlay in "$kubelab_directory"/apps/overlays/*; do
     "${KUBECTL:-kubectl}" kustomize "$target" > "$temporary_directory/manifests.yaml"
     CLUSTER="$cluster" yq --from-file "$route_script" -I=0 -N -o=json \
       "$temporary_directory/manifests.yaml" >> "$temporary_directory/routes.json"
+    mini_apps_path=$(yq 'select(.kind == "Kustomization" and .metadata.name == "mini-apps") | .spec.path' "$temporary_directory/manifests.yaml")
+    [ -n "$mini_apps_path" ] || continue
+    if [ -z "$mini_apps_directory" ]; then
+      mini_apps_url=$(yq 'select(.kind == "GitRepository" and .metadata.name == "mini-apps") | .spec.url' "$temporary_directory/manifests.yaml")
+      mini_apps_repository=${mini_apps_url#https://github.com/}
+      mini_apps_repository=${mini_apps_repository%.git}
+      case "$mini_apps_repository" in
+        '' | *[!a-zA-Z0-9_./-]* | *..*) echo 'Invalid mini-apps repository' >&2; exit 1 ;;
+      esac
+      mini_apps_revision=$("${KUBECTL:-kubectl}" --namespace flux-system get kustomization mini-apps \
+        --output jsonpath='{.status.lastAppliedRevision}' --ignore-not-found)
+      mini_apps_revision=${mini_apps_revision##*@sha1:}
+      if [ -n "$mini_apps_revision" ]; then
+        case "$mini_apps_revision" in
+          *[!a-f0-9]*) echo 'Invalid applied mini-apps revision' >&2; exit 1 ;;
+        esac
+        [ "${#mini_apps_revision}" -eq 40 ] || exit 1
+      else
+        mini_apps_branch=$(yq 'select(.kind == "GitRepository" and .metadata.name == "mini-apps") | .spec.ref.branch' "$temporary_directory/manifests.yaml")
+        mini_apps_revision="refs/heads/$mini_apps_branch"
+      fi
+      wget -O "$temporary_directory/mini-apps.tar.gz" -q -T 30 \
+        "https://codeload.github.com/$mini_apps_repository/tar.gz/$mini_apps_revision"
+      mini_apps_directory="$temporary_directory/mini-apps"
+      mkdir "$mini_apps_directory"
+      tar -xzf "$temporary_directory/mini-apps.tar.gz" -C "$mini_apps_directory" --strip-components=1
+    fi
+    "${KUBECTL:-kubectl}" kustomize "$mini_apps_directory/$mini_apps_path" > "$temporary_directory/mini-apps.yaml"
+    CLUSTER="$cluster" yq --from-file "$route_script" -I=0 -N -o=json \
+      "$temporary_directory/mini-apps.yaml" >> "$temporary_directory/routes.json"
   done
 done
 yq ea -p=json -o=yaml '[.] | map(select(.annotations."gethomepage.dev/enabled" == "true"))' \

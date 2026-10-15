@@ -30,3 +30,6 @@ replacements:
         options:
           delimiter: /
           index: 2
+# Preserve the existing release while ownership moves to mini-apps.
+commonAnnotations:
+  kustomize.toolkit.fluxcd.io/prune: disabled
