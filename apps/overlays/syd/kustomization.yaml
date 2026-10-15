@@ -7,6 +7,17 @@ resources:
   - ../../base/redlib
   - openspeedtest-route.yaml
 patches:
+  - patch: |-
+      - op: add
+        path: /spec/postBuild
+        value:
+          substitute:
+            REDLIB_CHECK_URL: http://redlib.redlib.svc.cluster.local:8080
+            REDLIB_URL: https://app.invalid
+    target:
+      kind: Kustomization
+      name: mini-apps
+      namespace: flux-system
   - path: beszel-agent.yaml
   - patch: |-
       apiVersion: v1
