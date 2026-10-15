@@ -75,9 +75,9 @@ application upgrades do not require it. The deploy task waits for its selected
 reconciliation stage. Check the affected release and application separately to
 verify the workload has recovered and its important workflow works.
 
-The only GitHub workflow refreshes external monitoring after a merge. Flux
-performs cluster deployments directly from `main`. Local checks remain available
-when needed; run `prek install` to enable optional commit hooks.
+One GitHub job validates changes, then refreshes external monitoring after a
+merge. Flux performs cluster deployments directly from `main`. The same checks
+remain available locally when needed; run `prek install` to enable optional commit hooks.
 
 ## Updates & Recovery
 
