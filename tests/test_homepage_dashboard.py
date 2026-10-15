@@ -175,6 +175,17 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Feeds", services)
         self.assertIn("Existing", services)
         self.assertEqual(services["Feeds"]["href"], "https://feeds.example.net")
+        groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
+        self.assertEqual([next(iter(card)) for card in groups["Mini Apps"]], ["Budget", "Feeds"])
+        self.assertNotIn("Feeds", [next(iter(card)) for card in groups["Applications"]])
+        self.assertEqual(read_yaml(self.output / "settings.yaml")["layout"]["Mini Apps"]["tab"], "Services")
+        # Newly deployed apps appear on refresh; removed apps disappear without
+        # maintaining a second list of dashboard cards.
+        path = mini_apps / "clusters/syd/app.yaml"
+        path.write_text(json.dumps(route("New Tool")))
+        self.assertEqual(self.render(MINI_APPS_DIRECTORY=str(mini_apps)).returncode, 0)
+        self.assertIn("New Tool", self.services())
+        self.assertNotIn("Feeds", self.services())
         before = (self.output / "services.yaml").read_bytes()
         (mini_apps / "clusters/syd/app.yaml").unlink()
         self.assertNotEqual(self.render(MINI_APPS_DIRECTORY=str(mini_apps)).returncode, 0)

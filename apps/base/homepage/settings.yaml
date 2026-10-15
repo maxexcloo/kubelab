@@ -23,6 +23,10 @@ layout:
     columns: 4
     style: row
     tab: Services
+  Mini Apps:
+    columns: 4
+    style: row
+    tab: Services
   Operations:
     columns: 2
     style: row
