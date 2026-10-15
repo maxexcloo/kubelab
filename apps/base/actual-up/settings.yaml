@@ -1,0 +1,11 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: actual-up
+  namespace: actual-up
+spec:
+  values:
+    route:
+      private:
+        hostnames:
+          - actual-up.mbk.excloo.dev
