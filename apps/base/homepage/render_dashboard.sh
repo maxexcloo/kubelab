@@ -96,7 +96,9 @@ for overlay in "$kubelab_directory"/apps/overlays/*; do
     fi
     "${KUBECTL:-kubectl}" kustomize "$mini_apps_directory/$mini_apps_path" > "$temporary_directory/mini-apps.yaml"
     CLUSTER="$cluster" yq --from-file "$route_script" -I=0 -N -o=json \
-      "$temporary_directory/mini-apps.yaml" >> "$temporary_directory/routes.json"
+      "$temporary_directory/mini-apps.yaml" | \
+      yq -p=json -o=json -I=0 '.annotations."gethomepage.dev/group" = "Mini Apps"' \
+      >> "$temporary_directory/routes.json"
   done
 done
 yq ea -p=json -o=yaml '[.] | map(select(.annotations."gethomepage.dev/enabled" == "true"))' \
