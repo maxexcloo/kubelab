@@ -12,6 +12,8 @@ import urllib.request
 
 logger = logging.getLogger(__name__)
 
+AGGREGATORS = {"cli-proxy-api", "opencode", "opencode-go", "opencode-zen", "openrouter"}
+
 LABELS = {
     "bento": "Bento",
     "cli-proxy-api": "CLI Proxy API",
@@ -24,7 +26,7 @@ LABELS = {
     "openai": "OpenAI",
     "openrouter": "OpenRouter",
     "xai": "xAI",
-    "xiaomi-mimo": "Xiaomi MiMo",
+    "xiaomi-mimo": "Xiaomi",
 }
 
 
@@ -50,7 +52,7 @@ def display_name(prefix, model):
         ):
             name = name.replace(original, replacement)
     parts = [label(prefix)]
-    if vendor and vendor.casefold() != prefix.casefold():
+    if prefix in AGGREGATORS and vendor and vendor.casefold() != prefix.casefold():
         parts.append(label(vendor))
     return " · ".join([*parts, name])
 
