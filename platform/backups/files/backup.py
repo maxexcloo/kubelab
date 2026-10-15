@@ -13,6 +13,7 @@ import shutil
 import sqlite3
 import stat
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 
@@ -149,6 +150,69 @@ def restore(backup, target):
     print(f"Restore complete: {len(files)} files", flush=True)
 
 
+def copy_stable_sqlite(source, directory, attempts=3):
+    source = Path(source)
+    wal = Path(str(source) + "-wal")
+    output = Path(directory) / source.name
+
+    def identity(path):
+        try:
+            info = path.stat()
+        except FileNotFoundError:
+            return None
+        if not stat.S_ISREG(info.st_mode):
+            raise ValueError("SQLite snapshots require regular files")
+        return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+    # A read-only WAL database may lack sidecars that SQLite needs to create.
+    # Copy a stable DB/WAL pair locally; never create sidecars on the source.
+    for _ in range(attempts):
+        before = (identity(source), identity(wal))
+        try:
+            shutil.copyfile(source, output)
+            if before[1] is not None:
+                shutil.copyfile(wal, Path(str(output) + "-wal"))
+            after = (identity(source), identity(wal))
+        except FileNotFoundError:
+            after = None
+        if before[0] is not None and before == after:
+            return output
+        for copied in Path(directory).iterdir():
+            copied.unlink()
+    raise ValueError("SQLite files changed during the local snapshot")
+
+
+def backup_sqlite(source, target):
+    deadline = time.monotonic() + 120
+
+    def progress(status, remaining, total):
+        if time.monotonic() > deadline:
+            raise TimeoutError("SQLite backup exceeded its deadline")
+
+    with closing(sqlite3.connect(source.as_uri() + "?mode=ro", uri=True, timeout=5)) as connection:
+        with closing(sqlite3.connect(target)) as backup:
+            connection.backup(backup, pages=256, progress=progress)
+            backup.execute("PRAGMA journal_mode=DELETE")
+            if backup.execute("PRAGMA quick_check").fetchall() != [("ok",)]:
+                raise ValueError("SQLite snapshot failed its integrity check")
+
+
+def snapshot_database(source, target):
+    try:
+        backup_sqlite(source, target)
+    except sqlite3.OperationalError as error:
+        if error.sqlite_errorcode & 0xff not in {sqlite3.SQLITE_CANTOPEN, sqlite3.SQLITE_READONLY}:
+            raise
+        with source.open("rb") as stream:
+            header = stream.read(20)
+        if header[18:20] != b"\x02\x02":
+            raise
+        target.unlink(missing_ok=True)
+        with tempfile.TemporaryDirectory(prefix="sqlite-backup-") as directory:
+            local = copy_stable_sqlite(source, directory)
+            backup_sqlite(local, target)
+
+
 def snapshot(source, destination):
     source = Path(source).resolve(strict=True)
     destination = Path(destination).resolve()
@@ -185,18 +249,7 @@ def snapshot(source, destination):
             target = staging / "data" / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             if relative in databases:
-                deadline = time.monotonic() + 120
-
-                def progress(status, remaining, total):
-                    if time.monotonic() > deadline:
-                        raise TimeoutError("SQLite backup exceeded its deadline")
-
-                with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=5)) as connection:
-                    with closing(sqlite3.connect(target)) as backup:
-                        connection.backup(backup, pages=256, progress=progress)
-                        backup.execute("PRAGMA journal_mode=DELETE")
-                        if backup.execute("PRAGMA quick_check").fetchall() != [("ok",)]:
-                            raise ValueError("SQLite snapshot failed its integrity check")
+                snapshot_database(path, target)
             else:
                 # Refuse known live database stores that need a native export.
                 if path.name in {"data.mdb", "lock.mdb", "CURRENT"} or path.suffix in {".sst", ".ldb"}:

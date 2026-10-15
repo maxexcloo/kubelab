@@ -1,9 +1,11 @@
 import importlib.util
 import json
+import os
 from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
+from unittest import mock
 
 
 MODULE = Path(__file__).resolve().parents[1] / "platform/backups/files/backup.py"
@@ -13,6 +15,9 @@ SPEC.loader.exec_module(BACKUP)
 
 
 class FileBackupTests(unittest.TestCase):
+    def setUp(self):
+        self.addCleanup(os.umask, os.umask(0o022))
+
     def test_live_wal_restore_and_unchanged_file_deduplication(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -48,6 +53,70 @@ class FileBackupTests(unittest.TestCase):
             self.assertEqual((root / "restored/attachment").read_bytes(), b"unchanged attachment")
             self.assertEqual((root / "restored/attachment").stat().st_mode & 0o777, 0o750)
             self.assertEqual((root / "restored/empty").stat().st_mode & 0o777, 0o750)
+
+    def test_closed_wal_database_on_read_only_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            path = source / "state.sqlite"
+            writer = sqlite3.connect(path)
+            writer.execute("PRAGMA journal_mode=WAL")
+            writer.execute("CREATE TABLE records (value TEXT)")
+            writer.execute("INSERT INTO records VALUES ('committed')")
+            writer.commit()
+            writer.close()
+            self.assertFalse(Path(str(path) + "-wal").exists())
+            checksum = BACKUP.digest(path)
+            path.chmod(0o400)
+            source.chmod(0o500)
+            try:
+                BACKUP.snapshot(source, root / "backups")
+            finally:
+                source.chmod(0o700)
+                path.chmod(0o600)
+            self.assertEqual(BACKUP.digest(path), checksum)
+            self.assertFalse(Path(str(path) + "-wal").exists())
+            self.assertFalse(Path(str(path) + "-shm").exists())
+            backup = next((root / "backups").iterdir())
+            BACKUP.restore(backup, root / "restored")
+            with sqlite3.connect(root / "restored/state.sqlite") as database:
+                self.assertEqual(database.execute("SELECT value FROM records").fetchall(), [("committed",)])
+
+    def test_local_sqlite_copy_retries_when_wal_appears(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "state.sqlite"
+            writer = sqlite3.connect(source)
+            writer.execute("PRAGMA journal_mode=WAL")
+            writer.execute("CREATE TABLE records (value TEXT)")
+            writer.execute("INSERT INTO records VALUES ('before')")
+            writer.commit()
+            writer.close()
+            destination = root / "copy"
+            destination.mkdir()
+            copy = BACKUP.shutil.copyfile
+            writes = []
+
+            def concurrent_copy(start, target):
+                result = copy(start, target)
+                if not writes:
+                    connection = sqlite3.connect(source)
+                    connection.execute("INSERT INTO records VALUES ('after')")
+                    connection.commit()
+                    writes.append(connection)
+                return result
+
+            try:
+                with mock.patch.object(BACKUP.shutil, "copyfile", side_effect=concurrent_copy) as copying:
+                    local = BACKUP.copy_stable_sqlite(source, destination)
+                self.assertGreaterEqual(copying.call_count, 3)
+                BACKUP.backup_sqlite(local, root / "backup.sqlite")
+                with sqlite3.connect(root / "backup.sqlite") as database:
+                    self.assertEqual(database.execute("SELECT value FROM records").fetchall(), [("before",), ("after",)])
+            finally:
+                for connection in writes:
+                    connection.close()
 
     def test_restore_rejects_corruption_and_nonempty_target(self):
         with tempfile.TemporaryDirectory() as directory:
