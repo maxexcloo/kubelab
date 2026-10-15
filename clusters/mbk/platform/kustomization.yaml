@@ -4,10 +4,10 @@ resources:
   - ../../../platform
   - ../../../platform/automation/crossplane
   - ../../../platform/databases/cloudnative-pg
+  - ../../../platform/networking/external-dns-private
   - ../../../platform/storage/truenas-nfs
   - observability
   - certificate.yaml
-  - external-dns-private.yaml
   - grafana.yaml
   - headlamp.yaml
 patches:

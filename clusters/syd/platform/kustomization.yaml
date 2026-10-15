@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../../../platform
   - ../../../platform/automation/crossplane
+  - ../../../platform/networking/external-dns-private
   - observability
   - certificate.yaml
   - gateway-public-direct.yaml
