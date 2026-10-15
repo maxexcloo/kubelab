@@ -29,13 +29,8 @@ jobs:
           version: 2026.10.9
       - name: Run Hooks
         run: mise run check
-  monitoring:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    name: Refresh External Monitoring
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy The Validated Inventory
+      - name: Refresh External Monitoring
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.HOMELAB_FLY_DEPLOY_TOKEN }}
           KUBELAB_REVISION: ${{ github.sha }}
