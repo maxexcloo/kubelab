@@ -1,99 +1,84 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: romm
-  namespace: romm
+  name: application
 spec:
-  interval: 30m
-  releaseName: romm
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      romm:
-        strategy: Recreate
+      main:
         containers:
-          romm:
+          main:
             env:
+              # Retain audit events and avoid automatic cleanup jobs.
+              AUDIT_LOG_RETENTION_DAYS: "0"
+              CSDB_API_ENABLED: "true"
+              DB_HOST: "{{ .Release.Name }}-database-rw"
+              DB_PORT: "5432"
+              DB_QUERY_JSON: '{"sslmode":"require"}'
+              DEMOZOO_API_ENABLED: "true"
+              DEVICE_INSTALL_REQUEST_TTL_DAYS: "0"
+              ENABLE_SCHEDULED_CLEANUP_NETPLAY: "false"
+              ENABLE_SCHEDULED_CLEANUP_SYNC_SESSIONS: "false"
+              ENABLE_SCHEDULED_CLEANUP_UPLOAD_TMP: "false"
+              ENABLE_SCHEDULED_CLEANUP_ZIP_CACHE: "false"
+              FLASHPOINT_API_ENABLED: "true"
+              HASHEOUS_API_ENABLED: "true"
+              HLTB_API_ENABLED: "true"
+              LAUNCHBOX_API_ENABLED: "true"
+              OIDC_ENABLED: "true"
+              OIDC_PROVIDER: Pocket ID
               OIDC_REDIRECT_URI: https://app.invalid/api/oauth/openid
               OIDC_SERVER_APPLICATION_URL: https://identity.invalid
               OIDC_SERVER_METADATA_URL: https://identity.invalid/.well-known/openid-configuration
+              PLAYMATCH_API_ENABLED: "true"
+              POUET_API_ENABLED: "true"
+              REDIS_HOST: localhost
               ROMM_BASE_URL: https://app.invalid
+              ROMM_DB_DRIVER: postgresql
+              # Large library metadata scans exceed 24 hours even with four workers.
+              SCAN_TIMEOUT: "259200"
+              SMTP_FROM: romm@excloo.dev
+              SMTP_HOST: smtp.resend.com
+              SMTP_PORT: "465"
+              SMTP_SECURITY: tls
+              SMTP_USERNAME: resend
+              STEAM_API_ENABLED: "true"
+              TGDB_API_ENABLED: "true"
+              TZ: Australia/Sydney
               DB_PASSWD:
                 valueFrom:
                   secretKeyRef:
                     key: password
-                    name: romm-database
+                    name: "{{ .Release.Name }}-database"
               DB_USER:
                 valueFrom:
                   secretKeyRef:
                     key: username
-                    name: romm-database
+                    name: "{{ .Release.Name }}-database"
             envFrom:
               - secretRef:
-                  name: romm
+                  name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/rommapp/romm
               tag: 5.4.0@sha256:03295f95a6290e752641f9553ac4198b0e5b71b879d57f7b2371b98f608feb54
             probes:
-              liveness:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 3
-                  httpGet:
-                    path: /api/heartbeat
-                    port: 8080
-                  periodSeconds: 30
-                  timeoutSeconds: 10
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 3
-                  httpGet:
-                    path: /api/heartbeat
-                    port: 8080
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-              startup:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 60
-                  httpGet:
-                    path: /api/heartbeat
-                    port: 8080
-                  periodSeconds: 5
-                  timeoutSeconds: 5
+              liveness: &health
+                path: /api/heartbeat
+                port: 8080
+              readiness: *health
+              startup: *health
             resources:
               limits:
                 memory: 4Gi
               requests:
                 cpu: 100m
                 memory: 1Gi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              runAsGroup: 568
-              runAsNonRoot: true
-              runAsUser: 568
-              capabilities:
-                drop:
-                  - ALL
           valkey:
             args:
               - valkey-server
               - --appendonly
-              - no
+              - "no"
               - --save
               - ""
             image:
@@ -101,52 +86,32 @@ spec:
               repository: docker.io/valkey/valkey
               tag: 9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
             probes:
-              liveness:
-                custom: true
+              liveness: &valkey-health
                 enabled: true
+                port: 6379
                 spec:
-                  tcpSocket:
-                    port: 6379
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  tcpSocket:
-                    port: 6379
+                  timeoutSeconds: 5
+              readiness: *valkey-health
             resources:
               limits:
                 memory: 512Mi
               requests:
                 cpu: 20m
                 memory: 128Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              runAsGroup: 568
-              runAsNonRoot: true
-              runAsUser: 568
-              capabilities:
-                drop:
-                  - ALL
-    defaultPodOptions:
-      automountServiceAccountToken: false
-      securityContext:
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 568
-        runAsNonRoot: true
-        runAsUser: 568
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: romm
+        defaultContainerOptions:
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
     persistence:
       data:
         existingClaim: data
         type: persistentVolumeClaim
         advancedMounts:
-          romm:
-            romm:
+          main:
+            main:
               - path: /romm/assets
                 subPath: assets
               - path: /romm/config
@@ -157,8 +122,8 @@ spec:
         existingClaim: games
         type: persistentVolumeClaim
         advancedMounts:
-          romm:
-            romm:
+          main:
+            main:
               - path: /romm/library/roms
                 subPath: roms
               - path: /romm/library/bios
@@ -166,17 +131,13 @@ spec:
       nginx-configuration:
         type: emptyDir
         advancedMounts:
-          romm:
-            romm:
+          main:
+            main:
               - path: /etc/nginx/conf.d
-      temporary:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
       valkey:
         type: emptyDir
         advancedMounts:
-          romm:
+          main:
             valkey:
               - path: /data
     route:
@@ -184,31 +145,38 @@ spec:
         hostnames:
           - app.invalid
         labels:
-          app.kubernetes.io/name: romm
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
         rules:
           - backendRefs:
-              - name: romm
+              - name: "{{ .Release.Name }}"
                 port: 8080
       public:
-        forceRename: romm
+        forceRename: "{{ .Release.Name }}"
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+          gethomepage.dev/description: Game & ROM Library
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-romm
+          gethomepage.dev/name: RoMM
           gethomepage.dev/widget.type: romm
           gethomepage.dev/widget.url: https://app.invalid
+          monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: RoMM
+        hostnames:
+          - games.excloo.com
         labels:
-          app.kubernetes.io/name: romm
+          app.kubernetes.io/name: "{{ .Release.Name }}"
           gateway.excloo.dev/public-access: "true"
         parentRefs:
           - name: public-tunnel
             namespace: networking
     service:
-      romm:
-        controller: romm
+      main:
         ports:
           http:
             port: 8080
-            protocol: HTTP

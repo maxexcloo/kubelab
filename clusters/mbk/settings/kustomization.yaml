@@ -128,6 +128,11 @@ replacements:
           name: nfs-subdir-external-provisioner
         fieldPaths:
           - spec.values.nfs.server
+      - select:
+          kind: HelmRelease
+          name: truenas-backups
+        fieldPaths:
+          - spec.values.nfs.server
   - source:
       kind: ConfigMap
       name: cluster-settings-mbk

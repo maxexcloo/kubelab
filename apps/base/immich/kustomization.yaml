@@ -5,23 +5,21 @@ resources:
   - database.yaml
   - external-secrets.yaml
   - helm-release.yaml
+  - namespace.yaml
+  - network-policy.yaml
   - pocket-id.yaml
-  - resources.yaml
+  - private-dns.yaml
+  - resend.yaml
+  - route.yaml
   - source.yaml
   - storage.yaml
-  - route.yaml
-  - private-dns.yaml
 replacements:
   - source:
       kind: HTTPRoute
-      name: immich
-      namespace: immich
       fieldPath: spec.hostnames.0
     targets:
       - select:
           kind: HTTPRoute
-          name: immich
-          namespace: immich
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
           - metadata.annotations.[gethomepage.dev/widget.url]
@@ -30,14 +28,10 @@ replacements:
           index: 2
       - select:
           kind: PrivateDNSRecord
-          name: immich
-          namespace: immich
         fieldPaths:
           - spec.hostname
       - select:
           kind: PocketIDClient
-          name: immich
-          namespace: immich
         fieldPaths:
           - spec.client.callbackURLs.1
           - spec.client.callbackURLs.2
@@ -45,3 +39,7 @@ replacements:
         options:
           delimiter: /
           index: 2
+components:
+  - ../../../platform/backups/destination
+  - ../../../platform/backups/postgres
+  - ../../components/app-namespace

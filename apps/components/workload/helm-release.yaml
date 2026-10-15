@@ -1,0 +1,14 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        # Chart identifiers stay generic while deployed names and selectors stay stable.
+        forceRename: "{{ .Release.Name }}"
+        extraSelectorLabels:
+          app.kubernetes.io/controller: "{{ .Release.Name }}"
+        labels:
+          app.kubernetes.io/controller: "{{ .Release.Name }}"

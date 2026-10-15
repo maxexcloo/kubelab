@@ -1,7 +1,6 @@
 apiVersion: automation.excloo.dev/v1alpha1
 kind: PrivateDNSRecord
 metadata:
-  name: atvloadly
-  namespace: atvloadly
+  name: application
 spec:
   hostname: app.invalid

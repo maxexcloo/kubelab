@@ -1,8 +1,7 @@
 apiVersion: automation.excloo.dev/v1alpha1
 kind: PocketIDClient
 metadata:
-  name: romm
-  namespace: romm
+  name: application
 spec:
   client:
     callbackURLs:

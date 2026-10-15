@@ -2,9 +2,8 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: beszel-agent
-  namespace: beszel-agent
   labels:
-    app.kubernetes.io/name: beszel-agent
+    app.kubernetes.io/name: application
 spec:
   selector:
     matchLabels:
@@ -41,24 +40,17 @@ spec:
                   name: beszel-agent
           image: henrygd/beszel-agent:0.21.0@sha256:f27b1aa2c68404bc5b9e1a2ab36653bd9b4ee14f6299862f09cd5051a4134767
           imagePullPolicy: IfNotPresent
-          livenessProbe:
+          livenessProbe: &health
             exec:
               command:
                 - /agent
                 - health
-            periodSeconds: 120
             timeoutSeconds: 5
           ports:
             - name: agent
               containerPort: 45876
               protocol: TCP
-          readinessProbe:
-            exec:
-              command:
-                - /agent
-                - health
-            periodSeconds: 10
-            timeoutSeconds: 5
+          readinessProbe: *health
           resources:
             limits:
               memory: 128Mi
@@ -72,12 +64,8 @@ spec:
               drop:
                 - ALL
           startupProbe:
-            exec:
-              command:
-                - /agent
-                - health
+            <<: *health
             failureThreshold: 30
-            periodSeconds: 2
           volumeMounts:
             - name: data
               mountPath: /var/lib/beszel-agent

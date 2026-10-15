@@ -1,111 +1,63 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: bichon
-  namespace: bichon
+  name: application
 spec:
-  interval: 30m
-  releaseName: bichon
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      bichon:
-        strategy: Recreate
+      main:
         containers:
-          bichon:
+          main:
+            env:
+              BICHON_CORS_ORIGINS: https://app.invalid
+              BICHON_HTTP_PORT: "15630"
+              BICHON_PUBLIC_URL: https://app.invalid
+              BICHON_ROOT_DIR: /data/bichon-data
+              TZ: Australia/Sydney
             envFrom:
               - secretRef:
-                  name: bichon
+                  name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/rustmailer/bichon
               tag: 2.1.1@sha256:81aeb6d331bbef407df9f927b355398ea87ec5099a0b15a062cd62a6e7cb402e
             probes:
-              liveness:
-                custom: true
-                enabled: true
-                spec:
-                  httpGet:
-                    path: /api/status
-                    port: 15630
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  httpGet:
-                    path: /api/status
-                    port: 15630
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-              startup:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 60
-                  httpGet:
-                    path: /api/status
-                    port: 15630
-                  periodSeconds: 2
+              liveness: &health
+                path: /api/status
+              readiness: *health
+              startup: *health
             resources:
               limits:
                 memory: 512Mi
               requests:
                 cpu: 20m
                 memory: 128Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
-            env:
-              BICHON_CORS_ORIGINS: https://app.invalid
-              BICHON_PUBLIC_URL: https://app.invalid
-    defaultPodOptions:
-      automountServiceAccountToken: false
-      securityContext:
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 568
-        runAsNonRoot: true
-        runAsUser: 568
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: bichon
     persistence:
       data:
         existingClaim: retained-data
         type: persistentVolumeClaim
         globalMounts:
           - path: /data/bichon-data
-      temporary:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
     route:
       private:
         annotations:
+          gethomepage.dev/description: Email Archiving
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Operations
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-bichon
+          gethomepage.dev/name: Bichon
+          monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: Bichon
+        hostnames:
+          - bichon.excloo.com
         labels:
-          app.kubernetes.io/name: bichon
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
     service:
-      bichon:
-        controller: bichon
+      main:
         ports:
           http:
             port: 15630
-            protocol: HTTP

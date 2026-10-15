@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: application
+spec:
+  ingress:
+    - ports:
+        - port: 41641
+          protocol: UDP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sidestore-vpn
+  policyTypes:
+    - Ingress

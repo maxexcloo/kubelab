@@ -1,52 +1,39 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: aiometadata
-  namespace: aiometadata
+  name: application
 spec:
-  interval: 30m
-  releaseName: aiometadata
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      aiometadata:
-        strategy: Recreate
+      main:
+        defaultContainerOptionsStrategy: merge
         containers:
-          aiometadata:
+          main:
+            env:
+              AUTH_REQUIRE_SIGNIN: "false"
+              DATABASE_URI: sqlite://addon/data/db.sqlite
+              ENABLE_CACHE_WARMING: "false"
+              HOST_NAME: https://app.invalid
+              MAL_WARMUP_ENABLED: "false"
+              OIDC_ENABLED: "true"
+              OIDC_GROUP_PERMISSIONS: all_services=admin
+              OIDC_ISSUER: https://identity.invalid
+              REDIS_URL: redis://localhost:6379
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/cedya77/aiometadata
               tag: 3.5.0@sha256:e7a1e8d08c0f6d38c51f081169e2b29f642883964a80160911e4ff88352edab0
-            envFrom:
-              - secretRef:
-                  name: aiometadata
             probes:
-              liveness:
-                enabled: true
+              liveness: &health
                 path: /health/live
                 port: 3232
-                type: HTTP
               readiness:
-                enabled: true
                 path: /health/ready
                 port: 3232
-                type: HTTP
-              startup:
-                enabled: true
-                path: /health/live
-                port: 3232
-                type: HTTP
-                spec:
-                  failureThreshold: 12
-                  periodSeconds: 5
+              startup: *health
             resources:
               limits:
                 memory: 1Gi
@@ -54,45 +41,34 @@ spec:
                 cpu: 50m
                 memory: 512Mi
             securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
               runAsGroup: 1000
-              runAsNonRoot: true
               runAsUser: 1000
-              capabilities:
-                drop:
-                  - ALL
-            env:
-              HOST_NAME: https://app.invalid
-              OIDC_ISSUER: https://identity.invalid
           redis:
-            image:
-              pullPolicy: IfNotPresent
-              repository: docker.io/library/redis
-              tag: 8.10.2@sha256:2c2dff791878316e3b083188be0d578423b24813cdda5de0e80ea4f7b3e6bfd6
             args:
               - redis-server
               - --appendonly
-              - no
+              - "no"
               - --save
               - ""
               - --maxmemory
               - 192mb
               - --maxmemory-policy
               - volatile-lfu
+            image:
+              pullPolicy: IfNotPresent
+              repository: docker.io/library/redis
+              tag: 8.10.2@sha256:2c2dff791878316e3b083188be0d578423b24813cdda5de0e80ea4f7b3e6bfd6
             probes:
               liveness:
-                custom: true
                 enabled: true
+                port: 6379
                 spec:
-                  tcpSocket:
-                    port: 6379
+                  timeoutSeconds: 5
               readiness:
-                custom: true
                 enabled: true
+                port: 6379
                 spec:
-                  tcpSocket:
-                    port: 6379
+                  timeoutSeconds: 5
             resources:
               limits:
                 memory: 256Mi
@@ -100,52 +76,57 @@ spec:
                 cpu: 20m
                 memory: 64Mi
             securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
               runAsGroup: 999
-              runAsNonRoot: true
               runAsUser: 999
-              capabilities:
-                drop:
-                  - ALL
+        defaultContainerOptions:
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
     defaultPodOptions:
-      automountServiceAccountToken: false
       securityContext:
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: aiometadata
+        fsGroup: null
+        fsGroupChangePolicy: null
+        runAsGroup: null
+        runAsNonRoot: null
+        runAsUser: null
     persistence:
       data:
         existingClaim: data
         type: persistentVolumeClaim
         advancedMounts:
-          aiometadata:
-            aiometadata:
+          main:
+            main:
               - path: /app/addon/data
       redis:
         type: emptyDir
         advancedMounts:
-          aiometadata:
+          main:
             redis:
               - path: /data
-      temporary:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
     route:
       private:
         annotations:
+          gethomepage.dev/description: Stremio Metadata
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-aiometadata
+          gethomepage.dev/name: AIOMetadata
+          monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: AIOMetadata
+        hostnames:
+          - aiometadata.excloo.com
         labels:
-          app.kubernetes.io/name: aiometadata
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
     service:
-      aiometadata:
-        controller: aiometadata
+      main:
         ports:
           http:
             port: 3232
-            protocol: HTTP

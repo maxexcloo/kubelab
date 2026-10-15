@@ -1,11 +1,9 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: open-webui
-  namespace: open-webui
+  name: application
 spec:
   interval: 30m
-  releaseName: open-webui
   chart:
     spec:
       chart: open-webui
@@ -19,14 +17,10 @@ spec:
     enableOpenaiApi: false
     fullnameOverride: open-webui
     openaiApiKey: ""
-    replicaCount: 1
     revisionHistoryLimit: 3
     containerSecurityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
-      runAsGroup: 568
-      runAsNonRoot: true
-      runAsUser: 568
       capabilities:
         drop:
           - ALL
@@ -98,12 +92,10 @@ spec:
       pullPolicy: IfNotPresent
       repository: ghcr.io/open-webui/open-webui
       tag: v0.12.2@sha256:10e6a78ba2d172493460a9e8a92c496aaa7a64dc4d26d622a2e95e0c736081c9
-    livenessProbe:
-      failureThreshold: 3
+    livenessProbe: &health
       httpGet:
         path: /health
         port: http
-      periodSeconds: 30
       timeoutSeconds: 5
     ollama:
       enabled: false
@@ -121,12 +113,10 @@ spec:
       seccompProfile:
         type: RuntimeDefault
     readinessProbe:
-      failureThreshold: 3
+      <<: *health
       httpGet:
         path: /health/db
         port: http
-      periodSeconds: 10
-      timeoutSeconds: 5
     resources:
       limits:
         memory: 4Gi
@@ -137,7 +127,16 @@ spec:
       apiVersion: gateway.networking.k8s.io/v1
       enabled: true
       annotations:
+        gethomepage.dev/description: AI Chat
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Artificial Intelligence
         gethomepage.dev/href: https://app.invalid
+        gethomepage.dev/icon: sh-open-webui
+        gethomepage.dev/name: Open WebUI
+        monitoring.excloo.dev/enabled: "true"
+        onepassword.excloo.dev/item: Open WebUI
+      hostnames:
+        - chat.excloo.com
       parentRefs:
         - name: private
           namespace: networking
@@ -153,12 +152,8 @@ spec:
         providerUrl: https://identity.invalid/.well-known/openid-configuration
         scopes: openid email profile
     startupProbe:
+      <<: *health
       failureThreshold: 30
-      httpGet:
-        path: /health
-        port: http
-      periodSeconds: 5
-      timeoutSeconds: 5
     strategy:
       type: Recreate
     terminals:
@@ -191,9 +186,6 @@ spec:
         containerSecurityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
-          runAsGroup: 999
-          runAsNonRoot: true
-          runAsUser: 999
           capabilities:
             drop:
               - ALL

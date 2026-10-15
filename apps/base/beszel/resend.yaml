@@ -1,0 +1,6 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: ResendKey
+metadata:
+  name: resend
+spec:
+  displayName: Beszel

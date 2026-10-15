@@ -35,8 +35,8 @@ targets:
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update controldns/ctrld In apps/base/redlib/helm-release.yaml $.spec.values.controllers.redlib.containers.ctrld
-pipelineid: update-controldns-ctrld-in-apps-base-redlib-helm-release-yaml-spec-values-controllers-redlib-containers-ctrld
+name: Update controldns/ctrld In apps/base/redlib/helm-release.yaml $.spec.values.controllers.main.containers.ctrld
+pipelineid: update-controldns-ctrld-in-apps-base-redlib-helm-release-yaml-spec-values-controllers-main-containers-ctrld
 labels:
   group: containers
 sources:
@@ -50,7 +50,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/redlib/helm-release.yaml
-      key: $.spec.values.controllers.redlib.containers.ctrld.image.repository
+      key: $.spec.values.controllers.main.containers.ctrld.image.repository
   version:
     kind: dockerimage
     spec:
@@ -67,12 +67,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/redlib/helm-release.yaml
-      key: $.spec.values.controllers.redlib.containers.ctrld.image.tag
+      key: $.spec.values.controllers.main.containers.ctrld.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update docker.io/actualbudget/actual-server In apps/base/actual-budget/helm-release.yaml $.spec.values.controllers.actual-budget.containers.actual-budget
-pipelineid: update-docker-io-actualbudget-actual-server-in-apps-base-actual-budget-helm-release-yaml-spec-values-controllers-actual-budget-containers-actual-budget
+name: Update docker.io/actualbudget/actual-server In apps/base/actual-budget/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-docker-io-actualbudget-actual-server-in-apps-base-actual-budget-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -86,7 +86,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/actual-budget/helm-release.yaml
-      key: $.spec.values.controllers.actual-budget.containers.actual-budget.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -103,12 +103,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/actual-budget/helm-release.yaml
-      key: $.spec.values.controllers.actual-budget.containers.actual-budget.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update docker.io/eceasy/cli-proxy-api In apps/base/cliproxyapi/helm-release.yaml $.spec.values.controllers.cliproxyapi.containers.cliproxyapi
-pipelineid: update-docker-io-eceasy-cli-proxy-api-in-apps-base-cliproxyapi-helm-release-yaml-spec-values-controllers-cliproxyapi-containers-cliproxyapi
+name: Update docker.io/eceasy/cli-proxy-api In apps/base/cliproxyapi/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-docker-io-eceasy-cli-proxy-api-in-apps-base-cliproxyapi-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -122,7 +122,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/cliproxyapi/helm-release.yaml
-      key: $.spec.values.controllers.cliproxyapi.containers.cliproxyapi.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -139,7 +139,7 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/cliproxyapi/helm-release.yaml
-      key: $.spec.values.controllers.cliproxyapi.containers.cliproxyapi.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
@@ -179,8 +179,8 @@ targets:
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update docker.io/library/nginx In apps/base/atvloadly/helm-release.yaml $.spec.values.controllers.atvloadly.containers.proxy
-pipelineid: update-docker-io-library-nginx-in-apps-base-atvloadly-helm-release-yaml-spec-values-controllers-atvloadly-containers-proxy
+name: Update docker.io/library/nginx In apps/base/atvloadly/helm-release.yaml $.spec.values.controllers.main.containers.proxy
+pipelineid: update-docker-io-library-nginx-in-apps-base-atvloadly-helm-release-yaml-spec-values-controllers-main-containers-proxy
 labels:
   group: containers
 sources:
@@ -194,7 +194,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/atvloadly/helm-release.yaml
-      key: $.spec.values.controllers.atvloadly.containers.proxy.image.repository
+      key: $.spec.values.controllers.main.containers.proxy.image.repository
   version:
     kind: dockerimage
     spec:
@@ -211,12 +211,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/atvloadly/helm-release.yaml
-      key: $.spec.values.controllers.atvloadly.containers.proxy.image.tag
+      key: $.spec.values.controllers.main.containers.proxy.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update docker.io/library/redis In apps/base/aiometadata/helm-release.yaml $.spec.values.controllers.aiometadata.containers.redis
-pipelineid: update-docker-io-library-redis-in-apps-base-aiometadata-helm-release-yaml-spec-values-controllers-aiometadata-containers-redis
+name: Update docker.io/library/redis In apps/base/aiometadata/helm-release.yaml $.spec.values.controllers.main.containers.redis
+pipelineid: update-docker-io-library-redis-in-apps-base-aiometadata-helm-release-yaml-spec-values-controllers-main-containers-redis
 labels:
   group: containers
 sources:
@@ -230,7 +230,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/aiometadata/helm-release.yaml
-      key: $.spec.values.controllers.aiometadata.containers.redis.image.repository
+      key: $.spec.values.controllers.main.containers.redis.image.repository
   version:
     kind: dockerimage
     spec:
@@ -247,7 +247,7 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/aiometadata/helm-release.yaml
-      key: $.spec.values.controllers.aiometadata.containers.redis.image.tag
+      key: $.spec.values.controllers.main.containers.redis.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
@@ -280,8 +280,8 @@ targets:
       file: apps/base/homepage/helm-release.yaml
       key: $.spec.values.controllers.homepage.initContainers.endpoints.image.tag
 ---
-name: Update docker.io/miniflux/miniflux In apps/base/miniflux/helm-release.yaml $.spec.values.controllers.miniflux.containers.miniflux
-pipelineid: update-docker-io-miniflux-miniflux-in-apps-base-miniflux-helm-release-yaml-spec-values-controllers-miniflux-containers-miniflux
+name: Update docker.io/miniflux/miniflux In apps/base/miniflux/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-docker-io-miniflux-miniflux-in-apps-base-miniflux-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -295,7 +295,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/miniflux/helm-release.yaml
-      key: $.spec.values.controllers.miniflux.containers.miniflux.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -312,12 +312,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/miniflux/helm-release.yaml
-      key: $.spec.values.controllers.miniflux.containers.miniflux.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update docker.io/rustmailer/bichon In apps/base/bichon/helm-release.yaml $.spec.values.controllers.bichon.containers.bichon
-pipelineid: update-docker-io-rustmailer-bichon-in-apps-base-bichon-helm-release-yaml-spec-values-controllers-bichon-containers-bichon
+name: Update docker.io/rustmailer/bichon In apps/base/bichon/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-docker-io-rustmailer-bichon-in-apps-base-bichon-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -331,7 +331,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/bichon/helm-release.yaml
-      key: $.spec.values.controllers.bichon.containers.bichon.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -348,7 +348,7 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/bichon/helm-release.yaml
-      key: $.spec.values.controllers.bichon.containers.bichon.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
@@ -424,8 +424,8 @@ targets:
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update docker.io/valkey/valkey In apps/base/romm/helm-release.yaml $.spec.values.controllers.romm.containers.valkey
-pipelineid: update-docker-io-valkey-valkey-in-apps-base-romm-helm-release-yaml-spec-values-controllers-romm-containers-valkey
+name: Update docker.io/valkey/valkey In apps/base/romm/helm-release.yaml $.spec.values.controllers.main.containers.valkey
+pipelineid: update-docker-io-valkey-valkey-in-apps-base-romm-helm-release-yaml-spec-values-controllers-main-containers-valkey
 labels:
   group: containers
 sources:
@@ -439,7 +439,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/romm/helm-release.yaml
-      key: $.spec.values.controllers.romm.containers.valkey.image.repository
+      key: $.spec.values.controllers.main.containers.valkey.image.repository
   version:
     kind: dockerimage
     spec:
@@ -456,7 +456,7 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/romm/helm-release.yaml
-      key: $.spec.values.controllers.romm.containers.valkey.image.tag
+      key: $.spec.values.controllers.main.containers.valkey.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
@@ -489,8 +489,8 @@ targets:
       file: apps/base/litellm/helm-release.yaml
       key: $.spec.values.image.tag
 ---
-name: Update ghcr.io/bookorbit/bookorbit In apps/base/bookorbit/helm-release.yaml $.spec.values.controllers.bookorbit.containers.bookorbit
-pipelineid: update-ghcr-io-bookorbit-bookorbit-in-apps-base-bookorbit-helm-release-yaml-spec-values-controllers-bookorbit-containers-bookorbit
+name: Update ghcr.io/bookorbit/bookorbit In apps/base/bookorbit/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-bookorbit-bookorbit-in-apps-base-bookorbit-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -504,7 +504,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/bookorbit/helm-release.yaml
-      key: $.spec.values.controllers.bookorbit.containers.bookorbit.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -521,12 +521,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/bookorbit/helm-release.yaml
-      key: $.spec.values.controllers.bookorbit.containers.bookorbit.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/calibrain/shelfmark In apps/base/shelfmark/helm-release.yaml $.spec.values.controllers.shelfmark.containers.shelfmark
-pipelineid: update-ghcr-io-calibrain-shelfmark-in-apps-base-shelfmark-helm-release-yaml-spec-values-controllers-shelfmark-containers-shelfmark
+name: Update ghcr.io/calibrain/shelfmark In apps/base/shelfmark/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-calibrain-shelfmark-in-apps-base-shelfmark-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -540,7 +540,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/shelfmark/helm-release.yaml
-      key: $.spec.values.controllers.shelfmark.containers.shelfmark.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -557,12 +557,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/shelfmark/helm-release.yaml
-      key: $.spec.values.controllers.shelfmark.containers.shelfmark.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/cedya77/aiometadata In apps/base/aiometadata/helm-release.yaml $.spec.values.controllers.aiometadata.containers.aiometadata
-pipelineid: update-ghcr-io-cedya77-aiometadata-in-apps-base-aiometadata-helm-release-yaml-spec-values-controllers-aiometadata-containers-aiometadata
+name: Update ghcr.io/cedya77/aiometadata In apps/base/aiometadata/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-cedya77-aiometadata-in-apps-base-aiometadata-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -576,7 +576,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/aiometadata/helm-release.yaml
-      key: $.spec.values.controllers.aiometadata.containers.aiometadata.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -593,7 +593,7 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/aiometadata/helm-release.yaml
-      key: $.spec.values.controllers.aiometadata.containers.aiometadata.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
@@ -700,8 +700,8 @@ targets:
       file: apps/base/homepage/helm-release.yaml
       key: $.spec.values.controllers.homepage.containers.homepage.image.tag
 ---
-name: Update ghcr.io/henrygd/beszel/beszel In apps/base/beszel/helm-release.yaml $.spec.values.controllers.beszel.containers.beszel
-pipelineid: update-ghcr-io-henrygd-beszel-beszel-in-apps-base-beszel-helm-release-yaml-spec-values-controllers-beszel-containers-beszel
+name: Update ghcr.io/henrygd/beszel/beszel In apps/base/beszel/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-henrygd-beszel-beszel-in-apps-base-beszel-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -715,7 +715,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/beszel/helm-release.yaml
-      key: $.spec.values.controllers.beszel.containers.beszel.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -732,7 +732,7 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/beszel/helm-release.yaml
-      key: $.spec.values.controllers.beszel.containers.beszel.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
@@ -808,8 +808,8 @@ targets:
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/linkwarden/linkwarden In apps/base/linkwarden/helm-release.yaml $.spec.values.controllers.linkwarden.containers.linkwarden
-pipelineid: update-ghcr-io-linkwarden-linkwarden-in-apps-base-linkwarden-helm-release-yaml-spec-values-controllers-linkwarden-containers-linkwarden
+name: Update ghcr.io/linkwarden/linkwarden In apps/base/linkwarden/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-linkwarden-linkwarden-in-apps-base-linkwarden-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -823,7 +823,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/linkwarden/helm-release.yaml
-      key: $.spec.values.controllers.linkwarden.containers.linkwarden.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -840,12 +840,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/linkwarden/helm-release.yaml
-      key: $.spec.values.controllers.linkwarden.containers.linkwarden.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/maxexcloo/actual-up In apps/base/actual-up/helm-release.yaml $.spec.values.controllers.actual-up.containers.actual-up
-pipelineid: update-ghcr-io-maxexcloo-actual-up-in-apps-base-actual-up-helm-release-yaml-spec-values-controllers-actual-up-containers-actual-up
+name: Update ghcr.io/maxexcloo/actual-up In apps/base/actual-up/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-maxexcloo-actual-up-in-apps-base-actual-up-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -854,7 +854,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/actual-up/helm-release.yaml
-      key: $.spec.values.controllers.actual-up.containers.actual-up.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - find: ^[^@]+
   digest:
@@ -867,7 +867,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/actual-up/helm-release.yaml
-      key: $.spec.values.controllers.actual-up.containers.actual-up.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
 targets:
   image:
     kind: yaml
@@ -875,12 +875,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/actual-up/helm-release.yaml
-      key: $.spec.values.controllers.actual-up.containers.actual-up.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "current" }}@'
 ---
-name: Update ghcr.io/maxexcloo/atvloadly In apps/base/atvloadly/helm-release.yaml $.spec.values.controllers.atvloadly.containers.atvloadly
-pipelineid: update-ghcr-io-maxexcloo-atvloadly-in-apps-base-atvloadly-helm-release-yaml-spec-values-controllers-atvloadly-containers-atvloadly
+name: Update ghcr.io/maxexcloo/atvloadly In apps/base/atvloadly/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-maxexcloo-atvloadly-in-apps-base-atvloadly-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -889,7 +889,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/atvloadly/helm-release.yaml
-      key: $.spec.values.controllers.atvloadly.containers.atvloadly.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - find: ^[^@]+
   digest:
@@ -902,7 +902,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/atvloadly/helm-release.yaml
-      key: $.spec.values.controllers.atvloadly.containers.atvloadly.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
 targets:
   image:
     kind: yaml
@@ -910,12 +910,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/atvloadly/helm-release.yaml
-      key: $.spec.values.controllers.atvloadly.containers.atvloadly.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "current" }}@'
 ---
-name: Update ghcr.io/maxexcloo/redlib In apps/base/redlib/helm-release.yaml $.spec.values.controllers.redlib.containers.redlib
-pipelineid: update-ghcr-io-maxexcloo-redlib-in-apps-base-redlib-helm-release-yaml-spec-values-controllers-redlib-containers-redlib
+name: Update ghcr.io/maxexcloo/redlib In apps/base/redlib/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-maxexcloo-redlib-in-apps-base-redlib-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -924,7 +924,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/redlib/helm-release.yaml
-      key: $.spec.values.controllers.redlib.containers.redlib.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - find: ^[^@]+
   digest:
@@ -937,7 +937,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/redlib/helm-release.yaml
-      key: $.spec.values.controllers.redlib.containers.redlib.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
 targets:
   image:
     kind: yaml
@@ -945,7 +945,7 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/redlib/helm-release.yaml
-      key: $.spec.values.controllers.redlib.containers.redlib.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "current" }}@'
 ---
@@ -985,8 +985,8 @@ targets:
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/papra-hq/papra In apps/base/papra/helm-release.yaml $.spec.values.controllers.papra.containers.papra
-pipelineid: update-ghcr-io-papra-hq-papra-in-apps-base-papra-helm-release-yaml-spec-values-controllers-papra-containers-papra
+name: Update ghcr.io/papra-hq/papra In apps/base/papra/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-papra-hq-papra-in-apps-base-papra-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -1000,7 +1000,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/papra/helm-release.yaml
-      key: $.spec.values.controllers.papra.containers.papra.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -1017,12 +1017,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/papra/helm-release.yaml
-      key: $.spec.values.controllers.papra.containers.papra.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/pocket-id/pocket-id In apps/base/pocket-id/helm-release.yaml $.spec.values.controllers.pocket-id.containers.pocket-id
-pipelineid: update-ghcr-io-pocket-id-pocket-id-in-apps-base-pocket-id-helm-release-yaml-spec-values-controllers-pocket-id-containers-pocket-id
+name: Update ghcr.io/pocket-id/pocket-id In apps/base/pocket-id/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-pocket-id-pocket-id-in-apps-base-pocket-id-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -1036,7 +1036,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/pocket-id/helm-release.yaml
-      key: $.spec.values.controllers.pocket-id.containers.pocket-id.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -1053,12 +1053,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/pocket-id/helm-release.yaml
-      key: $.spec.values.controllers.pocket-id.containers.pocket-id.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/rommapp/romm In apps/base/romm/helm-release.yaml $.spec.values.controllers.romm.containers.romm
-pipelineid: update-ghcr-io-rommapp-romm-in-apps-base-romm-helm-release-yaml-spec-values-controllers-romm-containers-romm
+name: Update ghcr.io/rommapp/romm In apps/base/romm/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-rommapp-romm-in-apps-base-romm-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -1072,7 +1072,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/romm/helm-release.yaml
-      key: $.spec.values.controllers.romm.containers.romm.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -1089,12 +1089,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/romm/helm-release.yaml
-      key: $.spec.values.controllers.romm.containers.romm.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/tailscale/tailscale In apps/base/sidestore-vpn/helm-release.yaml $.spec.values.controllers.sidestore-vpn.containers.tailscale
-pipelineid: update-ghcr-io-tailscale-tailscale-in-apps-base-sidestore-vpn-helm-release-yaml-spec-values-controllers-sidestore-vpn-containers-tailscale
+name: Update ghcr.io/tailscale/tailscale In apps/base/sidestore-vpn/helm-release.yaml $.spec.values.controllers.main.initContainers.forwarding
+pipelineid: update-ghcr-io-tailscale-tailscale-in-apps-base-sidestore-vpn-helm-release-yaml-spec-values-controllers-main-initcontainers-forwarding
 labels:
   group: containers
 sources:
@@ -1108,7 +1108,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/sidestore-vpn/helm-release.yaml
-      key: $.spec.values.controllers.sidestore-vpn.containers.tailscale.image.repository
+      key: $.spec.values.controllers.main.initContainers.forwarding.image.repository
   version:
     kind: dockerimage
     spec:
@@ -1125,43 +1125,7 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/sidestore-vpn/helm-release.yaml
-      key: $.spec.values.controllers.sidestore-vpn.containers.tailscale.image.tag
-    transformers:
-      - addprefix: '{{ source "version" }}@'
----
-name: Update ghcr.io/tailscale/tailscale In apps/base/sidestore-vpn/helm-release.yaml $.spec.values.controllers.sidestore-vpn.initContainers.forwarding
-pipelineid: update-ghcr-io-tailscale-tailscale-in-apps-base-sidestore-vpn-helm-release-yaml-spec-values-controllers-sidestore-vpn-initcontainers-forwarding
-labels:
-  group: containers
-sources:
-  digest:
-    kind: dockerdigest
-    spec:
-      image: '{{ source "repository" }}'
-      tag: '{{ source "version" }}'
-  repository:
-    kind: yaml
-    spec:
-      engine: yamlpath
-      file: apps/base/sidestore-vpn/helm-release.yaml
-      key: $.spec.values.controllers.sidestore-vpn.initContainers.forwarding.image.repository
-  version:
-    kind: dockerimage
-    spec:
-      image: '{{ source "repository" }}'
-      tagfilter: ^v?[0-9]+(?:\.[0-9]+){0,2}$
-      versionfilter:
-        kind: regex/semver
-        pattern: "*"
-        regex: ^(v?[0-9]+(?:\.[0-9]+){0,2})$
-targets:
-  image:
-    kind: yaml
-    sourceid: digest
-    spec:
-      engine: yamlpath
-      file: apps/base/sidestore-vpn/helm-release.yaml
-      key: $.spec.values.controllers.sidestore-vpn.initContainers.forwarding.image.tag
+      key: $.spec.values.controllers.main.initContainers.forwarding.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
@@ -1185,8 +1149,8 @@ targets:
       files:
         - apps/base/immich/database.yaml
 ---
-name: Update ghcr.io/usetrmnl/larapaper In apps/base/larapaper/helm-release.yaml $.spec.values.controllers.larapaper.containers.larapaper
-pipelineid: update-ghcr-io-usetrmnl-larapaper-in-apps-base-larapaper-helm-release-yaml-spec-values-controllers-larapaper-containers-larapaper
+name: Update ghcr.io/usetrmnl/larapaper In apps/base/larapaper/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-usetrmnl-larapaper-in-apps-base-larapaper-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -1200,7 +1164,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/larapaper/helm-release.yaml
-      key: $.spec.values.controllers.larapaper.containers.larapaper.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -1217,12 +1181,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/larapaper/helm-release.yaml
-      key: $.spec.values.controllers.larapaper.containers.larapaper.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/viren070/aiostreams In apps/base/aiostreams/helm-release.yaml $.spec.values.controllers.aiostreams.containers.aiostreams
-pipelineid: update-ghcr-io-viren070-aiostreams-in-apps-base-aiostreams-helm-release-yaml-spec-values-controllers-aiostreams-containers-aiostreams
+name: Update ghcr.io/viren070/aiostreams In apps/base/aiostreams/helm-release.yaml $.spec.values.controllers.main.containers.main
+pipelineid: update-ghcr-io-viren070-aiostreams-in-apps-base-aiostreams-helm-release-yaml-spec-values-controllers-main-containers-main
 labels:
   group: containers
 sources:
@@ -1236,7 +1200,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/aiostreams/helm-release.yaml
-      key: $.spec.values.controllers.aiostreams.containers.aiostreams.image.repository
+      key: $.spec.values.controllers.main.containers.main.image.repository
   version:
     kind: dockerimage
     spec:
@@ -1253,12 +1217,12 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/aiostreams/helm-release.yaml
-      key: $.spec.values.controllers.aiostreams.containers.aiostreams.image.tag
+      key: $.spec.values.controllers.main.containers.main.image.tag
     transformers:
       - addprefix: '{{ source "version" }}@'
 ---
-name: Update ghcr.io/xddxdd/sidestore-vpn In apps/base/sidestore-vpn/helm-release.yaml $.spec.values.controllers.sidestore-vpn.containers.reflector
-pipelineid: update-ghcr-io-xddxdd-sidestore-vpn-in-apps-base-sidestore-vpn-helm-release-yaml-spec-values-controllers-sidestore-vpn-containers-reflector
+name: Update ghcr.io/xddxdd/sidestore-vpn In apps/base/sidestore-vpn/helm-release.yaml $.spec.values.controllers.main.containers.reflector
+pipelineid: update-ghcr-io-xddxdd-sidestore-vpn-in-apps-base-sidestore-vpn-helm-release-yaml-spec-values-controllers-main-containers-reflector
 labels:
   group: containers
 sources:
@@ -1267,7 +1231,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/sidestore-vpn/helm-release.yaml
-      key: $.spec.values.controllers.sidestore-vpn.containers.reflector.image.tag
+      key: $.spec.values.controllers.main.containers.reflector.image.tag
     transformers:
       - find: ^[^@]+
   digest:
@@ -1280,7 +1244,7 @@ sources:
     spec:
       engine: yamlpath
       file: apps/base/sidestore-vpn/helm-release.yaml
-      key: $.spec.values.controllers.sidestore-vpn.containers.reflector.image.repository
+      key: $.spec.values.controllers.main.containers.reflector.image.repository
 targets:
   image:
     kind: yaml
@@ -1288,7 +1252,7 @@ targets:
     spec:
       engine: yamlpath
       file: apps/base/sidestore-vpn/helm-release.yaml
-      key: $.spec.values.controllers.sidestore-vpn.containers.reflector.image.tag
+      key: $.spec.values.controllers.main.containers.reflector.image.tag
     transformers:
       - addprefix: '{{ source "current" }}@'
 ---

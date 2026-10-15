@@ -1,53 +1,33 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: bookorbit
-  namespace: bookorbit
+  name: application
 spec:
-  interval: 30m
-  releaseName: bookorbit
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      bookorbit:
-        strategy: Recreate
+      main:
         containers:
-          bookorbit:
+          main:
+            env:
+              APP_DATA_PATH: /data
+              APP_URL: https://app.invalid
+              BOOK_DOCK_PATH: /books-drop
+              CLIENT_URL: https://app.invalid
+              LIBRARY_BROWSE_ROOT: /books
+              PORT: "3000"
+              TZ: Australia/Sydney
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/bookorbit/bookorbit
               tag: 3.4.0@sha256:99539be044c94f10fa5fba616cb08e1b128deb4996c975d181a950818a8632e4
-            envFrom:
-              - secretRef:
-                  name: bookorbit
             probes:
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-                  httpGet:
-                    path: /api/v1/health
-                    port: 3000
-              startup:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 60
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-                  httpGet:
-                    path: /api/v1/health
-                    port: 3000
+              liveness: null
+              readiness: &ready
+                path: /api/v1/health
+              startup: *ready
             resources:
               limits:
                 memory: 1Gi
@@ -55,25 +35,7 @@ spec:
                 cpu: 50m
                 memory: 256Mi
             securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                  - ALL
-            env:
-              APP_URL: https://app.invalid
-              CLIENT_URL: https://app.invalid
-    defaultPodOptions:
-      automountServiceAccountToken: false
-      securityContext:
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 568
-        runAsNonRoot: true
-        runAsUser: 568
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: bookorbit
+              readOnlyRootFilesystem: null
     persistence:
       bookdrop:
         existingClaim: bookdrop
@@ -90,38 +52,41 @@ spec:
         type: persistentVolumeClaim
         globalMounts:
           - path: /data
-      temporary:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
     route:
       private:
         hostnames:
           - app.invalid
         labels:
-          app.kubernetes.io/name: bookorbit
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
         rules:
           - backendRefs:
-              - name: bookorbit
+              - name: "{{ .Release.Name }}"
                 port: 3000
       public:
-        forceRename: bookorbit
+        forceRename: "{{ .Release.Name }}"
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+          gethomepage.dev/description: Digital Library
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: bookorbit
+          gethomepage.dev/name: BookOrbit
+          monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: BookOrbit
+        hostnames:
+          - books.excloo.com
         labels:
-          app.kubernetes.io/name: bookorbit
+          app.kubernetes.io/name: "{{ .Release.Name }}"
           gateway.excloo.dev/public-access: "true"
         parentRefs:
           - name: public-tunnel
             namespace: networking
     service:
-      bookorbit:
-        controller: bookorbit
+      main:
         ports:
           http:
             port: 3000
-            protocol: HTTP

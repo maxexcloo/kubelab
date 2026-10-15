@@ -1,87 +1,48 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: papra
-  namespace: papra
+  name: application
 spec:
-  interval: 30m
-  releaseName: papra
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      papra:
-        strategy: Recreate
+      main:
         containers:
-          papra:
+          main:
+            env:
+              AI_DEFAULT_MODEL: openrouter://openrouter/auto
+              AI_IS_ENABLED: "true"
+              APP_BASE_URL: https://app.invalid
+              AUTO_TAGGING_ENABLED: "true"
+              DATABASE_URL: file:/app/app-data/db/db.sqlite
+              DOCUMENT_STORAGE_DRIVER: filesystem
+              DOCUMENT_STORAGE_FILESYSTEM_ROOT: /app/app-data/documents
+              HOME: /tmp
+              INGESTION_FOLDER_ERROR_FOLDER_PATH: /app/ingestion/ingestion-error
+              INGESTION_FOLDER_IS_ENABLED: "true"
+              INGESTION_FOLDER_POST_PROCESSING_MOVE_FOLDER_PATH: /app/ingestion/ingestion-done
+              INGESTION_FOLDER_ROOT_PATH: /app/ingestion
+              IS_FREE_PLAN_UNLIMITED: "true"
+              PORT: "21221"
+              PROCESS_MODE: all
+              TZ: Australia/Sydney
             envFrom:
               - secretRef:
-                  name: papra
+                  name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/papra-hq/papra
               tag: 26.7.0-rootless@sha256:bf4a66e776d0a40d71543747a2e17af800204b4a81d19f7951b8552c8032dbeb
             probes:
-              liveness:
-                custom: true
-                enabled: true
-                spec:
-                  httpGet:
-                    path: /api/health
-                    port: 21221
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  httpGet:
-                    path: /api/health
-                    port: 21221
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-              startup:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 60
-                  httpGet:
-                    path: /api/health
-                    port: 21221
-                  periodSeconds: 2
+              liveness: &health
+                path: /api/health
+              readiness: *health
+              startup: *health
             resources:
               limits:
                 memory: 1Gi
               requests:
                 cpu: 20m
                 memory: 512Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
-            env:
-              APP_BASE_URL: https://app.invalid
-    defaultPodOptions:
-      automountServiceAccountToken: false
-      securityContext:
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 568
-        runAsNonRoot: true
-        runAsUser: 568
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: papra
     persistence:
       data:
         existingClaim: retained-data
@@ -94,23 +55,26 @@ spec:
         globalMounts:
           - path: /app/ingestion
             subPath: ingestion
-      temporary:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
     route:
       private:
         annotations:
+          gethomepage.dev/description: Document Management
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-papra
+          gethomepage.dev/name: Papra
+          monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: Papra
+        hostnames:
+          - papra.excloo.com
         labels:
-          app.kubernetes.io/name: papra
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
     service:
-      papra:
-        controller: papra
+      main:
         ports:
           http:
             port: 21221
-            protocol: HTTP

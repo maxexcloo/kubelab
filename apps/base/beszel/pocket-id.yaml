@@ -1,8 +1,7 @@
 apiVersion: automation.excloo.dev/v1alpha1
 kind: PocketIDClient
 metadata:
-  name: beszel
-  namespace: beszel
+  name: application
 spec:
   client:
     callbackURLs:

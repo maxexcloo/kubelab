@@ -1,8 +1,7 @@
 apiVersion: automation.excloo.dev/v1alpha1
 kind: PocketIDClient
 metadata:
-  name: shelfmark
-  namespace: shelfmark
+  name: application
 spec:
   accessPolicy: books
   client:

@@ -1,11 +1,9 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: litellm
-  namespace: litellm
+  name: application
 spec:
   interval: 30m
-  releaseName: litellm
   chart:
     spec:
       chart: litellm-helm
@@ -19,7 +17,6 @@ spec:
     fullnameOverride: litellm
     masterkeySecretKey: LITELLM_MASTER_KEY
     masterkeySecretName: litellm
-    replicaCount: 1
     db:
       database: litellm
       deployStandalone: false
@@ -216,8 +213,6 @@ spec:
     serviceAccount:
       automount: false
       create: true
-    startupProbe:
-      failureThreshold: 60
     strategy:
       type: Recreate
     volumeMounts:
@@ -238,3 +233,6 @@ spec:
       - name: temporary
         emptyDir:
           sizeLimit: 1Gi
+    livenessProbe:
+      failureThreshold: 3
+      periodSeconds: 10

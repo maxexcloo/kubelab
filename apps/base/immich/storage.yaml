@@ -2,7 +2,6 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: icloud-photos
-  namespace: immich
 spec:
   accessModes:
     - ReadOnlyMany
@@ -16,7 +15,6 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: library
-  namespace: immich
 spec:
   accessModes:
     - ReadWriteMany
@@ -30,7 +28,6 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: valkey-data
-  namespace: immich
 spec:
   accessModes:
     - ReadWriteOnce
@@ -44,7 +41,7 @@ kind: PersistentVolume
 metadata:
   name: immich-icloud-photos
   labels:
-    app.kubernetes.io/name: immich
+    app.kubernetes.io/name: application
 spec:
   accessModes:
     - ReadOnlyMany
@@ -63,7 +60,7 @@ kind: PersistentVolume
 metadata:
   name: immich-library
   labels:
-    app.kubernetes.io/name: immich
+    app.kubernetes.io/name: application
 spec:
   accessModes:
     - ReadWriteMany

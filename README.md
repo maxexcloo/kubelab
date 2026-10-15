@@ -45,6 +45,10 @@ Edit workload configuration in `apps/base/<application>` and select it through
 native application settings belong beside their application; shared settings and
 controllers belong under `platform/`.
 
+Apps derive their namespace and release identity from their Namespace resource.
+App-template releases inherit shared chart policy from `apps/components/`; keep
+application values and required exceptions beside each app.
+
 Define settings once near their owner and use Kustomize replacements for derived
 values. Preserve native configuration formats and upstream interfaces. Keep
 substantial application configuration and executable code in their own files.
@@ -63,6 +67,7 @@ cluster and optionally a configured reconciliation component.
 
 | Command                                   | Purpose                                                              |
 | ----------------------------------------- | -------------------------------------------------------------------- |
+| `mise run backup <cluster> <application>` | Start the application's configured backup jobs                       |
 | `mise run bootstrap <cluster>`            | Install networking, bootstrap credentials and start Flux             |
 | `mise run check`                          | Validate manifests, metadata, formatting, scripts and reconciliation |
 | `mise run deploy <cluster> [component]`   | Fetch Git and reconcile the entry point or selected component        |
@@ -80,6 +85,17 @@ merge. Flux performs cluster deployments directly from `main`. The same checks
 remain available locally when needed; run `prek install` to enable optional commit hooks.
 
 ## Updates & Recovery
+
+Configured app backups run hourly to retained NFS backup volumes on Kimbap's
+`truenas` HDD pool. The separate backup provisioner is configured under
+`platform/storage/truenas-backups`; app-data storage and dedicated exports remain
+independent.
+`mise run backup <cluster> <application>` starts the same jobs immediately; inspect
+their status with `kubectl --context <cluster> get jobs -n <application>`.
+The shared implementation in `platform/backups/` owns backup and restore commands.
+SQLite snapshots and PostgreSQL dumps have separate restore procedures; restore
+into fresh storage and verify the app before switching its active volume. Backups
+are retained without pruning; B2 synchronisation is deferred.
 
 Use `mise run dependencies:check` to preview local updates. Policies are configured
 in `.updatecli.d/`; changes and deployment remain manual.

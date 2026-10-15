@@ -1,51 +1,39 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: linkwarden
-  namespace: linkwarden
+  name: application
 spec:
-  interval: 30m
-  releaseName: linkwarden
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      linkwarden:
-        strategy: Recreate
+      main:
         containers:
-          linkwarden:
+          main:
+            env:
+              BASE_URL: https://app.invalid
+              EMAIL_FROM: linkwarden@excloo.dev
+              KEYCLOAK_CUSTOM_NAME: Pocket ID
+              KEYCLOAK_ISSUER: https://identity.invalid
+              MEILI_HOST: "http://{{ .Release.Name }}-meilisearch:7700"
+              NEXTAUTH_INTERNAL_URL: http://localhost:3000/api/v1/auth
+              NEXTAUTH_URL: https://app.invalid/api/v1/auth
+              NEXT_PUBLIC_EMAIL_PROVIDER: "true"
+              NEXT_PUBLIC_KEYCLOAK_ENABLED: "true"
+              OPENROUTER_MODEL: openrouter/auto
+              PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+              PORT: "3000"
+              TZ: Australia/Sydney
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/linkwarden/linkwarden
               tag: v2.16.3@sha256:0664c28a039bda8ffa6663389e8536b2fc717219e329f85b83faca7efed3b144
-            envFrom:
-              - secretRef:
-                  name: linkwarden
             probes:
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-                  tcpSocket:
-                    port: 3000
-              startup:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 60
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-                  tcpSocket:
-                    port: 3000
+              liveness: null
+              readiness: &ready
+                type: TCP
+              startup: *ready
             resources:
               limits:
                 memory: 2Gi
@@ -53,48 +41,40 @@ spec:
                 cpu: 50m
                 memory: 512Mi
             securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                  - ALL
-            env:
-              BASE_URL: https://app.invalid
-              KEYCLOAK_ISSUER: https://identity.invalid
-              NEXTAUTH_URL: https://app.invalid/api/v1/auth
+              readOnlyRootFilesystem: null
       meilisearch:
         strategy: Recreate
         containers:
           meilisearch:
-            image:
-              pullPolicy: IfNotPresent
-              repository: docker.io/getmeili/meilisearch
-              tag: v1.55.0@sha256:ff546679970126f8822e15d1b6a06bfbff1f2ce2e43f810cfb5258012f92de5c
             env:
+              MEILI_HTTP_ADDR: 0.0.0.0:7700
+              MEILI_NO_ANALYTICS: "true"
+              MEILI_SERVER_PROVIDER: docker
+              MEILI_UPGRADE_DB: "true"
+              TZ: Australia/Sydney
               MEILI_MASTER_KEY:
                 valueFrom:
                   secretKeyRef:
                     key: MEILI_MASTER_KEY
-                    name: linkwarden
+                    name: "{{ .Release.Name }}"
+            image:
+              pullPolicy: IfNotPresent
+              repository: docker.io/getmeili/meilisearch
+              tag: v1.55.0@sha256:ff546679970126f8822e15d1b6a06bfbff1f2ce2e43f810cfb5258012f92de5c
             probes:
               readiness:
-                custom: true
                 enabled: true
+                path: /health
+                type: HTTP
                 spec:
-                  periodSeconds: 10
                   timeoutSeconds: 5
-                  httpGet:
-                    path: /health
-                    port: 7700
               startup:
-                custom: true
                 enabled: true
+                path: /health
+                type: HTTP
                 spec:
-                  failureThreshold: 60
-                  periodSeconds: 10
+                  failureThreshold: 30
                   timeoutSeconds: 5
-                  httpGet:
-                    path: /health
-                    port: 7700
             resources:
               limits:
                 memory: 512Mi
@@ -106,25 +86,13 @@ spec:
               capabilities:
                 drop:
                   - ALL
-    defaultPodOptions:
-      automountServiceAccountToken: false
-      securityContext:
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 568
-        runAsNonRoot: true
-        runAsUser: 568
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: linkwarden
     persistence:
       data:
         existingClaim: data
         type: persistentVolumeClaim
         advancedMounts:
-          linkwarden:
-            linkwarden:
+          main:
+            main:
               - path: /data/data
       meilisearch:
         accessMode: ReadWriteOnce
@@ -135,49 +103,52 @@ spec:
           meilisearch:
             meilisearch:
               - path: /meili_data
-      temporary:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
     route:
       private:
         hostnames:
           - app.invalid
           - linkwarden.mbk.excloo.dev
         labels:
-          app.kubernetes.io/name: linkwarden
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
         rules:
           - backendRefs:
-              - name: linkwarden
+              - name: "{{ .Release.Name }}"
                 port: 3000
       public:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+          gethomepage.dev/description: Bookmark Manager
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-linkwarden
+          gethomepage.dev/name: Linkwarden
           gethomepage.dev/pod-selector: app.kubernetes.io/name=linkwarden,app.kubernetes.io/controller=linkwarden
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_LINKWARDEN_KEY}}" }}'
           gethomepage.dev/widget.type: linkwarden
           gethomepage.dev/widget.url: https://app.invalid
+          monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: Linkwarden
+        hostnames:
+          - links.excloo.com
         labels:
-          app.kubernetes.io/name: linkwarden
+          app.kubernetes.io/name: "{{ .Release.Name }}"
           gateway.excloo.dev/public-access: "true"
         parentRefs:
           - name: public-tunnel
             namespace: networking
         rules:
           - backendRefs:
-              - name: linkwarden
+              - name: "{{ .Release.Name }}"
                 port: 3000
     service:
-      linkwarden:
-        controller: linkwarden
+      main:
         ports:
           http:
             port: 3000
-            protocol: HTTP
       meilisearch:
         controller: meilisearch
         ports:

@@ -1,8 +1,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: immich
-  namespace: immich
+  name: application
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
     gethomepage.dev/description: Photo Manager
@@ -19,7 +18,7 @@ metadata:
     monitoring.excloo.dev/enabled: "true"
     onepassword.excloo.dev/item: Immich
   labels:
-    app.kubernetes.io/name: immich
+    app.kubernetes.io/name: application
     gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:

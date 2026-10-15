@@ -1,38 +1,27 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: redlib
-  namespace: redlib
+  name: application
 spec:
-  interval: 30m
-  releaseName: redlib
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      redlib:
+      main:
+        defaultContainerOptionsStrategy: merge
         strategy: RollingUpdate
         containers:
           ctrld:
+            workingDir: /etc/controld
             args:
               - --cd=$(CTRLD_ENDPOINT)
             command:
               - /ctrld
               - run
-            workingDir: /etc/controld
             env:
               CTRLD_ENDPOINT:
                 valueFrom:
                   secretKeyRef:
                     key: ctrld-endpoint
-                    name: redlib
+                    name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: controldns/ctrld
@@ -44,40 +33,28 @@ spec:
                 cpu: 10m
                 memory: 32Mi
             securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
               runAsGroup: 65534
-              runAsNonRoot: true
               runAsUser: 65534
               capabilities:
                 add:
                   - NET_BIND_SERVICE
-                drop:
-                  - ALL
-          redlib:
+          main:
+            env:
+              REDLIB_DEFAULT_REMOVE_DEFAULT_FEEDS: "on"
+              REDLIB_DEFAULT_SHOW_NSFW: "on"
+              REDLIB_DEFAULT_SUBSCRIPTIONS: '{{ join "+" .Values.subscriptions }}'
+              REDLIB_DEFAULT_USE_HLS: "on"
+              REDLIB_FULL_URL: https://app.invalid
+              REDLIB_ROBOTS_DISABLE_INDEXING: "on"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/redlib
               tag: sha-5c3d1a6@sha256:b433bdde33e9beb10dd72d3cb3ed1e8861cf86311d0e2a895bd36c805fe8c712
             probes:
-              liveness:
-                enabled: true
+              liveness: &health
                 path: /settings
-                port: 8080
-                type: HTTP
-              readiness:
-                enabled: true
-                path: /settings
-                port: 8080
-                type: HTTP
-              startup:
-                enabled: true
-                path: /settings
-                port: 8080
-                type: HTTP
-                spec:
-                  failureThreshold: 30
-                  periodSeconds: 5
+              readiness: *health
+              startup: *health
             resources:
               limits:
                 memory: 256Mi
@@ -85,73 +62,178 @@ spec:
                 cpu: 20m
                 memory: 64Mi
             securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
               runAsGroup: 1000
-              runAsNonRoot: true
               runAsUser: 1000
-              capabilities:
-                drop:
-                  - ALL
-            env:
-              REDLIB_DEFAULT_SUBSCRIPTIONS: '{{ join "+" .Values.subscriptions }}'
-              REDLIB_FULL_URL: https://app.invalid
+        defaultContainerOptions:
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
         rollingUpdate:
           maxSurge: 1
           maxUnavailable: 0
     defaultPodOptions:
-      automountServiceAccountToken: false
+      dnsPolicy: None
       dnsConfig:
         nameservers:
           - 127.0.0.1
-      dnsPolicy: None
       securityContext:
         fsGroup: 65534
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: redlib
+        runAsGroup: null
+        runAsNonRoot: null
+        runAsUser: null
     persistence:
       controld:
         type: emptyDir
         advancedMounts:
-          redlib:
+          main:
             ctrld:
               - path: /etc/controld
-      tmp:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
     route:
       private:
         hostnames:
           - app.invalid
         labels:
-          app.kubernetes.io/name: redlib
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
         rules:
           - backendRefs:
-              - name: redlib
+              - name: "{{ .Release.Name }}"
                 port: 8080
       public:
-        forceRename: redlib
+        forceRename: "{{ .Release.Name }}"
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+          gethomepage.dev/description: Reddit Frontend
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-redlib
+          gethomepage.dev/name: Redlib
+          # Cloudflare challenges the unauthenticated monitor; Gatus checks it with a token.
+          gethomepage.dev/siteMonitor: ""
           monitoring.excloo.dev/alerts: "false"
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/headers: '{"x-gatus-token":{"name":"redlib","key":"monitoring-token"}}'
+          onepassword.excloo.dev/item: Redlib
+        hostnames:
+          - reddit.excloo.com
         labels:
-          app.kubernetes.io/name: redlib
+          app.kubernetes.io/name: "{{ .Release.Name }}"
           gateway.excloo.dev/public-access: "true"
         parentRefs:
           - name: public-tunnel
             namespace: networking
     service:
-      redlib:
-        controller: redlib
+      main:
         ports:
           http:
             port: 8080
-            protocol: HTTP
+    subscriptions:
+      - anime_titties
+      - apple
+      - askanaustralian
+      - askhistorians
+      - askscience
+      - auscorp
+      - ausfinance
+      - auspropertychat
+      - aussiefrugal
+      - australia
+      - australiannostalgia
+      - bazzite
+      - boxoffice
+      - budgetaudiophile
+      - cars
+      - carsaustralia
+      - catastrophicfailure
+      - chatgptcoding
+      - crackwatch
+      - cscareerquestionsoce
+      - datahoarder
+      - decomps
+      - deepseek
+      - docker
+      - eink
+      - electricvehicles
+      - emulation
+      - emulationonandroid
+      - esphome
+      - flashlight
+      - flipperzero
+      - games
+      - handhelds
+      - hardware
+      - homeassistant
+      - homelab
+      - homenetworking
+      - homeserver
+      - immich
+      - internetisbeautiful
+      - korea
+      - linux
+      - linux_gaming
+      - linuxhardware
+      - living_in_korea
+      - llmdevs
+      - localllama
+      - localllm
+      - meshcore
+      - minilab
+      - minimalism
+      - minipcs
+      - moonlightstreaming
+      - movies
+      - nbn
+      - netsec
+      - networking
+      - nixos
+      - odinhandheld
+      - onebag
+      - opencode
+      - opensource
+      - openwrt
+      - organizationporn
+      - outoftheloop
+      - pikvm
+      - comfyui
+      - stablediffusion
+      - praisethecameraman
+      - privacy
+      - programming
+      - proxmox
+      - raspberry_pi
+      - retroarch
+      - retroid
+      - roms
+      - sbcgaming
+      - sbcs
+      - selfhosted
+      - sffpc
+      - sideloaded
+      - solotravel
+      - space
+      - steamdeck
+      - sydney
+      - sydneyscene
+      - sydneytrains
+      - sysadmin
+      - tailscale
+      - television
+      - thatlookedexpensive
+      - trance
+      - travel
+      - travelhacks
+      - trimui
+      - truenas
+      - ubiquiti
+      - usbchardware
+      - wallstreetbets
+      - wled
+      - zfs
+      - zigbee

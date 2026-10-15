@@ -1,126 +1,71 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: beszel
-  namespace: beszel
+  name: application
 spec:
-  interval: 30m
-  releaseName: beszel
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
-      beszel:
-        strategy: Recreate
+      main:
         containers:
-          beszel:
+          main:
+            env:
+              APP_URL: https://app.invalid
+              TZ: Australia/Sydney
+              USER_CREATION: "true"
             envFrom:
               - secretRef:
-                  name: beszel
+                  name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/henrygd/beszel/beszel
               tag: 0.21.0@sha256:020d80f5974e66356e6d6440736952edc9b9ea59978ac9f98418b5fb643dc0e2
             probes:
-              liveness:
-                custom: true
-                enabled: true
-                spec:
-                  exec:
-                    command:
-                      - /beszel
-                      - health
-                      - --url
-                      - http://127.0.0.1:8090
-                  periodSeconds: 30
-                  timeoutSeconds: 5
-              readiness:
-                custom: true
-                enabled: true
-                spec:
-                  exec:
-                    command:
-                      - /beszel
-                      - health
-                      - --url
-                      - http://127.0.0.1:8090
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-              startup:
-                custom: true
-                enabled: true
-                spec:
-                  failureThreshold: 30
-                  periodSeconds: 2
-                  exec:
-                    command:
-                      - /beszel
-                      - health
-                      - --url
-                      - http://127.0.0.1:8090
+              liveness: &health
+                type: COMMAND
+                command:
+                  - /beszel
+                  - health
+                  - --url
+                  - http://127.0.0.1:8090
+              readiness: *health
+              startup: *health
             resources:
               limits:
                 memory: 512Mi
               requests:
                 cpu: 20m
                 memory: 64Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
-            env:
-              APP_URL: https://app.invalid
-    defaultPodOptions:
-      automountServiceAccountToken: false
-      securityContext:
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 568
-        runAsNonRoot: true
-        runAsUser: 568
-        seccompProfile:
-          type: RuntimeDefault
-    global:
-      nameOverride: beszel
     persistence:
       data:
         existingClaim: data
         type: persistentVolumeClaim
         globalMounts:
           - path: /beszel_data
-      tmp:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
     route:
       private:
         annotations:
+          gethomepage.dev/description: System Monitoring
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Operations
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-beszel
+          gethomepage.dev/name: Beszel
           gethomepage.dev/widget.password: '{{ "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}" }}'
           gethomepage.dev/widget.type: beszel
           gethomepage.dev/widget.url: https://app.invalid
           gethomepage.dev/widget.username: '{{ "{{HOMEPAGE_FILE_BESZEL_USERNAME}}" }}'
           gethomepage.dev/widget.version: "2"
+          monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/item: Beszel
         hostnames:
           - app.invalid
         labels:
-          app.kubernetes.io/name: beszel
+          app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
           - name: private
             namespace: networking
     service:
-      beszel:
-        controller: beszel
+      main:
         ports:
           http:
             port: 8090
-            protocol: HTTP

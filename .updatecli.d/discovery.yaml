@@ -5,7 +5,10 @@ autodiscovery:
   crawlers:
     flux:
       digest: false
-    kubernetes: {}
+    kubernetes:
+      ignore:
+        # Backup client images are derived from their owning database Cluster.
+        - path: platform/backups/postgres/cronjob.yaml
     precommit:
       digest: false
 labels:

@@ -3,5 +3,8 @@ kind: Kustomization
 resources:
   - helm-release.yaml
   - middleware.yaml
-  - resources.yaml
+  - namespace.yaml
+  - network-policy.yaml
   - source.yaml
+components:
+  - ../../components/app-namespace
