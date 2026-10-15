@@ -8,15 +8,10 @@ target device.
 
 ## Builder
 
-Create the private repository with `main` as its default branch and copy
-`builder/sign.yaml` to `.github/workflows/sign.yaml` and `builder/run_signer.py` to
-`run_signer.py` at the repository root. The wrapper masks downloaded passwords in
-GitHub logs before upstream error reporting can include command arguments.
-The workflow checks out a fixed upstream signing revision because SignTools-CI
-does not publish release tags. The standard Intel macOS runner supports the
-bundled tweak-injection helper. The workflow runs
-only when dispatched, serialises signing jobs and does not cache Apple sessions or
-upload signing files as artefacts.
+The [builder repository](https://github.com/maxexcloo/signtools-builder) owns its
+workflows, scripts, tests and development tooling. Start signing requests through
+SignTools so it queues a job before dispatching the workflow. Apple sessions are
+stored as GitHub repository secrets; expired sessions require 2FA in SignTools.
 
 The runner joins Tailscale as an ephemeral `tag:ephemeral` device using
 workload identity federation. Homelab declares the federated identity restricted
@@ -35,7 +30,9 @@ application authentication providing the remaining separation. Verify the policy
 and private DNS resolution in the first workflow run.
 
 Create a fine-grained GitHub token restricted to the builder repository with
-Actions and Secrets read/write permissions. SignTools sets `SECRET_KEY` and
+Actions and Secrets read/write permissions. Set repository secret
+`SESSION_STORAGE_TOKEN` from the same token through local credential tools; only
+the session-saving step receives it. SignTools sets `SECRET_KEY` and
 `SECRET_URL` itself at startup; do not copy them manually. Use a zero-spend Actions
 budget with usage blocking if signing must stop when the included allowance runs
 out. The account's other private workflows share that allowance.
