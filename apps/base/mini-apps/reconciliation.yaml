@@ -13,6 +13,7 @@ spec:
     - name: automation
   postBuild:
     substitute:
+      REDLIB_CHECK_URL: http://redlib.redlib.svc.cluster.local:8080
       REDLIB_URL: https://app.invalid
   sourceRef:
     kind: GitRepository
