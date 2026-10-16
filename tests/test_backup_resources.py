@@ -1,4 +1,4 @@
-"""Applications retain state and database isolation without retired HDD backups."""
+"""S3 backups cover app state and databases without retired NFS backup volumes."""
 
 import json
 import subprocess
@@ -26,6 +26,26 @@ class BackupResourceTests(unittest.TestCase):
             if item["kind"] == "PersistentVolumeClaim":
                 self.assertNotEqual(item["metadata"]["name"], "backups")
                 self.assertNotEqual(item["spec"].get("storageClassName"), "local-backups")
+
+    def test_s3_backups_cover_databases_and_exclude_bulk_media(self):
+        stores = [item for item in self.resources if item["kind"] == "ObjectStore"]
+        self.assertEqual(len(stores), 7)
+        for item in stores:
+            self.assertEqual(item["spec"]["retentionPolicy"], "14d")
+            self.assertEqual(item["spec"]["configuration"]["endpointURL"], "https://kimbap.mbk.excloo.net:9000")
+        jobs = [item for item in self.resources if item["kind"] == "CronJob" and item["metadata"]["name"] == "state-backup"]
+        self.assertIn("redlib-multi", [item["metadata"]["namespace"] for item in jobs])
+        for item in jobs:
+            spec = item["spec"]
+            self.assertEqual(spec["timeZone"], "Australia/Sydney")
+            claims = [v["persistentVolumeClaim"]["claimName"] for v in spec["jobTemplate"]["spec"]["template"]["spec"]["volumes"] if "persistentVolumeClaim" in v]
+            self.assertFalse(set(claims) & {"books", "games", "icloud-photos", "library", "immich-machine-learning"})
+        for item in self.resources:
+            if item["kind"] == "Role" and item["metadata"]["name"] == "state-backup":
+                for rule in item["rules"]:
+                    self.assertNotIn("secrets", rule["resources"])
+                    if "deployments/scale" in rule["resources"]:
+                        self.assertEqual(rule["resourceNames"], [item["metadata"]["namespace"]])
 
     def test_application_state_and_database_isolation_remain(self):
         claims = [item for item in self.resources if item["kind"] == "PersistentVolumeClaim"]

@@ -1,0 +1,53 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: redlib-multi
+resources:
+  - namespace.yaml
+  - settings.yaml
+components:
+  - ../../../../platform/backups/credentials
+  - ../../../../platform/backups/files
+patches:
+  - target:
+      kind: CronJob
+    patch: '[{"op": "replace", "path": "/spec/schedule", "value": "54 3 * * *"}, {"op": "replace", "path": "/spec/jobTemplate/spec/template/spec/volumes/0/persistentVolumeClaim/claimName", "value": "data"}]'
+  - target:
+      kind: CronJob
+    patch: |
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/securityContext
+        value:
+          fsGroup: 1000
+          fsGroupChangePolicy: OnRootMismatch
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+          seccompProfile:
+            type: RuntimeDefault
+replacements:
+  - source:
+      kind: ConfigMap
+      name: backup-settings
+      fieldPath: data.deployment
+    targets:
+      - select:
+          kind: CronJob
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.containers.[name=backup].env.[name=DEPLOYMENT].value
+      - select:
+          kind: Role
+        fieldPaths:
+          - rules.0.resourceNames.0
+  - source:
+      kind: ConfigMap
+      name: backup-settings
+      fieldPath: data.helm_release
+    targets:
+      - select:
+          kind: CronJob
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.containers.[name=backup].env.[name=HELM_RELEASE].value
+      - select:
+          kind: Role
+        fieldPaths:
+          - rules.1.resourceNames.0

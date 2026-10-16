@@ -70,12 +70,25 @@ if [[ ! -s "${external_secrets_schema_file}" ]]; then
   mv "${external_secrets_schema_temporary_file}" "${external_secrets_schema_file}"
 fi
 
+barman_chart_version="$(yq -r '.spec.chart.spec.version' platform/databases/cloudnative-pg/barman.yaml)"
+barman_schema_directory="${schema_cache_directory}/barman-${barman_chart_version}/barmancloud.cnpg.io"
+mkdir -p "${barman_schema_directory}"
+if [[ ! -s "${barman_schema_directory}/objectstore_v1.json" ]]; then
+  # shellcheck disable=SC2016
+  helm template schema-check plugin-barman-cloud \
+    --namespace cnpg-system \
+    --repo "$(yq -r '.spec.url' platform/databases/cloudnative-pg/source.yaml)" \
+    --version "${barman_chart_version}" |
+    yq -I=2 -o=json 'select(.kind == "CustomResourceDefinition" and .metadata.name == "objectstores.barmancloud.cnpg.io") | .spec.versions[] | select(.name == "v1") | .schema.openAPIV3Schema' > "${barman_schema_directory}/objectstore_v1.json"
+fi
+
 kubeconform_flags=(
   -cache "${remote_schema_cache_directory}"
   -kubernetes-version "${kubernetes_version}"
   -schema-location "${schema_directory}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location "${provider_http_schema_root}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location "${external_secrets_schema_root}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
+  -schema-location "${schema_cache_directory}/barman-${barman_chart_version}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -schema-location default
   -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/${crd_catalog_revision}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
   -skip "ClusterProviderConfig,CustomResourceDefinition"

@@ -4,6 +4,7 @@ resources:
   - ../../../../platform/observability/grafana-credentials
   - ../../../../platform/observability/metrics-server
   - ../../../../platform/observability/victoria-metrics
+  - backups
 patches:
   - path: external-secret.yaml
   - path: helm-release.yaml

@@ -1,0 +1,27 @@
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: backups
+spec:
+  configuration:
+    destinationPath: s3://backup.invalid/postgres
+    endpointURL: https://backup.invalid
+    s3Credentials:
+      accessKeyId:
+        name: backup-credentials
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKey:
+        name: backup-credentials
+        key: AWS_SECRET_ACCESS_KEY
+    data:
+      compression: gzip
+    wal:
+      compression: gzip
+  instanceSidecarConfiguration:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 512Mi
+  retentionPolicy: 14d

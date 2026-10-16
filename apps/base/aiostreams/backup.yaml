@@ -1,0 +1,6 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: state-backup
+spec:
+  schedule: 9 3 * * *

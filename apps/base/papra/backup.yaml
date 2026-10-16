@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: state-backup
+spec:
+  schedule: 36 3 * * *
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: data
+                readOnly: true
+            - name: uploads
+              persistentVolumeClaim:
+                claimName: retained-data
+                readOnly: true
+          containers:
+            - name: backup
+              volumeMounts:
+                - name: uploads
+                  mountPath: /sources/uploads
+                  readOnly: true
