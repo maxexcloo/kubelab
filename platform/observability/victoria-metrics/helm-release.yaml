@@ -165,12 +165,32 @@ spec:
           memory: 128Mi
     kubeApiServer:
       enabled: true
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              interval: 60s
+              port: https
+              scheme: https
+              metricRelabelConfigs:
+                # Retain request latency, errors, storage and process health.
+                - action: keep
+                  regex: apiserver_(current_inflight_requests|registered_watchers|request_duration_seconds_(bucket|count|sum)|request_total|storage_objects|storage_size_bytes)|etcd_object_counts|go_(goroutines|memstats_.*)|process_.*
+                  sourceLabels: [__name__]
+              tlsConfig:
+                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                serverName: kubernetes
     kubeControllerManager:
       enabled: false
     kubeEtcd:
       enabled: false
     kubeScheduler:
       enabled: false
+    kubelet:
+      vmScrapes:
+        # cAdvisor already supplies container CPU and memory metrics.
+        resources:
+          enabled: false
     prometheus-node-exporter:
       enabled: false
     syncJob:
@@ -228,6 +248,7 @@ spec:
     vmagent:
       enabled: true
       spec:
+        scrapeInterval: 60s
         useStrictSecurity: true
         externalLabels:
           cluster: _
