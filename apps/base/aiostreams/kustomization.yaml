@@ -5,12 +5,12 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
-  - private-dns.yaml
   - storage.yaml
 components:
   - ../../components/application
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
+  - ../../components/private-dns
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
@@ -26,18 +26,6 @@ replacements:
       fieldPath: spec.values.route.private.hostnames.0
     targets:
       - select:
-          kind: PocketIDClient
-        fieldPaths:
-          - spec.client.callbackURLs.0
-          - spec.client.launchURL
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: PrivateDNSRecord
-        fieldPaths:
-          - spec.hostname
-      - select:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.BASE_URL
@@ -45,3 +33,5 @@ replacements:
         options:
           delimiter: /
           index: 2
+transformers:
+  - ../../transformers/route-private

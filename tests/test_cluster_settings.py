@@ -1,28 +1,21 @@
 """Shared settings must reach each Flux boundary without deploying helper resources."""
 
 import json
-import shutil
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-
-
-def read_yaml(path):
-    return json.loads(subprocess.check_output(["yq", "-o=json", ".", str(path)]))
+from support import copy_repository, read_resources, read_yaml
 
 
 class ClusterSettingsTests(unittest.TestCase):
     def test_shared_settings_reach_apps_platform_and_integrations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ("apps", "clusters", "platform", "scripts"):
-                shutil.copytree(ROOT / name, root / name)
+            copy_repository(root)
             shared = root / "platform/settings/settings.yaml"
             settings = read_yaml(shared)
-            settings["data"]["grafana_syd_host"] = "grafana.syd.changed.example"
             settings["data"]["headlamp_client_id"] = "headlamp-test"
             settings["data"]["headlamp_syd_host"] = "headlamp.syd.changed.example"
             settings["data"]["identity_host"] = "id.changed.example"
@@ -33,7 +26,6 @@ class ClusterSettingsTests(unittest.TestCase):
             settings["data"].update({
                 "bento_address": "192.0.2.15",
                 "grafana_host": "grafana.changed.example",
-                "nfs_server": "192.0.2.12",
                 "private_dns_host": "private.changed.example",
                 "unifi_host": "gateway.changed.example",
             })
@@ -45,8 +37,7 @@ class ClusterSettingsTests(unittest.TestCase):
                 rendered = path.read_text()
                 for unresolved in ("app.invalid", "identity.invalid", "storage.invalid", "id.excloo.com", "grafana.excloo.com", "10.4.0.3"):
                     self.assertNotIn(unresolved, rendered, str(path))
-                resources.extend(json.loads(subprocess.check_output(["yq", "ea", "-o=json", "[.]", str(path)])))
-            resources = [r for r in resources if r]
+                resources.extend(read_resources(path))
             self.assertFalse(any(r["metadata"]["name"].startswith(("cluster-settings-", "shared-settings")) for r in resources))
             litellm = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "litellm")
             values = litellm["spec"]["values"]

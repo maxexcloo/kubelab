@@ -4,40 +4,14 @@ metadata:
   name: external-dns
   namespace: external-dns
 spec:
-  interval: 30m
   releaseName: external-dns
-  chart:
-    spec:
-      chart: external-dns
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: external-dns
-        namespace: flux-system
-      version: 1.23.0
   values:
     labelFilter: gateway.excloo.dev/public-access=true
-    logFormat: json
-    managedRecordTypes: [A, AAAA, CNAME]
-    policy: upsert-only
-    registry: noop
-    sources: [gateway-httproute]
-    triggerLoopOnEvent: true
-    env:
-      - name: CF_API_TOKEN
-        valueFrom:
-          secretKeyRef:
-            key: token
-            name: cloudflare-api-token
+    managedRecordTypes:
+      - A
+      - AAAA
+      - CNAME
+    sources:
+      - gateway-httproute
     extraArgs:
-      cloudflare-dns-records-per-page: "5000"
-      cloudflare-record-comment: Kubelab ExternalDNS Managed
       enable-legacy-annotation-prefix: null
-    provider:
-      name: cloudflare
-    resources:
-      limits:
-        memory: 128Mi
-      requests:
-        cpu: 20m
-        memory: 64Mi

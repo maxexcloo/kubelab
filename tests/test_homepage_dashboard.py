@@ -9,14 +9,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from support import ROOT, read_yaml
 
-ROOT = Path(__file__).resolve().parent.parent
 APP = ROOT / "apps/base/homepage"
 HOMELAB = ROOT / "tests/fixtures/homepage/homelab"
-
-
-def read_yaml(path):
-    return json.loads(subprocess.check_output(["yq", "-o=json", ".", str(path)]))
 
 
 def route(name, **annotations):

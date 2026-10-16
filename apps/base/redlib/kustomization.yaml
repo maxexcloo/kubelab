@@ -6,11 +6,11 @@ resources:
   - external-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
-  - private-dns.yaml
   - private-redirect.yaml
   - redirect.yaml
 components:
   - ../../components/application
+  - ../../components/private-dns-control-d-only
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
@@ -51,10 +51,6 @@ replacements:
           delimiter: /
           index: 2
       - select:
-          kind: PrivateDNSRecord
-        fieldPaths:
-          - spec.hostname
-      - select:
           kind: HTTPRoute
           name: redlib-www
         fieldPaths:
@@ -70,12 +66,10 @@ replacements:
       - select:
           kind: HelmRelease
         fieldPaths:
-          - spec.values.route.private.hostnames.0
-      - select:
-          kind: HelmRelease
-        fieldPaths:
           - spec.values.controllers.main.containers.main.env.REDLIB_FULL_URL
           - spec.values.route.public.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
           index: 2
+transformers:
+  - ../../transformers/route-public

@@ -6,13 +6,13 @@ resources:
   - network-policy.yaml
   - object-storage.yaml
   - pocket-id.yaml
-  - private-dns.yaml
   - resend.yaml
   - storage.yaml
 components:
   - ../../components/application
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
+  - ../../components/private-dns
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml

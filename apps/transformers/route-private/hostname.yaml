@@ -1,0 +1,22 @@
+apiVersion: builtin
+kind: ReplacementTransformer
+metadata:
+  name: route-hostname
+# Run through the app's transformers after its Helm patches supply route hostnames.
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+        fieldPaths:
+          - spec.hostname
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2

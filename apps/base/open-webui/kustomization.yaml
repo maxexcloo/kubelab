@@ -6,7 +6,6 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
-  - private-dns.yaml
   - service-account.yaml
   - source.yaml
   - storage.yaml
@@ -45,6 +44,7 @@ replacements:
 components:
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
+  - ../../components/private-dns
   - ../../components/app-namespace
 patches:
   - path: backup.yaml

@@ -8,8 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from support import ROOT, read_yaml
 
-ROOT = Path(__file__).resolve().parent.parent
 FIXTURE = ROOT / "tests/fixtures/homepage/homelab"
 SCRIPT = ROOT / "apps/base/homepage/render_services.sh"
 
@@ -33,7 +33,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                 "other_service": "homelab://mbk/kimbap/netboot",
             }))
             subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
-            result = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
+            result = read_yaml(output)
             self.assertEqual(result["href"], "https://storage.mbk.example.net:8444")
             self.assertEqual(result["href"], result["siteMonitor"])
             self.assertEqual(result["href"], result["widget"]["url"])
@@ -58,7 +58,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             homelab = Path(directory) / "homelab"
             shutil.copytree(FIXTURE, homelab)
             inventory_path = homelab / "data/machines.yaml"
-            inventory = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(inventory_path)]))
+            inventory = read_yaml(inventory_path)
             machine = inventory["machines"]["mbk"]["slzb-06m"]
             machine["hostname"] = "coordinator"
             machine["interfaces"][0]["address"] = "192.0.2.9"
@@ -71,7 +71,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             template.write_text("[]\n")
             output = Path(directory) / "services.yaml"
             subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True)
-            groups = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
+            groups = read_yaml(output)
             cards = {name: entries for group in groups for name, entries in group.items()}
             adapter = cards["mbk-coordinator"][0]["Adapter Console"]
             self.assertEqual(adapter["href"], "http://coordinator.mbk.example.net")
@@ -96,7 +96,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                     published.write_text(json.dumps({"hosts": {"kimbap": host}}))
                     subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)],
                                    check=True, env=os.environ | {"HOMELAB_INFRASTRUCTURE_FILE": str(published)})
-                    result = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
+                    result = read_yaml(output)
                     self.assertEqual(result["http"], f"http://{host or 'storage.mbk.example.net'}:31010")
                     self.assertEqual(result["https"], "https://storage.mbk.example.net:8444/path")
 
@@ -105,7 +105,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             homelab = Path(directory) / "homelab"
             shutil.copytree(FIXTURE, homelab)
             inventory_path = homelab / "data/machines.yaml"
-            inventory = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(inventory_path)]))
+            inventory = read_yaml(inventory_path)
             service = inventory["machines"]["mbk"]["kimbap"]["services"]["management"]
             template = Path(directory) / "source.yaml"
             output = Path(directory) / "services.yaml"
@@ -118,7 +118,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                     inventory_path.write_text(json.dumps(inventory))
                     subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)],
                                    check=True, env=os.environ | {"HOMELAB_INFRASTRUCTURE_FILE": str(published)})
-                    result = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
+                    result = read_yaml(output)
                     authority = "studio.example.com" + (":8443" if port == 8443 else "")
                     self.assertEqual(result["href"], f"{scheme}://{authority}/path")
             service["hostname"] = "https://invalid.example/path"
@@ -133,7 +133,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             homelab = Path(directory) / "homelab"
             shutil.copytree(FIXTURE, homelab)
             inventory_path = homelab / "data/machines.yaml"
-            inventory = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(inventory_path)]))
+            inventory = read_yaml(inventory_path)
             service = inventory["machines"]["mbk"]["kimbap"]["services"]["management"]
             template = Path(directory) / "source.yaml"
             output = Path(directory) / "services.yaml"
@@ -144,7 +144,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                     service.update(hostname="ai.example.com", path=path, port=443, scheme="https")
                     inventory_path.write_text(json.dumps(inventory))
                     subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True)
-                    result = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(output)]))
+                    result = read_yaml(output)
                     self.assertEqual(result["root"], "https://ai.example.com" + path)
                     self.assertEqual(result["child"], "https://ai.example.com" + path.rstrip("/") + "/api/config")
             before = output.read_text()
@@ -159,7 +159,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             homelab = Path(directory) / "homelab"
             shutil.copytree(FIXTURE, homelab)
             inventory_path = homelab / "data/machines.yaml"
-            inventory = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(inventory_path)]))
+            inventory = read_yaml(inventory_path)
             service = inventory["machines"]["mbk"]["kimbap"]["services"]["management"]
             template = Path(directory) / "source.yaml"
             output = Path(directory) / "services.yaml"
@@ -182,7 +182,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             homelab = Path(directory) / "homelab"
             shutil.copytree(FIXTURE, homelab)
             zone = homelab / "data/dns/example.net.yaml"
-            data = json.loads(subprocess.check_output(["yq", "-o=json", ".", str(zone)]))
+            data = read_yaml(zone)
             data["records"].append({"content": "excloo-gatus.fly.dev", "name": "other", "type": "CNAME"})
             zone.write_text(json.dumps(data))
             template = Path(directory) / "source.yaml"

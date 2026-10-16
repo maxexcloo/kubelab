@@ -1,23 +1,30 @@
 """S3 backups cover app state and databases without retired NFS backup volumes."""
 
-import json
-import subprocess
 import unittest
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+from support import repository_resources
 
 
 class BackupResourceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        rendered = subprocess.check_output(
-            ["kubectl", "kustomize", str(ROOT / "apps/overlays/syd")], text=True
-        )
-        documents = subprocess.check_output(
-            ["yq", "-I=0", "-o=json", "."], input=rendered, text=True
-        )
-        cls.resources = [item for item in map(json.loads, documents.splitlines()) if item]
+        cls.resources = repository_resources("apps/overlays/syd")
+
+    def test_database_identities_and_backup_references_follow_the_app_namespace(self):
+        databases = {
+            (item["metadata"]["namespace"], item["metadata"]["name"]): item
+            for item in self.resources if item["kind"] == "Cluster"
+        }
+        self.assertTrue(databases)
+        for (namespace, name), database in databases.items():
+            with self.subTest(namespace=namespace):
+                self.assertEqual(name, namespace + "-database")
+                self.assertEqual(database["spec"]["bootstrap"]["initdb"], {
+                    "database": namespace, "owner": namespace, "secret": {"name": name},
+                })
+        for item in self.resources:
+            if item["kind"] == "ScheduledBackup":
+                self.assertIn((item["metadata"]["namespace"], item["spec"]["cluster"]["name"]), databases)
 
     def test_hdd_backup_jobs_and_claims_are_absent(self):
         for item in self.resources:

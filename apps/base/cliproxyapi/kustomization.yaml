@@ -4,12 +4,12 @@ resources:
   - external-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
-  - private-dns.yaml
   - storage.yaml
 components:
   - ../../components/application
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
+  - ../../components/private-dns
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
@@ -25,10 +25,6 @@ replacements:
       fieldPath: spec.values.route.private.hostnames.0
     targets:
       - select:
-          kind: PrivateDNSRecord
-        fieldPaths:
-          - spec.hostname
-      - select:
           kind: HelmRelease
         fieldPaths:
           - spec.values.route.private.annotations.[gethomepage.dev/href]
@@ -36,3 +32,5 @@ replacements:
         options:
           delimiter: /
           index: 2
+transformers:
+  - ../../transformers/route-private

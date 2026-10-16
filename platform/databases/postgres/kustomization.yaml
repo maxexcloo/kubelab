@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - cluster.yaml
+# Database identities follow the app namespace; preserve the database suffix.
+replacements:
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: Cluster
+        fieldPaths:
+          - spec.bootstrap.initdb.database
+          - spec.bootstrap.initdb.owner
+      - select:
+          kind: Cluster
+        fieldPaths:
+          - metadata.name
+          - spec.bootstrap.initdb.secret.name
+        options:
+          delimiter: -database
+          index: 0

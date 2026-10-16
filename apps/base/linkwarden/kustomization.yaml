@@ -1,19 +1,19 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - database.yaml
   - external-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
-  - private-dns.yaml
   - resend.yaml
   - storage.yaml
 components:
+  - ../../../platform/databases/postgres-minimal
   - ../../components/application
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
   - ../../../platform/backups/postgres
+  - ../../components/private-dns-control-d-only
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
@@ -29,22 +29,6 @@ replacements:
       fieldPath: spec.values.route.public.hostnames.0
     targets:
       - select:
-          kind: PrivateDNSRecord
-        fieldPaths:
-          - spec.hostname
-      - select:
-          kind: PocketIDClient
-        fieldPaths:
-          - spec.client.callbackURLs.0
-          - spec.client.launchURL
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.route.private.hostnames.0
-      - select:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.BASE_URL
@@ -54,3 +38,5 @@ replacements:
         options:
           delimiter: /
           index: 2
+transformers:
+  - ../../transformers/route-public

@@ -7,27 +7,22 @@ import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-
-
-def read_yaml(path):
-    # Resolve YAML merges before rewriting whole documents as JSON.
-    return json.loads(subprocess.check_output([
-        "yq", "--yaml-fix-merge-anchor-to-spec", "-o=json", ".", str(path)
-    ]))
+from support import (
+    CLUSTERS,
+    ROOT,
+    copy_repository,
+    read_yaml,
+    render_resources,
+    repository_resources,
+)
 
 
 class AppSettingsTests(unittest.TestCase):
     def test_owned_probe_timing_policy(self):
-        for cluster in ("syd",):
-            output = subprocess.check_output(
-                ["kubectl", "kustomize", str(ROOT / "apps/overlays" / cluster)], text=True
-            )
-            documents = subprocess.check_output(
-                ["yq", "-I=0", "-N", "-o=json", "."], input=output, text=True
-            )
+        for cluster in CLUSTERS:
+            resources = repository_resources(f"apps/overlays/{cluster}")
             checked = 0
-            for resource in map(json.loads, documents.splitlines()):
+            for resource in resources:
                 if resource["kind"] == "HelmRelease":
                     if resource["metadata"]["name"] == "homepage":
                         continue
@@ -78,10 +73,10 @@ class AppSettingsTests(unittest.TestCase):
                     with self.subTest(app=settings.parent.name, hostname=old), tempfile.TemporaryDirectory() as directory:
                         app = Path(directory) / "apps/base" / settings.parent.name
                         app.parent.mkdir(parents=True)
-                        shutil.copytree(ROOT / "apps/components", Path(directory) / "apps/components")
-                        shutil.copytree(ROOT / "platform/backups", Path(directory) / "platform/backups")
-                        if settings.parent.name == "homepage":
-                            shutil.copytree(ROOT / "scripts/service-routes", Path(directory) / "scripts/service-routes")
+                        copy_repository(directory, paths=(
+                            "apps/components", "apps/transformers", "platform/backups",
+                            "platform/databases", "scripts/service-routes",
+                        ))
                         shutil.copytree(settings.parent, app)
                         route["hostnames"][index] = "renamed.example.test"
                         (app / settings.name).write_text(json.dumps(resource))
@@ -93,13 +88,7 @@ class AppSettingsTests(unittest.TestCase):
                     route["hostnames"][index] = old
 
     def test_persistent_volumes_use_direct_kimbap_datasets(self):
-        output = subprocess.check_output(
-            ["kubectl", "kustomize", str(ROOT / "apps/overlays/syd")], text=True
-        )
-        documents = subprocess.check_output(
-            ["yq", "-I=0", "-N", "-o=json", "."], input=output, text=True
-        )
-        volumes = [item for item in map(json.loads, documents.splitlines())
+        volumes = [item for item in repository_resources("apps/overlays/syd")
                    if item["kind"] == "PersistentVolume"]
         self.assertTrue(volumes)
         for volume in volumes:
@@ -111,26 +100,16 @@ class AppSettingsTests(unittest.TestCase):
     def test_shared_beszel_hostname_changes_reach_syd(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ("apps", "clusters", "platform", "scripts"):
-                shutil.copytree(ROOT / name, root / name)
+            copy_repository(root)
             settings = root / "platform/settings/settings.yaml"
             resource = read_yaml(settings)
             resource["data"]["beszel_host"] = "renamed.example.test"
             settings.write_text(json.dumps(resource))
-            for cluster in ("syd",):
+            for cluster in CLUSTERS:
                 with self.subTest(cluster=cluster):
-                    output = subprocess.check_output(
-                        ["kubectl", "kustomize", str(root / "apps/overlays" / cluster)],
-                        text=True,
-                    )
-                    documents = subprocess.check_output(
-                        ["yq", "-I=0", "-N", "-o=json", "."],
-                        input=output,
-                        text=True,
-                    )
                     resources = {
                         (item["kind"], item["metadata"]["name"]): item
-                        for item in map(json.loads, documents.splitlines())
+                        for item in render_resources(root / "apps/overlays" / cluster)
                     }
                     agent = resources[("DaemonSet", "beszel-agent")]
                     container = next(

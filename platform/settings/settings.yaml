@@ -7,7 +7,6 @@ metadata:
 data:
   beszel_host: beszel.excloo.com
   control_d_profile: 653224sydwhf
-  grafana_syd_host: grafana.syd.excloo.dev
   headlamp_client_id: headlamp
   headlamp_syd_host: headlamp.syd.excloo.dev
   identity_host: id.excloo.com

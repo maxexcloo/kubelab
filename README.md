@@ -51,7 +51,11 @@ controllers belong under `platform/`.
 
 Apps derive their namespace and release identity from their Namespace resource.
 App-template releases inherit shared chart policy from `apps/components/`; keep
-application values and required exceptions beside each app.
+application values and required exceptions beside each app. Shared PostgreSQL
+components derive database identities from the app Namespace; keep capacity,
+extensions and resource exceptions beside the app. Private DNS components own the
+record policy, and native route transformers apply shared hostname wiring after
+app-specific Helm patches.
 
 Define settings once near their owner and use Kustomize replacements for derived
 values. Preserve native configuration formats and upstream interfaces. Keep

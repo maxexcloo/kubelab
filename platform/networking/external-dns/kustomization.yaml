@@ -5,3 +5,5 @@ resources:
   - helm-release.yaml
   - namespace.yaml
   - vm-service-scrape.yaml
+components:
+  - ../../components/external-dns
