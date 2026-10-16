@@ -22,8 +22,8 @@ mkdir -p \
   "${schema_directory}"
 
 provider_http_version="$(
-  yq -r '.spec.values.provider.packages[] | select(contains("provider-http:")) | split(":")[-1]' \
-    platform/automation/crossplane/helm-release.yaml
+  yq -r '.spec.package | split(":")[-1]' \
+    platform/automation/crossplane-runtime/provider-http.yaml
 )"
 provider_http_schema_root="${schema_cache_directory}/provider-http-${provider_http_version}"
 provider_http_schema_directory="${provider_http_schema_root}/http.m.crossplane.io"

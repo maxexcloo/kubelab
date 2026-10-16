@@ -37,6 +37,6 @@ targets:
     kind: file
     sourceid: version
     spec:
-      file: platform/automation/crossplane/helm-release.yaml
+      file: platform/automation/crossplane-runtime/provider-http.yaml
       matchpattern: (xpkg\.upbound\.io/crossplane\-contrib/provider\-http:)[^\s,\]]+
       replacepattern: ${1}{{ source "version" }}

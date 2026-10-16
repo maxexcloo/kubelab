@@ -1,0 +1,11 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: crossplane-contrib-provider-http
+  annotations:
+    # Bootstrap-installed packages were retained when their declaration was removed.
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/provider-http:v1.0.14
+  runtimeConfigRef:
+    name: provider-http
