@@ -48,14 +48,6 @@ run = "scripts/bootstrap_cluster_secrets.sh"
 wait_for = ["bootstrap-cilium"]
 
 # Deploy
-[tasks.backup]
-description = "Run An Application's Configured Backups Now"
-run = 'scripts/backup_app.sh "$usage_cluster" "$usage_application"'
-usage = '''
-arg "<cluster>"
-arg "<application>"
-'''
-
 [tasks.deploy]
 description = "Reconcile A Cluster Or Flux Component From Git"
 run = 'flux --context "$usage_cluster" reconcile kustomization "${usage_component:-flux-system}" --with-source'
@@ -94,7 +86,7 @@ run = """
 updatecli manifest validate --config .updatecli.d --disable-templating --strict
 actionlint .github/workflows/*.yaml
 prettier --check .
-shellcheck scripts/*.sh apps/base/homepage/*.sh platform/backups/postgres/*.sh
+shellcheck scripts/*.sh apps/base/homepage/*.sh
 manifest_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-check.XXXXXX")"
 trap 'rm -fr -- "${manifest_directory:?}"' EXIT
 scripts/render_manifests.sh "$manifest_directory"
