@@ -91,7 +91,8 @@ delivery workflow. Flux performs routine cluster deployments.
 PostgreSQL uses the CloudNativePG Barman plugin for online S3 backups and WAL
 archiving. App-state jobs briefly stop their application, copy selected volumes,
 resume it and upload the copy with Restic. Schedules, retention and volume
-selection live beside their owning resources. Bulk media and caches are excluded.
+selection live beside their owning resources. Dedicated TrueNAS app datasets,
+bulk media and caches are excluded.
 
 Credentials and Restic encryption passwords stay in 1Password. Restore PostgreSQL
 through the Barman plugin and app state through Restic into fresh volumes before

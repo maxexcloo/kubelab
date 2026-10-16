@@ -34,12 +34,14 @@ class BackupResourceTests(unittest.TestCase):
             self.assertEqual(item["spec"]["retentionPolicy"], "14d")
             self.assertEqual(item["spec"]["configuration"]["endpointURL"], "https://kimbap.mbk.excloo.net:9000")
         jobs = [item for item in self.resources if item["kind"] == "CronJob" and item["metadata"]["name"] == "state-backup"]
-        self.assertIn("redlib-multi", [item["metadata"]["namespace"] for item in jobs])
+        namespaces = {item["metadata"]["namespace"] for item in jobs}
+        self.assertIn("redlib-multi", namespaces)
+        self.assertFalse(namespaces & {"bichon", "romm"})
         for item in jobs:
             spec = item["spec"]
             self.assertEqual(spec["timeZone"], "Australia/Sydney")
             claims = [v["persistentVolumeClaim"]["claimName"] for v in spec["jobTemplate"]["spec"]["template"]["spec"]["volumes"] if "persistentVolumeClaim" in v]
-            self.assertFalse(set(claims) & {"books", "games", "icloud-photos", "library", "immich-machine-learning"})
+            self.assertFalse(set(claims) & {"books", "games", "icloud-photos", "library", "immich-machine-learning", "retained-data"})
         for item in self.resources:
             if item["kind"] == "Role" and item["metadata"]["name"] == "state-backup":
                 for rule in item["rules"]:
