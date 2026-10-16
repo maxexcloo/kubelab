@@ -31,7 +31,7 @@ while IFS="$(printf '\t')" read -r namespace selector; do
   ' >> "$temporary_directory/nodes.json"
 done < "$temporary_directory/selectors.tsv"
 # shellcheck disable=SC2016
-yq ea -p=json '. as $placement ireduce ({}; . * $placement)' \
+yq ea -o=yaml -p=json '. as $placement ireduce ({}; . * $placement)' \
   "$temporary_directory/nodes.json" > "$temporary_directory/nodes.yaml"
 
 # Look up placements directly, rather than scanning every selector for each route.
