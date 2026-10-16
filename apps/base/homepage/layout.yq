@@ -1,0 +1,11 @@
+# Nested groups keep identical host and Kubernetes node names on separate tabs.
+.layout as $preferences |
+load(strenv(SERVICES)) as $services |
+.layout = (["Home", "Clusters", "Servers"][] as $tab ireduce ({};
+  ($services | map(select(has($tab))) | .[0][$tab] // []) as $groups |
+  with(select(($groups | length) > 0);
+    .[$tab] = (($groups[] | keys | .[]) as $group ireduce (
+      {"columns": 1, "header": false, "style": "row", "tab": $tab};
+        .[$group] = ({"columns": 2, "style": "row"} * ($preferences[$group] // {}) | del(.tab))))))) |
+.layout.Providers = $preferences.Providers |
+.layout |= pick(["Home", "Clusters", "Providers", "Servers"])

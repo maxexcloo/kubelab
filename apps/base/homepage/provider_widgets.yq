@@ -1,4 +1,10 @@
 load(strenv(PROVIDERS)).providers as $providers |
+with(select(tag != "!!seq" or length == 0); error("Missing Gatus endpoint statuses")) |
+([$providers | to_entries[] | select(.value.conditions != null) | .value.name] +
+ [$providers | to_entries[] | select(.value.dns != null) |
+   (.value.dns.name // (.value.name + " DNS"))]) as $expected |
+[.[] | select(.group == "Providers") | .name] as $available |
+with(select(($expected - $available) | length > 0); error("Missing Gatus provider checks")) |
 [$providers | to_entries[] | .value as $provider |
   ({"probe": .value.name, "provider": $provider},
    (select(.value.dns != null) |

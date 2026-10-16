@@ -29,6 +29,7 @@ configMapGenerator:
     namespace: homepage
     files:
       - dashboard.yq
+      - layout.yq
       - machine_widgets.yq
       - provider_widgets.yq
       - render_dashboard.sh

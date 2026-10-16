@@ -56,7 +56,8 @@ if sys.argv[1:2] == ["--namespace"] and sys.argv[3:5] == ["get", "pods"]:
     with open(os.environ["POD_QUERIES"], "a") as output:
         output.write(json.dumps(sys.argv[1:]) + "\\n")
     with open(os.environ["POD_PLACEMENTS"]) as source:
-        nodes = json.load(source).get(sys.argv[2], ["node"])
+        placements = json.load(source)
+        nodes = placements.get(sys.argv[2] + "/" + sys.argv[-1], placements.get(sys.argv[2], ["node"]))
     if nodes == "fail":
         sys.exit(1)
     print("\\n".join(nodes))
@@ -522,6 +523,32 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertNotEqual(self.render().returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
 
+    def test_placement_queries_share_only_identical_namespaces_and_selectors(self):
+        resources = [route("Reader", **{"pod-selector": "app in (reader,feeds)"}),
+                     route("Copy", **{"pod-selector": "app in (reader,feeds)"}),
+                     route("Other", **{"pod-selector": "app=other"}),
+                     route("Separate", **{"pod-selector": "app in (reader,feeds)"})]
+        for resource in resources[:3]:
+            resource["metadata"]["namespace"] = "reader"
+        self.write_routes("mbk", resources)
+        self.placements.write_text(json.dumps({
+            "reader/app in (reader,feeds)": ["first"],
+            "reader/app=other": ["second"],
+            "separate/app in (reader,feeds)": ["third"],
+        }))
+        result = self.render()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        groups = self.groups("Clusters")
+        for group, expected in [("mbk-first", {"Reader", "Copy"}),
+                                ("mbk-second", {"Other"}), ("mbk-third", {"Separate"})]:
+            self.assertEqual({name for card in groups[group] for name in card}, expected)
+        queries = [json.loads(line) for line in self.queries.read_text().splitlines()]
+        self.assertEqual(len(queries), 3)
+        self.assertEqual({(query[1], query[-1]) for query in queries}, {
+            ("reader", "app in (reader,feeds)"), ("reader", "app=other"),
+            ("separate", "app in (reader,feeds)"),
+        })
+
     def test_same_host_and_node_names_stay_on_separate_tabs(self):
         self.write_routes("mbk", [route("Reader")])
         self.placements.write_text(json.dumps({"reader": ["storage"]}))
@@ -571,6 +598,49 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.gatus.write_text('{"error": "unavailable"}')
         self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
+
+    def test_gatus_retries_partial_results_and_preserves_files_on_exhaustion(self):
+        homelab = self.directory / "homelab"
+        shutil.copytree(HOMELAB, homelab)
+        providers_path = homelab / "data/providers.yaml"
+        providers = read_yaml(providers_path)
+        providers["providers"]["example"]["conditions"] = ["[STATUS] == 200"]
+        providers_path.write_text(json.dumps(providers))
+        commands = self.directory / "commands"
+        commands.mkdir()
+        requests = self.directory / "requests"
+        wget = commands / "wget"
+        wget.write_text('''#!/usr/bin/env python3
+import json
+import os
+import sys
+from pathlib import Path
+requests = Path(os.environ["GATUS_REQUESTS"])
+count = int(requests.read_text()) + 1 if requests.exists() else 1
+requests.write_text(str(count))
+partial = count == 1 or os.environ.get("FAIL_GATUS") == "true"
+Path(sys.argv[2]).write_text(json.dumps([{"group": "Applications", "name": "Other"}])
+                           if partial else Path(os.environ["GATUS_READY"]).read_text())
+''')
+        sleep = commands / "sleep"
+        sleep.write_text("#!/bin/sh\nexit 0\n")
+        for command in (wget, sleep):
+            command.chmod(0o755)
+        environment = {
+            "GATUS_READY": str(self.gatus),
+            "GATUS_REQUESTS": str(requests),
+            "HOMELAB_DIRECTORY": str(homelab),
+            "HOMEPAGE_GATUS_STATUSES_FILE": "",
+            "PATH": str(commands) + os.pathsep + os.environ["PATH"],
+        }
+        result = self.render(**environment)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(requests.read_text(), "2")
+        before = {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.output.iterdir()}
+        result = self.render(**(environment | {"FAIL_GATUS": "true"}))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(requests.read_text(), "32")
+        self.assertEqual(before, {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.output.iterdir()})
 
     def test_unchanged_refresh_and_invalid_input_preserve_files(self):
         result = self.render()

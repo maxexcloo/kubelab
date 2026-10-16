@@ -10,18 +10,19 @@ trap 'rm -fr "$temporary_directory"' EXIT
 
 script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 printf '{}\n' > "$temporary_directory/infrastructure.json"
-cp "$template" "$temporary_directory/services.yaml"
+services="$template"
 if [ "$(yq 'tag' "$template")" = '!!seq' ]; then
   TEMPLATE="$template" INFRASTRUCTURE="${HOMELAB_INFRASTRUCTURE_FILE:-$temporary_directory/infrastructure.json}" \
     PROVIDERS="$homelab_directory/data/providers.yaml" \
     HOMEPAGE_BESZEL_URL="${HOMEPAGE_BESZEL_URL:-}" \
     yq --from-file "$script_directory/machine_widgets.yq" \
-    "$homelab_directory/data/machines.yaml" > "$temporary_directory/services.yaml"
+    "$homelab_directory/data/machines.yaml" > "$temporary_directory/machines.yaml"
+  services="$temporary_directory/machines.yaml"
 fi
 # Resolve inventory references in one pass, including nested widget URLs.
 printf '{}\n' > "$temporary_directory/dns.json"
 if yq -e '.. | select(tag == "!!str" and test("^homelab-dns://"))' \
-  "$temporary_directory/services.yaml" >/dev/null 2>&1; then
+  "$services" >/dev/null 2>&1; then
   # shellcheck disable=SC2016
   yq ea -o=json '
     [. as $zone | .records[] |
@@ -34,8 +35,7 @@ MACHINES="$homelab_directory/data/machines.yaml" DOMAINS="$homelab_directory/dat
   INFRASTRUCTURE="${HOMELAB_INFRASTRUCTURE_FILE:-$temporary_directory/infrastructure.json}" \
   DNS="$temporary_directory/dns.json" \
   yq --from-file "$script_directory/resolve_endpoints.yq" \
-  "$temporary_directory/services.yaml" > "$temporary_directory/resolved.yaml"
-mv "$temporary_directory/resolved.yaml" "$temporary_directory/services.yaml"
+  "$services" > "$temporary_directory/services.yaml"
 
 # Providers are service cards with Gatus widgets, rendered by render_dashboard.sh.
 yq -e '.providers | length > 0' "$homelab_directory/data/providers.yaml" >/dev/null
