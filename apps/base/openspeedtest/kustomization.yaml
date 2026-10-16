@@ -7,4 +7,5 @@ resources:
   - network-policy.yaml
   - source.yaml
 components:
+  - chart
   - ../../components/app-namespace

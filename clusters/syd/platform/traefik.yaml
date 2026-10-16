@@ -5,6 +5,8 @@ metadata:
   namespace: networking
 spec:
   values:
+    nodeSelector:
+      node.excloo.dev/network: external
     ports:
       webdirect:
         exposedPort: 80

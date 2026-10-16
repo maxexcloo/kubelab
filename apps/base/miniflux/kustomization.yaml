@@ -8,6 +8,7 @@ resources:
 components:
   - ../../../platform/databases/postgres-minimal
   - ../../components/application
+  - ../../components/database-colocation
   - ../../../platform/backups/credentials
   - ../../../platform/backups/postgres
   - ../../components/private-dns

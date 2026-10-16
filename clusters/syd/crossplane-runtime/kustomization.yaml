@@ -9,4 +9,4 @@ patches:
       - op: add
         path: /spec/deploymentTemplate/spec/template/spec/nodeSelector
         value:
-          kubernetes.io/hostname: kimbap
+          node.excloo.dev/network: internal

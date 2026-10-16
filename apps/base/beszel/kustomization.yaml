@@ -22,3 +22,5 @@ patches:
     target:
       kind: CronJob
       name: state-backup
+transformers:
+  - ../../transformers/internal-alias

@@ -1,0 +1,10 @@
+apiVersion: builtin
+kind: LabelTransformer
+metadata:
+  name: internal-alias
+labels:
+  gateway.excloo.dev/internal-alias: app-template
+fieldSpecs:
+  - kind: HelmRelease
+    path: metadata/labels
+    create: true

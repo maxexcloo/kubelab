@@ -14,9 +14,11 @@ metadata:
     onepassword.excloo.dev/item: OpenSpeedTest
   labels:
     app.kubernetes.io/name: openspeedtest
+    gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:
     - speed.syd.excloo.dev
+    - openspeedtest.cluster.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

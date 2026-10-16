@@ -11,3 +11,6 @@ spec:
           endpoints:
             env:
               HOMEPAGE_CLUSTER: syd
+    defaultPodOptions:
+      nodeSelector:
+        node.excloo.dev/network: external

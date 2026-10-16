@@ -17,6 +17,13 @@ spec:
     fullnameOverride: litellm
     masterkeySecretKey: LITELLM_MASTER_KEY
     masterkeySecretName: litellm
+    affinity:
+      podAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                cnpg.io/instanceRole: primary
+            topologyKey: kubernetes.io/hostname
     db:
       database: litellm
       deployStandalone: false
@@ -85,6 +92,8 @@ spec:
         requests:
           cpu: 100m
           memory: 512Mi
+    nodeSelector:
+      node.excloo.dev/network: internal
     podSecurityContext:
       fsGroup: 1000
       fsGroupChangePolicy: OnRootMismatch

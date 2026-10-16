@@ -15,9 +15,11 @@ metadata:
     onepassword.excloo.dev/url: https://app.invalid/ui/
   labels:
     app.kubernetes.io/name: application
+    gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:
     - litellm.excloo.com
+    - litellm.cluster.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

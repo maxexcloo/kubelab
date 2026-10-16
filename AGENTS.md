@@ -33,6 +33,15 @@ Kubelab owns its Flux source, cluster selection and shared integration settings.
 - `clusters/`: Flux entry points for each cluster.
 - `platform/`: cluster controllers and shared configuration.
 
+Private browser and API routes include `<app>.<cluster>.excloo.dev` alongside
+existing primary addresses. App-template routes derive aliases through the shared
+route transformers; upstream charts use their native route shape. Keep aliases
+on private gateways. Database-backed application pods use required affinity to
+the CloudNativePG primary in their namespace; local volumes remain authoritative
+for data placement. Node network labels describe host locality, independently of
+application access. Cluster applications default to internal nodes; cluster
+overlays select external workloads. Mini apps use only `<name>.mini.excloo.com`.
+
 Keep app-specific configuration and integration declarations beside the app. Keep
 shared controllers and integration implementations under `platform/`.
 

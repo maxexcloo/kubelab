@@ -19,9 +19,11 @@ metadata:
     onepassword.excloo.dev/item: Grafana
   labels:
     app.kubernetes.io/name: grafana
+    gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:
     - app.invalid
+    - grafana.cluster.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

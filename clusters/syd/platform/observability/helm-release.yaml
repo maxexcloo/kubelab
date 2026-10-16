@@ -7,24 +7,24 @@ spec:
   values:
     grafana:
       nodeSelector:
-        kubernetes.io/hostname: kimbap
+        node.excloo.dev/network: internal
     kube-state-metrics:
       nodeSelector:
-        kubernetes.io/hostname: kimbap
+        node.excloo.dev/network: internal
     victoria-metrics-operator:
       nodeSelector:
-        kubernetes.io/hostname: kimbap
+        node.excloo.dev/network: internal
     vlsingle:
       spec:
         nodeSelector:
-          kubernetes.io/hostname: kimbap
+          node.excloo.dev/network: internal
     vmagent:
       spec:
         externalLabels:
           cluster: syd
         nodeSelector:
-          kubernetes.io/hostname: kimbap
+          node.excloo.dev/network: internal
     vmsingle:
       spec:
         nodeSelector:
-          kubernetes.io/hostname: kimbap
+          node.excloo.dev/network: internal

@@ -7,6 +7,16 @@ spec:
   releaseName: external-dns
   values:
     labelFilter: gateway.excloo.dev/public-access=true
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: node.excloo.dev/network
+                  operator: In
+                  values:
+                    - internal
     managedRecordTypes:
       - A
       - AAAA

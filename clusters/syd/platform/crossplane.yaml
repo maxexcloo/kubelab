@@ -6,7 +6,7 @@ metadata:
 spec:
   values:
     nodeSelector:
-      kubernetes.io/hostname: kimbap
+      node.excloo.dev/network: internal
     rbacManager:
       nodeSelector:
-        kubernetes.io/hostname: kimbap
+        node.excloo.dev/network: internal

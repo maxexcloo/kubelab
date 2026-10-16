@@ -107,7 +107,6 @@ spec:
       private:
         hostnames:
           - app.invalid
-          - linkwarden.syd.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

@@ -49,6 +49,16 @@ spec:
                 drop:
                   - ALL
     defaultPodOptions:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: node.excloo.dev/network
+                    operator: In
+                    values:
+                      - internal
       automountServiceAccountToken: false
       securityContext:
         runAsGroup: 65532

@@ -18,6 +18,95 @@ from support import (
 
 
 class AppSettingsTests(unittest.TestCase):
+    def test_private_aliases_cover_routed_applications(self):
+        for cluster in CLUSTERS:
+            for path in (f"apps/overlays/{cluster}", f"clusters/{cluster}/platform"):
+                for resource in repository_resources(path):
+                    if resource["kind"] == "HelmRelease":
+                        values = resource["spec"].get("values", {})
+                        routes = values.get("route", {})
+                        if not routes:
+                            continue
+                        identity = resource["metadata"]["namespace"]
+                        routes = [routes] if "hostnames" in routes else routes.values()
+                    elif resource["kind"] == "HTTPRoute":
+                        route = resource["spec"]
+                        if any(item.get("type") == "RequestRedirect" for rule in route.get("rules", [])
+                               for item in rule.get("filters", [])):
+                            continue
+                        identity = resource["metadata"]["name"].removesuffix("-private")
+                        routes = [route]
+                    else:
+                        continue
+                    alias = f"{identity}.{cluster}.excloo.dev"
+                    for route in routes:
+                        with self.subTest(cluster=cluster, identity=identity):
+                            hosts = route.get("hostnames", [])
+                            self.assertEqual(len(hosts), len(set(hosts)))
+                            if any(parent["name"] == "private" for parent in route.get("parentRefs", [])):
+                                self.assertIn(alias, hosts)
+                            else:
+                                self.assertNotIn(alias, hosts)
+
+    def test_database_clients_require_colocation_with_the_primary(self):
+        for cluster in CLUSTERS:
+            resources = repository_resources(f"apps/overlays/{cluster}")
+            databases = [item for item in resources if item["kind"] == "Cluster"]
+            self.assertTrue(databases)
+            for database in databases:
+                namespace = database["metadata"]["namespace"]
+                release = next(item for item in resources if item["kind"] == "HelmRelease"
+                               and item["metadata"]["namespace"] == namespace)
+                values = release["spec"]["values"]
+                if namespace == "immich":
+                    affinity = values["server"]["defaultPodOptions"]["affinity"]
+                elif namespace == "litellm":
+                    affinity = values["affinity"]
+                else:
+                    affinity = values["defaultPodOptions"]["affinity"]
+                rules = affinity["podAffinity"]["requiredDuringSchedulingIgnoredDuringExecution"]
+                with self.subTest(namespace=namespace):
+                    self.assertTrue(any(
+                        rule["topologyKey"] == "kubernetes.io/hostname"
+                        and rule["labelSelector"]["matchLabels"].get("cnpg.io/instanceRole") == "primary"
+                        and "namespaces" not in rule and "namespaceSelector" not in rule
+                        for rule in rules
+                    ))
+
+    def test_open_webui_redis_follows_its_application(self):
+        release = next(item for item in repository_resources("apps/overlays/syd")
+                       if item["kind"] == "HelmRelease" and item["metadata"]["name"] == "open-webui")
+        rule = release["spec"]["values"]["websocket"]["redis"]["affinity"]["podAffinity"][
+            "requiredDuringSchedulingIgnoredDuringExecution"][0]
+        self.assertEqual(rule["topologyKey"], "kubernetes.io/hostname")
+        self.assertEqual(rule["labelSelector"]["matchLabels"], {
+            "app.kubernetes.io/component": "open-webui",
+            "app.kubernetes.io/instance": "open-webui",
+        })
+        self.assertNotIn("namespaces", rule)
+        self.assertNotIn("namespaceSelector", rule)
+
+    def test_cluster_applications_follow_network_placement(self):
+        external = {"aiometadata", "aiostreams", "cliproxyapi", "homepage", "openspeedtest", "redlib"}
+        releases = [item for item in repository_resources("apps/overlays/syd") if item["kind"] == "HelmRelease"]
+        for release in releases:
+            name = release["metadata"]["name"]
+            values = release["spec"]["values"]
+            chart = release["spec"].get("chart", {}).get("spec", {}).get("chart")
+            if chart == "app-template" or name == "immich":
+                selector = values["defaultPodOptions"]["nodeSelector"]
+            else:
+                selector = values["nodeSelector"]
+            with self.subTest(application=name):
+                self.assertEqual(selector["node.excloo.dev/network"], "external" if name in external else "internal")
+        primary = next(item for item in releases if item["metadata"]["name"] == "openspeedtest")
+        secondary = next(item for item in releases if item["metadata"]["name"] == "openspeedtest-internal")
+        self.assertEqual(primary["spec"]["chart"], secondary["spec"]["chart"])
+        self.assertNotEqual(primary["spec"].get("releaseName"), secondary["spec"].get("releaseName"))
+        for database in repository_resources("apps/overlays/syd"):
+            if database["kind"] == "Cluster":
+                self.assertEqual(database["spec"]["affinity"]["nodeSelector"]["node.excloo.dev/network"], "internal")
+
     def test_owned_probe_timing_policy(self):
         for cluster in CLUSTERS:
             resources = repository_resources(f"apps/overlays/{cluster}")
@@ -61,14 +150,14 @@ class AppSettingsTests(unittest.TestCase):
             resource = read_yaml(settings)
             if not isinstance(resource, dict) or resource.get("kind") != "HelmRelease":
                 continue
-            routes = resource["spec"]["values"].get("route", {})
+            routes = resource.get("spec", {}).get("values", {}).get("route", {})
             routes = [routes] if "hostnames" in routes else routes.values()
             for route in routes:
                 if "hostnames" not in route:
                     continue
                 for index, old in enumerate(list(route["hostnames"])):
                     # Derived route placeholders receive their hostname from another owner.
-                    if old.endswith(".invalid"):
+                    if old.endswith((".invalid", ".cluster.excloo.dev")):
                         continue
                     with self.subTest(app=settings.parent.name, hostname=old), tempfile.TemporaryDirectory() as directory:
                         app = Path(directory) / "apps/base" / settings.parent.name
@@ -127,7 +216,7 @@ class AppSettingsTests(unittest.TestCase):
                     )
                     values = resources[("HelmRelease", "beszel")]["spec"]["values"]
                     route = values["route"]["private"]
-                    self.assertEqual(route["hostnames"], ["renamed.example.test"])
+                    self.assertEqual(route["hostnames"], ["renamed.example.test", f"beszel.{cluster}.excloo.dev"])
                     env = values["controllers"]["main"]["containers"]["main"]["env"]
                     self.assertEqual(env["APP_URL"], "https://renamed.example.test")
                     for name in ("gethomepage.dev/href", "gethomepage.dev/widget.url"):

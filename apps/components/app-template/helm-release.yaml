@@ -16,3 +16,5 @@ spec:
   values:
     defaultPodOptions:
       automountServiceAccountToken: false
+      nodeSelector:
+        node.excloo.dev/network: internal

@@ -25,8 +25,12 @@ spec:
       hostRoot: /sys/fs/cgroup
     hubble:
       relay:
+        nodeSelector:
+          node.excloo.dev/network: internal
         enabled: true
       ui:
+        nodeSelector:
+          node.excloo.dev/network: internal
         enabled: true
       metrics:
         enabled:
@@ -40,6 +44,8 @@ spec:
     ipam:
       mode: kubernetes
     operator:
+      nodeSelector:
+        node.excloo.dev/network: internal
       replicas: 1
     securityContext:
       capabilities:

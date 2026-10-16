@@ -40,53 +40,8 @@ configurations:
   - name-reference.yaml
 patches:
   - path: release-settings.yaml
-replacements:
-  - source:
-      kind: HelmRelease
-      name: homepage
-      namespace: homepage
-      fieldPath: spec.values.route.private.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-          name: homepage
-          namespace: homepage
-        fieldPaths:
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: HelmRelease
-          name: homepage
-          namespace: homepage
-        fieldPaths:
-          - spec.values.controllers.homepage.containers.homepage.env.HOMEPAGE_ALLOWED_HOSTS
-        options:
-          delimiter: ","
-          index: 0
-  - source:
-      kind: HelmRelease
-      name: homepage
-      namespace: homepage
-      fieldPath: spec.values.route.private.hostnames.1
-    targets:
-      - select:
-          kind: HelmRelease
-          name: homepage
-          namespace: homepage
-        fieldPaths:
-          - spec.values.controllers.homepage.containers.homepage.probes.liveness.spec.httpGet.httpHeaders.0.value
-          - spec.values.controllers.homepage.containers.homepage.probes.readiness.spec.httpGet.httpHeaders.0.value
-          - spec.values.controllers.homepage.containers.homepage.probes.startup.spec.httpGet.httpHeaders.0.value
-      - select:
-          kind: HelmRelease
-          name: homepage
-          namespace: homepage
-        fieldPaths:
-          - spec.values.controllers.homepage.containers.homepage.env.HOMEPAGE_ALLOWED_HOSTS
-        options:
-          delimiter: ","
-          index: 1
+transformers:
+  - ../../transformers/internal-alias
+  - routing
 components:
   - ../../../scripts/service-routes

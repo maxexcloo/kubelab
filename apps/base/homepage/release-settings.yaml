@@ -9,7 +9,6 @@ spec:
       private:
         hostnames:
           - home.excloo.com
-          - homepage.syd.excloo.dev
         annotations:
           gethomepage.dev/description: Application Dashboard
           gethomepage.dev/enabled: "true"

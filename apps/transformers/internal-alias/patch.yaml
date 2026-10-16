@@ -1,0 +1,10 @@
+apiVersion: builtin
+kind: PatchTransformer
+metadata:
+  name: internal-alias
+patch: |-
+  - op: add
+    path: /spec/values/route/private/hostnames/1
+    value: app.cluster.excloo.dev
+target:
+  kind: HelmRelease

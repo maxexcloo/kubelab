@@ -104,6 +104,8 @@ spec:
       existingClaim: data
     pipelines:
       enabled: false
+    nodeSelector:
+      node.excloo.dev/network: internal
     podSecurityContext:
       fsGroup: 568
       fsGroupChangePolicy: OnRootMismatch
@@ -137,6 +139,7 @@ spec:
         onepassword.excloo.dev/item: Open WebUI
       hostnames:
         - chat.excloo.com
+        - app.cluster.excloo.dev
       parentRefs:
         - name: private
           namespace: networking
@@ -183,6 +186,14 @@ spec:
       enabled: true
       manager: redis
       redis:
+        affinity:
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: open-webui
+                    app.kubernetes.io/instance: open-webui
+                topologyKey: kubernetes.io/hostname
         containerSecurityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
