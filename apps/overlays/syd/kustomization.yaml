@@ -30,6 +30,7 @@ resources:
   - homepage-private-dns.yaml
   - immich-private-route.yaml
   - openspeedtest-route.yaml
+  - redlib-multi-backup
 patches:
   - patch: |-
       - op: add
