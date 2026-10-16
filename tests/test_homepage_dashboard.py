@@ -252,6 +252,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         shutil.copytree(HOMELAB, homelab)
         path = homelab / "data/machines.yaml"
         inventory = read_yaml(path)
+        del inventory["machines"]["mbk"]["kimbap"]["services"]["syncthing"]
         inventory["machines"]["mbk"]["kimbap"]["beszel"] = True
         inventory["machines"]["mbk"]["personal"] = {"platform": "macos", "services": {"management": {"port": 443, "scheme": "https"}}}
         inventory["machines"]["mbk"]["sensor"] = {"platform": "slzb"}
@@ -294,9 +295,9 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Home Assistant", groups["Smart Home"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • HASS (MBK)")
-        self.assertEqual(groups["Infrastructure"]["Syncthing"]["widget"], groups["mbk-storage"]["Syncthing"]["widget"])
+        self.assertEqual(groups["Infrastructure"]["Syncthing"]["widget"]["url"], "https://syncthing.excloo.com")
         storage = groups["mbk-storage"]
-        self.assertEqual(list(storage), ["Beszel", "Cloudflare", "Syncthing", "Tailscale", "TrueNAS", "Netboot"])
+        self.assertEqual(list(storage), ["Beszel", "Cloudflare", "Tailscale", "TrueNAS", "Netboot"])
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])

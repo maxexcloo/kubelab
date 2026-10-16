@@ -36,7 +36,7 @@
         siteMonitor: *netboot
     - Syncthing:
         description: File Synchronisation
-        href: &syncthing homelab://mbk/kimbap/syncthing
+        href: &syncthing https://syncthing.excloo.com
         icon: sh-syncthing
         siteMonitor: *syncthing
         widget:
