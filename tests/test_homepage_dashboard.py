@@ -251,7 +251,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertNotIn("mbk-hass", services)
         self.assertNotIn("mbk-gateway", services)
         self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")
-        self.assertEqual(list(read_yaml(self.output / "settings.yaml")["layout"])[-1], "Providers")
+        self.assertEqual(list(read_yaml(self.output / "settings.yaml")["layout"])[-1], "Servers")
 
     def test_helm_widget_and_moving_an_app_between_clusters(self):
         annotations = route("Library", group="Media", **{
@@ -560,7 +560,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
             self.assertEqual(card["widget"]["mappings"][0]["field"], "results.0.success")
         self.assertEqual(read_yaml(self.output / "bookmarks.yaml"), [])
         layout = read_yaml(self.output / "settings.yaml")["layout"]
-        self.assertEqual(list(layout), ["Home", "Clusters", "Servers", "Providers"])
+        self.assertEqual(list(layout), ["Home", "Clusters", "Providers", "Servers"])
         self.assertEqual(layout["Providers"]["tab"], "Providers")
         before = (self.output / "services.yaml").read_bytes()
         self.gatus.write_text(json.dumps([

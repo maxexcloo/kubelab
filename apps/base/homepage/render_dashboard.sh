@@ -189,7 +189,8 @@ SERVICES="$temporary_directory/config/services.yaml" \
         .[$tab] = (($groups[] | keys | .[]) as $group ireduce (
           {"columns": 1, "header": false, "style": "row", "tab": $tab};
             .[$group] = ({"columns": 2, "style": "row"} * ($preferences[$group] // {}) | del(.tab))))))) |
-    .layout.Providers = $preferences.Providers
+    .layout.Providers = $preferences.Providers |
+    .layout |= pick(["Home", "Clusters", "Providers", "Servers"])
   ' "$source_directory/settings.yaml" > "$temporary_directory/config/settings.yaml"
 
 # Validate the entire refresh before publishing any files. Settings is last so
