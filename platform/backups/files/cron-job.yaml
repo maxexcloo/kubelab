@@ -30,6 +30,17 @@ spec:
               volumeMounts:
                 - name: tools
                   mountPath: /tools
+                - name: tmp
+                  mountPath: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              env:
+                - name: HOME
+                  value: /tmp
           containers:
             - name: backup
               image: docker.io/restic/restic:0.19.1
@@ -47,6 +58,8 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
+                - name: HOME
+                  value: /tmp
               envFrom:
                 - secretRef:
                     name: backup-credentials
@@ -69,6 +82,14 @@ spec:
                 - name: tools
                   mountPath: /tools
                   readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
           volumes:
             - name: data
               persistentVolumeClaim:
@@ -82,3 +103,13 @@ spec:
                 sizeLimit: 30Gi
             - name: tools
               emptyDir: {}
+            - name: tmp
+              emptyDir: {}
+          securityContext:
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault

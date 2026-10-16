@@ -11,5 +11,5 @@ data:
   private_dns_host: private.syd.excloo.dev
   unifi_host: gateway.mbk.excloo.net
   private_dns_lookup: https://cloudflare-dns.com/dns-query?name=app.invalid
-  backup_endpoint: https://s3.kimbap.mbk.excloo.net:9000
+  backup_endpoint: https://kimbap.mbk.excloo.net:9000
   backup_destination: s3://syd-backups/postgres

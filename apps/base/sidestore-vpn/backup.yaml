@@ -13,3 +13,8 @@ spec:
               persistentVolumeClaim:
                 claimName: sidestore-vpn
                 readOnly: true
+          securityContext:
+            fsGroup: 0
+            runAsGroup: 0
+            runAsNonRoot: false
+            runAsUser: 0

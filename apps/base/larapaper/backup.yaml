@@ -4,3 +4,12 @@ metadata:
   name: state-backup
 spec:
   schedule: 27 3 * * *
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            fsGroup: 82
+            runAsGroup: 82
+            runAsNonRoot: true
+            runAsUser: 82

@@ -16,6 +16,19 @@ patches:
       - op: add
         path: /metadata/namespace
         value: observability
+  - target:
+      kind: CronJob
+    patch: |
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/securityContext
+        value:
+          fsGroup: 472
+          fsGroupChangePolicy: OnRootMismatch
+          runAsGroup: 472
+          runAsNonRoot: true
+          runAsUser: 472
+          seccompProfile:
+            type: RuntimeDefault
 replacements:
   - source:
       kind: ConfigMap

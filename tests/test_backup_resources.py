@@ -32,7 +32,7 @@ class BackupResourceTests(unittest.TestCase):
         self.assertEqual(len(stores), 7)
         for item in stores:
             self.assertEqual(item["spec"]["retentionPolicy"], "14d")
-            self.assertEqual(item["spec"]["configuration"]["endpointURL"], "https://s3.kimbap.mbk.excloo.net:9000")
+            self.assertEqual(item["spec"]["configuration"]["endpointURL"], "https://kimbap.mbk.excloo.net:9000")
         jobs = [item for item in self.resources if item["kind"] == "CronJob" and item["metadata"]["name"] == "state-backup"]
         self.assertIn("redlib-multi", [item["metadata"]["namespace"] for item in jobs])
         for item in jobs:

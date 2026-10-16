@@ -22,7 +22,7 @@ if [ -n "$pods" ]; then
   # shellcheck disable=SC2086
   $kubectl wait --for=delete $pods --timeout=120s
 fi
-cp -a /sources/. /snapshot/
+cp -R /sources/. /snapshot/data/
 resume
 trap - EXIT INT TERM
 restic cat config >/dev/null 2>&1 || restic init
