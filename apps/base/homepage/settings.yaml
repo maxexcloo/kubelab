@@ -32,9 +32,9 @@ layout:
     style: row
     tab: Services
   Providers:
-    columns: 2
+    columns: 4
     style: row
-    tab: Services
+    tab: Providers
   Infrastructure:
     columns: 2
     style: row

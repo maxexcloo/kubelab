@@ -29,9 +29,11 @@ configMapGenerator:
     files:
       - dashboard.yq
       - machine_widgets.yq
+      - provider_widgets.yq
       - render_dashboard.sh
       - render_services.sh
       - resolve_endpoints.yq
+      - route_nodes.sh
 configurations:
   - name-reference.yaml
 patches:

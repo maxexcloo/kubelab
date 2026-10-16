@@ -50,3 +50,18 @@ body {
   font-size: 0.7rem;
   font-weight: 600;
 }
+/* The native widget supplies node names; the renderer supplies the cluster prefix. */
+.information-widget-kubernetes
+  > div
+  > div:nth-child(n + 2)
+  .pt-1.text-center::before {
+  content: var(--homepage-cluster) ": ";
+}
+[id^="provider-"] .service-icon {
+  min-height: 5rem;
+  width: 4.5rem;
+}
+[id^="provider-"] .service-icon > * {
+  height: 3rem !important;
+  width: 3rem !important;
+}

@@ -1,23 +1,26 @@
+[load(strenv(HOMELAB_MACHINES)).machines | to_entries[] | .key as $network |
+  .value | to_entries[] | select(.value.type != null) |
+  ($network + "-" + (.value.hostname // .key))] as $host_groups |
 map(
-  ([.] +
-    ([.] | map(select(.annotations."gethomepage.dev/group" != .serverGroup) |
-      . + {"annotations": (.annotations + {"gethomepage.dev/group": .serverGroup})}))) | .[] |
+  ([. + {"clusterView": false}] +
+    [.clusterGroups[] as $group |
+      . + {"clusterView": true, "annotations": (.annotations + {"gethomepage.dev/group": $group})}]) | .[] |
   . as $route |
   .cluster as $cluster |
   .annotations |
   with_entries(select(.key | test("^gethomepage.dev/"))) |
   with_entries(.key |= sub("^gethomepage.dev/"; "")) |
   del(.enabled, .instance) |
+  .tab = "Services" |
+  with(select($route.clusterView == true); .tab = "Clusters") |
   with(select($cluster == strenv(HOMEPAGE_CLUSTER));
     .app = (.app // $route.labels."app.kubernetes.io/name" // ($route.source | split("/") | .[2])) |
     .namespace = $route.namespace |
-    # Native pod stats aggregate matching pods; Homepage cannot show their hosting nodes.
-    .showStats = (.showStats // "true") |
     with(select(."pod-selector" != null); .podSelector = ."pod-selector")) |
   del(."pod-selector") |
   with(select($cluster != strenv(HOMEPAGE_CLUSTER)); del(.app, .namespace, .showStats)) |
   .description = (.description // "") |
-  with(select(.group != $route.serverGroup);
+  with(select($route.clusterView == false);
     .description = ([.description, ($cluster | upcase)] | map(select(. != "")) | join(" • "))) |
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
@@ -33,10 +36,18 @@ map(
   .weight = 0 |
   with(select(.widget != null or (.widgets | length > 0)); .weight = -100)
 ) as $applications |
+($applications | map(select(.tab == "Clusters")) | map(.group) | unique) as $cluster_groups |
 [load(strenv(SERVICES)) | .[] | to_entries | .[] |
   .key as $group | .value[] | to_entries | .[] |
-  .value + {"group": $group, "name": .key}] as $external |
-($external + $applications) | unique_by(.group + "/" + .name) |
-sort_by(.group, .weight // 0, .name) |
-group_by(.group) |
-map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})
+  .value + {"group": $group, "name": .key,
+    "tab": (["Services"] +
+      ($host_groups | map(select(. == $group)) | map("Servers")) +
+      ([$group] | map(select(test("^Cluster: "))) | map("Clusters")) | .[-1])} |
+  # Homepage resolves widget proxies by leaf group name, even across nested tabs.
+  with(select(.tab == "Servers" and ($cluster_groups | contains([$group])));
+    .group += " (Server)")] as $external |
+($external + $applications) | unique_by(.tab + "/" + .group + "/" + .name) |
+sort_by(.tab, .group, .weight // 0, .name) |
+group_by(.tab) |
+map({(.[0].tab): (group_by(.group) |
+  map({(.[0].group): map(.name as $name | del(.name, .group, .tab) | {($name): .})}))})

@@ -1,0 +1,25 @@
+load(strenv(PROVIDERS)).providers as $providers |
+[$providers | to_entries[] | .value as $provider |
+  ({"probe": .value.name, "provider": $provider},
+   (select(.value.dns != null) |
+     {"probe": (.value.dns.name // (.value.name + " DNS")), "provider": $provider}))
+] as $catalogue |
+map(select(.group == "Providers")) | sort_by(.name) |
+map(. as $endpoint |
+  ($catalogue | map(select(.probe == $endpoint.name)) | .[0]) as $entry |
+  {(.name): {
+    "description": ($entry.provider.description // "External Monitoring"),
+    "href": ($entry.provider.url // (strenv(GATUS_URL) + "/endpoints/" + .key)),
+    "icon": ($entry.provider.icon // "mdi-cloud"),
+    "id": ("provider-" + .key),
+    "widget": {
+      "type": "customapi",
+      "url": (strenv(GATUS_URL) + "/api/v1/endpoints/" + .key + "/statuses?pageSize=1"),
+      "refreshInterval": 30000,
+      "mappings": [
+        {"field": "results.0.success", "label": "Status",
+         "remap": [{"value": true, "to": "Online"}, {"value": false, "to": "Offline"}, {"any": true, "to": "Unknown"}]},
+        {"field": "results.0.duration", "label": "Response", "format": "float", "scale": 0.000001, "suffix": "ms"}
+      ]
+    }
+  }}) | [{"Providers": .}]

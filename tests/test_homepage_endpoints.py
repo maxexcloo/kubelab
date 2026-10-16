@@ -46,9 +46,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             bookmarks = json.loads(subprocess.check_output([
                 "yq", "-o=json", ".", str(Path(directory) / "bookmarks.yaml")
             ]))
-            self.assertEqual(bookmarks, [{"Providers": [{"Example": [{
-                "description": "Example provider", "href": "https://provider.example.com", "icon": "example"
-            }]}]}])
+            self.assertEqual(bookmarks, [])
             timestamp = output.stat().st_mtime_ns
             subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
             self.assertEqual(output.stat().st_mtime_ns, timestamp)
@@ -73,12 +71,12 @@ class HomepageEndpointsTests(unittest.TestCase):
             subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True)
             groups = read_yaml(output)
             cards = {name: entries for group in groups for name, entries in group.items()}
-            adapter = cards["mbk-coordinator"][0]["Adapter Console"]
+            adapter = cards["Infrastructure"][0]["Adapter Console"]
             self.assertEqual(adapter["href"], "http://coordinator.mbk.example.net")
             self.assertEqual(adapter["siteMonitor"], "http://192.0.2.9/status")
-            self.assertEqual(cards["Infrastructure"][0]["Adapter Console"]["siteMonitor"], adapter["siteMonitor"])
+            self.assertFalse(any("Adapter Console" in card for card in cards["mbk-coordinator"]))
             self.assertEqual(adapter["icon"], "zigbee")
-            self.assertEqual(adapter["description"], "Zigbee Ethernet Adapter")
+            self.assertEqual(adapter["description"], "Zigbee Ethernet Adapter • Coordinator (MBK)")
             self.assertEqual(cards["mbk-nanokvm"][0]["NanoKVM"]["href"], "http://nanokvm.mbk.example.net")
             self.assertEqual(cards["mbk-nanokvm"][0]["NanoKVM"]["siteMonitor"], "http://nanokvm.mbk.example.net")
 

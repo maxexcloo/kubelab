@@ -105,13 +105,13 @@ yq ea -p=json -o=yaml '[.] | map(select(.annotations."gethomepage.dev/enabled" =
   "$temporary_directory/routes.json" > "$temporary_directory/inventory.yaml"
 yq -e 'length > 0' "$temporary_directory/inventory.yaml" >/dev/null
 
-# Cluster services belong to the cluster, independently of node count or placement.
+# Host management stays on Servers; cluster administration tools are services.
 yq '
-  with(.[];
-    .serverGroup = ("Cluster: " + (.cluster | upcase)) |
-    with(select(.annotations."gethomepage.dev/group" == "Servers");
-      .annotations."gethomepage.dev/group" = .serverGroup))
+  with(.[] | select(.annotations."gethomepage.dev/group" == "Servers");
+    .annotations."gethomepage.dev/group" = "Operations")
 ' "$temporary_directory/inventory.yaml" > "$temporary_directory/inventory.yaml.next"
+mv "$temporary_directory/inventory.yaml.next" "$temporary_directory/inventory.yaml"
+sh "$script_directory/route_nodes.sh" "$temporary_directory/inventory.yaml" "$temporary_directory/inventory.yaml.next"
 mv "$temporary_directory/inventory.yaml.next" "$temporary_directory/inventory.yaml"
 
 mkdir "$temporary_directory/config"
@@ -123,26 +123,46 @@ SERVICES="$temporary_directory/config/services.yaml" \
   > "$temporary_directory/config/services.yaml.next"
 mv "$temporary_directory/config/services.yaml.next" "$temporary_directory/config/services.yaml"
 
+# Discover probe keys from Gatus; its native checks own website and DNS health.
+gatus_url=$(yq -r 'explode(.) | [.. | select(tag == "!!map" and .widget.type == "gatus") |
+  .widget.url] | .[0]' "$temporary_directory/config/services.yaml")
+case "$gatus_url" in
+  http://* | https://*) ;;
+  *) echo 'Missing Gatus widget URL' >&2; exit 1 ;;
+esac
+gatus_statuses=${HOMEPAGE_GATUS_STATUSES_FILE:-}
+if [ -z "$gatus_statuses" ]; then
+  gatus_statuses="$temporary_directory/gatus.json"
+  wget -O "$gatus_statuses" -q -T 30 "$gatus_url/api/v1/endpoints/statuses?pageSize=1"
+fi
+yq -e 'tag == "!!seq" and length > 0' "$gatus_statuses" >/dev/null
+GATUS_URL="$gatus_url" PROVIDERS="$homelab_directory/data/providers.yaml" \
+  yq --from-file "$script_directory/provider_widgets.yq" "$gatus_statuses" > "$temporary_directory/config/providers.yaml"
+yq ea '[.[]]' "$temporary_directory/config/services.yaml" "$temporary_directory/config/providers.yaml" \
+  > "$temporary_directory/config/services.yaml.next"
+mv "$temporary_directory/config/services.yaml.next" "$temporary_directory/config/services.yaml"
+
 for file in custom.css docker.yaml kubernetes.yaml; do
   cp "$source_directory/$file" "$temporary_directory/config/$file"
 done
-yq '(.[] | select(has("kubernetes"))).kubernetes.cluster.label = ("Cluster: " + (strenv(HOMEPAGE_CLUSTER) | upcase))' \
+cluster_label=$(printf '%s' "$HOMEPAGE_CLUSTER" | tr '[:lower:]' '[:upper:]')
+printf '\n:root { --homepage-cluster: "%s"; }\n' "$cluster_label" >> "$temporary_directory/config/custom.css"
+yq '(.[] | select(has("kubernetes"))).kubernetes.cluster.label = (strenv(HOMEPAGE_CLUSTER) | upcase)' \
   "$source_directory/widgets.yaml" > "$temporary_directory/config/widgets.yaml"
 
-# Native Homepage layout preferences override defaults for discovered groups.
+# Nested groups keep identical host and Kubernetes node names on separate tabs.
 # shellcheck disable=SC2016
-INVENTORY="$temporary_directory/inventory.yaml" \
-  SERVICES="$temporary_directory/config/services.yaml" \
+SERVICES="$temporary_directory/config/services.yaml" \
   yq '
     .layout as $preferences |
-    [load(strenv(HOMELAB_MACHINES)).machines | to_entries[] | .key as $network |
-      .value | to_entries[] | select(.value.type != null) |
-      ($network + "-" + (.value.hostname // .key))] as $host_groups |
-    ((load(strenv(INVENTORY)) | map(.annotations."gethomepage.dev/group")) +
-      (load(strenv(SERVICES)) | map(keys | .[])) | unique | sort | map(select(. != "Providers"))) + ["Providers"] as $groups |
-    .layout = ($groups[] as $group ireduce ({};
-      .[$group] = ({"columns": 2, "style": "row",
-        "tab": (["Services"] + ($host_groups | map(select(. == $group) | "Servers")) + ([$group] | map(select((. // "") | test("^Cluster: ")) | "Servers")) | .[-1])} * ($preferences[$group] // {}))))
+    load(strenv(SERVICES)) as $services |
+    .layout = (["Services", "Clusters", "Servers"][] as $tab ireduce ({};
+      ($services | map(select(has($tab))) | .[0][$tab] // []) as $groups |
+      with(select(($groups | length) > 0);
+        .[$tab] = (($groups[] | keys | .[]) as $group ireduce (
+          {"columns": 1, "header": false, "style": "row", "tab": $tab};
+            .[$group] = ({"columns": 2, "style": "row"} * ($preferences[$group] // {}) | del(.tab))))))) |
+    .layout.Providers = $preferences.Providers
   ' "$source_directory/settings.yaml" > "$temporary_directory/config/settings.yaml"
 
 # Validate the entire refresh before publishing any files. Settings is last so

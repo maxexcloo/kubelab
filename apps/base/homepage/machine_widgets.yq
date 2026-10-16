@@ -26,17 +26,17 @@ load(strenv(PROVIDERS)).providers as $providers |
   }
 ] as $hosts |
 ($hosts[] as $host ireduce ({}; .[$host.network][$host.key] = $host)) as $host_index |
-# Service cards appear in their configured group and their owning host's group.
+# Only host management and monitoring appear on Servers; apps keep their categories.
 (([$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
   .value + {"name": .key, "group": $group}] +
  [$hosts[] | select(.machine.type != null) | . as $host |
   (.machine.services // {}) | to_entries[] |
   select(.key != "management" and (.value.description != null or .value.icon != null or .value.group != null)) |
   ("homelab://" + $host.network + "/" + $host.key + "/" + .key) as $reference |
-  {"description": .value.description, "icon": .value.icon, "name": (.value.name // .key), "group": (.value.group // "Servers"),
+  {"description": .value.description, "icon": .value.icon, "name": (.value.name // .key), "group": (.value.group // "Infrastructure"),
     "href": $reference, "siteMonitor": (.value.siteMonitor // $reference)}]) |
 [.[] |
-  (., (select(.group != "Servers" and (.href | test("^homelab://"))) | . + {"group": "Servers"})) |
+  (., (select(.group != "Servers" and (.href | test("^homelab://[^/]+/[^/]+/management$"))) | . + {"group": "Servers"})) |
   with(select(.href | test("^homelab://"));
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
     $host_index[$reference[0]][$reference[1]] as $host |

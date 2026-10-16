@@ -37,10 +37,9 @@ MACHINES="$homelab_directory/data/machines.yaml" DOMAINS="$homelab_directory/dat
   "$temporary_directory/services.yaml" > "$temporary_directory/resolved.yaml"
 mv "$temporary_directory/resolved.yaml" "$temporary_directory/services.yaml"
 
-# Keep Homepage's provider bookmarks in the shared Homelab inventory.
+# Providers are service cards with Gatus widgets, rendered by render_dashboard.sh.
 yq -e '.providers | length > 0' "$homelab_directory/data/providers.yaml" >/dev/null
-yq '.providers | to_entries | map({(.value.name): [{"description": .value.description, "href": .value.url, "icon": .value.icon}]}) | [{"Providers": .}]' \
-  "$homelab_directory/data/providers.yaml" > "$temporary_directory/bookmarks.yaml"
+printf '[]\n' > "$temporary_directory/bookmarks.yaml"
 
 # Rename on the destination filesystem so readers never see a partial update.
 mkdir -p "$(dirname "$output")"
