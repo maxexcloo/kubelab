@@ -21,6 +21,8 @@ jobs:
           persist-credentials: false
       - name: Set Up Shared Tools & Tasks
         uses: maxexcloo/dotfiles/.github/actions/mise@main
+        with:
+          tools: actionlint gh helm jq kubeconform kubectl node prek prettier python shellcheck updatecli yq
       - name: Run Checks
         run: mise run check
       - name: Refresh External Monitoring
