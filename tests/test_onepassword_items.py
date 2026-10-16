@@ -2,10 +2,14 @@
 
 """Tests for the 1Password item reconciler."""
 
+import base64
 import contextlib
 import copy
 import importlib.util
 import io
+import json
+import subprocess
+import tempfile
 import unittest
 import urllib.error
 from pathlib import Path
@@ -24,9 +28,11 @@ def item_configuration(**overrides):
         "constants": {},
         "defaults": {},
         "fields": set(),
+        "formats": {},
         "generate": set(),
         "login": False,
         "namespaces": set(),
+        "remove": set(),
         "urls": set(),
     }
     configuration.update(overrides)
@@ -34,6 +40,101 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_interpolated_tokens_use_only_letters_and_digits(self):
+        desired = item_configuration(
+            fields={"monitoring-token"}, formats={"monitoring-token": "alphanumeric"},
+            generate={"monitoring-token"},
+        )
+        result = RECONCILER.normalise_item({}, "Redlib", desired, "vault")
+        field = result["fields"][0]
+        self.assertTrue(field["generate"])
+        self.assertEqual(field["recipe"], {"characterSets": ["DIGITS", "LETTERS"], "length": 48})
+
+    def test_external_credentials_get_empty_placeholders_without_overwriting_values(self):
+        desired = item_configuration(fields={"certificate-base64", "external-token", "password"})
+        current = {"fields": [{"id": "password", "label": "password", "value": "keep-me"}]}
+        result = RECONCILER.normalise_item(current, "Application", desired, "vault")
+        fields = {field["label"]: field for field in result["fields"]}
+        self.assertEqual(fields["password"]["value"], "keep-me")
+        self.assertEqual(fields["external-token"]["value"], "")
+        self.assertEqual(fields["external-token"]["type"], "CONCEALED")
+        self.assertNotIn("generate", fields["external-token"])
+        self.assertEqual(fields["certificate-base64"]["type"], "CONCEALED")
+
+    def test_laravel_key_is_generated_once_with_the_required_encoding(self):
+        desired = item_configuration(
+            fields={"app-key"}, formats={"app-key": "laravel"}, generate={"app-key"},
+        )
+        current = RECONCILER.normalise_item({}, "LaraPaper", desired, "vault")
+        key = current["fields"][0]["value"]
+        self.assertTrue(key.startswith("base64:"))
+        self.assertEqual(len(base64.b64decode(key.removeprefix("base64:"), validate=True)), 32)
+        repeated = RECONCILER.normalise_item(copy.deepcopy(current), "LaraPaper", desired, "vault")
+        self.assertEqual(repeated, current)
+        desired["formats"]["app-key"] = "unsupported"
+        with self.assertRaisesRegex(RuntimeError, "unsupported field formats"):
+            RECONCILER.normalise_item({}, "LaraPaper", desired, "vault")
+
+    def test_explicit_field_removal_requires_readiness_and_preserves_unrelated_fields(self):
+        desired = item_configuration(remove={"duplicate-password"})
+        current = {"fields": [
+            {"id": "old", "label": "duplicate-password", "value": "old-value"},
+            {"id": "personal", "label": "personal-token", "value": "keep-me"},
+        ]}
+        pending = RECONCILER.normalise_item(copy.deepcopy(current), "Application", desired, "vault")
+        self.assertEqual(len(pending["fields"]), 2)
+        ready = RECONCILER.normalise_item(
+            copy.deepcopy(current), "Application", desired, "vault", allow_removal=True,
+        )
+        self.assertEqual([field["label"] for field in ready["fields"]], ["personal-token"])
+        desired["fields"].add("duplicate-password")
+        with self.assertRaisesRegex(RuntimeError, "cannot remove referenced fields"):
+            RECONCILER.normalise_item(current, "Application", desired, "vault", allow_removal=True)
+
+    def test_papra_provider_template_preserves_settings_and_escapes_credentials(self):
+        manifests = subprocess.check_output(
+            ["kubectl", "kustomize", str(REPOSITORY_ROOT / "apps/overlays/syd")], text=True,
+        )
+        resource = json.loads(subprocess.check_output(
+            ["yq", "-o=json", 'select(.kind == "ExternalSecret" and .metadata.name == "papra")'],
+            input=manifests, text=True,
+        ))
+        credentials = {
+            "AUTH_SECRET": "fixture-auth-secret", "OPENROUTER_API_KEY": "fixture-api-key",
+            "oidc-client-secret": 'fixture"\\secret',
+        }
+        templates = resource["spec"]["target"]["template"]["data"]
+        with tempfile.TemporaryDirectory() as directory:
+            chart = Path(directory)
+            (chart / "templates").mkdir()
+            (chart / "Chart.yaml").write_text("apiVersion: v2\nname: fixture\nversion: 0.1.0\n")
+            (chart / "values.yaml").write_text(json.dumps({"credentials": credentials}))
+            definitions = "\n".join(
+                '{{- define "' + name + '" -}}' + template + '{{- end -}}'
+                for name, template in templates.items()
+            )
+            data = "\n".join(
+                '  ' + name + ': {{ include "' + name + '" .Values.credentials | quote }}'
+                for name in templates
+            )
+            (chart / "templates/secret.yaml").write_text(
+                definitions + "\napiVersion: v1\nkind: Secret\nmetadata:\n  name: fixture\nstringData:\n" + data,
+            )
+            rendered = subprocess.check_output(["helm", "template", "fixture", str(chart)], text=True)
+        actual = json.loads(subprocess.check_output(
+            ["yq", "-o=json", ".stringData"], input=rendered, text=True,
+        ))
+        self.assertEqual(json.loads(actual["AUTH_PROVIDERS_CUSTOMS"]), [{
+            "clientId": "papra-au-truenas",
+            "clientSecret": credentials["oidc-client-secret"],
+            "discoveryUrl": "https://id.excloo.com/.well-known/openid-configuration",
+            "pkce": True, "providerId": "pocket-id", "providerName": "Excloo ID",
+            "scopes": ["openid", "profile", "email"], "type": "oidc",
+        }])
+        self.assertEqual(actual["AUTH_SECRET"], credentials["AUTH_SECRET"])
+        self.assertEqual(actual["OPENROUTER_API_KEY"], credentials["OPENROUTER_API_KEY"])
+        self.assertEqual(set(actual), {"AUTH_PROVIDERS_CUSTOMS", "AUTH_SECRET", "OPENROUTER_API_KEY"})
+
     def test_field_sort_preserves_values_ids_sections_and_native_fields(self):
         fields = [
             {"id": "username", "purpose": "USERNAME", "value": "max@example.net"},

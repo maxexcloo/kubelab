@@ -1,6 +1,8 @@
+import base64
 import copy
 import json
 import os
+import secrets
 import ssl
 import time
 import urllib.error
@@ -79,8 +81,12 @@ def item_configuration(resource):
     return {
         "constants": json.loads(values.get(f"{ANNOTATION_PREFIX}constants", "{}")),
         "defaults": json.loads(values.get(f"{ANNOTATION_PREFIX}defaults", "{}")),
+        "formats": json.loads(values.get(f"{ANNOTATION_PREFIX}field-formats", "{}")),
         "generate": set(
             filter(None, values.get(f"{ANNOTATION_PREFIX}generate-fields", "").split(","))
+        ),
+        "remove": set(
+            filter(None, values.get(f"{ANNOTATION_PREFIX}remove-fields", "").split(","))
         ),
     }
 
@@ -89,7 +95,9 @@ def merge_configuration(item, resource):
     configuration = item_configuration(resource)
     item["constants"].update(configuration["constants"])
     item["defaults"].update(configuration["defaults"])
+    item["formats"].update(configuration["formats"])
     item["generate"].update(configuration["generate"])
+    item["remove"].update(configuration["remove"])
 
 
 def new_item():
@@ -97,9 +105,11 @@ def new_item():
         "constants": {},
         "defaults": {},
         "fields": set(),
+        "formats": {},
         "generate": set(),
         "login": False,
         "namespaces": set(),
+        "remove": set(),
         "urls": set(),
     }
 
@@ -252,19 +262,24 @@ def sort_fields(fields):
             fields[index] = field
 
 
-def generated_field(label, *, value=None):
+def generated_field(label, *, field_format=None, value=None):
     native = label in {"password", "username"}
     field = {
         "id": label,
         "label": label,
-        "type": "CONCEALED" if label.endswith(SECRET_SUFFIXES) else "STRING",
+        "type": "CONCEALED" if label.endswith(SECRET_SUFFIXES) or label == "certificate-base64" else "STRING",
     }
     if native:
         field["purpose"] = label.upper()
-    if value is None:
+    if value is None and field_format == "laravel":
+        field["value"] = "base64:" + base64.b64encode(secrets.token_bytes(32)).decode()
+    elif value is None:
         field["generate"] = True
         field["recipe"] = {
-            "characterSets": ["DIGITS", "LETTERS", "SYMBOLS"],
+            "characterSets": (
+                ["DIGITS", "LETTERS"] if field_format == "alphanumeric"
+                else ["DIGITS", "LETTERS", "SYMBOLS"]
+            ),
             "length": 48,
         }
     else:
@@ -272,7 +287,17 @@ def generated_field(label, *, value=None):
     return field
 
 
-def normalise_item(current, title, desired, vault_id):
+def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
+    required_fields = (
+        desired["fields"]
+        | desired["generate"]
+        | set(desired["constants"])
+        | set(desired["defaults"])
+    )
+    if desired["remove"] & required_fields:
+        raise RuntimeError(f"1Password item {title} cannot remove referenced fields")
+    if set(desired["formats"].values()) - {"alphanumeric", "laravel"}:
+        raise RuntimeError(f"1Password item {title} has unsupported field formats")
     current["category"] = "LOGIN" if desired["login"] else "SERVER"
     current.setdefault("tags", ["Kubelab"])
     current.setdefault("title", title)
@@ -285,13 +310,10 @@ def normalise_item(current, title, desired, vault_id):
         ],
     )
     fields = current.setdefault("fields", [])
+    if allow_removal:
+        fields[:] = [field for field in fields if field_label(field) not in desired["remove"]]
     by_label = {field_label(field): field for field in fields}
-    for label in sorted(
-        desired["fields"]
-        | desired["generate"]
-        | set(desired["constants"])
-        | set(desired["defaults"])
-    ):
+    for label in sorted(required_fields):
         field = by_label.get(label)
         if label in desired["constants"]:
             replacement = generated_field(label, value=desired["constants"][label])
@@ -300,9 +322,10 @@ def normalise_item(current, title, desired, vault_id):
         elif label in desired["defaults"]:
             replacement = generated_field(label, value=desired["defaults"][label])
         elif label in desired["generate"]:
-            replacement = generated_field(label)
+            replacement = generated_field(label, field_format=desired["formats"].get(label))
         else:
-            continue
+            # Referenced external credentials get a placeholder, never a random value.
+            replacement = generated_field(label, value="")
         if field is not None:
             # Preserve IDs, sections and presentation of existing fields.
             field.update(
@@ -366,6 +389,14 @@ def main():
         if title in active:
             raise RuntimeError(f"duplicate 1Password item title: {title}")
         active[title] = summary
+    try:
+        archive_ready = applications_ready()
+    except RuntimeError as error:
+        archive_ready = False
+        print(f"skipped removals because application readiness could not be read: {error}")
+    else:
+        if not archive_ready:
+            print("skipped removals because applications are not fully reconciled")
     changed = 0
     for title, configuration in sorted(desired.items()):
         summary = active.get(title)
@@ -376,7 +407,10 @@ def main():
         )
         if externally_owned(current):
             continue
-        wanted = normalise_item(copy.deepcopy(current), title, configuration, vault_id)
+        wanted = normalise_item(
+            copy.deepcopy(current), title, configuration, vault_id,
+            allow_removal=archive_ready,
+        )
         if summary:
             if current.get("category") != wanted["category"]:
                 action = "replaced"
@@ -417,14 +451,6 @@ def main():
         changed += 1
         prefix = "would be " if dry_run else ""
         print(f"{title} {prefix}{action}")
-    try:
-        archive_ready = applications_ready()
-    except RuntimeError as error:
-        archive_ready = False
-        print(f"skipped archival because application readiness could not be read: {error}")
-    else:
-        if not archive_ready:
-            print("skipped archival because applications are not fully reconciled")
     if not archive_ready:
         print(f"reconciled {len(desired)} items; changed {changed}")
         return

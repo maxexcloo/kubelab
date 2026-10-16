@@ -89,6 +89,15 @@ replacements:
       fieldPath: data.identity_host
     targets:
       - select:
+          kind: ExternalSecret
+          name: papra
+          namespace: papra
+        fieldPaths:
+          - spec.target.template.data.AUTH_PROVIDERS_CUSTOMS
+        options:
+          delimiter: /
+          index: 2
+      - select:
           kind: HelmRelease
           name: actual-budget
           namespace: actual-budget
