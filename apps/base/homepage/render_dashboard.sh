@@ -115,6 +115,7 @@ sh "$script_directory/route_nodes.sh" "$temporary_directory/inventory.yaml" "$te
 mv "$temporary_directory/inventory.yaml.next" "$temporary_directory/inventory.yaml"
 
 mkdir "$temporary_directory/config"
+HOMEPAGE_CLUSTER_NAMES=$(yq -r 'map(.cluster) | unique | join(",")' "$temporary_directory/inventory.yaml") \
 HOMEPAGE_BESZEL_URL=$(yq -r 'map(select(.namespace == "beszel")) | .[0].annotations."gethomepage.dev/href" // ""' "$temporary_directory/inventory.yaml") \
   sh "$script_directory/render_services.sh" "$source_directory/services.yaml" \
   "$temporary_directory/config/services.yaml" "$homelab_directory"
@@ -142,7 +143,7 @@ yq ea '[.[]]' "$temporary_directory/config/services.yaml" "$temporary_directory/
   > "$temporary_directory/config/services.yaml.next"
 mv "$temporary_directory/config/services.yaml.next" "$temporary_directory/config/services.yaml"
 
-for file in custom.css docker.yaml kubernetes.yaml; do
+for file in custom.css custom.js docker.yaml kubernetes.yaml; do
   cp "$source_directory/$file" "$temporary_directory/config/$file"
 done
 cluster_label=$(printf '%s' "$HOMEPAGE_CLUSTER" | tr '[:lower:]' '[:upper:]')
@@ -171,7 +172,7 @@ for file in "$temporary_directory/config/"*.yaml; do
   yq '.' "$file" >/dev/null
 done
 mkdir -p "$output_directory"
-for file in custom.css docker.yaml kubernetes.yaml widgets.yaml bookmarks.yaml services.yaml settings.yaml; do
+for file in custom.css custom.js docker.yaml kubernetes.yaml widgets.yaml bookmarks.yaml services.yaml settings.yaml; do
   if ! cmp -s "$temporary_directory/config/$file" "$output_directory/$file"; then
     staged_output=$(mktemp "$output_directory/$file.XXXXXX")
     cp "$temporary_directory/config/$file" "$staged_output"

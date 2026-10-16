@@ -1,6 +1,7 @@
 [load(strenv(HOMELAB_MACHINES)).machines | to_entries[] | .key as $network |
   .value | to_entries[] | select(.value.type != null) |
   ($network + "-" + (.value.hostname // .key))] as $host_groups |
+(map(.cluster) | unique) as $cluster_names |
 map(
   ([. + {"clusterView": false}] +
     [.clusterGroups[] as $group |
@@ -42,7 +43,7 @@ map(
   .value + {"group": $group, "name": .key,
     "tab": (["Services"] +
       ($host_groups | map(select(. == $group)) | map("Servers")) +
-      ([$group] | map(select(test("^Cluster: "))) | map("Clusters")) | .[-1])} |
+      ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])} |
   # Homepage resolves widget proxies by leaf group name, even across nested tabs.
   with(select(.tab == "Servers" and ($cluster_groups | contains([$group])));
     .group += " (Server)")] as $external |

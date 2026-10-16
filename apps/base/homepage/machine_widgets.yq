@@ -2,6 +2,7 @@
 load(strenv(TEMPLATE)) as $groups |
 load(strenv(INFRASTRUCTURE)) as $infra |
 load(strenv(PROVIDERS)).providers as $providers |
+(strenv(HOMEPAGE_CLUSTER_NAMES) | split(",") | map(select(. != ""))) as $cluster_names |
 ($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare"}) as $cloudflare |
 ($providers.tailscale // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "tailscale-light"}) as $tailscale |
 {
@@ -75,11 +76,17 @@ load(strenv(PROVIDERS)).providers as $providers |
 ] as $monitoring |
 [($infra.cloudflare.tunnels // {}) | to_entries[] | select($cloudflare.widget != null) |
   .key as $name | select($hosts | any_c(.key == $name) | not) |
-  $cloudflare + {"group": ("Cluster: " + ($name | upcase)),
+  $cloudflare + {"group": $name,
    "href": ("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .value),
    "widget": ($cloudflare.widget + {"accountid": $infra.cloudflare.account_id, "tunnelid": .value})}
 ] as $cluster_tunnels |
-($existing + $management + $monitoring + $cluster_tunnels) |
+[($infra.tailscale // {}) | to_entries[] | .key as $name |
+  select($cluster_names | contains([$name])) | select($tailscale.widget != null) |
+  $tailscale + {"group": $name,
+    "href": ("https://login.tailscale.com/admin/machines/" + .value),
+    "widget": ($tailscale.widget + {"deviceid": .value})}
+] as $cluster_devices |
+($existing + $management + $monitoring + $cluster_tunnels + $cluster_devices) |
 map(.weight = 0 | with(select(.widget != null or (.widgets | length > 0)); .weight = -100)) |
 sort_by(.group, .weight, .name) | group_by(.group) |
 map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})

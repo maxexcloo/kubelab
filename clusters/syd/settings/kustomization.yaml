@@ -56,6 +56,12 @@ replacements:
           name: privatednsrecords.automation.excloo.dev
         fieldPaths:
           - spec.versions.0.schema.openAPIV3Schema.properties.spec.properties.target.default
+      - select:
+          kind: PrivateDNSRecord
+        fieldPaths:
+          - spec.target
+        options:
+          create: true
   - source:
       kind: ConfigMap
       name: cluster-settings-syd

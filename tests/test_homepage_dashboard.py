@@ -341,7 +341,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         identities = self.directory / "infrastructure.json"
         identities.write_text(json.dumps({
             "cloudflare": {"account_id": "account", "tunnels": {"kimbap": "storage-tunnel", "mbk": "cluster-tunnel"}},
-            "tailscale": {"kimbap": "storage-device", "taco": "node-device", "personal": "personal-device"},
+            "tailscale": {"kimbap": "storage-device", "mbk": "cluster-device", "taco": "node-device", "personal": "personal-device"},
         }))
         beszel = route("Beszel")
         beszel["metadata"]["namespace"] = "beszel"
@@ -370,7 +370,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(node["Beszel"]["widget"]["systemId"], "mbk-taco")
         self.assertEqual(node["Beszel"]["href"], "https://beszel.example.net/system/mbk-taco")
         self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
-        self.assertEqual(groups["Cluster: MBK"]["Cloudflare"]["widget"]["tunnelid"], "cluster-tunnel")
+        self.assertEqual(groups["mbk"]["Cloudflare"]["widget"]["tunnelid"], "cluster-tunnel")
+        self.assertEqual(groups["mbk"]["Tailscale"]["widget"]["deviceid"], "cluster-device")
         self.assertEqual(node["Tailscale"]["widget"]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
         self.assertEqual(node["Tailscale"]["href"], "https://login.tailscale.com/admin/machines/node-device")
         self.assertEqual(node["Beszel"]["widget"]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")

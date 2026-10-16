@@ -39,6 +39,10 @@ class ClusterSettingsTests(unittest.TestCase):
                     self.assertNotIn(unresolved, rendered, str(path))
                 resources.extend(read_resources(path))
             self.assertFalse(any(r["metadata"]["name"].startswith(("cluster-settings-", "shared-settings")) for r in resources))
+            # Defaults only affect creation; explicit targets migrate existing DNS records too.
+            dns_records = [r for r in resources if r["kind"] == "PrivateDNSRecord"]
+            self.assertTrue(dns_records)
+            self.assertEqual({r["spec"]["target"] for r in dns_records}, {"private.changed.example"})
             litellm = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "litellm")
             values = litellm["spec"]["values"]
             bento = next(d for d in values["proxy_config"]["model_list"] if d["model_name"].startswith("bento/"))
