@@ -7,8 +7,6 @@ resources:
   - storage.yaml
 components:
   - ../../components/application
-  - ../../../platform/backups/destination
-  - ../../../platform/backups/files
   - ../../components/app-namespace
 configurations:
   - kustomizeconfig.yaml
@@ -20,10 +18,6 @@ patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
-  - path: file-backup.yaml
-    target:
-      kind: CronJob
-      name: file-backup
 replacements:
   - source:
       kind: HelmRelease

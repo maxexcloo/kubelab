@@ -11,8 +11,6 @@ resources:
   - storage.yaml
 components:
   - ../../components/application
-  - ../../../platform/backups/destination
-  - ../../../platform/backups/postgres
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml

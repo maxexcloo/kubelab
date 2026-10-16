@@ -40,6 +40,4 @@ replacements:
           delimiter: /
           index: 2
 components:
-  - ../../../platform/backups/destination
-  - ../../../platform/backups/postgres
   - ../../components/app-namespace

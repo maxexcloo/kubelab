@@ -74,8 +74,6 @@ spec:
               HOMEPAGE_FILE_BESZEL_PASSWORD: /secrets/beszel-password
               HOMEPAGE_FILE_BESZEL_USERNAME: /secrets/beszel-username
               HOMEPAGE_FILE_CLOUDFLARE_KEY: /secrets/cloudflare-key
-              HOMEPAGE_FILE_GRAFANA_MBK_PASSWORD: /secrets/grafana-mbk-password
-              HOMEPAGE_FILE_GRAFANA_MBK_USERNAME: /secrets/grafana-mbk-username
               HOMEPAGE_FILE_GRAFANA_SYD_PASSWORD: /secrets/grafana-syd-password
               HOMEPAGE_FILE_GRAFANA_SYD_USERNAME: /secrets/grafana-syd-username
               HOMEPAGE_FILE_HOME_ASSISTANT_KEY: /secrets/home-assistant-key

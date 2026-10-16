@@ -43,6 +43,4 @@ replacements:
           delimiter: /
           index: 2
 components:
-  - ../../../platform/backups/destination
-  - ../../../platform/backups/files
   - ../../components/app-namespace

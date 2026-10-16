@@ -36,21 +36,6 @@ spec:
           defaultVolumeType: hostPath
           reclaimPolicy: Delete
           volumeBindingMode: WaitForFirstConsumer
-      local-backups:
-        nodePathMap:
-          - node: kimbap
-            paths:
-              - /var/mnt/datasets/truenas/clusters/mbk
-        storageClass:
-          allowVolumeExpansion: true
-          create: true
-          defaultClass: false
-          defaultVolumeType: hostPath
-          groupPattern: "568"
-          permPattern: "0770"
-          reclaimPolicy: Retain
-          volumeBindingMode: WaitForFirstConsumer
-          userPattern: "568"
       atvloadly-local:
         nodePathMap:
           - node: DEFAULT_PATH_FOR_NON_LISTED_NODES

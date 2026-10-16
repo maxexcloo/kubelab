@@ -6,14 +6,8 @@ resources:
   - network-policy.yaml
 components:
   - ../../components/workload
-  - ../../../platform/backups/destination
-  - ../../../platform/backups/files
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
-  - path: file-backup.yaml
-    target:
-      kind: CronJob
-      name: file-backup
