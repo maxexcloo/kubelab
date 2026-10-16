@@ -13,4 +13,5 @@ spec:
         containers:
           proxy:
             env:
+              GATEWAY_HOST: hsp.syd.excloo.net
               POD_SUBNET: 10.100.0.0/22

@@ -17,7 +17,8 @@ http {
     }
     server {
         listen 5534;
-        # Only the private gateway's cluster traffic and node-local probes enter.
+        # Gateway traffic can be masqueraded to its node's Tailscale address.
+        allow ${GATEWAY_IP};
         allow ${POD_SUBNET};
         allow ${NODE_IP};
         allow 127.0.0.1;

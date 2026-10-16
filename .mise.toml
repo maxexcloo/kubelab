@@ -1,5 +1,5 @@
 [vars]
-shell_paths = "scripts/*.sh apps/base/homepage/*.sh apps/base/syncthing/*.sh platform/backups/files/*.sh"
+shell_paths = "scripts/*.sh apps/base/atvloadly/*.envsh apps/base/homepage/*.sh apps/base/syncthing/*.sh platform/backups/files/*.sh"
 updatecli_discovery = "python -B scripts/updates.py"
 
 [tools]

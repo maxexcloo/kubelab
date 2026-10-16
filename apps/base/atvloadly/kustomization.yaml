@@ -7,6 +7,7 @@ configMapGenerator:
   - name: atvloadly-proxy
     files:
       - nginx.conf.template=proxy.conf.template
+      - proxy-gateway.envsh
 configurations:
   - name-reference.yaml
 replacements:

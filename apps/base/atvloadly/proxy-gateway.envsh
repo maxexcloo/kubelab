@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+GATEWAY_IP="$(getent ahostsv4 "${GATEWAY_HOST:?}" | awk 'NR == 1 { print $1 }')"
+: "${GATEWAY_IP:?Private gateway hostname did not resolve to IPv4}"
+export GATEWAY_IP
