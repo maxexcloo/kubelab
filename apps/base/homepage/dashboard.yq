@@ -11,6 +11,8 @@ map(
   with(select($cluster == strenv(HOMEPAGE_CLUSTER));
     .app = (.app // $route.labels."app.kubernetes.io/name" // ($route.source | split("/") | .[2])) |
     .namespace = $route.namespace |
+    # Native pod stats aggregate matching pods; Homepage cannot show their hosting nodes.
+    .showStats = (.showStats // "true") |
     with(select(."pod-selector" != null); .podSelector = ."pod-selector")) |
   del(."pod-selector") |
   with(select($cluster != strenv(HOMEPAGE_CLUSTER)); del(.app, .namespace, .showStats)) |
@@ -20,6 +22,7 @@ map(
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
   with(select(.widget.version != null); .widget.version |= from_yaml) |
+  with(select(.showStats != null); .showStats |= from_yaml) |
   # In-cluster services report status through the Kubernetes connection. Keep
   # the siteMonitor annotation for other clusters, where no connection exists.
   with(select(.app != null); del(.siteMonitor)) |

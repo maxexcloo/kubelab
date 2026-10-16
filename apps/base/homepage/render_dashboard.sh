@@ -123,9 +123,11 @@ SERVICES="$temporary_directory/config/services.yaml" \
   > "$temporary_directory/config/services.yaml.next"
 mv "$temporary_directory/config/services.yaml.next" "$temporary_directory/config/services.yaml"
 
-for file in custom.css docker.yaml kubernetes.yaml widgets.yaml; do
+for file in custom.css docker.yaml kubernetes.yaml; do
   cp "$source_directory/$file" "$temporary_directory/config/$file"
 done
+yq '(.[] | select(has("kubernetes"))).kubernetes.cluster.label = ("Cluster: " + (strenv(HOMEPAGE_CLUSTER) | upcase))' \
+  "$source_directory/widgets.yaml" > "$temporary_directory/config/widgets.yaml"
 
 # Native Homepage layout preferences override defaults for discovered groups.
 # shellcheck disable=SC2016

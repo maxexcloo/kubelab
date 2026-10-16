@@ -1,3 +1,16 @@
 - search:
     provider: google
     target: _blank
+# Node names, Ready state and usage come from the local Kubernetes API and metrics-server.
+- kubernetes:
+    cluster:
+      cpu: true
+      label: Cluster
+      memory: true
+      show: true
+      showLabel: true
+    nodes:
+      cpu: true
+      memory: true
+      show: true
+      showLabel: true

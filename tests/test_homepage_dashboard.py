@@ -403,6 +403,33 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
 
+    def test_native_node_widget_and_local_pod_stats_follow_cluster_selection(self):
+        self.write_routes("mbk", [route("Local", **{"pod-selector": "app=local"}),
+                                  route("Compact", showStats="false")])
+        for cluster in ("mbk", "syd"):
+            with self.subTest(cluster=cluster):
+                result = self.render(HOMEPAGE_CLUSTER=cluster)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                widgets = read_yaml(self.output / "widgets.yaml")
+                kubernetes = next(widget["kubernetes"] for widget in widgets if "kubernetes" in widget)
+                self.assertEqual(kubernetes["cluster"]["label"], f"Cluster: {cluster.upper()}")
+                for scope in ("cluster", "nodes"):
+                    for option in ("cpu", "memory", "show", "showLabel"):
+                        self.assertIs(kubernetes[scope][option], True)
+                # Nodes are discovered by Homepage, never copied from host inventory.
+                self.assertEqual(set(kubernetes), {"cluster", "nodes"})
+                services = self.services()
+                local, remote = ("Local", "Remote") if cluster == "mbk" else ("Remote", "Local")
+                self.assertIs(services[local]["showStats"], True)
+                self.assertEqual(services[local]["namespace"], local.lower())
+                for option in ("app", "namespace", "podSelector", "showStats"):
+                    self.assertNotIn(option, services[remote])
+                if cluster == "mbk":
+                    self.assertEqual(services[local]["podSelector"], "app=local")
+                    self.assertIs(services["Compact"]["showStats"], False)
+                layout = read_yaml(self.output / "settings.yaml")["layout"]
+                self.assertEqual(layout[f"Cluster: {cluster.upper()}"]["tab"], "Servers")
+
     def test_unchanged_refresh_and_invalid_input_preserve_files(self):
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
