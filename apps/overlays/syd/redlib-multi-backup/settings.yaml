@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-settings
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  deployment: redlib-multi
+  helm_release: redlib-multi

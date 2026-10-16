@@ -1,0 +1,115 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: state-backup
+  labels:
+    backup.excloo.dev/component: state
+spec:
+  schedule: 0 3 * * *
+  timeZone: Australia/Sydney
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: state-backup
+        spec:
+          serviceAccountName: state-backup
+          restartPolicy: Never
+          initContainers:
+            - name: kubectl
+              image: docker.io/alpine/k8s:1.37.1
+              command:
+                - /bin/sh
+                - -ec
+                - cp "$(command -v kubectl)" /tools/kubectl
+              volumeMounts:
+                - name: tools
+                  mountPath: /tools
+                - name: tmp
+                  mountPath: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              env:
+                - name: HOME
+                  value: /tmp
+          containers:
+            - name: backup
+              image: docker.io/restic/restic:0.19.1
+              command:
+                - /bin/sh
+                - /scripts/backup.sh
+              env:
+                - name: AWS_DEFAULT_REGION
+                  value: us-east-1
+                - name: DEPLOYMENT
+                  value: application
+                - name: HELM_RELEASE
+                  value: application
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: HOME
+                  value: /tmp
+              envFrom:
+                - secretRef:
+                    name: backup-credentials
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: "1"
+                  memory: 1Gi
+              volumeMounts:
+                - name: data
+                  mountPath: /sources/data
+                  readOnly: true
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+                - name: snapshot
+                  mountPath: /snapshot
+                - name: tools
+                  mountPath: /tools
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: data
+                readOnly: true
+            - name: script
+              configMap:
+                name: state-backup
+            - name: snapshot
+              emptyDir:
+                sizeLimit: 30Gi
+            - name: tools
+              emptyDir: {}
+            - name: tmp
+              emptyDir: {}
+          securityContext:
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault

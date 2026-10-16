@@ -54,4 +54,7 @@ replacements:
           delimiter: /
           index: 2
 components:
+  - ../../../platform/backups/credentials
+  - ../../../platform/backups/postgres
   - ../../components/app-namespace
+patches: []

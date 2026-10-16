@@ -32,6 +32,8 @@ targets:
   - <<: *namespaced
     select: { kind: NetworkPolicy }
   - <<: *namespaced
+    select: { kind: ObjectStore }
+  - <<: *namespaced
     select: { kind: PersistentVolumeClaim }
   - <<: *namespaced
     select: { kind: PocketIDClient }
@@ -41,6 +43,12 @@ targets:
     select: { kind: Request }
   - <<: *namespaced
     select: { kind: ResendKey }
+  - <<: *namespaced
+    select: { kind: Role }
+  - <<: *namespaced
+    select: { kind: RoleBinding }
+  - <<: *namespaced
+    select: { kind: ScheduledBackup }
   - <<: *namespaced
     select: { kind: Service }
   - <<: *namespaced

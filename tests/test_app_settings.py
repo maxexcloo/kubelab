@@ -79,6 +79,7 @@ class AppSettingsTests(unittest.TestCase):
                         app = Path(directory) / "apps/base" / settings.parent.name
                         app.parent.mkdir(parents=True)
                         shutil.copytree(ROOT / "apps/components", Path(directory) / "apps/components")
+                        shutil.copytree(ROOT / "platform/backups", Path(directory) / "platform/backups")
                         if settings.parent.name == "homepage":
                             shutil.copytree(ROOT / "scripts/service-routes", Path(directory) / "scripts/service-routes")
                         shutil.copytree(settings.parent, app)

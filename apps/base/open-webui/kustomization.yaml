@@ -43,4 +43,11 @@ replacements:
           delimiter: /
           index: 2
 components:
+  - ../../../platform/backups/credentials
+  - ../../../platform/backups/files
   - ../../components/app-namespace
+patches:
+  - path: backup.yaml
+    target:
+      kind: CronJob
+      name: state-backup

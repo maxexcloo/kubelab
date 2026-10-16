@@ -1,0 +1,58 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - settings.yaml
+components:
+  - ../../../../../platform/backups/credentials
+  - ../../../../../platform/backups/files
+patches:
+  - target:
+      kind: CronJob
+    patch: '[{"op": "replace", "path": "/spec/schedule", "value": "57 3 * * *"}, {"op": "replace", "path": "/spec/jobTemplate/spec/template/spec/volumes/0/persistentVolumeClaim/claimName", "value": "victoria-metrics-k8s-stack-grafana"}]'
+  - target:
+      labelSelector: backup.excloo.dev/component=state
+    patch: |
+      - op: add
+        path: /metadata/namespace
+        value: observability
+  - target:
+      kind: CronJob
+    patch: |
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/securityContext
+        value:
+          fsGroup: 472
+          fsGroupChangePolicy: OnRootMismatch
+          runAsGroup: 472
+          runAsNonRoot: true
+          runAsUser: 472
+          seccompProfile:
+            type: RuntimeDefault
+replacements:
+  - source:
+      kind: ConfigMap
+      name: backup-settings
+      fieldPath: data.deployment
+    targets:
+      - select:
+          kind: CronJob
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.containers.[name=backup].env.[name=DEPLOYMENT].value
+      - select:
+          kind: Role
+        fieldPaths:
+          - rules.0.resourceNames.0
+  - source:
+      kind: ConfigMap
+      name: backup-settings
+      fieldPath: data.helm_release
+    targets:
+      - select:
+          kind: CronJob
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.containers.[name=backup].env.[name=HELM_RELEASE].value
+      - select:
+          kind: Role
+        fieldPaths:
+          - rules.1.resourceNames.0

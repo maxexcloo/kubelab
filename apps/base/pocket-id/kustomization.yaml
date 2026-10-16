@@ -10,6 +10,8 @@ resources:
   - resend.yaml
 components:
   - ../../components/application
+  - ../../../platform/backups/credentials
+  - ../../../platform/backups/postgres
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml

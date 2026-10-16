@@ -145,3 +145,21 @@ replacements:
         options:
           delimiter: /
           index: 2
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-syd
+      fieldPath: data.backup_endpoint
+    targets:
+      - select:
+          kind: ObjectStore
+        fieldPaths:
+          - spec.configuration.endpointURL
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-syd
+      fieldPath: data.backup_destination
+    targets:
+      - select:
+          kind: ObjectStore
+        fieldPaths:
+          - spec.configuration.destinationPath
