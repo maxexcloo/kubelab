@@ -55,7 +55,7 @@ body {
   > div
   > div:nth-child(n + 2)
   .pt-1.text-center::before {
-  content: var(--homepage-cluster) ": ";
+  content: var(--homepage-cluster) "-";
 }
 [id^="provider-"] .service-icon {
   min-height: 5rem;

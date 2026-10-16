@@ -14,23 +14,23 @@ layout:
   Applications:
     columns: 4
     style: row
-    tab: Services
+    tab: Home
   Artificial Intelligence:
     columns: 2
     style: row
-    tab: Services
+    tab: Home
   Media:
     columns: 4
     style: row
-    tab: Services
+    tab: Home
   Mini Apps:
     columns: 4
     style: row
-    tab: Services
+    tab: Home
   Operations:
     columns: 2
     style: row
-    tab: Services
+    tab: Home
   Providers:
     columns: 4
     style: row
@@ -38,8 +38,8 @@ layout:
   Infrastructure:
     columns: 2
     style: row
-    tab: Services
+    tab: Home
   Smart Home:
     columns: 4
     style: row
-    tab: Services
+    tab: Home

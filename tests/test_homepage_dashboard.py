@@ -221,7 +221,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         groups = self.groups()
         self.assertEqual([next(iter(card)) for card in groups["Mini Apps"]], ["Budget", "Feeds"])
         self.assertNotIn("Feeds", [next(iter(card)) for card in groups["Applications"]])
-        self.assertEqual(read_yaml(self.output / "settings.yaml")["layout"]["Services"]["tab"], "Services")
+        self.assertEqual(read_yaml(self.output / "settings.yaml")["layout"]["Home"]["tab"], "Home")
         # Newly deployed apps appear on refresh; removed apps disappear without
         # maintaining a second list of dashboard cards.
         path = mini_apps / "clusters/syd/app.yaml"
@@ -280,7 +280,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(widget["key"], "{{HOMEPAGE_FILE_IMMICH_KEY}}")
         self.assertEqual(widget["headers"], {"X-Example": "value"})
         self.assertEqual(widget["version"], 2)
-        self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"]["Services"])
+        self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"]["Home"])
         self.write_routes("mbk", [resource])
         self.write_routes("syd", [route("Remote")])
         result = self.render()
@@ -290,7 +290,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         groups = self.groups()
         self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • MBK")
         self.assertIn("Library", groups["mbk-node"][0])
-        self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"]["Services"])
+        self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"]["Home"])
 
     def test_helm_status_selector_uses_explicit_release_name_for_both_route_layouts(self):
         annotations = route("Reader")["metadata"]["annotations"]
@@ -383,8 +383,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
             self.assertEqual(layout["Servers"]["tab"], "Servers")
             self.assertIn(group, layout["Servers"])
         for group in ["Infrastructure", "Operations", "Smart Home"]:
-            self.assertEqual(layout["Services"]["tab"], "Services")
-            self.assertIn(group, layout["Services"])
+            self.assertEqual(layout["Home"]["tab"], "Home")
+            self.assertIn(group, layout["Home"])
         before = (self.output / "services.yaml").read_bytes()
         identities.write_text("{broken json")
         self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities)).returncode, 0)
@@ -465,7 +465,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(layout["Clusters"]["tab"], "Clusters")
         self.assertIn("mbk-node", layout["Clusters"])
         self.assertIn("syd", layout["Clusters"])
-        self.assertEqual(layout["Services"]["tab"], "Services")
+        self.assertEqual(layout["Home"]["tab"], "Home")
         self.assertIn("Servers", layout)
         before = (self.output / "services.yaml").read_bytes()
         inventory["machines"]["mbk"]["extra"] = {"cluster": "mbk", "type": "vm"}
@@ -482,8 +482,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
                 self.assertEqual(result.returncode, 0, result.stderr)
                 widgets = read_yaml(self.output / "widgets.yaml")
                 kubernetes = next(widget["kubernetes"] for widget in widgets if "kubernetes" in widget)
-                self.assertEqual(kubernetes["cluster"]["label"], cluster.upper())
-                self.assertIn(f'--homepage-cluster: "{cluster.upper()}"', (self.output / "custom.css").read_text())
+                self.assertEqual(kubernetes["cluster"]["label"], cluster)
+                self.assertIn(f'--homepage-cluster: "{cluster}"', (self.output / "custom.css").read_text())
                 for scope in ("cluster", "nodes"):
                     for option in ("cpu", "memory", "show", "showLabel"):
                         self.assertIs(kubernetes[scope][option], True)
@@ -560,7 +560,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
             self.assertEqual(card["widget"]["mappings"][0]["field"], "results.0.success")
         self.assertEqual(read_yaml(self.output / "bookmarks.yaml"), [])
         layout = read_yaml(self.output / "settings.yaml")["layout"]
-        self.assertEqual(list(layout), ["Services", "Clusters", "Servers", "Providers"])
+        self.assertEqual(list(layout), ["Home", "Clusters", "Servers", "Providers"])
         self.assertEqual(layout["Providers"]["tab"], "Providers")
         before = (self.output / "services.yaml").read_bytes()
         self.gatus.write_text(json.dumps([

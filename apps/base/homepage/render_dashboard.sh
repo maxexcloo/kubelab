@@ -173,9 +173,8 @@ mv "$temporary_directory/config/services.yaml.next" "$temporary_directory/config
 for file in custom.css custom.js docker.yaml kubernetes.yaml; do
   cp "$source_directory/$file" "$temporary_directory/config/$file"
 done
-cluster_label=$(printf '%s' "$HOMEPAGE_CLUSTER" | tr '[:lower:]' '[:upper:]')
-printf '\n:root { --homepage-cluster: "%s"; }\n' "$cluster_label" >> "$temporary_directory/config/custom.css"
-yq '(.[] | select(has("kubernetes"))).kubernetes.cluster.label = (strenv(HOMEPAGE_CLUSTER) | upcase)' \
+printf '\n:root { --homepage-cluster: "%s"; }\n' "$HOMEPAGE_CLUSTER" >> "$temporary_directory/config/custom.css"
+yq '(.[] | select(has("kubernetes"))).kubernetes.cluster.label = strenv(HOMEPAGE_CLUSTER)' \
   "$source_directory/widgets.yaml" > "$temporary_directory/config/widgets.yaml"
 
 # Nested groups keep identical host and Kubernetes node names on separate tabs.
@@ -184,7 +183,7 @@ SERVICES="$temporary_directory/config/services.yaml" \
   yq '
     .layout as $preferences |
     load(strenv(SERVICES)) as $services |
-    .layout = (["Services", "Clusters", "Servers"][] as $tab ireduce ({};
+    .layout = (["Home", "Clusters", "Servers"][] as $tab ireduce ({};
       ($services | map(select(has($tab))) | .[0][$tab] // []) as $groups |
       with(select(($groups | length) > 0);
         .[$tab] = (($groups[] | keys | .[]) as $group ireduce (

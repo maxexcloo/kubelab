@@ -12,7 +12,7 @@ map(
   with_entries(select(.key | test("^gethomepage.dev/"))) |
   with_entries(.key |= sub("^gethomepage.dev/"; "")) |
   del(.enabled, .instance) |
-  .tab = "Services" |
+  .tab = "Home" |
   with(select($route.clusterView == true); .tab = "Clusters") |
   with(select($cluster == strenv(HOMEPAGE_CLUSTER));
     .app = (.app // $route.labels."app.kubernetes.io/name" // ($route.source | split("/") | .[2])) |
@@ -41,7 +41,7 @@ map(
 [load(strenv(SERVICES)) | .[] | to_entries | .[] |
   .key as $group | .value[] | to_entries | .[] |
   .value + {"group": $group, "name": .key,
-    "tab": (["Services"] +
+    "tab": (["Home"] +
       ($host_groups | map(select(. == $group)) | map("Servers")) +
       ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])} |
   # Homepage resolves widget proxies by leaf group name, even across nested tabs.
