@@ -1,55 +1,57 @@
+[vars]
+shell_paths = "scripts/*.sh apps/base/homepage/*.sh"
+updatecli_discovery = "python -B scripts/updates.py"
+
 [tools]
 # 1password-cli = "latest"
+# actionlint = "latest"
 # gh = "latest"
 # helm = "latest"
-# kubectl = "latest"
+# jq = "latest"
+# node = "latest"
 # prek = "latest"
+# prettier = "latest"
 # python = "latest"
+# ruff = "latest"
+# shellcheck = "latest"
 # updatecli = "latest"
+# uv = "latest"
 # yq = "latest"
-actionlint = "1.7.12"
 flux2 = "2.9.6"
 kubeconform = "0.8.0"
 # Select schemas for the deployed Kubernetes API.
 kubectl = "1.37.1"
-prettier = "3.9.10"
-shellcheck = "0.11.0"
 
 # Bootstrap
 [tasks.bootstrap]
-description = "Bootstrap A Cluster In Dependency Order"
 run = 'echo "Cluster $usage_cluster bootstrap submitted. Check progress with: mise run status $usage_cluster"'
 usage = 'arg "<cluster>"'
 depends = [
-  { task = "bootstrap-cilium", args = [
+  { task = "bootstrap:cilium", args = [
     "{{usage.cluster}}",
   ] },
-  { task = "bootstrap-secrets", args = [
+  { task = "bootstrap:secrets", args = [
     "{{usage.cluster}}",
   ] },
-  { task = "bootstrap-flux", args = [
+  { task = "bootstrap:flux", args = [
     "{{usage.cluster}}",
   ] },
 ]
 
-[tasks.bootstrap-cilium]
-description = "Bootstrap Cilium Networking For A Cluster"
+[tasks."bootstrap:cilium"]
 interactive = true
 run = "scripts/bootstrap_cilium.sh"
 
-[tasks.bootstrap-flux]
-description = "Bootstrap Flux Reconciliation For A Cluster"
+[tasks."bootstrap:flux"]
 run = "scripts/bootstrap_flux.sh"
-wait_for = ["bootstrap-secrets"]
+wait_for = ["bootstrap:secrets"]
 
-[tasks.bootstrap-secrets]
-description = "Bootstrap 1Password Connect Credentials"
+[tasks."bootstrap:secrets"]
 run = "scripts/bootstrap_cluster_secrets.sh"
-wait_for = ["bootstrap-cilium"]
+wait_for = ["bootstrap:cilium"]
 
 # Deploy
 [tasks.deploy]
-description = "Reconcile A Cluster Or Flux Component From Git"
 run = 'flux --context "$usage_cluster" reconcile kustomization "${usage_component:-flux-system}" --with-source'
 usage = '''
 arg "<cluster>"
@@ -73,32 +75,21 @@ arg "[application]"
 
 # Development
 [tasks.check]
-description = "Run All Repository Checks"
-run = "prek run --all-files"
+depends = ["hooks:check"]
 
 [tasks.fmt]
-description = "Format Project Files"
-run = "prettier --write ."
+depends = ["fmt:prettier"]
 
 [tasks.validate]
-description = "Check Project Files & Configuration"
-run = """
-updatecli manifest validate --config .updatecli.d --disable-templating --strict
-actionlint .github/workflows/*.yaml
-prettier --check .
-shellcheck scripts/*.sh apps/base/homepage/*.sh
+depends = ["check:actions", "check:prettier", "check:shell", "check:updates"]
+run = ["""
 manifest_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-check.XXXXXX")"
 trap 'rm -fr -- "${manifest_directory:?}"' EXIT
 scripts/render_manifests.sh "$manifest_directory"
 scripts/check_manifests.sh "$manifest_directory"
 scripts/check_service_metadata.sh "$manifest_directory"
-python -m unittest discover -p 'test_*.py' -s tests
-"""
+""", { task = "test:python" }]
 
 # Setup
 [tasks.setup]
-description = "Install Tools & Git Hooks"
-run = """
-mise install
-prek install
-"""
+depends = ["hooks:install"]

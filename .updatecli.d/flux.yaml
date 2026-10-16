@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://www.updatecli.io/schema/latest/policy/manifest/config.json
+name: Update Flux
+pipelineid: update-flux
+autodiscovery:
+  crawlers:
+    flux:
+      digest: false
+labels:
+  group: flux

@@ -27,6 +27,9 @@ invariants and editing conventions.
 
 ## Setup
 
+Install the [shared Mise configuration](https://github.com/maxexcloo/dotfiles#shared-tools--tasks)
+before running local Mise tasks.
+
 Install jq, wget and [Mise](https://mise.jdx.dev/), then install the configured tools
 and Git hooks:
 

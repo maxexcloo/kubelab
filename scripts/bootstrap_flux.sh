@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
-  echo "Usage: mise run bootstrap-flux <cluster>" >&2
+  echo "Usage: mise run bootstrap:flux <cluster>" >&2
   exit 1
 fi
 
