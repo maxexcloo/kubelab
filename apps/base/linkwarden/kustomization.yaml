@@ -10,6 +10,7 @@ resources:
 components:
   - ../../../platform/databases/postgres-minimal
   - ../../components/application
+  - ../../components/database-colocation
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
   - ../../../platform/backups/postgres

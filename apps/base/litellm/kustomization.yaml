@@ -19,6 +19,18 @@ configMapGenerator:
       - hooks.py
 replacements:
   - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: application
+        fieldPaths:
+          - spec.hostnames.1
+        options:
+          delimiter: .
+          index: 0
+  - source:
       kind: HTTPRoute
       name: litellm
       fieldPath: spec.hostnames.0

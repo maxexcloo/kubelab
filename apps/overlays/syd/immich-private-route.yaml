@@ -5,9 +5,11 @@ metadata:
   namespace: immich
   labels:
     app.kubernetes.io/name: immich
+    gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:
     - app.invalid
+    - immich.cluster.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

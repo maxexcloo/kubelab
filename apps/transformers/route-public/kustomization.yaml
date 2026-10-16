@@ -5,6 +5,7 @@ resources:
 patches:
   - target:
       kind: ReplacementTransformer
+      name: route-hostname
     patch: |-
       - op: test
         path: /replacements/0/source/fieldPath

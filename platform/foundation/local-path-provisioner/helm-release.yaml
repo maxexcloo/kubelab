@@ -11,6 +11,8 @@ spec:
     name: local-path-provisioner
     namespace: flux-system
   values:
+    nodeSelector:
+      node.excloo.dev/network: internal
     helperImage:
       repository: docker.io/library/busybox
       tag: 1.38.0

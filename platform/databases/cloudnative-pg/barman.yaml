@@ -16,6 +16,16 @@ spec:
         namespace: flux-system
       interval: 24h
   values:
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: node.excloo.dev/network
+                  operator: In
+                  values:
+                    - internal
     resources:
       requests:
         cpu: 10m

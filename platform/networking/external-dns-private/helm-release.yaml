@@ -6,6 +6,16 @@ metadata:
 spec:
   releaseName: external-dns-private
   values:
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: node.excloo.dev/network
+                  operator: In
+                  values:
+                    - internal
     domainFilters:
       - excloo.com
     labelFilter: gateway.excloo.dev/private-dns=true

@@ -8,6 +8,44 @@ replacements:
   - source:
       kind: ConfigMap
       name: cluster-settings-syd
+      fieldPath: data.cluster_name
+    targets:
+      - select:
+          kind: HelmRelease
+          labelSelector: gateway.excloo.dev/internal-alias=app-template
+        fieldPaths:
+          - spec.values.route.private.hostnames.1
+        options:
+          delimiter: .
+          index: 1
+      - select:
+          kind: HTTPRoute
+          labelSelector: gateway.excloo.dev/internal-alias=primary
+        fieldPaths:
+          - spec.hostnames.0
+        options:
+          delimiter: .
+          index: 1
+      - select:
+          kind: HTTPRoute
+          labelSelector: gateway.excloo.dev/internal-alias=true
+        fieldPaths:
+          - spec.hostnames.1
+        options:
+          delimiter: .
+          index: 1
+      - select:
+          kind: HelmRelease
+          name: open-webui
+          namespace: open-webui
+        fieldPaths:
+          - spec.values.route.hostnames.1
+        options:
+          delimiter: .
+          index: 1
+  - source:
+      kind: ConfigMap
+      name: cluster-settings-syd
       fieldPath: data.bento_address
     targets:
       - select:

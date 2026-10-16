@@ -17,6 +17,17 @@ configMapGenerator:
       - tool-images.py
 replacements:
   - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.route.hostnames.1
+        options:
+          delimiter: .
+          index: 0
+  - source:
       kind: HelmRelease
       fieldPath: spec.values.route.hostnames.0
     targets:

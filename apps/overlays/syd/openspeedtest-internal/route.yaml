@@ -1,0 +1,33 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: openspeedtest-internal
+  namespace: openspeedtest
+  annotations:
+    gethomepage.dev/description: Internal Network Speed Test
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Servers
+    gethomepage.dev/href: https://app.invalid
+    gethomepage.dev/icon: sh-openspeedtest
+    gethomepage.dev/name: OpenSpeedTest Internal
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-internal
+    monitoring.excloo.dev/enabled: "true"
+  labels:
+    app.kubernetes.io/name: openspeedtest-internal
+    gateway.excloo.dev/internal-alias: primary
+spec:
+  hostnames:
+    - openspeedtest-internal.cluster.excloo.dev
+  parentRefs:
+    - name: private
+      namespace: networking
+  rules:
+    - backendRefs:
+        - name: openspeedtest-internal
+          port: 80
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: openspeedtest-buffering

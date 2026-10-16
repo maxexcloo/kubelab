@@ -3,3 +3,25 @@ kind: Kustomization
 resources:
   - ../../../platform/bootstrap/flux-system
   - gotk-sync.yaml
+patches:
+  - target:
+      kind: Deployment
+      labelSelector: app.kubernetes.io/part-of=flux
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: controller
+      spec:
+        template:
+          spec:
+            affinity:
+              nodeAffinity:
+                preferredDuringSchedulingIgnoredDuringExecution:
+                  - weight: 100
+                    preference:
+                      matchExpressions:
+                        - key: node.excloo.dev/network
+                          operator: In
+                          values:
+                            - internal

@@ -1,0 +1,45 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: openspeedtest
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: openspeedtest
+        namespace: flux-system
+      version: 0.1.2
+      # This chart hardcodes probes rather than exposing their timing in values.
+  values:
+    image:
+      pullPolicy: IfNotPresent
+      repository: openspeedtest/latest
+      tag: v2.0.6
+    nodeSelector:
+      node.excloo.dev/network: external
+    podSecurityContext:
+      runAsGroup: 101
+      runAsUser: 101
+    resources:
+      limits:
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 64Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+    service:
+      port: 80
+      type: ClusterIP
+    serviceAccount:
+      create: false

@@ -1,0 +1,16 @@
+apiVersion: builtin
+kind: ReplacementTransformer
+metadata:
+  name: internal-alias
+replacements:
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.route.private.hostnames.1
+        options:
+          delimiter: .
+          index: 0

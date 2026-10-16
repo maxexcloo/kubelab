@@ -5,6 +5,8 @@ metadata:
 spec:
   statefulSet:
     pod:
+      nodeSelector:
+        node.excloo.dev/network: external
       tailscaleContainer:
         resources:
           limits:

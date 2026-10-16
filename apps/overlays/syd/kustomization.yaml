@@ -28,11 +28,16 @@ resources:
   - ../../base/sidestore-vpn
   - ../../base/signtools
   - ../../base/syncthing
+  - openspeedtest-internal
+  - redlib-multi-backup
   - homepage-private-dns.yaml
   - immich-private-route.yaml
   - openspeedtest-route.yaml
-  - redlib-multi-backup
 patches:
+  - path: external-placement.yaml
+    target:
+      kind: HelmRelease
+      name: (aiometadata|aiostreams|cliproxyapi|redlib)
   - patch: |-
       - op: add
         path: /spec/postBuild
@@ -88,7 +93,25 @@ patches:
             ports:
               - port: 5006
                 protocol: TCP
+# Reapply hostname consumers after cluster settings resolve the private alias.
+transformers:
+  - ../../base/homepage/routing
 replacements:
+  - source:
+      kind: HTTPRoute
+      name: openspeedtest-internal
+      namespace: openspeedtest
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: openspeedtest-internal
+          namespace: openspeedtest
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
   - source:
       kind: HelmRelease
       name: redlib
