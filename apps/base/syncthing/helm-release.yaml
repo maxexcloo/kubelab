@@ -18,7 +18,7 @@ spec:
               STGUIADDRESS: http://0.0.0.0:8384
               STHOMEDIR: /var/syncthing/config
               TZ: Australia/Sydney
-            image:
+            image: &syncthing-image
               pullPolicy: IfNotPresent
               repository: docker.io/syncthing/syncthing
               tag: 2.1.6@sha256:4d0281bdcb4ed9baf503d251d0544ddd856f49fce3f114056257ae172b7fb670
@@ -33,10 +33,41 @@ spec:
               requests:
                 cpu: 100m
                 memory: 256Mi
+        initContainers:
+          authentication:
+            command:
+              - /bin/sh
+              - /scripts/configure_auth.sh
+            env:
+              HOME: /var/syncthing
+              STHOMEDIR: /var/syncthing/config
+            image: *syncthing-image
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
     defaultPodOptions:
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
     persistence:
+      auth-script:
+        name: syncthing-auth
+        type: configMap
+        advancedMounts:
+          main:
+            authentication:
+              - path: /scripts
+                readOnly: true
+      credentials:
+        name: "{{ .Release.Name }}"
+        type: secret
+        advancedMounts:
+          main:
+            authentication:
+              - path: /credentials
+                readOnly: true
       data:
         existingClaim: retained-data
         type: persistentVolumeClaim
@@ -59,6 +90,7 @@ spec:
           gethomepage.dev/name: Syncthing
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /rest/noauth/health
+          onepassword.excloo.dev/item: Syncthing
         hostnames:
           - syncthing.excloo.com
         labels:

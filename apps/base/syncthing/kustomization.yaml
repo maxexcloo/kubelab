@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - external-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
   - private-dns.yaml
@@ -8,6 +9,12 @@ resources:
 components:
   - ../../components/application
   - ../../components/app-namespace
+configMapGenerator:
+  - name: syncthing-auth
+    files:
+      - configure_auth.sh
+generatorOptions:
+  disableNameSuffixHash: true
 patches:
   - path: helm-release.yaml
     target:
