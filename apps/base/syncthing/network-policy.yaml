@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: application
+  labels:
+    app.kubernetes.io/name: application
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 8384
+          protocol: TCP
+    - ports:
+        - port: 22000
+          protocol: TCP
+        - port: 22000
+          protocol: UDP
+        - port: 21027
+          protocol: UDP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: syncthing
+  policyTypes:
+    - Ingress
