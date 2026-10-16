@@ -218,7 +218,10 @@ cp "$ARCHIVE_FIXTURE" "$2"
             "apiVersion": "helm.toolkit.fluxcd.io/v2",
             "kind": "HelmRelease",
             "metadata": {"name": "library", "namespace": "library"},
-            "spec": {"values": {"route": {"private": {"annotations": annotations}}}},
+            "spec": {"values": {"route": {"private": {
+                "annotations": annotations,
+                "labels": {"app.kubernetes.io/name": "{{ .Release.Name }}"},
+            }}}},
         }
         self.write_routes("syd", [resource])
         result = self.render()
@@ -236,10 +239,29 @@ cp "$ARCHIVE_FIXTURE" "$2"
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Library", self.services())
+        self.assertEqual(self.services()["Library"]["app"], "library")
         groups = {name: cards for group in read_yaml(self.output / "services.yaml") for name, cards in group.items()}
         self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • MBK")
         self.assertIn("Library", groups["Cluster: MBK"][0])
         self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"])
+
+    def test_helm_status_selector_uses_explicit_release_name_for_both_route_layouts(self):
+        annotations = route("Reader")["metadata"]["annotations"]
+        route_values = {
+            "annotations": annotations,
+            "labels": {"app.kubernetes.io/name": "{{ .Release.Name }}"},
+        }
+        for routes in (dict(route_values, apiVersion="gateway.networking.k8s.io/v1"), {"private": route_values}):
+            with self.subTest(routes=routes):
+                self.write_routes("mbk", [{
+                    "apiVersion": "helm.toolkit.fluxcd.io/v2",
+                    "kind": "HelmRelease",
+                    "metadata": {"name": "application", "namespace": "reader"},
+                    "spec": {"releaseName": "miniflux", "values": {"route": routes}},
+                }])
+                result = self.render()
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(self.services()["Reader"]["app"], "miniflux")
 
     def test_native_machine_widgets_use_homelab_identities(self):
         import shutil

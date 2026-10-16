@@ -14,13 +14,15 @@
   (
     select(.kind == "HelmRelease" and .spec.values.route.apiVersion == null) |
     .metadata as $metadata |
+    (.spec.releaseName // $metadata.name) as $releaseName |
     (.spec.values.route // {} | to_entries[]) |
     select(.value.enabled != false) |
     {
       "cluster": strenv(CLUSTER),
       "annotations": (.value.annotations // {}),
       "hostnames": (.value.hostnames // []),
-      "labels": (.value.labels // {}),
+      "labels": (.value.labels // {} | with_entries(
+        with(select(.value == "{{ .Release.Name }}"); .value = $releaseName))),
       "namespace": $metadata.namespace,
       "parentRefs": ((.value.parentRefs // []) | map(.name)),
       "source": (
@@ -35,11 +37,13 @@
       .spec.values.route.apiVersion != null and
       .spec.values.route.enabled != false
     ) |
+    (.spec.releaseName // .metadata.name) as $releaseName |
     {
       "cluster": strenv(CLUSTER),
       "annotations": (.spec.values.route.annotations // {}),
       "hostnames": (.spec.values.route.hostnames // []),
-      "labels": (.spec.values.route.labels // {}),
+      "labels": (.spec.values.route.labels // {} | with_entries(
+        with(select(.value == "{{ .Release.Name }}"); .value = $releaseName))),
       "namespace": .metadata.namespace,
       "parentRefs": ((.spec.values.route.parentRefs // []) | map(.name)),
       "source": (
