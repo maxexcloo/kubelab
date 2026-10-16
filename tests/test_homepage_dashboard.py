@@ -563,6 +563,11 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(list(layout), ["Services", "Clusters", "Servers", "Providers"])
         self.assertEqual(layout["Providers"]["tab"], "Providers")
         before = (self.output / "services.yaml").read_bytes()
+        self.gatus.write_text(json.dumps([
+            {"group": "Providers", "key": "discovered_website", "name": "Example"},
+        ]))
+        self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
+        self.assertEqual((self.output / "services.yaml").read_bytes(), before)
         self.gatus.write_text('{"error": "unavailable"}')
         self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)

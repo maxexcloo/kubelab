@@ -140,11 +140,30 @@ case "$gatus_url" in
   *) echo 'Missing Gatus widget URL' >&2; exit 1 ;;
 esac
 gatus_statuses=${HOMEPAGE_GATUS_STATUSES_FILE:-}
+gatus_providers_ready() {
+  # shellcheck disable=SC2016
+  yq -e 'tag == "!!seq" and length > 0' "$gatus_statuses" >/dev/null &&
+    PROVIDERS="$homelab_directory/data/providers.yaml" yq -e '
+      load(strenv(PROVIDERS)).providers as $providers |
+      ([$providers | to_entries[] | select(.value.conditions != null) | .value.name] +
+        [$providers | to_entries[] | select(.value.dns != null) |
+          (.value.dns.name // (.value.name + " DNS"))]) as $expected |
+      [.[] | select(.group == "Providers") | .name] as $available |
+      (($expected - $available) | length) == 0
+    ' "$gatus_statuses" >/dev/null
+}
 if [ -z "$gatus_statuses" ]; then
   gatus_statuses="$temporary_directory/gatus.json"
-  wget -O "$gatus_statuses" -q -T 30 "$gatus_url/api/v1/endpoints/statuses?page=1&pageSize=1"
+  # Gatus exposes partial endpoint lists while its first checks are still running.
+  for _ in $(seq 1 30); do
+    if wget -O "$gatus_statuses" -q -T 30 "$gatus_url/api/v1/endpoints/statuses?page=1&pageSize=1" &&
+      gatus_providers_ready; then
+      break
+    fi
+    sleep 5
+  done
 fi
-yq -e 'tag == "!!seq" and length > 0' "$gatus_statuses" >/dev/null
+gatus_providers_ready
 GATUS_URL="$gatus_url" PROVIDERS="$homelab_directory/data/providers.yaml" \
   yq --from-file "$script_directory/provider_widgets.yq" "$gatus_statuses" > "$temporary_directory/config/providers.yaml"
 yq ea '[.[]]' "$temporary_directory/config/services.yaml" "$temporary_directory/config/providers.yaml" \
