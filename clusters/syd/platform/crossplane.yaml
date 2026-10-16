@@ -1,0 +1,12 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: crossplane
+  namespace: crossplane-system
+spec:
+  values:
+    nodeSelector:
+      kubernetes.io/hostname: kimbap
+    rbacManager:
+      nodeSelector:
+        kubernetes.io/hostname: kimbap

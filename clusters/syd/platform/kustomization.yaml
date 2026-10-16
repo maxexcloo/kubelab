@@ -11,6 +11,7 @@ resources:
   - gateway-public-direct.yaml
   - headlamp.yaml
 patches:
+  - path: crossplane.yaml
   - path: secret-store.yaml
   - path: tailscale.yaml
   - path: traefik-gateway.yaml

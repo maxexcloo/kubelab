@@ -1,0 +1,9 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: metrics-server
+  namespace: observability
+spec:
+  values:
+    nodeSelector:
+      kubernetes.io/hostname: kimbap

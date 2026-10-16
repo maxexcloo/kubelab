@@ -10,3 +10,11 @@ resources:
   - platform.yaml
 components:
   - ../../platform/bootstrap/flux-reconciliation
+patches:
+  - target:
+      kind: Kustomization
+      name: crossplane-runtime
+    patch: |-
+      - op: replace
+        path: /spec/path
+        value: ./clusters/syd/crossplane-runtime

@@ -5,7 +5,26 @@ metadata:
   namespace: observability
 spec:
   values:
+    grafana:
+      nodeSelector:
+        kubernetes.io/hostname: kimbap
+    kube-state-metrics:
+      nodeSelector:
+        kubernetes.io/hostname: kimbap
+    victoria-metrics-operator:
+      nodeSelector:
+        kubernetes.io/hostname: kimbap
+    vlsingle:
+      spec:
+        nodeSelector:
+          kubernetes.io/hostname: kimbap
     vmagent:
       spec:
         externalLabels:
           cluster: syd
+        nodeSelector:
+          kubernetes.io/hostname: kimbap
+    vmsingle:
+      spec:
+        nodeSelector:
+          kubernetes.io/hostname: kimbap
