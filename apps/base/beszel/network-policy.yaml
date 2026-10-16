@@ -9,16 +9,6 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: beszel-agent
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: beszel-agent
-      ports:
-        - port: 8090
-          protocol: TCP
-    - from:
-        - namespaceSelector:
-            matchLabels:
               kubernetes.io/metadata.name: networking
           podSelector:
             matchLabels:
@@ -31,3 +21,22 @@ spec:
       app.kubernetes.io/name: beszel
   policyTypes:
     - Ingress
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: beszel-agents
+  namespace: beszel
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: beszel
+  ingress:
+    # Host-network agents have node identities rather than pod identities.
+    - fromEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "8090"
+              protocol: TCP
