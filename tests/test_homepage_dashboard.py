@@ -556,7 +556,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
             self.assertNotIn("siteMonitor", card)
             self.assertNotIn("ping", card)
             self.assertEqual(card["widget"]["type"], "customapi")
-            self.assertEqual(card["widget"]["url"], f"https://status.example.net/api/v1/endpoints/{key}/statuses?pageSize=1")
+            self.assertEqual(card["widget"]["url"], f"https://status.example.net/api/v1/endpoints/{key}/statuses?page=1&pageSize=1")
             self.assertEqual(card["widget"]["mappings"][0]["field"], "results.0.success")
         self.assertEqual(read_yaml(self.output / "bookmarks.yaml"), [])
         layout = read_yaml(self.output / "settings.yaml")["layout"]

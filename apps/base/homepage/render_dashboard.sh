@@ -9,6 +9,14 @@ if [ "${1:-}" = --watch ]; then
   while true; do
     if ! sh "$0" "$@"; then
       echo 'Homepage refresh failed; retaining the last valid configuration' >&2
+    elif [ -n "${HOMEPAGE_REVALIDATE_URL:-}" ]; then
+      # Native page caching otherwise leaves new browsers on the image's layout.
+      for _ in $(seq 1 30); do
+        if wget -O /dev/null -q -T 5 --header 'Host: localhost:3000' "$HOMEPAGE_REVALIDATE_URL"; then
+          break
+        fi
+        sleep 1
+      done
     fi
     sleep 300 &
     wait $!
@@ -134,7 +142,7 @@ esac
 gatus_statuses=${HOMEPAGE_GATUS_STATUSES_FILE:-}
 if [ -z "$gatus_statuses" ]; then
   gatus_statuses="$temporary_directory/gatus.json"
-  wget -O "$gatus_statuses" -q -T 30 "$gatus_url/api/v1/endpoints/statuses?pageSize=1"
+  wget -O "$gatus_statuses" -q -T 30 "$gatus_url/api/v1/endpoints/statuses?page=1&pageSize=1"
 fi
 yq -e 'tag == "!!seq" and length > 0' "$gatus_statuses" >/dev/null
 GATUS_URL="$gatus_url" PROVIDERS="$homelab_directory/data/providers.yaml" \

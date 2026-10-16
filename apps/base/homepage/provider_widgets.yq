@@ -14,7 +14,7 @@ map(. as $endpoint |
     "id": ("provider-" + .key),
     "widget": {
       "type": "customapi",
-      "url": (strenv(GATUS_URL) + "/api/v1/endpoints/" + .key + "/statuses?pageSize=1"),
+      "url": (strenv(GATUS_URL) + "/api/v1/endpoints/" + .key + "/statuses?page=1&pageSize=1"),
       "refreshInterval": 30000,
       "mappings": [
         {"field": "results.0.success", "label": "Status",
