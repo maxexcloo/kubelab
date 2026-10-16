@@ -1,6 +1,6 @@
 # SignTools
 
-The web service is configured to run in `mbk` and dispatch signing jobs to the private
+The web service is configured to run in `syd` and dispatch signing jobs to the private
 `maxexcloo/signtools-builder` GitHub repository. The proposed endpoint is
 `https://signtools.excloo.com`, using the existing private gateway and private DNS.
 Keep SideStore available until an app has been signed, installed and tested on the
@@ -24,7 +24,7 @@ The workflow checks HTTPS connectivity before signing begins.
 
 Tailnet policy is owned by `homelab/data/access.yaml` and `homelab/tailscale.tf`.
 Ephemeral devices are excluded from the broad tagged-device grant and receive only TCP
-port 443 access to the discovered `mbk` gateway addresses. The gateway is shared by other
+port 443 access to the discovered `syd` gateway addresses. The gateway is shared by other
 private applications, so this grants network access to its HTTPS listener, with
 application authentication providing the remaining separation. Verify the policy
 and private DNS resolution in the first workflow run.

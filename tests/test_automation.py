@@ -313,7 +313,7 @@ class B2ComparisonTests(unittest.TestCase):
     def setUp(self):
         self.key = {
             "applicationKeyId": "key-id",
-            "keyName": "kubelab-mbk-beszel",
+            "keyName": "kubelab-syd-beszel",
             "bucketIds": ["bucket-id"],
             "capabilities": ["readFiles", "writeFiles"],
         }

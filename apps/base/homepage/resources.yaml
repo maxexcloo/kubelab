@@ -4,7 +4,7 @@ metadata:
   name: homepage
   namespace: homepage
   annotations:
-    onepassword.excloo.dev/defaults: '{"cloudflare-api-token":"","grafana-mbk-password":"","grafana-mbk-username":"","grafana-syd-password":"","grafana-syd-username":"","home-assistant-access-token":"","immich-api-key":"","linkwarden-access-token":"","miniflux-api-key":"","syncthing-api-key":"","tailscale-api-token":"","truenas-api-key":"","unifi-api-key":""}'
+    onepassword.excloo.dev/defaults: '{"cloudflare-api-token":"","grafana-syd-password":"","grafana-syd-username":"","home-assistant-access-token":"","immich-api-key":"","linkwarden-access-token":"","miniflux-api-key":"","syncthing-api-key":"","tailscale-api-token":"","truenas-api-key":"","unifi-api-key":""}'
 spec:
   refreshInterval: 1h
   data:
@@ -20,14 +20,6 @@ spec:
         key: Homepage
         property: cloudflare-api-token
       secretKey: cloudflare-key
-    - remoteRef:
-        key: Homepage
-        property: grafana-mbk-password
-      secretKey: grafana-mbk-password
-    - remoteRef:
-        key: Homepage
-        property: grafana-mbk-username
-      secretKey: grafana-mbk-username
     - remoteRef:
         key: Homepage
         property: grafana-syd-password

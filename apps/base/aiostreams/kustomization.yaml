@@ -9,8 +9,6 @@ resources:
   - storage.yaml
 components:
   - ../../components/application
-  - ../../../platform/backups/destination
-  - ../../../platform/backups/files
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
