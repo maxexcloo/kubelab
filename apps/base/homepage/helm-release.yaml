@@ -142,6 +142,11 @@ spec:
           identifier: homepage
     defaultPodOptions:
       automountServiceAccountToken: true
+      # The inherited OCI search suffix returns SERVFAIL for external names.
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
