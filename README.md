@@ -68,7 +68,6 @@ cluster and optionally a configured reconciliation component.
 
 | Command                                   | Purpose                                                              |
 | ----------------------------------------- | -------------------------------------------------------------------- |
-| `mise run backup <cluster> <application>` | Start the application's configured backup jobs                       |
 | `mise run bootstrap <cluster>`            | Install networking, bootstrap credentials and start Flux             |
 | `mise run check`                          | Validate manifests, metadata, formatting, scripts and reconciliation |
 | `mise run deploy <cluster> [component]`   | Fetch Git and reconcile the entry point or selected component        |
@@ -86,16 +85,9 @@ delivery workflow. Flux performs routine cluster deployments.
 
 ## Updates & Recovery
 
-Configured app backups run hourly to retained NFS backup volumes on Kimbap's
-`truenas` HDD pool. The separate backup provisioner is configured under
-`platform/storage/truenas-backups`; app-data storage and dedicated exports remain
-independent.
-`mise run backup <cluster> <application>` starts the same jobs immediately; inspect
-their status with `kubectl --context <cluster> get jobs -n <application>`.
-The shared implementation in `platform/backups/` owns backup and restore commands.
-SQLite snapshots and PostgreSQL dumps have separate restore procedures; restore
-into fresh storage and verify the app before switching its active volume. Backups
-are retained without pruning; B2 synchronisation is deferred.
+Application backups are not currently configured. Keep manual recovery copies
+outside the cluster until a replacement backup destination and restore workflow
+are configured.
 
 Use `mise run dependencies:check` to preview local updates. Policies are configured
 in `.updatecli.d/`; changes and deployment remain manual.
