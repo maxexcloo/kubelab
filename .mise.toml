@@ -77,8 +77,14 @@ arg "[application]"
 depends = ["check:updates", "hooks:check", "test:python"]
 
 [tasks.fmt]
-depends = ["fmt:oxfmt"]
+run = "oxfmt --write ."
+
+[tasks."hooks:check"]
+run = "hk check --all"
 
 # Setup
 [tasks.setup]
 depends = ["hooks:install"]
+
+[tasks."hooks:install"]
+run = "hk install --mise"

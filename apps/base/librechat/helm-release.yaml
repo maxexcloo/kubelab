@@ -126,6 +126,9 @@ spec:
         failureThreshold: 30
         periodSeconds: 10
         timeoutSeconds: 5
+      # Standalone MongoDB must release its local data files before replacement.
+      updateStrategy:
+        type: Recreate
     nodeSelector:
       node.excloo.dev/network: internal
     podSecurityContext:
