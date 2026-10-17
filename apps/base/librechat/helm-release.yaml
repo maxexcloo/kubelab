@@ -128,7 +128,10 @@ spec:
         timeoutSeconds: 5
       # Standalone MongoDB must release its local data files before replacement.
       updateStrategy:
-        type: Recreate
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 0
+          maxUnavailable: 1
     nodeSelector:
       node.excloo.dev/network: internal
     podSecurityContext:
