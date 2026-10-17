@@ -182,15 +182,6 @@ replacements:
           index: 2
       - select:
           kind: HelmRelease
-          name: open-webui
-          namespace: open-webui
-        fieldPaths:
-          - spec.values.sso.oidc.providerUrl
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: HelmRelease
           name: pocket-id
           namespace: pocket-id
         fieldPaths:

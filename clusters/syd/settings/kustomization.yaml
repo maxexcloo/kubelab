@@ -34,15 +34,6 @@ replacements:
         options:
           delimiter: .
           index: 1
-      - select:
-          kind: HelmRelease
-          name: open-webui
-          namespace: open-webui
-        fieldPaths:
-          - spec.values.route.hostnames.1
-        options:
-          delimiter: .
-          index: 1
   - source:
       kind: ConfigMap
       name: cluster-settings-syd

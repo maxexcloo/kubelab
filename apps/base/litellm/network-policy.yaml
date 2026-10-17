@@ -19,12 +19,6 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: traefik
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: open-webui
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: open-webui
       ports:
         - port: 4000
           protocol: TCP

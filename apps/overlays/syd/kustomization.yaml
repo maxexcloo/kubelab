@@ -20,7 +20,6 @@ resources:
   - ../../base/litellm
   - ../../base/mini-apps
   - ../../base/miniflux
-  - ../../base/open-webui
   - ../../base/openspeedtest
   - ../../base/papra
   - ../../base/pocket-id
@@ -71,26 +70,6 @@ patches:
   - path: atvloadly.yaml
   - path: beszel-agent.yaml
   - path: homepage.yaml
-  - path: open-webui.yaml
-    target:
-      group: helm.toolkit.fluxcd.io
-      kind: HelmRelease
-      name: open-webui
-      namespace: open-webui
-      version: v2
-  - patch: |-
-      $patch: delete
-      apiVersion: automation.excloo.dev/v1alpha1
-      kind: PrivateDNSRecord
-      metadata:
-        name: open-webui
-        namespace: open-webui
-    target:
-      group: automation.excloo.dev
-      kind: PrivateDNSRecord
-      name: open-webui
-      namespace: open-webui
-      version: v1alpha1
   - patch: |-
       apiVersion: networking.k8s.io/v1
       kind: NetworkPolicy

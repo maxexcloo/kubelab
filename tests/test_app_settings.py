@@ -73,19 +73,6 @@ class AppSettingsTests(unittest.TestCase):
                         for rule in rules
                     ))
 
-    def test_open_webui_redis_follows_its_application(self):
-        release = next(item for item in repository_resources("apps/overlays/syd")
-                       if item["kind"] == "HelmRelease" and item["metadata"]["name"] == "open-webui")
-        rule = release["spec"]["values"]["websocket"]["redis"]["affinity"]["podAffinity"][
-            "requiredDuringSchedulingIgnoredDuringExecution"][0]
-        self.assertEqual(rule["topologyKey"], "kubernetes.io/hostname")
-        self.assertEqual(rule["labelSelector"]["matchLabels"], {
-            "app.kubernetes.io/component": "open-webui",
-            "app.kubernetes.io/instance": "open-webui",
-        })
-        self.assertNotIn("namespaces", rule)
-        self.assertNotIn("namespaceSelector", rule)
-
     def test_cluster_applications_follow_network_placement(self):
         external = {"aiometadata", "aiostreams", "cliproxyapi", "homepage", "openspeedtest", "redlib"}
         releases = [item for item in repository_resources("apps/overlays/syd") if item["kind"] == "HelmRelease"]
