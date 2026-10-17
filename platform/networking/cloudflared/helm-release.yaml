@@ -18,6 +18,7 @@ spec:
   values:
     controllers:
       cloudflared:
+        replicas: 2
         strategy: RollingUpdate
         type: deployment
         containers:
@@ -48,17 +49,18 @@ spec:
               capabilities:
                 drop:
                   - ALL
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 0
     defaultPodOptions:
       affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: node.excloo.dev/network
-                    operator: In
-                    values:
-                      - internal
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/instance: cloudflared
+                  app.kubernetes.io/name: cloudflared
+              topologyKey: kubernetes.io/hostname
       automountServiceAccountToken: false
       securityContext:
         runAsGroup: 65532
