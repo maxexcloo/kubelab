@@ -103,6 +103,9 @@ through the Barman plugin and app state through Restic into fresh volumes before
 switching the workload. Initial backup uploads are verified separately from restore
 tests.
 
+Kubernetes client updates read the configured API version from the sibling
+`../homelab/data/clusters.yaml` inventory; keep that checkout current.
+
 Use `mise run dependencies:check` to preview local updates. Policies are configured
 in `.updatecli.d/`; changes and deployment remain manual.
 

@@ -18,7 +18,7 @@ updatecli_discovery = "python -B scripts/updates.py"
 # yq = "latest"
 flux2 = "2.9.6"
 kubeconform = "0.8.0"
-# Select schemas for the deployed Kubernetes API.
+# Select schemas for the Kubernetes API configured in Homelab.
 kubectl = "1.37.1"
 
 # Bootstrap
@@ -77,14 +77,8 @@ arg "[application]"
 depends = ["check:updates", "hooks:check", "test:python"]
 
 [tasks.fmt]
-run = "oxfmt --write ."
-
-[tasks."hooks:check"]
-run = "hk check --all"
+depends = ["fmt:oxfmt"]
 
 # Setup
 [tasks.setup]
 depends = ["hooks:install"]
-
-[tasks."hooks:install"]
-run = "hk install --mise"
