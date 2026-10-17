@@ -3,4 +3,7 @@ kind: PrivateDNSRecord
 metadata:
   name: application
 spec:
+  crossplane:
+    compositionRef:
+      name: private-dns-record
   hostname: app.invalid
