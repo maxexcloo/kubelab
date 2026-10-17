@@ -47,6 +47,9 @@ spec:
       nodeSelector:
         node.excloo.dev/network: internal
       replicas: 1
+    # Tell senders to shrink to the 1280-byte pod MTU instead of dropping silently.
+    pmtuDiscovery:
+      enabled: true
     securityContext:
       capabilities:
         ciliumAgent:
