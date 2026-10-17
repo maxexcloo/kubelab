@@ -10,7 +10,7 @@ spec:
         containers:
           main:
             env:
-              AUTH_REQUIRE_SIGNIN: "false"
+              AUTH_REQUIRE_SIGNIN: "true"
               DATABASE_URI: sqlite://addon/data/db.sqlite
               ENABLE_CACHE_WARMING: "false"
               HOST_NAME: https://app.invalid
