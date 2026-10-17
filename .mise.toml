@@ -1,5 +1,4 @@
 [vars]
-shell_paths = "scripts/*.sh apps/base/atvloadly/*.envsh apps/base/homepage/*.sh apps/base/syncthing/*.sh platform/backups/files/*.sh"
 updatecli_discovery = "python -B scripts/updates.py"
 
 [tools]
@@ -7,10 +6,10 @@ updatecli_discovery = "python -B scripts/updates.py"
 # actionlint = "latest"
 # gh = "latest"
 # helm = "latest"
+# hk = "latest"
 # jq = "latest"
 # node = "latest"
-# prek = "latest"
-# prettier = "latest"
+# oxfmt = "latest"
 # python = "latest"
 # ruff = "latest"
 # shellcheck = "latest"
@@ -75,20 +74,10 @@ arg "[application]"
 
 # Development
 [tasks.check]
-depends = ["hooks:check"]
+depends = ["check:updates", "hooks:check", "test:python"]
 
 [tasks.fmt]
-depends = ["fmt:prettier"]
-
-[tasks.validate]
-depends = ["check:actions", "check:prettier", "check:shell", "check:updates"]
-run = ["""
-manifest_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-check.XXXXXX")"
-trap 'rm -fr -- "${manifest_directory:?}"' EXIT
-scripts/render_manifests.sh "$manifest_directory"
-scripts/check_manifests.sh "$manifest_directory"
-scripts/check_service_metadata.sh "$manifest_directory"
-""", { task = "test:python" }]
+depends = ["fmt:oxfmt"]
 
 # Setup
 [tasks.setup]
