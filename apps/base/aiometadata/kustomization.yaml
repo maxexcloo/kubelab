@@ -10,7 +10,7 @@ components:
   - ../../components/application
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
-  - ../../components/private-dns
+  - ../../components/private-dns-control-d-only
   - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
@@ -23,15 +23,15 @@ patches:
 replacements:
   - source:
       kind: HelmRelease
-      fieldPath: spec.values.route.private.hostnames.0
+      fieldPath: spec.values.route.public.hostnames.0
     targets:
       - select:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.HOST_NAME
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
+          - spec.values.route.public.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
           index: 2
 transformers:
-  - ../../transformers/route-private
+  - ../../transformers/route-public
