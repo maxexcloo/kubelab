@@ -47,6 +47,7 @@ spec:
         OPENID_ISSUER: https://identity.invalid/.well-known/openid-configuration
         OPENID_SCOPE: openid profile email
         OPENID_USE_PKCE: "true"
+        SCHEDULES_SINGLE_PROCESS: "true"
         TZ: Australia/Sydney
       existingConfigYaml: librechat-config
       imageVolume:
@@ -65,7 +66,7 @@ spec:
       enabled: true
       fullnameOverride: meilisearch
       image:
-        tag: v1.7.3
+        tag: v1.35.1
       nodeSelector:
         node.excloo.dev/network: internal
       persistence:
@@ -149,7 +150,12 @@ spec:
     volumeMounts:
       - name: data
         mountPath: /app/client/public/images
+      - name: uploads
+        mountPath: /app/uploads
     volumes:
       - name: data
         persistentVolumeClaim:
           claimName: data
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: uploads

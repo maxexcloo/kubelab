@@ -3,4 +3,56 @@ kind: CronJob
 metadata:
   name: state-backup
 spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: backup
+              volumeMounts:
+                - name: uploads
+                  mountPath: /sources/uploads
+                  readOnly: true
+          # The database dump is logical and is taken while the application still runs.
+          initContainers:
+            - name: mongodump
+              image: docker.io/bitnamilegacy/mongodb:8.0.13-debian-12-r0
+              command:
+                - /opt/bitnami/mongodb/bin/mongodump
+              args:
+                - --archive=/snapshot/mongodb.archive
+                - --authenticationDatabase=admin
+                - --db=LibreChat
+                - --gzip
+                - --host=mongodb
+                - --password=$(MONGODB_ROOT_PASSWORD)
+                - --port=27017
+                - --username=root
+              env:
+                - name: HOME
+                  value: /tmp
+                - name: MONGODB_ROOT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: mongodb-root-password
+                      name: mongodb
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsGroup: 1001
+                runAsNonRoot: true
+                runAsUser: 1001
+              volumeMounts:
+                - name: snapshot
+                  mountPath: /snapshot
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: uploads
+              persistentVolumeClaim:
+                claimName: uploads
+                readOnly: true
   schedule: 33 3 * * *

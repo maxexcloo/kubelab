@@ -1,9 +1,43 @@
 version: 1.3.17
 cache: true
+interface:
+  defaultPinnedTools:
+    - artifacts
+    - mcp
+    - web_search
+  # File search needs the RAG API, which this deployment does not run.
+  fileSearch: false
+  # Expiry covers regular chats as well as temporary ones. Drop the general
+  # retention deadlines before returning to the temporary-only mode.
+  generalChatRetention: 8760
+  retainAgentFiles: true
+  retentionMode: all
+  # Scheduled chats run in this single replica; multi-replica writes would need shared Redis streams.
+  schedules:
+    create: true
+    use: true
+  temporaryChatRetention: 720
 registration:
   socialLogins:
     - openid
 endpoints:
+  agents:
+    activityEndpoint: LiteLLM
+    activityLabel: true
+    activityModel: bento/qwen3.8-flash-next
+    # File search, execute_code and ocr need the RAG API, the Code API and a Mistral OCR service.
+    capabilities:
+      - actions
+      - artifacts
+      - ask_user_question
+      - chain
+      - context
+      - deferred_tools
+      - memory
+      - skills
+      - subagents
+      - tools
+      - web_search
   custom:
     - name: LiteLLM
       apiKey: ${LITELLM_API_KEY}
@@ -15,6 +49,15 @@ endpoints:
       titleConvo: true
       titleModel: current_model
       modelDisplayLabel: LiteLLM
+fileConfig:
+  endpoints:
+    agents:
+      fileLimit: 20
+# Keyless providers keep web search working without per-user credentials.
+webSearch:
+  rerankerType: none
+  scraperProvider: keenable
+  searchProvider: keenable
 # LiteLLM's MCP gateway is an internal service; exempt just that host and port.
 mcpSettings:
   allowedAddresses:

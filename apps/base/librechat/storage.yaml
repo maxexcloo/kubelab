@@ -13,3 +13,19 @@ spec:
     requests:
       storage: 10Gi
   storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uploads
+  annotations:
+    groupPattern: "1000"
+    permPattern: "0700"
+    userPattern: "1000"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: local-path
