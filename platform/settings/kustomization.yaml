@@ -144,6 +144,15 @@ replacements:
           index: 2
       - select:
           kind: HelmRelease
+          name: librechat
+          namespace: librechat
+        fieldPaths:
+          - spec.values.librechat.configEnv.OPENID_ISSUER
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
           name: linkwarden
           namespace: linkwarden
         fieldPaths:

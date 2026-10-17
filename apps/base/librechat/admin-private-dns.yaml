@@ -1,0 +1,6 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: librechat-admin
+spec:
+  hostname: app.invalid

@@ -1,0 +1,150 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: librechat
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: librechat
+        namespace: flux-system
+      version: 3.0.0
+  values:
+    fullnameOverride: librechat
+    global:
+      librechat:
+        env:
+          - name: LITELLM_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: LITELLM_API_KEY
+                name: litellm
+        existingSecretName: librechat
+    image:
+      pullPolicy: IfNotPresent
+      tag: v0.8.8@sha256:5b706bcee1ca154a1e2987303aaeca0eb27f97919cccee4bb604226c2f8abf61
+    ingress:
+      enabled: false
+    librechat:
+      adminPanelUrl: https://app.invalid
+      configEnv:
+        ALLOW_REGISTRATION: "false"
+        ALLOW_SOCIAL_LOGIN: "true"
+        ALLOW_SOCIAL_REGISTRATION: "true"
+        DOMAIN_CLIENT: https://app.invalid
+        DOMAIN_SERVER: https://app.invalid
+        ENDPOINTS: custom
+        OPENID_BUTTON_LABEL: Pocket ID
+        OPENID_CALLBACK_URL: /oauth/openid/callback
+        OPENID_CLIENT_ID: librechat
+        OPENID_ISSUER: https://identity.invalid/.well-known/openid-configuration
+        OPENID_SCOPE: openid profile email
+        OPENID_USE_PKCE: "true"
+        TZ: Australia/Sydney
+      existingConfigYaml: librechat-config
+      imageVolume:
+        enabled: false
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /livez
+        port: 3080
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+    meilisearch:
+      enabled: true
+      fullnameOverride: meilisearch
+      image:
+        tag: v1.7.3
+      nodeSelector:
+        node.excloo.dev/network: internal
+      persistence:
+        enabled: true
+        size: 5Gi
+        storageClass: local-path
+      podSecurityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      resources:
+        limits:
+          memory: 512Mi
+        requests:
+          cpu: 20m
+          memory: 128Mi
+    mongodb:
+      enabled: true
+      fullnameOverride: mongodb
+      nodeSelector:
+        node.excloo.dev/network: internal
+      persistence:
+        enabled: true
+        size: 5Gi
+        storageClass: local-path
+      podSecurityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+      resources:
+        limits:
+          memory: 1Gi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+    nodeSelector:
+      node.excloo.dev/network: internal
+    podSecurityContext:
+      fsGroup: 1000
+      fsGroupChangePolicy: OnRootMismatch
+      runAsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /readyz
+        port: 3080
+      periodSeconds: 10
+      timeoutSeconds: 5
+    replicaCount: 1
+    redis:
+      enabled: false
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        cpu: 50m
+        memory: 512Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsNonRoot: true
+      runAsUser: 1000
+    service:
+      containerPort: 3080
+      port: 3080
+      targetPort: 3080
+    serviceAccount:
+      automount: false
+      create: true
+    updateStrategy:
+      type: Recreate
+    volumeMounts:
+      - name: data
+        mountPath: /app/client/public/images
+    volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: data

@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librechat-admin
+  labels:
+    app.kubernetes.io/name: librechat-admin
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: librechat-admin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: librechat-admin
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: admin
+          image: ghcr.io/clickhouse/librechat-admin-panel:1.0.0@sha256:f889fb4fcec19ef90203cce11d66e8f34223d512957666a6a7c8967efb22a2de
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: API_SERVER_URL
+              value: http://librechat:3080
+            - name: HOME
+              value: /tmp
+            - name: SESSION_COOKIE_SECURE
+              value: "true"
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: ADMIN_PANEL_SESSION_SECRET
+                  name: librechat
+            - name: TZ
+              value: Australia/Sydney
+            - name: VITE_API_BASE_URL
+              value: https://app.invalid
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          startupProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            limits:
+              memory: 512Mi
+            requests:
+              cpu: 20m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+          volumeMounts:
+            - name: temporary
+              mountPath: /tmp
+      volumes:
+        - name: temporary
+          emptyDir: {}
+      nodeSelector:
+        node.excloo.dev/network: internal
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: librechat-admin
+  labels:
+    app.kubernetes.io/name: librechat-admin
+spec:
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+  selector:
+    app.kubernetes.io/name: librechat-admin

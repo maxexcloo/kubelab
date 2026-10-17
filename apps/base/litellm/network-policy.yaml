@@ -9,6 +9,12 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
+              kubernetes.io/metadata.name: librechat
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: librechat
+        - namespaceSelector:
+            matchLabels:
               kubernetes.io/metadata.name: networking
           podSelector:
             matchLabels:

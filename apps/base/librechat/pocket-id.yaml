@@ -1,0 +1,16 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: application
+spec:
+  client:
+    # The admin panel reuses the LibreChat admin OAuth callback for its SSO login.
+    callbackURLs:
+      - https://app.invalid/oauth/openid/callback
+      - https://app.invalid/api/admin/oauth/openid/callback
+    description: AI Chat
+    id: librechat
+    isPublic: true
+    launchURL: https://app.invalid
+    name: LibreChat
+    pkceEnabled: true
