@@ -15,3 +15,25 @@ endpoints:
       titleConvo: true
       titleModel: current_model
       modelDisplayLabel: LiteLLM
+# LiteLLM fronts its MCP servers at /<server>/mcp.
+mcpServers:
+  heiss:
+    type: streamable-http
+    url: http://litellm.litellm.svc.cluster.local:4000/heiss/mcp
+    headers:
+      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+  heiss-x:
+    type: streamable-http
+    url: http://litellm.litellm.svc.cluster.local:4000/heiss_x/mcp
+    headers:
+      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+  home-assistant:
+    type: streamable-http
+    url: http://litellm.litellm.svc.cluster.local:4000/home_assistant/mcp
+    headers:
+      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+  unifi-network:
+    type: streamable-http
+    url: http://litellm.litellm.svc.cluster.local:4000/unifi_network/mcp
+    headers:
+      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
