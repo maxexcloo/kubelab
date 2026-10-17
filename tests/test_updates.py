@@ -14,6 +14,30 @@ SPEC.loader.exec_module(updates)
 
 
 class UpdateDiscoveryTests(unittest.TestCase):
+    def test_shared_images_target_anchor_definitions_only(self):
+        manifests = list(updates.discover())
+        for application, definition, alias in (
+            (
+                "sidestore-vpn",
+                "$.spec.values.controllers.main.initContainers.forwarding.image.tag",
+                "$.spec.values.controllers.main.containers.tailscale.image.tag",
+            ),
+            (
+                "syncthing",
+                "$.spec.values.controllers.main.containers.main.image.tag",
+                "$.spec.values.controllers.main.initContainers.authentication.image.tag",
+            ),
+        ):
+            with self.subTest(application=application):
+                keys = [
+                    manifest["targets"]["image"]["spec"]["key"]
+                    for manifest in manifests
+                    if manifest["targets"]["image"]["spec"]["file"]
+                    == f"apps/base/{application}/helm-release.yaml"
+                ]
+                self.assertEqual(keys.count(definition), 1)
+                self.assertNotIn(alias, keys)
+
     def test_new_images_are_discovered_without_a_policy_list(self):
         document = {
             "kind": "HelmRelease",

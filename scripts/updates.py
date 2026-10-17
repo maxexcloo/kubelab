@@ -111,7 +111,15 @@ def discover():
         }
     )
     result = subprocess.check_output(
-        ["yq", "--indent=0", "--output-format=json", "[filename, .]", *paths],
+        # Updatecli can write anchor definitions, but cannot traverse aliases.
+        # Clear aliases before JSON encoding loses their node kind; keep list indices.
+        [
+            "yq",
+            "--indent=0",
+            "--output-format=json",
+            '(.. | select(kind == "alias")) = null | [filename, .]',
+            *paths,
+        ],
         cwd=ROOT,
         text=True,
     )
