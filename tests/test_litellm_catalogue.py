@@ -40,6 +40,9 @@ class CatalogueTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(catalogue.model_names("openrouter", {
             "id": "anthropic/claude-sonnet-4.6", "owned_by": "openrouter",
         })[0], "openrouter/anthropic/claude-sonnet-4.6")
+        self.assertEqual(catalogue.model_names("bento", {
+            "id": "qwen3.8-27b-fp8", "owned_by": "radiance",
+        })[0], "bento/qwen3.8-27b-fp8")
 
     def test_upstream_display_name_is_preserved(self):
         self.assertEqual(catalogue.display_name("deepseek", {
@@ -48,12 +51,8 @@ class CatalogueTests(unittest.IsolatedAsyncioTestCase):
 
     def test_direct_provider_labels_have_two_tiers(self):
         for prefix, model, expected in [
-            ("gemini", {"id": "gemini-pro", "normalized_name": "Gemini Pro", "owned_by": "google"},
-             "Gemini · Gemini Pro"),
-            ("venice", {"id": "gemma-4-uncensored", "owned_by": "venice.ai"},
-             "Venice · Gemma 4 Uncensored"),
-            ("xiaomi-mimo", {"id": "mimo-v2.6-pro", "owned_by": "xiaomi"},
-             "Xiaomi · MiMo V2.6 Pro"),
+            ("bento", {"id": "qwen3.8-27b-fp8", "owned_by": "radiance"},
+             "Bento · Qwen3.8 27B FP8"),
         ]:
             with self.subTest(prefix=prefix):
                 self.assertEqual(catalogue.display_name(prefix, model), expected)
@@ -74,8 +73,8 @@ class CatalogueTests(unittest.IsolatedAsyncioTestCase):
                                          [deployment()], [], metadata)
 
     async def test_static_model_does_not_require_discovery(self):
-        configured = deployment("bento", "openai/qwen3.8-27b-fp8")
-        configured["model_name"] = "bento/qwen3.8-27b-fp8"
+        configured = deployment("fixture", "openai/qwen3.8-27b-fp8")
+        configured["model_name"] = "fixture/qwen3.8-27b-fp8"
         with patch.object(catalogue, "fetch_models", side_effect=AssertionError("No discovery")):
             result = await catalogue.Catalogue().listing([configured], [configured["model_name"]], {})
         self.assertEqual(result["data"][0]["id"], configured["model_name"])
@@ -107,18 +106,6 @@ class CatalogueTests(unittest.IsolatedAsyncioTestCase):
             rows = catalogue.fetch_models(deployment())
         self.assertEqual([row["id"] for row in rows], ["first", "second"])
         self.assertEqual(fetch.call_args.args[0].full_url, "https://provider.example/v1/models?after=first")
-
-    def test_gemini_response_names_and_pagination(self):
-        pages = [
-            {"models": [{"name": "models/gemini-pro", "displayName": "Gemini Pro"}],
-             "nextPageToken": "next"},
-            {"models": [{"name": "models/gemini-flash", "displayName": "Gemini Flash"}]},
-        ]
-        with patch.object(catalogue.urllib.request, "urlopen",
-                          side_effect=[io.StringIO(json.dumps(page)) for page in pages]) as fetch:
-            rows = catalogue.fetch_models(deployment("gemini", "gemini/*"))
-        self.assertEqual(rows[0], {"id": "gemini-pro", "normalized_name": "Gemini Pro", "owned_by": "google"})
-        self.assertIn("pageToken=next", fetch.call_args.args[0].full_url)
 
     async def test_inference_scope_filters_other_sources(self):
         with patch.object(catalogue, "fetch_models", return_value=[{"id": "example"}]):

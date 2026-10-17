@@ -18,7 +18,6 @@ LABELS = {
     "bento": "Bento",
     "cli-proxy-api": "CLI Proxy API",
     "deepseek": "DeepSeek",
-    "gemini": "Gemini",
     "google": "Google",
     "opencode": "OpenCode",
     "opencode-go": "OpenCode Go",
@@ -26,7 +25,6 @@ LABELS = {
     "openai": "OpenAI",
     "openrouter": "OpenRouter",
     "xai": "xAI",
-    "xiaomi-mimo": "Xiaomi",
 }
 
 
@@ -48,7 +46,7 @@ def display_name(prefix, model):
         name = name.replace("-", " ").replace("_", " ").title()
         for original, replacement in (
             ("Deepseek", "DeepSeek"), ("Fp8", "FP8"),
-            ("Gpt ", "GPT-"), ("Mimo", "MiMo"),
+            ("Gpt ", "GPT-"),
         ):
             name = name.replace(original, replacement)
     parts = [label(prefix)]
@@ -69,7 +67,7 @@ def model_names(prefix, model):
     vendor = (model.get("owned_by") or "").strip("/")
     # An upstream namespace, such as OpenRouter's anthropic/, is already useful.
     public = original
-    if vendor and vendor.casefold() != prefix.casefold() and "/" not in identifier:
+    if prefix in AGGREGATORS and vendor and vendor.casefold() != prefix.casefold() and "/" not in identifier:
         public = f"{prefix}/{vendor}/{identifier}"
     return public, original
 
@@ -89,36 +87,27 @@ def fetch_models(deployment):
     params = deployment["litellm_params"]
     endpoint = resolve(params["api_base"]).rstrip("/")
     credential = resolve(params["api_key"])
-    gemini = params["model"].startswith("gemini/")
-    headers = {"x-goog-api-key": credential} if gemini else {"Authorization": f"Bearer {credential}"}
+    headers = {"Authorization": f"Bearer {credential}"}
     models = []
     page = ""
     for _ in range(20):
-        query = {"pageSize": "1000"} if gemini else {}
+        query = {}
         if page:
-            query["pageToken" if gemini else "after"] = page
+            query["after"] = page
         url = endpoint + "/models"
         if query:
             url += "?" + urllib.parse.urlencode(query)
         request = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(request, timeout=15) as response:
             data = json.load(response)
-        entries = data.get("models" if gemini else "data")
+        entries = data.get("data")
         if not isinstance(entries, list):
             raise ValueError("Upstream did not return a model list")
         for model in entries:
-            if gemini:
-                model = {
-                    "id": model["name"].removeprefix("models/"),
-                    "normalized_name": model.get("displayName", ""),
-                    "owned_by": "google",
-                }
             if not isinstance(model.get("id"), str) or not model["id"]:
                 raise ValueError("Upstream returned an invalid model ID")
             models.append(model)
-        next_page = data.get("nextPageToken", "") if gemini else (
-            entries[-1]["id"] if data.get("has_more") and entries else ""
-        )
+        next_page = entries[-1]["id"] if data.get("has_more") and entries else ""
         if not next_page:
             return models
         if next_page == page:
