@@ -26,7 +26,9 @@ def request(url, *, token, body=None, context=None, method="GET"):
         method=method,
     )
     try:
-        with urllib.request.urlopen(api_request, context=context, timeout=30) as response:
+        with urllib.request.urlopen(
+            api_request, context=context, timeout=30
+        ) as response:
             content = response.read()
             return None if not content else json.loads(content)
     except urllib.error.HTTPError as error:
@@ -43,9 +45,7 @@ def kubernetes_request(path):
         encoding="utf-8",
     ) as token_file:
         token = token_file.read()
-    context = ssl.create_default_context(
-        cafile=f"{KUBERNETES_SERVICE_ACCOUNT}/ca.crt"
-    )
+    context = ssl.create_default_context(cafile=f"{KUBERNETES_SERVICE_ACCOUNT}/ca.crt")
     return request(
         f"{KUBERNETES_HOST}{path}",
         token=token,
@@ -76,6 +76,21 @@ def annotations(resource):
     return resource.get("metadata", {}).get("annotations", {})
 
 
+def secret_values(resource, mapping):
+    namespace = resource["metadata"]["namespace"]
+    resolved = {}
+    for label, source in mapping.items():
+        name, _, key = source.partition("/")
+        secret = kubernetes_request(f"/api/v1/namespaces/{namespace}/secrets/{name}")
+        encoded = secret.get("data", {}).get(key)
+        if encoded is None:
+            raise RuntimeError(
+                f"1Password field {label} needs key {key} in secret {namespace}/{name}"
+            )
+        resolved[label] = base64.b64decode(encoded).decode()
+    return resolved
+
+
 def item_configuration(resource):
     values = annotations(resource)
     return {
@@ -83,10 +98,15 @@ def item_configuration(resource):
         "defaults": json.loads(values.get(f"{ANNOTATION_PREFIX}defaults", "{}")),
         "formats": json.loads(values.get(f"{ANNOTATION_PREFIX}field-formats", "{}")),
         "generate": set(
-            filter(None, values.get(f"{ANNOTATION_PREFIX}generate-fields", "").split(","))
+            filter(
+                None, values.get(f"{ANNOTATION_PREFIX}generate-fields", "").split(",")
+            )
         ),
         "remove": set(
             filter(None, values.get(f"{ANNOTATION_PREFIX}remove-fields", "").split(","))
+        ),
+        "values": secret_values(
+            resource, json.loads(values.get(f"{ANNOTATION_PREFIX}values", "{}"))
         ),
     }
 
@@ -98,6 +118,7 @@ def merge_configuration(item, resource):
     item["formats"].update(configuration["formats"])
     item["generate"].update(configuration["generate"])
     item["remove"].update(configuration["remove"])
+    item["values"].update(configuration["values"])
 
 
 def new_item():
@@ -111,6 +132,7 @@ def new_item():
         "namespaces": set(),
         "remove": set(),
         "urls": set(),
+        "values": {},
     }
 
 
@@ -167,16 +189,13 @@ def discover_items():
             store = resource.get("spec", {}).get("secretStoreRef", {})
             if store.get("name") != "onepassword":
                 continue
-            references = (
-                [
-                    data.get("remoteRef", {})
-                    for data in resource.get("spec", {}).get("data", [])
-                ]
-                + [
-                    {"key": data.get("extract", {}).get("key")}
-                    for data in resource.get("spec", {}).get("dataFrom", [])
-                ]
-            )
+            references = [
+                data.get("remoteRef", {})
+                for data in resource.get("spec", {}).get("data", [])
+            ] + [
+                {"key": data.get("extract", {}).get("key")}
+                for data in resource.get("spec", {}).get("dataFrom", [])
+            ]
         else:
             stores = resource.get("spec", {}).get("secretStoreRefs", [])
             if not any(store.get("name") == "onepassword" for store in stores):
@@ -221,19 +240,26 @@ def discover_items():
         title = route_annotations.get(f"{ANNOTATION_PREFIX}item")
         if not title:
             continue
-        urls = {f"https://{hostname}" for hostname in route.get("spec", {}).get("hostnames", [])}
+        urls = {
+            f"https://{hostname}"
+            for hostname in route.get("spec", {}).get("hostnames", [])
+        }
         login_url = route_annotations.get(f"{ANNOTATION_PREFIX}url")
         if login_url:
             urls.add(login_url)
         if not urls:
-            raise RuntimeError(f"1Password route {namespace}/{route['metadata']['name']} has no URL")
+            raise RuntimeError(
+                f"1Password route {namespace}/{route['metadata']['name']} has no URL"
+            )
         item = desired.setdefault(title, new_item())
         item["login"] = True
         item["namespaces"].add(namespace)
         item["urls"].update(urls)
     for title, login_item in login_items.items():
         if login_item not in desired or not desired[login_item]["urls"]:
-            raise RuntimeError(f"1Password item {title} references missing login item {login_item}")
+            raise RuntimeError(
+                f"1Password item {title} references missing login item {login_item}"
+            )
         desired[title]["urls"].update(desired[login_item]["urls"])
         desired[title]["login"] = True
     return desired
@@ -267,7 +293,9 @@ def generated_field(label, *, field_format=None, value=None):
     field = {
         "id": label,
         "label": label,
-        "type": "CONCEALED" if label.endswith(SECRET_SUFFIXES) or label == "certificate-base64" else "STRING",
+        "type": "CONCEALED"
+        if label.endswith(SECRET_SUFFIXES) or label == "certificate-base64"
+        else "STRING",
     }
     if native:
         field["purpose"] = label.upper()
@@ -277,7 +305,8 @@ def generated_field(label, *, field_format=None, value=None):
         field["generate"] = True
         field["recipe"] = {
             "characterSets": (
-                ["DIGITS", "LETTERS"] if field_format == "alphanumeric"
+                ["DIGITS", "LETTERS"]
+                if field_format == "alphanumeric"
                 else ["DIGITS", "LETTERS", "SYMBOLS"]
             ),
             "length": 48,
@@ -293,6 +322,7 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
         | desired["generate"]
         | set(desired["constants"])
         | set(desired["defaults"])
+        | set(desired.get("values", {}))
     )
     if desired["remove"] & required_fields:
         raise RuntimeError(f"1Password item {title} cannot remove referenced fields")
@@ -311,18 +341,24 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
     )
     fields = current.setdefault("fields", [])
     if allow_removal:
-        fields[:] = [field for field in fields if field_label(field) not in desired["remove"]]
+        fields[:] = [
+            field for field in fields if field_label(field) not in desired["remove"]
+        ]
     by_label = {field_label(field): field for field in fields}
     for label in sorted(required_fields):
         field = by_label.get(label)
-        if label in desired["constants"]:
+        if label in desired.get("values", {}):
+            replacement = generated_field(label, value=desired["values"][label])
+        elif label in desired["constants"]:
             replacement = generated_field(label, value=desired["constants"][label])
         elif field and (field.get("value") or field.get("generate")):
             continue
         elif label in desired["defaults"]:
             replacement = generated_field(label, value=desired["defaults"][label])
         elif label in desired["generate"]:
-            replacement = generated_field(label, field_format=desired["formats"].get(label))
+            replacement = generated_field(
+                label, field_format=desired["formats"].get(label)
+            )
         else:
             # Referenced external credentials get a placeholder, never a random value.
             replacement = generated_field(label, value="")
@@ -379,7 +415,9 @@ def main():
     dry_run = is_dry_run()
     vaults = connect("/vaults")
     if len(vaults) != 1:
-        raise RuntimeError(f"Connect token must expose exactly one vault; found {len(vaults)}")
+        raise RuntimeError(
+            f"Connect token must expose exactly one vault; found {len(vaults)}"
+        )
     vault_id = vaults[0]["id"]
     desired = discover_items()
     summaries = connect(f"/vaults/{vault_id}/items")
@@ -393,7 +431,9 @@ def main():
         archive_ready = applications_ready()
     except RuntimeError as error:
         archive_ready = False
-        print(f"skipped removals because application readiness could not be read: {error}")
+        print(
+            f"skipped removals because application readiness could not be read: {error}"
+        )
     else:
         if not archive_ready:
             print("skipped removals because applications are not fully reconciled")
@@ -408,7 +448,10 @@ def main():
         if externally_owned(current):
             continue
         wanted = normalise_item(
-            copy.deepcopy(current), title, configuration, vault_id,
+            copy.deepcopy(current),
+            title,
+            configuration,
+            vault_id,
             allow_removal=archive_ready,
         )
         if summary:

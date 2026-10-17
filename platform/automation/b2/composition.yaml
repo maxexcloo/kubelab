@@ -33,8 +33,7 @@ spec:
                       and .response.body.authorizationToken != null
                     type: CUSTOM
                   headers:
-                    Authorization:
-                      ["{{ b2-credentials:crossplane-system:authorization }}"]
+                    Authorization: ["{{ b2-credentials:crossplane-system:authorization }}"]
                     User-Agent: [kubelab-crossplane/1.0]
                   mappings:
                     - action: OBSERVE
@@ -113,8 +112,7 @@ spec:
                       )
                     type: CUSTOM
                   headers:
-                    Authorization:
-                      ["{{ b2-session:default:authorization-token }}"]
+                    Authorization: ["{{ b2-session:default:authorization-token }}"]
                     Content-Type: [application/json]
                     User-Agent: [kubelab-crossplane/1.0]
                   mappings:
@@ -231,8 +229,7 @@ spec:
                     logic: "false"
                     type: CUSTOM
                   headers:
-                    Authorization:
-                      ["{{ b2-session:default:authorization-token }}"]
+                    Authorization: ["{{ b2-session:default:authorization-token }}"]
                     Content-Type: [application/json]
                     User-Agent: [kubelab-crossplane/1.0]
                   mappings:
@@ -321,50 +318,3 @@ spec:
                     - fromFieldPath: metadata.namespace
                     - fromFieldPath: spec.keyName
                 toFieldPath: spec.forProvider.payload.body
-          - name: onepassword-item
-            base:
-              apiVersion: external-secrets.io/v1alpha1
-              kind: PushSecret
-              metadata:
-                name: b2-object-storage
-              spec:
-                data:
-                  - match:
-                      secretKey: access-key-id
-                      remoteRef:
-                        property: object-storage-access-key-id
-                        remoteKey: placeholder
-                  - match:
-                      secretKey: secret-access-key
-                      remoteRef:
-                        property: object-storage-secret-access-key
-                        remoteKey: placeholder
-                    metadata:
-                      apiVersion: kubernetes.external-secrets.io/v1alpha1
-                      kind: PushSecretMetadata
-                      spec:
-                        tags: [Kubelab]
-                  - match:
-                      secretKey: endpoint
-                      remoteRef:
-                        property: object-storage-endpoint
-                        remoteKey: placeholder
-                secretStoreRefs:
-                  - kind: ClusterSecretStore
-                    name: onepassword
-                selector:
-                  secret:
-                    name: b2-application-key
-            patches:
-              - type: FromCompositeFieldPath
-                fromFieldPath: metadata.namespace
-                toFieldPath: metadata.namespace
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.displayName
-                toFieldPath: spec.data[0].match.remoteRef.remoteKey
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.displayName
-                toFieldPath: spec.data[1].match.remoteRef.remoteKey
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.displayName
-                toFieldPath: spec.data[2].match.remoteRef.remoteKey
