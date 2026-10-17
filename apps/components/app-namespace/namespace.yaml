@@ -19,6 +19,8 @@ targets:
   - <<: *namespaced
     select: { kind: Database }
   - <<: *namespaced
+    select: { kind: Deployment }
+  - <<: *namespaced
     select: { kind: EndpointSlice }
   - <<: *namespaced
     select: { kind: ExternalSecret }
