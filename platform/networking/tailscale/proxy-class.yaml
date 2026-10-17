@@ -6,7 +6,7 @@ spec:
   statefulSet:
     pod:
       nodeSelector:
-        node.excloo.dev/network: external
+        node.excloo.dev/network: internal
       tailscaleContainer:
         resources:
           limits:
