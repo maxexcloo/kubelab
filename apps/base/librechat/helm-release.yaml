@@ -67,6 +67,9 @@ spec:
       fullnameOverride: meilisearch
       image:
         tag: v1.35.1
+      # The subchart exposes probe periods and startup failures, but no timeouts.
+      livenessProbe:
+        periodSeconds: 10
       nodeSelector:
         node.excloo.dev/network: internal
       persistence:
@@ -87,9 +90,18 @@ spec:
         requests:
           cpu: 20m
           memory: 128Mi
+      readinessProbe:
+        periodSeconds: 10
+      startupProbe:
+        failureThreshold: 30
+        periodSeconds: 10
     mongodb:
       enabled: true
       fullnameOverride: mongodb
+      livenessProbe:
+        failureThreshold: 3
+        periodSeconds: 10
+        timeoutSeconds: 5
       nodeSelector:
         node.excloo.dev/network: internal
       persistence:
@@ -99,12 +111,21 @@ spec:
       podSecurityContext:
         fsGroup: 1001
         fsGroupChangePolicy: OnRootMismatch
+      readinessProbe:
+        failureThreshold: 3
+        periodSeconds: 10
+        timeoutSeconds: 5
       resources:
         limits:
           memory: 1Gi
         requests:
           cpu: 50m
           memory: 256Mi
+      startupProbe:
+        enabled: true
+        failureThreshold: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
     nodeSelector:
       node.excloo.dev/network: internal
     podSecurityContext:
