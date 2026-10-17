@@ -127,7 +127,7 @@ spec:
           app.kubernetes.io/name: "{{ .Release.Name }}"
           gateway.excloo.dev/public-access: "true"
         parentRefs:
-          - name: public-direct
+          - name: public-tunnel
             namespace: networking
     service:
       main:

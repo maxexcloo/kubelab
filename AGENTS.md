@@ -41,9 +41,10 @@ the CloudNativePG primary in their namespace; local volumes remain authoritative
 for data placement. Node network labels describe host locality, independently of
 application access. Cluster applications default to internal nodes; cluster
 overlays select external workloads. Public routes on external nodes attach to the
-`public-direct` gateway, so Cloudflare reaches the origin on its public address;
-routes whose origin is behind NAT attach to the `public-tunnel` gateway. Mini apps
-use only `<name>.mini.excloo.com`.
+`public-direct` gateway once the zone reaches origins over HTTPS (Cloudflare
+SSL/TLS mode Full), so Cloudflare connects to the public address instead of the
+tunnel; routes whose origin is behind NAT attach to the `public-tunnel` gateway.
+Mini apps use only `<name>.mini.excloo.com`.
 
 Keep app-specific configuration and integration declarations beside the app. Keep
 shared controllers and integration implementations under `platform/`.
