@@ -35,7 +35,7 @@ spec:
               protocol: TCP
           env:
             - name: API_SERVER_URL
-              value: http://librechat:3080
+              value: http://librechat.librechat.svc.cluster.local:3080
             - name: HOME
               value: /tmp
             - name: SESSION_COOKIE_SECURE
@@ -43,12 +43,12 @@ spec:
             - name: SESSION_SECRET
               valueFrom:
                 secretKeyRef:
-                  key: ADMIN_PANEL_SESSION_SECRET
-                  name: librechat
+                  key: SESSION_SECRET
+                  name: librechat-admin
             - name: TZ
               value: Australia/Sydney
             - name: VITE_API_BASE_URL
-              value: https://app.invalid
+              value: https://chat.excloo.com
           livenessProbe:
             failureThreshold: 3
             httpGet:

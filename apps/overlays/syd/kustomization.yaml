@@ -15,6 +15,7 @@ resources:
   - ../../base/immich
   - ../../base/larapaper
   - ../../base/librechat
+  - ../../base/librechat-admin
   - ../../base/linkwarden
   - ../../base/litellm
   - ../../base/mini-apps

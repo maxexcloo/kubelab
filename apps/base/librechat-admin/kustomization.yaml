@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - admin-panel.yaml
+  - external-secrets.yaml
+  - namespace.yaml
+  - network-policy.yaml
+  - route.yaml
+replacements:
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HTTPRoute
+        fieldPaths:
+          - spec.hostnames.1
+        options:
+          delimiter: .
+          index: 0
+  - source:
+      kind: HTTPRoute
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: PrivateDNSRecord
+        fieldPaths:
+          - spec.hostname
+components:
+  - ../../components/private-dns
+  - ../../components/app-namespace

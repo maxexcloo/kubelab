@@ -30,7 +30,7 @@ spec:
     ingress:
       enabled: false
     librechat:
-      adminPanelUrl: https://app.invalid
+      adminPanelUrl: https://librechat-admin.excloo.com
       configEnv:
         ALLOW_REGISTRATION: "false"
         ALLOW_SOCIAL_LOGIN: "true"
@@ -57,6 +57,8 @@ spec:
       periodSeconds: 10
       timeoutSeconds: 5
     meilisearch:
+      auth:
+        existingMasterKeySecret: librechat
       enabled: true
       fullnameOverride: meilisearch
       image:
