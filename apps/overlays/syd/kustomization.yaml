@@ -63,14 +63,6 @@ patches:
           kustomize.toolkit.fluxcd.io/substitute: disabled
     target:
       kind: ConfigMap
-  - patch: |-
-      - op: add
-        path: /spec/cluster
-        value: syd
-    target:
-      group: automation.excloo.dev
-      kind: ResendKey
-      version: v1alpha1
   - path: atvloadly.yaml
   - path: beszel-agent.yaml
   - path: homepage.yaml
