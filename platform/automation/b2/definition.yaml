@@ -21,10 +21,6 @@ spec:
             spec:
               type: object
               properties:
-                displayName:
-                  maxLength: 128
-                  minLength: 1
-                  type: string
                 keyName:
                   maxLength: 100
                   minLength: 1
@@ -45,7 +41,7 @@ spec:
                       pattern: ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$
                       type: string
                   required: [name]
-              required: [displayName, keyName, secretRef]
+              required: [keyName, secretRef]
             status:
               type: object
               properties:
