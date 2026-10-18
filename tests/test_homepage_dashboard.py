@@ -241,7 +241,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         services = self.services()
         self.assertIn("Remote", services)
         self.assertEqual(services["Remote"]["description"], "SYD")
-        self.assertEqual(services["Syncthing"]["description"], "File Synchronisation")
+        self.assertEqual(services["Syncthing (Kimbap)"]["description"], "File Synchronisation")
         self.assertIn("Shared", services)
         self.assertIn("Local", services)
         self.assertNotIn("siteMonitor", services["Local"])
@@ -360,7 +360,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Home Assistant", groups["Smart Home"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • HASS (MBK)")
-        self.assertEqual(groups["Infrastructure"]["Syncthing"]["widget"]["url"], "https://syncthing.excloo.com")
+        self.assertEqual(groups["Infrastructure"]["Syncthing (Kimbap)"]["widget"]["url"], "https://syncthing.excloo.com")
         storage = groups["mbk-storage"]
         self.assertEqual(list(storage), ["Beszel", "Cloudflare", "Tailscale", "TrueNAS"])
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")

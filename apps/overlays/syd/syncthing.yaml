@@ -9,3 +9,7 @@ spec:
       # Synced folders are mounted from kimbap's TrueNAS datasets.
       nodeSelector:
         kubernetes.io/hostname: kimbap
+    route:
+      private:
+        annotations:
+          gethomepage.dev/name: Syncthing (Kimbap)
