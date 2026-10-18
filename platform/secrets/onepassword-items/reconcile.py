@@ -287,8 +287,8 @@ def group_fields(item):
             group = "Virtual Keys"
         elif label.startswith("database-"):
             group = "Database"
-        elif label.startswith(("oidc-", "openid-")):
-            group = "OIDC"
+        elif label.startswith(("oauth-", "oidc-", "openid-")):
+            group = "Authentication"
         elif label in {"master-key", "salt-key"}:
             group = "Administration"
         else:

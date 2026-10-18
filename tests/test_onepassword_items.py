@@ -46,7 +46,9 @@ class ReconcilerTests(unittest.TestCase):
                 {"id": "username", "label": "username", "value": "keep-user"},
                 {"id": "p", "label": "provider-unifi-password", "value": "keep-p"},
                 {"id": "v", "label": "virtual-key-pi", "value": "keep-v"},
+                {"id": "a", "label": "oauth-client-secret", "value": "keep-a"},
                 {"id": "o", "label": "oidc-client-secret", "value": "keep-o"},
+                {"id": "s", "label": "openid-session-secret", "value": "keep-s"},
             ],
             "sections": [
                 {"id": "empty", "label": "Empty"},
@@ -66,9 +68,9 @@ class ReconcilerTests(unittest.TestCase):
         )
         self.assertEqual(
             [s["label"] for s in result["sections"]],
-            ["OIDC", "Providers", "Virtual Keys"],
+            ["Authentication", "Providers", "Virtual Keys"],
         )
-        self.assertEqual(result["fields"][3]["section"], {"id": "oidc"})
+        self.assertEqual(result["fields"][3]["section"], {"id": "authentication"})
         repeated = RECONCILER.normalise_item(
             copy.deepcopy(result), "Application", desired, "vault"
         )
