@@ -60,9 +60,8 @@ app-specific Helm patches.
 Define settings once near their owner and use Kustomize replacements for derived
 values. Preserve native configuration formats and upstream interfaces. Keep
 substantial application configuration and executable code in their own files.
-Application display names drive dashboard and 1Password titles. Bind credential
-consumers and publishers to existing item UUIDs so renaming preserves credentials;
-non-routed integrations declare their owning title explicitly.
+Bind credential consumers and publishers to existing 1Password item UUIDs so
+renaming preserves credentials; item titles are declared explicitly.
 
 Validate the changed configuration before committing. Local manifest rendering uses
 `kubectl kustomize` from the pinned kubectl tool. Render changed Helm charts

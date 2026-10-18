@@ -49,7 +49,7 @@ spec:
           gethomepage.dev/group: Operations
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-beszel
-          gethomepage.dev/name: Beszel
+          gethomepage.dev/name: &title Beszel
           gethomepage.dev/widget.password: '{{ "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}" }}'
           gethomepage.dev/widget.type: beszel
           gethomepage.dev/widget.url: https://app.invalid
@@ -57,6 +57,7 @@ spec:
           gethomepage.dev/widget.version: "2"
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: l6ndlsmefn6gafyr7cfk3u24gm
+          onepassword.excloo.dev/title: *title
         hostnames:
           - app.invalid
         labels:

@@ -2,7 +2,6 @@ import base64
 import copy
 import json
 import os
-import re
 import secrets
 import ssl
 import urllib.error
@@ -142,10 +141,6 @@ def new_item():
     }
 
 
-def is_item_id(value):
-    return bool(re.fullmatch(r"[a-z0-9]{26}", value))
-
-
 def kustomization_ready(resource):
     metadata = resource.get("metadata", {})
     source_reference = resource.get("spec", {}).get("sourceRef", {})
@@ -249,7 +244,7 @@ def discover_items():
                     login_items[title] = login_item
             if field:
                 item["fields"].add(field)
-    # References own credential identity; an optional title follows the app name.
+    # References own credential identity; only an explicit title renames an item.
     for route in routes:
         namespace = route["metadata"]["namespace"]
         route_annotations = annotations(route)
@@ -269,8 +264,6 @@ def discover_items():
             )
         item = desired.setdefault(title, new_item())
         display_title = route_annotations.get(f"{ANNOTATION_PREFIX}title")
-        if not display_title and is_item_id(title):
-            display_title = route_annotations.get("gethomepage.dev/name")
         if display_title:
             if item["title"] and item["title"] != display_title:
                 raise RuntimeError(f"1Password item {title} has conflicting titles")

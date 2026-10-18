@@ -73,9 +73,10 @@ spec:
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-pocket-id
-          gethomepage.dev/name: Pocket ID
+          gethomepage.dev/name: &title Pocket ID
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: dgxladwiom2fs27x3fhzyt2kj4
+          onepassword.excloo.dev/title: *title
         hostnames:
           - identity.invalid
         labels:

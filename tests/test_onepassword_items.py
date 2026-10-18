@@ -16,6 +16,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 
+ITEM_ID = r"^[a-z0-9]{26}$"
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 RECONCILER_PATH = REPOSITORY_ROOT / "platform/secrets/onepassword-items/reconcile.py"
 SPEC = importlib.util.spec_from_file_location("onepassword_items", RECONCILER_PATH)
@@ -54,22 +55,21 @@ class ReconcilerTests(unittest.TestCase):
         self.assertGreaterEqual(len(managed), 20)
         for route in managed:
             annotations = route["metadata"]["annotations"]
-            self.assertTrue(RECONCILER.is_item_id(annotations["onepassword.excloo.dev/item"]))
-            self.assertNotIn("onepassword.excloo.dev/title", annotations)
-            annotations["gethomepage.dev/name"] = "Renamed " + annotations["gethomepage.dev/name"]
+            self.assertRegex(annotations["onepassword.excloo.dev/item"], ITEM_ID)
+            self.assertEqual(annotations["onepassword.excloo.dev/title"], annotations["gethomepage.dev/name"])
         secrets = [r for r in resources if r["kind"] == "ExternalSecret" and r["spec"].get("secretStoreRef", {}).get("name") == "onepassword"]
         for secret in secrets:
             for data in secret["spec"].get("data", []):
-                self.assertTrue(RECONCILER.is_item_id(data["remoteRef"]["key"]))
+                self.assertRegex(data["remoteRef"]["key"], ITEM_ID)
         with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda p: routes if "httproutes" in p else secrets if p.endswith("/externalsecrets") else []), \
                 patch.object(RECONCILER, "secret_values", side_effect=lambda r, m: {k: "fixture" for k in m}):
             desired = RECONCILER.discover_items()
         for route in managed:
             annotations = route["metadata"]["annotations"]
-            self.assertEqual(desired[annotations["onepassword.excloo.dev/item"]]["title"], annotations["gethomepage.dev/name"])
+            self.assertEqual(desired[annotations["onepassword.excloo.dev/item"]]["title"], annotations["onepassword.excloo.dev/title"])
         for resource in resources:
             if resource["kind"] == "ResendKey":
-                self.assertTrue(RECONCILER.is_item_id(resource["spec"]["itemID"]))
+                self.assertRegex(resource["spec"]["itemID"], ITEM_ID)
                 self.assertNotIn("displayName", resource["spec"])
 
     def test_uuid_secret_ownership_preserves_generation_for_multiple_items(self):
@@ -78,25 +78,26 @@ class ReconcilerTests(unittest.TestCase):
         route = {"metadata": {"name": "app", "namespace": "app", "annotations": {"gethomepage.dev/name": "Application", "onepassword.excloo.dev/item": owner}}, "spec": {"hostnames": ["app.example.net"]}}
         with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda p: [route] if "httproutes" in p else [secret] if p.endswith("/externalsecrets") else []):
             desired = RECONCILER.discover_items()
-        self.assertEqual(desired[owner]["generate"], {"password"})
-        self.assertEqual(desired[shared]["generate"], set())
-        self.assertEqual(desired[owner]["title"], "Application")
+            self.assertEqual(desired[owner]["generate"], {"password"})
+            self.assertEqual(desired[shared]["generate"], set())
+            # Dashboard names never rename an item without an explicit title.
+            self.assertIsNone(desired[owner]["title"])
+            route["metadata"]["annotations"]["onepassword.excloo.dev/title"] = "Application"
+            self.assertEqual(RECONCILER.discover_items()[owner]["title"], "Application")
 
     def test_display_name_change_keeps_syncthing_resource_and_item_identities(self):
-        from support import copy_repository, read_yaml, render_resources
+        from support import copy_repository, render_resources
 
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             copy_repository(root)
             path = root / "apps/overlays/syd/syncthing.yaml"
-            settings = read_yaml(path)
-            settings["spec"]["values"]["route"]["private"]["annotations"]["gethomepage.dev/name"] = "Syncthing (Archive)"
-            path.write_text(json.dumps(settings))
+            path.write_text(path.read_text().replace("Syncthing (Kimbap)", "Syncthing (Archive)"))
             resources = render_resources(root / "apps/overlays/syd")
         release = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "syncthing")
         secret = next(r for r in resources if r["kind"] == "ExternalSecret" and r["metadata"]["namespace"] == "syncthing")
         annotations = release["spec"]["values"]["route"]["private"]["annotations"]
-        self.assertNotIn("onepassword.excloo.dev/title", annotations)
+        self.assertEqual(annotations["gethomepage.dev/name"], "Syncthing (Archive)")
         route = {"metadata": {"namespace": "syncthing", "name": "syncthing", "annotations": annotations}, "spec": {"hostnames": ["syncthing.example.net"]}}
         with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda p: [route] if "httproutes" in p else []):
             desired = RECONCILER.discover_items()
