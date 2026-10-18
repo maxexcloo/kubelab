@@ -46,8 +46,6 @@ class ClusterSettingsTests(unittest.TestCase):
             self.assertEqual({r["spec"]["target"] for r in dns_records}, {"private.changed.example"})
             litellm = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "litellm")
             values = litellm["spec"]["values"]
-            bento = next(d for d in values["proxy_config"]["model_list"] if d["model_name"].startswith("bento/"))
-            self.assertEqual(bento["litellm_params"]["api_base"], "http://bento.changed.example:8123/v1")
             librechat = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "librechat")
             self.assertEqual(librechat["spec"]["values"]["librechat"]["configEnv"]["BENTO_API_URL"],
                              "http://bento.changed.example:8123/v1")

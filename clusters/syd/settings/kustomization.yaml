@@ -77,15 +77,6 @@ replacements:
         options:
           delimiter: /
           index: 2
-      - select:
-          kind: HelmRelease
-          name: litellm
-          namespace: litellm
-        fieldPaths:
-          - spec.values.proxy_config.model_list.[model_name=bento/.*].litellm_params.api_base
-        options:
-          delimiter: /
-          index: 2
   - source:
       kind: ConfigMap
       name: cluster-settings-syd

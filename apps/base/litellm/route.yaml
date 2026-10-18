@@ -3,7 +3,7 @@ kind: HTTPRoute
 metadata:
   name: application
   annotations:
-    gethomepage.dev/description: LLM & MCP Gateway
+    gethomepage.dev/description: MCP Gateway
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Artificial Intelligence
     gethomepage.dev/href: https://app.invalid/ui/

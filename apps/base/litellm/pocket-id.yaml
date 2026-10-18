@@ -6,7 +6,7 @@ spec:
   client:
     callbackURLs:
       - https://app.invalid/sso/callback
-    description: LLM & MCP Gateway
+    description: MCP Gateway
     id: litellm-au-truenas
     launchURL: https://app.invalid/ui/
     name: LiteLLM
