@@ -173,6 +173,7 @@ class AppSettingsTests(unittest.TestCase):
                                 "apps/components",
                                 "apps/transformers",
                                 "platform/backups",
+                                "platform/components",
                                 "platform/databases",
                                 "scripts/service-routes",
                             ),
