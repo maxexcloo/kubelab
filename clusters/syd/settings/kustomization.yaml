@@ -25,7 +25,7 @@ patches:
 replacements:
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.cluster_name
     targets:
       - select:
@@ -54,7 +54,7 @@ replacements:
           index: 1
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.bento_address
     targets:
       - select:
@@ -71,7 +71,7 @@ replacements:
           - endpoints.0.addresses.0
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.bento_llm_authority
     targets:
       - select:
@@ -94,12 +94,12 @@ replacements:
           index: 2
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.private_dns_host
     targets:
       - select:
           kind: ConfigMap
-          name: cluster-settings-syd
+          name: cluster-settings
         fieldPaths:
           - data.private_dns_lookup
         options:
@@ -118,7 +118,7 @@ replacements:
           create: true
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.private_dns_lookup
     targets:
       - select:
@@ -139,7 +139,7 @@ replacements:
           index: 0
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.grafana_host
     targets:
       - select:
@@ -176,7 +176,7 @@ replacements:
           index: 2
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.unifi_host
     targets:
       - select:
@@ -207,7 +207,7 @@ replacements:
           index: 2
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.backup_endpoint
     targets:
       - select:
@@ -216,7 +216,7 @@ replacements:
           - spec.configuration.endpointURL
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.backup_destination
     targets:
       - select:
