@@ -10,13 +10,6 @@ resources:
   - public-route.yaml
   - route.yaml
   - source.yaml
-configurations:
-  - name-reference.yaml
-configMapGenerator:
-  - name: litellm-extensions
-    files:
-      - catalogue.py
-      - hooks.py
 replacements:
   - source:
       kind: Namespace

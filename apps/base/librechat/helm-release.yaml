@@ -37,7 +37,7 @@ spec:
         ALLOW_SOCIAL_REGISTRATION: "true"
         DOMAIN_CLIENT: https://app.invalid
         DOMAIN_SERVER: https://app.invalid
-        ENDPOINTS: custom
+        ENDPOINTS: custom,agents
         OPENID_ADMIN_ROLE: max@excloo.com
         OPENID_ADMIN_ROLE_PARAMETER_PATH: email
         OPENID_ADMIN_ROLE_TOKEN_KIND: id

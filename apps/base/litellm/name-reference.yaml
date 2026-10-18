@@ -1,7 +1,0 @@
-nameReference:
-  - kind: ConfigMap
-    version: v1
-    fieldSpecs:
-      - group: helm.toolkit.fluxcd.io
-        kind: HelmRelease
-        path: spec/values/volumes/configMap/name

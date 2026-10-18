@@ -22,9 +22,7 @@ registration:
     - openid
 endpoints:
   agents:
-    activityEndpoint: LiteLLM
     activityLabel: true
-    activityModel: bento/qwen3.8-flash-next
     # File search, execute_code and ocr need the RAG API, the Code API and a Mistral OCR service.
     capabilities:
       - actions
@@ -43,8 +41,7 @@ endpoints:
       apiKey: ${LITELLM_API_KEY}
       baseURL: http://litellm.litellm.svc.cluster.local:4000/v1
       models:
-        default:
-          - bento/qwen3.8-flash-next
+        default: []
         fetch: true
       titleConvo: true
       titleModel: current_model
@@ -53,6 +50,11 @@ fileConfig:
   endpoints:
     agents:
       fileLimit: 20
+# Agents save and delete memories through their native tools.
+memory:
+  disabled: false
+  personalize: true
+  tokenLimit: 2000
 webSearch:
   firecrawlApiKey: ${FIRECRAWL_API_KEY}
   keenableApiKey: ${KEENABLE_API_KEY}

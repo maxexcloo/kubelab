@@ -47,11 +47,8 @@ spec:
       GENERIC_USER_LAST_NAME_ATTRIBUTE: family_name
       HOME: /tmp
       LITELLM_ENABLE_MCP_STDIO: "true"
-      LITELLM_WORKER_STARTUP_HOOKS: hooks:install
       PATH: /opt/mcp:/app/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       PROXY_BASE_URL: https://app.invalid
-      PYTHONDONTWRITEBYTECODE: "1"
-      PYTHONPATH: /etc/litellm/extensions
       STORE_MODEL_IN_DB: "True"
       TZ: Australia/Sydney
       UNIFI_NETWORK_HOST: host.invalid
@@ -108,8 +105,7 @@ spec:
         master_key: os.environ/LITELLM_MASTER_KEY
         require_key_mcp_access_defined: true
       litellm_settings:
-        callbacks:
-          - hooks.callback
+        check_provider_endpoint: true
         request_timeout: 300
       mcp_servers:
         heiss:
@@ -210,17 +206,11 @@ spec:
     strategy:
       type: Recreate
     volumeMounts:
-      - name: extensions
-        mountPath: /etc/litellm/extensions
-        readOnly: true
       - name: mcp-runtime
         mountPath: /opt/mcp
       - name: temporary
         mountPath: /tmp
     volumes:
-      - name: extensions
-        configMap:
-          name: litellm-extensions
       - name: mcp-runtime
         emptyDir:
           sizeLimit: 64Mi
