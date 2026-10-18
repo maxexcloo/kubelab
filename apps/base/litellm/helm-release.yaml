@@ -49,6 +49,8 @@ spec:
       LITELLM_ENABLE_MCP_STDIO: "true"
       PATH: /opt/mcp:/app/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       PROXY_BASE_URL: https://app.invalid
+      # Provider discovery uses the shared HTTP client; chat requests use the deployment timeout.
+      REQUEST_TIMEOUT: "5"
       STORE_MODEL_IN_DB: "True"
       TZ: Australia/Sydney
       UNIFI_NETWORK_HOST: host.invalid
@@ -106,16 +108,19 @@ spec:
         require_key_mcp_access_defined: true
       litellm_settings:
         check_provider_endpoint: true
-        request_timeout: 300
       mcp_servers:
-        ai_control:
+        AI_Control:
+          alias: ai_control
           allow_all_keys: false
           auth_type: bearer_token
           auth_value: os.environ/CONTROL_MCP_API_KEY
           server_id: ai-control
           transport: http
           url: http://heiss-mcp:1338/mcp
-        heiss:
+          mcp_info:
+            description: Manage AI workloads and preview GPU allocation changes.
+        HEISS:
+          alias: heiss
           allow_all_keys: true
           auth_type: bearer_token
           auth_value: os.environ/HEISS_MCP_API_KEY
@@ -124,7 +129,10 @@ spec:
           url: http://heiss-mcp:1338/mcp
           extra_headers:
             - X-Bento-User-Id
-        heiss_x:
+          mcp_info:
+            description: Create and manage images and videos in the HEISS studio.
+        HEISS_X:
+          alias: heiss_x
           allow_all_keys: false
           auth_type: bearer_token
           auth_value: os.environ/HEISS_X_MCP_API_KEY
@@ -133,11 +141,17 @@ spec:
           url: http://heiss-mcp:1338/mcp
           extra_headers:
             - X-Bento-User-Id
-        home_assistant:
+          mcp_info:
+            description: Create and manage images and videos in the HEISS X studio.
+        Home_Assistant:
+          alias: home_assistant
           server_id: home-assistant
           transport: http
           url: os.environ/HOME_ASSISTANT_MCP_URL
-        unifi_network:
+          mcp_info:
+            description: Inspect and control home devices, automations and dashboards.
+        UniFi_Network:
+          alias: unifi_network
           command: /opt/mcp/uvx
           server_id: unifi-network
           transport: stdio
@@ -155,13 +169,16 @@ spec:
             UV_LINK_MODE: os.environ/UV_LINK_MODE
             UV_PYTHON: os.environ/UV_PYTHON
             UV_PYTHON_DOWNLOADS: os.environ/UV_PYTHON_DOWNLOADS
+          mcp_info:
+            description: Inspect and manage UniFi networks, devices and clients.
       model_list:
         - model_name: bento/*
           litellm_params:
             api_base: http://host.invalid:8000/v1
             api_key: os.environ/BENTO_API_KEY
-            model: openai/*
             max_parallel_requests: 8
+            model: openai/*
+            timeout: &generation-timeout 300
           model_info:
             input_cost_per_token: 0
             output_cost_per_token: 0
@@ -170,31 +187,37 @@ spec:
             api_base: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317/v1
             api_key: os.environ/CLIPROXY_API_KEY
             model: openai/*
+            timeout: *generation-timeout
         - model_name: deepseek/*
           litellm_params:
             api_base: https://api.deepseek.com/v1
             api_key: os.environ/DEEPSEEK_API_KEY
             model: deepseek/*
+            timeout: *generation-timeout
         - model_name: opencode-go/*
           litellm_params:
             api_base: https://opencode.ai/zen/go/v1
             api_key: os.environ/OPENCODE_GO_API_KEY_1
             model: openai/*
+            timeout: *generation-timeout
         - model_name: opencode-go/*
           litellm_params:
             api_base: https://opencode.ai/zen/go/v1
             api_key: os.environ/OPENCODE_GO_API_KEY_2
             model: openai/*
+            timeout: *generation-timeout
         - model_name: opencode-zen/*
           litellm_params:
             api_base: https://opencode.ai/zen/v1
             api_key: os.environ/OPENCODE_ZEN_API_KEY_1
             model: openai/*
+            timeout: *generation-timeout
         - model_name: opencode-zen/*
           litellm_params:
             api_base: https://opencode.ai/zen/v1
             api_key: os.environ/OPENCODE_ZEN_API_KEY_2
             model: openai/*
+            timeout: *generation-timeout
     resources:
       limits:
         memory: 2Gi

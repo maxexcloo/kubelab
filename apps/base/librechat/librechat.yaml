@@ -119,6 +119,20 @@ memory:
   disabled: false
   personalize: true
   tokenLimit: 2000
+skillSync:
+  github:
+    enabled: true
+    intervalMinutes: 60
+    runOnStartup: true
+    sources:
+      - id: maxexcloo-agents
+        owner: maxexcloo
+        ref: main
+        repo: agents
+        skillDiscoveryDepth: 2
+        token: ${GITHUB_SKILLS_TOKEN}
+        paths:
+          - skills
 webSearch:
   firecrawlApiKey: ${FIRECRAWL_API_KEY}
   keenableApiKey: ${KEENABLE_API_KEY}
@@ -135,6 +149,7 @@ mcpSettings:
 mcpServers:
   ai-control:
     type: streamable-http
+    description: Manage AI workloads and preview GPU allocation changes.
     requiresOAuth: false
     startup: false
     title: AI Control
@@ -149,25 +164,33 @@ mcpServers:
       x-litellm-api-key: "Bearer {{AI_CONTROL_API_KEY}}"
   heiss:
     type: streamable-http
+    description: Create and manage images and videos in the HEISS studio.
     requiresOAuth: false
+    title: HEISS
     url: http://litellm.litellm.svc.cluster.local:4000/heiss/mcp
     headers:
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   heiss-x:
     type: streamable-http
+    description: Create and manage images and videos in the HEISS X studio.
     requiresOAuth: false
+    title: HEISS X
     url: http://litellm.litellm.svc.cluster.local:4000/heiss_x/mcp
     headers:
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   home-assistant:
     type: streamable-http
+    description: Inspect and control home devices, automations and dashboards.
     requiresOAuth: false
+    title: Home Assistant
     url: http://litellm.litellm.svc.cluster.local:4000/home_assistant/mcp
     headers:
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   unifi-network:
     type: streamable-http
+    description: Inspect and manage UniFi networks, devices and clients.
     requiresOAuth: false
+    title: UniFi Network
     url: http://litellm.litellm.svc.cluster.local:4000/unifi_network/mcp
     headers:
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
