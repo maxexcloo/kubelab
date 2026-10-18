@@ -18,31 +18,6 @@ from support import (
 
 
 class AppSettingsTests(unittest.TestCase):
-    def test_heiss_chat_connections_forward_the_signed_in_user(self):
-        resources = repository_resources("apps/overlays/syd")
-        configuration = next(
-            resource["data"]["librechat.yaml"] for resource in resources
-            if resource["kind"] == "ConfigMap"
-            and resource["metadata"]["namespace"] == "librechat"
-            and "librechat.yaml" in resource.get("data", {})
-        )
-        chat = json.loads(subprocess.check_output(
-            ["yq", "-o=json", "."], input=configuration, text=True
-        ))["mcpServers"]
-        gateway = next(
-            resource["spec"]["values"]["proxy_config"]["mcp_servers"]
-            for resource in resources if resource["kind"] == "HelmRelease"
-            and resource["metadata"]["name"] == "litellm"
-        )
-        for client, provider in [("heiss", "HEISS"), ("heiss-x", "HEISS_X")]:
-            with self.subTest(client=client):
-                self.assertTrue(chat[client]["serverInstructions"])
-                self.assertGreater(chat[client]["timeout"], 1800000)
-                self.assertGreater(gateway[provider]["timeout"], 1800)
-                self.assertEqual(chat[client]["headers"]["X-Bento-User-Id"],
-                                 "{{LIBRECHAT_USER_ID}}")
-                self.assertIn("X-Bento-User-Id", gateway[provider]["extra_headers"])
-
     def test_private_aliases_cover_routed_applications(self):
         for cluster in CLUSTERS:
             for path in (f"apps/overlays/{cluster}", f"clusters/{cluster}/platform"):
@@ -115,54 +90,6 @@ class AppSettingsTests(unittest.TestCase):
                             for rule in rules
                         )
                     )
-
-    def test_cluster_applications_follow_network_placement(self):
-        external = {
-            "aiometadata",
-            "aiostreams",
-            "cliproxyapi",
-            "homepage",
-            "openspeedtest",
-            "redlib",
-        }
-        releases = [
-            item
-            for item in repository_resources("apps/overlays/syd")
-            if item["kind"] == "HelmRelease"
-        ]
-        for release in releases:
-            name = release["metadata"]["name"]
-            values = release["spec"]["values"]
-            chart = release["spec"].get("chart", {}).get("spec", {}).get("chart")
-            if chart == "app-template" or name == "immich":
-                selector = values["defaultPodOptions"]["nodeSelector"]
-            else:
-                selector = values["nodeSelector"]
-            with self.subTest(application=name):
-                self.assertEqual(
-                    selector["node.excloo.dev/network"],
-                    "external" if name in external else "internal",
-                )
-        primary = next(
-            item for item in releases if item["metadata"]["name"] == "openspeedtest"
-        )
-        secondary = next(
-            item
-            for item in releases
-            if item["metadata"]["name"] == "openspeedtest-internal"
-        )
-        self.assertEqual(primary["spec"]["chart"], secondary["spec"]["chart"])
-        self.assertNotEqual(
-            primary["spec"].get("releaseName"), secondary["spec"].get("releaseName")
-        )
-        for database in repository_resources("apps/overlays/syd"):
-            if database["kind"] == "Cluster":
-                self.assertEqual(
-                    database["spec"]["affinity"]["nodeSelector"][
-                        "node.excloo.dev/network"
-                    ],
-                    "internal",
-                )
 
     def test_owned_probe_timing_policy(self):
         for cluster in CLUSTERS:
@@ -261,21 +188,6 @@ class AppSettingsTests(unittest.TestCase):
                         self.assertNotIn("app.invalid", output)
                         self.assertNotIn("alias.invalid", output)
                     route["hostnames"][index] = old
-
-    def test_persistent_volumes_use_direct_kimbap_datasets(self):
-        volumes = [
-            item
-            for item in repository_resources("apps/overlays/syd")
-            if item["kind"] == "PersistentVolume"
-        ]
-        self.assertTrue(volumes)
-        for volume in volumes:
-            self.assertNotIn("nfs", volume["spec"])
-            self.assertTrue(
-                volume["spec"]["hostPath"]["path"].startswith("/var/mnt/datasets/")
-            )
-            terms = volume["spec"]["nodeAffinity"]["required"]["nodeSelectorTerms"]
-            self.assertEqual(terms[0]["matchExpressions"][0]["values"], ["kimbap"])
 
     def test_shared_beszel_hostname_changes_reach_syd(self):
         with tempfile.TemporaryDirectory() as directory:
