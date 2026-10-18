@@ -148,6 +148,15 @@ replacements:
         fieldPaths:
           - spec.hostnames.0
       - select:
+          kind: HTTPRoute
+          name: grafana
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+          - metadata.annotations.[gethomepage.dev/widget.url]
+        options:
+          delimiter: /
+          index: 2
+      - select:
           kind: HelmRelease
           name: victoria-metrics-k8s-stack
         fieldPaths:
@@ -187,8 +196,8 @@ replacements:
           - spec.values.envVars.UNIFI_NETWORK_HOST
   - source:
       kind: ConfigMap
-      name: shared-settings
-      fieldPath: data.headlamp_syd_host
+      name: cluster-settings
+      fieldPath: data.headlamp_host
     targets:
       - select:
           kind: HTTPRoute
@@ -197,11 +206,30 @@ replacements:
         fieldPaths:
           - spec.hostnames.0
       - select:
+          kind: HTTPRoute
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+      - select:
           kind: HelmRelease
           name: headlamp
           namespace: headlamp
         fieldPaths:
           - spec.values.config.oidc.callbackURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PocketIDClient
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
         options:
           delimiter: /
           index: 2

@@ -71,21 +71,6 @@ replacements:
   - source:
       kind: ConfigMap
       name: shared-settings
-      fieldPath: data.headlamp_syd_host
-    targets:
-      - select:
-          kind: PocketIDClient
-          name: headlamp
-          namespace: headlamp
-        fieldPaths:
-          - spec.client.callbackURLs.0
-          - spec.client.launchURL
-        options:
-          delimiter: /
-          index: 2
-  - source:
-      kind: ConfigMap
-      name: shared-settings
       fieldPath: data.identity_host
     targets:
       - select:
