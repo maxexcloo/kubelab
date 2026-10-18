@@ -53,11 +53,14 @@ fileConfig:
   endpoints:
     agents:
       fileLimit: 20
-# Keyless providers keep web search working without per-user credentials.
 webSearch:
+  firecrawlApiKey: ${FIRECRAWL_API_KEY}
+  keenableApiKey: ${KEENABLE_API_KEY}
   rerankerType: none
   scraperProvider: keenable
   searchProvider: keenable
+  serperApiKey: ${SERPER_API_KEY}
+  tavilyApiKey: ${TAVILY_API_KEY}
 # LiteLLM's MCP gateway is an internal service; exempt just that host and port.
 mcpSettings:
   allowedAddresses:
