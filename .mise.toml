@@ -18,6 +18,9 @@ kubeconform = "0.8.0"
 # Select schemas for the Kubernetes API configured in Homelab.
 kubectl = "1.37.1"
 
+[vars]
+updatecli_generator = "python -B scripts/updates.py"
+
 # Bootstrap
 [tasks.bootstrap]
 run = 'echo "Cluster $usage_cluster bootstrap submitted. Check progress with: mise run status $usage_cluster"'
@@ -73,67 +76,16 @@ arg "[application]"
 [tasks.check]
 depends = ["check:updates", "hooks:check", "test:python"]
 
-[tasks."check:updates"]
-description = "Validate Updatecli Policies & Discovered Pins"
-env.GITHUB_TOKEN = "validation-placeholder"
-run = '''
-set -eu
-directory=$(mktemp -d)
-trap 'rm -rf -- "$directory"' EXIT
-python -B scripts/updates.py "$directory"
-updatecli manifest validate --config .updatecli.d --config "$directory" --strict --unique-tmp-dir
-'''
-
 [tasks.fmt]
 depends = ["fmt:oxfmt"]
 
 # Dependencies
-[tasks."dependencies:check"]
-description = "Preview Dependency Updates"
-usage = 'flag "--labels <labels>" help="Select Updatecli Groups (group:actions)"'
-run = '''
-set -eu
-GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
-if [ -z "$GITHUB_TOKEN" ] && command -v gh >/dev/null 2>&1; then
-  GITHUB_TOKEN=$(gh auth token)
-fi
-export GITHUB_TOKEN
-directory=$(mktemp -d)
-trap 'rm -rf -- "$directory"' EXIT
-python -B scripts/updates.py "$directory"
-set --
-if [ -n "${usage_labels:-}" ]; then
-  set -- --labels "$usage_labels"
-fi
-updatecli pipeline diff --config .updatecli.d --config "$directory" --disable-changelog --disable-udash-report --unique-tmp-dir "$@"
-'''
-
 # Cluster-compatible clients follow the platform policies.
 [tasks."dependencies:mise:check"]
 run = "mise upgrade --bump --dry-run --exclude kubectl --local --no-prune"
 
 [tasks."dependencies:mise:update"]
 run = "mise upgrade --bump --exclude kubectl --local --no-prune"
-
-[tasks."dependencies:update"]
-description = "Apply Reviewed Dependency Updates"
-usage = 'flag "--labels <labels>" help="Select Updatecli Groups (group:actions)"'
-run = '''
-set -eu
-GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
-if [ -z "$GITHUB_TOKEN" ] && command -v gh >/dev/null 2>&1; then
-  GITHUB_TOKEN=$(gh auth token)
-fi
-export GITHUB_TOKEN
-directory=$(mktemp -d)
-trap 'rm -rf -- "$directory"' EXIT
-python -B scripts/updates.py "$directory"
-set --
-if [ -n "${usage_labels:-}" ]; then
-  set -- --labels "$usage_labels"
-fi
-updatecli pipeline apply --config .updatecli.d --config "$directory" --disable-changelog --disable-udash-report --unique-tmp-dir "$@"
-'''
 
 # Setup
 [tasks.setup]
