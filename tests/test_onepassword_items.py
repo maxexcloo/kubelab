@@ -31,7 +31,6 @@ def item_configuration(**overrides):
         "formats": {},
         "generate": set(),
         "login": False,
-        "namespaces": set(),
         "remove": set(),
         "urls": set(),
     }
@@ -156,17 +155,15 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(current["fields"][0]["value"], "keep-password")
         self.assertEqual(current["urls"], [{"href": "https://app.example.net", "label": "Sign In", "primary": True}])
 
-    def test_item_rename_rejects_conflicts_and_remaining_title_consumers(self):
+    def test_item_rename_rejects_conflicts_and_missing_items(self):
         item_id = "a" * 26
         summaries = [{"id": item_id, "title": "Application"}, {"id": "other", "title": "Taken"}]
         with self.assertRaisesRegex(RuntimeError, "belongs to another item"):
-            RECONCILER.resolve_items({item_id: {"title": "Taken"}}, summaries)
-        with self.assertRaisesRegex(RuntimeError, "title-based references"):
-            RECONCILER.resolve_items({item_id: {"title": "Renamed"}, "Application": {}}, summaries)
-        with self.assertRaisesRegex(RuntimeError, "requires an existing item ID"):
-            RECONCILER.resolve_items({"Application": {"title": "Renamed"}}, summaries)
+            RECONCILER.check_references({item_id: {"title": "Taken"}}, summaries)
         with self.assertRaisesRegex(RuntimeError, "is missing"):
-            RECONCILER.resolve_items({"b" * 26: {}}, summaries)
+            RECONCILER.check_references({"Application": {"title": "Renamed"}}, summaries)
+        with self.assertRaisesRegex(RuntimeError, "is missing"):
+            RECONCILER.check_references({"b" * 26: {}}, summaries)
 
     def test_grouping_preserves_websites_and_credentials_and_removes_empty_groups(self):
         current = {
@@ -579,101 +576,32 @@ class ReconcilerTests(unittest.TestCase):
         self.assertNotIn("private-value", str(caught.exception))
         self.assertTrue(error.closed)
 
-    def test_eventual_update_retries_only_not_found(self):
-        for code in [400, 404]:
-            with (
-                self.subTest(code=code),
-                patch.object(
-                    RECONCILER,
-                    "connect",
-                    side_effect=[
-                        RuntimeError(f"PUT http://connect returned {code}"),
-                        {},
-                    ],
-                ) as connect,
-                patch.object(RECONCILER.time, "sleep") as sleep,
-            ):
-                if code == 404:
-                    self.assertEqual(
-                        RECONCILER.update_eventually("/items/item", {}), {}
-                    )
-                    self.assertEqual(connect.call_count, 2)
-                    sleep.assert_called_once_with(5)
-                else:
-                    with self.assertRaises(RuntimeError):
-                        RECONCILER.update_eventually("/items/item", {})
-                    sleep.assert_not_called()
-
-    def test_category_replacement_preserves_credentials_before_removing_original(self):
-        original = {
+    def test_category_change_stops_instead_of_replacing_the_referenced_item(self):
+        item_id = "a" * 26
+        current = {
             "category": "SERVER",
-            "id": "original-id",
+            "fields": [],
+            "id": item_id,
+            "tags": ["Kubelab"],
             "title": "Application",
-            "fields": [{"id": "password", "label": "password", "value": "keep-me"}],
-            "tags": ["Kubelab"],
-            "urls": [],
-            "vault": {"id": "vault"},
         }
-        replacement = dict(original, category="LOGIN", id="replacement-id")
-        replies = [
-            [{"id": "vault"}],
-            [{"id": "original-id", "title": "Application"}],
-            original,
-            replacement,
-            replacement,
-            None,
-        ]
-        with (
-            patch.object(RECONCILER, "kustomizations_ready", return_value=False),
-            patch.object(RECONCILER, "is_dry_run", return_value=False),
-            patch.object(
-                RECONCILER,
-                "discover_items",
-                return_value={"Application": item_configuration(login=True)},
-            ),
-            patch.object(RECONCILER, "connect", side_effect=replies) as connect,
-            contextlib.redirect_stdout(io.StringIO()),
-        ):
-            RECONCILER.main()
-        writes = connect.call_args_list[3:]
-        self.assertEqual(
-            [call.kwargs["method"] for call in writes], ["POST", "PUT", "DELETE"]
-        )
-        self.assertEqual(writes[0].kwargs["body"]["fields"][0]["value"], "keep-me")
-        self.assertEqual(writes[1].args[0], "/vaults/vault/items/replacement-id")
-        self.assertEqual(writes[2].args[0], "/vaults/vault/items/original-id")
-
-    def test_category_replacement_keeps_original_if_credentials_are_not_saved(self):
-        original = {
-            "category": "LOGIN",
-            "id": "old",
-            "title": "App",
-            "fields": [
-                {"id": "key", "label": "api-key", "value": "keep-me"},
-            ],
-            "tags": ["Kubelab"],
-            "urls": [],
-        }
-        replies = [
-            [{"id": "vault"}],
-            [{"id": "old", "title": "App"}],
-            original,
-            {"id": "new", "fields": []},
-            {"id": "new", "fields": []},
-        ]
         with (
             patch.object(RECONCILER, "kustomizations_ready", return_value=True),
             patch.object(RECONCILER, "is_dry_run", return_value=False),
             patch.object(
-                RECONCILER, "discover_items", return_value={"App": item_configuration()}
+                RECONCILER,
+                "discover_items",
+                return_value={item_id: item_configuration(login=True)},
             ),
-            patch.object(RECONCILER, "connect", side_effect=replies) as connect,
+            patch.object(
+                RECONCILER,
+                "connect",
+                side_effect=[[{"id": "vault"}], [{"id": item_id, "title": "Application"}], current],
+            ) as connect,
         ):
-            with self.assertRaisesRegex(RuntimeError, "original retained"):
+            with self.assertRaisesRegex(RuntimeError, "wrong category"):
                 RECONCILER.main()
-        self.assertNotIn(
-            "DELETE", [call.kwargs.get("method") for call in connect.call_args_list]
-        )
+        self.assertEqual(connect.call_count, 3)
 
     def test_archival_only_removes_unreferenced_exclusively_managed_items(self):
         items = {
@@ -757,7 +685,7 @@ class ReconcilerTests(unittest.TestCase):
             self.addCleanup(setattr, RECONCILER, name, value)
         RECONCILER.kustomizations_ready = lambda: False
         RECONCILER.connect = connect
-        RECONCILER.discover_items = lambda cluster=None: {"Pocket ID": desired}
+        RECONCILER.discover_items = lambda cluster=None: {"existing-id": desired}
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
@@ -859,10 +787,8 @@ class ReconcilerTests(unittest.TestCase):
             routes if "httproutes" in path else resources
         )
         desired = RECONCILER.discover_items()
-        self.assertEqual(desired["Comfy Control"]["namespaces"], {"comfy-control"})
         self.assertEqual(desired["Comfy Control"]["urls"], {"https://comfy.excloo.com"})
         self.assertTrue(desired["Comfy Control"]["login"])
-        self.assertEqual(desired["CLIProxyAPI"]["namespaces"], set())
         self.assertFalse(desired["CLIProxyAPI"]["login"])
 
     def test_discovery_recognises_data_from_extract_owner(self):
@@ -890,7 +816,6 @@ class ReconcilerTests(unittest.TestCase):
         desired = RECONCILER.discover_items()
         self.assertEqual(set(desired), {"Homepage"})
         self.assertEqual(desired["Homepage"]["defaults"], {"widget-key": ""})
-        self.assertEqual(desired["Homepage"]["namespaces"], {"homepage"})
         self.assertFalse(desired["Homepage"]["login"])
 
     def test_discovery_seeds_only_explicit_route_items(self):
@@ -922,7 +847,6 @@ class ReconcilerTests(unittest.TestCase):
         desired = RECONCILER.discover_items()
         self.assertEqual(set(desired), {"Headlamp"})
         self.assertTrue(desired["Headlamp"]["login"])
-        self.assertEqual(desired["Headlamp"]["namespaces"], {"headlamp"})
         self.assertEqual(
             desired["Headlamp"]["urls"],
             {"https://headlamp.syd.excloo.dev"},
