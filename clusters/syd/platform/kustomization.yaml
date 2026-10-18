@@ -17,6 +17,28 @@ patches:
   - path: traefik-gateway.yaml
   - path: traefik.yaml
 replacements:
+  # Tunnel connectors and private proxies share Traefik's always-online nodes.
+  - source:
+      kind: HelmRelease
+      name: traefik
+      namespace: networking
+      fieldPath: spec.values.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution
+    targets:
+      - select:
+          kind: HelmRelease
+          name: cloudflared
+          namespace: cloudflared
+        fieldPaths:
+          - spec.values.defaultPodOptions.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution
+        options:
+          create: true
+      - select:
+          kind: ProxyClass
+          name: ingress
+        fieldPaths:
+          - spec.statefulSet.pod.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution
+        options:
+          create: true
   - source:
       kind: HTTPRoute
       name: headlamp

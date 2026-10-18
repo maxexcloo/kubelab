@@ -1,0 +1,22 @@
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: ingress
+spec:
+  statefulSet:
+    pod:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  tailscale.com/parent-resource: ingress
+                  tailscale.com/parent-resource-type: proxygroup
+              topologyKey: kubernetes.io/hostname
+      tailscaleContainer:
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            cpu: 20m
+            memory: 128Mi

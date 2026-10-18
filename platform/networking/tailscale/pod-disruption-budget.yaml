@@ -1,0 +1,11 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ingress
+  namespace: tailscale
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      tailscale.com/parent-resource: ingress
+      tailscale.com/parent-resource-type: proxygroup

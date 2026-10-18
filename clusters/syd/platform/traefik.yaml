@@ -5,9 +5,28 @@ metadata:
   namespace: networking
 spec:
   values:
-    nodeSelector:
-      node.excloo.dev/network: external
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                # Ingress stays on always-online nodes when GPU workers join.
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - hsp
+                    - kimbap
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: traefik-networking
+                app.kubernetes.io/name: traefik
+            topologyKey: kubernetes.io/hostname
     ports:
+      web:
+        expose:
+          private: true
       webdirect:
         exposedPort: 80
         port: 8082
@@ -21,6 +40,9 @@ spec:
               permanent: true
               scheme: https
               to: websecuredirect
+      websecure:
+        expose:
+          private: true
       websecuredirect:
         exposedPort: 443
         port: 8444
@@ -35,13 +57,24 @@ spec:
       additionalServices:
         direct:
           spec:
+            externalTrafficPolicy: Local
             externalIPs:
               - 10.20.0.4
+            internalTrafficPolicy: Local
             type: ClusterIP
+        private:
+          annotations:
+            tailscale.com/hostname: syd-ingress
+            tailscale.com/proxy-group: ingress
+            tailscale.com/tags: tag:cluster-syd
+          spec:
+            allocateLoadBalancerNodePorts: false
+            internalTrafficPolicy: Local
+            loadBalancerClass: tailscale
+            type: LoadBalancer
+      # Retain the old proxy until Homelab DNS switches to svc:syd-ingress.
       annotations:
         tailscale.com/expose: "true"
         tailscale.com/hostname: syd
       spec:
         type: ClusterIP
-    updateStrategy:
-      type: Recreate
