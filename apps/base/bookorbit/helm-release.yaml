@@ -74,9 +74,10 @@ spec:
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: bookorbit
-          gethomepage.dev/name: BookOrbit
+          gethomepage.dev/name: &title BookOrbit
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: ve6qfldrb2gltpkkvyvp7zhkxi
+          onepassword.excloo.dev/title: *title
         hostnames:
           - books.excloo.com
         labels:

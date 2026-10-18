@@ -163,11 +163,12 @@ spec:
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-romm
-          gethomepage.dev/name: RoMM
+          gethomepage.dev/name: &title RoMM
           gethomepage.dev/widget.type: romm
           gethomepage.dev/widget.url: https://app.invalid
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: qkrf4jrzlqslswzcqjcsm3u4xe
+          onepassword.excloo.dev/title: *title
         hostnames:
           - games.excloo.com
         labels:

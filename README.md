@@ -45,34 +45,12 @@ Deployment requires a kubeconfig context matching the selected configuration in
 ## Configuration Changes
 
 Edit workload configuration in `apps/base/<application>` and select it through
-`apps/overlays/<cluster>`. Keep cluster differences in overlays. Helm releases and
-native application settings belong beside their application; shared settings and
-controllers belong under `platform/`.
-
-Apps derive their namespace and release identity from their Namespace resource.
-App-template releases inherit shared chart policy from `apps/components/`; keep
-application values and required exceptions beside each app. Shared PostgreSQL
-components derive database identities from the app Namespace; keep capacity,
-extensions and resource exceptions beside the app. Private DNS components own the
-record policy, and native route transformers apply shared hostname wiring after
-app-specific Helm patches.
-
-Define settings once near their owner and use Kustomize replacements for derived
-values. Preserve native configuration formats and upstream interfaces. Keep
-substantial application configuration and executable code in their own files.
-Application display names drive dashboard and 1Password titles. Bind credential
-consumers and publishers to existing item UUIDs so renaming preserves credentials;
-non-routed integrations declare their owning title explicitly.
-
-Validate the changed configuration before committing. Local manifest rendering uses
-`kubectl kustomize` from the pinned kubectl tool. Render changed Helm charts
-separately: manifest checks cover Kustomize output, not chart-generated workloads.
-Review deletion and recovery behaviour before removing declarations or changing
-storage, secrets or external integrations.
+`apps/overlays/<cluster>`; `AGENTS.md` describes the editing conventions. Local
+manifest checks cover Kustomize output, so render changed Helm charts separately.
 
 ## Deployment
 
-Push reviewed changes to `main`; Flux reconciles the repository automatically.
+Merge reviewed pull requests into `main`; Flux reconciles it automatically.
 Use the deployment task to fetch and reconcile immediately. Select an existing
 cluster and optionally a configured reconciliation component.
 
@@ -105,12 +83,6 @@ Credentials and Restic encryption passwords stay in 1Password. Restore PostgreSQ
 through the Barman plugin and app state through Restic into fresh volumes before
 switching the workload. Initial backup uploads are verified separately from restore
 tests.
-
-Kubernetes client updates read the configured API version from the sibling
-`../homelab/data/clusters.yaml` inventory; keep that checkout current.
-
-Use `mise run dependencies:check` to preview local updates. Policies are configured
-in `.updatecli.d/`; changes and deployment remain manual.
 
 Check upstream migration requirements before upgrading. Preserve persistent data
 and the credentials needed to restore it. Reverting an image does not reverse a

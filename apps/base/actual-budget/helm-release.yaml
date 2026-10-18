@@ -44,9 +44,10 @@ spec:
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-actual-budget
-          gethomepage.dev/name: Actual Budget
+          gethomepage.dev/name: &title Actual Budget
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: nrb2ibt7eu6lvwykuvl3pjzolq
+          onepassword.excloo.dev/title: *title
         hostnames:
           - budget.excloo.com
         labels:

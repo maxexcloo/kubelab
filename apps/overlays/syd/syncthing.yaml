@@ -12,4 +12,5 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/name: Syncthing (Kimbap)
+          gethomepage.dev/name: &title Syncthing (Kimbap)
+          onepassword.excloo.dev/title: *title

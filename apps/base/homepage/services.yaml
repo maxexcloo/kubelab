@@ -34,15 +34,6 @@
         href: &netboot homelab://mbk/kimbap/netboot
         icon: mdi-server-network-#ffffff
         siteMonitor: *netboot
-    - Syncthing:
-        description: File Synchronisation
-        href: &syncthing https://syncthing.excloo.com
-        icon: sh-syncthing
-        siteMonitor: *syncthing
-        widget:
-          key: "{{HOMEPAGE_FILE_SYNCTHING_KEY}}"
-          type: syncthing
-          url: *syncthing
 - Servers:
     - TrueNAS:
         description: Storage Appliance

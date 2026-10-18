@@ -57,9 +57,10 @@ spec:
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-actual-budget
-          gethomepage.dev/name: Actual Up
+          gethomepage.dev/name: &title Actual Up
           gethomepage.dev/siteMonitor: https://app.invalid/livez
           onepassword.excloo.dev/item: 6ckeqicrsz42u6ryn2hqfyveky
+          onepassword.excloo.dev/title: *title
         hostnames:
           - actual-up.syd.excloo.dev
         labels:
