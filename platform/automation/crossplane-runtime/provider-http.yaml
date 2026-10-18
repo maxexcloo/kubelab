@@ -6,6 +6,6 @@ metadata:
     # Bootstrap-installed packages were retained when their declaration was removed.
     kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/provider-http:v1.0.14
+  package: xpkg.upbound.io/crossplane-contrib/provider-http:v1.0.15
   runtimeConfigRef:
     name: provider-http
