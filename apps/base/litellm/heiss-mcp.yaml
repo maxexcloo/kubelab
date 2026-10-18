@@ -5,8 +5,8 @@ metadata:
 spec:
   ports:
     - name: http
-      port: 1338
-      targetPort: 1338
+      port: 8788
+      targetPort: 8788
 ---
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
@@ -23,5 +23,33 @@ endpoints:
       ready: true
 ports:
   - name: http
-    port: 1338
+    port: 8788
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heiss-x-mcp
+spec:
+  ports:
+    - name: http
+      port: 8787
+      targetPort: 8787
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: heiss-x-mcp
+  labels:
+    endpointslice.kubernetes.io/managed-by: kubelab
+    kubernetes.io/service-name: heiss-x-mcp
+addressType: IPv4
+endpoints:
+  - addresses:
+      - 192.0.2.1
+    conditions:
+      ready: true
+ports:
+  - name: http
+    port: 8787
     protocol: TCP

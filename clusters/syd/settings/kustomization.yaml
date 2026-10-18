@@ -63,6 +63,12 @@ replacements:
           namespace: litellm
         fieldPaths:
           - endpoints.0.addresses.0
+      - select:
+          kind: EndpointSlice
+          name: heiss-x-mcp
+          namespace: litellm
+        fieldPaths:
+          - endpoints.0.addresses.0
   - source:
       kind: ConfigMap
       name: cluster-settings-syd

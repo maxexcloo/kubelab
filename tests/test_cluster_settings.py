@@ -50,9 +50,10 @@ class ClusterSettingsTests(unittest.TestCase):
             self.assertEqual(librechat["spec"]["values"]["librechat"]["configEnv"]["BENTO_API_URL"],
                              "http://bento.changed.example:8123/v1")
             self.assertEqual(values["envVars"]["UNIFI_NETWORK_HOST"], "gateway.changed.example")
-            heiss = next(r for r in resources if r["kind"] == "EndpointSlice" and r["metadata"]["name"] == "heiss-mcp")
-            self.assertEqual(heiss["endpoints"][0]["addresses"], ["192.0.2.15"])
-            self.assertEqual(heiss["ports"][0]["port"], 1338)
+            for name, port in [("heiss-mcp", 8788), ("heiss-x-mcp", 8787)]:
+                heiss = next(r for r in resources if r["kind"] == "EndpointSlice" and r["metadata"]["name"] == name)
+                self.assertEqual(heiss["endpoints"][0]["addresses"], ["192.0.2.15"])
+                self.assertEqual(heiss["ports"][0]["port"], port)
             volumes = [r for r in resources if r["kind"] == "PersistentVolume"]
             self.assertTrue(volumes)
             self.assertFalse(any("nfs" in r["spec"] for r in volumes))

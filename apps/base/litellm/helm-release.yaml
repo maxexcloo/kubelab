@@ -116,7 +116,7 @@ spec:
           auth_value: os.environ/CONTROL_MCP_API_KEY
           server_id: ai-control
           transport: http
-          url: http://heiss-mcp:1338/mcp
+          url: http://heiss-mcp:8788/mcp
           mcp_info:
             description: Manage AI workloads and preview GPU allocation changes.
         HEISS:
@@ -126,7 +126,7 @@ spec:
           auth_value: os.environ/HEISS_MCP_API_KEY
           server_id: heiss
           transport: http
-          url: http://heiss-mcp:1338/mcp
+          url: http://heiss-mcp:8788/mcp
           extra_headers:
             - X-Bento-User-Id
           mcp_info:
@@ -138,7 +138,7 @@ spec:
           auth_value: os.environ/HEISS_X_MCP_API_KEY
           server_id: heiss-x
           transport: http
-          url: http://heiss-mcp:1338/mcp
+          url: http://heiss-x-mcp:8787/mcp
           extra_headers:
             - X-Bento-User-Id
           mcp_info:
