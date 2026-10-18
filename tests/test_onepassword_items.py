@@ -800,6 +800,7 @@ class ReconcilerTests(unittest.TestCase):
                 "metadata": {
                     "annotations": {
                         "onepassword.excloo.dev/defaults": '{"widget-key":""}',
+                        "onepassword.excloo.dev/item": "Homepage",
                     },
                     "name": "homepage",
                     "namespace": "homepage",
@@ -888,7 +889,10 @@ class ReconcilerTests(unittest.TestCase):
         secret = {
             "kind": "ExternalSecret",
             "metadata": {
-                "annotations": {"onepassword.excloo.dev/login-item": "Dashboard"},
+                "annotations": {
+                    "onepassword.excloo.dev/item": "Inventory",
+                    "onepassword.excloo.dev/login-item": "Dashboard",
+                },
                 "name": "inventory",
                 "namespace": "homepage",
             },

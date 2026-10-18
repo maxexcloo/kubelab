@@ -32,9 +32,8 @@ spec:
         containers:
           reflector:
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/xddxdd/sidestore-vpn
-              tag: latest@sha256:077de9af996cae9d63803715f2eb54596d6e48a37069f9b15656990459c4c9d4
+              tag: latest
             resources:
               limits:
                 memory: 32Mi

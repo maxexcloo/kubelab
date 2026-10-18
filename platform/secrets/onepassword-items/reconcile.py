@@ -226,11 +226,8 @@ def discover_items():
         owner_title = annotations(resource).get(f"{ANNOTATION_PREFIX}item")
         if owner_title and owner_title not in titles:
             raise RuntimeError("1Password secret owner must be one of its item references")
-        if not owner_title:
-            if len(owning_items) == 1:
-                owner_title = next(iter(owning_items))
-            elif len(titles) == 1:
-                owner_title = next(iter(titles))
+        if not owner_title and len(owning_items) == 1:
+            owner_title = next(iter(owning_items))
         for reference in references:
             title = reference.get("key") or reference.get("remoteKey")
             field = reference.get("property")
