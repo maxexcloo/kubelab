@@ -120,6 +120,7 @@ spec:
           monitoring.excloo.dev/alerts: "false"
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/headers: '{"x-gatus-token":{"name":"redlib","key":"monitoring-token"}}'
+          onepassword.excloo.dev/category: SERVER
           onepassword.excloo.dev/item: Redlib
         hostnames:
           - reddit.excloo.com

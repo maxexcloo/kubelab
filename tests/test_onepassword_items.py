@@ -59,7 +59,7 @@ class ReconcilerTests(unittest.TestCase):
             ],
         }
         original = copy.deepcopy(current)
-        desired = item_configuration(login=True)
+        desired = item_configuration(login=True, urls={"https://example.net"})
         result = RECONCILER.normalise_item(current, "Application", desired, "vault")
         self.assertEqual(result["urls"], original["urls"])
         self.assertEqual(
@@ -75,6 +75,116 @@ class ReconcilerTests(unittest.TestCase):
             copy.deepcopy(result), "Application", desired, "vault"
         )
         self.assertEqual(result, repeated)
+
+    def test_route_urls_follow_cluster_renames_without_losing_presentation(self):
+        current = {
+            "urls": [
+                {
+                    "href": "https://app.mbk.excloo.dev",
+                    "label": "Private",
+                    "primary": True,
+                },
+                {"href": "https://app.excloo.com", "label": "Public"},
+            ]
+        }
+        desired = item_configuration(
+            urls={"https://app.syd.excloo.dev", "https://app.excloo.com"}
+        )
+        pending = RECONCILER.normalise_item(
+            copy.deepcopy(current), "App", desired, "vault"
+        )
+        self.assertIn(
+            "https://app.mbk.excloo.dev", [url["href"] for url in pending["urls"]]
+        )
+        result = RECONCILER.normalise_item(
+            copy.deepcopy(current), "App", desired, "vault", allow_removal=True
+        )
+        self.assertEqual(
+            result["urls"],
+            [
+                {"href": "https://app.excloo.com", "label": "Public"},
+                {
+                    "href": "https://app.syd.excloo.dev",
+                    "label": "Private",
+                    "primary": True,
+                },
+            ],
+        )
+        repeated = RECONCILER.normalise_item(
+            copy.deepcopy(result), "App", desired, "vault", allow_removal=True
+        )
+        self.assertEqual(result, repeated)
+        without_route = item_configuration()
+        removed = RECONCILER.normalise_item(
+            copy.deepcopy(result), "App", without_route, "vault", allow_removal=True
+        )
+        self.assertEqual(removed["urls"], [])
+
+    def test_server_category_removes_only_unused_empty_login_fields(self):
+        current = {
+            "fields": [
+                {
+                    "id": "username",
+                    "label": "username",
+                    "purpose": "USERNAME",
+                    "value": "",
+                },
+                {
+                    "id": "password",
+                    "label": "password",
+                    "purpose": "PASSWORD",
+                    "value": "",
+                },
+                {"id": "token", "label": "provider-api-key", "value": "keep"},
+            ]
+        }
+        result = RECONCILER.normalise_item(
+            copy.deepcopy(current), "App", item_configuration(), "vault"
+        )
+        self.assertEqual(result["category"], "SERVER")
+        self.assertEqual([field["id"] for field in result["fields"]], ["token"])
+        current["fields"][1]["value"] = "real-password"
+        result = RECONCILER.normalise_item(
+            current, "App", item_configuration(fields={"username"}), "vault"
+        )
+        self.assertEqual(
+            {field["id"] for field in result["fields"]},
+            {"username", "password", "token"},
+        )
+        self.assertTrue(all("purpose" not in field for field in result["fields"]))
+
+    def test_explicit_route_category_and_conflicts(self):
+        route = {
+            "metadata": {
+                "name": "app",
+                "namespace": "app",
+                "annotations": {
+                    "onepassword.excloo.dev/item": "App",
+                    "onepassword.excloo.dev/category": "SERVER",
+                },
+            },
+            "spec": {"hostnames": ["app.example.net"]},
+        }
+        routes = [route]
+        with patch.object(
+            RECONCILER,
+            "kubernetes_list",
+            side_effect=lambda path: routes if "httproutes" in path else [],
+        ):
+            self.assertFalse(RECONCILER.discover_items()["App"]["login"])
+            other = copy.deepcopy(route)
+            other["metadata"]["annotations"]["onepassword.excloo.dev/category"] = (
+                "LOGIN"
+            )
+            routes.append(other)
+            with self.assertRaisesRegex(RuntimeError, "conflicting route categories"):
+                RECONCILER.discover_items()
+            routes.pop()
+            route["metadata"]["annotations"]["onepassword.excloo.dev/category"] = (
+                "INVALID"
+            )
+            with self.assertRaisesRegex(RuntimeError, "unsupported category"):
+                RECONCILER.discover_items()
 
     def test_declared_values_overwrite_existing_field_values(self):
         desired = item_configuration(
@@ -393,6 +503,38 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(writes[0].kwargs["body"]["fields"][0]["value"], "keep-me")
         self.assertEqual(writes[1].args[0], "/vaults/vault/items/replacement-id")
         self.assertEqual(writes[2].args[0], "/vaults/vault/items/original-id")
+
+    def test_category_replacement_keeps_original_if_credentials_are_not_saved(self):
+        original = {
+            "category": "LOGIN",
+            "id": "old",
+            "title": "App",
+            "fields": [
+                {"id": "key", "label": "api-key", "value": "keep-me"},
+            ],
+            "tags": ["Kubelab"],
+            "urls": [],
+        }
+        replies = [
+            [{"id": "vault"}],
+            [{"id": "old", "title": "App"}],
+            original,
+            {"id": "new", "fields": []},
+            {"id": "new", "fields": []},
+        ]
+        with (
+            patch.object(RECONCILER, "applications_ready", return_value=True),
+            patch.object(RECONCILER, "is_dry_run", return_value=False),
+            patch.object(
+                RECONCILER, "discover_items", return_value={"App": item_configuration()}
+            ),
+            patch.object(RECONCILER, "connect", side_effect=replies) as connect,
+        ):
+            with self.assertRaisesRegex(RuntimeError, "original retained"):
+                RECONCILER.main()
+        self.assertNotIn(
+            "DELETE", [call.kwargs.get("method") for call in connect.call_args_list]
+        )
 
     def test_archival_only_removes_unreferenced_exclusively_managed_items(self):
         items = {
@@ -783,7 +925,11 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(result["id"], "existing-id")
         self.assertEqual(result["tags"], ["Kubelab", "Personal"])
         self.assertEqual(
-            result["urls"], [{"href": "https://old.example.com", "primary": True}]
+            result["urls"],
+            [
+                {"href": "https://application.excloo.com"},
+                {"href": "https://old.example.com", "primary": True},
+            ],
         )
         self.assertEqual(fields["password"]["value"], "edited")
         self.assertEqual(fields["token"]["value"], "preserved")

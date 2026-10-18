@@ -7,6 +7,7 @@ import ssl
 import time
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
 
 ANNOTATION_PREFIX = "onepassword.excloo.dev/"
 KUBERNETES_HOST = "https://kubernetes.default.svc"
@@ -179,6 +180,7 @@ def is_dry_run():
 def discover_items():
     desired = {}
     login_items = {}
+    categories = {}
     resources = kubernetes_list(
         "/apis/external-secrets.io/v1/externalsecrets"
     ) + kubernetes_list("/apis/external-secrets.io/v1alpha1/pushsecrets")
@@ -252,7 +254,17 @@ def discover_items():
                 f"1Password route {namespace}/{route['metadata']['name']} has no URL"
             )
         item = desired.setdefault(title, new_item())
-        item["login"] = True
+        category = route_annotations.get(f"{ANNOTATION_PREFIX}category", "LOGIN")
+        if category not in {"LOGIN", "SERVER"}:
+            raise RuntimeError(
+                f"1Password route {namespace}/{route['metadata']['name']} has unsupported category {category}"
+            )
+        if title in categories and categories[title] != category:
+            raise RuntimeError(
+                f"1Password item {title} has conflicting route categories"
+            )
+        categories[title] = category
+        item["login"] = category == "LOGIN"
         item["namespaces"].add(namespace)
         item["urls"].update(urls)
     for title, login_item in login_items.items():
@@ -261,7 +273,7 @@ def discover_items():
                 f"1Password item {title} references missing login item {login_item}"
             )
         desired[title]["urls"].update(desired[login_item]["urls"])
-        desired[title]["login"] = True
+        desired[title]["login"] = desired[login_item]["login"]
     return desired
 
 
@@ -270,9 +282,7 @@ def field_label(field):
 
 
 def group_fields(item):
-    sections = {
-        section.get("label"): section for section in item.get("sections", [])
-    }
+    sections = {section.get("label"): section for section in item.get("sections", [])}
     for field in item.get("fields", []):
         label = field_label(field)
         if (
@@ -298,9 +308,7 @@ def group_fields(item):
         )
         if field.get("section", {}).get("id") != section["id"]:
             field["section"] = {"id": section["id"]}
-    used = {
-        field.get("section", {}).get("id") for field in item.get("fields", [])
-    }
+    used = {field.get("section", {}).get("id") for field in item.get("fields", [])}
     item["sections"] = sorted(
         (section for section in sections.values() if section["id"] in used),
         key=lambda section: section.get("label", "").casefold(),
@@ -354,6 +362,46 @@ def generated_field(label, *, field_format=None, value=None):
     return field
 
 
+def reconcile_urls(item, desired, *, allow_removal):
+    existing = item.setdefault("urls", [])
+    if not desired:
+        if allow_removal:
+            item["urls"] = []
+        return
+    urls = {url["href"]: copy.deepcopy(url) for url in existing if url.get("href")}
+    reconciled = []
+    for href in sorted(desired):
+        website = urls.get(href)
+        if website is None:
+            target = urlsplit(href)
+            # Carry presentation across a cluster alias rename, never credentials.
+            previous = [
+                url
+                for old, url in urls.items()
+                if old not in desired
+                and urlsplit(old).scheme == target.scheme
+                and urlsplit(old).path == target.path
+                and urlsplit(old).hostname
+                and target.hostname
+                and urlsplit(old).hostname.split(".")[0]
+                == target.hostname.split(".")[0]
+                and urlsplit(old).hostname.endswith(".excloo.dev")
+                and target.hostname.endswith(".excloo.dev")
+            ]
+            website = copy.deepcopy(previous[0]) if len(previous) == 1 else {}
+            website["href"] = href
+        reconciled.append(website)
+    if not allow_removal:
+        reconciled.extend(url for href, url in urls.items() if href not in desired)
+    primary = next((url for url in reconciled if url.get("primary")), reconciled[0])
+    for url in reconciled:
+        if url is primary:
+            url["primary"] = True
+        else:
+            url.pop("primary", None)
+    item["urls"] = reconciled
+
+
 def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
     required_fields = (
         desired["fields"]
@@ -370,17 +418,21 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
     current.setdefault("tags", ["Kubelab"])
     current.setdefault("title", title)
     current.setdefault("vault", {"id": vault_id})
-    current.setdefault(
-        "urls",
-        [
-            {"href": url} | ({"primary": True} if index == 0 else {})
-            for index, url in enumerate(sorted(desired["urls"]))
-        ],
-    )
+    reconcile_urls(current, desired["urls"], allow_removal=allow_removal)
     fields = current.setdefault("fields", [])
     if allow_removal:
         fields[:] = [
             field for field in fields if field_label(field) not in desired["remove"]
+        ]
+    if not desired["login"]:
+        # Server items have no empty sign-in placeholders; retain real credentials.
+        fields[:] = [
+            field
+            for field in fields
+            if field_label(field) not in {"password", "username"}
+            or field_label(field) in required_fields
+            or field.get("value")
+            or field.get("generate")
         ]
     by_label = {field_label(field): field for field in fields}
     for label in sorted(required_fields):
@@ -505,10 +557,22 @@ def main():
                         method="POST",
                     )
                     created["title"] = title
-                    update_eventually(
+                    saved = update_eventually(
                         f"/vaults/{vault_id}/items/{created['id']}",
                         created,
                     )
+                    saved_fields = {
+                        field_label(field): field.get("value")
+                        for field in saved.get("fields", [])
+                    }
+                    if any(
+                        field.get("value")
+                        and saved_fields.get(field_label(field)) != field["value"]
+                        for field in wanted["fields"]
+                    ):
+                        raise RuntimeError(
+                            f"1Password replacement for {title} did not preserve credentials; original retained"
+                        )
                     connect(
                         f"/vaults/{vault_id}/items/{summary['id']}",
                         method="DELETE",

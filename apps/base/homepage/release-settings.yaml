@@ -16,6 +16,7 @@ spec:
           gethomepage.dev/icon: sh-homepage
           gethomepage.dev/name: Homepage
           monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/category: SERVER
           onepassword.excloo.dev/item: Homepage
     controllers:
       homepage:
