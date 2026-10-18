@@ -152,14 +152,12 @@ def is_item_id(value):
     return bool(re.fullmatch(r"[a-z0-9]{26}", value))
 
 
-def applications_ready():
-    resource = kubernetes_get(
-        "/apis/kustomize.toolkit.fluxcd.io/v1/namespaces/flux-system/"
-        "kustomizations/apps"
-    )
+def kustomization_ready(resource):
     metadata = resource.get("metadata", {})
     source_reference = resource.get("spec", {}).get("sourceRef", {})
     status = resource.get("status", {})
+    if source_reference.get("kind") != "GitRepository":
+        return False
     source_namespace = source_reference.get("namespace", metadata.get("namespace"))
     source = kubernetes_get(
         f"/apis/source.toolkit.fluxcd.io/v1/namespaces/{source_namespace}/"
@@ -178,6 +176,14 @@ def applications_ready():
         and bool(source_revision)
         and status.get("lastAppliedRevision") == source_revision
     )
+
+
+def kustomizations_ready():
+    # Credential consumers come from several Kustomizations, including mini-apps.
+    kustomizations = kubernetes_list(
+        "/apis/kustomize.toolkit.fluxcd.io/v1/namespaces/flux-system/kustomizations"
+    )
+    return bool(kustomizations) and all(map(kustomization_ready, kustomizations))
 
 
 def externally_owned(item):
@@ -572,15 +578,13 @@ def main():
     resolved = resolve_items(desired, summaries)
     referenced_ids = {summary["id"] for summary in resolved.values() if summary}
     try:
-        archive_ready = applications_ready()
+        archive_ready = kustomizations_ready()
     except RuntimeError as error:
         archive_ready = False
-        print(
-            f"skipped removals because application readiness could not be read: {error}"
-        )
+        print(f"skipped removals because Flux readiness could not be read: {error}")
     else:
         if not archive_ready:
-            print("skipped removals because applications are not fully reconciled")
+            print("skipped removals because Flux Kustomizations are not fully reconciled")
     changed = 0
     for title, configuration in sorted(desired.items()):
         summary = resolved[title]

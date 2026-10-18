@@ -141,7 +141,7 @@ class ReconcilerTests(unittest.TestCase):
         readiness = False
         with patch.object(RECONCILER, "connect", side_effect=connect), \
                 patch.object(RECONCILER, "discover_items", return_value=desired), \
-                patch.object(RECONCILER, "applications_ready", side_effect=lambda: readiness), \
+                patch.object(RECONCILER, "kustomizations_ready", side_effect=lambda: readiness), \
                 patch.object(RECONCILER, "is_dry_run", return_value=False), \
                 contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
@@ -624,7 +624,7 @@ class ReconcilerTests(unittest.TestCase):
             None,
         ]
         with (
-            patch.object(RECONCILER, "applications_ready", return_value=False),
+            patch.object(RECONCILER, "kustomizations_ready", return_value=False),
             patch.object(RECONCILER, "is_dry_run", return_value=False),
             patch.object(
                 RECONCILER,
@@ -662,7 +662,7 @@ class ReconcilerTests(unittest.TestCase):
             {"id": "new", "fields": []},
         ]
         with (
-            patch.object(RECONCILER, "applications_ready", return_value=True),
+            patch.object(RECONCILER, "kustomizations_ready", return_value=True),
             patch.object(RECONCILER, "is_dry_run", return_value=False),
             patch.object(
                 RECONCILER, "discover_items", return_value={"App": item_configuration()}
@@ -695,7 +695,7 @@ class ReconcilerTests(unittest.TestCase):
             return copy.deepcopy(items[item_id])
 
         with (
-            patch.object(RECONCILER, "applications_ready", return_value=True),
+            patch.object(RECONCILER, "kustomizations_ready", return_value=True),
             patch.object(RECONCILER, "is_dry_run", return_value=False),
             patch.object(RECONCILER, "discover_items", return_value={}),
             patch.object(RECONCILER, "connect", side_effect=connect),
@@ -748,14 +748,14 @@ class ReconcilerTests(unittest.TestCase):
             urls={"https://id.excloo.com"},
         )
         originals = {
-            "applications_ready": RECONCILER.applications_ready,
+            "kustomizations_ready": RECONCILER.kustomizations_ready,
             "connect": RECONCILER.connect,
             "discover_items": RECONCILER.discover_items,
             "is_dry_run": RECONCILER.is_dry_run,
         }
         for name, value in originals.items():
             self.addCleanup(setattr, RECONCILER, name, value)
-        RECONCILER.applications_ready = lambda: False
+        RECONCILER.kustomizations_ready = lambda: False
         RECONCILER.connect = connect
         RECONCILER.discover_items = lambda cluster=None: {"Pocket ID": desired}
         RECONCILER.is_dry_run = lambda: False
@@ -765,39 +765,48 @@ class ReconcilerTests(unittest.TestCase):
             any(method in {"DELETE", "POST", "PUT"} for method, _, _ in calls)
         )
 
-    def test_applications_ready_requires_current_ready_condition(self):
-        application = {
-            "metadata": {"generation": 3, "namespace": "flux-system"},
-            "spec": {
-                "sourceRef": {
-                    "kind": "GitRepository",
-                    "name": "flux-system",
-                }
-            },
-            "status": {
-                "conditions": [{"status": "True", "type": "Ready"}],
-                "lastAppliedRevision": "main@sha1:current",
-                "observedGeneration": 3,
-            },
+    def test_kustomizations_ready_require_every_current_ready_condition(self):
+        def kustomization(source):
+            return {
+                "metadata": {"generation": 3, "namespace": "flux-system"},
+                "spec": {"sourceRef": {"kind": "GitRepository", "name": source}},
+                "status": {
+                    "conditions": [{"status": "True", "type": "Ready"}],
+                    "lastAppliedRevision": f"{source}@sha1:current",
+                    "observedGeneration": 3,
+                },
+            }
+
+        applications, mini_apps = kustomization("flux-system"), kustomization("mini-apps")
+        sources = {
+            name: {"status": {"artifact": {"revision": f"{name}@sha1:current"}}}
+            for name in ["flux-system", "mini-apps"]
         }
-        source = {
-            "status": {"artifact": {"revision": "main@sha1:current"}},
-        }
-        original = RECONCILER.kubernetes_get
-        self.addCleanup(setattr, RECONCILER, "kubernetes_get", original)
-        RECONCILER.kubernetes_get = lambda path: (
-            source if "gitrepositories" in path else application
-        )
-        self.assertTrue(RECONCILER.applications_ready())
-        for resource in [application, source]:
-            resource.setdefault("spec", {})["suspend"] = True
-            self.assertFalse(RECONCILER.applications_ready())
-            resource["spec"]["suspend"] = False
-        source["status"]["artifact"]["revision"] = "main@sha1:new"
-        self.assertFalse(RECONCILER.applications_ready())
-        source["status"]["artifact"]["revision"] = "main@sha1:current"
-        application["status"]["observedGeneration"] = 2
-        self.assertFalse(RECONCILER.applications_ready())
+        with (
+            patch.object(
+                RECONCILER,
+                "kubernetes_list",
+                side_effect=lambda path: [applications, mini_apps],
+            ),
+            patch.object(
+                RECONCILER,
+                "kubernetes_get",
+                side_effect=lambda path: sources[path.rsplit("/", 1)[-1]],
+            ),
+        ):
+            self.assertTrue(RECONCILER.kustomizations_ready())
+            for resource in [mini_apps, sources["mini-apps"]]:
+                resource.setdefault("spec", {})["suspend"] = True
+                self.assertFalse(RECONCILER.kustomizations_ready())
+                resource["spec"]["suspend"] = False
+            sources["mini-apps"]["status"]["artifact"]["revision"] = "mini-apps@sha1:new"
+            self.assertFalse(RECONCILER.kustomizations_ready())
+            sources["mini-apps"]["status"]["artifact"]["revision"] = "mini-apps@sha1:current"
+            mini_apps["status"]["observedGeneration"] = 2
+            self.assertFalse(RECONCILER.kustomizations_ready())
+            mini_apps["status"]["observedGeneration"] = 3
+            mini_apps["spec"]["sourceRef"]["kind"] = "OCIRepository"
+            self.assertFalse(RECONCILER.kustomizations_ready())
 
     def test_discovery_uses_secret_owner_and_explicit_route_item(self):
         resources = [
@@ -1016,14 +1025,14 @@ class ReconcilerTests(unittest.TestCase):
             self.fail(f"unexpected Connect request: {method} {path}")
 
         originals = {
-            "applications_ready": RECONCILER.applications_ready,
+            "kustomizations_ready": RECONCILER.kustomizations_ready,
             "connect": RECONCILER.connect,
             "discover_items": RECONCILER.discover_items,
             "is_dry_run": RECONCILER.is_dry_run,
         }
         for name, value in originals.items():
             self.addCleanup(setattr, RECONCILER, name, value)
-        RECONCILER.applications_ready = lambda: False
+        RECONCILER.kustomizations_ready = lambda: False
         RECONCILER.connect = connect
         RECONCILER.discover_items = lambda cluster=None: {}
         RECONCILER.is_dry_run = lambda: False
