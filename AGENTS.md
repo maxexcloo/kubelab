@@ -22,9 +22,8 @@ settings in its own repository; Kubelab deploys its published image.
 - Omit trailing slashes from project-owned base URLs.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
-- Pin tools, charts, images, and remote manifests to stable release versions.
-  Use readable major tags such as `v7` for GitHub Actions, not commit SHAs.
-  Updatecli previews upgrades locally for manual review.
+- Pin remote manifests to stable release versions. Updatecli previews upgrades
+  locally for manual review.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Use existing 1Password item UUIDs for credential consumers and publishers,
   including mini-app ExternalSecrets. Declare managed item titles with
