@@ -45,6 +45,8 @@ endpoints:
         default:
           - "*"
         fetch: true
+        # GPU allocation changes the available models; bypass the shared two-minute model cache.
+        userIdQuery: true
       titleConvo: true
       titleModel: current_model
       modelDisplayLabel: Bento
@@ -131,6 +133,20 @@ mcpSettings:
     - litellm.litellm.svc.cluster.local:4000
 # LiteLLM fronts its MCP servers at /<server>/mcp.
 mcpServers:
+  ai-control:
+    type: streamable-http
+    requiresOAuth: false
+    startup: false
+    title: AI Control
+    url: http://litellm.litellm.svc.cluster.local:4000/ai_control/mcp
+    # Admin access stays with individually authorised keys, never the shared chat key.
+    customUserVars:
+      AI_CONTROL_API_KEY:
+        description: Your personal LiteLLM virtual key authorised for AI Control. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Admin API Key
+    headers:
+      x-litellm-api-key: "Bearer {{AI_CONTROL_API_KEY}}"
   heiss:
     type: streamable-http
     requiresOAuth: false

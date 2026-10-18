@@ -49,6 +49,7 @@ spec:
       LITELLM_ENABLE_MCP_STDIO: "true"
       PATH: /opt/mcp:/app/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       PROXY_BASE_URL: https://app.invalid
+      STORE_MODEL_IN_DB: "True"
       TZ: Australia/Sydney
       UNIFI_NETWORK_HOST: host.invalid
       UV_CACHE_DIR: /tmp/uv-cache
@@ -103,7 +104,17 @@ spec:
         disable_env_credential_login: true
         master_key: os.environ/LITELLM_MASTER_KEY
         require_key_mcp_access_defined: true
+      litellm_settings:
+        check_provider_endpoint: true
+        request_timeout: 300
       mcp_servers:
+        ai_control:
+          allow_all_keys: false
+          auth_type: bearer_token
+          auth_value: os.environ/CONTROL_MCP_API_KEY
+          server_id: ai-control
+          transport: http
+          url: http://heiss-mcp:1338/mcp
         heiss:
           allow_all_keys: true
           auth_type: bearer_token
@@ -144,7 +155,46 @@ spec:
             UV_LINK_MODE: os.environ/UV_LINK_MODE
             UV_PYTHON: os.environ/UV_PYTHON
             UV_PYTHON_DOWNLOADS: os.environ/UV_PYTHON_DOWNLOADS
-      model_list: []
+      model_list:
+        - model_name: bento/*
+          litellm_params:
+            api_base: http://host.invalid:8000/v1
+            api_key: os.environ/BENTO_API_KEY
+            model: openai/*
+            max_parallel_requests: 8
+          model_info:
+            input_cost_per_token: 0
+            output_cost_per_token: 0
+        - model_name: cli-proxy-api/*
+          litellm_params:
+            api_base: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317/v1
+            api_key: os.environ/CLIPROXY_API_KEY
+            model: openai/*
+        - model_name: deepseek/*
+          litellm_params:
+            api_base: https://api.deepseek.com/v1
+            api_key: os.environ/DEEPSEEK_API_KEY
+            model: deepseek/*
+        - model_name: opencode-go/*
+          litellm_params:
+            api_base: https://opencode.ai/zen/go/v1
+            api_key: os.environ/OPENCODE_GO_API_KEY_1
+            model: openai/*
+        - model_name: opencode-go/*
+          litellm_params:
+            api_base: https://opencode.ai/zen/go/v1
+            api_key: os.environ/OPENCODE_GO_API_KEY_2
+            model: openai/*
+        - model_name: opencode-zen/*
+          litellm_params:
+            api_base: https://opencode.ai/zen/v1
+            api_key: os.environ/OPENCODE_ZEN_API_KEY_1
+            model: openai/*
+        - model_name: opencode-zen/*
+          litellm_params:
+            api_base: https://opencode.ai/zen/v1
+            api_key: os.environ/OPENCODE_ZEN_API_KEY_2
+            model: openai/*
     resources:
       limits:
         memory: 2Gi
