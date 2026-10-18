@@ -6,7 +6,7 @@ metadata:
     config.kubernetes.io/local-config: "true"
 data:
   bento_address: 100.73.126.15
-  bento_llm_authority: host.invalid:8000
+  bento_llm_authority: bento.mbk.excloo.net:8000
   cluster_name: syd
   grafana_host: grafana.excloo.com
   private_dns_host: private.syd.excloo.dev

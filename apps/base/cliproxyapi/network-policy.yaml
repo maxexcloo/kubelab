@@ -15,6 +15,12 @@ spec:
               app.kubernetes.io/name: traefik
         - namespaceSelector:
             matchLabels:
+              kubernetes.io/metadata.name: librechat
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: librechat
+        - namespaceSelector:
+            matchLabels:
               kubernetes.io/metadata.name: litellm
           podSelector:
             matchLabels:

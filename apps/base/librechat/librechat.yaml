@@ -37,9 +37,9 @@ endpoints:
       - tools
       - web_search
   custom:
-    - name: LiteLLM
-      apiKey: ${LITELLM_API_KEY}
-      baseURL: http://litellm.litellm.svc.cluster.local:4000/v1
+    - name: Bento
+      apiKey: ${BENTO_API_KEY}
+      baseURL: ${BENTO_API_URL}
       models:
         # LibreChat requires a fallback entry; fetched models replace this placeholder.
         default:
@@ -47,7 +47,67 @@ endpoints:
         fetch: true
       titleConvo: true
       titleModel: current_model
-      modelDisplayLabel: LiteLLM
+      modelDisplayLabel: Bento
+    - name: CLI Proxy API
+      apiKey: ${CLI_PROXY_API_KEY}
+      baseURL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317/v1
+      models:
+        default:
+          - "*"
+        fetch: true
+      titleConvo: true
+      titleModel: current_model
+      modelDisplayLabel: CLI Proxy API
+    - name: DeepSeek
+      apiKey: ${DEEPSEEK_API_KEY}
+      baseURL: https://api.deepseek.com/v1
+      models:
+        default:
+          - "*"
+        fetch: true
+      titleConvo: true
+      titleModel: current_model
+      modelDisplayLabel: DeepSeek
+    - name: OpenCode Go
+      apiKey: ${OPENCODE_GO_API_KEY_1}
+      baseURL: https://opencode.ai/zen/go/v1
+      models:
+        default:
+          - "*"
+        fetch: true
+      titleConvo: true
+      titleModel: current_model
+      modelDisplayLabel: OpenCode Go
+    - name: OpenCode Go (Account 2)
+      apiKey: ${OPENCODE_GO_API_KEY_2}
+      baseURL: https://opencode.ai/zen/go/v1
+      models:
+        default:
+          - "*"
+        fetch: true
+      titleConvo: true
+      titleModel: current_model
+      modelDisplayLabel: OpenCode Go (Account 2)
+    - name: OpenCode Zen
+      apiKey: ${OPENCODE_ZEN_API_KEY_1}
+      baseURL: https://opencode.ai/zen/v1
+      models:
+        default:
+          - "*"
+        fetch: true
+      titleConvo: true
+      titleModel: current_model
+      modelDisplayLabel: OpenCode Zen
+    - name: OpenCode Zen (Account 2)
+      apiKey: ${OPENCODE_ZEN_API_KEY_2}
+      baseURL: https://opencode.ai/zen/v1
+      models:
+        default:
+          - "*"
+        fetch: true
+      titleConvo: true
+      titleModel: current_model
+      modelDisplayLabel: OpenCode Zen (Account 2)
 fileConfig:
   endpoints:
     agents:

@@ -63,19 +63,20 @@ replacements:
           namespace: litellm
         fieldPaths:
           - endpoints.0.addresses.0
-      - select:
-          kind: ConfigMap
-          name: cluster-settings-syd
-        fieldPaths:
-          - data.bento_llm_authority
-        options:
-          delimiter: ":"
-          index: 0
   - source:
       kind: ConfigMap
       name: cluster-settings-syd
       fieldPath: data.bento_llm_authority
     targets:
+      - select:
+          kind: HelmRelease
+          name: librechat
+          namespace: librechat
+        fieldPaths:
+          - spec.values.librechat.configEnv.BENTO_API_URL
+        options:
+          delimiter: /
+          index: 2
       - select:
           kind: HelmRelease
           name: litellm

@@ -25,6 +25,7 @@ class ClusterSettingsTests(unittest.TestCase):
             settings = read_yaml(cluster)
             settings["data"].update({
                 "bento_address": "192.0.2.15",
+                "bento_llm_authority": "bento.changed.example:8123",
                 "grafana_host": "grafana.changed.example",
                 "private_dns_host": "private.changed.example",
                 "unifi_host": "gateway.changed.example",
@@ -46,7 +47,10 @@ class ClusterSettingsTests(unittest.TestCase):
             litellm = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "litellm")
             values = litellm["spec"]["values"]
             bento = next(d for d in values["proxy_config"]["model_list"] if d["model_name"].startswith("bento/"))
-            self.assertEqual(bento["litellm_params"]["api_base"], "http://192.0.2.15:8000/v1")
+            self.assertEqual(bento["litellm_params"]["api_base"], "http://bento.changed.example:8123/v1")
+            librechat = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "librechat")
+            self.assertEqual(librechat["spec"]["values"]["librechat"]["configEnv"]["BENTO_API_URL"],
+                             "http://bento.changed.example:8123/v1")
             self.assertEqual(values["envVars"]["UNIFI_NETWORK_HOST"], "gateway.changed.example")
             heiss = next(r for r in resources if r["kind"] == "EndpointSlice" and r["metadata"]["name"] == "heiss-mcp")
             self.assertEqual(heiss["endpoints"][0]["addresses"], ["192.0.2.15"])
