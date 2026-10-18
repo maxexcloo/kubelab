@@ -10,49 +10,47 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def image_manifest(path, key, repository, tag, *, versioned=True):
-    version, separator, _ = tag.partition("@")
-    sources = {}
-    if versioned and re.fullmatch(r"v?\d+(?:\.\d+){0,2}", version):
-        sources["version"] = {
-            "kind": "dockerimage",
-            "spec": {
-                "image": repository,
-                "tagfilter": r"^v?[0-9]+(?:\.[0-9]+){0,2}$",
-                "versionfilter": {
-                    "kind": "regex/semver",
-                    "pattern": "*",
-                    "regex": r"^(v?[0-9]+(?:\.[0-9]+){0,2})$",
-                },
-            },
-        }
-        version = '{{ source "version" }}'
-    else:
-        # Preserve source variants and database compatibility; refresh their digest.
-        if not separator:
-            return None
-    sourceid = "version"
-    if separator:
-        sourceid = "digest"
-        sources["digest"] = {
-            "kind": "dockerdigest",
-            "spec": {"image": repository, "tag": version},
-            "transformers": [{"find": r"sha256:[a-f0-9]{64}$"}],
-        }
-    target = {
-        "kind": "yaml",
-        "sourceid": sourceid,
-        "spec": {"engine": "yamlpath", "file": path, "key": key},
-    }
-    if separator:
-        target["transformers"] = [{"addprefix": version + "@"}]
+def image_manifest(path, key, repository, tag, *, major=False):
+    # Keep each tag's shape, such as a "v" prefix or "-alpine" variant suffix;
+    # updates replace any legacy digest with the exact tag.
+    match = re.fullmatch(
+        r"(v?)(\d+)((?:\.\d+){0,2})(-[A-Za-z0-9.-]+)?", tag.partition("@")[0]
+    )
+    if not match:
+        return None
+    prefix, current_major, minor, suffix = match.groups()
+    components = r"(?:\.[0-9]+)" * minor.count(".")
+    # Database images stay on their major version for data compatibility.
+    version = re.escape(current_major) if major else "[0-9]+"
+    pattern = (
+        "^" + prefix + "(" + version + components + ")" + re.escape(suffix or "") + "$"
+    )
     return {
         "name": f"Update Docker: {path} {key}",
         "pipelineid": "update-docker-"
         + re.sub(r"[^a-z0-9]+", "-", f"{path}-{key}".lower()).strip("-"),
         "labels": {"group": "docker"},
-        "sources": dict(sorted(sources.items())),
-        "targets": {"image": target},
+        "sources": {
+            "version": {
+                "kind": "dockerimage",
+                "spec": {
+                    "image": repository,
+                    "tagfilter": pattern,
+                    "versionfilter": {
+                        "kind": "regex/semver",
+                        "pattern": "*",
+                        "regex": pattern,
+                    },
+                },
+            }
+        },
+        "targets": {
+            "image": {
+                "kind": "yaml",
+                "sourceid": "version",
+                "spec": {"engine": "yamlpath", "file": path, "key": key},
+            }
+        },
     }
 
 
@@ -70,21 +68,14 @@ def manifests(path, document):
                     document.get("kind") == "Cluster"
                     and field in {"imageName", "reference"}
                     and isinstance(item, str)
-                    and "@sha256:" in item
                 ):
                     # Split at the tag separator, preserving registry ports.
-                    repository, tag = item.split("@", 1)[0].rsplit(":", 1)
-                    manifest = image_manifest(
-                        path,
-                        child,
-                        repository,
-                        tag + "@" + item.split("@", 1)[1],
-                        versioned=False,
-                    )
+                    repository, tag = item.partition("@")[0].rsplit(":", 1)
+                    manifest = image_manifest(path, child, repository, tag, major=True)
                     if manifest:
-                        manifest["targets"]["image"]["transformers"][0]["addprefix"] = (
-                            repository + ":" + tag + "@"
-                        )
+                        manifest["targets"]["image"]["transformers"] = [
+                            {"addprefix": repository + ":"}
+                        ]
                     yield manifest
                 yield from walk(item, child)
         elif isinstance(value, list):
