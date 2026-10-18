@@ -14,10 +14,11 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/icon: sh-homepage
-          gethomepage.dev/name: Homepage
+          gethomepage.dev/name: &title Homepage
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/category: SERVER
           onepassword.excloo.dev/item: 2yyv3pzwee6gstpq4n6hvklhy4
+          onepassword.excloo.dev/title: *title
     controllers:
       homepage:
         containers:

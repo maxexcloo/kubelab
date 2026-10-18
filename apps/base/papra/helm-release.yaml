@@ -63,9 +63,10 @@ spec:
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-papra
-          gethomepage.dev/name: Papra
+          gethomepage.dev/name: &title Papra
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: k3c4sjg26qsapc3g7it6f7bcl4
+          onepassword.excloo.dev/title: *title
         hostnames:
           - papra.excloo.com
         labels:

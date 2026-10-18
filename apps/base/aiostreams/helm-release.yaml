@@ -66,10 +66,11 @@ spec:
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-aiostreams
-          gethomepage.dev/name: AIOStreams
+          gethomepage.dev/name: &title AIOStreams
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /api/v1/health
           onepassword.excloo.dev/item: qskenmj3tnyc3vtal7tkreukda
+          onepassword.excloo.dev/title: *title
         hostnames:
           - aiostreams.excloo.com
         labels:

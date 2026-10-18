@@ -9,7 +9,7 @@ metadata:
     gethomepage.dev/group: Media
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-immich
-    gethomepage.dev/name: Immich
+    gethomepage.dev/name: &title Immich
     gethomepage.dev/pod-selector: app.kubernetes.io/instance=immich,app.kubernetes.io/name=server
     gethomepage.dev/widget.key: "{{HOMEPAGE_FILE_IMMICH_KEY}}"
     gethomepage.dev/widget.type: immich
@@ -17,6 +17,7 @@ metadata:
     gethomepage.dev/widget.version: "2"
     monitoring.excloo.dev/enabled: "true"
     onepassword.excloo.dev/item: nr4tpmfv2m2j5xbzllnhjqi2ay
+    onepassword.excloo.dev/title: *title
   labels:
     app.kubernetes.io/name: application
     gateway.excloo.dev/public-access: "true"
