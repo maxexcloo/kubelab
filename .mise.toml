@@ -13,8 +13,8 @@
 # updatecli = "latest"
 # uv = "latest"
 # yq = "latest"
-flux2 = "2.9.6"
-kubeconform = "0.8.0"
+flux2 = "latest"
+kubeconform = "latest"
 # Select schemas for the Kubernetes API configured in Homelab.
 kubectl = "1.37.1"
 
