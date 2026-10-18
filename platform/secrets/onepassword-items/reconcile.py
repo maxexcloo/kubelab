@@ -269,6 +269,44 @@ def field_label(field):
     return field.get("label") or field.get("id")
 
 
+def group_fields(item):
+    sections = {
+        section.get("label"): section for section in item.get("sections", [])
+    }
+    for field in item.get("fields", []):
+        label = field_label(field)
+        if (
+            field.get("purpose")
+            or field.get("id") == "notesPlain"
+            or label.casefold() in {"password", "url", "username"}
+        ):
+            continue
+        if label.startswith("provider-"):
+            group = "Providers"
+        elif label.startswith("virtual-key-"):
+            group = "Virtual Keys"
+        elif label.startswith("database-"):
+            group = "Database"
+        elif label.startswith(("oidc-", "openid-")):
+            group = "OIDC"
+        elif label in {"master-key", "salt-key"}:
+            group = "Administration"
+        else:
+            group = "Application"
+        section = sections.setdefault(
+            group, {"id": group.lower().replace(" ", "-"), "label": group}
+        )
+        if field.get("section", {}).get("id") != section["id"]:
+            field["section"] = {"id": section["id"]}
+    used = {
+        field.get("section", {}).get("id") for field in item.get("fields", [])
+    }
+    item["sections"] = sorted(
+        (section for section in sections.values() if section["id"] in used),
+        key=lambda section: section.get("label", "").casefold(),
+    )
+
+
 def sort_fields(fields):
     sections = {}
     for index, field in enumerate(fields):
@@ -382,6 +420,7 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
                 field["purpose"] = label.upper()
             else:
                 field.pop("purpose", None)
+    group_fields(current)
     sort_fields(fields)
     return current
 

@@ -79,7 +79,7 @@ spec:
                   - match:
                       secretKey: api-key
                       remoteRef:
-                        property: api-key-resend
+                        property: provider-resend-api-key
                         remoteKey: placeholder
                     metadata:
                       apiVersion: kubernetes.external-secrets.io/v1alpha1

@@ -40,6 +40,40 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_grouping_preserves_websites_and_credentials_and_removes_empty_groups(self):
+        current = {
+            "fields": [
+                {"id": "username", "label": "username", "value": "keep-user"},
+                {"id": "p", "label": "provider-unifi-password", "value": "keep-p"},
+                {"id": "v", "label": "virtual-key-pi", "value": "keep-v"},
+                {"id": "o", "label": "oidc-client-secret", "value": "keep-o"},
+            ],
+            "sections": [
+                {"id": "empty", "label": "Empty"},
+                {"id": "oidc", "label": "OIDC"},
+            ],
+            "urls": [
+                {"href": "https://example.net", "label": "My Website", "primary": True}
+            ],
+        }
+        original = copy.deepcopy(current)
+        desired = item_configuration(login=True)
+        result = RECONCILER.normalise_item(current, "Application", desired, "vault")
+        self.assertEqual(result["urls"], original["urls"])
+        self.assertEqual(
+            [(f["id"], f["value"]) for f in result["fields"]],
+            [(f["id"], f["value"]) for f in original["fields"]],
+        )
+        self.assertEqual(
+            [s["label"] for s in result["sections"]],
+            ["OIDC", "Providers", "Virtual Keys"],
+        )
+        self.assertEqual(result["fields"][3]["section"], {"id": "oidc"})
+        repeated = RECONCILER.normalise_item(
+            copy.deepcopy(result), "Application", desired, "vault"
+        )
+        self.assertEqual(result, repeated)
+
     def test_declared_values_overwrite_existing_field_values(self):
         desired = item_configuration(
             fields={"object-storage-secret-access-key"},
@@ -759,9 +793,9 @@ class ReconcilerTests(unittest.TestCase):
             [
                 "password",
                 "api-key",
+                "token",
                 "database-password",
                 "database-username",
-                "token",
                 "username",
             ],
         )

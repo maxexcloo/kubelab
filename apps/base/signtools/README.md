@@ -41,13 +41,13 @@ out. The account's other private workflows share that allowance.
 
 The `SignTools` 1Password item supplies these fields:
 
-| Field                    | Purpose                                                   |
-| ------------------------ | --------------------------------------------------------- |
-| `apple-account-name`     | Paid Apple developer account email                        |
-| `apple-account-password` | Apple account password; signing may prompt for 2FA        |
-| `certificate-base64`     | Base64-encoded exported `.p12`, including its private key |
-| `certificate-password`   | Password protecting the `.p12`                            |
-| `github-token`           | Builder repository token                                  |
+| Field                          | Purpose                                                   |
+| ------------------------------ | --------------------------------------------------------- |
+| `apple-account-name`           | Paid Apple developer account email                        |
+| `apple-account-password`       | Apple account password; signing may prompt for 2FA        |
+| `certificate-base64`           | Base64-encoded exported `.p12`, including its private key |
+| `certificate-password`         | Password protecting the `.p12`                            |
+| `provider-github-access-token` | Builder repository token                                  |
 
 Populate credentials through local credential tools without printing their values.
 The signing profile is mounted read-only with a stable `developer` ID, so saved

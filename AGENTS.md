@@ -31,7 +31,8 @@ Kubelab owns its Flux source, cluster selection and shared integration settings.
   application's item and virtual keys in the issuing gateway's item. Group custom
   fields by purpose, and update field references and generation declarations
   together. Preserve descriptive names for application, database and sign-in
-  secrets.
+  secrets. Use `OIDC` for the OIDC group and remove empty groups. Preserve existing
+  website URLs, labels and primary flags when reconciling fields.
 - Default Crossplane external resources to orphan-on-delete.
 - Do not change a live route without explicit approval and a reviewed plan.
 
