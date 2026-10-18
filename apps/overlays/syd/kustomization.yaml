@@ -44,17 +44,6 @@ patches:
       kind: HelmRelease
       name: (aiometadata|aiostreams|redlib)
   - patch: |-
-      - op: add
-        path: /spec/postBuild
-        value:
-          substitute:
-            REDLIB_CHECK_URL: http://redlib.redlib.svc.cluster.local:8080
-            REDLIB_URL: https://app.invalid
-    target:
-      kind: Kustomization
-      name: mini-apps
-      namespace: flux-system
-  - patch: |-
       apiVersion: v1
       kind: ConfigMap
       metadata:
@@ -63,35 +52,13 @@ patches:
           kustomize.toolkit.fluxcd.io/substitute: disabled
     target:
       kind: ConfigMap
+  - path: actual-budget.yaml
   - path: atvloadly.yaml
   - path: beszel-agent.yaml
   - path: homepage.yaml
+  - path: mini-apps.yaml
   - path: openspeedtest.yaml
   - path: syncthing.yaml
-  - patch: |-
-      apiVersion: networking.k8s.io/v1
-      kind: NetworkPolicy
-      metadata:
-        name: actual-budget
-        namespace: actual-budget
-      spec:
-        ingress:
-          - from:
-              - namespaceSelector:
-                  matchLabels:
-                    kubernetes.io/metadata.name: networking
-                podSelector:
-                  matchLabels:
-                    app.kubernetes.io/name: traefik
-              - namespaceSelector:
-                  matchLabels:
-                    kubernetes.io/metadata.name: actual-up
-                podSelector:
-                  matchLabels:
-                    app.kubernetes.io/name: actual-up
-            ports:
-              - port: 5006
-                protocol: TCP
 # Reapply hostname consumers after cluster settings resolve the private alias.
 transformers:
   - ../../base/homepage/routing
