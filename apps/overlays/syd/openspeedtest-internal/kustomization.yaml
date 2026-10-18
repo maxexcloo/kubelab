@@ -14,6 +14,7 @@ patches:
       spec:
         values:
           nodeSelector:
+            kubernetes.io/hostname: kimbap
             node.excloo.dev/network: internal
     target:
       kind: HelmRelease

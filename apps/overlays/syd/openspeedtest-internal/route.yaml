@@ -4,12 +4,12 @@ metadata:
   name: openspeedtest-internal
   namespace: openspeedtest
   annotations:
-    gethomepage.dev/description: Internal Network Speed Test
+    gethomepage.dev/description: Kimbap Network Speed Test
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Servers
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-openspeedtest
-    gethomepage.dev/name: OpenSpeedTest Internal
+    gethomepage.dev/name: OpenSpeedTest Kimbap
     gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-internal
     monitoring.excloo.dev/enabled: "true"
   labels:

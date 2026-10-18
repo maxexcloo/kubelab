@@ -74,6 +74,7 @@ patches:
   - path: atvloadly.yaml
   - path: beszel-agent.yaml
   - path: homepage.yaml
+  - path: openspeedtest.yaml
   - patch: |-
       apiVersion: networking.k8s.io/v1
       kind: NetworkPolicy
