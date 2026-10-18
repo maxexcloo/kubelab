@@ -17,7 +17,6 @@ class ClusterSettingsTests(unittest.TestCase):
             shared = root / "platform/settings/settings.yaml"
             settings = read_yaml(shared)
             settings["data"]["headlamp_client_id"] = "headlamp-test"
-            settings["data"]["headlamp_syd_host"] = "headlamp.syd.changed.example"
             settings["data"]["identity_host"] = "id.changed.example"
             settings["data"]["control_d_profile"] = "test-profile"
             shared.write_text(json.dumps(settings))
@@ -27,6 +26,7 @@ class ClusterSettingsTests(unittest.TestCase):
                 "bento_address": "192.0.2.15",
                 "bento_llm_authority": "bento.changed.example:8123",
                 "grafana_host": "grafana.changed.example",
+                "headlamp_host": "headlamp.syd.changed.example",
                 "private_dns_host": "private.changed.example",
                 "unifi_host": "gateway.changed.example",
             })

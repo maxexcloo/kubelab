@@ -3,6 +3,6 @@ kind: Kustomization
 metadata:
   name: headlamp-integrations
 spec:
-  path: ./platform/identity/headlamp/integrations
+  path: ./clusters/syd/platform/headlamp/integrations
   dependsOn:
     - name: automation
