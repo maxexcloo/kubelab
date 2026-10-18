@@ -32,6 +32,7 @@ endpoints:
       - context
       - deferred_tools
       - memory
+      - run_in_background
       - skills
       - subagents
       - tools
@@ -166,6 +167,8 @@ mcpServers:
     type: streamable-http
     description: Create and manage images and videos in the HEISS studio.
     requiresOAuth: false
+    serverInstructions: true
+    timeout: 1860000
     title: HEISS
     url: http://litellm.litellm.svc.cluster.local:4000/heiss/mcp
     headers:
@@ -175,6 +178,8 @@ mcpServers:
     type: streamable-http
     description: Create and manage images and videos in the HEISS X studio.
     requiresOAuth: false
+    serverInstructions: true
+    timeout: 1860000
     title: HEISS X
     url: http://litellm.litellm.svc.cluster.local:4000/heiss_x/mcp
     headers:

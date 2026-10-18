@@ -125,6 +125,7 @@ spec:
           auth_type: bearer_token
           auth_value: os.environ/HEISS_MCP_API_KEY
           server_id: heiss
+          timeout: 1860
           transport: http
           url: http://heiss-mcp:8788/mcp
           extra_headers:
@@ -137,6 +138,7 @@ spec:
           auth_type: bearer_token
           auth_value: os.environ/HEISS_X_MCP_API_KEY
           server_id: heiss-x
+          timeout: 1860
           transport: http
           url: http://heiss-x-mcp:8787/mcp
           extra_headers:

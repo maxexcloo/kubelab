@@ -36,6 +36,9 @@ class AppSettingsTests(unittest.TestCase):
         )
         for client, provider in [("heiss", "HEISS"), ("heiss-x", "HEISS_X")]:
             with self.subTest(client=client):
+                self.assertTrue(chat[client]["serverInstructions"])
+                self.assertGreater(chat[client]["timeout"], 1800000)
+                self.assertGreater(gateway[provider]["timeout"], 1800)
                 self.assertEqual(chat[client]["headers"]["X-Bento-User-Id"],
                                  "{{LIBRECHAT_USER_ID}}")
                 self.assertIn("X-Bento-User-Id", gateway[provider]["extra_headers"])
