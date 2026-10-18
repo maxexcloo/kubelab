@@ -14,6 +14,8 @@ spec:
     - name: public-tunnel
       namespace: networking
   rules:
+    # Studios serve results only for HMAC-signed, owner-bound tokens; other paths
+    # stay behind LiteLLM key authentication.
     - backendRefs:
         - name: heiss-mcp
           port: 8788
