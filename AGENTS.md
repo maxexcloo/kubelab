@@ -92,6 +92,19 @@ settings in its own repository; Kubelab deploys its published image.
 - Use standard Kustomize replacements for derived hostnames and URLs.
 - Homepage retains its existing configuration layout and probe timings.
 
+### Shared Values
+
+Define each value once and derive consumers with Kustomize replacements:
+
+- Cross-cluster settings: `platform/settings/settings.yaml`.
+- Cluster name and cluster-specific hosts, addresses and endpoints:
+  `clusters/<cluster>/settings/settings.yaml`.
+- App hostnames: the app's route; app replacements and `apps/transformers`
+  derive URLs, DNS records and Pocket ID clients.
+- 1Password item UUIDs: once per manifest, using YAML anchors for repeats.
+- The app-template chart version: `platform/components/app-template`.
+- Kubernetes client versions: Homelab's cluster data, applied by Updatecli.
+
 ### Documentation
 
 Keep root Markdown limited to `AGENTS.md` and `README.md`. Keep `README.md`

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cluster-settings-syd
+  name: cluster-settings
   annotations:
     config.kubernetes.io/local-config: "true"
 data:
@@ -9,6 +9,7 @@ data:
   bento_llm_authority: bento.mbk.excloo.net:8000
   cluster_name: syd
   grafana_host: grafana.excloo.com
+  headlamp_host: headlamp.syd.excloo.dev
   private_dns_host: private.syd.excloo.dev
   unifi_host: gateway.mbk.excloo.net
   private_dns_lookup: https://cloudflare-dns.com/dns-query?name=app.invalid

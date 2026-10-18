@@ -25,9 +25,31 @@ patches:
 replacements:
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.cluster_name
     targets:
+      - select:
+          kind: HelmRelease
+          name: homepage
+          namespace: homepage
+        fieldPaths:
+          - spec.values.controllers.homepage.initContainers.endpoints.env.HOMEPAGE_CLUSTER
+        options:
+          create: true
+      - select:
+          kind: HelmRelease
+          name: victoria-metrics-k8s-stack
+          namespace: observability
+        fieldPaths:
+          - spec.values.vmagent.spec.externalLabels.cluster
+        options:
+          create: true
+      - select:
+          kind: ResendKey
+        fieldPaths:
+          - spec.cluster
+        options:
+          create: true
       - select:
           kind: HelmRelease
           labelSelector: gateway.excloo.dev/internal-alias=app-template
@@ -54,7 +76,7 @@ replacements:
           index: 1
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.bento_address
     targets:
       - select:
@@ -71,7 +93,7 @@ replacements:
           - endpoints.0.addresses.0
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.bento_llm_authority
     targets:
       - select:
@@ -94,12 +116,12 @@ replacements:
           index: 2
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.private_dns_host
     targets:
       - select:
           kind: ConfigMap
-          name: cluster-settings-syd
+          name: cluster-settings
         fieldPaths:
           - data.private_dns_lookup
         options:
@@ -118,7 +140,7 @@ replacements:
           create: true
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.private_dns_lookup
     targets:
       - select:
@@ -139,7 +161,7 @@ replacements:
           index: 0
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.grafana_host
     targets:
       - select:
@@ -147,6 +169,15 @@ replacements:
           name: grafana
         fieldPaths:
           - spec.hostnames.0
+      - select:
+          kind: HTTPRoute
+          name: grafana
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+          - metadata.annotations.[gethomepage.dev/widget.url]
+        options:
+          delimiter: /
+          index: 2
       - select:
           kind: HelmRelease
           name: victoria-metrics-k8s-stack
@@ -176,7 +207,7 @@ replacements:
           index: 2
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.unifi_host
     targets:
       - select:
@@ -187,8 +218,8 @@ replacements:
           - spec.values.envVars.UNIFI_NETWORK_HOST
   - source:
       kind: ConfigMap
-      name: shared-settings
-      fieldPath: data.headlamp_syd_host
+      name: cluster-settings
+      fieldPath: data.headlamp_host
     targets:
       - select:
           kind: HTTPRoute
@@ -196,6 +227,15 @@ replacements:
           namespace: headlamp
         fieldPaths:
           - spec.hostnames.0
+      - select:
+          kind: HTTPRoute
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
       - select:
           kind: HelmRelease
           name: headlamp
@@ -205,9 +245,19 @@ replacements:
         options:
           delimiter: /
           index: 2
+      - select:
+          kind: PocketIDClient
+          name: headlamp
+          namespace: headlamp
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.backup_endpoint
     targets:
       - select:
@@ -216,7 +266,7 @@ replacements:
           - spec.configuration.endpointURL
   - source:
       kind: ConfigMap
-      name: cluster-settings-syd
+      name: cluster-settings
       fieldPath: data.backup_destination
     targets:
       - select:

@@ -5,12 +5,6 @@ metadata:
   namespace: homepage
 spec:
   values:
-    controllers:
-      homepage:
-        initContainers:
-          endpoints:
-            env:
-              HOMEPAGE_CLUSTER: syd
     defaultPodOptions:
       nodeSelector:
         node.excloo.dev/network: external

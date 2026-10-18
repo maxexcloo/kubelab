@@ -20,8 +20,6 @@ spec:
           node.excloo.dev/network: internal
     vmagent:
       spec:
-        externalLabels:
-          cluster: syd
         nodeSelector:
           node.excloo.dev/network: internal
     vmsingle:
