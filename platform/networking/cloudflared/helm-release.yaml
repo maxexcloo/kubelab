@@ -4,17 +4,7 @@ metadata:
   name: cloudflared
   namespace: cloudflared
 spec:
-  interval: 30m
   releaseName: cloudflared
-  chart:
-    spec:
-      chart: app-template
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-      version: 5.3.0
   values:
     controllers:
       cloudflared:

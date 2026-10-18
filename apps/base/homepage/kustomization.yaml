@@ -44,4 +44,5 @@ transformers:
   - ../../transformers/internal-alias
   - routing
 components:
+  - ../../../platform/components/app-template
   - ../../../scripts/service-routes
