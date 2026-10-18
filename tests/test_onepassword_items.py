@@ -186,6 +186,17 @@ class ReconcilerTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "unsupported category"):
                 RECONCILER.discover_items()
 
+    def test_absent_and_empty_sections_do_not_create_perpetual_drift(self):
+        current = {"category": "LOGIN", "fields": [], "urls": []}
+        wanted = dict(current, sections=[])
+        self.assertEqual(RECONCILER.comparable(current), RECONCILER.comparable(wanted))
+        current["sections"] = None
+        self.assertEqual(RECONCILER.comparable(current), RECONCILER.comparable(wanted))
+        wanted["sections"] = [{"id": "providers", "label": "Providers"}]
+        self.assertNotEqual(
+            RECONCILER.comparable(current), RECONCILER.comparable(wanted)
+        )
+
     def test_declared_values_overwrite_existing_field_values(self):
         desired = item_configuration(
             fields={"object-storage-secret-access-key"},

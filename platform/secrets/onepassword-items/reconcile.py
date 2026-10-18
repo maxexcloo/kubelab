@@ -480,6 +480,7 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
 def comparable(item):
     ignored = {"createdAt", "lastEditedBy", "updatedAt", "version"}
     result = {key: value for key, value in item.items() if key not in ignored}
+    result["sections"] = result.get("sections") or []
     result["urls"] = result.get("urls") or []
     return result
 
