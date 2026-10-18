@@ -26,9 +26,12 @@ labels:
   group: platform
 sources:
   version:
-    kind: dockerimage
+    # The registry's tag list is incomplete; GitHub releases match published packages.
+    kind: githubrelease
     spec:
-      image: xpkg.upbound.io/crossplane-contrib/provider-http
+      owner: crossplane-contrib
+      repository: provider-http
+      token: '{{ env "GITHUB_TOKEN" }}'
       versionfilter:
         kind: semver
         pattern: "*"
