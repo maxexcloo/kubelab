@@ -41,7 +41,9 @@ endpoints:
       apiKey: ${LITELLM_API_KEY}
       baseURL: http://litellm.litellm.svc.cluster.local:4000/v1
       models:
-        default: []
+        # LibreChat requires a fallback entry; fetched models replace this placeholder.
+        default:
+          - "*"
         fetch: true
       titleConvo: true
       titleModel: current_model
