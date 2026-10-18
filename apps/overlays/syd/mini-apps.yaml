@@ -1,0 +1,10 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: mini-apps
+  namespace: flux-system
+spec:
+  postBuild:
+    substitute:
+      REDLIB_CHECK_URL: http://redlib.redlib.svc.cluster.local:8080
+      REDLIB_URL: https://app.invalid
