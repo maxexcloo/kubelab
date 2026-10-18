@@ -74,6 +74,7 @@ metadata:
   name: homepage-infrastructure
   namespace: homepage
   annotations:
+    onepassword.excloo.dev/item: 3plwv6rsgl2hcz5j7tf7gyj7je
     onepassword.excloo.dev/login-item: 2yyv3pzwee6gstpq4n6hvklhy4
 spec:
   refreshInterval: 1h
