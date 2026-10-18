@@ -18,6 +18,28 @@ from support import (
 
 
 class AppSettingsTests(unittest.TestCase):
+    def test_heiss_chat_connections_forward_the_signed_in_user(self):
+        resources = repository_resources("apps/overlays/syd")
+        configuration = next(
+            resource["data"]["librechat.yaml"] for resource in resources
+            if resource["kind"] == "ConfigMap"
+            and resource["metadata"]["namespace"] == "librechat"
+            and "librechat.yaml" in resource.get("data", {})
+        )
+        chat = json.loads(subprocess.check_output(
+            ["yq", "-o=json", "."], input=configuration, text=True
+        ))["mcpServers"]
+        gateway = next(
+            resource["spec"]["values"]["proxy_config"]["mcp_servers"]
+            for resource in resources if resource["kind"] == "HelmRelease"
+            and resource["metadata"]["name"] == "litellm"
+        )
+        for client, provider in [("heiss", "HEISS"), ("heiss-x", "HEISS_X")]:
+            with self.subTest(client=client):
+                self.assertEqual(chat[client]["headers"]["X-Bento-User-Id"],
+                                 "{{LIBRECHAT_USER_ID}}")
+                self.assertIn("X-Bento-User-Id", gateway[provider]["extra_headers"])
+
     def test_private_aliases_cover_routed_applications(self):
         for cluster in CLUSTERS:
             for path in (f"apps/overlays/{cluster}", f"clusters/{cluster}/platform"):

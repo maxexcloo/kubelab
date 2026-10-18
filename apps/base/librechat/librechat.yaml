@@ -169,6 +169,7 @@ mcpServers:
     title: HEISS
     url: http://litellm.litellm.svc.cluster.local:4000/heiss/mcp
     headers:
+      X-Bento-User-Id: "{{LIBRECHAT_USER_ID}}"
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   heiss-x:
     type: streamable-http
@@ -177,6 +178,7 @@ mcpServers:
     title: HEISS X
     url: http://litellm.litellm.svc.cluster.local:4000/heiss_x/mcp
     headers:
+      X-Bento-User-Id: "{{LIBRECHAT_USER_ID}}"
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   home-assistant:
     type: streamable-http
