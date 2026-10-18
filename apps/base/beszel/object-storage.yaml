@@ -47,7 +47,6 @@ kind: B2ObjectStorage
 metadata:
   name: application
 spec:
-  displayName: Beszel
   keyName: kubelab-syd-beszel
   secretRef:
     name: beszel-object-storage

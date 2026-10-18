@@ -70,6 +70,7 @@ class ReconcilerTests(unittest.TestCase):
         for resource in resources:
             if resource["kind"] == "ResendKey":
                 self.assertRegex(resource["spec"]["itemID"], ITEM_ID)
+            if resource["kind"] in {"B2ObjectStorage", "ResendKey"}:
                 self.assertNotIn("displayName", resource["spec"])
 
     def test_uuid_secret_ownership_preserves_generation_for_multiple_items(self):
