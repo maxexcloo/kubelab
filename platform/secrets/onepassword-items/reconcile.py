@@ -5,7 +5,6 @@ import os
 import re
 import secrets
 import ssl
-import time
 import urllib.error
 import urllib.request
 from urllib.parse import urlsplit
@@ -136,16 +135,11 @@ def new_item():
         "formats": {},
         "generate": set(),
         "login": False,
-        "namespaces": set(),
         "remove": set(),
         "title": None,
         "urls": set(),
         "values": {},
     }
-
-
-def slug(value):
-    return "".join(character for character in value.lower() if character.isalnum())
 
 
 def is_item_id(value):
@@ -233,11 +227,6 @@ def discover_items():
             reference.get("key") or reference.get("remoteKey")
             for reference in references
         } - {None}
-        matching_titles = {
-            title
-            for title in titles
-            if slug(title) == slug(resource["metadata"]["name"])
-        }
         owning_items = titles & namespace_items.get(namespace, set())
         owner_title = annotations(resource).get(f"{ANNOTATION_PREFIX}item")
         if owner_title and owner_title not in titles:
@@ -245,8 +234,6 @@ def discover_items():
         if not owner_title:
             if len(owning_items) == 1:
                 owner_title = next(iter(owning_items))
-            elif len(matching_titles) == 1:
-                owner_title = matching_titles.pop()
             elif len(titles) == 1:
                 owner_title = next(iter(titles))
         for reference in references:
@@ -256,7 +243,6 @@ def discover_items():
                 continue
             item = desired.setdefault(title, new_item())
             if title == owner_title:
-                item["namespaces"].add(namespace)
                 merge_configuration(item, resource)
                 login_item = annotations(resource).get(f"{ANNOTATION_PREFIX}login-item")
                 if login_item:
@@ -300,7 +286,6 @@ def discover_items():
             )
         categories[title] = category
         item["login"] = category == "LOGIN"
-        item["namespaces"].add(namespace)
         item["urls"].update(urls)
     for title, login_item in login_items.items():
         if login_item not in desired or not desired[login_item]["urls"]:
@@ -520,25 +505,7 @@ def comparable(item):
     return result
 
 
-def creation_payload(item, vault_id):
-    return {
-        key: item[key]
-        for key in ("category", "fields", "sections", "tags", "title", "urls")
-        if key in item
-    } | {"vault": {"id": vault_id}}
-
-
-def update_eventually(path, item):
-    for attempt in range(1, 7):
-        try:
-            return connect(path, body=item, method="PUT")
-        except RuntimeError as error:
-            if not str(error).endswith(" returned 404") or attempt == 6:
-                raise
-            time.sleep(attempt * 5)
-
-
-def resolve_items(desired, summaries):
+def check_references(desired, summaries):
     by_id = {summary["id"]: summary for summary in summaries}
     by_title = {}
     for summary in summaries:
@@ -546,23 +513,13 @@ def resolve_items(desired, summaries):
         if title in by_title:
             raise RuntimeError(f"duplicate 1Password item title: {title}")
         by_title[title] = summary
-    resolved = {}
     for reference, configuration in desired.items():
-        summary = by_id.get(reference) or by_title.get(reference)
-        title = configuration.get("title")
-        if summary is None and is_item_id(reference):
+        summary = by_id.get(reference)
+        if summary is None:
             raise RuntimeError(f"referenced 1Password item ID {reference} is missing")
-        if title:
-            if reference not in by_id:
-                raise RuntimeError(f"1Password title {title} requires an existing item ID")
-            if title in by_title and by_title[title]["id"] != summary["id"]:
-                raise RuntimeError(f"1Password title {title} belongs to another item")
-            if title != summary["title"] and summary["title"] in desired:
-                raise RuntimeError(
-                    f"1Password item {reference} still has title-based references"
-                )
-        resolved[reference] = summary
-    return resolved
+        title = configuration.get("title")
+        if title in by_title and by_title[title]["id"] != summary["id"]:
+            raise RuntimeError(f"1Password title {title} belongs to another item")
 
 
 def main():
@@ -575,8 +532,7 @@ def main():
     vault_id = vaults[0]["id"]
     desired = discover_items()
     summaries = connect(f"/vaults/{vault_id}/items")
-    resolved = resolve_items(desired, summaries)
-    referenced_ids = {summary["id"] for summary in resolved.values() if summary}
+    check_references(desired, summaries)
     try:
         archive_ready = kustomizations_ready()
     except RuntimeError as error:
@@ -586,87 +542,41 @@ def main():
         if not archive_ready:
             print("skipped removals because Flux Kustomizations are not fully reconciled")
     changed = 0
-    for title, configuration in sorted(desired.items()):
-        summary = resolved[title]
-        current = (
-            connect(f"/vaults/{vault_id}/items/{summary['id']}")
-            if summary
-            else {"fields": [], "sections": []}
-        )
+    for reference, configuration in sorted(desired.items()):
+        current = connect(f"/vaults/{vault_id}/items/{reference}")
         if externally_owned(current):
             continue
         wanted = normalise_item(
             copy.deepcopy(current),
-            title,
+            reference,
             configuration,
             vault_id,
             allow_removal=archive_ready,
         )
-        if summary and not archive_ready:
+        if not archive_ready:
             # A rename waits until Flux has updated every credential consumer.
             wanted["title"] = current["title"]
-        if summary:
-            if current.get("category") != wanted["category"]:
-                if title == summary["id"]:
-                    raise RuntimeError(
-                        f"1Password item {title} cannot replace its referenced item ID"
-                    )
-                action = "replaced"
-                if not dry_run:
-                    replacement = creation_payload(wanted, vault_id)
-                    replacement["title"] = f"{title} (Kubelab replacement)"
-                    created = connect(
-                        f"/vaults/{vault_id}/items",
-                        body=replacement,
-                        method="POST",
-                    )
-                    created["title"] = title
-                    saved = update_eventually(
-                        f"/vaults/{vault_id}/items/{created['id']}",
-                        created,
-                    )
-                    saved_fields = {
-                        field_label(field): field.get("value")
-                        for field in saved.get("fields", [])
-                    }
-                    if any(
-                        field.get("value")
-                        and saved_fields.get(field_label(field)) != field["value"]
-                        for field in wanted["fields"]
-                    ):
-                        raise RuntimeError(
-                            f"1Password replacement for {title} did not preserve credentials; original retained"
-                        )
-                    connect(
-                        f"/vaults/{vault_id}/items/{summary['id']}",
-                        method="DELETE",
-                    )
-                changed += 1
-                prefix = "would be " if dry_run else ""
-                print(f"{wanted['title']} {prefix}{action}")
-                continue
-            if comparable(current) == comparable(wanted):
-                continue
-            action = "updated"
-            if not dry_run:
-                connect(
-                    f"/vaults/{vault_id}/items/{summary['id']}",
-                    body=wanted,
-                    method="PUT",
-                )
-        else:
-            action = "created"
-            if not dry_run:
-                connect(f"/vaults/{vault_id}/items", body=wanted, method="POST")
+        if current.get("category") != wanted["category"]:
+            # Connect cannot change a category in place; replacing the item would
+            # change the ID its consumers reference.
+            raise RuntimeError(f"1Password item {reference} has the wrong category")
+        if comparable(current) == comparable(wanted):
+            continue
+        if not dry_run:
+            connect(
+                f"/vaults/{vault_id}/items/{reference}",
+                body=wanted,
+                method="PUT",
+            )
         changed += 1
         prefix = "would be " if dry_run else ""
-        print(f"{wanted['title']} {prefix}{action}")
+        print(f"{wanted['title']} {prefix}updated")
     if not archive_ready:
         print(f"reconciled {len(desired)} items; changed {changed}")
         return
     for summary in sorted(summaries, key=lambda item: item["title"].lower()):
         title = summary["title"]
-        if summary["id"] in referenced_ids:
+        if summary["id"] in desired:
             continue
         current = connect(f"/vaults/{vault_id}/items/{summary['id']}")
         if current.get("tags") != ["Kubelab"]:
