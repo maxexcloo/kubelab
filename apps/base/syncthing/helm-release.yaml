@@ -69,7 +69,7 @@ spec:
               - path: /credentials
                 readOnly: true
       data:
-        existingClaim: retained-data
+        existingClaim: data
         type: persistentVolumeClaim
         globalMounts:
           - path: /var/syncthing

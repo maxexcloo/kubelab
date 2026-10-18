@@ -75,6 +75,7 @@ patches:
   - path: beszel-agent.yaml
   - path: homepage.yaml
   - path: openspeedtest.yaml
+  - path: syncthing.yaml
   - patch: |-
       apiVersion: networking.k8s.io/v1
       kind: NetworkPolicy
