@@ -90,10 +90,13 @@ depends = ["fmt:oxfmt"]
 # Dependencies
 [tasks."dependencies:check"]
 description = "Preview Dependency Updates"
-usage = 'flag "--labels <labels>" help="Select Updatecli Groups"'
+usage = 'flag "--labels <labels>" help="Select Updatecli Groups (group:actions)"'
 run = '''
 set -eu
-GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-$(gh auth token)}}"
+GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+if [ -z "$GITHUB_TOKEN" ] && command -v gh >/dev/null 2>&1; then
+  GITHUB_TOKEN=$(gh auth token)
+fi
 export GITHUB_TOKEN
 directory=$(mktemp -d)
 trap 'rm -rf -- "$directory"' EXIT
@@ -105,12 +108,22 @@ fi
 updatecli pipeline diff --config .updatecli.d --config "$directory" --disable-changelog --disable-udash-report --unique-tmp-dir "$@"
 '''
 
+# Cluster-compatible clients follow the platform policies.
+[tasks."dependencies:mise:check"]
+run = "mise upgrade --bump --dry-run --exclude kubectl --local --no-prune"
+
+[tasks."dependencies:mise:update"]
+run = "mise upgrade --bump --exclude kubectl --local --no-prune"
+
 [tasks."dependencies:update"]
 description = "Apply Reviewed Dependency Updates"
-usage = 'flag "--labels <labels>" help="Select Updatecli Groups"'
+usage = 'flag "--labels <labels>" help="Select Updatecli Groups (group:actions)"'
 run = '''
 set -eu
-GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-$(gh auth token)}}"
+GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+if [ -z "$GITHUB_TOKEN" ] && command -v gh >/dev/null 2>&1; then
+  GITHUB_TOKEN=$(gh auth token)
+fi
 export GITHUB_TOKEN
 directory=$(mktemp -d)
 trap 'rm -rf -- "$directory"' EXIT
