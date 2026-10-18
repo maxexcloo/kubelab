@@ -48,7 +48,7 @@ spec:
           gethomepage.dev/icon: sh-bichon
           gethomepage.dev/name: Bichon
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: Bichon
+          onepassword.excloo.dev/item: k275joy34gu3qyy4zmhzpxpfui
         hostnames:
           - bichon.excloo.com
         labels:

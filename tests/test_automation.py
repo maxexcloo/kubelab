@@ -40,6 +40,21 @@ def evaluate(expression, data):
     return json.loads(result.stdout)
 
 
+class ResendIdentityTests(unittest.TestCase):
+    def test_publishing_uses_the_existing_item_id_and_retains_the_api_key_identity(self):
+        publisher = composition_resource(
+            "platform/automation/resend/composition.yaml", "onepassword-item", base=False
+        )
+        patch = next(p for p in publisher["patches"] if p.get("toFieldPath") == "spec.data[0].match.remoteRef.remoteKey")
+        self.assertEqual(patch["fromFieldPath"], "spec.itemID")
+        self.assertEqual(patch["policy"]["fromFieldPath"], "Required")
+        key = composition_resource(
+            "platform/automation/resend/composition.yaml", "api-key", base=False
+        )
+        naming = next(p for p in key["patches"] if p.get("toFieldPath") == "spec.forProvider.payload.body")
+        self.assertEqual([v["fromFieldPath"] for v in naming["combine"]["variables"]], ["spec.cluster", "metadata.namespace"])
+
+
 class PocketIDClientTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

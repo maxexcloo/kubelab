@@ -76,7 +76,7 @@ spec:
           gethomepage.dev/icon: bookorbit
           gethomepage.dev/name: BookOrbit
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: BookOrbit
+          onepassword.excloo.dev/item: ve6qfldrb2gltpkkvyvp7zhkxi
         hostnames:
           - books.excloo.com
         labels:

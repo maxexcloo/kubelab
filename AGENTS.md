@@ -24,6 +24,10 @@ Kubelab owns its Flux source, cluster selection and shared integration settings.
   Use readable major tags such as `v7` for GitHub Actions, not commit SHAs.
   Updatecli previews upgrades locally for manual review.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
+- Use existing 1Password item UUIDs for credential consumers and publishers.
+  Managed item titles follow the app's route display name by default; declare an
+  explicit owning title for non-routed integrations. Keep resource identities
+  independent of display names.
 - Name 1Password upstream API keys `provider-<provider>[-<number>]-api-key`
   and access tokens `provider-<provider>[-<number>]-<token-type>-token`.
   Name gateway-issued client keys `virtual-key-<consumer>` and gateway

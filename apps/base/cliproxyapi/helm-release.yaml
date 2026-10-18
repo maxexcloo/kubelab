@@ -55,7 +55,7 @@ spec:
           gethomepage.dev/name: CLI Proxy API
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /management.html
-          onepassword.excloo.dev/item: CLI Proxy API
+          onepassword.excloo.dev/item: 7affbypxjhmx2jkwpvhbhfr6lq
           onepassword.excloo.dev/url: https://app.invalid/management.html
         hostnames:
           - cliproxy.excloo.com

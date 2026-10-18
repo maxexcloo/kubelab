@@ -107,6 +107,7 @@ def item_configuration(resource):
         "remove": set(
             filter(None, values.get(f"{ANNOTATION_PREFIX}remove-fields", "").split(","))
         ),
+        "title": values.get(f"{ANNOTATION_PREFIX}title"),
         "values": secret_values(
             resource, json.loads(values.get(f"{ANNOTATION_PREFIX}values", "{}"))
         ),
@@ -120,6 +121,10 @@ def merge_configuration(item, resource):
     item["formats"].update(configuration["formats"])
     item["generate"].update(configuration["generate"])
     item["remove"].update(configuration["remove"])
+    if configuration["title"]:
+        if item["title"] and item["title"] != configuration["title"]:
+            raise RuntimeError("1Password item has conflicting owning titles")
+        item["title"] = configuration["title"]
     item["values"].update(configuration["values"])
 
 
@@ -141,6 +146,10 @@ def new_item():
 
 def slug(value):
     return "".join(character for character in value.lower() if character.isalnum())
+
+
+def is_item_id(value):
+    return bool(re.fullmatch(r"[a-z0-9]{26}", value))
 
 
 def applications_ready():
@@ -183,6 +192,12 @@ def discover_items():
     desired = {}
     login_items = {}
     categories = {}
+    routes = kubernetes_list("/apis/gateway.networking.k8s.io/v1/httproutes")
+    namespace_items = {}
+    for route in routes:
+        reference = annotations(route).get(f"{ANNOTATION_PREFIX}item")
+        if reference:
+            namespace_items.setdefault(route["metadata"]["namespace"], set()).add(reference)
     resources = kubernetes_list(
         "/apis/external-secrets.io/v1/externalsecrets"
     ) + kubernetes_list("/apis/external-secrets.io/v1alpha1/pushsecrets")
@@ -217,11 +232,17 @@ def discover_items():
             for title in titles
             if slug(title) == slug(resource["metadata"]["name"])
         }
-        owner_title = None
-        if len(matching_titles) == 1:
-            owner_title = matching_titles.pop()
-        elif len(titles) == 1:
-            owner_title = next(iter(titles))
+        owning_items = titles & namespace_items.get(namespace, set())
+        owner_title = annotations(resource).get(f"{ANNOTATION_PREFIX}item")
+        if owner_title and owner_title not in titles:
+            raise RuntimeError("1Password secret owner must be one of its item references")
+        if not owner_title:
+            if len(owning_items) == 1:
+                owner_title = next(iter(owning_items))
+            elif len(matching_titles) == 1:
+                owner_title = matching_titles.pop()
+            elif len(titles) == 1:
+                owner_title = next(iter(titles))
         for reference in references:
             title = reference.get("key") or reference.get("remoteKey")
             field = reference.get("property")
@@ -236,7 +257,6 @@ def discover_items():
                     login_items[title] = login_item
             if field:
                 item["fields"].add(field)
-    routes = kubernetes_list("/apis/gateway.networking.k8s.io/v1/httproutes")
     # References own credential identity; an optional title follows the app name.
     for route in routes:
         namespace = route["metadata"]["namespace"]
@@ -257,6 +277,8 @@ def discover_items():
             )
         item = desired.setdefault(title, new_item())
         display_title = route_annotations.get(f"{ANNOTATION_PREFIX}title")
+        if not display_title and is_item_id(title):
+            display_title = route_annotations.get("gethomepage.dev/name")
         if display_title:
             if item["title"] and item["title"] != display_title:
                 raise RuntimeError(f"1Password item {title} has conflicting titles")
@@ -522,7 +544,7 @@ def resolve_items(desired, summaries):
     for reference, configuration in desired.items():
         summary = by_id.get(reference) or by_title.get(reference)
         title = configuration.get("title")
-        if summary is None and re.fullmatch(r"[a-z0-9]{26}", reference):
+        if summary is None and is_item_id(reference):
             raise RuntimeError(f"referenced 1Password item ID {reference} is missing")
         if title:
             if reference not in by_id:

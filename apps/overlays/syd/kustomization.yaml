@@ -105,20 +105,6 @@ transformers:
   - ../../base/homepage/routing
 replacements:
   - source:
-      kind: HelmRelease
-      name: syncthing
-      namespace: syncthing
-      fieldPath: spec.values.route.private.annotations.[gethomepage.dev/name]
-    targets:
-      - select:
-          kind: HelmRelease
-          name: syncthing
-          namespace: syncthing
-        fieldPaths:
-          - spec.values.route.private.annotations.[onepassword.excloo.dev/title]
-        options:
-          create: true
-  - source:
       kind: HTTPRoute
       name: openspeedtest-internal
       namespace: openspeedtest

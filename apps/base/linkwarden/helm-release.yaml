@@ -130,7 +130,7 @@ spec:
           gethomepage.dev/widget.type: linkwarden
           gethomepage.dev/widget.url: https://app.invalid
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: Linkwarden
+          onepassword.excloo.dev/item: 37fmyulaj34v5ylihuophrd6ai
         hostnames:
           - links.excloo.com
         labels:

@@ -92,7 +92,7 @@ spec:
           gethomepage.dev/icon: sh-shelfmark
           gethomepage.dev/name: Shelfmark
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: Shelfmark
+          onepassword.excloo.dev/item: chx5fdcskb6kst47yqawzdveka
         hostnames:
           - shelf.excloo.com
         labels:

@@ -97,5 +97,7 @@ spec:
                 fromFieldPath: metadata.namespace
                 toFieldPath: metadata.namespace
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.displayName
+                fromFieldPath: spec.itemID
                 toFieldPath: spec.data[0].match.remoteRef.remoteKey
+                policy:
+                  fromFieldPath: Required

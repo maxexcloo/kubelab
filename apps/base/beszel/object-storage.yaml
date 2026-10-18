@@ -9,7 +9,7 @@ spec:
   refreshInterval: 1h
   data:
     - remoteRef:
-        key: Beszel
+        key: l6ndlsmefn6gafyr7cfk3u24gm
         property: object-storage-bucket
       secretKey: bucket
   secretStoreRef:

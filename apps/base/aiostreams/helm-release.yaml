@@ -69,7 +69,7 @@ spec:
           gethomepage.dev/name: AIOStreams
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /api/v1/health
-          onepassword.excloo.dev/item: AIOStreams
+          onepassword.excloo.dev/item: qskenmj3tnyc3vtal7tkreukda
         hostnames:
           - aiostreams.excloo.com
         labels:
