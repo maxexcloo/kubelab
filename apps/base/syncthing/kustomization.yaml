@@ -22,6 +22,14 @@ patches:
 replacements:
   - source:
       kind: HelmRelease
+      fieldPath: spec.values.route.private.annotations.[onepassword.excloo.dev/item]
+    targets:
+      - select:
+          kind: ExternalSecret
+        fieldPaths:
+          - spec.data.*.remoteRef.key
+  - source:
+      kind: HelmRelease
       fieldPath: spec.values.route.private.hostnames.0
     targets:
       - select:

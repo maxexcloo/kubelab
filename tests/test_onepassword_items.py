@@ -40,6 +40,87 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_display_name_change_keeps_syncthing_resource_and_item_identities(self):
+        from support import copy_repository, read_yaml, render_resources
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            copy_repository(root)
+            path = root / "apps/overlays/syd/syncthing.yaml"
+            patch = read_yaml(path)
+            patch["spec"]["values"]["route"]["private"]["annotations"]["gethomepage.dev/name"] = "Syncthing (Archive)"
+            path.write_text(json.dumps(patch))
+            resources = render_resources(root / "apps/overlays/syd")
+        release = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "syncthing")
+        secret = next(r for r in resources if r["kind"] == "ExternalSecret" and r["metadata"]["namespace"] == "syncthing")
+        annotations = release["spec"]["values"]["route"]["private"]["annotations"]
+        self.assertEqual(annotations["onepassword.excloo.dev/title"], "Syncthing (Archive)")
+        self.assertTrue(all(d["remoteRef"]["key"] == annotations["onepassword.excloo.dev/item"] for d in secret["spec"]["data"]))
+        self.assertEqual(secret["metadata"]["name"], "syncthing")
+        self.assertEqual(release["spec"]["values"]["persistence"]["data"]["existingClaim"], "data")
+        self.assertEqual(release["spec"]["values"]["defaultPodOptions"]["nodeSelector"]["kubernetes.io/hostname"], "kimbap")
+
+    def test_item_rename_preserves_identity_credentials_and_consumers(self):
+        item_id = "a" * 26
+        current = {
+            "category": "LOGIN",
+            "fields": [{"id": "password", "label": "password", "value": "keep-password"}],
+            "id": item_id,
+            "tags": ["Kubelab"],
+            "title": "Application",
+            "urls": [{"href": "https://app.example.net", "label": "Sign In", "primary": True}],
+            "vault": {"id": "vault"},
+        }
+        desired = {item_id: item_configuration(
+            fields={"password"}, login=True, title="Application (Kimbap)",
+            urls={"https://app.example.net"},
+        )}
+        writes = []
+
+        def connect(path, *, body=None, method="GET"):
+            if path == "/vaults":
+                return [{"id": "vault"}]
+            if path == "/vaults/vault/items":
+                return [{key: current[key] for key in ["id", "title"]}]
+            self.assertEqual(path, f"/vaults/vault/items/{item_id}")
+            if method == "PUT":
+                writes.append(copy.deepcopy(body))
+                current.clear()
+                current.update(copy.deepcopy(body))
+            else:
+                self.assertEqual(method, "GET")
+            return copy.deepcopy(current)
+
+        readiness = False
+        with patch.object(RECONCILER, "connect", side_effect=connect), \
+                patch.object(RECONCILER, "discover_items", return_value=desired), \
+                patch.object(RECONCILER, "applications_ready", side_effect=lambda: readiness), \
+                patch.object(RECONCILER, "is_dry_run", return_value=False), \
+                contextlib.redirect_stdout(io.StringIO()):
+            RECONCILER.main()
+            self.assertEqual(current["title"], "Application")
+            readiness = True
+            writes.clear()
+            RECONCILER.main()
+            RECONCILER.main()
+        self.assertEqual(len(writes), 1)
+        self.assertEqual(current["id"], item_id)
+        self.assertEqual(current["title"], "Application (Kimbap)")
+        self.assertEqual(current["fields"][0]["value"], "keep-password")
+        self.assertEqual(current["urls"], [{"href": "https://app.example.net", "label": "Sign In", "primary": True}])
+
+    def test_item_rename_rejects_conflicts_and_remaining_title_consumers(self):
+        item_id = "a" * 26
+        summaries = [{"id": item_id, "title": "Application"}, {"id": "other", "title": "Taken"}]
+        with self.assertRaisesRegex(RuntimeError, "belongs to another item"):
+            RECONCILER.resolve_items({item_id: {"title": "Taken"}}, summaries)
+        with self.assertRaisesRegex(RuntimeError, "title-based references"):
+            RECONCILER.resolve_items({item_id: {"title": "Renamed"}, "Application": {}}, summaries)
+        with self.assertRaisesRegex(RuntimeError, "requires an existing item ID"):
+            RECONCILER.resolve_items({"Application": {"title": "Renamed"}}, summaries)
+        with self.assertRaisesRegex(RuntimeError, "is missing"):
+            RECONCILER.resolve_items({"b" * 26: {}}, summaries)
+
     def test_grouping_preserves_websites_and_credentials_and_removes_empty_groups(self):
         current = {
             "fields": [

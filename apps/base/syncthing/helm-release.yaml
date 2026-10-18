@@ -90,7 +90,7 @@ spec:
           gethomepage.dev/name: Syncthing
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /rest/noauth/health
-          onepassword.excloo.dev/item: Syncthing
+          onepassword.excloo.dev/item: ekuczjex5kp6fhopu44flqdu3y
         hostnames:
           - syncthing.excloo.com
         labels:

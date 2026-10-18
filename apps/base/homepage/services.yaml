@@ -34,7 +34,7 @@
         href: &netboot homelab://mbk/kimbap/netboot
         icon: mdi-server-network-#ffffff
         siteMonitor: *netboot
-    - Syncthing (Kimbap):
+    - Syncthing:
         description: File Synchronisation
         href: &syncthing https://syncthing.excloo.com
         icon: sh-syncthing

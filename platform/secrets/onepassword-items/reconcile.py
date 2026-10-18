@@ -2,6 +2,7 @@ import base64
 import copy
 import json
 import os
+import re
 import secrets
 import ssl
 import time
@@ -132,6 +133,7 @@ def new_item():
         "login": False,
         "namespaces": set(),
         "remove": set(),
+        "title": None,
         "urls": set(),
         "values": {},
     }
@@ -235,7 +237,7 @@ def discover_items():
             if field:
                 item["fields"].add(field)
     routes = kubernetes_list("/apis/gateway.networking.k8s.io/v1/httproutes")
-    # Route item names own credential identity independently of dashboard labels.
+    # References own credential identity; an optional title follows the app name.
     for route in routes:
         namespace = route["metadata"]["namespace"]
         route_annotations = annotations(route)
@@ -254,6 +256,11 @@ def discover_items():
                 f"1Password route {namespace}/{route['metadata']['name']} has no URL"
             )
         item = desired.setdefault(title, new_item())
+        display_title = route_annotations.get(f"{ANNOTATION_PREFIX}title")
+        if display_title:
+            if item["title"] and item["title"] != display_title:
+                raise RuntimeError(f"1Password item {title} has conflicting titles")
+            item["title"] = display_title
         category = route_annotations.get(f"{ANNOTATION_PREFIX}category", "LOGIN")
         if category not in {"LOGIN", "SERVER"}:
             raise RuntimeError(
@@ -416,7 +423,7 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
         raise RuntimeError(f"1Password item {title} has unsupported field formats")
     current["category"] = "LOGIN" if desired["login"] else "SERVER"
     current.setdefault("tags", ["Kubelab"])
-    current.setdefault("title", title)
+    current["title"] = desired.get("title") or current.get("title") or title
     current.setdefault("vault", {"id": vault_id})
     reconcile_urls(current, desired["urls"], allow_removal=allow_removal)
     fields = current.setdefault("fields", [])
@@ -503,6 +510,33 @@ def update_eventually(path, item):
             time.sleep(attempt * 5)
 
 
+def resolve_items(desired, summaries):
+    by_id = {summary["id"]: summary for summary in summaries}
+    by_title = {}
+    for summary in summaries:
+        title = summary["title"]
+        if title in by_title:
+            raise RuntimeError(f"duplicate 1Password item title: {title}")
+        by_title[title] = summary
+    resolved = {}
+    for reference, configuration in desired.items():
+        summary = by_id.get(reference) or by_title.get(reference)
+        title = configuration.get("title")
+        if summary is None and re.fullmatch(r"[a-z0-9]{26}", reference):
+            raise RuntimeError(f"referenced 1Password item ID {reference} is missing")
+        if title:
+            if reference not in by_id:
+                raise RuntimeError(f"1Password title {title} requires an existing item ID")
+            if title in by_title and by_title[title]["id"] != summary["id"]:
+                raise RuntimeError(f"1Password title {title} belongs to another item")
+            if title != summary["title"] and summary["title"] in desired:
+                raise RuntimeError(
+                    f"1Password item {reference} still has title-based references"
+                )
+        resolved[reference] = summary
+    return resolved
+
+
 def main():
     dry_run = is_dry_run()
     vaults = connect("/vaults")
@@ -513,12 +547,8 @@ def main():
     vault_id = vaults[0]["id"]
     desired = discover_items()
     summaries = connect(f"/vaults/{vault_id}/items")
-    active = {}
-    for summary in summaries:
-        title = summary["title"]
-        if title in active:
-            raise RuntimeError(f"duplicate 1Password item title: {title}")
-        active[title] = summary
+    resolved = resolve_items(desired, summaries)
+    referenced_ids = {summary["id"] for summary in resolved.values() if summary}
     try:
         archive_ready = applications_ready()
     except RuntimeError as error:
@@ -531,7 +561,7 @@ def main():
             print("skipped removals because applications are not fully reconciled")
     changed = 0
     for title, configuration in sorted(desired.items()):
-        summary = active.get(title)
+        summary = resolved[title]
         current = (
             connect(f"/vaults/{vault_id}/items/{summary['id']}")
             if summary
@@ -546,8 +576,15 @@ def main():
             vault_id,
             allow_removal=archive_ready,
         )
+        if summary and not archive_ready:
+            # A rename waits until Flux has updated every credential consumer.
+            wanted["title"] = current["title"]
         if summary:
             if current.get("category") != wanted["category"]:
+                if title == summary["id"]:
+                    raise RuntimeError(
+                        f"1Password item {title} cannot replace its referenced item ID"
+                    )
                 action = "replaced"
                 if not dry_run:
                     replacement = creation_payload(wanted, vault_id)
@@ -580,7 +617,7 @@ def main():
                     )
                 changed += 1
                 prefix = "would be " if dry_run else ""
-                print(f"{title} {prefix}{action}")
+                print(f"{wanted['title']} {prefix}{action}")
                 continue
             if comparable(current) == comparable(wanted):
                 continue
@@ -597,13 +634,13 @@ def main():
                 connect(f"/vaults/{vault_id}/items", body=wanted, method="POST")
         changed += 1
         prefix = "would be " if dry_run else ""
-        print(f"{title} {prefix}{action}")
+        print(f"{wanted['title']} {prefix}{action}")
     if not archive_ready:
         print(f"reconciled {len(desired)} items; changed {changed}")
         return
     for summary in sorted(summaries, key=lambda item: item["title"].lower()):
         title = summary["title"]
-        if title in desired:
+        if summary["id"] in referenced_ids:
             continue
         current = connect(f"/vaults/{vault_id}/items/{summary['id']}")
         if current.get("tags") != ["Kubelab"]:

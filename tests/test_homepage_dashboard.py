@@ -241,7 +241,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         services = self.services()
         self.assertIn("Remote", services)
         self.assertEqual(services["Remote"]["description"], "SYD")
-        self.assertEqual(services["Syncthing (Kimbap)"]["description"], "File Synchronisation")
+        self.assertEqual(services["Syncthing"]["description"], "File Synchronisation")
         self.assertIn("Shared", services)
         self.assertIn("Local", services)
         self.assertNotIn("siteMonitor", services["Local"])
@@ -253,6 +253,22 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertNotIn("mbk-gateway", services)
         self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")
         self.assertEqual(list(read_yaml(self.output / "settings.yaml")["layout"])[-1], "Servers")
+
+    def test_widget_name_follows_application_rename(self):
+        app = route("Syncthing (Kimbap)")
+        app["metadata"]["annotations"]["gethomepage.dev/group"] = "Infrastructure"
+        app["metadata"]["annotations"]["gethomepage.dev/href"] = "https://syncthing.excloo.com"
+        app["spec"] = {"hostnames": ["syncthing.excloo.com"]}
+        self.write_routes("syd", [app])
+        for name in ["Syncthing (Kimbap)", "Syncthing (New Name)"]:
+            app["metadata"]["annotations"]["gethomepage.dev/name"] = name
+            self.write_routes("syd", [app])
+            result = self.render()
+            self.assertEqual(result.returncode, 0, result.stderr)
+            services = self.services()
+            self.assertNotIn("Syncthing", services)
+            self.assertEqual(services[name]["widget"]["type"], "syncthing")
+            self.assertEqual(services[name]["widget"]["url"], "https://syncthing.excloo.com")
 
     def test_helm_widget_and_moving_an_app_between_clusters(self):
         annotations = route("Library", group="Media", **{
@@ -360,7 +376,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Home Assistant", groups["Smart Home"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • HASS (MBK)")
-        self.assertEqual(groups["Infrastructure"]["Syncthing (Kimbap)"]["widget"]["url"], "https://syncthing.excloo.com")
+        self.assertEqual(groups["Infrastructure"]["Syncthing"]["widget"]["url"], "https://syncthing.excloo.com")
         storage = groups["mbk-storage"]
         self.assertEqual(list(storage), ["Beszel", "Cloudflare", "Tailscale", "TrueNAS"])
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
