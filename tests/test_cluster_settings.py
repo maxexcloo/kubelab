@@ -39,7 +39,7 @@ class ClusterSettingsTests(unittest.TestCase):
                 for unresolved in ("app.invalid", "identity.invalid", "storage.invalid", "id.excloo.com", "grafana.excloo.com", "10.4.0.3"):
                     self.assertNotIn(unresolved, rendered, str(path))
                 resources.extend(read_resources(path))
-            self.assertFalse(any(r["metadata"]["name"].startswith(("cluster-settings-", "shared-settings")) for r in resources))
+            self.assertFalse(any(r["metadata"]["name"].startswith(("cluster-settings", "shared-settings")) for r in resources))
             # Defaults only affect creation; explicit targets migrate existing DNS records too.
             dns_records = [r for r in resources if r["kind"] == "PrivateDNSRecord"]
             self.assertTrue(dns_records)
