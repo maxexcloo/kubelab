@@ -1,6 +1,3 @@
-[vars]
-updatecli_discovery = "python -B scripts/updates.py"
-
 [tools]
 # 1password-cli = "latest"
 # actionlint = "latest"
@@ -76,8 +73,54 @@ arg "[application]"
 [tasks.check]
 depends = ["check:updates", "hooks:check", "test:python"]
 
+[tasks."check:updates"]
+description = "Validate Updatecli Policies & Discovered Pins"
+env.GITHUB_TOKEN = "validation-placeholder"
+run = '''
+set -eu
+directory=$(mktemp -d)
+trap 'rm -rf -- "$directory"' EXIT
+python -B scripts/updates.py "$directory"
+updatecli manifest validate --config .updatecli.d --config "$directory" --strict --unique-tmp-dir
+'''
+
 [tasks.fmt]
 depends = ["fmt:oxfmt"]
+
+# Dependencies
+[tasks."dependencies:check"]
+description = "Preview Dependency Updates"
+usage = 'flag "--labels <labels>" help="Select Updatecli Groups"'
+run = '''
+set -eu
+GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-$(gh auth token)}}"
+export GITHUB_TOKEN
+directory=$(mktemp -d)
+trap 'rm -rf -- "$directory"' EXIT
+python -B scripts/updates.py "$directory"
+set --
+if [ -n "${usage_labels:-}" ]; then
+  set -- --labels "$usage_labels"
+fi
+updatecli pipeline diff --config .updatecli.d --config "$directory" --disable-changelog --disable-udash-report --unique-tmp-dir "$@"
+'''
+
+[tasks."dependencies:update"]
+description = "Apply Reviewed Dependency Updates"
+usage = 'flag "--labels <labels>" help="Select Updatecli Groups"'
+run = '''
+set -eu
+GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-$(gh auth token)}}"
+export GITHUB_TOKEN
+directory=$(mktemp -d)
+trap 'rm -rf -- "$directory"' EXIT
+python -B scripts/updates.py "$directory"
+set --
+if [ -n "${usage_labels:-}" ]; then
+  set -- --labels "$usage_labels"
+fi
+updatecli pipeline apply --config .updatecli.d --config "$directory" --disable-changelog --disable-udash-report --unique-tmp-dir "$@"
+'''
 
 # Setup
 [tasks.setup]
