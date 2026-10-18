@@ -124,13 +124,14 @@ spec:
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-linkwarden
-          gethomepage.dev/name: Linkwarden
+          gethomepage.dev/name: &title Linkwarden
           gethomepage.dev/pod-selector: app.kubernetes.io/name=linkwarden,app.kubernetes.io/controller=linkwarden
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_LINKWARDEN_KEY}}" }}'
           gethomepage.dev/widget.type: linkwarden
           gethomepage.dev/widget.url: https://app.invalid
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: 37fmyulaj34v5ylihuophrd6ai
+          onepassword.excloo.dev/title: *title
         hostnames:
           - links.excloo.com
         labels:

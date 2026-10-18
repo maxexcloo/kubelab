@@ -44,10 +44,6 @@ map(
     "tab": (["Home"] +
       ($host_groups | map(select(. == $group)) | map("Servers")) +
       ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])} |
-  # Widget templates follow the app's display name through their shared URL.
-  . as $card |
-  ($applications | map(select(.tab == "Home" and .href == $card.href)) | map(.name) | unique) as $names |
-  with(select($names | length == 1); .name = $names[0]) |
   # Homepage resolves widget proxies by leaf group name, even across nested tabs.
   with(select(.tab == "Servers" and ($cluster_groups | contains([$group])));
     .group += " (Server)")] as $external |

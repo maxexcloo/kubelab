@@ -22,6 +22,10 @@ spec:
     accessLog:
       enabled: true
       format: json
+      fields:
+        names:
+          # Paths can carry capability URLs, such as mini-app list links.
+          RequestPath: drop
     deployment:
       replicas: 2
     gateway:

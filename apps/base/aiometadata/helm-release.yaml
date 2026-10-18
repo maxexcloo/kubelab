@@ -125,9 +125,10 @@ spec:
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-aiometadata
-          gethomepage.dev/name: AIOMetadata
+          gethomepage.dev/name: &title AIOMetadata
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: ia4ldwhyyqxnbrqugi7i4jyhf4
+          onepassword.excloo.dev/title: *title
         hostnames:
           - aiometadata.excloo.com
         labels:

@@ -48,12 +48,13 @@ spec:
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: miniflux-light
-          gethomepage.dev/name: Miniflux
+          gethomepage.dev/name: &title Miniflux
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_MINIFLUX_KEY}}" }}'
           gethomepage.dev/widget.type: miniflux
           gethomepage.dev/widget.url: https://app.invalid
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: pq2izjduqiynjzrzy4327av4n4
+          onepassword.excloo.dev/title: *title
         hostnames:
           - reader.excloo.com
         labels:

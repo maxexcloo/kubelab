@@ -10,6 +10,8 @@ Kubernetes is unavailable.
 
 The `mini-apps` repository owns mini-app source and native workload manifests.
 Kubelab owns its Flux source, cluster selection and shared integration settings.
+Actual Up keeps its dependencies, serial operation queue, schedules and encrypted
+settings in its own repository; Kubelab deploys its published image.
 
 ## Conventions
 
@@ -24,20 +26,10 @@ Kubelab owns its Flux source, cluster selection and shared integration settings.
   Use readable major tags such as `v7` for GitHub Actions, not commit SHAs.
   Updatecli previews upgrades locally for manual review.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
-- Use existing 1Password item UUIDs for credential consumers and publishers.
-  Managed item titles follow the app's route display name by default; declare an
-  explicit owning title for non-routed integrations. Keep resource identities
-  independent of display names.
-- Name 1Password upstream API keys `provider-<provider>[-<number>]-api-key`
-  and access tokens `provider-<provider>[-<number>]-<token-type>-token`.
-  Name gateway-issued client keys `virtual-key-<consumer>` and gateway
-  administration keys `master-key`. Keep provider credentials in the consuming
-  application's item and virtual keys in the issuing gateway's item. Group custom
-  fields by purpose, and update field references and generation declarations
-  together. Preserve descriptive names for application, database and sign-in
-  secrets. Group OAuth and OIDC fields under `Authentication` and remove empty
-  groups. Preserve existing website URLs, labels and primary flags when
-  reconciling fields.
+- Use existing 1Password item UUIDs for credential consumers and publishers,
+  including mini-app ExternalSecrets. Declare managed item titles with
+  `onepassword.excloo.dev/title`; routes alias it to their `gethomepage.dev/name`.
+  Keep resource identities independent of display names.
 - Default Crossplane external resources to orphan-on-delete.
 - Do not change a live route without explicit approval and a reviewed plan.
 
@@ -47,42 +39,60 @@ Kubelab owns its Flux source, cluster selection and shared integration settings.
 - `clusters/`: Flux entry points for each cluster.
 - `platform/`: cluster controllers and shared configuration.
 
-Private browser and API routes include `<app>.<cluster>.excloo.dev` alongside
-existing primary addresses. App-template routes derive aliases through the shared
-route transformers; upstream charts use their native route shape. Keep aliases
-on private gateways. Database-backed application pods use required affinity to
-the CloudNativePG primary in their namespace; local volumes remain authoritative
-for data placement. Node network labels describe host locality, independently of
-application access. Cluster applications default to internal nodes; cluster
-overlays select external workloads. Public routes on external nodes attach to the
-`public-direct` gateway once the zone reaches origins over HTTPS (Cloudflare
-SSL/TLS mode Full), so Cloudflare connects to the public address instead of the
-tunnel; routes whose origin is behind NAT attach to the `public-tunnel` gateway.
-Mini apps use only `<name>.mini.excloo.com`.
+### Routing & Placement
 
-Keep app-specific configuration and integration declarations beside the app. Keep
-shared controllers and integration implementations under `platform/`.
+- Private browser and API routes include `<app>.<cluster>.excloo.dev` alongside
+  existing primary addresses. Keep aliases on private gateways.
+- App-template routes derive aliases through the shared route transformers;
+  upstream charts use their native route shape.
+- Public routes on external nodes attach to the `public-direct` gateway once the
+  zone reaches origins over HTTPS (Cloudflare SSL/TLS mode Full), so Cloudflare
+  connects to the public address instead of the tunnel. Routes whose origin is
+  behind NAT attach to the `public-tunnel` gateway.
+- Mini apps use only `<name>.mini.excloo.com`.
+- Cluster applications default to internal nodes; cluster overlays select
+  external workloads. Node network labels describe host locality, independently
+  of application access.
+- Database-backed application pods use required affinity to the CloudNativePG
+  primary in their namespace; local volumes remain authoritative for data
+  placement.
+- SQLite apps use one replica, the `Recreate` strategy and local volumes, never
+  NFS.
 
-Use standard Kubernetes configuration directly. Do not add a general application
-schema, generator, operator, or generated manifest. A narrow repository-defined
-resource is acceptable when it materially removes repeated security or lifecycle
-integration logic; document the contract in its schema and compose standard
-resources underneath. Use Kustomize for composition and small patches. Use
-`configMapGenerator` only to mount checked-in app configuration, scripts or assets;
-do not use `secretGenerator`. Keep executable code in its own source file. Keep
-shared chart policy in native Kustomize components and app-specific values in the
-app's Flux `HelmRelease` patch; use overlay patches for cluster differences. The
-`app-namespace` component derives app-local namespaces and Flux release identity
-from the app's Namespace. The `application` component supplies standard probes,
-security and scratch storage. Use `main` for its primary controller,
-container and service; preserve deployed names and immutable selector labels.
-Override only app differences; native patch `null` removes an inherited setting.
-Specialised app-template workloads use the `workload` component without the
-application defaults. Keep
-databases, external secrets, integrations, namespaces, network policies and storage
-in files named for their purpose rather than mixed `resources.yaml` files. Use
-standard Kustomize replacements for derived hostnames and URLs. Homepage retains
-its existing configuration layout and probe timings.
+### Composition
+
+- Keep app-specific configuration and integration declarations beside the app.
+  Keep shared controllers and integration implementations under `platform/`.
+- Use standard Kubernetes configuration directly. Do not add a general application
+  schema, generator, operator, or generated manifest. A narrow repository-defined
+  resource is acceptable when it materially removes repeated security or lifecycle
+  integration logic; document the contract in its schema and compose standard
+  resources underneath.
+- The 1Password item reconciler in `platform/secrets/onepassword-items` is the
+  approved narrow exception: a scheduled job that updates referenced items and
+  archives unreferenced Kubelab-tagged items. Its contract lives beside it.
+- Use Kustomize for composition and small patches. Use `configMapGenerator` only
+  to mount checked-in app configuration, scripts or assets; do not use
+  `secretGenerator`. Keep executable code in its own source file.
+- Flux `postBuild` substitution also rewrites `${...}` in ConfigMaps, including
+  mounted mini-app scripts and assets.
+- Keep shared chart policy in native Kustomize components and app-specific values
+  in the app's Flux `HelmRelease` patch; use overlay patches for cluster
+  differences.
+- The `app-namespace` component derives app-local namespaces and Flux release
+  identity from the app's Namespace. The `application` component supplies
+  standard probes, security and scratch storage. Specialised app-template
+  workloads use the `workload` component without the application defaults.
+- Use `main` for the primary controller, container and service; preserve deployed
+  names and immutable selector labels. Override only app differences; native
+  patch `null` removes an inherited setting.
+- Keep databases, external secrets, integrations, namespaces, network policies
+  and storage in files named for their purpose rather than mixed `resources.yaml`
+  files.
+- Use standard Kustomize replacements for derived hostnames and URLs.
+- Homepage retains its existing configuration layout and probe timings.
+
+### Documentation
 
 Keep root Markdown limited to `AGENTS.md` and `README.md`. Keep `README.md`
 focused on purpose and general usage; do not duplicate deployment inventories,
@@ -99,19 +109,14 @@ alphabetise within each group. Preserve deliberate grouping and workflow order.
 
 ## Style
 
-- Add scheduled jobs or automatic deletion only when explicitly requested.
 - Use supported app configuration interfaces; leave unsupported settings manual.
-- Keep comments local and specific to non-obvious behaviour.
 - Use 10-second probe intervals, 5-second timeouts and three consecutive failures;
   allow 30 failures for startup. Preserve app-specific check mechanisms and
   endpoints, and retain chart limitations or evidenced exceptions.
 
-## Verification
+## Verification & Delivery
 
+- Run Kubelab's checks whenever its configuration changes.
 - Render changed Helm charts and use small response fixtures for changed API
   comparisons; avoid adding a general validation framework.
-
-## Git History
-
-Keep a decision or ownership transfer separate from its implementation when
-review of that decision is useful.
+- Deliver changes through a pull request; Flux deploys `main` once it merges.

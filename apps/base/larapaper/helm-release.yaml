@@ -75,9 +75,10 @@ spec:
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-trmnl
-          gethomepage.dev/name: LaraPaper
+          gethomepage.dev/name: &title LaraPaper
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: qprahdzfh7qp5hdvxwwcjjnqqa
+          onepassword.excloo.dev/title: *title
         hostnames:
           - larapaper.excloo.com
         labels:
