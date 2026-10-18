@@ -50,6 +50,10 @@ replacements:
         fieldPaths:
           - spec.hostnames.0
       - select:
+          kind: PrivateDNSRecord
+        fieldPaths:
+          - spec.hostname
+      - select:
           kind: HelmRelease
         fieldPaths:
           - spec.values.envVars.PROXY_BASE_URL
@@ -68,6 +72,7 @@ components:
   - ../../../platform/databases/postgres
   - ../../../platform/backups/credentials
   - ../../../platform/backups/postgres
+  - ../../components/private-dns-control-d-only
   - ../../components/app-namespace
 patches:
   - path: database.yaml
