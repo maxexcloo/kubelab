@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+# Back up a workload whose names differ from its namespace; consumers supply a
+# local backup-settings ConfigMap. Include after the files component.
+replacements:
+  - source:
+      kind: ConfigMap
+      name: backup-settings
+      fieldPath: data.deployment
+    targets:
+      - select:
+          kind: CronJob
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.containers.[name=backup].env.[name=DEPLOYMENT].value
+      - select:
+          kind: Role
+        fieldPaths:
+          - rules.0.resourceNames.0
+  - source:
+      kind: ConfigMap
+      name: backup-settings
+      fieldPath: data.helm_release
+    targets:
+      - select:
+          kind: CronJob
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.containers.[name=backup].env.[name=HELM_RELEASE].value
+      - select:
+          kind: Role
+        fieldPaths:
+          - rules.1.resourceNames.0

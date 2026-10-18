@@ -3,5 +3,3 @@ kind: Kustomization
 namespace: headlamp
 resources:
   - pocket-id.yaml
-components:
-  - ../../../settings

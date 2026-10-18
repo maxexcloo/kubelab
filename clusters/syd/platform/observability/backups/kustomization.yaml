@@ -6,6 +6,7 @@ resources:
 components:
   - ../../../../../platform/backups/credentials
   - ../../../../../platform/backups/files
+  - ../../../../../platform/backups/workload
 patches:
   - target:
       kind: CronJob
@@ -29,30 +30,3 @@ patches:
           runAsUser: 472
           seccompProfile:
             type: RuntimeDefault
-replacements:
-  - source:
-      kind: ConfigMap
-      name: backup-settings
-      fieldPath: data.deployment
-    targets:
-      - select:
-          kind: CronJob
-        fieldPaths:
-          - spec.jobTemplate.spec.template.spec.containers.[name=backup].env.[name=DEPLOYMENT].value
-      - select:
-          kind: Role
-        fieldPaths:
-          - rules.0.resourceNames.0
-  - source:
-      kind: ConfigMap
-      name: backup-settings
-      fieldPath: data.helm_release
-    targets:
-      - select:
-          kind: CronJob
-        fieldPaths:
-          - spec.jobTemplate.spec.template.spec.containers.[name=backup].env.[name=HELM_RELEASE].value
-      - select:
-          kind: Role
-        fieldPaths:
-          - rules.1.resourceNames.0

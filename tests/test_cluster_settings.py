@@ -17,7 +17,6 @@ class ClusterSettingsTests(unittest.TestCase):
             shared = root / "platform/settings/settings.yaml"
             settings = read_yaml(shared)
             settings["data"]["headlamp_client_id"] = "headlamp-test"
-            settings["data"]["headlamp_syd_host"] = "headlamp.syd.changed.example"
             settings["data"]["identity_host"] = "id.changed.example"
             settings["data"]["control_d_profile"] = "test-profile"
             shared.write_text(json.dumps(settings))
@@ -27,6 +26,7 @@ class ClusterSettingsTests(unittest.TestCase):
                 "bento_address": "192.0.2.15",
                 "bento_llm_authority": "bento.changed.example:8123",
                 "grafana_host": "grafana.changed.example",
+                "headlamp_host": "headlamp.syd.changed.example",
                 "private_dns_host": "private.changed.example",
                 "unifi_host": "gateway.changed.example",
             })
@@ -39,7 +39,7 @@ class ClusterSettingsTests(unittest.TestCase):
                 for unresolved in ("app.invalid", "identity.invalid", "storage.invalid", "id.excloo.com", "grafana.excloo.com", "10.4.0.3"):
                     self.assertNotIn(unresolved, rendered, str(path))
                 resources.extend(read_resources(path))
-            self.assertFalse(any(r["metadata"]["name"].startswith(("cluster-settings-", "shared-settings")) for r in resources))
+            self.assertFalse(any(r["metadata"]["name"].startswith(("cluster-settings", "shared-settings")) for r in resources))
             # Defaults only affect creation; explicit targets migrate existing DNS records too.
             dns_records = [r for r in resources if r["kind"] == "PrivateDNSRecord"]
             self.assertTrue(dns_records)
