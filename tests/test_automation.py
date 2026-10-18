@@ -7,6 +7,8 @@ import subprocess
 import unittest
 from pathlib import Path
 
+from support import read_resources
+
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -87,6 +89,43 @@ class PocketIDClientTests(unittest.TestCase):
             changed = copy.deepcopy(data)
             changed["response"]["body"][key] = value
             self.assertFalse(evaluate(expression, changed))
+
+
+class PrivateDNSTargetDiscoveryTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        resource = next(
+            resource for resource in read_resources(
+                ROOT / "platform/automation/private-dns/target-discovery.yaml"
+            ) if resource["metadata"]["name"] == "private-dns-target-ipv6"
+        )
+        cls.parameters = resource["spec"]["forProvider"]
+
+    def test_absent_and_present_ipv6_answers_have_defined_targets(self):
+        mapping = self.parameters["secretInjectionConfigs"][0]["keyMappings"][0]["responseJQ"]
+        for answers, target in [
+            ([], "::"),
+            ([{"type": 5, "data": "target.example"}], "::"),
+            ([{"type": 28, "data": "fd00::1"}], "fd00::1"),
+        ]:
+            with self.subTest(answers=answers):
+                body = {"Answer": answers, "Status": 0}
+                response = {"response": {"body": body, "statusCode": 200}}
+                self.assertTrue(evaluate(self.parameters["expectedResponseCheck"]["logic"], response))
+                self.assertEqual(evaluate(mapping, {"body": body}), target)
+
+    def test_failed_and_ambiguous_dns_responses_are_rejected(self):
+        expression = self.parameters["expectedResponseCheck"]["logic"]
+        for response in [
+            {"body": {"Status": 0}, "statusCode": 503},
+            {"body": {"Status": 3}, "statusCode": 200},
+            {"body": {"Answer": [
+                {"type": 28, "data": "fd00::1"},
+                {"type": 28, "data": "fd00::2"},
+            ], "Status": 0}, "statusCode": 200},
+        ]:
+            with self.subTest(response=response):
+                self.assertFalse(evaluate(expression, {"response": response}))
 
 
 class PrivateDNSComparisonTests(unittest.TestCase):

@@ -4,6 +4,24 @@ components:
   - ../../../platform/settings
 resources:
   - settings.yaml
+patches:
+  # The cluster is IPv4-only; Tailscale ingress needs dual-stack Services for IPv6.
+  - patch: |-
+      apiVersion: automation.excloo.dev/v1alpha1
+      kind: PrivateDNSRecord
+      metadata:
+        name: application
+      spec:
+        ipv6Enabled: false
+    target:
+      kind: PrivateDNSRecord
+  - patch: |-
+      - op: replace
+        path: /spec/versions/0/schema/openAPIV3Schema/properties/spec/properties/ipv6Enabled/default
+        value: false
+    target:
+      kind: CompositeResourceDefinition
+      name: privatednsrecords.automation.excloo.dev
 replacements:
   - source:
       kind: ConfigMap

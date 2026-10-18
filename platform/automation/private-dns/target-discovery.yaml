@@ -46,7 +46,7 @@ spec:
       logic: |-
         .response.statusCode == 200
         and .response.body.Status == 0
-        and ([.response.body.Answer[]? | select(.type == 28) | .data] | length) == 1
+        and ([.response.body.Answer[]? | select(.type == 28) | .data] | length) <= 1
       type: CUSTOM
     headers:
       Accept: [application/dns-json]
@@ -60,7 +60,8 @@ spec:
     secretInjectionConfigs:
       - keyMappings:
           - missingFieldStrategy: preserve
-            responseJQ: ".body.Answer[]? | select(.type == 28) | .data"
+            # Control D uses :: to suppress IPv6 when the target has no AAAA record.
+            responseJQ: '([.body.Answer[]? | select(.type == 28) | .data] | first) // "::"'
             secretKey: address
         secretRef:
           name: private-dns-target-ipv6
