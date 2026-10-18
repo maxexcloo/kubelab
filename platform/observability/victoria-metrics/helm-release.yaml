@@ -38,7 +38,7 @@ spec:
     grafana:
       automountServiceAccountToken: false
       enabled: true
-      plugins: [victoriametrics-logs-datasource@0.32.0]
+      plugins: [victoriametrics-logs-datasource@0.33.1]
       admin:
         existingSecret: grafana
         passwordKey: password
