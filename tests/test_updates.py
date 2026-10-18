@@ -49,7 +49,7 @@ class UpdateDiscoveryTests(unittest.TestCase):
                                 "app": {
                                     "image": {
                                         "repository": "registry.invalid:5000/app",
-                                        "tag": "1.2.3@sha256:old",
+                                        "tag": "v1.2.3",
                                     }
                                 }
                             }
@@ -59,58 +59,55 @@ class UpdateDiscoveryTests(unittest.TestCase):
             },
         }
         (manifest,) = updates.manifests("apps/new.yaml", document)
-        self.assertEqual(
-            manifest["sources"]["version"]["spec"]["image"], "registry.invalid:5000/app"
-        )
+        source = manifest["sources"]["version"]["spec"]
+        self.assertEqual(source["image"], "registry.invalid:5000/app")
+        self.assertEqual(source["tagfilter"], r"^v([0-9]+(?:\.[0-9]+)(?:\.[0-9]+))$")
         self.assertEqual(
             manifest["targets"]["image"]["spec"]["key"],
             "$.spec.values.controllers.new.containers.app.image.tag",
         )
-        self.assertEqual(
-            manifest["sources"]["digest"]["transformers"],
-            [{"find": r"sha256:[a-f0-9]{64}$"}],
+
+    def test_variants_keep_their_suffix(self):
+        manifest = updates.image_manifest(
+            "app.yaml", "$.image.tag", "example/app", "26.7.0-rootless"
         )
         self.assertEqual(
-            manifest["sources"]["digest"]["spec"]["tag"], '{{ source "version" }}'
+            manifest["sources"]["version"]["spec"]["tagfilter"],
+            r"^([0-9]+(?:\.[0-9]+)(?:\.[0-9]+))\-rootless$",
         )
 
-    def test_database_versions_and_source_variants_remain_fixed(self):
+    def test_database_images_keep_their_major_version(self):
         document = {
             "kind": "Cluster",
             "spec": {
-                "imageName": "registry.invalid:5000/postgres:18.6-standard@sha256:old",
-                "extensions": [
-                    {"reference": "registry.invalid/extension:pg18-v1.1.1@sha256:old"}
-                ],
+                "imageName": "registry.invalid:5000/postgres:18.6-standard-trixie",
+                "extensions": [{"reference": "registry.invalid/extension:pg18-v1.1.1"}],
             },
         }
-        manifests = list(updates.manifests("apps/database.yaml", document))
-        self.assertEqual(len(manifests), 2)
-        for manifest in manifests:
-            self.assertNotIn("version", manifest["sources"])
+        (manifest,) = updates.manifests("apps/database.yaml", document)
         self.assertEqual(
-            manifests[0]["sources"]["digest"]["spec"]["image"],
+            manifest["sources"]["version"]["spec"]["image"],
             "registry.invalid:5000/postgres",
         )
         self.assertEqual(
-            manifests[1]["targets"]["image"]["spec"]["key"],
-            "$.spec.extensions[0].reference",
+            manifest["sources"]["version"]["spec"]["tagfilter"],
+            r"^(18(?:\.[0-9]+))\-standard\-trixie$",
         )
-        manifest = updates.image_manifest(
-            "app.yaml", "$.image.tag", "example/app", "sha-123@sha256:old"
+        self.assertEqual(
+            manifest["targets"]["image"]["transformers"],
+            [{"addprefix": "registry.invalid:5000/postgres:"}],
         )
-        self.assertEqual(manifest["sources"]["digest"]["spec"]["tag"], "sha-123")
 
-    def test_undigested_variant_is_not_switched_to_another_release(self):
-        self.assertIsNone(
-            updates.image_manifest(
-                "app.yaml", "$.image.tag", "example/app", "stable-rocm"
-            )
-        )
+    def test_unversioned_tags_have_no_policy(self):
+        for tag in ("latest", "sha-123", "stable-rocm"):
+            with self.subTest(tag=tag):
+                self.assertIsNone(
+                    updates.image_manifest("app.yaml", "$.image.tag", "example/app", tag)
+                )
 
     def test_generated_yaml_can_be_templated_by_updatecli(self):
         manifest = updates.image_manifest(
-            "app.yaml", "$.image.tag", "example/app", "1.2.3@sha256:old"
+            "app.yaml", "$.image.tag", "example/app", "1.2.3"
         )
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "image.yaml"

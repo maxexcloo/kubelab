@@ -3,6 +3,11 @@ name: Update Kubernetes
 pipelineid: update-kubernetes
 autodiscovery:
   crawlers:
-    kubernetes: {}
+    kubernetes:
+      digest: false
+      # The Kubernetes client policy pins kubectl images to the cluster version.
+      ignore:
+        - images:
+            - docker.io/alpine/k8s
 labels:
   group: kubernetes
