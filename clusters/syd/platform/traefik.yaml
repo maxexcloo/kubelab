@@ -72,9 +72,5 @@ spec:
             internalTrafficPolicy: Local
             loadBalancerClass: tailscale
             type: LoadBalancer
-      # Retain the old proxy until Homelab DNS switches to svc:syd-ingress.
-      annotations:
-        tailscale.com/expose: "true"
-        tailscale.com/hostname: syd
       spec:
         type: ClusterIP
