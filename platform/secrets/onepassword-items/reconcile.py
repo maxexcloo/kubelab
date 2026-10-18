@@ -294,6 +294,9 @@ def field_label(field):
     return field.get("label") or field.get("id")
 
 
+# Field names: provider-<provider>[-<number>]-api-key or -<token-type>-token for
+# upstream credentials in the consuming app's item; virtual-key-<consumer> and
+# master-key in the issuing gateway's item.
 def group_fields(item):
     sections = {section.get("label"): section for section in item.get("sections", [])}
     for field in item.get("fields", []):
