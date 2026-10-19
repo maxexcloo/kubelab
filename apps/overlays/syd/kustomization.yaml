@@ -60,6 +60,7 @@ patches:
   - path: syncthing.yaml
 # Reapply hostname consumers after cluster settings resolve the private alias.
 transformers:
+  - ../../base/actual-up/routing
   - ../../base/homepage/routing
 replacements:
   - source:

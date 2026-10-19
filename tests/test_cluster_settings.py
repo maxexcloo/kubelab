@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from support import copy_repository, read_resources, read_yaml
+from support import CLUSTERS, copy_repository, read_resources, read_yaml
 
 
 class ClusterSettingsTests(unittest.TestCase):
@@ -20,17 +20,19 @@ class ClusterSettingsTests(unittest.TestCase):
             settings["data"]["identity_host"] = "id.changed.example"
             settings["data"]["control_d_profile"] = "test-profile"
             shared.write_text(json.dumps(settings))
-            cluster = root / "clusters/syd/settings/settings.yaml"
-            settings = read_yaml(cluster)
-            settings["data"].update({
-                "bento_address": "192.0.2.15",
-                "bento_llm_authority": "bento.changed.example:8123",
-                "grafana_host": "grafana.changed.example",
-                "headlamp_host": "headlamp.syd.changed.example",
-                "private_dns_host": "private.changed.example",
-                "unifi_host": "gateway.changed.example",
-            })
-            cluster.write_text(json.dumps(settings))
+            for cluster in CLUSTERS:
+                path = root / "clusters" / cluster / "settings/settings.yaml"
+                settings = read_yaml(path)
+                settings["data"].update({
+                    "bento_address": "192.0.2.15",
+                    "bento_llm_authority": "bento.changed.example:8123",
+                    "cluster_name": "renamed",
+                    "grafana_host": "grafana.changed.example",
+                    "headlamp_host": "headlamp.cluster.changed.example",
+                    "private_dns_host": "private.cluster.changed.example",
+                    "unifi_host": "gateway.changed.example",
+                })
+                path.write_text(json.dumps(settings))
             output = root / "rendered"
             subprocess.run(["scripts/render_manifests.sh", str(output)], cwd=root, check=True)
             resources = []
@@ -43,7 +45,7 @@ class ClusterSettingsTests(unittest.TestCase):
             # Defaults only affect creation; explicit targets migrate existing DNS records too.
             dns_records = [r for r in resources if r["kind"] == "PrivateDNSRecord"]
             self.assertTrue(dns_records)
-            self.assertEqual({r["spec"]["target"] for r in dns_records}, {"private.changed.example"})
+            self.assertEqual({r["spec"]["target"] for r in dns_records}, {"private.renamed.changed.example"})
             litellm = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "litellm")
             values = litellm["spec"]["values"]
             librechat = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "librechat")
@@ -78,9 +80,9 @@ class ClusterSettingsTests(unittest.TestCase):
             headlamp_client = next(r for r in resources if r["kind"] == "PocketIDClient"
                                    and r["metadata"]["name"] == "headlamp")["spec"]["client"]
             self.assertEqual(headlamp_client["callbackURLs"], [
-                "https://headlamp.syd.changed.example/oidc-callback",
+                "https://headlamp.renamed.changed.example/oidc-callback",
             ])
-            self.assertEqual(headlamp_client["launchURL"], "https://headlamp.syd.changed.example")
+            self.assertEqual(headlamp_client["launchURL"], "https://headlamp.renamed.changed.example")
             self.assertEqual(headlamp_client["id"], "headlamp-test")
             self.assertTrue(headlamp_client["isPublic"])
             self.assertTrue(headlamp_client["pkceEnabled"])
@@ -96,6 +98,16 @@ class ClusterSettingsTests(unittest.TestCase):
                 self.assertEqual(oidc["scopes"], "profile,email,groups")
                 self.assertTrue(oidc["usePKCE"])
                 self.assertFalse(oidc["secret"]["create"])
+            # Cluster zone names follow the cluster name.
+            certificate = next(r for r in resources if r["kind"] == "Certificate" and r["metadata"]["name"] == "wildcard")
+            self.assertIn("*.renamed.excloo.dev", certificate["spec"]["dnsNames"])
+            targets = {r["metadata"]["name"]: r["metadata"]["annotations"]["external-dns.alpha.kubernetes.io/target"]
+                       for r in resources if r["kind"] == "Gateway" and r["metadata"]["name"].startswith("public-")}
+            self.assertEqual(targets, {"public-direct": "public.renamed.excloo.dev", "public-tunnel": "tunnel.renamed.excloo.dev"})
+            actual_up = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "actual-up")
+            self.assertEqual(actual_up["spec"]["values"]["route"]["private"]["hostnames"], ["actual-up.renamed.excloo.dev"])
+            self.assertEqual(actual_up["spec"]["values"]["route"]["private"]["annotations"]["gethomepage.dev/href"],
+                             "https://actual-up.renamed.excloo.dev")
             defaults = [r["spec"]["versions"][0]["schema"]["openAPIV3Schema"]["properties"]["spec"]["properties"]["controlDProfileID"]["default"]
                         for r in resources if r["kind"] == "CompositeResourceDefinition" and r["metadata"]["name"] == "privatednsrecords.automation.excloo.dev"]
             self.assertEqual(set(defaults), {"test-profile"})

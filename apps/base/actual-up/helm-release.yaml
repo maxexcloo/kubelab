@@ -60,7 +60,7 @@ spec:
           gethomepage.dev/siteMonitor: https://app.invalid/livez
           onepassword.excloo.dev/item: *title
         hostnames:
-          - actual-up.syd.excloo.dev
+          - actual-up.cluster.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

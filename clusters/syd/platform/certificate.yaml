@@ -8,7 +8,7 @@ spec:
   dnsNames:
     - "*.excloo.com"
     - "*.mini.excloo.com"
-    - "*.syd.excloo.dev"
+    - "*.cluster.excloo.dev"
   issuerRef:
     kind: ClusterIssuer
     name: letsencrypt-dns01

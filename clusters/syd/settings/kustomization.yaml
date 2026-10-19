@@ -50,6 +50,52 @@ replacements:
           - spec.cluster
         options:
           create: true
+      # Private names and gateway targets live in the cluster's own zone.
+      - select:
+          kind: Certificate
+          name: wildcard
+          namespace: networking
+        fieldPaths:
+          - spec.dnsNames.2
+        options:
+          delimiter: .
+          index: 1
+      - select:
+          kind: ConfigMap
+          name: cluster-settings
+        fieldPaths:
+          - data.headlamp_host
+          - data.private_dns_host
+        options:
+          delimiter: .
+          index: 1
+      - select:
+          kind: Gateway
+          name: public-direct
+          namespace: networking
+        fieldPaths:
+          - metadata.annotations.[external-dns.alpha.kubernetes.io/target]
+        options:
+          delimiter: .
+          index: 1
+      - select:
+          kind: Gateway
+          name: public-tunnel
+          namespace: networking
+        fieldPaths:
+          - metadata.annotations.[external-dns.alpha.kubernetes.io/target]
+        options:
+          delimiter: .
+          index: 1
+      - select:
+          kind: HelmRelease
+          name: actual-up
+          namespace: actual-up
+        fieldPaths:
+          - spec.values.route.private.hostnames.0
+        options:
+          delimiter: .
+          index: 1
       - select:
           kind: HelmRelease
           labelSelector: gateway.excloo.dev/internal-alias=app-template
