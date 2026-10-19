@@ -22,7 +22,7 @@ jobs:
       - name: Set Up Shared Tools & Tasks
         uses: maxexcloo/dotfiles/.github/actions/mise@main
         with:
-          tools: actionlint gh helm hk jq kubeconform kubectl node oxfmt python shellcheck updatecli yq
+          tools: actionlint gh helm hk jq kubeconform kubectl node oxfmt node@24 npm:renovate python shellcheck yq
       - name: Run Checks
         run: mise run check
       - name: Refresh External Monitoring

@@ -16,6 +16,7 @@ remote_schema_cache_directory="${schema_cache_directory}/remote"
 # Keep validation aligned with the deployed cluster API.
 kubernetes_version="$(mise exec -- kubectl version --client -o json | yq -r '.clientVersion.gitVersion')"
 kubernetes_version="${kubernetes_version#v}"
+# renovate: datasource=git-refs depName=https://github.com/datreeio/CRDs-catalog
 crd_catalog_revision="63669a570e231d4f1f8396d229a1de512bcf0a34"
 mkdir -p \
   "${remote_schema_cache_directory}" \

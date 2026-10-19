@@ -22,9 +22,9 @@ settings in its own repository; Kubelab deploys its published image.
 - Omit trailing slashes from project-owned base URLs.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
-- Pin remote manifests to stable release versions. Updatecli previews upgrades
-  locally for manual review.
-- Upgrade Flux manually with `flux install --export`; Updatecli ignores
+- Pin remote manifests to stable release versions. Renovate previews upgrades
+  locally and opens pull requests for review.
+- Upgrade Flux manually with `flux install --export`; Renovate ignores
   `gotk-components.yaml`.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Use existing 1Password item UUIDs for credential consumers and publishers,
@@ -104,7 +104,8 @@ Define each value once and derive consumers with Kustomize replacements:
   derive URLs, DNS records and Pocket ID clients.
 - 1Password item UUIDs: once per manifest, using YAML anchors for repeats.
 - The app-template chart version: `platform/components/app-template`.
-- Kubernetes client versions: Homelab's cluster data, applied by Updatecli.
+- Kubernetes client versions: Homelab's cluster data. Renovate groups the kubectl
+  pins; merge them only once Homelab runs that Kubernetes version.
 
 ### Documentation
 
