@@ -88,6 +88,8 @@ spec:
         require_key_mcp_access_defined: true
       litellm_settings:
         check_provider_endpoint: true
+      # An empty list replaces the chart's example models; models live in the UI.
+      model_list: []
       # UI-registered search tools cannot read os.environ/ keys, so these stay here.
       # Keenable, LibreChat's default search provider, has no LiteLLM integration.
       search_tools:
