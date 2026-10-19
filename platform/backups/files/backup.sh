@@ -34,7 +34,8 @@ trap resume EXIT
 trap 'exit 143' TERM
 trap 'exit 130' INT
 $kubectl patch helmrelease "$HELM_RELEASE" --type merge -p '{"spec":{"suspend":true}}'
-pods="$($kubectl get pods -l "$selector" -o name)"
+# Terminated pods, such as those stopped by node shutdown, are never deleted on scale-down.
+pods="$($kubectl get pods -l "$selector" --field-selector=status.phase!=Failed,status.phase!=Succeeded -o name)"
 $kubectl scale deployment "$DEPLOYMENT" --replicas=0
 if [ -n "$pods" ]; then
   # Each token is a kubectl pod resource name, never shell input.
