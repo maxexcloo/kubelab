@@ -4,17 +4,7 @@ load(strenv(PROVIDERS)).providers as $providers |
 (strenv(HOMEPAGE_CLUSTER_NAMES) | split(",") | map(select(. != ""))) as $cluster_names |
 ($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare"}) as $cloudflare |
 ($providers.tailscale // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "tailscale-light"}) as $tailscale |
-{
-  "bazzite": {"description": "Bazzite", "icon": "sh-linux"},
-  "haos": {"description": "Home Assistant OS", "icon": "sh-home-assistant"},
-  "macos": {"description": "macOS", "icon": "sh-apple"},
-  "nanokvm": {"description": "NanoKVM", "icon": "mdi-server"},
-  "steamos": {"description": "SteamOS", "icon": "sh-steam"},
-  "talos": {"description": "Talos Linux", "icon": "talos"},
-  "truenas": {"description": "TrueNAS", "icon": "sh-truenas-scale"},
-  "ucore": {"description": "uCore", "icon": "sh-linux"},
-  "unifi": {"description": "UniFi", "icon": "sh-ubiquiti-unifi"}
-} as $platforms |
+load(strenv(PLATFORMS)).platforms as $platforms |
 # Keep inventory fields separate from the derived Homepage presentation.
 [$inventory | to_entries[] | .key as $network | .value | to_entries[] |
   .key as $key | .value as $machine | ($machine.hostname // $key) as $hostname |
@@ -53,7 +43,7 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
   .machine.services.management as $panel | $platforms[.machine.platform] as $platform |
   {
     "name": ($panel.name // .group), "group": .group,
-    "description": ($panel.description // $platform.description // .machine.platform),
+    "description": ($panel.description // $platform.name // .machine.platform),
     "icon": ($panel.icon // $platform.icon // "mdi-server"),
     "href": .reference, "siteMonitor": ($panel.siteMonitor // .reference)
   }

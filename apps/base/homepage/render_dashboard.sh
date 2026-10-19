@@ -125,11 +125,8 @@ for overlay in "$kubelab_directory"/apps/overlays/*; do
       "$temporary_directory/mini-app-routes.json" >> "$temporary_directory/routes.json"
   done
 done
-# Host management stays on Servers; cluster administration tools are services.
 yq ea -p=json -o=yaml '
-  [.] | map(select(.annotations."gethomepage.dev/enabled" == "true")) |
-  with(.[] | select(.annotations."gethomepage.dev/group" == "Servers");
-    .annotations."gethomepage.dev/group" = "Operations")
+  [.] | map(select(.annotations."gethomepage.dev/enabled" == "true"))
 ' "$temporary_directory/routes.json" > "$temporary_directory/routes.yaml"
 yq -e 'length > 0' "$temporary_directory/routes.yaml" >/dev/null
 sh "$script_directory/route_nodes.sh" "$temporary_directory/routes.yaml" "$temporary_directory/inventory.yaml"

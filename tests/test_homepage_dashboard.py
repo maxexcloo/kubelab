@@ -462,7 +462,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         inventory["machines"]["syd"] = {"node": {"cluster": "syd", "type": "vm"}}
         path.write_text(json.dumps(inventory))
         for cluster in ("mbk", "syd"):
-            tool = route("Headlamp", group="Servers", instance="inventory")
+            tool = route("Headlamp", group="Operations", instance="inventory")
             tool["metadata"]["namespace"] = "headlamp"
             self.write_routes(cluster, [tool])
         result = self.render(HOMELAB_DIRECTORY=str(homelab))
