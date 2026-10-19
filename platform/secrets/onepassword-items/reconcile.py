@@ -252,9 +252,6 @@ def discover_items():
             f"https://{hostname}"
             for hostname in route.get("spec", {}).get("hostnames", [])
         }
-        login_url = route_annotations.get(f"{ANNOTATION_PREFIX}url")
-        if login_url:
-            urls.add(login_url)
         if not urls:
             raise RuntimeError(
                 f"1Password route {namespace}/{route['metadata']['name']} has no URL"
