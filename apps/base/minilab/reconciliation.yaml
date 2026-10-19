@@ -7,6 +7,7 @@ spec:
   interval: 1m
   path: ./clusters/cluster
   prune: true
+  serviceAccountName: minilab
   timeout: 5m
   wait: true
   dependsOn:

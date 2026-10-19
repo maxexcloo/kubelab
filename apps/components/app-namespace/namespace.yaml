@@ -38,8 +38,6 @@ targets:
   - <<: *namespaced
     select: { kind: PersistentVolumeClaim }
   - <<: *namespaced
-    select: { kind: PocketIDClient }
-  - <<: *namespaced
     select: { kind: PrivateDNSRecord }
   - <<: *namespaced
     select: { kind: ReferenceGrant }

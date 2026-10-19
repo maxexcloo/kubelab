@@ -21,6 +21,10 @@ spec:
             spec:
               type: object
               properties:
+                item:
+                  description: Title of the existing 1Password item that receives the application key.
+                  minLength: 1
+                  type: string
                 keyName:
                   maxLength: 100
                   minLength: 1
@@ -41,7 +45,7 @@ spec:
                       pattern: ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$
                       type: string
                   required: [name]
-              required: [keyName, secretRef]
+              required: [item, keyName, secretRef]
             status:
               type: object
               properties:

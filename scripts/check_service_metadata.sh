@@ -37,7 +37,7 @@ jq -e \
     }) | unique_by(.cluster, .name)) as $namespaces |
     ($resources | map(select(.kind == "PocketIDClient") | {
       launchURL: .spec.client.launchURL,
-      source: ("PocketIDClient/" + .metadata.namespace + "/" + .metadata.name)
+      source: ("PocketIDClient/" + .metadata.name)
     })) as $pocket_id |
     ($resources | map(select(.kind == "PrivateDNSRecord") | {
       cluster, hostname: .spec.hostname, namespace: .metadata.namespace,

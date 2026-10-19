@@ -10,3 +10,4 @@ spec:
     id: miniflux-au-truenas
     launchURL: https://app.invalid
     name: Miniflux
+  item: Miniflux

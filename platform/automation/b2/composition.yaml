@@ -318,3 +318,53 @@ spec:
                     - fromFieldPath: metadata.namespace
                     - fromFieldPath: spec.keyName
                 toFieldPath: spec.forProvider.payload.body
+          - name: onepassword-item
+            base:
+              apiVersion: external-secrets.io/v1alpha1
+              kind: PushSecret
+              metadata:
+                name: b2-application-key
+              spec:
+                data:
+                  - match:
+                      secretKey: access-key-id
+                      remoteRef:
+                        property: object-storage-access-key-id
+                        remoteKey: placeholder
+                    metadata: &metadata
+                      apiVersion: kubernetes.external-secrets.io/v1alpha1
+                      kind: PushSecretMetadata
+                      spec:
+                        tags: [Kubelab]
+                  - match:
+                      secretKey: endpoint
+                      remoteRef:
+                        property: object-storage-endpoint
+                        remoteKey: placeholder
+                    metadata: *metadata
+                  - match:
+                      secretKey: secret-access-key
+                      remoteRef:
+                        property: object-storage-secret-access-key
+                        remoteKey: placeholder
+                    metadata: *metadata
+                secretStoreRefs:
+                  - kind: ClusterSecretStore
+                    name: onepassword
+                selector:
+                  secret:
+                    name: b2-application-key
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - &item
+                type: FromCompositeFieldPath
+                fromFieldPath: spec.item
+                toFieldPath: spec.data[0].match.remoteRef.remoteKey
+                policy:
+                  fromFieldPath: Required
+              - <<: *item
+                toFieldPath: spec.data[1].match.remoteRef.remoteKey
+              - <<: *item
+                toFieldPath: spec.data[2].match.remoteRef.remoteKey

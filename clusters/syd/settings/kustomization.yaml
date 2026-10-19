@@ -336,7 +336,6 @@ replacements:
       - select:
           kind: PocketIDClient
           name: headlamp
-          namespace: headlamp
         fieldPaths:
           - spec.client.callbackURLs.0
           - spec.client.launchURL

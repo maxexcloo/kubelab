@@ -11,3 +11,4 @@ spec:
     id: bookorbit-au-truenas
     launchURL: https://app.invalid
     name: BookOrbit
+  item: BookOrbit

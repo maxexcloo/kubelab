@@ -32,6 +32,12 @@ settings in its own repository; Kubelab deploys its published image.
   `onepassword.excloo.dev/item` to their `gethomepage.dev/name`. Renaming an item
   is a coordinated change: rename it in 1Password and every reference together.
   Keep Kubernetes resource identities independent of item titles.
+- Publish generated credentials to 1Password with PushSecrets. Confidential
+  PocketIDClients name the item that receives their generated
+  `oidc-client-secret`; never copy client secrets by hand.
+- Minilab reconciles as `flux-system/minilab`; its admission policy limits it to
+  namespaces it creates and items titled `Minilab: <App>`. Grant it new kinds in
+  `apps/base/minilab` before mini apps use them.
 - Default Crossplane external resources to orphan-on-delete.
 - Do not change a live route without explicit approval and a reviewed plan.
 

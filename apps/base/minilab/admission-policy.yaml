@@ -1,0 +1,60 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: minilab
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["*"]
+        apiVersions: ["*"]
+        operations: [CREATE, UPDATE, DELETE]
+        resources: ["*"]
+  matchConditions:
+    - name: minilab
+      expression: request.userInfo.username == "system:serviceaccount:flux-system:minilab"
+  variables:
+    # A Namespace is its own namespace; Flux labels everything it applies.
+    - name: targetNamespace
+      expression: "request.kind.kind == 'Namespace' ? (request.operation == 'DELETE' ? oldObject : object) : namespaceObject"
+    - name: owned
+      expression: >-
+        variables.targetNamespace != null && has(variables.targetNamespace.metadata.labels) &&
+        variables.targetNamespace.metadata.labels[?'kustomize.toolkit.fluxcd.io/name'].orValue('') == 'minilab' &&
+        variables.targetNamespace.metadata.labels[?'kustomize.toolkit.fluxcd.io/namespace'].orValue('') == 'flux-system'
+  validations:
+    - expression: variables.owned
+      message: Minilab manages only namespaces it created.
+    - expression: >-
+        request.kind.kind != 'Namespace' || request.operation != 'UPDATE' ||
+        (has(oldObject.metadata.labels) && oldObject.metadata.labels[?'kustomize.toolkit.fluxcd.io/name'].orValue('') == 'minilab')
+      message: Minilab cannot adopt existing namespaces.
+    - expression: >-
+        request.kind.kind != 'Namespace' || request.operation == 'DELETE' ||
+        object.metadata.labels[?'pod-security.kubernetes.io/enforce'].orValue('') == 'restricted'
+      message: Minilab namespaces enforce the restricted Pod Security Standard.
+    - expression: >-
+        request.kind.kind != 'HelmRelease' || request.operation == 'DELETE' ||
+        object.spec.?serviceAccountName.orValue('') == 'minilab'
+      message: Minilab Helm releases impersonate their namespace's minilab ServiceAccount.
+    - expression: >-
+        request.kind.kind != 'RoleBinding' || request.operation == 'DELETE' ||
+        (object.roleRef.kind == 'ClusterRole' && object.roleRef.name == 'minilab-release')
+      message: Minilab binds only the minilab-release role.
+    # Mini app credentials live in their own "Minilab: <App>" items.
+    - expression: >-
+        request.kind.kind != 'ExternalSecret' || request.operation == 'DELETE' ||
+        (object.spec.?secretStoreRef.kind.orValue('') == 'ClusterSecretStore' &&
+        object.spec.?secretStoreRef.name.orValue('') == 'onepassword' &&
+        object.spec.?data.orValue([]).all(d, !has(d.sourceRef) && d.remoteRef.key.startsWith('Minilab: ')) &&
+        object.spec.?dataFrom.orValue([]).all(d, has(d.extract) && !has(d.find) && !has(d.sourceRef) &&
+        d.extract.key.startsWith('Minilab: ')))
+      message: Minilab ExternalSecrets read only "Minilab:" items from the onepassword store.
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: minilab
+spec:
+  policyName: minilab
+  validationActions: [Deny]

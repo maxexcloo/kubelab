@@ -76,40 +76,23 @@ def annotations(resource):
     return resource.get("metadata", {}).get("annotations", {})
 
 
-def secret_values(resource, mapping):
-    namespace = resource["metadata"]["namespace"]
-    resolved = {}
-    for label, source in mapping.items():
-        name, _, key = source.partition("/")
-        secret = kubernetes_request(f"/api/v1/namespaces/{namespace}/secrets/{name}")
-        encoded = secret.get("data", {}).get(key)
-        if encoded is None:
-            raise RuntimeError(
-                f"1Password field {label} needs key {key} in secret {namespace}/{name}"
-            )
-        resolved[label] = base64.b64decode(encoded).decode()
-    return resolved
+def field_list(values, name):
+    return set(filter(None, values.get(f"{ANNOTATION_PREFIX}{name}", "").split(",")))
 
 
 def item_configuration(resource):
     values = annotations(resource)
+    defaults = json.loads(values.get(f"{ANNOTATION_PREFIX}defaults", "{}"))
+    owner_email_fields = field_list(values, "owner-email-fields")
+    if owner_email_fields:
+        owner_email = os.environ["OWNER_EMAIL"]
+        defaults.update(dict.fromkeys(owner_email_fields, owner_email))
     return {
-        "concealed": set(
-            filter(
-                None, values.get(f"{ANNOTATION_PREFIX}concealed-fields", "").split(",")
-            )
-        ),
+        "concealed": field_list(values, "concealed-fields"),
         "constants": json.loads(values.get(f"{ANNOTATION_PREFIX}constants", "{}")),
-        "defaults": json.loads(values.get(f"{ANNOTATION_PREFIX}defaults", "{}")),
+        "defaults": defaults,
         "formats": json.loads(values.get(f"{ANNOTATION_PREFIX}field-formats", "{}")),
-        "generate": set(
-            filter(
-                None, values.get(f"{ANNOTATION_PREFIX}generate-fields", "").split(",")
-            )
-        ),
-        "values": secret_values(
-            resource, json.loads(values.get(f"{ANNOTATION_PREFIX}values", "{}"))
-        ),
+        "generate": field_list(values, "generate-fields"),
     }
 
 
@@ -120,7 +103,6 @@ def merge_configuration(item, resource):
     item["defaults"].update(configuration["defaults"])
     item["formats"].update(configuration["formats"])
     item["generate"].update(configuration["generate"])
-    item["values"].update(configuration["values"])
 
 
 def new_item():
@@ -128,12 +110,12 @@ def new_item():
         "concealed": set(),
         "constants": {},
         "defaults": {},
+        "extracted": False,
         "fields": set(),
         "formats": {},
         "generate": set(),
         "login": False,
         "urls": set(),
-        "values": {},
     }
 
 
@@ -171,6 +153,29 @@ def kustomizations_ready():
     return bool(kustomizations) and all(map(kustomization_ready, kustomizations))
 
 
+def helm_release_ready(resource):
+    metadata = resource.get("metadata", {})
+    status = resource.get("status", {})
+    return (
+        any(
+            condition.get("type") == "Ready" and condition.get("status") == "True"
+            for condition in status.get("conditions", [])
+        )
+        and not resource.get("spec", {}).get("suspend", False)
+        and status.get("observedGeneration") == metadata.get("generation")
+    )
+
+
+def helm_releases_ready():
+    # Charts render ExternalSecrets, so an upgrade in progress can hide references.
+    releases = kubernetes_list("/apis/helm.toolkit.fluxcd.io/v2/helmreleases")
+    return all(map(helm_release_ready, releases))
+
+
+def flux_ready():
+    return kustomizations_ready() and helm_releases_ready()
+
+
 def externally_owned(item):
     return "Homelab" in item.get("tags", [])
 
@@ -202,10 +207,12 @@ def discover_items():
             references = [
                 data.get("remoteRef", {})
                 for data in resource.get("spec", {}).get("data", [])
-            ] + [
-                {"key": data.get("extract", {}).get("key")}
-                for data in resource.get("spec", {}).get("dataFrom", [])
             ]
+            for data in resource.get("spec", {}).get("dataFrom", []):
+                title = data.get("extract", {}).get("key")
+                if title:
+                    desired.setdefault(title, new_item())["extracted"] = True
+                    references.append({"key": title})
         else:
             stores = resource.get("spec", {}).get("secretStoreRefs", [])
             if not any(store.get("name") == "onepassword" for store in stores):
@@ -413,7 +420,6 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
         | desired["generate"]
         | set(desired["constants"])
         | set(desired["defaults"])
-        | set(desired.get("values", {}))
     )
     if set(desired["formats"].values()) - {"alphanumeric", "laravel"}:
         raise RuntimeError(f"1Password item {title} has unsupported field formats")
@@ -422,7 +428,8 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
     current.setdefault("vault", {"id": vault_id})
     reconcile_urls(current, desired["urls"], allow_removal=allow_removal)
     fields = current.setdefault("fields", [])
-    if allow_removal:
+    # Extracted items publish every field, so none of their fields is unreferenced.
+    if allow_removal and not desired.get("extracted"):
         # Unreferenced credentials go once every consumer is current; sign-in
         # details, notes and specialised fields, such as one-time passwords, remain.
         fields[:] = [
@@ -447,9 +454,7 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
     by_label = {field_label(field): field for field in fields}
     for label in sorted(required_fields):
         field = by_label.get(label)
-        if label in desired.get("values", {}):
-            replacement = generated_field(label, value=desired["values"][label])
-        elif label in desired["constants"]:
+        if label in desired["constants"]:
             replacement = generated_field(label, value=desired["constants"][label])
         elif field and (field.get("value") or field.get("generate")):
             continue
@@ -526,13 +531,13 @@ def main():
     summaries = connect(f"/vaults/{vault_id}/items")
     ids = item_ids(desired, summaries)
     try:
-        archive_ready = kustomizations_ready()
+        archive_ready = flux_ready()
     except RuntimeError as error:
         archive_ready = False
         print(f"skipped removals because Flux readiness could not be read: {error}")
     else:
         if not archive_ready:
-            print("skipped removals because Flux Kustomizations are not fully reconciled")
+            print("skipped removals because Flux resources are not fully reconciled")
     changed = 0
     for title, configuration in sorted(desired.items()):
         current = connect(f"/vaults/{vault_id}/items/{ids[title]}")
@@ -552,6 +557,11 @@ def main():
         if comparable(current) == comparable(wanted):
             continue
         if not dry_run:
+            # Connect replaces the whole item; leave concurrent edits for the next run.
+            latest = connect(f"/vaults/{vault_id}/items/{ids[title]}")
+            if latest.get("version") != current.get("version"):
+                print(f"{title} changed during reconciliation; skipped")
+                continue
             connect(
                 f"/vaults/{vault_id}/items/{ids[title]}",
                 body=wanted,

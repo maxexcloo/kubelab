@@ -11,3 +11,4 @@ spec:
     launchURL: https://app.invalid
     name: AIOMetadata
     pkceEnabled: true
+  item: AIOMetadata

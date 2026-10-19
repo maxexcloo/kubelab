@@ -11,3 +11,4 @@ spec:
     launchURL: https://app.invalid
     name: Papra
     pkceEnabled: true
+  item: Papra
