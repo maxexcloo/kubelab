@@ -1,5 +1,7 @@
 load(strenv(PROVIDERS)).providers as $providers |
 with(select(tag != "!!seq" or length == 0); error("Missing Gatus endpoint statuses")) |
+# Gatus prefixes category groups with a Hangul filler (U+3164) to sort them last.
+map(.group |= sub("^\\x{3164}"; "")) |
 ([$providers | to_entries[] | select(.value.conditions != null) | .value.name] +
  [$providers | to_entries[] | select(.value.dns != null) |
    (.value.dns.name // (.value.name + " DNS"))]) as $expected |
