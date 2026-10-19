@@ -7,7 +7,7 @@ spec:
     callbackURLs:
       - https://app.invalid/auth/oidc/callback
     description: TRMNL Server
-    id: larapaper-au-truenas
+    id: larapaper
     launchURL: https://app.invalid
     name: LaraPaper
   item: LaraPaper

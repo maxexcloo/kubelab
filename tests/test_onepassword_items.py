@@ -474,7 +474,7 @@ class ReconcilerTests(unittest.TestCase):
             json.loads(actual["AUTH_PROVIDERS_CUSTOMS"]),
             [
                 {
-                    "clientId": "papra-au-truenas",
+                    "clientId": "papra",
                     "clientSecret": credentials["oidc-client-secret"],
                     "discoveryUrl": "https://id.excloo.com/.well-known/openid-configuration",
                     "pkce": True,

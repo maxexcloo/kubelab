@@ -7,7 +7,7 @@ spec:
     callbackURLs:
       - https://app.invalid/api/oauth2-redirect
     description: System Monitoring
-    id: beszel-au-truenas
+    id: beszel
     launchURL: https://app.invalid
     name: Beszel
     pkceEnabled: true

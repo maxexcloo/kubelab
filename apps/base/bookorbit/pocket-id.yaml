@@ -8,7 +8,7 @@ spec:
     callbackURLs:
       - https://app.invalid/oauth2-callback
     description: Digital Library
-    id: bookorbit-au-truenas
+    id: bookorbit
     launchURL: https://app.invalid
     name: BookOrbit
   item: BookOrbit

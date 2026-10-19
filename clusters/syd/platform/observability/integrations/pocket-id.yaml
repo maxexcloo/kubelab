@@ -7,7 +7,7 @@ spec:
     callbackURLs:
       - https://app.invalid/login/generic_oauth
     description: Infrastructure Observability
-    id: grafana-au-truenas
+    id: grafana
     launchURL: https://app.invalid
     name: Grafana
     pkceEnabled: true

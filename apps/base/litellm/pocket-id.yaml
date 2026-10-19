@@ -7,7 +7,7 @@ spec:
     callbackURLs:
       - https://app.invalid/sso/callback
     description: MCP Gateway
-    id: litellm-au-truenas
+    id: litellm
     launchURL: https://app.invalid/ui/
     name: LiteLLM
     pkceEnabled: true

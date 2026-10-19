@@ -9,7 +9,7 @@ spec:
       - https://app.invalid/auth/login
       - https://app.invalid/user-settings
     description: Photo Manager
-    id: immich-au-truenas
+    id: immich
     launchURL: https://app.invalid
     name: Immich
   item: Immich

@@ -7,7 +7,7 @@ spec:
     callbackURLs:
       - https://app.invalid/api/oauth/openid
     description: Game & ROM Library
-    id: romm-au-truenas
+    id: romm
     launchURL: https://app.invalid
     name: RoMM
   item: RoMM
