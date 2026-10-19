@@ -6,7 +6,9 @@ metadata:
 spec:
   interval: 1m
   path: ./clusters/cluster
-  prune: true
+  # Temporary: keep Minilab's resources while this Kustomization is renamed.
+  deletionPolicy: Orphan
+  prune: false
   timeout: 5m
   wait: true
   dependsOn:
