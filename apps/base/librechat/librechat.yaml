@@ -26,7 +26,6 @@ registration:
     - openid
 endpoints:
   agents:
-    activityLabel: false
     # Stop also ends ordinary background tool waits, such as Studio MCP Result.
     backgroundTasks:
       ordinaryToolCancellation: true
@@ -42,6 +41,8 @@ endpoints:
       - run_in_background
       - skills
       - subagents
+      # Live status lines for web search, file and memory calls, and for tools a spec selects.
+      - tool_intents
       - tools
       - web_search
   custom:
@@ -52,6 +53,8 @@ endpoints:
       models:
         default:
           - ai/text
+      # A live heading summarises long reasoning while it streams; labels run on the chat's own model.
+      reasoningLabel: true
       titleConvo: true
       titleModel: current_model
       modelDisplayLabel: AI
@@ -200,7 +203,7 @@ mcpServers:
     chatMenu: false
     description: Create and manage images and videos in Studio.
     requiresOAuth: false
-    serverInstructions: true
+    # The Studio spec prompt carries the workflow rules, so the server's instructions are not resent each step.
     timeout: 1860000
     title: Studio
     url: http://litellm.litellm.svc.cluster.local:4000/studio/mcp
@@ -216,6 +219,11 @@ modelSpecs:
     - name: studio
       description: Studio images and videos with automatic inline results.
       label: Studio
+      # Status lines for the calls that keep a chat waiting; each costs a short schema field.
+      describeIntent:
+        - studio-Generate_mcp_studio
+        - studio-Models_mcp_studio
+        - studio-Reuse_mcp_studio
       conversation_starters:
         - Animate my last image
         - Fast video of waves rolling onto a beach at sunset
