@@ -3,6 +3,41 @@ kind: Component
 resources:
   - settings.yaml
 replacements:
+  # The Minilab domain is a subdomain of the public domain, so resolve it first.
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.public_domain
+    targets:
+      - select:
+          kind: ConfigMap
+          name: shared-settings
+        fieldPaths:
+          - data.minilab_domain
+        options:
+          delimiter: mini.
+          index: 1
+      - select:
+          kind: Certificate
+          name: wildcard
+          namespace: networking
+        fieldPaths:
+          - spec.dnsNames.0
+        options:
+          delimiter: "*."
+          index: 1
+      - select:
+          kind: CloudflareWAFPolicy
+          name: redlib
+          namespace: redlib
+        fieldPaths:
+          - spec.zoneName
+      - select:
+          kind: HelmRelease
+          name: external-dns-private
+          namespace: external-dns
+        fieldPaths:
+          - spec.values.domainFilters.0
   - source:
       kind: ConfigMap
       name: shared-settings
@@ -253,6 +288,60 @@ replacements:
           namespace: pocket-id
         fieldPaths:
           - spec.hostname
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.mail_domain
+    targets:
+      - select:
+          kind: HelmRelease
+          name: linkwarden
+          namespace: linkwarden
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.EMAIL_FROM
+        options:
+          delimiter: "@"
+          index: 1
+      - select:
+          kind: HelmRelease
+          name: pocket-id
+          namespace: pocket-id
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.SMTP_FROM
+        options:
+          delimiter: "@"
+          index: 1
+      - select:
+          kind: HelmRelease
+          name: romm
+          namespace: romm
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.SMTP_FROM
+        options:
+          delimiter: "@"
+          index: 1
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.minilab_domain
+    targets:
+      - select:
+          kind: Certificate
+          name: wildcard
+          namespace: networking
+        fieldPaths:
+          - spec.dnsNames.1
+        options:
+          delimiter: "*."
+          index: 1
+      - select:
+          kind: Kustomization
+          name: mini-apps
+          namespace: flux-system
+        fieldPaths:
+          - spec.postBuild.substitute.MINILAB_DOMAIN
+        options:
+          create: true
   - source:
       kind: ConfigMap
       name: shared-settings

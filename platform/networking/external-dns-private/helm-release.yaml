@@ -17,7 +17,7 @@ spec:
                   values:
                     - internal
     domainFilters:
-      - excloo.com
+      - public-domain.invalid
     labelFilter: gateway.excloo.dev/private-dns=true
     managedRecordTypes:
       - CNAME

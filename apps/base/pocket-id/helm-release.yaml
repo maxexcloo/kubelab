@@ -16,7 +16,7 @@ spec:
               EMAILS_VERIFIED: "true"
               FILE_BACKEND: database
               REQUIRE_USER_EMAIL: "true"
-              SMTP_FROM: pocket-id@excloo.dev
+              SMTP_FROM: pocket-id@mail-domain.invalid
               SMTP_HOST: smtp.resend.com
               SMTP_PORT: "465"
               SMTP_TLS: tls

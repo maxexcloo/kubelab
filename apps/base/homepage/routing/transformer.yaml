@@ -27,6 +27,12 @@ replacements:
         options:
           delimiter: ","
           index: 0
+      - select:
+          kind: PrivateDNSRecord
+          name: homepage
+          namespace: homepage
+        fieldPaths:
+          - spec.hostname
   - source:
       kind: HelmRelease
       name: homepage

@@ -4,4 +4,4 @@ metadata:
   name: homepage
   namespace: homepage
 spec:
-  hostname: home.excloo.com
+  hostname: app.invalid

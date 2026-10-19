@@ -12,7 +12,7 @@ from support import CLUSTERS, ROOT, copy_repository, read_resources, read_yaml
 # Base manifests use these until settings or route replacements resolve them.
 # Crossplane composition templates keep pending.invalid and placeholder.invalid
 # for their functions to patch at runtime.
-PLACEHOLDER = re.compile(r"(?<![\w.-])[\w-]+(?:\.[\w-]+)*\.invalid\b|\.cluster\.excloo\.dev\b|profile-placeholder")
+PLACEHOLDER = re.compile(r"(?<![\w-])[\w-]+(?:\.[\w-]+)*\.invalid\b|\.cluster\.excloo\.dev\b|profile-placeholder")
 RUNTIME_PLACEHOLDERS = {"pending.invalid", "placeholder.invalid"}
 
 

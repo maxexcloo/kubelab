@@ -6,8 +6,8 @@ metadata:
 spec:
   secretName: wildcard
   dnsNames:
-    - "*.excloo.com"
-    - "*.mini.excloo.com"
+    - "*.public-domain.invalid"
+    - "*.minilab-domain.invalid"
     - "*.cluster.excloo.dev"
   issuerRef:
     kind: ClusterIssuer

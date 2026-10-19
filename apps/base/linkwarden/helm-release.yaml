@@ -10,7 +10,7 @@ spec:
           main:
             env:
               BASE_URL: https://app.invalid
-              EMAIL_FROM: linkwarden@excloo.dev
+              EMAIL_FROM: linkwarden@mail-domain.invalid
               KEYCLOAK_CUSTOM_NAME: Pocket ID
               KEYCLOAK_ISSUER: https://identity.invalid
               MEILI_HOST: "http://{{ .Release.Name }}-meilisearch:7700"

@@ -38,7 +38,7 @@ spec:
               # Large library metadata scans exceed 24 hours even with four workers.
               SCAN_TIMEOUT: "259200"
               SCAN_WORKERS: "4"
-              SMTP_FROM: romm@excloo.dev
+              SMTP_FROM: romm@mail-domain.invalid
               SMTP_HOST: smtp.resend.com
               SMTP_PORT: "465"
               SMTP_SECURITY: tls
