@@ -46,35 +46,11 @@ spec:
       GENERIC_USER_ID_ATTRIBUTE: sub
       GENERIC_USER_LAST_NAME_ATTRIBUTE: family_name
       HOME: /tmp
-      LITELLM_ENABLE_MCP_STDIO: "true"
-      PATH: /opt/mcp:/app/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       PROXY_BASE_URL: https://app.invalid
       # Provider discovery uses the shared HTTP client; chat requests use the deployment timeout.
       REQUEST_TIMEOUT: "5"
       STORE_MODEL_IN_DB: "True"
       TZ: time-zone.invalid
-      UNIFI_NETWORK_HOST: host.invalid
-      UV_CACHE_DIR: /tmp/uv-cache
-      UV_LINK_MODE: copy
-      UV_PYTHON: /app/.venv/bin/python
-      UV_PYTHON_DOWNLOADS: never
-    extraInitContainers:
-      - name: install-uv
-        image: ghcr.io/astral-sh/uv:0.13.1-alpine3.23
-        command:
-          - cp
-        args:
-          - /usr/local/bin/uv
-          - /usr/local/bin/uvx
-          - /opt/mcp/
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-        volumeMounts:
-          - name: mcp-runtime
-            mountPath: /opt/mcp
     image:
       pullPolicy: IfNotPresent
       repository: ghcr.io/berriai/litellm
@@ -108,6 +84,7 @@ spec:
         require_key_mcp_access_defined: true
       litellm_settings:
         check_provider_endpoint: true
+      # Servers registered in the UI join these; LibreChat discovers both through /mcp.
       mcp_servers:
         AI_Control:
           alias: ai_control
@@ -119,13 +96,6 @@ spec:
           url: http://studio.studio.svc.cluster.local:8787/mcp
           mcp_info:
             description: Manage AI workloads and preview GPU allocation changes.
-        Home_Assistant:
-          alias: home_assistant
-          server_id: home-assistant
-          transport: http
-          url: os.environ/HOME_ASSISTANT_MCP_URL
-          mcp_info:
-            description: Inspect and control home devices, automations and dashboards.
         Studio:
           alias: studio
           allow_all_keys: true
@@ -139,27 +109,6 @@ spec:
             - X-AI-User-Id
           mcp_info:
             description: Create and manage images and videos in Studio.
-        UniFi_Network:
-          alias: unifi_network
-          command: /opt/mcp/uvx
-          server_id: unifi-network
-          transport: stdio
-          args:
-            - unifi-network-mcp==0.36.5
-          env:
-            HOME: os.environ/HOME
-            PATH: os.environ/PATH
-            UNIFI_NETWORK_API_KEY: os.environ/UNIFI_NETWORK_API_KEY
-            UNIFI_NETWORK_HOST: os.environ/UNIFI_NETWORK_HOST
-            UNIFI_NETWORK_PASSWORD: os.environ/UNIFI_NETWORK_PASSWORD
-            UNIFI_NETWORK_USERNAME: os.environ/UNIFI_NETWORK_USERNAME
-            UNIFI_NETWORK_VERIFY_SSL: "true"
-            UV_CACHE_DIR: os.environ/UV_CACHE_DIR
-            UV_LINK_MODE: os.environ/UV_LINK_MODE
-            UV_PYTHON: os.environ/UV_PYTHON
-            UV_PYTHON_DOWNLOADS: os.environ/UV_PYTHON_DOWNLOADS
-          mcp_info:
-            description: Inspect and manage UniFi networks, devices and clients.
       model_list:
         - model_name: ai/*
           litellm_params:
@@ -247,14 +196,9 @@ spec:
     strategy:
       type: Recreate
     volumeMounts:
-      - name: mcp-runtime
-        mountPath: /opt/mcp
       - name: temporary
         mountPath: /tmp
     volumes:
-      - name: mcp-runtime
-        emptyDir:
-          sizeLimit: 64Mi
       - name: temporary
         emptyDir:
           sizeLimit: 1Gi

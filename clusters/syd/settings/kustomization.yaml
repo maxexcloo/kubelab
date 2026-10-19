@@ -286,10 +286,24 @@ replacements:
     targets:
       - select:
           kind: HelmRelease
-          name: litellm
-          namespace: litellm
+          name: unifi-network-mcp
+          namespace: unifi-network-mcp
         fieldPaths:
-          - spec.values.envVars.UNIFI_NETWORK_HOST
+          - spec.values.controllers.main.containers.main.env.UNIFI_NETWORK_HOST
+  - source:
+      kind: ConfigMap
+      name: cluster-settings
+      fieldPath: data.home_assistant_host
+    targets:
+      - select:
+          kind: HelmRelease
+          name: home-assistant-mcp
+          namespace: home-assistant-mcp
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.HOMEASSISTANT_URL
+        options:
+          delimiter: /
+          index: 2
   - source:
       kind: ConfigMap
       name: cluster-settings
