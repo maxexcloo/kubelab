@@ -13,38 +13,10 @@ background:
   brightness: 50
   image: /images/background.jpg
 layout:
-  Applications:
-    columns: 4
-    style: row
-    tab: Home
-  Artificial Intelligence:
-    columns: 4
-    style: row
-    tab: Home
-  Infrastructure:
-    columns: 2
-    style: row
-    tab: Home
-  Media:
-    columns: 4
-    style: row
-    tab: Home
-  Mini:
-    columns: 4
-    style: row
-    tab: Home
-  Operations:
-    columns: 2
-    style: row
-    tab: Home
   Providers:
     columns: 4
     style: row
     tab: Providers
-  Smart Home:
-    columns: 4
-    style: row
-    tab: Home
 # Typing anywhere searches cards, including descriptions, before the web.
 quicklaunch:
   searchDescriptions: true

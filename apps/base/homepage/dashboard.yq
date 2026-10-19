@@ -47,10 +47,17 @@ map(
       ($host_groups | map(select(. == $group)) | map("Servers")) +
       ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])}] as $external |
 ($external + $applications) | unique_by(.tab + "/" + .group + "/" + .name) |
-# Larger cards lead each group so rows stay even: widgets, then extra widget rows.
+# Home widgets gather in Overview, alphabetically; category groups list every
+# service compactly without them.
+(map(select(.tab == "Home" and (.widget != null or (.widgets | length > 0)))) |
+  map(.group = "Overview" | .weight = 0)) as $overview |
+map(with(select(.tab == "Home"); del(.widget, .widgets))) |
+# Larger cards lead other groups so rows stay even: widgets, then extra widget rows.
 map(.weight = (([.widget] | map(select(. != null)) | length) + (.widgets // [] | length) +
-  (if .widget.enablePools == true then 1 else 0 end)) * -1) |
+  (if .widget.enablePools == true then 1 else 0 end)) * -1) + $overview |
 sort_by(.tab, .group, .weight, .name) |
 group_by(.tab) |
+# Homepage shows nested groups in file order, so Overview goes first.
 map({(.[0].tab): (group_by(.group) |
+  (map(select(.[0].group == "Overview")) + map(select(.[0].group != "Overview"))) |
   map({(.[0].group): map(.name as $name | del(.name, .group, .tab) | {($name): .})}))})

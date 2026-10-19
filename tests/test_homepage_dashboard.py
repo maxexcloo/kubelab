@@ -305,7 +305,14 @@ cp "$ARCHIVE_FIXTURE" "$2"
         # Clusters cards show placement only, four to a row; widgets stay on Home.
         self.assertNotIn("widget", groups["syd"][0]["Library"])
         self.assertEqual(read_yaml(self.output / "settings.yaml")["layout"]["Clusters"]["syd"]["columns"], 4)
-        widget = groups["Media"][0]["Library"]["widget"]
+        # Home widgets move to Overview, which leads Home; categories stay compact.
+        self.assertNotIn("widget", groups["Media"][0]["Library"])
+        overview = {name: card for entry in groups["Overview"] for name, card in entry.items()}
+        self.assertEqual(overview["Library"]["description"], "Photo Manager • syd")
+        layout = read_yaml(self.output / "settings.yaml")["layout"]["Home"]
+        self.assertEqual([key for key in layout if isinstance(layout[key], dict)][0], "Overview")
+        self.assertEqual(layout["Media"]["columns"], 4)
+        widget = overview["Library"]["widget"]
         self.assertEqual(widget["fields"], ["photos", "videos"])
         self.assertEqual(widget["key"], "{{HOMEPAGE_VAR_IMMICH_API_KEY}}")
         self.assertEqual(widget["headers"], {"X-Example": "value"})
@@ -386,7 +393,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Netboot", groups["Infrastructure"])
         self.assertIn("ESPHome", groups["Smart Home"])
         self.assertIn("Home Assistant", groups["Smart Home"])
-        self.assertEqual(groups["Smart Home"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
+        self.assertNotIn("widget", groups["Smart Home"]["Home Assistant"])
+        self.assertEqual(groups["Overview"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • mbk-hass")
         storage = groups["mbk-storage"]
         # Larger cards lead: TrueNAS adds pool rows to its widget.
