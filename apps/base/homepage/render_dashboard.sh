@@ -136,8 +136,7 @@ sh "$script_directory/route_nodes.sh" "$temporary_directory/routes.yaml" "$tempo
 
 mkdir "$temporary_directory/config"
 HOMEPAGE_CLUSTER_NAMES=$(yq -r 'map(.cluster) | unique | join(",")' "$temporary_directory/inventory.yaml") \
-  sh "$script_directory/render_services.sh" "$source_directory/services.yaml" \
-  "$temporary_directory/external-services.yaml" "$homelab_directory"
+  sh "$script_directory/render_services.sh" "$temporary_directory/external-services.yaml" "$homelab_directory"
 SERVICES="$temporary_directory/external-services.yaml" \
   yq --from-file "$script_directory/dashboard.yq" "$temporary_directory/inventory.yaml" \
   > "$temporary_directory/dashboard-services.yaml"
