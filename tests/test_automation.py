@@ -99,6 +99,17 @@ class PocketIDClientTests(unittest.TestCase):
             gate = next(p for p in resource["patches"] if p.get("fromFieldPath") == "spec.item")
             self.assertEqual(gate["policy"]["fromFieldPath"], "Required")
 
+    def test_public_composition_matches_shared_client_resources(self):
+        for name in ["client", "group-access"]:
+            self.assertEqual(
+                composition_resource(
+                    "platform/automation/pocket-id/public-composition.yaml", name, base=False
+                ),
+                composition_resource(
+                    "platform/automation/pocket-id/composition.yaml", name, base=False
+                ),
+            )
+
     def test_secret_is_created_until_a_create_succeeds(self):
         secret = composition_resource(
             "platform/automation/pocket-id/composition.yaml", "client-secret", base=False

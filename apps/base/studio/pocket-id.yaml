@@ -12,3 +12,6 @@ spec:
     launchURL: https://app.invalid
     name: Studio
     pkceEnabled: true
+  crossplane:
+    compositionRef:
+      name: pocket-id-public-client

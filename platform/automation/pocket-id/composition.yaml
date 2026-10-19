@@ -210,7 +210,6 @@ spec:
                     string:
                       fmt: http://pocket-id.invalid/api/oidc/clients/%s/secrets
                       type: Format
-              # Public clients have no item, so their secret resources are skipped.
               - &item
                 type: FromCompositeFieldPath
                 fromFieldPath: spec.item

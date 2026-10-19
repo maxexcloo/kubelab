@@ -12,3 +12,6 @@ spec:
     pkceEnabled: true
     callbackURLs:
       - https://app.invalid/oidc-callback
+  crossplane:
+    compositionRef:
+      name: pocket-id-public-client

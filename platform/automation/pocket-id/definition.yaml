@@ -96,5 +96,5 @@ spec:
                   type: string
               required: [client]
               x-kubernetes-validations:
-                - message: Confidential clients need an item for their secret; public clients have none.
+                - message: Confidential clients need an item for their secret; public clients have none and use pocket-id-public-client.
                   rule: self.client.isPublic != has(self.item)
