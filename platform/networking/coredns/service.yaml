@@ -1,0 +1,10 @@
+# Talos owns kube-dns; this applies only the field Talos cannot set. Keep
+# lookups off the Tailscale link to remote nodes when a local replica is ready.
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  trafficDistribution: PreferSameNode
