@@ -81,34 +81,12 @@ spec:
       general_settings:
         disable_env_credential_login: true
         master_key: os.environ/LITELLM_MASTER_KEY
+        # MCP servers are registered in the UI, which keeps copies of Studio's
+        # mcp-api-key and this item's provider-ai-control-api-key; update both
+        # there after rotating either.
         require_key_mcp_access_defined: true
       litellm_settings:
         check_provider_endpoint: true
-      # Servers registered in the UI join these; LibreChat discovers both through /mcp.
-      mcp_servers:
-        AI_Control:
-          alias: ai_control
-          allow_all_keys: false
-          auth_type: bearer_token
-          auth_value: os.environ/CONTROL_MCP_API_KEY
-          server_id: ai-control
-          transport: http
-          url: http://studio.studio.svc.cluster.local:8787/mcp
-          mcp_info:
-            description: Manage AI workloads and preview GPU allocation changes.
-        Studio:
-          alias: studio
-          allow_all_keys: true
-          auth_type: bearer_token
-          auth_value: os.environ/STUDIO_MCP_API_KEY
-          server_id: studio
-          timeout: 1860
-          transport: http
-          url: http://studio.studio.svc.cluster.local:8787/mcp
-          extra_headers:
-            - X-AI-User-Id
-          mcp_info:
-            description: Create and manage images and videos in Studio.
       model_list:
         - model_name: ai/*
           litellm_params:

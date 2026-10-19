@@ -149,8 +149,8 @@ webSearch:
 mcpSettings:
   allowedAddresses:
     - litellm.litellm.svc.cluster.local:4000
-# LiteLLM's /mcp combines every server the shared key may use, including servers
-# registered in its UI. Grant the key access there to offer a server here.
+# MCP servers are registered in LiteLLM's UI. Its /mcp combines every server the
+# shared key may use; grant the key access there to offer a server here.
 mcpServers:
   ai-control:
     type: streamable-http
