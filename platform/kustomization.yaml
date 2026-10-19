@@ -4,6 +4,7 @@ resources:
   - certificates/cert-manager
   - identity/headlamp
   - networking/cilium
+  - networking/coredns
   - networking/cloudflared
   - networking/external-dns
   - networking/tailscale
