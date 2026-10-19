@@ -29,11 +29,12 @@ patches:
     target:
       kind: Deployment
       name: (helm|kustomize)-controller
-  # Fail post-build substitution on undefined variables instead of rendering empty values.
+  # Fail post-build substitution on undefined variables instead of rendering empty values,
+  # and apply a new revision without waiting out health checks still running for an older one.
   - patch: |-
       - op: add
         path: /spec/template/spec/containers/0/args/-
-        value: --feature-gates=StrictPostBuildSubstitutions=true
+        value: --feature-gates=CancelHealthCheckOnNewRevision=true,StrictPostBuildSubstitutions=true
     target:
       kind: Deployment
       name: kustomize-controller
