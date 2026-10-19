@@ -5,9 +5,8 @@
   --homepage-card-padding: 0.25rem;
   --homepage-card-radius: 15px;
   --homepage-edge: 0.75rem;
-  --homepage-status-width: 6px;
   --homepage-tag-height: 0.875rem;
-  --homepage-tag-top: 0.375rem;
+  --homepage-tag-width: 5.5rem;
 }
 /* Typography */
 html,
@@ -44,58 +43,44 @@ body {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
-/* Status: a pill under the location tag, ending just above the title row's bottom. */
+/* Status: Homepage's dot, centred on the title row's right edge, or below the
+   location tag when the card has one. */
 .service-title {
   position: relative;
 }
 .service-tags {
-  align-items: stretch;
-  bottom: var(--homepage-tag-top);
-  margin: 0 !important;
-  right: calc(
-    var(--homepage-edge) - var(--homepage-card-padding) +
-      (var(--homepage-tag-height) - var(--homepage-status-width)) / 2
-  );
-  top: var(--homepage-tag-top);
-  width: var(--homepage-status-width);
+  align-items: center;
+  bottom: 0;
 }
 .service-card:has(> .service-locations) .service-tags {
-  top: calc(
-    var(--homepage-tag-top) * 2 + var(--homepage-tag-height) - var(--homepage-card-padding)
-  );
+  justify-content: center;
+  margin: 0 !important;
+  right: calc(var(--homepage-edge) - var(--homepage-card-padding));
+  top: calc(var(--homepage-tag-height) - var(--homepage-card-padding));
+  width: var(--homepage-tag-width);
 }
-.service-tags > .service-tag {
-  flex: 1;
-}
-.k8s-status,
-.site-monitor-status {
-  background: transparent !important;
-  height: 100%;
+.service-card:has(> .service-locations) :is(.k8s-status, .site-monitor-status) {
   padding: 0 !important;
-  width: 100%;
 }
-.k8s-status > .rounded-full,
-.site-monitor-status > .rounded-full {
-  height: 100% !important;
-  width: 100% !important;
-}
-/* Location tags sit inside the card's top-right corner. */
+/* Location tags hang from the card's top edge. */
 .service-locations {
   display: flex;
   gap: 0.25rem;
   position: absolute;
   right: var(--homepage-edge);
-  top: var(--homepage-tag-top);
+  top: 0;
   z-index: 20;
 }
 .service-location {
-  background-color: rgb(var(--color-700) / 0.5);
-  border-radius: 9999px;
-  color: rgb(var(--color-200));
+  background-color: rgb(var(--color-800) / 0.5);
+  border-radius: 0 0 3px 3px;
+  color: rgb(var(--color-300));
   font-size: 0.6rem;
   font-weight: 600;
   line-height: var(--homepage-tag-height);
   padding: 0 0.5rem;
+  text-align: center;
+  width: var(--homepage-tag-width);
 }
 /* Widgets */
 .service-block {
