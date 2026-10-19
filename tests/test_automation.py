@@ -7,7 +7,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-from support import read_resources
+from support import CLUSTERS, read_resources
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -285,7 +285,7 @@ class PrivateDNSCompositionTests(unittest.TestCase):
         )])
 
     def test_each_cluster_discovers_its_own_tailscale_addresses(self):
-        for cluster in ["syd"]:
+        for cluster in CLUSTERS:
             with self.subTest(cluster=cluster):
                 rendered = subprocess.run(
                     ["kubectl", "kustomize", ROOT / "clusters" / cluster / "automation"],

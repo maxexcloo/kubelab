@@ -190,7 +190,7 @@ class AppSettingsTests(unittest.TestCase):
                         self.assertNotIn("alias.invalid", output)
                     route["hostnames"][index] = old
 
-    def test_shared_beszel_hostname_changes_reach_syd(self):
+    def test_shared_beszel_hostname_changes_reach_each_cluster(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             copy_repository(root)

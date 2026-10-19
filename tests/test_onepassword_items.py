@@ -42,9 +42,14 @@ def item_configuration(**overrides):
 
 class ReconcilerTests(unittest.TestCase):
     def test_all_managed_routes_reference_items_by_display_name(self):
-        from support import repository_resources
+        from support import CLUSTERS, repository_resources
 
-        resources = repository_resources("apps/overlays/syd") + repository_resources("clusters/syd/platform")
+        resources = [
+            resource
+            for cluster in CLUSTERS
+            for path in (f"apps/overlays/{cluster}", f"clusters/{cluster}/platform")
+            for resource in repository_resources(path)
+        ]
         routes = []
         for resource in resources:
             if resource["kind"] == "HTTPRoute":

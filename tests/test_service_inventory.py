@@ -8,6 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from support import CLUSTERS
+
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -40,11 +42,11 @@ class ServiceInventoryTests(unittest.TestCase):
             builds = log.read_text().splitlines()
             self.assertTrue(builds)
             self.assertEqual(len(builds), len(set(builds)))
-            for cluster in ("syd",):
+            for cluster in CLUSTERS:
                 self.assertIn(f"kustomize clusters/{cluster}", builds)
                 self.assertIn(f"kustomize apps/overlays/{cluster}", builds)
 
-            for options in ([], ["--all-routes"], ["syd"]):
+            for options in ([], ["--all-routes"], [CLUSTERS[0]]):
                 command = ["scripts/render_service_inventory.sh", *options]
                 expected = subprocess.check_output(
                     command, cwd=ROOT,
@@ -78,7 +80,7 @@ class ServiceInventoryTests(unittest.TestCase):
             self.assertEqual(json.loads(original_inventory), json.loads(hidden_inventory))
 
             # A broken access label in the snapshot must still fail validation.
-            source = manifests / "apps/overlays/syd.yaml"
+            source = manifests / f"apps/overlays/{CLUSTERS[0]}.yaml"
             subprocess.run(
                 ["yq", "-i", 'del(.metadata.labels."gateway.excloo.dev/public-access")', str(source)],
                 check=True,

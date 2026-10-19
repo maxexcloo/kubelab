@@ -7,6 +7,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from support import CLUSTERS
+
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -41,7 +43,7 @@ class BootstrapSecretTests(unittest.TestCase):
                 for executable in [op, kubectl]:
                     executable.chmod(0o755)
                 result = subprocess.run(
-                    ["bash", ROOT / "scripts/bootstrap_cluster_secrets.sh", "syd"],
+                    ["bash", ROOT / "scripts/bootstrap_cluster_secrets.sh", CLUSTERS[0]],
                     capture_output=True, text=True,
                     env=os.environ | {
                         "KUBECTL_MARKER": str(marker),

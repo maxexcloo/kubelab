@@ -2,13 +2,15 @@
 
 import unittest
 
-from support import repository_resources
+from support import CLUSTERS, repository_resources
 
 
 class BackupResourceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.resources = repository_resources("apps/overlays/syd")
+        cls.resources = [
+            item for cluster in CLUSTERS for item in repository_resources(f"apps/overlays/{cluster}")
+        ]
 
     def test_database_identities_and_backup_references_follow_the_app_namespace(self):
         databases = {
