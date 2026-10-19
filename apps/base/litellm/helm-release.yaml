@@ -176,7 +176,7 @@ spec:
           mcp_info:
             description: Inspect and manage UniFi networks, devices and clients.
       model_list:
-        - model_name: bento/*
+        - model_name: ai/*
           litellm_params:
             api_base: http://host.invalid:8000/v1
             api_key: os.environ/BENTO_API_KEY
