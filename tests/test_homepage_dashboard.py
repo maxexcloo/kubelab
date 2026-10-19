@@ -314,7 +314,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(self.services()["Library"]["app"], "library")
         groups = self.groups()
         self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • mbk")
-        self.assertIn("Library", groups["mbk • node"][0])
+        self.assertIn("Library", groups["mbk: node"][0])
         self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"]["Home"])
 
     def test_helm_status_selector_uses_explicit_release_name_for_both_route_layouts(self):
@@ -478,14 +478,14 @@ cp "$ARCHIVE_FIXTURE" "$2"
         result = self.render(HOMELAB_DIRECTORY=str(homelab))
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = self.groups()
-        local = groups["mbk • node"][0]["Headlamp"]
+        local = groups["mbk: node"][0]["Headlamp"]
         remote = groups["syd"][0]["Headlamp"]
         self.assertEqual(local["namespace"], "headlamp")
         self.assertEqual(local["app"], "headlamp")
         self.assertNotIn("namespace", remote)
         layout = read_yaml(self.output / "settings.yaml")["layout"]
         self.assertEqual(layout["Clusters"]["tab"], "Clusters")
-        self.assertIn("mbk • node", layout["Clusters"])
+        self.assertIn("mbk: node", layout["Clusters"])
         self.assertIn("syd", layout["Clusters"])
         self.assertEqual(layout["Home"]["tab"], "Home")
         self.assertIn("Servers", layout)
@@ -529,16 +529,16 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.placements.write_text(json.dumps({"reader": ["hsp", "kimbap", "hsp"], "waiting": []}))
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(set(self.groups("Clusters")), {"mbk • hsp", "mbk • kimbap", "mbk • unscheduled", "syd"})
-        self.assertIn("Reader", self.groups("Clusters")["mbk • hsp"][0])
-        self.assertIn("Reader", self.groups("Clusters")["mbk • kimbap"][0])
+        self.assertEqual(set(self.groups("Clusters")), {"mbk: hsp", "mbk: kimbap", "mbk: unscheduled", "syd"})
+        self.assertIn("Reader", self.groups("Clusters")["mbk: hsp"][0])
+        self.assertIn("Reader", self.groups("Clusters")["mbk: kimbap"][0])
         queries = [json.loads(line) for line in self.queries.read_text().splitlines()]
         self.assertTrue(any(query[-1] == "app in (reader,feeds)" for query in queries))
         self.assertTrue(all(query[1] != "remote" for query in queries))
         self.placements.write_text(json.dumps({"reader": ["renamed"], "waiting": []}))
         self.assertEqual(self.render().returncode, 0)
-        self.assertIn("mbk • renamed", self.groups("Clusters"))
-        self.assertNotIn("mbk • hsp", self.groups("Clusters"))
+        self.assertIn("mbk: renamed", self.groups("Clusters"))
+        self.assertNotIn("mbk: hsp", self.groups("Clusters"))
         before = (self.output / "services.yaml").read_bytes()
         self.placements.write_text(json.dumps({"reader": "fail"}))
         self.assertNotEqual(self.render().returncode, 0)
@@ -560,8 +560,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = self.groups("Clusters")
-        for group, expected in [("mbk • first", {"Reader", "Copy"}),
-                                ("mbk • second", {"Other"}), ("mbk • third", {"Separate"})]:
+        for group, expected in [("mbk: first", {"Reader", "Copy"}),
+                                ("mbk: second", {"Other"}), ("mbk: third", {"Separate"})]:
             self.assertEqual({name for card in groups[group] for name in card}, expected)
         queries = [json.loads(line) for line in self.queries.read_text().splitlines()]
         self.assertEqual(len(queries), 3)
@@ -574,7 +574,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.write_routes("mbk", [route("Reader")])
         self.placements.write_text(json.dumps({"reader": ["storage"]}))
         self.assertEqual(self.render().returncode, 0)
-        cluster = {name for card in self.groups("Clusters")["mbk • storage"] for name in card}
+        cluster = {name for card in self.groups("Clusters")["mbk: storage"] for name in card}
         server = {name for card in self.groups("Servers")["mbk-storage"] for name in card}
         self.assertEqual(cluster, {"Reader"})
         self.assertEqual(server, {"TrueNAS"})
