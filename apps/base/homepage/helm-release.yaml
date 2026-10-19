@@ -74,6 +74,9 @@ spec:
               HOMEPAGE_FILE_TAILSCALE_KEY: /secrets/tailscale-key
               HOMEPAGE_FILE_TRUENAS_KEY: /secrets/truenas-key
               HOMEPAGE_FILE_UNIFI_KEY: /secrets/unifi-key
+            envFrom:
+              - secretRef:
+                  name: homepage
         initContainers:
           bootstrap:
             command:

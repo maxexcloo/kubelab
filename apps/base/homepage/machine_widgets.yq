@@ -64,7 +64,7 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
     "href": (strenv(HOMEPAGE_BESZEL_URL) + "/system/" + $host.group),
     "widget": {
       "type": "beszel", "url": strenv(HOMEPAGE_BESZEL_URL), "version": 2, "systemId": $host.group,
-      "username": "{{HOMEPAGE_FILE_BESZEL_USERNAME}}", "password": "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}",
+      "username": "{{HOMEPAGE_VAR_BESZEL_USERNAME}}", "password": "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}",
       "fields": ["status", "cpu", "memory", "network"]
     }
   })) +

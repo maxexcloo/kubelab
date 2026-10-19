@@ -50,10 +50,10 @@ spec:
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-beszel
           gethomepage.dev/name: &title Beszel
-          gethomepage.dev/widget.password: '{{ "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}" }}'
+          gethomepage.dev/widget.password: '{{ "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}" }}'
           gethomepage.dev/widget.type: beszel
           gethomepage.dev/widget.url: https://app.invalid
-          gethomepage.dev/widget.username: '{{ "{{HOMEPAGE_FILE_BESZEL_USERNAME}}" }}'
+          gethomepage.dev/widget.username: '{{ "{{HOMEPAGE_VAR_BESZEL_USERNAME}}" }}'
           gethomepage.dev/widget.version: "2"
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: *title

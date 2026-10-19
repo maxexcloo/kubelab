@@ -65,7 +65,7 @@ class HomepageEndpointsTests(unittest.TestCase):
     def test_references_share_ports_and_preserve_paths_and_secrets(self):
         result = resolved({
             "href": "homelab://mbk/kimbap/management",
-            "widget": {"url": "homelab://mbk/kimbap/management", "key": "{{HOMEPAGE_FILE_TRUENAS_KEY}}"},
+            "widget": {"url": "homelab://mbk/kimbap/management", "key": "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}"},
             "link": "homelab://mbk/hass/management/add-on",
             "console": "homelab://mbk/nanokvm/management",
             "local_console": "homelab://mbk/slzb-06m/management",
@@ -73,7 +73,7 @@ class HomepageEndpointsTests(unittest.TestCase):
         })
         self.assertEqual(result["href"], "https://storage.mbk.example.net:8444")
         self.assertEqual(result["href"], result["widget"]["url"])
-        self.assertEqual(result["widget"]["key"], "{{HOMEPAGE_FILE_TRUENAS_KEY}}")
+        self.assertEqual(result["widget"]["key"], "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}")
         self.assertEqual(result["link"], "https://hass.mbk.example.net/add-on")
         self.assertEqual(result["other_service"], "http://storage.mbk.example.net:31010")
         self.assertEqual(result["console"], "http://nanokvm.mbk.example.net")
@@ -111,14 +111,14 @@ class HomepageEndpointsTests(unittest.TestCase):
         def change(machines):
             management = machines["mbk"]["kimbap"]["services"]["management"]
             management.update(group="Infrastructure", name="TrueNAS",
-                              widget={"key": "{{HOMEPAGE_FILE_TRUENAS_KEY}}", "type": "truenas"})
+                              widget={"key": "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}", "type": "truenas"})
             machines["mbk"]["slzb-06m"]["services"]["management"]["group"] = "Smart Home"
         edit_inventory(self.homelab, change)
         result = render(self.output, self.homelab)
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = cards(self.output)
         truenas = next(card["TrueNAS"] for card in groups["Infrastructure"] if "TrueNAS" in card)
-        self.assertEqual(truenas["widget"], {"key": "{{HOMEPAGE_FILE_TRUENAS_KEY}}", "type": "truenas",
+        self.assertEqual(truenas["widget"], {"key": "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}", "type": "truenas",
                                              "url": "https://storage.mbk.example.net:8444"})
         self.assertTrue(any("TrueNAS" in card for card in groups["mbk-storage"]))
         home = [card for card in groups["Smart Home"] if "SLZB-06M" in card]
