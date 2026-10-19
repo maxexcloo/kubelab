@@ -220,7 +220,10 @@ spec:
                 toFieldPath: metadata.annotations[automation.excloo.dev/item]
                 policy:
                   fromFieldPath: Required
-          - name: onepassword-item
+          # One field per PushSecret: 1Password Connect briefly serves the previous
+          # item version after a write, so a second write in the same push
+          # conflicts (HTTP 400). Separate pushes retry independently instead.
+          - name: onepassword-client-secret
             base:
               apiVersion: external-secrets.io/v1alpha1
               kind: PushSecret
@@ -239,6 +242,32 @@ spec:
                       kind: PushSecretMetadata
                       spec:
                         tags: [Kubelab]
+                secretStoreRefs:
+                  - kind: ClusterSecretStore
+                    name: onepassword
+                selector:
+                  secret:
+                    name: placeholder
+            patches:
+              - *secret-name
+              - <<: *secret-name
+                toFieldPath: spec.selector.secret.name
+              - <<: *item
+                toFieldPath: spec.data[0].match.remoteRef.remoteKey
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.itemTag
+                toFieldPath: spec.data[0].metadata.spec.tags[0]
+          # Publishes the client ID beside its secret so consumers read both from
+          # the item.
+          - name: onepassword-client-id
+            base:
+              apiVersion: external-secrets.io/v1alpha1
+              kind: PushSecret
+              metadata:
+                name: pocket-id-client-id
+                namespace: pocket-id
+              spec:
+                data:
                   - match:
                       secretKey: oidc-client-id
                       remoteRef:
@@ -250,24 +279,22 @@ spec:
                 selector:
                   secret:
                     name: placeholder
-                # Publishes the client ID beside its secret so consumers read both
-                # from the item.
                 template:
                   data:
                     oidc-client-id: placeholder
                   engineVersion: v2
                   mergePolicy: Merge
             patches:
-              - *secret-name
+              - <<: *secret-name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: pocket-id-client-id-%s
+                      type: Format
               - <<: *secret-name
                 toFieldPath: spec.selector.secret.name
               - <<: *item
                 toFieldPath: spec.data[0].match.remoteRef.remoteKey
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.itemTag
-                toFieldPath: spec.data[0].metadata.spec.tags[0]
-              - <<: *item
-                toFieldPath: spec.data[1].match.remoteRef.remoteKey
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.client.id
                 toFieldPath: spec.template.data[oidc-client-id]
