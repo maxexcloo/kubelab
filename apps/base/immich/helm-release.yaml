@@ -57,7 +57,7 @@ spec:
             main:
               image:
                 repository: ghcr.io/immich-app/immich-machine-learning
-                tag: v3.3.3
+                tag: &version v3.3.3
               resources:
                 limits:
                   memory: 4Gi
@@ -93,7 +93,7 @@ spec:
                       name: immich-database
               image:
                 repository: ghcr.io/immich-app/immich-server
-                tag: v3.3.3
+                tag: *version
               resources:
                 limits:
                   memory: 8Gi

@@ -8,6 +8,11 @@
       matchFileNames: ["platform/bootstrap/flux-system/gotk-components.yaml"],
     },
     {
+      description: "The Flux CLI image follows the installed Flux version in `gotk-components.yaml`",
+      enabled: false,
+      matchPackageNames: ["ghcr.io/fluxcd/flux-cli"],
+    },
+    {
       description: "Kubernetes clients follow the cluster version in Homelab",
       groupName: "Kubernetes clients",
       matchDepNames: ["docker.io/alpine/k8s", "kubectl"],
