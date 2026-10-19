@@ -6,7 +6,6 @@
   --homepage-card-radius: 15px;
   --homepage-edge: 0.75rem;
   --homepage-tag-height: 0.875rem;
-  --homepage-tag-width: 5.5rem;
 }
 /* Typography */
 html,
@@ -43,7 +42,7 @@ body {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
-/* Status: Homepage's dot, centred on the title row's right edge, or below the
+/* Status: Homepage's dot on the title row's right edge, centred below the
    location tag when the card has one. */
 .service-title {
   position: relative;
@@ -53,11 +52,9 @@ body {
   bottom: 0;
 }
 .service-card:has(> .service-locations) .service-tags {
-  justify-content: center;
   margin: 0 !important;
   right: calc(var(--homepage-edge) - var(--homepage-card-padding));
   top: calc(var(--homepage-tag-height) - var(--homepage-card-padding));
-  width: var(--homepage-tag-width);
 }
 .service-card:has(> .service-locations) :is(.k8s-status, .site-monitor-status) {
   padding: 0 !important;
@@ -72,15 +69,13 @@ body {
   z-index: 20;
 }
 .service-location {
-  background-color: rgb(var(--color-800) / 0.5);
+  background-color: var(--homepage-card-bg);
   border-radius: 0 0 3px 3px;
   color: rgb(var(--color-300));
   font-size: 0.6rem;
   font-weight: 600;
   line-height: var(--homepage-tag-height);
   padding: 0 0.5rem;
-  text-align: center;
-  width: var(--homepage-tag-width);
 }
 /* Widgets */
 .service-block {
