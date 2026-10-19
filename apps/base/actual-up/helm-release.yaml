@@ -9,7 +9,6 @@ spec:
         containers:
           main:
             env:
-              ACTUAL_UP_CONFIG: /config/config.yaml
               ACTUAL_UP_PUBLIC_URL: https://app.invalid
               TZ: Australia/Sydney
             envFrom:
@@ -18,7 +17,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/actual-up
-              tag: sha-b973c43df25b7f56c7f9d5566025c9dee6aa1939@sha256:63054f4520342a3114d242ae9626d5106f6dc0890528ebf0c533005604d6de70
+              tag: 0.3.0
             probes:
               liveness:
                 path: /livez
