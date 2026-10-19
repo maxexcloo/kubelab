@@ -4,3 +4,11 @@ providers:
     icon: example
     name: Example
     url: https://provider.example.com
+  gatus:
+    description: Health Monitoring & Status Page
+    group: Operations
+    icon: gatus
+    name: Gatus
+    url: https://status.example.net
+    widget:
+      type: gatus

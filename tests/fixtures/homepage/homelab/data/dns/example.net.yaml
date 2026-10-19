@@ -1,5 +1,0 @@
-name: example.net
-records:
-  - type: CNAME
-    name: status
-    content: excloo-gatus.fly.dev

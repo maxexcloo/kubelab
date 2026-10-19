@@ -1,14 +1,7 @@
 (load(strenv(MACHINES)) | explode(.) | .machines) as $machines |
 load(strenv(DOMAINS)).domains.infrastructure as $domain |
 load(strenv(INFRASTRUCTURE)) as $infra |
-load(strenv(DNS)) as $dns |
 with(select($domain == null or $domain == false); error("Missing infrastructure domain")) |
-(.. | select(tag == "!!str" and test("^homelab-dns://"))) |= (
-  . as $reference | sub("^homelab-dns://"; "") as $target |
-  ($dns[$target] // [] | unique) as $hostnames |
-  with(select($hostnames | length != 1); error("Missing or ambiguous DNS reference: " + $reference)) |
-  "https://" + $hostnames[0]
-) |
 (.. | select(tag == "!!str" and test("^homelab://"))) |= (
   . as $reference |
   capture("^homelab://(?P<network>[a-z0-9-]+)/(?P<machine>[a-z0-9-]+)/(?P<service>[a-z0-9-]+)(?P<suffix>/.*)?$") as $parts |

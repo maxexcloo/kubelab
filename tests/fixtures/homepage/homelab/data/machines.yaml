@@ -8,25 +8,61 @@ machines:
       type: router
       services:
         management:
+          description: Network Controller
+          group: Infrastructure
+          icon: sh-ubiquiti-unifi
+          name: UniFi
           port: 443
           scheme: https
+          widget:
+            key: "{{HOMEPAGE_FILE_UNIFI_KEY}}"
+            type: unifi
     hass:
       name: HASS
       platform: haos
       type: appliance
       services:
-        management:
+        esphome:
+          description: ESP Device Builder
+          group: Smart Home
+          icon: sh-esphome
+          name: ESPHome
+          path: /5c53de3b_esphome
           port: 443
           scheme: https
+          siteMonitor: ""
+        management:
+          description: Smart Home & Automations
+          group: Smart Home
+          icon: sh-home-assistant
+          name: Home Assistant
+          port: 443
+          scheme: https
+          widget:
+            key: "{{HOMEPAGE_FILE_HOME_ASSISTANT_KEY}}"
+            type: homeassistant
     kimbap:
       hostname: storage
       platform: truenas
       type: storage
       services:
         management:
+          description: Storage Appliance
+          group: Infrastructure
+          icon: sh-truenas-scale
+          name: TrueNAS
           port: 8444
           scheme: https
+          widget:
+            enablePools: true
+            key: "{{HOMEPAGE_FILE_TRUENAS_KEY}}"
+            type: truenas
+            version: 2
         netboot:
+          description: Network Boot Server
+          group: Infrastructure
+          icon: mdi-server-network-#ffffff
+          name: Netboot
           port: 31010
           scheme: http
         syncthing:

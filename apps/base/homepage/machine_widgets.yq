@@ -1,5 +1,4 @@
 .machines as $inventory |
-load(strenv(TEMPLATE)) as $groups |
 load(strenv(INFRASTRUCTURE)) as $infra |
 load(strenv(PROVIDERS)).providers as $providers |
 (strenv(HOMEPAGE_CLUSTER_NAMES) | split(",") | map(select(. != ""))) as $cluster_names |
@@ -28,15 +27,18 @@ load(strenv(PROVIDERS)).providers as $providers |
 ] as $hosts |
 ($hosts[] as $host ireduce ({}; .[$host.network][$host.key] = $host)) as $host_index |
 # Only host management and monitoring appear on Servers; apps keep their categories.
-(([$groups[] | to_entries[] | .key as $group | .value[] | to_entries[] |
-  .value + {"name": .key, "group": $group}] +
+# Grouped providers and services become Home cards; widgets default to the card's URL.
+(([$providers[] | select(.group != null) |
+  {"description": .description, "icon": .icon, "name": .name, "group": .group,
+    "href": .url, "siteMonitor": .url} + pick(["widget"])] +
  [$hosts[] | select(.machine.type != null) | . as $host |
   (.machine.services // {}) | to_entries[] |
   # A grouped management panel also appears in its Home group.
   select(.value.group != null or (.key != "management" and (.value.description != null or .value.icon != null))) |
   ("homelab://" + $host.network + "/" + $host.key + "/" + .key) as $reference |
   {"description": .value.description, "icon": .value.icon, "name": (.value.name // .key), "group": (.value.group // "Infrastructure"),
-    "href": $reference, "siteMonitor": (.value.siteMonitor // $reference)}]) |
+    "href": $reference, "siteMonitor": (.value.siteMonitor // $reference)} + (.value | pick(["widget"]))]) |
+map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
 [.[] |
   (., (select(.group != "Servers" and (.href | test("^homelab://[^/]+/[^/]+/management$"))) | . + {"group": "Servers"})) |
   with(select(.href | test("^homelab://"));
@@ -45,7 +47,7 @@ load(strenv(PROVIDERS)).providers as $providers |
     with(select(.group != "Servers");
       .description = (.description + " • " + $host.display_name + " (" + ($host.network | upcase) + ")")) |
     with(select(.group == "Servers"); .group = $host.group))]) as $existing |
-# Templates own their configured management cards, including app widgets.
+# Grouped services own their management cards; other hosts get a platform default.
 [$hosts[] | select(.machine.type != null and .machine.services.management != null) |
   select(.reference as $reference | $existing | any_c(.href == $reference) | not) |
   .machine.services.management as $panel | $platforms[.machine.platform] as $platform |

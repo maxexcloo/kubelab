@@ -14,7 +14,6 @@ configMapGenerator:
       - custom.js
       - docker.yaml
       - kubernetes.yaml
-      - services.yaml
       - settings.yaml
       - widgets.yaml
   - name: homepage-background
