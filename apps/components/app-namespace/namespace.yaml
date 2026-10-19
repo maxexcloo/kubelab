@@ -42,6 +42,8 @@ targets:
   - <<: *namespaced
     select: { kind: PrivateDNSRecord }
   - <<: *namespaced
+    select: { kind: ReferenceGrant }
+  - <<: *namespaced
     select: { kind: Request }
   - <<: *namespaced
     select: { kind: ResendKey }
