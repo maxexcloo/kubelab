@@ -84,6 +84,25 @@ class HomepageEndpointsTests(unittest.TestCase):
             self.assertEqual(cards["mbk-nanokvm"][0]["NanoKVM"]["href"], "http://nanokvm.mbk.example.net")
             self.assertEqual(cards["mbk-nanokvm"][0]["NanoKVM"]["siteMonitor"], "http://nanokvm.mbk.example.net")
 
+    def test_grouped_management_panels_join_home_groups_and_servers(self):
+        with tempfile.TemporaryDirectory() as directory:
+            homelab = Path(directory) / "homelab"
+            shutil.copytree(FIXTURE, homelab)
+            inventory_path = homelab / "data/machines.yaml"
+            inventory = read_yaml(inventory_path)
+            inventory["machines"]["mbk"]["slzb-06m"]["services"]["management"]["group"] = "Smart Home"
+            inventory_path.write_text(json.dumps(inventory))
+            template = Path(directory) / "source.yaml"
+            template.write_text("[]\n")
+            output = Path(directory) / "services.yaml"
+            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True, env=ENVIRONMENT)
+            cards = {name: entries for group in read_yaml(output) for name, entries in group.items()}
+            home = [card for card in cards["Smart Home"] if "SLZB-06M" in card]
+            servers = [card for card in cards["mbk-slzb-06m"] if "SLZB-06M" in card]
+            self.assertEqual(len(home), 1)
+            self.assertEqual(len(servers), 1)
+            self.assertEqual(home[0]["SLZB-06M"]["href"], servers[0]["SLZB-06M"]["href"])
+
     def test_published_hosts_apply_only_to_http(self):
         with tempfile.TemporaryDirectory() as directory:
             template = Path(directory) / "source.yaml"
