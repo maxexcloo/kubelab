@@ -33,7 +33,7 @@ spec:
           reflector:
             image:
               repository: ghcr.io/xddxdd/sidestore-vpn
-              tag: latest
+              tag: sha-1cb5f5d
             resources:
               limits:
                 memory: 32Mi
