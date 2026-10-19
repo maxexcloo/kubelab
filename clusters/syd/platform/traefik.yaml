@@ -59,7 +59,7 @@ spec:
           spec:
             externalTrafficPolicy: Local
             externalIPs:
-              - 10.20.0.4
+              - public-direct-address.invalid
             internalTrafficPolicy: Local
             type: ClusterIP
         private:

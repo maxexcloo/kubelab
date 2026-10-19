@@ -5,13 +5,16 @@ metadata:
   annotations:
     config.kubernetes.io/local-config: "true"
 data:
+  atvloadly_gateway_host: hsp.syd.excloo.net
   bento_address: 100.73.126.15
   bento_llm_authority: bento.mbk.excloo.net:8000
   cluster_name: syd
   dataset_root: /var/mnt/datasets
   grafana_host: grafana.excloo.com
   headlamp_host: headlamp.cluster.excloo.dev
+  pod_subnet: 10.100.0.0/22
   private_dns_host: private.cluster.excloo.dev
+  public_direct_address: 10.20.0.4
   storage_node: kimbap
   unifi_host: gateway.mbk.excloo.net
   private_dns_lookup: https://cloudflare-dns.com/dns-query?name=app.invalid
