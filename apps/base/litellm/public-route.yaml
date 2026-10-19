@@ -14,23 +14,11 @@ spec:
     - name: public-tunnel
       namespace: networking
   rules:
-    # Studios serve results only for HMAC-signed, owner-bound tokens; other paths
+    # Studio serves results only for HMAC-signed, owner-bound tokens; other paths
     # stay behind LiteLLM key authentication.
     - backendRefs:
-        - name: heiss-mcp
-          port: 8788
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /mcp/results
-      matches:
-        - path:
-            type: PathPrefix
-            value: /heiss/mcp/results
-    - backendRefs:
-        - name: heiss-x-mcp
+        - name: studio
+          namespace: studio
           port: 8787
       filters:
         - type: URLRewrite
@@ -41,7 +29,7 @@ spec:
       matches:
         - path:
             type: PathPrefix
-            value: /heiss-x/mcp/results
+            value: /studio/mcp/results
     - backendRefs:
         - name: litellm
           port: 4000

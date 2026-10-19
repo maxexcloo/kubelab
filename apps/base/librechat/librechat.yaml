@@ -23,7 +23,7 @@ registration:
 endpoints:
   agents:
     activityLabel: false
-    # Stop also ends ordinary background tool waits, such as HEISS MCP Result.
+    # Stop also ends ordinary background tool waits, such as Studio MCP Result.
     backgroundTasks:
       ordinaryToolCancellation: true
     # File search, execute_code and ocr need the RAG API, the Code API and a Mistral OCR service.
@@ -166,30 +166,6 @@ mcpServers:
         title: Admin API Key
     headers:
       x-litellm-api-key: "Bearer {{AI_CONTROL_API_KEY}}"
-  heiss:
-    type: streamable-http
-    description: Create and manage images and videos in the HEISS studio.
-    requiresOAuth: false
-    serverInstructions: true
-    timeout: 1860000
-    title: HEISS
-    url: http://litellm.litellm.svc.cluster.local:4000/heiss/mcp
-    headers:
-      X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
-      X-Bento-User-Id: "{{LIBRECHAT_USER_ID}}"
-      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
-  heiss-x:
-    type: streamable-http
-    description: Create and manage images and videos in the HEISS X studio.
-    requiresOAuth: false
-    serverInstructions: true
-    timeout: 1860000
-    title: HEISS X
-    url: http://litellm.litellm.svc.cluster.local:4000/heiss_x/mcp
-    headers:
-      X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
-      X-Bento-User-Id: "{{LIBRECHAT_USER_ID}}"
-      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   home-assistant:
     type: streamable-http
     description: Inspect and control home devices, automations and dashboards.
@@ -197,6 +173,17 @@ mcpServers:
     title: Home Assistant
     url: http://litellm.litellm.svc.cluster.local:4000/home_assistant/mcp
     headers:
+      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+  studio:
+    type: streamable-http
+    description: Create and manage images and videos in Studio.
+    requiresOAuth: false
+    serverInstructions: true
+    timeout: 1860000
+    title: Studio
+    url: http://litellm.litellm.svc.cluster.local:4000/studio/mcp
+    headers:
+      X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   unifi-network:
     type: streamable-http
