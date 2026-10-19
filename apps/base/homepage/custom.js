@@ -1,32 +1,26 @@
 // The renderer ends Home descriptions with " • <location>"; show each location
-// as a tag beside the card's status instead. Cards keep the full description
-// if Homepage's markup changes.
+// as a tag in the card's top-left corner instead. Cards keep the full
+// description if Homepage's markup changes.
 const LOCATION_SEPARATOR = " • ";
 
 function showLocationTags() {
   for (const description of document.querySelectorAll(".service-description")) {
     const text = description.textContent;
     const index = text.lastIndexOf(LOCATION_SEPARATOR);
-    const title = description.closest(".service-title");
-    if (index < 0 || !title) {
+    const card = description.closest(".service-card");
+    if (index < 0 || !card) {
       continue;
     }
-    let tags = title.querySelector(".service-tags");
-    if (!tags) {
-      tags = document.createElement("div");
-      tags.className =
-        "absolute top-0 right-0 flex flex-row justify-end gap-2 mr-2 z-10 service-tags";
-      title.append(tags);
-    }
-    for (const tag of tags.querySelectorAll(".service-location")) {
-      tag.remove();
-    }
+    card.querySelector(":scope > .service-locations")?.remove();
+    const tags = document.createElement("div");
+    tags.className = "service-locations";
     for (const location of text.slice(index + LOCATION_SEPARATOR.length).split(", ")) {
       const tag = document.createElement("div");
-      tag.className = "service-tag service-location";
+      tag.className = "service-location";
       tag.textContent = location;
-      tags.prepend(tag);
+      tags.append(tag);
     }
+    card.prepend(tags);
     description.textContent = text.slice(0, index);
   }
 }

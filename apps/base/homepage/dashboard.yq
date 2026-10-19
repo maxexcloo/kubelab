@@ -26,6 +26,7 @@ map(
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
   with(select(.widget.version != null); .widget.version |= from_yaml) |
+  with(select(.widget.fields != null); .widget.fields |= from_yaml) |
   with(select(.showStats != null); .showStats |= from_yaml) |
   with(select($route.clusterView == false and $route.homeName != null);
     .name = $route.homeName) |
@@ -36,6 +37,8 @@ map(
     .siteMonitor = (.siteMonitor // $route.annotations."monitoring.excloo.dev/url" // .href) |
     with(select($route.annotations."monitoring.excloo.dev/path" != null);
       .siteMonitor = ("https://" + $route.hostnames[0] + $route.annotations."monitoring.excloo.dev/path"))) |
+  # Clusters cards show placement; widgets stay on Home.
+  with(select($route.clusterView == true); del(.widget, .widgets)) |
   .weight = 0 |
   with(select(.widget != null or (.widgets | length > 0)); .weight = -100)
 ) as $applications |

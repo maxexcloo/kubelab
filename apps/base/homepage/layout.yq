@@ -6,6 +6,7 @@ load(strenv(SERVICES)) as $services |
   with(select(($groups | length) > 0);
     .[$tab] = (($groups[] | keys | .[]) as $group ireduce (
       {"columns": 1, "header": false, "style": "row", "tab": $tab};
-        .[$group] = ({"columns": 2, "style": "row"} * ($preferences[$group] // {}) | del(.tab))))))) |
+        .[$group] = ({"columns": (if $tab == "Clusters" then 4 else 2 end), "style": "row"} *
+          ($preferences[$group] // {}) | del(.tab))))))) |
 .layout.Providers = $preferences.Providers |
 .layout |= pick(["Home", "Clusters", "Providers", "Servers"])

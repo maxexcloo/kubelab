@@ -16,7 +16,8 @@ map(select(.group == "Providers")) | sort_by(.name) |
 map(. as $endpoint |
   ($catalogue | map(select(.probe == $endpoint.name)) | .[0]) as $entry |
   {(.name): {
-    "description": ($entry.provider.description // "External Monitoring"),
+    "description": (if $entry.probe == $entry.provider.name
+      then ($entry.provider.description // "External Monitoring") else "DNS Resolver" end),
     "href": ($entry.provider.url // (strenv(GATUS_URL) + "/endpoints/" + .key)),
     "icon": ($entry.provider.icon // "mdi-cloud"),
     "id": ("provider-" + .key),
@@ -27,7 +28,7 @@ map(. as $endpoint |
       "mappings": [
         {"field": "results.0.success", "label": "Status",
          "remap": [{"value": true, "to": "Online"}, {"value": false, "to": "Offline"}, {"any": true, "to": "Unknown"}]},
-        {"field": "results.0.duration", "label": "Response", "format": "float", "scale": 0.000001, "suffix": "ms"}
+        {"field": "results.0.duration", "label": "Response", "format": "number", "scale": 0.000001, "suffix": "ms"}
       ]
     }
   }}) | [{"Providers": .}]

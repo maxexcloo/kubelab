@@ -2,8 +2,11 @@
 load(strenv(INFRASTRUCTURE)) as $infra |
 load(strenv(PROVIDERS)).providers as $providers |
 (strenv(HOMEPAGE_CLUSTER_NAMES) | split(",") | map(select(. != ""))) as $cluster_names |
-($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare"}) as $cloudflare |
-($providers.tailscale // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "tailscale-light"}) as $tailscale |
+# Tunnel origins and key expiry are noise beside connection health.
+($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare"} |
+  with(select(.widget != null); .widget.fields = ["status"])) as $cloudflare |
+($providers.tailscale // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "tailscale-light"} |
+  with(select(.widget != null); .widget.fields = ["address", "last_seen"])) as $tailscale |
 load(strenv(PLATFORMS)).platforms as $platforms |
 # Keep inventory fields separate from the derived Homepage presentation.
 [$inventory | to_entries[] | .key as $network | .value | to_entries[] |

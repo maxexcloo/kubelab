@@ -282,6 +282,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         annotations = route("Library", group="Media", **{
             "description": "Photo Manager",
             "widget.type": "immich",
+            "widget.fields": '["photos", "videos"]',
             "widget.key": '{{ "{{HOMEPAGE_VAR_IMMICH_API_KEY}}" }}',
             "widget.version": "2",
             "widget.headers.X-Example": "value",
@@ -301,7 +302,11 @@ cp "$ARCHIVE_FIXTURE" "$2"
         groups = self.groups()
         self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • syd")
         self.assertEqual(groups["syd"][0]["Library"]["description"], "Photo Manager")
-        widget = self.services()["Library"]["widget"]
+        # Clusters cards show placement only, four to a row; widgets stay on Home.
+        self.assertNotIn("widget", groups["syd"][0]["Library"])
+        self.assertEqual(read_yaml(self.output / "settings.yaml")["layout"]["Clusters"]["syd"]["columns"], 4)
+        widget = groups["Media"][0]["Library"]["widget"]
+        self.assertEqual(widget["fields"], ["photos", "videos"])
         self.assertEqual(widget["key"], "{{HOMEPAGE_VAR_IMMICH_API_KEY}}")
         self.assertEqual(widget["headers"], {"X-Example": "value"})
         self.assertEqual(widget["version"], 2)
@@ -598,6 +603,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(result.returncode, 0, result.stderr)
         cards = {name: value for card in self.groups("Providers")["Providers"] for name, value in card.items()}
         self.assertEqual(set(cards), {"Example", "Example Resolver"})
+        self.assertEqual(cards["Example Resolver"]["description"], "DNS Resolver")
+        self.assertNotEqual(cards["Example"]["description"], "DNS Resolver")
         for name, key in [("Example", "discovered_website"), ("Example Resolver", "discovered_dns")]:
             card = cards[name]
             self.assertEqual(card["icon"], "example")
@@ -607,6 +614,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
             self.assertEqual(card["widget"]["type"], "customapi")
             self.assertEqual(card["widget"]["url"], f"https://status.example.net/api/v1/endpoints/{key}/statuses?page=1&pageSize=1")
             self.assertEqual(card["widget"]["mappings"][0]["field"], "results.0.success")
+            # Whole milliseconds: the number format truncates after scaling.
+            self.assertEqual(card["widget"]["mappings"][1]["format"], "number")
         self.assertEqual(read_yaml(self.output / "bookmarks.yaml"), [])
         layout = read_yaml(self.output / "settings.yaml")["layout"]
         self.assertEqual(list(layout), ["Home", "Clusters", "Providers", "Servers"])

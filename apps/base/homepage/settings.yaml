@@ -5,6 +5,7 @@ disableIndexing: true
 headerStyle: clean
 hideVersion: true
 iconStyle: theme
+statusStyle: dot
 theme: dark
 title: Homepage
 background:
@@ -16,7 +17,7 @@ layout:
     style: row
     tab: Home
   Artificial Intelligence:
-    columns: 2
+    columns: 4
     style: row
     tab: Home
   Infrastructure:

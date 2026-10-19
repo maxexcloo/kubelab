@@ -49,6 +49,7 @@ spec:
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: miniflux-light
           gethomepage.dev/name: &title Miniflux
+          gethomepage.dev/widget.fields: '["unread"]'
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_MINIFLUX_API_KEY}}" }}'
           gethomepage.dev/widget.type: miniflux
           gethomepage.dev/widget.url: https://app.invalid

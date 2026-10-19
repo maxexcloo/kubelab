@@ -10,6 +10,8 @@ metadata:
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-grafana
     gethomepage.dev/name: &title Grafana
+    # Dashboards and alert rules are not provisioned; only firing alerts matter.
+    gethomepage.dev/widget.fields: '["datasources", "alertstriggered"]'
     gethomepage.dev/widget.password: "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}"
     gethomepage.dev/widget.type: grafana
     gethomepage.dev/widget.url: https://app.invalid

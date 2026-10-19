@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/icon: sh-immich
     gethomepage.dev/name: &title Immich
     gethomepage.dev/pod-selector: app.kubernetes.io/instance=immich,app.kubernetes.io/name=server
+    gethomepage.dev/widget.fields: '["photos", "videos", "storage"]'
     gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_IMMICH_API_KEY}}"
     gethomepage.dev/widget.type: immich
     gethomepage.dev/widget.url: https://app.invalid
