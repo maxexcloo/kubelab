@@ -154,8 +154,24 @@ spec:
       periodSeconds: 10
       timeoutSeconds: 5
     replicaCount: 1
+    # Redis keeps resumable streams, steers and background tasks across pod restarts;
+    # the chart injects USE_REDIS, REDIS_URI and the generated password.
     redis:
-      enabled: false
+      enabled: true
+      architecture: standalone
+      master:
+        nodeSelector:
+          node.excloo.dev/network: internal
+        persistence:
+          enabled: true
+          size: 1Gi
+          storageClass: local-path
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            cpu: 25m
+            memory: 64Mi
     resources:
       limits:
         memory: 1Gi
