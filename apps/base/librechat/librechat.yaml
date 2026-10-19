@@ -191,6 +191,7 @@ mcpServers:
     title: LiteLLM
     url: http://litellm.litellm.svc.cluster.local:4000/mcp
     headers:
+      X-AI-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
       X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   # Hidden from the chat menu; the Studio model spec pins it to keep its tool list small.
@@ -204,6 +205,7 @@ mcpServers:
     title: Studio
     url: http://litellm.litellm.svc.cluster.local:4000/studio/mcp
     headers:
+      X-AI-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
       X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
 # Specs build an agent per request from the preset, MCP servers and background tools.
