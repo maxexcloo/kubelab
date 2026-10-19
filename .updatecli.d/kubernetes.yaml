@@ -5,9 +5,11 @@ autodiscovery:
   crawlers:
     kubernetes:
       digest: false
-      # The Kubernetes client policy pins kubectl images to the cluster version.
       ignore:
+        # The Kubernetes client policy pins kubectl images to the cluster version.
         - images:
             - docker.io/alpine/k8s
+        # Flux components are upgraded manually with `flux install --export`.
+        - path: platform/bootstrap/flux-system/gotk-components.yaml
 labels:
   group: kubernetes

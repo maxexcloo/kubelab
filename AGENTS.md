@@ -24,6 +24,8 @@ settings in its own repository; Kubelab deploys its published image.
 - Keep cluster differences in overlays; do not copy an entire application.
 - Pin remote manifests to stable release versions. Updatecli previews upgrades
   locally for manual review.
+- Upgrade Flux manually with `flux install --export`; Updatecli ignores
+  `gotk-components.yaml`.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Use existing 1Password item UUIDs for credential consumers and publishers,
   including mini-app ExternalSecrets. Declare managed item titles with
