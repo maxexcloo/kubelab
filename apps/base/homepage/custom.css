@@ -88,29 +88,36 @@ body {
 .service-container:empty {
   min-height: 3.25rem;
 }
-/* Header: search centred in the free space, then weather, then the time
-   stacked over the date. */
+/* Header: search fills the left, then cluster status, weather and the time
+   stacked over the date. Homepage keeps the cluster widget in its own block,
+   so its right-hand block joins the same grid. */
 @media (min-width: 640px) {
-  #information-widgets-right {
+  #widgets-wrap {
     align-items: center;
-    column-gap: 1.5rem;
+    column-gap: 2.5rem;
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr auto auto auto;
   }
-  #information-widgets-right > .information-widget-search,
-  #information-widgets-right > .information-widget-openmeteo {
-    grid-row: span 2;
+  #information-widgets-right {
+    display: contents;
   }
-  #information-widgets-right > .information-widget-search {
-    justify-self: center;
-    margin: 0 2rem;
-    width: min(100%, 36rem);
+  #widgets-wrap .information-widget-search {
+    grid-column: 1;
+    grid-row: 1 / span 2;
   }
-  #information-widgets-right > .information-widget-datetime {
+  #widgets-wrap > .information-widget-kubernetes {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  #widgets-wrap .information-widget-openmeteo {
     grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+  #widgets-wrap .information-widget-datetime {
+    grid-column: 4;
     line-height: 1.1;
   }
-  #information-widgets-right > .information-widget-datetime > div {
+  #widgets-wrap .information-widget-datetime > div {
     justify-content: center;
   }
 }
