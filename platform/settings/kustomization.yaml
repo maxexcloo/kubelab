@@ -256,6 +256,131 @@ replacements:
   - source:
       kind: ConfigMap
       name: shared-settings
+      fieldPath: data.owner_email
+    targets:
+      - select:
+          kind: ClusterIssuer
+          name: letsencrypt-dns01
+        fieldPaths:
+          - spec.acme.email
+      # Defaults are JSON strings; the index counts quote-delimited tokens.
+      - select:
+          kind: ExternalSecret
+          name: actual-up
+          namespace: actual-up
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 3
+      - select:
+          kind: ExternalSecret
+          name: aiostreams
+          namespace: aiostreams
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 3
+      - select:
+          kind: ExternalSecret
+          name: beszel
+          namespace: beszel
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 3
+      - select:
+          kind: ExternalSecret
+          name: bookorbit
+          namespace: bookorbit
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 3
+      - select:
+          kind: ExternalSecret
+          name: bookorbit
+          namespace: bookorbit
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 7
+      - select:
+          kind: ExternalSecret
+          name: immich-login
+          namespace: immich
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 3
+      - select:
+          kind: ExternalSecret
+          name: librechat
+          namespace: librechat
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 7
+      - select:
+          kind: ExternalSecret
+          name: linkwarden
+          namespace: linkwarden
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 3
+      - select:
+          kind: ExternalSecret
+          name: litellm
+          namespace: litellm
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 27
+      - select:
+          kind: ExternalSecret
+          name: miniflux
+          namespace: miniflux
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 3
+      - select:
+          kind: ExternalSecret
+          name: grafana
+          namespace: observability
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 3
+      - select:
+          kind: ExternalSecret
+          name: syncthing
+          namespace: syncthing
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: '"'
+          index: 3
+      - select:
+          kind: HelmRelease
+          name: librechat
+          namespace: librechat
+        fieldPaths:
+          - spec.values.librechat.configEnv.OPENID_ADMIN_ROLE
+  - source:
+      kind: ConfigMap
+      name: shared-settings
       fieldPath: data.time_zone
     targets:
       - select:

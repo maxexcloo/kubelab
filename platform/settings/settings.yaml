@@ -11,4 +11,5 @@ data:
   homelab_branch: main
   homelab_repository: https://github.com/maxexcloo/homelab
   identity_host: id.excloo.com
+  owner_email: max@excloo.com
   time_zone: Australia/Sydney
