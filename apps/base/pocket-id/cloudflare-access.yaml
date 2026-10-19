@@ -1,0 +1,14 @@
+# Homelab configures the Cloudflare Access identity provider from this item.
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: cloudflare-access
+spec:
+  client:
+    callbackURLs:
+      - https://excloo.cloudflareaccess.com/cdn-cgi/access/callback
+    id: cloudflare-access-excloo_id
+    launchURL: https://excloo.cloudflareaccess.com
+    name: Cloudflare Access
+    pkceEnabled: true
+  item: Cloudflare Access
