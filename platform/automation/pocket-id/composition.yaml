@@ -251,3 +251,6 @@ spec:
                 toFieldPath: spec.selector.secret.name
               - <<: *item
                 toFieldPath: spec.data[0].match.remoteRef.remoteKey
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.itemTag
+                toFieldPath: spec.data[0].metadata.spec.tags[0]

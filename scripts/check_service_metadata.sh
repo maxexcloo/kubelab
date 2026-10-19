@@ -106,8 +106,11 @@ jq -e \
       group_by(.cluster, .group, .name) |
       map(select(length > 1) | map(.source) | join(", "))
     ) as $duplicates |
+    # External services such as Cloudflare Access have no route to match.
+    ($route_inventory | map(.hostnames[] | split(".") | .[-2:] | join(".")) | unique) as $route_domains |
     (
       $pocket_id |
+      map(select((.launchURL | url_hostname | split(".") | .[-2:] | join(".")) as $domain | $route_domains | index($domain))) |
       map(select(.launchURL as $url | $inventory | any(.href == $url) | not)) |
       map(.source)
     ) as $missing_pocket_id_routes |
