@@ -19,3 +19,15 @@ resources:
   - sources/traefik.yaml
 components:
   - components/helm-remediation
+replacements:
+  - source:
+      kind: ClusterSecretStore
+      name: onepassword
+      fieldPath: spec.provider.onepassword.connectHost
+    targets:
+      - select:
+          kind: CronJob
+          name: onepassword-items
+          namespace: external-secrets
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.containers.[name=reconciler].env.[name=OP_CONNECT_HOST].value
