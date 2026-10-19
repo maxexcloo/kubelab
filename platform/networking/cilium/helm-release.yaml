@@ -43,6 +43,10 @@ spec:
           - tcp
     ipam:
       mode: kubernetes
+    # Cilium load-balances ClusterIPs itself; honour trafficDistribution such as
+    # kube-dns PreferSameNode.
+    loadBalancer:
+      serviceTopology: true
     operator:
       nodeSelector:
         node.excloo.dev/network: internal
