@@ -10,10 +10,10 @@ metadata:
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-grafana
     gethomepage.dev/name: &title Grafana
-    gethomepage.dev/widget.password: "{{HOMEPAGE_FILE_GRAFANA_SYD_PASSWORD}}"
+    gethomepage.dev/widget.password: "{{HOMEPAGE_FILE_GRAFANA_PASSWORD}}"
     gethomepage.dev/widget.type: grafana
     gethomepage.dev/widget.url: https://app.invalid
-    gethomepage.dev/widget.username: "{{HOMEPAGE_FILE_GRAFANA_SYD_USERNAME}}"
+    gethomepage.dev/widget.username: "{{HOMEPAGE_FILE_GRAFANA_USERNAME}}"
     gethomepage.dev/widget.version: "2"
     monitoring.excloo.dev/enabled: "true"
     onepassword.excloo.dev/item: *title
