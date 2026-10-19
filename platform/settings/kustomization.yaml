@@ -425,6 +425,24 @@ replacements:
         options:
           delimiter: /
           index: 2
+      - select:
+          kind: Request
+          name: pocket-id-group-llm
+          namespace: pocket-id
+        fieldPaths:
+          - spec.forProvider.payload.baseUrl
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: Request
+          name: pocket-id-group-llm-details
+          namespace: pocket-id
+        fieldPaths:
+          - spec.forProvider.payload.baseUrl
+        options:
+          delimiter: /
+          index: 2
   - source:
       kind: ConfigMap
       name: shared-settings

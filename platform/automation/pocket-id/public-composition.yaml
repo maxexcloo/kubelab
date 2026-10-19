@@ -141,6 +141,9 @@ spec:
                       books: |-
                         .response.statusCode == 200
                         and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}", "{{ pocket-id-group-books:pocket-id:id }}"] | sort)
+                      llm: |-
+                        .response.statusCode == 200
+                        and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}", "{{ pocket-id-group-llm:pocket-id:id }}"] | sort)
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.accessPolicy
                 toFieldPath: spec.forProvider.payload.body
@@ -149,3 +152,4 @@ spec:
                     map:
                       all-services: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}"]}'
                       books: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}","{{ pocket-id-group-books:pocket-id:id }}"]}'
+                      llm: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}","{{ pocket-id-group-llm:pocket-id:id }}"]}'

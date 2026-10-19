@@ -27,7 +27,7 @@ spec:
               properties:
                 accessPolicy:
                   default: all-services
-                  enum: [all-services, books]
+                  enum: [all-services, books, llm]
                   type: string
                 client:
                   type: object
