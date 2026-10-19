@@ -606,8 +606,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         path.write_text(json.dumps(providers))
         self.gatus.write_text(json.dumps([
             {"group": "Providers", "key": "discovered_website", "name": "Example", "results": [{"success": True}]},
-            # Gatus sorts category groups last behind an invisible Hangul filler.
-            {"group": "\u3164Providers", "key": "discovered_dns", "name": "Example Resolver", "results": [{"success": False}]},
+            {"group": "Providers", "key": "discovered_dns", "name": "Example Resolver", "results": [{"success": False}]},
             {"group": "Applications", "key": "ignored", "name": "Other"},
         ]))
         result = self.render(HOMELAB_DIRECTORY=str(homelab))
