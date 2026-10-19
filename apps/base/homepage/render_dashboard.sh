@@ -132,6 +132,9 @@ yq -e 'length > 0' "$temporary_directory/routes.yaml" >/dev/null
 sh "$script_directory/route_nodes.sh" "$temporary_directory/routes.yaml" "$temporary_directory/inventory.yaml"
 
 mkdir "$temporary_directory/config"
+yq -o=json 'map(select(.namespace == "beszel"))' \
+  "$temporary_directory/inventory.yaml" > "$temporary_directory/beszel-routes.json"
+HOMEPAGE_BESZEL_ROUTES="$temporary_directory/beszel-routes.json" \
 HOMEPAGE_CLUSTER_NAMES=$(yq -r 'map(.cluster) | unique | join(",")' "$temporary_directory/inventory.yaml") \
   sh "$script_directory/render_services.sh" "$temporary_directory/external-services.yaml" "$homelab_directory"
 SERVICES="$temporary_directory/external-services.yaml" \

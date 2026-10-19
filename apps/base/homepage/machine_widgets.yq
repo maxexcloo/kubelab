@@ -48,15 +48,19 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
     "href": .reference, "siteMonitor": ($panel.siteMonitor // .reference)
   }
 ] as $management |
+# Per-host Beszel cards reuse the Beszel route's own Homepage card.
+(load(strenv(BESZEL_ROUTES)) as $routes | if ($routes | length) == 1 then
+  ($routes[0].annotations | with_entries(select(.key | test("^gethomepage.dev/"))) |
+    to_entries | .[] as $field ireduce ({};
+      setpath(($field.key | sub("^gethomepage.dev/"; "") | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
+    with(select(.widget.version != null); .widget.version |= from_yaml) |
+    pick(["description", "href", "icon", "name", "widget"]))
+  else null end) as $beszel |
 [$hosts[] | select(.machine.type != null) | . as $host |
-  (([.machine] | map(select(.beszel == true)) | map({
-    "description": "System Monitoring", "icon": "sh-beszel", "name": "Beszel",
-    "href": (strenv(HOMEPAGE_BESZEL_URL) + "/system/" + $host.group),
-    "widget": {
-      "type": "beszel", "url": strenv(HOMEPAGE_BESZEL_URL), "version": 2, "systemId": $host.group,
-      "username": "{{HOMEPAGE_VAR_BESZEL_USERNAME}}", "password": "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}",
-      "fields": ["status", "cpu", "memory", "network"]
-    }
+  (([.machine] | map(select(.beszel == true)) |
+   map(with(select($beszel == null); error("Beszel monitoring needs exactly one Beszel route")) | $beszel + {
+    "href": ($beszel.href + "/system/" + $host.group),
+    "widget": ($beszel.widget + {"systemId": $host.group, "fields": ["status", "cpu", "memory", "network"]})
   })) +
   ([$infra.tailscale[$host.key]] | map(select(. != null and $tailscale.widget != null)) | map(. as $device | $tailscale + {
     "href": ("https://login.tailscale.com/admin/machines/" + $device),
