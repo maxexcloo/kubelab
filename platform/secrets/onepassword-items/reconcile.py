@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 ANNOTATION_PREFIX = "onepassword.excloo.dev/"
 KUBERNETES_HOST = "https://kubernetes.default.svc"
 KUBERNETES_SERVICE_ACCOUNT = "/var/run/secrets/kubernetes.io/serviceaccount"
-SECRET_SUFFIXES = ("key", "password", "secret", "token")
+SECRET_WORDS = {"key", "password", "secret", "token"}
 
 
 def request(url, *, token, body=None, context=None, method="GET"):
@@ -94,6 +94,11 @@ def secret_values(resource, mapping):
 def item_configuration(resource):
     values = annotations(resource)
     return {
+        "concealed": set(
+            filter(
+                None, values.get(f"{ANNOTATION_PREFIX}concealed-fields", "").split(",")
+            )
+        ),
         "constants": json.loads(values.get(f"{ANNOTATION_PREFIX}constants", "{}")),
         "defaults": json.loads(values.get(f"{ANNOTATION_PREFIX}defaults", "{}")),
         "formats": json.loads(values.get(f"{ANNOTATION_PREFIX}field-formats", "{}")),
@@ -114,6 +119,7 @@ def item_configuration(resource):
 
 def merge_configuration(item, resource):
     configuration = item_configuration(resource)
+    item["concealed"].update(configuration["concealed"])
     item["constants"].update(configuration["constants"])
     item["defaults"].update(configuration["defaults"])
     item["formats"].update(configuration["formats"])
@@ -128,6 +134,7 @@ def merge_configuration(item, resource):
 
 def new_item():
     return {
+        "concealed": set(),
         "constants": {},
         "defaults": {},
         "fields": set(),
@@ -344,15 +351,19 @@ def sort_fields(fields):
             fields[index] = field
 
 
+# Any key, password, secret or token word conceals a field unless it names an
+# identifier; concealed-fields covers secrets with neutral names, such as URLs.
+def field_type(label, concealed=frozenset()):
+    words = label.split("-")
+    secret = words[-1] != "id" and not SECRET_WORDS.isdisjoint(words)
+    if secret or label in concealed or label == "certificate-base64":
+        return "CONCEALED"
+    return "STRING"
+
+
 def generated_field(label, *, field_format=None, value=None):
     native = label in {"password", "username"}
-    field = {
-        "id": label,
-        "label": label,
-        "type": "CONCEALED"
-        if label.endswith(SECRET_SUFFIXES) or label == "certificate-base64"
-        else "STRING",
-    }
+    field = {"id": label, "label": label, "type": field_type(label)}
     if native:
         field["purpose"] = label.upper()
     if value is None and field_format == "laravel":
@@ -477,6 +488,12 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
             fields.append(replacement)
     for field in fields:
         label = field_label(field)
+        # Specialised field types, such as one-time passwords, keep their type.
+        if field.get("id") != "notesPlain" and field.get("type", "STRING") in {
+            "CONCEALED",
+            "STRING",
+        }:
+            field["type"] = field_type(label, desired.get("concealed", set()))
         if label in {"username", "password"}:
             if desired["login"]:
                 field["purpose"] = label.upper()
