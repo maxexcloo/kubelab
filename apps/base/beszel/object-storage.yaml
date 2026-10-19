@@ -3,7 +3,7 @@ kind: ExternalSecret
 metadata:
   name: beszel-object-storage
   annotations:
-    onepassword.excloo.dev/defaults: '{"object-storage-bucket":"excloo-syd-beszel"}'
+    onepassword.excloo.dev/defaults: '{"object-storage-bucket":"excloo-cluster-beszel"}'
     onepassword.excloo.dev/values: '{"object-storage-access-key-id":"b2-application-key/access-key-id","object-storage-endpoint":"b2-application-key/endpoint","object-storage-secret-access-key":"b2-application-key/secret-access-key"}'
 spec:
   refreshInterval: 1h
@@ -47,6 +47,6 @@ kind: B2ObjectStorage
 metadata:
   name: application
 spec:
-  keyName: kubelab-syd-beszel
+  keyName: kubelab-cluster-beszel
   secretRef:
     name: beszel-object-storage

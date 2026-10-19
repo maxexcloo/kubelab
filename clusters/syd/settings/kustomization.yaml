@@ -29,6 +29,13 @@ replacements:
       fieldPath: data.cluster_name
     targets:
       - select:
+          kind: CronJob
+          name: state-backup
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.containers.[name=backup].env.[name=CLUSTER].value
+        options:
+          create: true
+      - select:
           kind: HelmRelease
           name: homepage
           namespace: homepage
@@ -36,6 +43,33 @@ replacements:
           - spec.values.controllers.homepage.initContainers.endpoints.env.HOMEPAGE_CLUSTER
         options:
           create: true
+      - select:
+          kind: Kustomization
+          name: mini-apps
+          namespace: flux-system
+        fieldPaths:
+          - spec.path
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: B2ObjectStorage
+          name: beszel
+          namespace: beszel
+        fieldPaths:
+          - spec.keyName
+        options:
+          delimiter: "-"
+          index: 1
+      - select:
+          kind: ExternalSecret
+          name: beszel-object-storage
+          namespace: beszel
+        fieldPaths:
+          - metadata.annotations.[onepassword.excloo.dev/defaults]
+        options:
+          delimiter: "-"
+          index: 3
       - select:
           kind: HelmRelease
           name: victoria-metrics-k8s-stack

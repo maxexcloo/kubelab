@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+: "${CLUSTER:?CLUSTER is required}"
 kubectl=/tools/kubectl
 export RESTIC_REPOSITORY="s3:${BACKUP_ENDPOINT}/${BACKUP_BUCKET}/files/${POD_NAMESPACE}"
 resume_state="$($kubectl get deployment "$DEPLOYMENT" -o jsonpath='{.metadata.annotations.backup\.excloo\.dev/resume-state}')"
@@ -46,5 +47,5 @@ cp -R /sources/. /snapshot/data/
 resume
 trap - EXIT INT TERM
 restic cat config >/dev/null 2>&1 || restic init
-restic backup --host "syd/${POD_NAMESPACE}" --tag app-state /snapshot
+restic backup --host "${CLUSTER}/${POD_NAMESPACE}" --tag app-state /snapshot
 restic forget --keep-within 14d --prune

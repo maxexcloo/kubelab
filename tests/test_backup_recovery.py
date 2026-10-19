@@ -63,7 +63,7 @@ if mutation and state.get("crash_after") == state["mutations"]:
 
 
 class BackupRecoveryTests(unittest.TestCase):
-    def run_backup(self, directory, state):
+    def run_backup(self, directory, state, **environment):
         return subprocess.run(
             ["sh", str(directory / "backup.sh")],
             capture_output=True,
@@ -71,11 +71,12 @@ class BackupRecoveryTests(unittest.TestCase):
                 "BACKUP_BUCKET": "test",
                 "BACKUP_ENDPOINT": "https://example.invalid",
                 "BACKUP_TEST_STATE": str(state),
+                "CLUSTER": "example",
                 "DEPLOYMENT": "test",
                 "HELM_RELEASE": "test",
                 "PATH": f"{directory}:{os.environ['PATH']}",
                 "POD_NAMESPACE": "test",
-            },
+            } | environment,
             text=True,
             timeout=15,
         )
@@ -125,7 +126,19 @@ class BackupRecoveryTests(unittest.TestCase):
                         self.assertEqual(restored["suspended"], suspended)
                         self.assertNotIn("resume_state", restored)
                         self.assertEqual((directory / "snapshot/data/data.db").read_text(), "retained application data")
-                        self.assertIn("backup --host syd/test", Path(str(state) + ".restic").read_text())
+                        self.assertIn("backup --host example/test", Path(str(state) + ".restic").read_text())
+
+    def test_missing_cluster_fails_before_quiescing_the_workload(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            self.prepare(directory)
+            state = directory / "state.json"
+            original = json.dumps({"replicas": 2, "suspended": False})
+            state.write_text(original)
+            result = self.run_backup(directory, state, CLUSTER="")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("CLUSTER is required", result.stderr)
+            self.assertEqual(state.read_text(), original)
 
     def test_failed_restore_keeps_original_intent_until_a_successful_retry(self):
         with tempfile.TemporaryDirectory() as temporary:
