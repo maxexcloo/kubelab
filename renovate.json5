@@ -1,0 +1,28 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["github>maxexcloo/dotfiles//renovate/default.json5"],
+  packageRules: [
+    {
+      description: "Flux components are upgraded with `flux install --export`",
+      enabled: false,
+      matchFileNames: ["platform/bootstrap/flux-system/gotk-components.yaml"],
+    },
+    {
+      description: "Kubernetes clients follow the cluster version in Homelab",
+      groupName: "Kubernetes clients",
+      matchDepNames: ["docker.io/alpine/k8s", "kubectl"],
+    },
+    {
+      description: "PostgreSQL major upgrades need a data migration",
+      enabled: false,
+      matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],
+      matchUpdateTypes: ["major"],
+    },
+    {
+      description: "The registry's tag list is incomplete; GitHub releases match published packages",
+      matchPackageNames: ["xpkg.upbound.io/crossplane-contrib/provider-http"],
+      overrideDatasource: "github-releases",
+      overridePackageName: "crossplane-contrib/provider-http",
+    },
+  ],
+}
