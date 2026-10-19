@@ -13,6 +13,9 @@ background:
   brightness: 50
   image: /images/background.jpg
 layout:
+  # Overview cards carry widgets, so they need the wider columns.
+  Overview:
+    columns: 2
   Providers:
     columns: 4
     style: row
