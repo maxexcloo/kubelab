@@ -59,7 +59,7 @@ spec:
         annotations:
           gethomepage.dev/description: iOS App Signing & Installation
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: mdi-apple-#ffffff
           gethomepage.dev/name: &title SignTools
