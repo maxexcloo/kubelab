@@ -1,5 +1,5 @@
 // The renderer ends Home descriptions with " • <location>"; show each location
-// as a tag in the card's top-left corner instead. Cards keep the full
+// as a tag in the card's top-right corner instead. Cards keep the full
 // description if Homepage's markup changes.
 const LOCATION_SEPARATOR = " • ";
 

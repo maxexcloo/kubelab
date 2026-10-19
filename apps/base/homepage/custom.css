@@ -64,17 +64,14 @@ body {
   height: 0.625rem !important;
   width: 0.625rem !important;
 }
-/* Location tags hang from the card's top-left edge like the native tags. */
+/* Location tags hang from the card's top-right edge like Homepage's tags. */
 .service-locations {
   display: flex;
   gap: 0.25rem;
-  left: 0.75rem;
   position: absolute;
+  right: 0.75rem;
   top: 0;
   z-index: 20;
-}
-.service-card:has(> .service-locations) > .service-title {
-  padding-top: 0.5rem;
 }
 .service-location {
   background-color: rgb(var(--color-900) / 0.5);
