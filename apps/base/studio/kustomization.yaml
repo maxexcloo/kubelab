@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - external-secrets.yaml
+  - namespace.yaml
+  - network-policy.yaml
+  - pocket-id.yaml
+  - reference-grant.yaml
+  - storage.yaml
+components:
+  - ../../components/application
+  - ../../components/private-dns
+  - ../../components/app-namespace
+patches:
+  - path: helm-release.yaml
+    target:
+      kind: HelmRelease
+replacements:
+  - source:
+      kind: PocketIDClient
+      fieldPath: spec.client.id
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.STUDIO_OIDC_CLIENT_ID
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.ROUTE_HOST
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.STUDIO_OIDC_REDIRECT_URI
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+transformers:
+  - ../../transformers/route-private

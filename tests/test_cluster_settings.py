@@ -74,10 +74,11 @@ class ClusterSettingsTests(unittest.TestCase):
             ai = next(m for m in values["proxy_config"]["model_list"] if m["model_name"] == "ai/*")
             self.assertEqual(ai["litellm_params"]["api_base"], "http://bento.changed.example:8123/v1")
             self.assertEqual(values["envVars"]["UNIFI_NETWORK_HOST"], "gateway.changed.example")
-            for name, port in [("heiss-mcp", 8788), ("heiss-x-mcp", 8787)]:
-                heiss = next(r for r in resources if r["kind"] == "EndpointSlice" and r["metadata"]["name"] == name)
-                self.assertEqual(heiss["endpoints"][0]["addresses"], ["192.0.2.15"])
-                self.assertEqual(heiss["ports"][0]["port"], port)
+            studio = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "studio")
+            env = studio["spec"]["values"]["controllers"]["main"]["containers"]["main"]["env"]
+            self.assertEqual(env["BENTO_ADDRESS"], "192.0.2.15")
+            self.assertEqual(env["STUDIO_OIDC_ISSUER"], "https://id.changed.example")
+            self.assertEqual(env["ROUTE_ALIAS_HOST"], "studio.renamed.excloo.dev")
             volumes = [r for r in resources if r["kind"] == "PersistentVolume"]
             self.assertTrue(volumes)
             self.assertFalse(any("nfs" in r["spec"] for r in volumes))

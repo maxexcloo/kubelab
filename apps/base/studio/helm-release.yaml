@@ -1,0 +1,109 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            env:
+              # Address parts compose the URLs below; Studio ignores them.
+              BENTO_ADDRESS: bento.invalid
+              COMFY_URL:
+                dependsOn: BENTO_ADDRESS
+                value: http://$(BENTO_ADDRESS):8190
+              COMFY_VIDEO_URL:
+                dependsOn: BENTO_ADDRESS
+                value: http://$(BENTO_ADDRESS):8191
+              CONTROL_URL:
+                dependsOn: BENTO_ADDRESS
+                value: http://$(BENTO_ADDRESS):1337
+              HEISS_ALLOWED_HOSTS:
+                dependsOn:
+                  - LITELLM_HOST
+                  - ROUTE_ALIAS_HOST
+                  - ROUTE_HOST
+                value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(LITELLM_HOST),studio.studio.svc.cluster.local
+              HEISS_COMFY_ROOT: /comfy
+              HEISS_DATA_DIR: /data
+              STUDIO_ENABLE_BUILTIN_PROFILES: "0"
+              STUDIO_ENABLE_PRESETS: "1"
+              STUDIO_MODEL_MANIFEST: /data/config/models.json
+              STUDIO_MODEL_MANIFEST_PREFIX: models/comfyui/
+              STUDIO_MULTI_USER: "1"
+              HEISS_NO_BROWSER: "1"
+              STUDIO_OIDC_CLIENT_ID: client.invalid
+              STUDIO_OIDC_ISSUER: https://identity.invalid
+              STUDIO_OIDC_REDIRECT_URI: https://app.invalid/api/accounts/oidc/callback
+              HOST: 0.0.0.0
+              LITELLM_HOST: litellm.invalid
+              MCP_PROMPTING_PATH: /data/config/prompting.json
+              MCP_PUBLIC_URL:
+                dependsOn: LITELLM_HOST
+                value: https://$(LITELLM_HOST)/studio
+              PORT: "8787"
+              ROUTE_ALIAS_HOST: alias-host.invalid
+              ROUTE_HOST: app.invalid
+              TZ: time-zone.invalid
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/maxexcloo/studio
+              tag: 0.20.0
+            probes:
+              liveness:
+                path: /api/ping
+              readiness: &ready
+                path: /api/ready
+              startup: *ready
+            resources:
+              limits:
+                memory: 4Gi
+              requests:
+                cpu: 100m
+                memory: 512Mi
+    # Files on the TrueNAS datasets belong to the image's node user.
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /data
+      models:
+        existingClaim: models
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /comfy/models
+    route:
+      private:
+        annotations:
+          gethomepage.dev/description: Image & Video Studio
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Artificial Intelligence
+          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: mdi-image-#ffffff
+          gethomepage.dev/name: &title Studio
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/path: /api/ping
+          onepassword.excloo.dev/item: *title
+        hostnames:
+          - studio.excloo.com
+        labels:
+          app.kubernetes.io/name: "{{ .Release.Name }}"
+        parentRefs:
+          - name: private
+            namespace: networking
+    service:
+      main:
+        ports:
+          http:
+            port: 8787

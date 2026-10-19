@@ -190,6 +190,15 @@ replacements:
           index: 2
       - select:
           kind: HelmRelease
+          name: studio
+          namespace: studio
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.STUDIO_OIDC_ISSUER
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
           name: larapaper
           namespace: larapaper
         fieldPaths:
@@ -579,6 +588,12 @@ replacements:
           kind: HelmRelease
           name: cliproxyapi
           namespace: cliproxyapi
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: studio
+          namespace: studio
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.TZ
       - select:

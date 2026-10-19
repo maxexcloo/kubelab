@@ -1,0 +1,14 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: application
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/api/accounts/oidc/callback
+    description: Image & Video Studio
+    id: studio
+    isPublic: true
+    launchURL: https://app.invalid
+    name: Studio
+    pkceEnabled: true
