@@ -11,7 +11,7 @@ trap cleanup EXIT
 
 manifest_directory="${1:?Usage: check_manifests.sh <manifest-directory>}"
 schema_directory="${temporary_directory}/schemas"
-schema_cache_directory=".cache/kubeconform"
+schema_cache_directory="${XDG_CACHE_HOME:-${HOME}/.cache}/kubelab/kubeconform"
 remote_schema_cache_directory="${schema_cache_directory}/remote"
 # Keep validation aligned with the deployed cluster API.
 kubernetes_version="$(mise exec -- kubectl version --client -o json | yq -r '.clientVersion.gitVersion')"
