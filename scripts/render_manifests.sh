@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Flylab's Gatus renderer reads the per-cluster app and platform outputs.
 manifest_directory="${1:?Usage: render_manifests.sh <directory> [cluster ...]}"
 shift
 clusters=("$@")
