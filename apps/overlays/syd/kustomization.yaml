@@ -11,6 +11,7 @@ resources:
   - ../../base/bichon
   - ../../base/bookorbit
   - ../../base/cliproxyapi
+  - ../../base/studio
   - ../../base/homepage
   - ../../base/immich
   - ../../base/larapaper
@@ -198,6 +199,31 @@ replacements:
           namespace: syncthing
         fieldPaths:
           - spec.values.defaultPodOptions.nodeSelector.[kubernetes.io/hostname]
+  # Studio accepts its resolved private alias and serves result links on LiteLLM's host.
+  - source:
+      kind: HelmRelease
+      name: studio
+      namespace: studio
+      fieldPath: spec.values.route.private.hostnames.1
+    targets:
+      - select:
+          kind: HelmRelease
+          name: studio
+          namespace: studio
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.ROUTE_ALIAS_HOST
+  - source:
+      kind: HTTPRoute
+      name: litellm
+      namespace: litellm
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+          name: studio
+          namespace: studio
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.LITELLM_HOST
   # The cluster's Syncthing item is named for its host.
   - source:
       kind: HelmRelease

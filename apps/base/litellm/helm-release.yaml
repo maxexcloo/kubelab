@@ -116,37 +116,9 @@ spec:
           auth_value: os.environ/CONTROL_MCP_API_KEY
           server_id: ai-control
           transport: http
-          url: http://heiss-mcp:8788/mcp
+          url: http://studio.studio.svc.cluster.local:8787/mcp
           mcp_info:
             description: Manage AI workloads and preview GPU allocation changes.
-        HEISS:
-          alias: heiss
-          allow_all_keys: true
-          auth_type: bearer_token
-          auth_value: os.environ/HEISS_MCP_API_KEY
-          server_id: heiss
-          timeout: 1860
-          transport: http
-          url: http://heiss-mcp:8788/mcp
-          extra_headers:
-            - X-AI-User-Id
-            - X-Bento-User-Id
-          mcp_info:
-            description: Create and manage images and videos in the HEISS studio.
-        HEISS_X:
-          alias: heiss_x
-          allow_all_keys: false
-          auth_type: bearer_token
-          auth_value: os.environ/HEISS_X_MCP_API_KEY
-          server_id: heiss-x
-          timeout: 1860
-          transport: http
-          url: http://heiss-x-mcp:8787/mcp
-          extra_headers:
-            - X-AI-User-Id
-            - X-Bento-User-Id
-          mcp_info:
-            description: Create and manage images and videos in the HEISS X studio.
         Home_Assistant:
           alias: home_assistant
           server_id: home-assistant
@@ -154,6 +126,19 @@ spec:
           url: os.environ/HOME_ASSISTANT_MCP_URL
           mcp_info:
             description: Inspect and control home devices, automations and dashboards.
+        Studio:
+          alias: studio
+          allow_all_keys: true
+          auth_type: bearer_token
+          auth_value: os.environ/STUDIO_MCP_API_KEY
+          server_id: studio
+          timeout: 1860
+          transport: http
+          url: http://studio.studio.svc.cluster.local:8787/mcp
+          extra_headers:
+            - X-AI-User-Id
+          mcp_info:
+            description: Create and manage images and videos in Studio.
         UniFi_Network:
           alias: unifi_network
           command: /opt/mcp/uvx

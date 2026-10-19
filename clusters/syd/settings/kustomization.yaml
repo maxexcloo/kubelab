@@ -160,17 +160,11 @@ replacements:
       fieldPath: data.bento_address
     targets:
       - select:
-          kind: EndpointSlice
-          name: heiss-mcp
-          namespace: litellm
+          kind: HelmRelease
+          name: studio
+          namespace: studio
         fieldPaths:
-          - endpoints.0.addresses.0
-      - select:
-          kind: EndpointSlice
-          name: heiss-x-mcp
-          namespace: litellm
-        fieldPaths:
-          - endpoints.0.addresses.0
+          - spec.values.controllers.main.containers.main.env.BENTO_ADDRESS
   - source:
       kind: ConfigMap
       name: cluster-settings
