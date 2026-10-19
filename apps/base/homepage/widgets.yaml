@@ -1,18 +1,3 @@
-- datetime:
-    locale: en-AU
-    text_size: xl
-    format:
-      dateStyle: full
-      hourCycle: h23
-      timeStyle: short
-- openmeteo:
-    label: Sydney
-    latitude: -33.8688
-    longitude: 151.2093
-    units: metric
-- search:
-    provider: google
-    target: _blank
 # Node names, Ready state and usage come from the local Kubernetes API and metrics-server.
 - kubernetes:
     cluster:
@@ -26,3 +11,21 @@
       memory: true
       show: true
       showLabel: true
+- search:
+    provider: google
+    target: _blank
+- datetime:
+    locale: en-AU
+    text_size: md
+    format:
+      day: numeric
+      hour: 2-digit
+      hourCycle: h23
+      minute: 2-digit
+      month: short
+      weekday: short
+- openmeteo:
+    label: Sydney
+    latitude: -33.8688
+    longitude: 151.2093
+    units: metric
