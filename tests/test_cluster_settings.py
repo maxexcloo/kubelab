@@ -1,15 +1,37 @@
 """Shared settings must reach each Flux boundary without deploying helper resources."""
 
 import json
+import re
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
-from support import CLUSTERS, copy_repository, read_resources, read_yaml
+from support import CLUSTERS, ROOT, copy_repository, read_resources, read_yaml
+
+# Base manifests use these until settings or route replacements resolve them.
+# Crossplane compositions keep runtime templates that their functions patch.
+PLACEHOLDER = re.compile(r"[\w-]\.invalid\b|\.cluster\.excloo\.dev\b|profile-placeholder")
+
+
+def rendered_resources(test, root):
+    with tempfile.TemporaryDirectory() as directory:
+        output = Path(directory)
+        subprocess.run(["scripts/render_manifests.sh", str(output)], cwd=root, check=True)
+        resources = []
+        for path in sorted(output.rglob("*.yaml")):
+            for resource in read_resources(path):
+                if resource["kind"] != "Composition":
+                    match = PLACEHOLDER.search(json.dumps(resource))
+                    test.assertIsNone(match, f"{path.relative_to(output)}: {resource['kind']}/{resource['metadata']['name']}")
+                resources.append(resource)
+        return resources
 
 
 class ClusterSettingsTests(unittest.TestCase):
+    def test_every_flux_path_resolves_placeholders(self):
+        self.assertTrue(rendered_resources(self, ROOT))
+
     def test_shared_settings_reach_apps_platform_and_integrations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -33,14 +55,10 @@ class ClusterSettingsTests(unittest.TestCase):
                     "unifi_host": "gateway.changed.example",
                 })
                 path.write_text(json.dumps(settings))
-            output = root / "rendered"
-            subprocess.run(["scripts/render_manifests.sh", str(output)], cwd=root, check=True)
-            resources = []
-            for path in output.rglob("*.yaml"):
-                rendered = path.read_text()
-                for unresolved in ("app.invalid", "identity.invalid", "storage.invalid", "id.excloo.com", "grafana.excloo.com", "10.4.0.3"):
-                    self.assertNotIn(unresolved, rendered, str(path))
-                resources.extend(read_resources(path))
+            resources = rendered_resources(self, root)
+            rendered = json.dumps(resources)
+            for unresolved in ("id.excloo.com", "grafana.excloo.com"):
+                self.assertNotIn(unresolved, rendered)
             self.assertFalse(any(r["metadata"]["name"].startswith(("cluster-settings", "shared-settings")) for r in resources))
             # Defaults only affect creation; explicit targets migrate existing DNS records too.
             dns_records = [r for r in resources if r["kind"] == "PrivateDNSRecord"]
