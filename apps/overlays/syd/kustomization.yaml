@@ -108,6 +108,51 @@ replacements:
           delimiter: /
           index: 2
   - source:
+      kind: HelmRelease
+      name: bookorbit
+      namespace: bookorbit
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+          name: shelfmark
+          namespace: shelfmark
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.CALIBRE_WEB_URL
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: HTTPRoute
+      name: librechat
+      namespace: librechat
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: Deployment
+          name: librechat-admin
+          namespace: librechat-admin
+        fieldPaths:
+          - spec.template.spec.containers.[name=admin].env.[name=VITE_API_BASE_URL].value
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: HTTPRoute
+      name: librechat-admin
+      namespace: librechat-admin
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+          name: librechat
+          namespace: librechat
+        fieldPaths:
+          - spec.values.librechat.adminPanelUrl
+        options:
+          delimiter: /
+          index: 2
+  - source:
       kind: HTTPRoute
       name: immich
       namespace: immich

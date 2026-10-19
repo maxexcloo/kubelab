@@ -13,7 +13,7 @@ spec:
               AA_MIRROR_URLS: https://annas-archive.pk,https://annas-archive.gd,https://annas-archive.gl
               AUTH_METHOD: oidc
               BOOKS_OUTPUT_MODE: folder
-              CALIBRE_WEB_URL: https://books.excloo.com
+              CALIBRE_WEB_URL: https://bookorbit.invalid
               CONFIG_DIR: /config
               DIRECT_DOWNLOAD_ENABLED: "true"
               DIRECT_DOWNLOAD_LANGUAGE_FROM_PATH: "true"

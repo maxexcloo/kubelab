@@ -30,7 +30,7 @@ spec:
     ingress:
       enabled: false
     librechat:
-      adminPanelUrl: https://librechat-admin.excloo.com
+      adminPanelUrl: https://librechat-admin.invalid
       configEnv:
         ALLOW_REGISTRATION: "false"
         ALLOW_SOCIAL_LOGIN: "true"
