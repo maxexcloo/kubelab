@@ -88,7 +88,7 @@ class PocketIDClientTests(unittest.TestCase):
         self.assertEqual(secret["base"]["spec"]["managementPolicies"], ["Create", "Observe"])
 
     def test_requests_stay_beside_the_pocket_id_api_key(self):
-        for name in ["client", "client-secret", "group-access", "onepassword-item"]:
+        for name in ["client", "client-secret", "group-access", "onepassword-client-id", "onepassword-client-secret"]:
             resource = composition_resource(
                 "platform/automation/pocket-id/composition.yaml", name, base=False
             )
@@ -99,7 +99,7 @@ class PocketIDClientTests(unittest.TestCase):
             )
 
     def test_only_confidential_clients_publish_a_secret(self):
-        for name in ["client-secret", "onepassword-item"]:
+        for name in ["client-secret", "onepassword-client-id", "onepassword-client-secret"]:
             resource = composition_resource(
                 "platform/automation/pocket-id/composition.yaml", name, base=False
             )
