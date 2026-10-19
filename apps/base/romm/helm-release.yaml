@@ -62,7 +62,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/rommapp/romm
-              tag: 5.4.0@sha256:03295f95a6290e752641f9553ac4198b0e5b71b879d57f7b2371b98f608feb54
+              tag: 5.4.0
             probes:
               liveness: &health
                 path: /api/heartbeat
@@ -85,7 +85,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/valkey/valkey
-              tag: 9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
+              tag: 9.1.2
             probes:
               liveness: &valkey-health
                 enabled: true

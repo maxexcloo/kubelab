@@ -16,7 +16,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/atvloadly
-              tag: sha-0e8fa65d87697598dbb745f1f083dfcb7632b1a9@sha256:4a74ec5aa83982d8c3aafe522faf059600e2f7396db3b0ef1b7cb816fd8abdb4
+              tag: sha-0e8fa65d87697598dbb745f1f083dfcb7632b1a9
             probes:
               liveness: &health
                 custom: true
@@ -56,7 +56,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/library/nginx
-              tag: 1.31.6-alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
+              tag: 1.31.7-alpine
             resources:
               limits:
                 memory: 128Mi

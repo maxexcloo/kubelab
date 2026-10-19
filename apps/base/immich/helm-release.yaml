@@ -57,7 +57,7 @@ spec:
             main:
               image:
                 repository: ghcr.io/immich-app/immich-machine-learning
-                tag: v3.3.1@sha256:513c831cfb010ad319341a0c86b42c575a0d5b688d3e8cae346ee624074a58ed
+                tag: v3.3.3
               resources:
                 limits:
                   memory: 4Gi
@@ -93,7 +93,7 @@ spec:
                       name: immich-database
               image:
                 repository: ghcr.io/immich-app/immich-server
-                tag: v3.3.1@sha256:db996e352359771c6a3db121a0ed8761516b22f727fc092a0f46dcfef82c1bc1
+                tag: v3.3.3
               resources:
                 limits:
                   memory: 8Gi
@@ -139,7 +139,7 @@ spec:
                 - "yes"
               image:
                 repository: docker.io/valkey/valkey
-                tag: 9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
+                tag: 9.1.2
               resources:
                 limits:
                   memory: 2Gi
