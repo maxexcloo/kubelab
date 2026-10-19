@@ -129,6 +129,7 @@ spec:
           transport: http
           url: http://heiss-mcp:8788/mcp
           extra_headers:
+            - X-AI-User-Id
             - X-Bento-User-Id
           mcp_info:
             description: Create and manage images and videos in the HEISS studio.
@@ -142,6 +143,7 @@ spec:
           transport: http
           url: http://heiss-x-mcp:8787/mcp
           extra_headers:
+            - X-AI-User-Id
             - X-Bento-User-Id
           mcp_info:
             description: Create and manage images and videos in the HEISS X studio.

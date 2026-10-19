@@ -175,6 +175,7 @@ mcpServers:
     title: HEISS
     url: http://litellm.litellm.svc.cluster.local:4000/heiss/mcp
     headers:
+      X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
       X-Bento-User-Id: "{{LIBRECHAT_USER_ID}}"
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   heiss-x:
@@ -186,6 +187,7 @@ mcpServers:
     title: HEISS X
     url: http://litellm.litellm.svc.cluster.local:4000/heiss_x/mcp
     headers:
+      X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
       X-Bento-User-Id: "{{LIBRECHAT_USER_ID}}"
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
   home-assistant:
