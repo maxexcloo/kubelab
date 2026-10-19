@@ -16,8 +16,8 @@ spec:
                     operator: In
                     values:
                       - internal
-      hostname: syd-operator
+      hostname: name.invalid-operator
       defaultTags:
-        - tag:cluster-syd-operator
+        - tag:cluster-name.invalid-operator
     proxyConfig:
-      defaultTags: tag:cluster-syd
+      defaultTags: tag:cluster-name.invalid

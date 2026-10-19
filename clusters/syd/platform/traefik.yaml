@@ -64,9 +64,9 @@ spec:
             type: ClusterIP
         private:
           annotations:
-            tailscale.com/hostname: syd-ingress
+            tailscale.com/hostname: name.invalid-ingress
             tailscale.com/proxy-group: ingress
-            tailscale.com/tags: tag:cluster-syd
+            tailscale.com/tags: tag:cluster-name.invalid
           spec:
             allocateLoadBalancerNodePorts: false
             internalTrafficPolicy: Local
