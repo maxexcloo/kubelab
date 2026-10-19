@@ -43,7 +43,7 @@ spec:
         annotations:
           gethomepage.dev/description: Email Archiving
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Applications
+          gethomepage.dev/group: Infrastructure
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-bichon
           gethomepage.dev/name: &title Bichon

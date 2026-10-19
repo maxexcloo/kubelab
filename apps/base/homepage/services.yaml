@@ -20,6 +20,11 @@
         description: Matter Bridge
         href: homelab://mbk/hass/management/3fd9e6b0_hamh
         icon: sh-home-assistant-matter-hub
+    - SLZB-06M:
+        description: Zigbee Ethernet Adapter
+        href: &slzb_06m homelab://mbk/slzb-06m/management
+        icon: sh-zigbee
+        siteMonitor: *slzb_06m
     - Studio Code Server:
         description: Browser IDE
         href: homelab://mbk/hass/management/a0d7b954_vscode
@@ -29,17 +34,16 @@
         href: homelab://mbk/hass/management/45df7312_zigbee2mqtt
         icon: sh-zigbee2mqtt
 - Infrastructure:
-    - Netboot:
-        description: Network Boot Server
-        href: &netboot homelab://mbk/kimbap/netboot
-        icon: mdi-server-network-#ffffff
-        siteMonitor: *netboot
-- Hardware:
     - NanoKVM:
         description: Remote Console & Power Control
         href: &nanokvm homelab://mbk/nanokvm/management
         icon: sh-sipeed
         siteMonitor: *nanokvm
+    - Netboot:
+        description: Network Boot Server
+        href: &netboot homelab://mbk/kimbap/netboot
+        icon: mdi-server-network-#ffffff
+        siteMonitor: *netboot
     - TrueNAS:
         description: Storage Appliance
         href: &truenas homelab://mbk/kimbap/management

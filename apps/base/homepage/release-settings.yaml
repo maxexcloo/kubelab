@@ -12,7 +12,7 @@ spec:
         annotations:
           gethomepage.dev/description: Application Dashboard
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Operations
+          gethomepage.dev/group: Infrastructure
           gethomepage.dev/icon: sh-homepage
           gethomepage.dev/name: &title Homepage
           monitoring.excloo.dev/enabled: "true"

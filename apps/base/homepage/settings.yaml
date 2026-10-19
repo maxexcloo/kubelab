@@ -19,10 +19,6 @@ layout:
     columns: 2
     style: row
     tab: Home
-  Hardware:
-    columns: 3
-    style: row
-    tab: Home
   Infrastructure:
     columns: 2
     style: row
