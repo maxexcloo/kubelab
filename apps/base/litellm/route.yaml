@@ -11,8 +11,7 @@ metadata:
     gethomepage.dev/name: &title LiteLLM
     monitoring.excloo.dev/enabled: "true"
     monitoring.excloo.dev/path: /health/liveliness
-    onepassword.excloo.dev/item: a7lyhpxy7g2wf2lbmtba2lbdiy
-    onepassword.excloo.dev/title: *title
+    onepassword.excloo.dev/item: *title
   labels:
     app.kubernetes.io/name: application
     gateway.excloo.dev/internal-alias: "true"

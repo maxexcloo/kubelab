@@ -3,4 +3,4 @@ kind: ResendKey
 metadata:
   name: resend
 spec:
-  itemID: ve6qfldrb2gltpkkvyvp7zhkxi
+  item: BookOrbit

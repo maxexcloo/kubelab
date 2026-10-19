@@ -53,8 +53,7 @@ spec:
           gethomepage.dev/widget.type: miniflux
           gethomepage.dev/widget.url: https://app.invalid
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: pq2izjduqiynjzrzy4327av4n4
-          onepassword.excloo.dev/title: *title
+          onepassword.excloo.dev/item: *title
         hostnames:
           - reader.excloo.com
         labels:

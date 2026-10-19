@@ -13,4 +13,4 @@ spec:
       private:
         annotations:
           gethomepage.dev/name: &title Syncthing (Kimbap)
-          onepassword.excloo.dev/title: *title
+          onepassword.excloo.dev/item: *title

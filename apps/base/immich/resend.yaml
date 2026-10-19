@@ -3,4 +3,4 @@ kind: ResendKey
 metadata:
   name: resend
 spec:
-  itemID: nr4tpmfv2m2j5xbzllnhjqi2ay
+  item: Immich

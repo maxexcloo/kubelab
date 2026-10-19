@@ -75,8 +75,7 @@ spec:
           gethomepage.dev/icon: sh-pocket-id
           gethomepage.dev/name: &title Pocket ID
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: dgxladwiom2fs27x3fhzyt2kj4
-          onepassword.excloo.dev/title: *title
+          onepassword.excloo.dev/item: *title
         hostnames:
           - identity.invalid
         labels:

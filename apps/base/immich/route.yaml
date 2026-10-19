@@ -16,8 +16,7 @@ metadata:
     gethomepage.dev/widget.url: https://app.invalid
     gethomepage.dev/widget.version: "2"
     monitoring.excloo.dev/enabled: "true"
-    onepassword.excloo.dev/item: nr4tpmfv2m2j5xbzllnhjqi2ay
-    onepassword.excloo.dev/title: *title
+    onepassword.excloo.dev/item: *title
   labels:
     app.kubernetes.io/name: application
     gateway.excloo.dev/public-access: "true"

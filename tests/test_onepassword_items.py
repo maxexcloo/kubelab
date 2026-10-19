@@ -41,7 +41,7 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
-    def test_all_managed_routes_use_display_names_and_stable_item_references(self):
+    def test_all_managed_routes_reference_items_by_display_name(self):
         from support import repository_resources
 
         resources = repository_resources("apps/overlays/syd") + repository_resources("clusters/syd/platform")
@@ -56,38 +56,29 @@ class ReconcilerTests(unittest.TestCase):
         self.assertGreaterEqual(len(managed), 20)
         for route in managed:
             annotations = route["metadata"]["annotations"]
-            self.assertRegex(annotations["onepassword.excloo.dev/item"], ITEM_ID)
-            self.assertEqual(annotations["onepassword.excloo.dev/title"], annotations["gethomepage.dev/name"])
+            self.assertEqual(annotations["onepassword.excloo.dev/item"], annotations["gethomepage.dev/name"])
+            self.assertNotIn("onepassword.excloo.dev/title", annotations)
         secrets = [r for r in resources if r["kind"] == "ExternalSecret" and r["spec"].get("secretStoreRef", {}).get("name") == "onepassword"]
         for secret in secrets:
+            self.assertNotIn("onepassword.excloo.dev/title", secret["metadata"].get("annotations", {}))
             for data in secret["spec"].get("data", []):
-                self.assertRegex(data["remoteRef"]["key"], ITEM_ID)
-        with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda p: routes if "httproutes" in p else secrets if p.endswith("/externalsecrets") else []), \
-                patch.object(RECONCILER, "secret_values", side_effect=lambda r, m: {k: "fixture" for k in m}):
-            desired = RECONCILER.discover_items()
-        for route in managed:
-            annotations = route["metadata"]["annotations"]
-            self.assertEqual(desired[annotations["onepassword.excloo.dev/item"]]["title"], annotations["onepassword.excloo.dev/title"])
+                self.assertNotRegex(data["remoteRef"]["key"], ITEM_ID)
         for resource in resources:
             if resource["kind"] == "ResendKey":
-                self.assertRegex(resource["spec"]["itemID"], ITEM_ID)
+                self.assertNotRegex(resource["spec"]["item"], ITEM_ID)
             if resource["kind"] in {"B2ObjectStorage", "ResendKey"}:
                 self.assertNotIn("displayName", resource["spec"])
 
-    def test_uuid_secret_ownership_preserves_generation_for_multiple_items(self):
-        owner, shared = "a" * 26, "b" * 26
+    def test_secret_ownership_preserves_generation_for_multiple_items(self):
+        owner, shared = "Application", "Shared"
         secret = {"kind": "ExternalSecret", "metadata": {"name": "app", "namespace": "app", "annotations": {"onepassword.excloo.dev/generate-fields": "password"}}, "spec": {"secretStoreRef": {"name": "onepassword"}, "data": [{"remoteRef": {"key": owner, "property": "password"}}, {"remoteRef": {"key": shared, "property": "token"}}]}}
-        route = {"metadata": {"name": "app", "namespace": "app", "annotations": {"gethomepage.dev/name": "Application", "onepassword.excloo.dev/item": owner}}, "spec": {"hostnames": ["app.example.net"]}}
+        route = {"metadata": {"name": "app", "namespace": "app", "annotations": {"gethomepage.dev/name": owner, "onepassword.excloo.dev/item": owner}}, "spec": {"hostnames": ["app.example.net"]}}
         with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda p: [route] if "httproutes" in p else [secret] if p.endswith("/externalsecrets") else []):
             desired = RECONCILER.discover_items()
-            self.assertEqual(desired[owner]["generate"], {"password"})
-            self.assertEqual(desired[shared]["generate"], set())
-            # Dashboard names never rename an item without an explicit title.
-            self.assertIsNone(desired[owner]["title"])
-            route["metadata"]["annotations"]["onepassword.excloo.dev/title"] = "Application"
-            self.assertEqual(RECONCILER.discover_items()[owner]["title"], "Application")
+        self.assertEqual(desired[owner]["generate"], {"password"})
+        self.assertEqual(desired[shared]["generate"], set())
 
-    def test_display_name_change_keeps_syncthing_resource_and_item_identities(self):
+    def test_display_name_change_moves_syncthing_references_with_it(self):
         from support import copy_repository, render_resources
 
         with tempfile.TemporaryDirectory() as temporary:
@@ -100,29 +91,24 @@ class ReconcilerTests(unittest.TestCase):
         secret = next(r for r in resources if r["kind"] == "ExternalSecret" and r["metadata"]["namespace"] == "syncthing")
         annotations = release["spec"]["values"]["route"]["private"]["annotations"]
         self.assertEqual(annotations["gethomepage.dev/name"], "Syncthing (Archive)")
-        route = {"metadata": {"namespace": "syncthing", "name": "syncthing", "annotations": annotations}, "spec": {"hostnames": ["syncthing.example.net"]}}
-        with patch.object(RECONCILER, "kubernetes_list", side_effect=lambda p: [route] if "httproutes" in p else []):
-            desired = RECONCILER.discover_items()
-        self.assertEqual(desired[annotations["onepassword.excloo.dev/item"]]["title"], "Syncthing (Archive)")
-        self.assertTrue(all(d["remoteRef"]["key"] == annotations["onepassword.excloo.dev/item"] for d in secret["spec"]["data"]))
+        self.assertEqual(annotations["onepassword.excloo.dev/item"], "Syncthing (Archive)")
+        self.assertTrue(all(d["remoteRef"]["key"] == "Syncthing (Archive)" for d in secret["spec"]["data"]))
         self.assertEqual(secret["metadata"]["name"], "syncthing")
         self.assertEqual(release["spec"]["values"]["persistence"]["data"]["existingClaim"], "data")
         self.assertEqual(release["spec"]["values"]["defaultPodOptions"]["nodeSelector"]["kubernetes.io/hostname"], "kimbap")
 
-    def test_item_rename_preserves_identity_credentials_and_consumers(self):
-        item_id = "a" * 26
+    def test_items_are_found_by_title_and_never_renamed(self):
         current = {
             "category": "LOGIN",
             "fields": [{"id": "password", "label": "password", "value": "keep-password"}],
-            "id": item_id,
+            "id": "item-id",
             "tags": ["Kubelab"],
             "title": "Application",
-            "urls": [{"href": "https://app.example.net", "label": "Sign In", "primary": True}],
+            "urls": [{"href": "https://old.example.net", "label": "Sign In", "primary": True}],
             "vault": {"id": "vault"},
         }
-        desired = {item_id: item_configuration(
-            fields={"password"}, login=True, title="Application (Kimbap)",
-            urls={"https://app.example.net"},
+        desired = {"Application": item_configuration(
+            fields={"password"}, login=True, urls={"https://app.example.net"},
         )}
         writes = []
 
@@ -131,7 +117,7 @@ class ReconcilerTests(unittest.TestCase):
                 return [{"id": "vault"}]
             if path == "/vaults/vault/items":
                 return [{key: current[key] for key in ["id", "title"]}]
-            self.assertEqual(path, f"/vaults/vault/items/{item_id}")
+            self.assertEqual(path, "/vaults/vault/items/item-id")
             if method == "PUT":
                 writes.append(copy.deepcopy(body))
                 current.clear()
@@ -140,33 +126,26 @@ class ReconcilerTests(unittest.TestCase):
                 self.assertEqual(method, "GET")
             return copy.deepcopy(current)
 
-        readiness = False
         with patch.object(RECONCILER, "connect", side_effect=connect), \
                 patch.object(RECONCILER, "discover_items", return_value=desired), \
-                patch.object(RECONCILER, "kustomizations_ready", side_effect=lambda: readiness), \
+                patch.object(RECONCILER, "kustomizations_ready", return_value=True), \
                 patch.object(RECONCILER, "is_dry_run", return_value=False), \
                 contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
-            self.assertEqual(current["title"], "Application")
-            readiness = True
-            writes.clear()
-            RECONCILER.main()
             RECONCILER.main()
         self.assertEqual(len(writes), 1)
-        self.assertEqual(current["id"], item_id)
-        self.assertEqual(current["title"], "Application (Kimbap)")
+        self.assertEqual(current["id"], "item-id")
+        self.assertEqual(current["title"], "Application")
         self.assertEqual(current["fields"][0]["value"], "keep-password")
-        self.assertEqual(current["urls"], [{"href": "https://app.example.net", "label": "Sign In", "primary": True}])
+        self.assertEqual(current["urls"], [{"href": "https://app.example.net", "primary": True}])
 
-    def test_item_rename_rejects_conflicts_and_missing_items(self):
-        item_id = "a" * 26
-        summaries = [{"id": item_id, "title": "Application"}, {"id": "other", "title": "Taken"}]
-        with self.assertRaisesRegex(RuntimeError, "belongs to another item"):
-            RECONCILER.check_references({item_id: {"title": "Taken"}}, summaries)
-        with self.assertRaisesRegex(RuntimeError, "is missing"):
-            RECONCILER.check_references({"Application": {"title": "Renamed"}}, summaries)
-        with self.assertRaisesRegex(RuntimeError, "is missing"):
-            RECONCILER.check_references({"b" * 26: {}}, summaries)
+    def test_item_ids_reject_missing_and_duplicate_titles(self):
+        summaries = [{"id": "first", "title": "Application"}, {"id": "other", "title": "Taken"}]
+        self.assertEqual(RECONCILER.item_ids({"Application": {}}, summaries), {"Application": "first", "Taken": "other"})
+        with self.assertRaisesRegex(RuntimeError, "missing: Renamed"):
+            RECONCILER.item_ids({"Renamed": {}}, summaries)
+        with self.assertRaisesRegex(RuntimeError, "duplicate 1Password item title"):
+            RECONCILER.item_ids({}, summaries + [{"id": "second", "title": "Application"}])
 
     def test_grouping_preserves_websites_and_credentials_and_removes_empty_groups(self):
         current = {
@@ -617,7 +596,7 @@ class ReconcilerTests(unittest.TestCase):
             patch.object(
                 RECONCILER,
                 "discover_items",
-                return_value={item_id: item_configuration(login=True)},
+                return_value={"Application": item_configuration(login=True)},
             ),
             patch.object(
                 RECONCILER,
@@ -711,7 +690,7 @@ class ReconcilerTests(unittest.TestCase):
             self.addCleanup(setattr, RECONCILER, name, value)
         RECONCILER.kustomizations_ready = lambda: False
         RECONCILER.connect = connect
-        RECONCILER.discover_items = lambda cluster=None: {"existing-id": desired}
+        RECONCILER.discover_items = lambda cluster=None: {"Pocket ID": desired}
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()

@@ -118,5 +118,18 @@ replacements:
           name: immich-private
         fieldPaths:
           - spec.hostnames.0
+  # The cluster's Syncthing item is named for its host.
+  - source:
+      kind: HelmRelease
+      name: syncthing
+      namespace: syncthing
+      fieldPath: spec.values.route.private.annotations.[onepassword.excloo.dev/item]
+    targets:
+      - select:
+          kind: ExternalSecret
+          name: syncthing
+          namespace: syncthing
+        fieldPaths:
+          - spec.data.*.remoteRef.key
 components:
   - ../../../clusters/syd/settings

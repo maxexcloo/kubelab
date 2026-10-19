@@ -3,4 +3,4 @@ kind: ResendKey
 metadata:
   name: resend
 spec:
-  itemID: 37fmyulaj34v5ylihuophrd6ai
+  item: Linkwarden

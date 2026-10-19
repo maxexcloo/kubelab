@@ -128,8 +128,7 @@ spec:
           gethomepage.dev/icon: sh-aiometadata
           gethomepage.dev/name: &title AIOMetadata
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: ia4ldwhyyqxnbrqugi7i4jyhf4
-          onepassword.excloo.dev/title: *title
+          onepassword.excloo.dev/item: *title
         hostnames:
           - aiometadata.excloo.com
         labels:

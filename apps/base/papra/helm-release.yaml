@@ -65,8 +65,7 @@ spec:
           gethomepage.dev/icon: sh-papra
           gethomepage.dev/name: &title Papra
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: k3c4sjg26qsapc3g7it6f7bcl4
-          onepassword.excloo.dev/title: *title
+          onepassword.excloo.dev/item: *title
         hostnames:
           - papra.excloo.com
         labels:

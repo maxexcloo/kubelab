@@ -110,7 +110,6 @@ def item_configuration(resource):
         "remove": set(
             filter(None, values.get(f"{ANNOTATION_PREFIX}remove-fields", "").split(","))
         ),
-        "title": values.get(f"{ANNOTATION_PREFIX}title"),
         "values": secret_values(
             resource, json.loads(values.get(f"{ANNOTATION_PREFIX}values", "{}"))
         ),
@@ -125,10 +124,6 @@ def merge_configuration(item, resource):
     item["formats"].update(configuration["formats"])
     item["generate"].update(configuration["generate"])
     item["remove"].update(configuration["remove"])
-    if configuration["title"]:
-        if item["title"] and item["title"] != configuration["title"]:
-            raise RuntimeError("1Password item has conflicting owning titles")
-        item["title"] = configuration["title"]
     item["values"].update(configuration["values"])
 
 
@@ -142,7 +137,6 @@ def new_item():
         "generate": set(),
         "login": False,
         "remove": set(),
-        "title": None,
         "urls": set(),
         "values": {},
     }
@@ -248,7 +242,7 @@ def discover_items():
                     login_items[title] = login_item
             if field:
                 item["fields"].add(field)
-    # References own credential identity; only an explicit title renames an item.
+    # References are item titles in the cluster vault.
     for route in routes:
         namespace = route["metadata"]["namespace"]
         route_annotations = annotations(route)
@@ -264,11 +258,6 @@ def discover_items():
                 f"1Password route {namespace}/{route['metadata']['name']} has no URL"
             )
         item = desired.setdefault(title, new_item())
-        display_title = route_annotations.get(f"{ANNOTATION_PREFIX}title")
-        if display_title:
-            if item["title"] and item["title"] != display_title:
-                raise RuntimeError(f"1Password item {title} has conflicting titles")
-            item["title"] = display_title
         category = route_annotations.get(f"{ANNOTATION_PREFIX}category", "LOGIN")
         if category not in {"LOGIN", "SERVER"}:
             raise RuntimeError(
@@ -437,7 +426,6 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
         raise RuntimeError(f"1Password item {title} has unsupported field formats")
     current["category"] = "LOGIN" if desired["login"] else "SERVER"
     current.setdefault("tags", ["Kubelab"])
-    current["title"] = desired.get("title") or current.get("title") or title
     current.setdefault("vault", {"id": vault_id})
     reconcile_urls(current, desired["urls"], allow_removal=allow_removal)
     fields = current.setdefault("fields", [])
@@ -512,21 +500,17 @@ def comparable(item):
     return result
 
 
-def check_references(desired, summaries):
-    by_id = {summary["id"]: summary for summary in summaries}
-    by_title = {}
+def item_ids(desired, summaries):
+    ids = {}
     for summary in summaries:
         title = summary["title"]
-        if title in by_title:
+        if title in ids:
             raise RuntimeError(f"duplicate 1Password item title: {title}")
-        by_title[title] = summary
-    for reference, configuration in desired.items():
-        summary = by_id.get(reference)
-        if summary is None:
-            raise RuntimeError(f"referenced 1Password item ID {reference} is missing")
-        title = configuration.get("title")
-        if title in by_title and by_title[title]["id"] != summary["id"]:
-            raise RuntimeError(f"1Password title {title} belongs to another item")
+        ids[title] = summary["id"]
+    missing = sorted(set(desired) - set(ids))
+    if missing:
+        raise RuntimeError(f"referenced 1Password items are missing: {', '.join(missing)}")
+    return ids
 
 
 def main():
@@ -539,7 +523,7 @@ def main():
     vault_id = vaults[0]["id"]
     desired = discover_items()
     summaries = connect(f"/vaults/{vault_id}/items")
-    check_references(desired, summaries)
+    ids = item_ids(desired, summaries)
     try:
         archive_ready = kustomizations_ready()
     except RuntimeError as error:
@@ -549,29 +533,26 @@ def main():
         if not archive_ready:
             print("skipped removals because Flux Kustomizations are not fully reconciled")
     changed = 0
-    for reference, configuration in sorted(desired.items()):
-        current = connect(f"/vaults/{vault_id}/items/{reference}")
+    for title, configuration in sorted(desired.items()):
+        current = connect(f"/vaults/{vault_id}/items/{ids[title]}")
         if externally_owned(current):
             continue
         wanted = normalise_item(
             copy.deepcopy(current),
-            reference,
+            title,
             configuration,
             vault_id,
             allow_removal=archive_ready,
         )
-        if not archive_ready:
-            # A rename waits until Flux has updated every credential consumer.
-            wanted["title"] = current["title"]
         if current.get("category") != wanted["category"]:
             # Connect cannot change a category in place; replacing the item would
-            # change the ID its consumers reference.
-            raise RuntimeError(f"1Password item {reference} has the wrong category")
+            # discard its history and generated credentials.
+            raise RuntimeError(f"1Password item {title} has the wrong category")
         if comparable(current) == comparable(wanted):
             continue
         if not dry_run:
             connect(
-                f"/vaults/{vault_id}/items/{reference}",
+                f"/vaults/{vault_id}/items/{ids[title]}",
                 body=wanted,
                 method="PUT",
             )
@@ -583,7 +564,7 @@ def main():
         return
     for summary in sorted(summaries, key=lambda item: item["title"].lower()):
         title = summary["title"]
-        if summary["id"] in desired:
+        if title in desired:
             continue
         current = connect(f"/vaults/{vault_id}/items/{summary['id']}")
         if current.get("tags") != ["Kubelab"]:

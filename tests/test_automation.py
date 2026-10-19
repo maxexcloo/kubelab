@@ -41,12 +41,12 @@ def evaluate(expression, data):
 
 
 class ResendIdentityTests(unittest.TestCase):
-    def test_publishing_uses_the_existing_item_id_and_retains_the_api_key_identity(self):
+    def test_publishing_uses_the_existing_item_title_and_retains_the_api_key_identity(self):
         publisher = composition_resource(
             "platform/automation/resend/composition.yaml", "onepassword-item", base=False
         )
         patch = next(p for p in publisher["patches"] if p.get("toFieldPath") == "spec.data[0].match.remoteRef.remoteKey")
-        self.assertEqual(patch["fromFieldPath"], "spec.itemID")
+        self.assertEqual(patch["fromFieldPath"], "spec.item")
         self.assertEqual(patch["policy"]["fromFieldPath"], "Required")
         key = composition_resource(
             "platform/automation/resend/composition.yaml", "api-key", base=False

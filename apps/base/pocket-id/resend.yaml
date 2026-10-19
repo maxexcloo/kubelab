@@ -3,4 +3,4 @@ kind: ResendKey
 metadata:
   name: resend
 spec:
-  itemID: dgxladwiom2fs27x3fhzyt2kj4
+  item: Pocket ID

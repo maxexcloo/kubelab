@@ -26,10 +26,8 @@ spec:
                   minLength: 1
                   pattern: ^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$
                   type: string
-                itemID:
-                  description: Existing 1Password item UUID; publishing is independent of its display name.
-                  maxLength: 26
-                  minLength: 26
-                  pattern: ^[a-z0-9]{26}$
+                item:
+                  description: Title of the existing 1Password item that receives the key.
+                  minLength: 1
                   type: string
-              required: [cluster, itemID]
+              required: [cluster, item]

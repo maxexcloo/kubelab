@@ -167,8 +167,7 @@ spec:
           gethomepage.dev/widget.type: romm
           gethomepage.dev/widget.url: https://app.invalid
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: qkrf4jrzlqslswzcqjcsm3u4xe
-          onepassword.excloo.dev/title: *title
+          onepassword.excloo.dev/item: *title
         hostnames:
           - games.excloo.com
         labels:

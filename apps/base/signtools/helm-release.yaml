@@ -63,8 +63,7 @@ spec:
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: mdi-apple-#ffffff
           gethomepage.dev/name: &title SignTools
-          onepassword.excloo.dev/item: ssfpxdcvrsrvveyfa5aksoptva
-          onepassword.excloo.dev/title: *title
+          onepassword.excloo.dev/item: *title
         hostnames:
           - signtools.excloo.com
         labels:

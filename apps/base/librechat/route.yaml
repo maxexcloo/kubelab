@@ -10,8 +10,7 @@ metadata:
     gethomepage.dev/icon: sh-librechat
     gethomepage.dev/name: &title LibreChat
     monitoring.excloo.dev/enabled: "true"
-    onepassword.excloo.dev/item: e43huhgjkfqagasq6gdbgb7sgi
-    onepassword.excloo.dev/title: *title
+    onepassword.excloo.dev/item: *title
   labels:
     app.kubernetes.io/name: application
     gateway.excloo.dev/internal-alias: "true"

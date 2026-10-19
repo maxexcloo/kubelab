@@ -27,10 +27,11 @@ settings in its own repository; Kubelab deploys its published image.
 - Upgrade Flux manually with `flux install --export`; Renovate ignores
   `gotk-components.yaml`.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
-- Use existing 1Password item UUIDs for credential consumers and publishers,
-  including mini-app ExternalSecrets. Declare managed item titles with
-  `onepassword.excloo.dev/title`; routes alias it to their `gethomepage.dev/name`.
-  Keep resource identities independent of display names.
+- Reference 1Password items by title, never by UUID, in credential consumers and
+  publishers, including mini-app ExternalSecrets. Routes alias
+  `onepassword.excloo.dev/item` to their `gethomepage.dev/name`. Renaming an item
+  is a coordinated change: rename it in 1Password and every reference together.
+  Keep Kubernetes resource identities independent of item titles.
 - Default Crossplane external resources to orphan-on-delete.
 - Do not change a live route without explicit approval and a reviewed plan.
 
@@ -102,7 +103,7 @@ Define each value once and derive consumers with Kustomize replacements:
   `clusters/<cluster>/settings/settings.yaml`.
 - App hostnames: the app's route; app replacements and `apps/transformers`
   derive URLs, DNS records and Pocket ID clients.
-- 1Password item UUIDs: once per manifest, using YAML anchors for repeats.
+- 1Password item titles: once per manifest, using YAML anchors for repeats.
 - The app-template chart version: `platform/components/app-template`.
 - Kubernetes client versions: Homelab's cluster data. Renovate groups the kubectl
   pins; merge them only once Homelab runs that Kubernetes version.

@@ -56,8 +56,7 @@ spec:
           gethomepage.dev/widget.username: '{{ "{{HOMEPAGE_FILE_BESZEL_USERNAME}}" }}'
           gethomepage.dev/widget.version: "2"
           monitoring.excloo.dev/enabled: "true"
-          onepassword.excloo.dev/item: l6ndlsmefn6gafyr7cfk3u24gm
-          onepassword.excloo.dev/title: *title
+          onepassword.excloo.dev/item: *title
         hostnames:
           - app.invalid
         labels:
