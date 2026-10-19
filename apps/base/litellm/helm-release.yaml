@@ -222,6 +222,14 @@ spec:
             api_key: os.environ/OPENCODE_ZEN_API_KEY_2
             model: openai/*
             timeout: *generation-timeout
+        # LiteLLM pauses blocked deployments and hides them from model lists.
+        - model_name: openrouter/*
+          litellm_params:
+            api_key: os.environ/OPENROUTER_API_KEY
+            model: openrouter/*
+            timeout: *generation-timeout
+          model_info:
+            blocked: true
     resources:
       limits:
         memory: 2Gi
