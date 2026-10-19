@@ -15,13 +15,13 @@ spec:
       expression: request.userInfo.username == "system:serviceaccount:flux-system:minilab"
   variables:
     # A Namespace is its own namespace; Flux labels everything it applies.
-    - name: namespace
+    - name: targetNamespace
       expression: "request.kind.kind == 'Namespace' ? (request.operation == 'DELETE' ? oldObject : object) : namespaceObject"
     - name: owned
       expression: >-
-        variables.namespace != null && has(variables.namespace.metadata.labels) &&
-        variables.namespace.metadata.labels[?'kustomize.toolkit.fluxcd.io/name'].orValue('') == 'minilab' &&
-        variables.namespace.metadata.labels[?'kustomize.toolkit.fluxcd.io/namespace'].orValue('') == 'flux-system'
+        variables.targetNamespace != null && has(variables.targetNamespace.metadata.labels) &&
+        variables.targetNamespace.metadata.labels[?'kustomize.toolkit.fluxcd.io/name'].orValue('') == 'minilab' &&
+        variables.targetNamespace.metadata.labels[?'kustomize.toolkit.fluxcd.io/namespace'].orValue('') == 'flux-system'
   validations:
     - expression: variables.owned
       message: Minilab manages only namespaces it created.
