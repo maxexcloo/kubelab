@@ -1,0 +1,19 @@
+[
+  {
+    "annotations": {
+      "gethomepage.dev/description": "System Monitoring",
+      "gethomepage.dev/enabled": "true",
+      "gethomepage.dev/group": "Operations",
+      "gethomepage.dev/href": "https://beszel.example.net",
+      "gethomepage.dev/icon": "sh-beszel",
+      "gethomepage.dev/name": "Beszel",
+      "gethomepage.dev/widget.password": "{{ \"{{HOMEPAGE_VAR_BESZEL_PASSWORD}}\" }}",
+      "gethomepage.dev/widget.type": "beszel",
+      "gethomepage.dev/widget.url": "https://beszel.example.net",
+      "gethomepage.dev/widget.username": "{{ \"{{HOMEPAGE_VAR_BESZEL_USERNAME}}\" }}",
+      "gethomepage.dev/widget.version": "2"
+    },
+    "cluster": "mbk",
+    "namespace": "beszel"
+  }
+]

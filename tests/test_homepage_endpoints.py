@@ -16,7 +16,7 @@ INFRASTRUCTURE = ROOT / "tests/fixtures/homepage/infrastructure.json"
 SCRIPT = APP / "render_services.sh"
 ENVIRONMENT = os.environ | {
     "HOMELAB_INFRASTRUCTURE_FILE": str(INFRASTRUCTURE),
-    "HOMEPAGE_BESZEL_URL": "https://beszel.example.net",
+    "HOMEPAGE_BESZEL_ROUTES": str(ROOT / "tests/fixtures/homepage/beszel-routes.json"),
 }
 
 

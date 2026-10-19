@@ -33,6 +33,15 @@ def route(name, **annotations):
     }
 
 
+
+def beszel_route():
+    beszel = route("Beszel", description="System Monitoring", icon="sh-beszel", **{
+        "widget.password": '{{ "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}" }}', "widget.type": "beszel",
+        "widget.url": "https://beszel.example.net",
+        "widget.username": '{{ "{{HOMEPAGE_VAR_BESZEL_USERNAME}}" }}', "widget.version": "2"})
+    beszel["metadata"]["namespace"] = "beszel"
+    return beszel
+
 class HomepageDashboardTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
@@ -84,7 +93,6 @@ else:
             env=os.environ | {
                 "HOMELAB_DIRECTORY": str(HOMELAB),
                 "HOMELAB_INFRASTRUCTURE_FILE": str(ROOT / "tests/fixtures/homepage/infrastructure.json"),
-                "HOMEPAGE_BESZEL_URL": "https://beszel.example.net",
                 "HOMEPAGE_CLUSTER": "mbk",
                 "HOMEPAGE_GATUS_STATUSES_FILE": str(self.gatus),
                 "HOMEPAGE_ROUTE_SCRIPT": str(ROOT / "scripts/service-routes/service_routes.yq"),
@@ -241,7 +249,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
 
     def test_required_inputs_fail_without_publishing(self):
-        for name in ("HOMELAB_INFRASTRUCTURE_FILE", "HOMEPAGE_BESZEL_URL", "HOMEPAGE_ROUTE_SCRIPT", "KUBECTL"):
+        for name in ("HOMELAB_INFRASTRUCTURE_FILE", "HOMEPAGE_ROUTE_SCRIPT", "KUBECTL"):
             with self.subTest(name=name):
                 result = self.render(**{name: ""})
                 self.assertNotEqual(result.returncode, 0)
@@ -356,8 +364,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
             "cloudflare": {"account_id": "account", "tunnels": {"kimbap": "storage-tunnel", "mbk": "cluster-tunnel"}},
             "tailscale": {"kimbap": "storage-device", "mbk": "cluster-device", "taco": "node-device", "personal": "personal-device"},
         }))
-        beszel = route("Beszel")
-        beszel["metadata"]["namespace"] = "beszel"
+        beszel = beszel_route()
         self.write_routes("mbk", [beszel])
         result = self.render(HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities))
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -433,8 +440,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
           port: 9443
           scheme: https
 """)
-        beszel = route("Beszel")
-        beszel["metadata"]["namespace"] = "beszel"
+        beszel = beszel_route()
         self.write_routes("mbk", [beszel])
         result = self.render(HOMELAB_DIRECTORY=str(homelab))
         self.assertEqual(result.returncode, 0, result.stderr)
