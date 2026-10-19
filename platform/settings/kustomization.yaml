@@ -381,6 +381,57 @@ replacements:
   - source:
       kind: ConfigMap
       name: shared-settings
+      fieldPath: data.pocket_id_api_authority
+    targets:
+      - select:
+          kind: Composition
+          name: pocket-id-client
+        fieldPaths:
+          - spec.pipeline.[step=patch-and-transform].input.resources.[name=client].base.spec.forProvider.payload.baseUrl
+          - spec.pipeline.[step=patch-and-transform].input.resources.[name=group-access].base.spec.forProvider.payload.baseUrl
+          - spec.pipeline.[step=patch-and-transform].input.resources.[name=group-access].patches.[toFieldPath=spec.forProvider.payload.baseUrl].transforms.0.string.fmt
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: Request
+          name: pocket-id-group-all-services
+          namespace: pocket-id
+        fieldPaths:
+          - spec.forProvider.payload.baseUrl
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: Request
+          name: pocket-id-group-all-services-details
+          namespace: pocket-id
+        fieldPaths:
+          - spec.forProvider.payload.baseUrl
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: Request
+          name: pocket-id-group-books
+          namespace: pocket-id
+        fieldPaths:
+          - spec.forProvider.payload.baseUrl
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: Request
+          name: pocket-id-group-books-details
+          namespace: pocket-id
+        fieldPaths:
+          - spec.forProvider.payload.baseUrl
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: ConfigMap
+      name: shared-settings
       fieldPath: data.time_zone
     targets:
       - select:

@@ -57,7 +57,7 @@ spec:
                       method: PUT
                       url: .payload.baseUrl + "/" + .payload.body.id
                   payload:
-                    baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/oidc/clients
+                    baseUrl: http://pocket-id.invalid/api/oidc/clients
                     body: "{}"
                 providerConfigRef:
                   kind: ClusterProviderConfig
@@ -110,7 +110,7 @@ spec:
                       method: PUT
                       url: .payload.baseUrl + "/allowed-user-groups"
                   payload:
-                    baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/oidc/clients/placeholder
+                    baseUrl: http://pocket-id.invalid/api/oidc/clients/placeholder
                     body: "{}"
                 providerConfigRef:
                   kind: ClusterProviderConfig
@@ -125,7 +125,7 @@ spec:
                 transforms:
                   - type: string
                     string:
-                      fmt: http://pocket-id.pocket-id.svc.cluster.local:1411/api/oidc/clients/%s
+                      fmt: http://pocket-id.invalid/api/oidc/clients/%s
                       type: Format
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.accessPolicy

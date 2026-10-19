@@ -12,4 +12,5 @@ data:
   homelab_repository: https://github.com/maxexcloo/homelab
   identity_host: id.excloo.com
   owner_email: max@excloo.com
+  pocket_id_api_authority: pocket-id.pocket-id.svc.cluster.local:1411
   time_zone: Australia/Sydney

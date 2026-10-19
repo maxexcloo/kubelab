@@ -10,8 +10,10 @@ from pathlib import Path
 from support import CLUSTERS, ROOT, copy_repository, read_resources, read_yaml
 
 # Base manifests use these until settings or route replacements resolve them.
-# Crossplane compositions keep runtime templates that their functions patch.
-PLACEHOLDER = re.compile(r"[\w-]\.invalid\b|\.cluster\.excloo\.dev\b|profile-placeholder")
+# Crossplane composition templates keep pending.invalid and placeholder.invalid
+# for their functions to patch at runtime.
+PLACEHOLDER = re.compile(r"(?<![\w.-])[\w-]+(?:\.[\w-]+)*\.invalid\b|\.cluster\.excloo\.dev\b|profile-placeholder")
+RUNTIME_PLACEHOLDERS = {"pending.invalid", "placeholder.invalid"}
 
 
 def rendered_resources(test, root):
@@ -21,9 +23,9 @@ def rendered_resources(test, root):
         resources = []
         for path in sorted(output.rglob("*.yaml")):
             for resource in read_resources(path):
-                if resource["kind"] != "Composition":
-                    match = PLACEHOLDER.search(json.dumps(resource))
-                    test.assertIsNone(match, f"{path.relative_to(output)}: {resource['kind']}/{resource['metadata']['name']}: {json.dumps(resource)[max(0, match.start() - 80):match.end()] if match else ''}")
+                text = json.dumps(resource)
+                unresolved = [item for item in PLACEHOLDER.findall(text) if item not in RUNTIME_PLACEHOLDERS]
+                test.assertEqual(unresolved, [], f"{path.relative_to(output)}: {resource['kind']}/{resource['metadata']['name']}")
                 resources.append(resource)
         return resources
 
