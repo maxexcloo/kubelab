@@ -10,7 +10,8 @@ temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
 
 script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
-INFRASTRUCTURE="$HOMELAB_INFRASTRUCTURE_FILE" PROVIDERS="$homelab_directory/data/providers.yaml" \
+INFRASTRUCTURE="$HOMELAB_INFRASTRUCTURE_FILE" PLATFORMS="$homelab_directory/data/platforms.yaml" \
+  PROVIDERS="$homelab_directory/data/providers.yaml" \
   yq --from-file "$script_directory/machine_widgets.yq" \
   "$homelab_directory/data/machines.yaml" > "$temporary_directory/machines.yaml"
 # Resolve inventory references in one pass, including nested widget URLs.

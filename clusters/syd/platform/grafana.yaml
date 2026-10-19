@@ -6,7 +6,7 @@ metadata:
   annotations:
     gethomepage.dev/description: Infrastructure Observability
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Servers
+    gethomepage.dev/group: Operations
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-grafana
     gethomepage.dev/name: &title Grafana
