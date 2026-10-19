@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: failed-pods
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: failed-pods
+rules:
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [delete, list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: failed-pods
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: failed-pods
+subjects:
+  - kind: ServiceAccount
+    name: failed-pods
+    namespace: kube-system

@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: failed-pods
+  namespace: kube-system
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  schedule: "*/15 * * * *"
+  timeZone: time-zone.invalid
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: failed-pods
+          containers:
+            - name: cleanup
+              image: docker.io/alpine/k8s:1.37.1
+              command: [sh, /scripts/delete_failed_pods.sh]
+              env:
+                - name: HOME
+                  value: /tmp
+              resources:
+                limits:
+                  memory: 128Mi
+                requests:
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsGroup: 65532
+                runAsNonRoot: true
+                runAsUser: 65532
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - mountPath: /scripts
+                  name: script
+                  readOnly: true
+                - mountPath: /tmp
+                  name: temporary
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - configMap:
+                name: failed-pods
+              name: script
+            - emptyDir: {}
+              name: temporary

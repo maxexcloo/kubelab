@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - certificates/cert-manager
   - identity/headlamp
+  - maintenance/failed-pods
   - networking/cilium
   - networking/coredns
   - networking/cloudflared
