@@ -10,6 +10,10 @@ interface:
   # Expiry covers regular chats as well as temporary ones. Drop the general
   # retention deadlines before returning to the temporary-only mode.
   generalChatRetention: 8760
+  # Model specs otherwise hide the endpoint picker, parameters and presets.
+  modelSelect: true
+  parameters: true
+  presets: true
   retainAgentFiles: true
   retentionMode: all
   # Scheduled chats run in this single replica; Redis now holds the shared streams.
@@ -179,3 +183,44 @@ mcpServers:
     headers:
       X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+  # Hidden from the chat menu; the Studio model spec pins it to keep its tool list small.
+  studio:
+    type: streamable-http
+    chatMenu: false
+    description: Create and manage images and videos in Studio.
+    requiresOAuth: false
+    serverInstructions: true
+    timeout: 1860000
+    title: Studio
+    url: http://litellm.litellm.svc.cluster.local:4000/studio/mcp
+    headers:
+      X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
+      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+# Specs build an agent per request from the preset, MCP servers and background tools.
+modelSpecs:
+  enforce: false
+  prioritize: false
+  list:
+    - name: studio
+      description: Studio images and videos with automatic inline results.
+      label: Studio
+      conversation_starters:
+        - Animate my last image
+        - Fast video of waves rolling onto a beach at sunset
+        - Quality portrait of an old fisherman in soft window light
+        - Turbo photo of a lighthouse on a stormy coast
+      mcpServers:
+        - studio
+      preset:
+        endpoint: Bento
+        model: qwen3.8-27b-uncensored-fp8
+        reasoning_effort: low
+        temperature: 0.7
+        promptPrefix: |-
+          Use Studio to make the images and videos the user asks for.
+          For ordinary requests, call studio-Generate directly with kind (image or video), tier and prompts; do not call studio-Models first. Map the user's wording to tier: "turbo", "super fast" or "draft" → turbo; "fast" or "quick" → fast; "best", "high quality" or "detailed" → quality; otherwise omit tier for the default. Write one clear natural-language prompt that keeps the user's subjects, framing and scene; add no extra variations. Call studio-Models only when the user names a model, asks what is available, or needs controls, LoRAs or reference images.
+          If Generate returns done, reply with its markdown exactly plus at most one short sentence. If it returns queued, start one studio-Result per job with delivery=notification, wait_seconds=1500 and run_in_background=true, then end your turn; when the notification arrives, reply with its markdown exactly.
+          For follow-ups such as "again", "more like that" or "animate it", call studio-Reuse with the result's ref, then studio-Generate with kind (video to animate), tier, a prompt and reference_asset_ids set to the returned asset id; for "again", call studio-Generate with the same prompt. Never call Models for follow-ups.
+          Never poll, call Status unprompted or resubmit. Keep replies short.
+      runInBackground:
+        - studio-Result_mcp_studio
