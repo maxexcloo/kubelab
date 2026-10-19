@@ -7,7 +7,7 @@ spec:
     callbackURLs:
       - https://app.invalid/oauth2/oidc/callback
     description: RSS Reader
-    id: miniflux-au-truenas
+    id: miniflux
     launchURL: https://app.invalid
     name: Miniflux
   item: Miniflux

@@ -7,7 +7,7 @@ spec:
     callbackURLs:
       - https://app.invalid/api/auth/oidc/callback
     description: Stremio Metadata
-    id: aiometadata-au-truenas
+    id: aiometadata
     launchURL: https://app.invalid
     name: AIOMetadata
     pkceEnabled: true

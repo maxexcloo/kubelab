@@ -239,12 +239,24 @@ spec:
                       kind: PushSecretMetadata
                       spec:
                         tags: [Kubelab]
+                  - match:
+                      secretKey: oidc-client-id
+                      remoteRef:
+                        property: oidc-client-id
+                        remoteKey: placeholder
                 secretStoreRefs:
                   - kind: ClusterSecretStore
                     name: onepassword
                 selector:
                   secret:
                     name: placeholder
+                # Publishes the client ID beside its secret so consumers read both
+                # from the item.
+                template:
+                  data:
+                    oidc-client-id: placeholder
+                  engineVersion: v2
+                  mergePolicy: Merge
             patches:
               - *secret-name
               - <<: *secret-name
@@ -254,3 +266,8 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.itemTag
                 toFieldPath: spec.data[0].metadata.spec.tags[0]
+              - <<: *item
+                toFieldPath: spec.data[1].match.remoteRef.remoteKey
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.client.id
+                toFieldPath: spec.template.data[oidc-client-id]

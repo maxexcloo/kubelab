@@ -8,7 +8,7 @@ spec:
     callbackURLs:
       - https://app.invalid/api/auth/oidc/callback
     description: Book Search & Downloads
-    id: shelfmark-au-truenas
+    id: shelfmark
     launchURL: https://app.invalid
     name: Shelfmark
   item: Shelfmark

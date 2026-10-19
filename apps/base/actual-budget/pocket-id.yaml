@@ -7,7 +7,7 @@ spec:
     callbackURLs:
       - https://app.invalid/openid/callback
     description: Personal Finance
-    id: actual-budget-au-truenas
+    id: actual-budget
     launchURL: https://app.invalid
     name: Actual Budget
   item: Actual Budget
