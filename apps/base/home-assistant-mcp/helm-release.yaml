@@ -1,0 +1,47 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            args:
+              - ha-mcp-web
+            # The network policy restricts the default /mcp path to LiteLLM, so no
+            # secret path is needed.
+            env:
+              HA_MCP_DISABLE_SETTINGS_UI: "true"
+              HOMEASSISTANT_URL: https://host.invalid
+              MCP_HEALTHZ: "true"
+              MCP_PORT: "8086"
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/homeassistant-ai/ha-mcp
+              tag: 8.7.0
+            probes:
+              liveness: &health
+                path: /healthz
+              readiness: *health
+              startup: *health
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 10m
+                memory: 128Mi
+    persistence:
+      state:
+        type: emptyDir
+        globalMounts:
+          - path: /home/mcpuser/.ha-mcp
+    service:
+      main:
+        ports:
+          http:
+            port: 8086

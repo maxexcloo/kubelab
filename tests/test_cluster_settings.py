@@ -53,6 +53,7 @@ class ClusterSettingsTests(unittest.TestCase):
                     "cluster_name": "renamed",
                     "grafana_host": "grafana.changed.example",
                     "headlamp_host": "headlamp.cluster.changed.example",
+                    "home_assistant_host": "hass.changed.example",
                     "private_dns_host": "private.cluster.changed.example",
                     "unifi_host": "gateway.changed.example",
                 })
@@ -73,9 +74,12 @@ class ClusterSettingsTests(unittest.TestCase):
                              "http://bento.changed.example:8123/v1")
             ai = next(m for m in values["proxy_config"]["model_list"] if m["model_name"] == "ai/*")
             self.assertEqual(ai["litellm_params"]["api_base"], "http://bento.changed.example:8123/v1")
-            self.assertEqual(values["envVars"]["UNIFI_NETWORK_HOST"], "gateway.changed.example")
-            studio = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "studio")
-            env = studio["spec"]["values"]["controllers"]["main"]["containers"]["main"]["env"]
+            def main_env(name):
+                release = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == name)
+                return release["spec"]["values"]["controllers"]["main"]["containers"]["main"]["env"]
+            self.assertEqual(main_env("home-assistant-mcp")["HOMEASSISTANT_URL"], "https://hass.changed.example")
+            self.assertEqual(main_env("unifi-network-mcp")["UNIFI_NETWORK_HOST"], "gateway.changed.example")
+            env = main_env("studio")
             self.assertEqual(env["BENTO_ADDRESS"], "192.0.2.15")
             self.assertEqual(env["STUDIO_OIDC_ISSUER"], "https://id.changed.example")
             self.assertEqual(env["ROUTE_ALIAS_HOST"], "studio.renamed.excloo.dev")
