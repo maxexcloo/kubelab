@@ -19,8 +19,6 @@ spec:
       pullPolicy: IfNotPresent
       repository: openspeedtest/latest
       tag: v2.0.6
-    nodeSelector:
-      node.excloo.dev/network: external
     podSecurityContext:
       runAsGroup: 101
       runAsUser: 101

@@ -1,0 +1,10 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openspeedtest-hsp
+  namespace: openspeedtest
+spec:
+  releaseName: openspeedtest-hsp
+  values:
+    nodeSelector:
+      kubernetes.io/hostname: hsp

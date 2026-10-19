@@ -26,6 +26,7 @@ SPEC.loader.exec_module(RECONCILER)
 
 def item_configuration(**overrides):
     configuration = {
+        "concealed": set(),
         "constants": {},
         "defaults": {},
         "fields": set(),
@@ -404,6 +405,29 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(fields["external-token"]["type"], "CONCEALED")
         self.assertNotIn("generate", fields["external-token"])
         self.assertEqual(fields["certificate-base64"]["type"], "CONCEALED")
+
+    def test_field_types_follow_names_and_declared_concealed_fields(self):
+        desired = item_configuration(
+            concealed={"provider-home-assistant-url"},
+            fields={"provider-home-assistant-url", "virtual-key-pi"},
+        )
+        current = {
+            "fields": [
+                {"id": "a", "label": "virtual-key-pi", "type": "STRING", "value": "v"},
+                {"id": "b", "label": "oidc-client-id", "type": "CONCEALED", "value": "c"},
+                {"id": "c", "label": "provider-home-assistant-url", "type": "STRING", "value": "u"},
+                {"id": "d", "label": "access-key-id", "type": "CONCEALED", "value": "i"},
+                {"id": "e", "label": "one-time-password", "type": "OTP", "value": "o"},
+            ]
+        }
+        result = RECONCILER.normalise_item(current, "Application", desired, "vault")
+        types = {field["label"]: field["type"] for field in result["fields"]}
+        self.assertEqual(types["virtual-key-pi"], "CONCEALED")
+        self.assertEqual(types["oidc-client-id"], "STRING")
+        self.assertEqual(types["provider-home-assistant-url"], "CONCEALED")
+        self.assertEqual(types["access-key-id"], "STRING")
+        self.assertEqual(types["one-time-password"], "OTP")
+        self.assertEqual({field["value"] for field in result["fields"]}, {"v", "c", "u", "i", "o"})
 
     def test_laravel_key_is_generated_once_with_the_required_encoding(self):
         desired = item_configuration(
@@ -863,7 +887,6 @@ class ReconcilerTests(unittest.TestCase):
                     "gethomepage.dev/name": "Headlamp (SYD)",
                     "gethomepage.dev/href": "https://unrelated.example.net",
                     "onepassword.excloo.dev/item": "Headlamp",
-                    "onepassword.excloo.dev/url": "https://headlamp.example.net/login",
                 },
                 "name": "renamed-route",
                 "namespace": "headlamp",
@@ -877,13 +900,7 @@ class ReconcilerTests(unittest.TestCase):
         ):
             desired = RECONCILER.discover_items()
         self.assertEqual(set(desired), {"Headlamp"})
-        self.assertEqual(
-            desired["Headlamp"]["urls"],
-            {
-                "https://headlamp.example.net",
-                "https://headlamp.example.net/login",
-            },
-        )
+        self.assertEqual(desired["Headlamp"]["urls"], {"https://headlamp.example.net"})
 
     def test_secret_can_explicitly_share_another_items_login(self):
         secret = {

@@ -1,29 +1,29 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: openspeedtest-internal
+  name: openspeedtest-hsp
   namespace: openspeedtest
   annotations:
-    gethomepage.dev/description: Kimbap Network Speed Test
+    gethomepage.dev/description: Network Speed Test
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Servers
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-openspeedtest
-    gethomepage.dev/name: OpenSpeedTest Kimbap
-    gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-internal
+    gethomepage.dev/name: OpenSpeedTest (HSP)
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-hsp
     monitoring.excloo.dev/enabled: "true"
   labels:
-    app.kubernetes.io/name: openspeedtest-internal
+    app.kubernetes.io/name: openspeedtest-hsp
     gateway.excloo.dev/internal-alias: primary
 spec:
   hostnames:
-    - openspeedtest-internal.cluster.excloo.dev
+    - openspeedtest-hsp.cluster.excloo.dev
   parentRefs:
     - name: private
       namespace: networking
   rules:
     - backendRefs:
-        - name: openspeedtest-internal
+        - name: openspeedtest-hsp
           port: 80
       filters:
         - type: ExtensionRef
