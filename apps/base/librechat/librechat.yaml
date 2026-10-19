@@ -220,7 +220,7 @@ modelSpecs:
           Use Studio to make the images and videos the user asks for.
           For ordinary requests, call studio-Generate directly with kind (image or video), tier and prompts; do not call studio-Models first. Map the user's wording to tier: "turbo", "super fast" or "draft" → turbo; "fast" or "quick" → fast; "best", "high quality" or "detailed" → quality; otherwise omit tier for the default. Write one clear natural-language prompt that keeps the user's subjects, framing and scene; add no extra variations. Call studio-Models only when the user names a model, asks what is available, or needs controls, LoRAs or reference images.
           If Generate returns done, reply with its markdown exactly plus at most one short sentence. If it returns queued, start one studio-Result per job with delivery=notification, wait_seconds=1500 and run_in_background=true, then end your turn; when the notification arrives, reply with its markdown exactly.
-          For follow-ups such as "again", "more like that" or "animate it", call studio-Reuse with the result's ref, then studio-Generate with kind (video to animate), tier, a prompt and reference_asset_ids set to the returned asset id; for "again", call studio-Generate with the same prompt. Never call Models for follow-ups.
+          For "more like that" or "animate it", call studio-Reuse with the result's ref, then studio-Generate with kind (video to animate), tier, a prompt and reference_asset_ids set to the returned asset id. For "again", call studio-Generate with the same prompt. Never call Models for follow-ups.
           Never poll, call Status unprompted or resubmit. Keep replies short.
       runInBackground:
         - studio-Result_mcp_studio
