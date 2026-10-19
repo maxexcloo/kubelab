@@ -1,18 +1,4 @@
 [tools]
-# 1password-cli = "latest"
-# actionlint = "latest"
-# gh = "latest"
-# helm = "latest"
-# hk = "latest"
-# jq = "latest"
-# node = "latest"
-# oxfmt = "latest"
-# python = "latest"
-# ruff = "latest"
-# shellcheck = "latest"
-# updatecli = "latest"
-# uv = "latest"
-# yq = "latest"
 flux2 = "latest"
 kubeconform = "latest"
 # Select schemas for the Kubernetes API configured in Homelab.
