@@ -100,7 +100,10 @@ Define each value once and derive consumers with Kustomize replacements:
 
 - Cross-cluster settings: `platform/settings/settings.yaml`.
 - Cluster name and cluster-specific hosts, addresses and endpoints:
-  `clusters/<cluster>/settings/settings.yaml`.
+  `clusters/<cluster>/settings/settings.yaml`. Derive names that embed the
+  cluster, such as zones and Tailscale devices and tags, from `cluster_name`.
+- Write derived values as `.invalid` placeholders; the checks fail when one
+  survives rendering. Flux substitution is strict, so missing variables fail.
 - App hostnames: the app's route; app replacements and `apps/transformers`
   derive URLs, DNS records and Pocket ID clients.
 - 1Password item titles: once per manifest, using YAML anchors for repeats.
