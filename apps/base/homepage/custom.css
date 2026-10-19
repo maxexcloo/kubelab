@@ -38,6 +38,32 @@ body {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
+/* Status: Homepage's dot, centred on the title row's right edge. */
+.service-title {
+  position: relative;
+}
+.service-tags {
+  align-items: center;
+  bottom: 0;
+}
+/* Location tags hang from the card's top-right edge. */
+.service-locations {
+  display: flex;
+  gap: 0.25rem;
+  position: absolute;
+  right: 0.75rem;
+  top: 0;
+  z-index: 20;
+}
+.service-location {
+  background-color: rgb(var(--color-900) / 0.5);
+  border-radius: 0 0 3px 3px;
+  color: rgb(var(--color-300));
+  font-size: 0.6rem;
+  font-weight: 600;
+  line-height: 0.875rem;
+  padding: 0 0.375rem;
+}
 /* Widgets */
 .service-block {
   background: transparent !important;
@@ -48,22 +74,6 @@ body {
 }
 .service-container:empty {
   min-height: 3.25rem;
-}
-/* Location tags follow the card's name. */
-.service-locations {
-  display: inline-flex;
-  gap: 0.25rem;
-  margin-left: 0.375rem;
-  vertical-align: 0.1rem;
-}
-.service-location {
-  background-color: rgb(var(--color-900) / 0.5);
-  border-radius: 3px;
-  color: rgb(var(--color-300));
-  font-size: 0.6rem;
-  font-weight: 600;
-  line-height: 0.875rem;
-  padding: 0 0.375rem;
 }
 /* Kubernetes widget: the widget supplies node names; the renderer supplies the cluster. */
 .information-widget-kubernetes > div > div:nth-child(n + 2) .pt-1.text-center::before {

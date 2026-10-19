@@ -10,7 +10,7 @@ statusStyle: dot
 theme: dark
 title: Homepage
 background:
-  brightness: 60
+  brightness: 50
   image: /images/background.jpg
 layout:
   Applications:
