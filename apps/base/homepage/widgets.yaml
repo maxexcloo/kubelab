@@ -14,18 +14,23 @@
 - search:
     provider: google
     target: _blank
-- datetime:
-    locale: en-AU
-    text_size: md
-    format:
-      day: numeric
-      hour: 2-digit
-      hourCycle: h23
-      minute: 2-digit
-      month: short
-      weekday: short
+# Weather, then the time over the date at the right-hand end.
 - openmeteo:
     label: Sydney
     latitude: -33.8688
     longitude: 151.2093
     units: metric
+- datetime:
+    locale: en-AU
+    text_size: xl
+    format:
+      hour: 2-digit
+      hourCycle: h23
+      minute: 2-digit
+- datetime:
+    locale: en-AU
+    text_size: xs
+    format:
+      day: numeric
+      month: short
+      weekday: short

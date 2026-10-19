@@ -88,6 +88,29 @@ body {
 .service-container:empty {
   min-height: 3.25rem;
 }
+/* Header: search centred in the free space, then weather, then the time
+   stacked over the date. */
+@media (min-width: 640px) {
+  #information-widgets-right {
+    align-items: center;
+    column-gap: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+  }
+  #information-widgets-right > .information-widget-search,
+  #information-widgets-right > .information-widget-openmeteo {
+    grid-row: span 2;
+  }
+  #information-widgets-right > .information-widget-search {
+    justify-self: center;
+    margin: 0 2rem;
+    width: min(100%, 36rem);
+  }
+  #information-widgets-right > .information-widget-datetime {
+    grid-column: 3;
+    line-height: 1.1;
+  }
+}
 /* Kubernetes widget: the widget supplies node names; the renderer supplies the cluster. */
 .information-widget-kubernetes > div > div:nth-child(n + 2) .pt-1.text-center::before {
   content: var(--homepage-cluster) "/";
