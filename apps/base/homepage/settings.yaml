@@ -20,7 +20,7 @@ layout:
     style: row
     tab: Home
   Hardware:
-    columns: 3
+    columns: 2
     style: row
     tab: Home
   Infrastructure:
