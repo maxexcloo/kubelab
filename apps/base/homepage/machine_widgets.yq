@@ -11,7 +11,6 @@ load(strenv(PLATFORMS)).platforms as $platforms |
   {
     "key": $key, "network": $network, "machine": $machine,
     "group": ($network + "-" + $hostname),
-    "display_name": ($machine.name // ($hostname | split("") | .[0] |= upcase | join(""))),
     "reference": ("homelab://" + $network + "/" + $key + "/management")
   }
 ] as $hosts |
@@ -35,7 +34,7 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
     $host_index[$reference[0]][$reference[1]] as $host |
     with(select(.group != "Servers");
-      .description = (.description + " • " + $host.display_name + " (" + ($host.network | upcase) + ")")) |
+      .description = (.description + " • " + $host.group)) |
     with(select(.group == "Servers"); .group = $host.group))]) as $existing |
 # Grouped services own their management cards; other hosts get a platform default.
 [$hosts[] | select(.machine.type != null and .machine.services.management != null) |

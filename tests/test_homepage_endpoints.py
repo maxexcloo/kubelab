@@ -103,7 +103,7 @@ class HomepageEndpointsTests(unittest.TestCase):
         self.assertEqual(adapter["siteMonitor"], "http://192.0.2.9/status")
         self.assertFalse(any("Adapter Console" in card for card in groups["mbk-coordinator"]))
         self.assertEqual(adapter["icon"], "zigbee")
-        self.assertEqual(adapter["description"], "Zigbee Ethernet Adapter • Coordinator (MBK)")
+        self.assertEqual(adapter["description"], "Zigbee Ethernet Adapter • mbk-coordinator")
         self.assertEqual(groups["mbk-nanokvm"][0]["NanoKVM"]["href"], "http://nanokvm.mbk.example.net")
         self.assertEqual(groups["mbk-nanokvm"][0]["NanoKVM"]["siteMonitor"], "http://nanokvm.mbk.example.net")
 

@@ -89,7 +89,7 @@ class ReconcilerTests(unittest.TestCase):
             root = Path(temporary)
             copy_repository(root)
             path = root / "apps/overlays/syd/syncthing.yaml"
-            path.write_text(path.read_text().replace("Syncthing (Kimbap)", "Syncthing (Archive)"))
+            path.write_text(path.read_text().replace("Syncthing (mbk-kimbap)", "Syncthing (Archive)"))
             resources = render_resources(root / "apps/overlays/syd")
         release = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "syncthing")
         secret = next(r for r in resources if r["kind"] == "ExternalSecret" and r["metadata"]["namespace"] == "syncthing")

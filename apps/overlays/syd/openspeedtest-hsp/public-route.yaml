@@ -7,7 +7,7 @@ metadata:
     # Bypass Cloudflare so tests measure the internet path to HSP itself.
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
     monitoring.excloo.dev/enabled: "true"
-    monitoring.excloo.dev/name: OpenSpeedTest (HSP) Public
+    monitoring.excloo.dev/name: OpenSpeedTest Public (syd-hsp)
   labels:
     app.kubernetes.io/name: openspeedtest-hsp
     gateway.excloo.dev/public-access: "true"

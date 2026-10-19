@@ -22,11 +22,13 @@ map(
   with(select($cluster != strenv(HOMEPAGE_CLUSTER)); del(.app, .namespace, .showStats)) |
   .description = (.description // "") |
   with(select($route.clusterView == false);
-    .description = ([.description, ($cluster | upcase)] | map(select(. != "")) | join(" • "))) |
+    .description = ([.description, $cluster] | map(select(. != "")) | join(" • "))) |
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
   with(select(.widget.version != null); .widget.version |= from_yaml) |
   with(select(.showStats != null); .showStats |= from_yaml) |
+  with(select($route.clusterView == false and $route.homeName != null);
+    .name = $route.homeName) |
   # In-cluster services report status through the Kubernetes connection. Keep
   # the siteMonitor annotation for other clusters, where no connection exists.
   with(select(.app != null); del(.siteMonitor)) |
@@ -37,16 +39,12 @@ map(
   .weight = 0 |
   with(select(.widget != null or (.widgets | length > 0)); .weight = -100)
 ) as $applications |
-($applications | map(select(.tab == "Clusters")) | map(.group) | unique) as $cluster_groups |
 [load(strenv(SERVICES)) | .[] | to_entries | .[] |
   .key as $group | .value[] | to_entries | .[] |
   .value + {"group": $group, "name": .key,
     "tab": (["Home"] +
       ($host_groups | map(select(. == $group)) | map("Servers")) +
-      ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])} |
-  # Homepage resolves widget proxies by leaf group name, even across nested tabs.
-  with(select(.tab == "Servers" and ($cluster_groups | contains([$group])));
-    .group += " (Server)")] as $external |
+      ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])}] as $external |
 ($external + $applications) | unique_by(.tab + "/" + .group + "/" + .name) |
 sort_by(.tab, .group, .weight // 0, .name) |
 group_by(.tab) |

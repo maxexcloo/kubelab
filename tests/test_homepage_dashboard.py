@@ -213,7 +213,9 @@ cp "$ARCHIVE_FIXTURE" "$2"
             directory = minilab / "clusters" / cluster
             directory.mkdir(parents=True)
             (directory / "kustomization.yaml").write_text("resources: [app.yaml]\n")
-            (directory / "app.yaml").write_text(json.dumps(route(name)))
+            app = route(f"Minilab: {name}", href=f"https://{name.lower()}.example.net")
+            app["metadata"].update({"name": name.lower(), "namespace": name.lower()})
+            (directory / "app.yaml").write_text(json.dumps(app))
             source = {
                 "apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository",
                 "metadata": {"name": "minilab", "namespace": "flux-system"},
@@ -233,7 +235,9 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Existing", services)
         self.assertEqual(services["Feeds"]["href"], "https://feeds.example.net")
         groups = self.groups()
-        self.assertEqual([next(iter(card)) for card in groups["Minilab"]], ["Budget", "Feeds"])
+        self.assertEqual([next(iter(card)) for card in groups["Mini"]], ["Budget", "Feeds"])
+        # Only the Home group states the source; cluster groups keep the prefix.
+        self.assertIn("Minilab: Feeds", [next(iter(card)) for card in self.groups("Clusters")["syd"]])
         self.assertNotIn("Feeds", [next(iter(card)) for card in groups["Applications"]])
         self.assertEqual(read_yaml(self.output / "settings.yaml")["layout"]["Home"]["tab"], "Home")
         # Newly deployed apps appear on refresh; removed apps disappear without
@@ -261,7 +265,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(result.returncode, 0, result.stderr)
         services = self.services()
         self.assertIn("Remote", services)
-        self.assertEqual(services["Remote"]["description"], "SYD")
+        self.assertEqual(services["Remote"]["description"], "syd")
         self.assertIn("Shared", services)
         self.assertIn("Local", services)
         self.assertNotIn("siteMonitor", services["Local"])
@@ -295,7 +299,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = self.groups()
-        self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • SYD")
+        self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • syd")
         self.assertEqual(groups["syd"][0]["Library"]["description"], "Photo Manager")
         widget = self.services()["Library"]["widget"]
         self.assertEqual(widget["key"], "{{HOMEPAGE_VAR_IMMICH_API_KEY}}")
@@ -309,8 +313,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Library", self.services())
         self.assertEqual(self.services()["Library"]["app"], "library")
         groups = self.groups()
-        self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • MBK")
-        self.assertIn("Library", groups["mbk-node"][0])
+        self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • mbk")
+        self.assertIn("Library", groups["mbk • node"][0])
         self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"]["Home"])
 
     def test_helm_status_selector_uses_explicit_release_name_for_both_route_layouts(self):
@@ -378,7 +382,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("ESPHome", groups["Smart Home"])
         self.assertIn("Home Assistant", groups["Smart Home"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
-        self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • HASS (MBK)")
+        self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • mbk-hass")
         storage = groups["mbk-storage"]
         self.assertEqual(list(storage), ["Beszel", "Cloudflare", "Tailscale", "TrueNAS"])
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
@@ -474,14 +478,14 @@ cp "$ARCHIVE_FIXTURE" "$2"
         result = self.render(HOMELAB_DIRECTORY=str(homelab))
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = self.groups()
-        local = groups["mbk-node"][0]["Headlamp"]
+        local = groups["mbk • node"][0]["Headlamp"]
         remote = groups["syd"][0]["Headlamp"]
         self.assertEqual(local["namespace"], "headlamp")
         self.assertEqual(local["app"], "headlamp")
         self.assertNotIn("namespace", remote)
         layout = read_yaml(self.output / "settings.yaml")["layout"]
         self.assertEqual(layout["Clusters"]["tab"], "Clusters")
-        self.assertIn("mbk-node", layout["Clusters"])
+        self.assertIn("mbk • node", layout["Clusters"])
         self.assertIn("syd", layout["Clusters"])
         self.assertEqual(layout["Home"]["tab"], "Home")
         self.assertIn("Servers", layout)
@@ -525,16 +529,16 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.placements.write_text(json.dumps({"reader": ["hsp", "kimbap", "hsp"], "waiting": []}))
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(set(self.groups("Clusters")), {"mbk-hsp", "mbk-kimbap", "mbk-unscheduled", "syd"})
-        self.assertIn("Reader", self.groups("Clusters")["mbk-hsp"][0])
-        self.assertIn("Reader", self.groups("Clusters")["mbk-kimbap"][0])
+        self.assertEqual(set(self.groups("Clusters")), {"mbk • hsp", "mbk • kimbap", "mbk • unscheduled", "syd"})
+        self.assertIn("Reader", self.groups("Clusters")["mbk • hsp"][0])
+        self.assertIn("Reader", self.groups("Clusters")["mbk • kimbap"][0])
         queries = [json.loads(line) for line in self.queries.read_text().splitlines()]
         self.assertTrue(any(query[-1] == "app in (reader,feeds)" for query in queries))
         self.assertTrue(all(query[1] != "remote" for query in queries))
         self.placements.write_text(json.dumps({"reader": ["renamed"], "waiting": []}))
         self.assertEqual(self.render().returncode, 0)
-        self.assertIn("mbk-renamed", self.groups("Clusters"))
-        self.assertNotIn("mbk-hsp", self.groups("Clusters"))
+        self.assertIn("mbk • renamed", self.groups("Clusters"))
+        self.assertNotIn("mbk • hsp", self.groups("Clusters"))
         before = (self.output / "services.yaml").read_bytes()
         self.placements.write_text(json.dumps({"reader": "fail"}))
         self.assertNotEqual(self.render().returncode, 0)
@@ -556,8 +560,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = self.groups("Clusters")
-        for group, expected in [("mbk-first", {"Reader", "Copy"}),
-                                ("mbk-second", {"Other"}), ("mbk-third", {"Separate"})]:
+        for group, expected in [("mbk • first", {"Reader", "Copy"}),
+                                ("mbk • second", {"Other"}), ("mbk • third", {"Separate"})]:
             self.assertEqual({name for card in groups[group] for name in card}, expected)
         queries = [json.loads(line) for line in self.queries.read_text().splitlines()]
         self.assertEqual(len(queries), 3)
@@ -566,12 +570,12 @@ cp "$ARCHIVE_FIXTURE" "$2"
             ("separate", "app in (reader,feeds)"),
         })
 
-    def test_same_host_and_node_names_stay_on_separate_tabs(self):
+    def test_host_and_node_groups_have_distinct_names(self):
         self.write_routes("mbk", [route("Reader")])
         self.placements.write_text(json.dumps({"reader": ["storage"]}))
         self.assertEqual(self.render().returncode, 0)
-        cluster = {name for card in self.groups("Clusters")["mbk-storage"] for name in card}
-        server = {name for card in self.groups("Servers")["mbk-storage (Server)"] for name in card}
+        cluster = {name for card in self.groups("Clusters")["mbk • storage"] for name in card}
+        server = {name for card in self.groups("Servers")["mbk-storage"] for name in card}
         self.assertEqual(cluster, {"Reader"})
         self.assertEqual(server, {"TrueNAS"})
         self.assertNotIn("Netboot", server)

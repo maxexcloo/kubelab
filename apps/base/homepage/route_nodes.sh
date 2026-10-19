@@ -41,6 +41,6 @@ NODES="$temporary_directory/nodes.yaml" yq '
   with(.[] | select(.cluster == strenv(HOMEPAGE_CLUSTER));
     .cluster as $cluster |
     .clusterGroups = ($placements[.namespace][.placementSelector] |
-      with(select(length == 0); . = ["unscheduled"]) | map($cluster + "-" + .)) |
+      with(select(length == 0); . = ["unscheduled"]) | map($cluster + " • " + .)) |
     del(.placementSelector))
 ' "$temporary_directory/routes.yaml" > "$output"
