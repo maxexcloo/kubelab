@@ -25,7 +25,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: controldns/ctrld
-              tag: 1.5.8@sha256:18e92bb7918844ddba83acd7b1b6935e050563d0d339509f61e09bbdcdd12c35
+              tag: 1.5.8
             resources:
               limits:
                 memory: 128Mi
@@ -49,7 +49,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/nachtalb/redlib
-              tag: sha-2e5932a@sha256:79b42f872a4cfb724e4c02ae386d543fb380983b070a518aa148ef7e5c0c3912
+              tag: sha-2e5932a
             probes:
               liveness: &health
                 path: /settings
