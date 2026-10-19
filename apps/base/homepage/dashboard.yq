@@ -47,14 +47,15 @@ map(
       ($host_groups | map(select(. == $group)) | map("Servers")) +
       ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])}] as $external |
 ($external + $applications) | unique_by(.tab + "/" + .group + "/" + .name) |
-# Home widgets gather in Overview, alphabetically; category groups list every
-# service compactly without them.
-(map(select(.tab == "Home" and (.widget != null or (.widgets | length > 0)))) |
-  map(.group = "Overview" | .weight = 0)) as $overview |
-map(with(select(.tab == "Home"); del(.widget, .widgets))) |
-# Larger cards lead other groups so rows stay even: widgets, then extra widget rows.
-map(.weight = (([.widget] | map(select(. != null)) | length) + (.widgets // [] | length) +
-  (if .widget.enablePools == true then 1 else 0 end)) * -1) + $overview |
+# Card size: widgets, plus extra widget rows such as storage pools.
+map(.size = ([.widget] | map(select(. != null)) | length) + (.widgets // [] | length) +
+  (if .widget.enablePools == true then 1 else 0 end)) |
+# Home widgets gather in Overview, where taller cards go last so they don't leave
+# gaps mid-grid; category groups list every service compactly without widgets.
+(map(select(.tab == "Home" and .size > 0)) | map(.group = "Overview" | .weight = .size)) as $overview |
+map(with(select(.tab == "Home"); del(.widget, .widgets) | .size = 0)) |
+# Elsewhere larger cards lead so rows stay even.
+map(.weight = .size * -1) + $overview | map(del(.size)) |
 sort_by(.tab, .group, .weight, .name) |
 group_by(.tab) |
 # Homepage shows nested groups in file order, so Overview goes first.

@@ -110,6 +110,9 @@ body {
     grid-column: 3;
     line-height: 1.1;
   }
+  #information-widgets-right > .information-widget-datetime > div {
+    justify-content: center;
+  }
 }
 /* Kubernetes widget: the widget supplies node names; the renderer supplies the cluster. */
 .information-widget-kubernetes > div > div:nth-child(n + 2) .pt-1.text-center::before {

@@ -157,3 +157,83 @@ spec:
   providerConfigRef:
     kind: ClusterProviderConfig
     name: pocket-id
+---
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: pocket-id-group-llm
+spec:
+  managementPolicies:
+    - Create
+    - LateInitialize
+    - Observe
+    - Update
+  forProvider:
+    expectedResponseCheck:
+      logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
+      type: CUSTOM
+    headers:
+      Content-Type:
+        - application/json
+      User-Agent:
+        - kubelab-crossplane/1.0
+      X-API-Key:
+        - "{{ pocket-id:pocket-id:STATIC_API_KEY }}"
+    mappings:
+      - action: CREATE
+        body: .payload.body
+        url: .payload.baseUrl
+      - action: OBSERVE
+        url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
+      - action: UPDATE
+        body: .payload.body
+        method: POST
+        url: .payload.baseUrl
+    payload:
+      baseUrl: http://pocket-id.invalid/api/user-groups
+      body: '{"friendlyName":"LLM","name":"llm"}'
+    secretInjectionConfigs:
+      - keyMappings:
+          - missingFieldStrategy: preserve
+            responseJQ: if .body.id then .body.id else first(.body.data[]? | select(.name == "llm") | .id) end
+            secretKey: id
+        secretRef:
+          name: pocket-id-group-llm
+          namespace: pocket-id
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: pocket-id
+---
+apiVersion: http.m.crossplane.io/v1alpha2
+kind: Request
+metadata:
+  name: pocket-id-group-llm-details
+spec:
+  managementPolicies:
+    - LateInitialize
+    - Observe
+    - Update
+  forProvider:
+    expectedResponseCheck:
+      logic: .payload.body as $wanted | any(.response.body.data[]?; .name == $wanted.name and .friendlyName == $wanted.friendlyName)
+      type: CUSTOM
+    headers:
+      Content-Type:
+        - application/json
+      User-Agent:
+        - kubelab-crossplane/1.0
+      X-API-Key:
+        - "{{ pocket-id:pocket-id:STATIC_API_KEY }}"
+    mappings:
+      - action: OBSERVE
+        url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
+      - action: UPDATE
+        body: .payload.body | del(.id)
+        method: PUT
+        url: .payload.baseUrl + "/" + .payload.body.id
+    payload:
+      baseUrl: http://pocket-id.invalid/api/user-groups
+      body: '{"friendlyName":"LLM","id":"{{ pocket-id-group-llm:pocket-id:id }}","name":"llm"}'
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: pocket-id
