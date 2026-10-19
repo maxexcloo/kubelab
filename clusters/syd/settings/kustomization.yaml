@@ -353,3 +353,34 @@ replacements:
           kind: ObjectStore
         fieldPaths:
           - spec.configuration.destinationPath
+  # Local volumes live on the storage node's TrueNAS dataset mounts.
+  - source:
+      kind: ConfigMap
+      name: cluster-settings
+      fieldPath: data.dataset_root
+    targets:
+      - select:
+          kind: HelmRelease
+          name: syncthing
+          namespace: syncthing
+        fieldPaths:
+          - spec.values.persistence.files.hostPath
+        options:
+          delimiter: /truenas
+          index: 0
+      - select:
+          kind: PersistentVolume
+        fieldPaths:
+          - spec.hostPath.path
+        options:
+          delimiter: /truenas
+          index: 0
+  - source:
+      kind: ConfigMap
+      name: cluster-settings
+      fieldPath: data.storage_node
+    targets:
+      - select:
+          kind: PersistentVolume
+        fieldPaths:
+          - spec.nodeAffinity.required.nodeSelectorTerms.0.matchExpressions.0.values.0

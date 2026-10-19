@@ -164,6 +164,18 @@ replacements:
           name: immich-private
         fieldPaths:
           - spec.hostnames.0
+  # Cluster settings resolve before this overlay's patches add the selector.
+  - source:
+      kind: ConfigMap
+      name: cluster-settings
+      fieldPath: data.storage_node
+    targets:
+      - select:
+          kind: HelmRelease
+          name: syncthing
+          namespace: syncthing
+        fieldPaths:
+          - spec.values.defaultPodOptions.nodeSelector.[kubernetes.io/hostname]
   # The cluster's Syncthing item is named for its host.
   - source:
       kind: HelmRelease

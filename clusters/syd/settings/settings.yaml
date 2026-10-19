@@ -8,9 +8,11 @@ data:
   bento_address: 100.73.126.15
   bento_llm_authority: bento.mbk.excloo.net:8000
   cluster_name: syd
+  dataset_root: /var/mnt/datasets
   grafana_host: grafana.excloo.com
   headlamp_host: headlamp.cluster.excloo.dev
   private_dns_host: private.cluster.excloo.dev
+  storage_node: kimbap
   unifi_host: gateway.mbk.excloo.net
   private_dns_lookup: https://cloudflare-dns.com/dns-query?name=app.invalid
   backup_endpoint: https://kimbap.mbk.excloo.net:9000

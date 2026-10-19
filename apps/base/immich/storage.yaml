@@ -50,7 +50,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   hostPath:
-    path: /var/mnt/datasets/truenas/icloud-photos
+    path: /dataset-root.invalid/truenas/icloud-photos
     type: Directory
   nodeAffinity:
     required:
@@ -59,7 +59,7 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - kimbap
+                - storage-node.invalid
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -75,7 +75,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   hostPath:
-    path: /var/mnt/datasets/truenas-nvme/immich
+    path: /dataset-root.invalid/truenas-nvme/immich
     type: Directory
   nodeAffinity:
     required:
@@ -84,4 +84,4 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - kimbap
+                - storage-node.invalid

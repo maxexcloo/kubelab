@@ -74,7 +74,7 @@ spec:
         globalMounts:
           - path: /var/syncthing
       files:
-        hostPath: /var/mnt/datasets/truenas
+        hostPath: /dataset-root.invalid/truenas
         hostPathType: Directory
         type: hostPath
         globalMounts:
