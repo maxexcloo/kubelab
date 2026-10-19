@@ -22,7 +22,7 @@ map(
   with(select($cluster != strenv(HOMEPAGE_CLUSTER)); del(.app, .namespace, .showStats)) |
   .description = (.description // "") |
   with(select($route.clusterView == false);
-    .description = ([.description, $cluster] | map(select(. != "")) | join(" • "))) |
+    .description = ([.description, ($route.clusterGroups | join(", "))] | map(select(. != "")) | join(" • "))) |
   to_entries | .[] as $field ireduce ({};
     setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
   with(select(.widget.version != null); .widget.version |= from_yaml) |

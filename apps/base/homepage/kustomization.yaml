@@ -11,6 +11,7 @@ configMapGenerator:
     namespace: homepage
     files:
       - custom.css
+      - custom.js
       - docker.yaml
       - kubernetes.yaml
       - settings.yaml

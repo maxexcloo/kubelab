@@ -174,7 +174,7 @@ yq ea '[.[]]' "$temporary_directory/dashboard-services.yaml" "$temporary_directo
   > "$temporary_directory/config/services.yaml"
 cp "$temporary_directory/bookmarks.yaml" "$temporary_directory/config/bookmarks.yaml"
 
-for file in custom.css docker.yaml kubernetes.yaml; do
+for file in custom.css custom.js docker.yaml kubernetes.yaml; do
   cp "$source_directory/$file" "$temporary_directory/config/$file"
 done
 printf '\n:root { --homepage-cluster: "%s"; }\n' "$HOMEPAGE_CLUSTER" >> "$temporary_directory/config/custom.css"
@@ -191,7 +191,7 @@ for file in "$temporary_directory/config/"*.yaml; do
   yq '.' "$file" >/dev/null
 done
 mkdir -p "$output_directory"
-for file in custom.css docker.yaml kubernetes.yaml widgets.yaml bookmarks.yaml services.yaml settings.yaml; do
+for file in custom.css custom.js docker.yaml kubernetes.yaml widgets.yaml bookmarks.yaml services.yaml settings.yaml; do
   if ! cmp -s "$temporary_directory/config/$file" "$output_directory/$file"; then
     staged_output=$(mktemp "$output_directory/$file.XXXXXX")
     cp "$temporary_directory/config/$file" "$staged_output"

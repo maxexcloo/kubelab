@@ -46,13 +46,23 @@ body {
   font-weight: 400;
 }
 .k8s-status > div,
+.service-location,
 .site-monitor-status > div {
   font-size: 0.7rem;
   font-weight: 600;
 }
+/* Location tags match the native status tags beside them. */
+.service-location {
+  align-self: flex-start;
+  background-color: rgb(var(--color-900) / 0.5);
+  border-radius: 0 0 3px 3px;
+  color: rgb(var(--color-300));
+  line-height: 1rem;
+  padding: 0.125rem 0.375rem;
+}
 /* The native widget supplies node names; the renderer supplies the cluster prefix. */
 .information-widget-kubernetes > div > div:nth-child(n + 2) .pt-1.text-center::before {
-  content: var(--homepage-cluster) "-";
+  content: var(--homepage-cluster) "/";
 }
 [id^="provider-"] .service-icon {
   min-height: 5rem;
