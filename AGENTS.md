@@ -8,7 +8,7 @@ configuration records current deployment details. The separate `homelab`
 repository owns everything required to rebuild or reach a cluster while
 Kubernetes is unavailable.
 
-The `mini-apps` repository owns mini-app source and native workload manifests.
+The `minilab` repository owns mini-app source and native workload manifests.
 Kubelab owns its Flux source, cluster selection and shared integration settings.
 Actual Up keeps its dependencies, serial operation queue, schedules and encrypted
 settings in its own repository; Kubelab deploys its published image.
