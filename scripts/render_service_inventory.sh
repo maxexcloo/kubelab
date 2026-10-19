@@ -49,7 +49,9 @@ if [[ -z "${manifest_directory}" ]]; then
 fi
 
 inventory_file="${temporary_directory}/inventory.jsonl"
+secret_file="${temporary_directory}/secrets.jsonl"
 : >"${inventory_file}"
+: >"${secret_file}"
 
 for cluster in "${clusters[@]}"; do
   if [[ ! -d "apps/overlays/${cluster}" || ! -d "clusters/${cluster}/platform" ]]; then
@@ -93,7 +95,11 @@ for cluster in "${clusters[@]}"; do
         select(.source != null) |
         @json
       ' - | sed '/^null$/d; /^$/d' >>"${inventory_file}"
+    CLUSTER="${cluster}" yq eval -I=0 -N -o=json '
+      select(.kind == "ClusterSecretStore" or .kind == "ExternalSecret" or .kind == "SecretStore") |
+      .cluster = strenv(CLUSTER)
+    ' "${manifest_directory}/${target}.yaml" | sed '/^null$/d; /^$/d' >>"${secret_file}"
   done
 done
 
-jq -s 'sort_by(.cluster // "", .group, .name, .source)' "${inventory_file}"
+jq -s --slurpfile resources "${secret_file}" --from-file scripts/service-routes/monitoring_headers.jq "${inventory_file}"
