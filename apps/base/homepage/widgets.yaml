@@ -5,6 +5,11 @@
       dateStyle: full
       hourCycle: h23
       timeStyle: short
+- openmeteo:
+    label: Sydney
+    latitude: -33.8688
+    longitude: 151.2093
+    units: metric
 - search:
     provider: google
     target: _blank
