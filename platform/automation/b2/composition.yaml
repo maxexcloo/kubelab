@@ -318,12 +318,15 @@ spec:
                     - fromFieldPath: metadata.namespace
                     - fromFieldPath: spec.keyName
                 toFieldPath: spec.forProvider.payload.body
-          - name: onepassword-item
+          # One field per PushSecret: 1Password Connect briefly serves the previous
+          # item version after a write, so a second write in the same push
+          # conflicts (HTTP 400). Separate pushes retry independently instead.
+          - name: onepassword-access-key-id
             base:
               apiVersion: external-secrets.io/v1alpha1
               kind: PushSecret
               metadata:
-                name: b2-application-key
+                name: b2-access-key-id
               spec:
                 data:
                   - match:
@@ -336,12 +339,50 @@ spec:
                       kind: PushSecretMetadata
                       spec:
                         tags: [Kubelab]
+                secretStoreRefs:
+                  - kind: ClusterSecretStore
+                    name: onepassword
+                selector:
+                  secret:
+                    name: b2-application-key
+            patches: &push-patches
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.item
+                toFieldPath: spec.data[0].match.remoteRef.remoteKey
+                policy:
+                  fromFieldPath: Required
+          - name: onepassword-endpoint
+            base:
+              apiVersion: external-secrets.io/v1alpha1
+              kind: PushSecret
+              metadata:
+                name: b2-endpoint
+              spec:
+                data:
                   - match:
                       secretKey: endpoint
                       remoteRef:
                         property: object-storage-endpoint
                         remoteKey: placeholder
                     metadata: *metadata
+                secretStoreRefs:
+                  - kind: ClusterSecretStore
+                    name: onepassword
+                selector:
+                  secret:
+                    name: b2-application-key
+            patches: *push-patches
+          - name: onepassword-secret-access-key
+            base:
+              apiVersion: external-secrets.io/v1alpha1
+              kind: PushSecret
+              metadata:
+                name: b2-secret-access-key
+              spec:
+                data:
                   - match:
                       secretKey: secret-access-key
                       remoteRef:
@@ -354,17 +395,4 @@ spec:
                 selector:
                   secret:
                     name: b2-application-key
-            patches:
-              - type: FromCompositeFieldPath
-                fromFieldPath: metadata.namespace
-                toFieldPath: metadata.namespace
-              - &item
-                type: FromCompositeFieldPath
-                fromFieldPath: spec.item
-                toFieldPath: spec.data[0].match.remoteRef.remoteKey
-                policy:
-                  fromFieldPath: Required
-              - <<: *item
-                toFieldPath: spec.data[1].match.remoteRef.remoteKey
-              - <<: *item
-                toFieldPath: spec.data[2].match.remoteRef.remoteKey
+            patches: *push-patches

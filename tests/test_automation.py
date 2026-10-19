@@ -63,6 +63,13 @@ class PocketIDClientTests(unittest.TestCase):
         )
         cls.parameters = cls.resource["base"]["spec"]["forProvider"]
 
+    def test_b2_publishes_one_field_per_push_secret(self):
+        # 1Password Connect rejects a second write to an item within one push.
+        for key in ["access-key-id", "endpoint", "secret-access-key"]:
+            push = composition_resource("platform/automation/b2/composition.yaml", f"onepassword-{key}")
+            self.assertEqual([data["match"]["secretKey"] for data in push["spec"]["data"]], [key])
+            self.assertEqual(push["spec"]["selector"]["secret"]["name"], "b2-application-key")
+
     def test_creation_retains_the_registered_client_id_and_callbacks(self):
         client = {
             "id": "headlamp", "name": "Headlamp", "isPublic": True,
