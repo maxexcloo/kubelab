@@ -99,6 +99,8 @@ spec:
               - /output
             env:
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
+              HOMEPAGE_BESZEL_URL: https://beszel.invalid
+              HOMEPAGE_CACHE_DIRECTORY: /tmp/homepage
               HOMEPAGE_REVALIDATE_URL: http://127.0.0.1:3000/api/revalidate
               HOMEPAGE_ROUTE_SCRIPT: /routes/service_routes.yq
               KUBECTL: /tools/kubectl

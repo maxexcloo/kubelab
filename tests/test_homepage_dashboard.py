@@ -83,9 +83,12 @@ else:
             ["sh", str(APP / "render_dashboard.sh"), str(APP), str(self.output)],
             env=os.environ | {
                 "HOMELAB_DIRECTORY": str(HOMELAB),
-                "KUBELAB_DIRECTORY": str(self.directory),
+                "HOMELAB_INFRASTRUCTURE_FILE": str(ROOT / "tests/fixtures/homepage/infrastructure.json"),
+                "HOMEPAGE_BESZEL_URL": "https://beszel.example.net",
                 "HOMEPAGE_CLUSTER": "mbk",
                 "HOMEPAGE_GATUS_STATUSES_FILE": str(self.gatus),
+                "HOMEPAGE_ROUTE_SCRIPT": str(ROOT / "scripts/service-routes/service_routes.yq"),
+                "KUBELAB_DIRECTORY": str(self.directory),
                 "KUBECTL": str(self.kubectl),
                 "POD_PLACEMENTS": str(self.placements),
                 "POD_QUERIES": str(self.queries),
@@ -132,6 +135,8 @@ else:
         kubectl.write_text("""#!/bin/sh
 if [ "$3" = get ] && [ "$4" = kustomization ]; then
   cat "$REVISION_FIXTURE"
+elif [ "$3" = get ] && [ "$4" = gitrepository ] && [ "$5" = flux-system ]; then
+  printf 'https://github.com/example/kubelab.git'
 else
   exec "$REAL_KUBECTL" "$@"
 fi
@@ -168,7 +173,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Local", self.services())
         self.assertEqual(downloads.read_text().splitlines(), [
-            "https://codeload.github.com/maxexcloo/kubelab/tar.gz/" + first,
+            "https://codeload.github.com/example/kubelab/tar.gz/" + first,
         ])
         self.write_routes("mbk", [route("Future")])
         snapshot()
@@ -183,7 +188,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Future", self.services())
         self.assertNotIn("Local", self.services())
         self.assertEqual(downloads.read_text().splitlines()[-1],
-                         "https://codeload.github.com/maxexcloo/kubelab/tar.gz/" + second)
+                         "https://codeload.github.com/example/kubelab/tar.gz/" + second)
         before = {p.name: p.read_bytes() for p in self.output.iterdir()}
         revision_file.write_text("main@sha1:" + "c" * 40)
         self.assertNotEqual(self.render(**(environment | {"FAIL_DOWNLOAD": "true"})).returncode, 0)
@@ -195,16 +200,16 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(before, {p.name: p.read_bytes() for p in self.output.iterdir()})
 
     def test_mini_apps_follow_cluster_selection_and_homepage_annotations(self):
-        mini_apps = self.directory / "mini-apps"
+        minilab = self.directory / "minilab"
         for cluster, name in (("mbk", "Budget"), ("syd", "Feeds")):
-            directory = mini_apps / "clusters" / cluster
+            directory = minilab / "clusters" / cluster
             directory.mkdir(parents=True)
             (directory / "kustomization.yaml").write_text("resources: [app.yaml]\n")
             (directory / "app.yaml").write_text(json.dumps(route(name)))
             source = {
                 "apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository",
                 "metadata": {"name": "mini-apps", "namespace": "flux-system"},
-                "spec": {"url": "https://github.com/example/mini-apps.git", "ref": {"branch": "deploy"}},
+                "spec": {"url": "https://github.com/example/minilab.git", "ref": {"branch": "deploy"}},
             }
             selection = {
                 "apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization",
@@ -212,7 +217,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
                 "spec": {"path": f"./clusters/{cluster}"},
             }
             self.write_routes(cluster, [route("Existing"), selection, source])
-        result = self.render(MINI_APPS_DIRECTORY=str(mini_apps))
+        result = self.render(MINILAB_DIRECTORY=str(minilab))
         self.assertEqual(result.returncode, 0, result.stderr)
         services = self.services()
         self.assertIn("Budget", services)
@@ -225,15 +230,23 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(read_yaml(self.output / "settings.yaml")["layout"]["Home"]["tab"], "Home")
         # Newly deployed apps appear on refresh; removed apps disappear without
         # maintaining a second list of dashboard cards.
-        path = mini_apps / "clusters/syd/app.yaml"
+        path = minilab / "clusters/syd/app.yaml"
         path.write_text(json.dumps(route("New Tool")))
-        self.assertEqual(self.render(MINI_APPS_DIRECTORY=str(mini_apps)).returncode, 0)
+        self.assertEqual(self.render(MINILAB_DIRECTORY=str(minilab)).returncode, 0)
         self.assertIn("New Tool", self.services())
         self.assertNotIn("Feeds", self.services())
         before = (self.output / "services.yaml").read_bytes()
-        (mini_apps / "clusters/syd/app.yaml").unlink()
-        self.assertNotEqual(self.render(MINI_APPS_DIRECTORY=str(mini_apps)).returncode, 0)
+        (minilab / "clusters/syd/app.yaml").unlink()
+        self.assertNotEqual(self.render(MINILAB_DIRECTORY=str(minilab)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
+
+    def test_required_inputs_fail_without_publishing(self):
+        for name in ("HOMELAB_INFRASTRUCTURE_FILE", "HOMEPAGE_BESZEL_URL", "HOMEPAGE_ROUTE_SCRIPT", "KUBECTL"):
+            with self.subTest(name=name):
+                result = self.render(**{name: ""})
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(f"{name} is required", result.stderr)
+                self.assertFalse(self.output.exists())
 
     def test_remote_annotations_and_external_machines(self):
         result = self.render()

@@ -12,6 +12,10 @@ from support import ROOT, read_yaml
 
 FIXTURE = ROOT / "tests/fixtures/homepage/homelab"
 SCRIPT = ROOT / "apps/base/homepage/render_services.sh"
+ENVIRONMENT = os.environ | {
+    "HOMELAB_INFRASTRUCTURE_FILE": str(ROOT / "tests/fixtures/homepage/infrastructure.json"),
+    "HOMEPAGE_BESZEL_URL": "https://beszel.example.net",
+}
 
 
 class HomepageEndpointsTests(unittest.TestCase):
@@ -32,7 +36,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                 "local_console": "homelab://mbk/slzb-06m/management",
                 "other_service": "homelab://mbk/kimbap/netboot",
             }))
-            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
+            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True, env=ENVIRONMENT)
             result = read_yaml(output)
             self.assertEqual(result["href"], "https://storage.mbk.example.net:8444")
             self.assertEqual(result["href"], result["siteMonitor"])
@@ -48,7 +52,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             ]))
             self.assertEqual(bookmarks, [])
             timestamp = output.stat().st_mtime_ns
-            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True)
+            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)], check=True, env=ENVIRONMENT)
             self.assertEqual(output.stat().st_mtime_ns, timestamp)
 
     def test_inventory_cards_follow_metadata_and_addresses(self):
@@ -68,7 +72,7 @@ class HomepageEndpointsTests(unittest.TestCase):
             template = Path(directory) / "source.yaml"
             template.write_text("[]\n")
             output = Path(directory) / "services.yaml"
-            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True)
+            subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True, env=ENVIRONMENT)
             groups = read_yaml(output)
             cards = {name: entries for group in groups for name, entries in group.items()}
             adapter = cards["Infrastructure"][0]["Adapter Console"]
@@ -93,7 +97,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                 with self.subTest(host=host):
                     published.write_text(json.dumps({"hosts": {"kimbap": host}}))
                     subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(FIXTURE)],
-                                   check=True, env=os.environ | {"HOMELAB_INFRASTRUCTURE_FILE": str(published)})
+                                   check=True, env=ENVIRONMENT | {"HOMELAB_INFRASTRUCTURE_FILE": str(published)})
                     result = read_yaml(output)
                     self.assertEqual(result["http"], f"http://{host or 'storage.mbk.example.net'}:31010")
                     self.assertEqual(result["https"], "https://storage.mbk.example.net:8444/path")
@@ -115,14 +119,14 @@ class HomepageEndpointsTests(unittest.TestCase):
                     service.update(hostname="studio.example.com", port=port, scheme=scheme)
                     inventory_path.write_text(json.dumps(inventory))
                     subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)],
-                                   check=True, env=os.environ | {"HOMELAB_INFRASTRUCTURE_FILE": str(published)})
+                                   check=True, env=ENVIRONMENT | {"HOMELAB_INFRASTRUCTURE_FILE": str(published)})
                     result = read_yaml(output)
                     authority = "studio.example.com" + (":8443" if port == 8443 else "")
                     self.assertEqual(result["href"], f"{scheme}://{authority}/path")
             service["hostname"] = "https://invalid.example/path"
             inventory_path.write_text(json.dumps(inventory))
             before = output.read_text()
-            result = subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], capture_output=True)
+            result = subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], capture_output=True, env=ENVIRONMENT)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(output.read_text(), before)
 
@@ -141,14 +145,14 @@ class HomepageEndpointsTests(unittest.TestCase):
                 with self.subTest(path=path):
                     service.update(hostname="ai.example.com", path=path, port=443, scheme="https")
                     inventory_path.write_text(json.dumps(inventory))
-                    subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True)
+                    subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], check=True, env=ENVIRONMENT)
                     result = read_yaml(output)
                     self.assertEqual(result["root"], "https://ai.example.com" + path)
                     self.assertEqual(result["child"], "https://ai.example.com" + path.rstrip("/") + "/api/config")
             before = output.read_text()
             service["path"] = "https://invalid.example/path"
             inventory_path.write_text(json.dumps(inventory))
-            result = subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], capture_output=True)
+            result = subprocess.run(["sh", str(SCRIPT), str(template), str(output), str(homelab)], capture_output=True, env=ENVIRONMENT)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(output.read_text(), before)
 

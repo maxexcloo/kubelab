@@ -8,4 +8,6 @@ data:
   beszel_host: beszel.excloo.com
   control_d_profile: 653224sydwhf
   headlamp_client_id: headlamp
+  homelab_branch: main
+  homelab_repository: https://github.com/maxexcloo/homelab
   identity_host: id.excloo.com

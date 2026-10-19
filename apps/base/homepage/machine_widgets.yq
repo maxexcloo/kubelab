@@ -56,7 +56,7 @@ load(strenv(PROVIDERS)).providers as $providers |
   }
 ] as $management |
 [$hosts[] | select(.machine.type != null) | . as $host |
-  (([.machine] | map(select(.beszel == true and strenv(HOMEPAGE_BESZEL_URL) != "")) | map({
+  (([.machine] | map(select(.beszel == true)) | map({
     "description": "System Monitoring", "icon": "sh-beszel", "name": "Beszel",
     "href": (strenv(HOMEPAGE_BESZEL_URL) + "/system/" + $host.group),
     "widget": {

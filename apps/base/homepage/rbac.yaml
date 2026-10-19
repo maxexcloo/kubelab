@@ -45,6 +45,14 @@ rules:
       - kustomizations
     verbs:
       - get
+  - apiGroups:
+      - source.toolkit.fluxcd.io
+    resourceNames:
+      - flux-system
+    resources:
+      - gitrepositories
+    verbs:
+      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

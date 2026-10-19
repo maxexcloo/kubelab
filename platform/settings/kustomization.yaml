@@ -41,6 +41,15 @@ replacements:
           namespace: beszel
         fieldPaths:
           - spec.values.route.private.hostnames.0
+      - select:
+          kind: HelmRelease
+          name: homepage
+          namespace: homepage
+        fieldPaths:
+          - spec.values.controllers.homepage.initContainers.endpoints.env.HOMEPAGE_BESZEL_URL
+        options:
+          delimiter: /
+          index: 2
   - source:
       kind: ConfigMap
       name: shared-settings
@@ -68,6 +77,32 @@ replacements:
           namespace: headlamp
         fieldPaths:
           - spec.client.id
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.homelab_branch
+    targets:
+      - select:
+          kind: HelmRelease
+          name: homepage
+          namespace: homepage
+        fieldPaths:
+          - spec.values.controllers.homepage.initContainers.endpoints.env.HOMELAB_BRANCH
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.homelab_repository
+    targets:
+      - select:
+          kind: HelmRelease
+          name: homepage
+          namespace: homepage
+        fieldPaths:
+          - spec.values.controllers.homepage.initContainers.endpoints.env.HOMELAB_REPOSITORY
+        options:
+          create: true
   - source:
       kind: ConfigMap
       name: shared-settings

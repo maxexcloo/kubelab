@@ -1,15 +1,21 @@
 #!/bin/sh
 set -eu
 : "${HOMEPAGE_CLUSTER:?HOMEPAGE_CLUSTER is required}"
+: "${HOMEPAGE_ROUTE_SCRIPT:?HOMEPAGE_ROUTE_SCRIPT is required}"
+: "${KUBECTL:?KUBECTL is required}"
 export HOMEPAGE_CLUSTER
+# KUBELAB_DIRECTORY, HOMELAB_DIRECTORY, MINILAB_DIRECTORY and
+# HOMEPAGE_GATUS_STATUSES_FILE select local inputs for tests. Unset or empty,
+# the live repositories are downloaded and Gatus is queried.
 
 if [ "${1:-}" = --watch ]; then
   shift
+  : "${HOMEPAGE_REVALIDATE_URL:?HOMEPAGE_REVALIDATE_URL is required}"
   trap 'exit 0' INT TERM
   while true; do
     if ! sh "$0" "$@"; then
       echo 'Homepage refresh failed; retaining the last valid configuration' >&2
-    elif [ -n "${HOMEPAGE_REVALIDATE_URL:-}" ]; then
+    else
       # Native page caching otherwise leaves new browsers on the image's layout.
       for _ in $(seq 1 30); do
         if wget -O /dev/null -q -T 5 --header 'Host: localhost:3000' "$HOMEPAGE_REVALIDATE_URL"; then
@@ -26,10 +32,17 @@ fi
 source_directory=${1:?Usage: render_dashboard.sh source-directory output-directory}
 output_directory=${2:?Usage: render_dashboard.sh source-directory output-directory}
 script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
-route_script=${HOMEPAGE_ROUTE_SCRIPT:-$script_directory/../../../scripts/service-routes/service_routes.yq}
 temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
 # Keep downloads and Kustomize rendering separate from dashboard assembly.
+github_repository() (
+  repository=${1#https://github.com/}
+  repository=${repository%.git}
+  case "$repository" in
+    '' | *[!a-zA-Z0-9_./-]* | *..*) echo "Invalid GitHub repository: $1" >&2; exit 1 ;;
+  esac
+  printf '%s' "$repository"
+)
 download_repository() (
   repository=$1
   revision=$2
@@ -40,7 +53,7 @@ download_repository() (
   tar -xzf "$temporary_directory/repository.tar.gz" -C "$destination" --strip-components=1
 )
 applied_revision() (
-  revision=$("${KUBECTL:-kubectl}" --namespace flux-system get kustomization "$1" \
+  revision=$("$KUBECTL" --namespace flux-system get kustomization "$1" \
     --output jsonpath='{.status.lastAppliedRevision}' --ignore-not-found)
   revision=${revision##*@sha1:}
   if [ -n "$revision" ]; then
@@ -52,8 +65,8 @@ applied_revision() (
   printf '%s' "$revision"
 )
 render_routes() {
-  "${KUBECTL:-kubectl}" kustomize "$1" > "$temporary_directory/manifests.yaml"
-  CLUSTER="$cluster" yq --from-file "$route_script" -I=0 -N -o=json \
+  "$KUBECTL" kustomize "$1" > "$temporary_directory/manifests.yaml"
+  CLUSTER="$cluster" yq --from-file "$HOMEPAGE_ROUTE_SCRIPT" -I=0 -N -o=json \
     "$temporary_directory/manifests.yaml"
 }
 
@@ -63,10 +76,13 @@ if [ -z "$kubelab_directory" ]; then
   # Follow the local cluster's applied configuration rather than newer Git commits.
   revision=$(applied_revision apps)
   : "${revision:?Missing applied Flux revision}"
-  cache_directory=${HOMEPAGE_CACHE_DIRECTORY:-/tmp/homepage}
+  cache_directory=${HOMEPAGE_CACHE_DIRECTORY:?HOMEPAGE_CACHE_DIRECTORY is required}
   kubelab_directory="$cache_directory/kubelab"
   if [ ! -d "$kubelab_directory" ] || [ "$(cat "$cache_directory/revision" 2>/dev/null || true)" != "$revision" ]; then
-    download_repository maxexcloo/kubelab "$revision" "$temporary_directory/kubelab"
+    # The applied revision belongs to the cluster's own Flux source.
+    kubelab_url=$("$KUBECTL" --namespace flux-system get gitrepository flux-system --output jsonpath='{.spec.url}')
+    kubelab_repository=$(github_repository "$kubelab_url")
+    download_repository "$kubelab_repository" "$revision" "$temporary_directory/kubelab"
     mkdir -p "$cache_directory"
     rm -fr "$kubelab_directory"
     mv "$temporary_directory/kubelab" "$kubelab_directory"
@@ -76,15 +92,16 @@ fi
 
 homelab_directory=${HOMELAB_DIRECTORY:-}
 if [ -z "$homelab_directory" ]; then
+  homelab_repository=$(github_repository "${HOMELAB_REPOSITORY:?HOMELAB_REPOSITORY is required}")
   homelab_directory="$temporary_directory/homelab"
-  download_repository maxexcloo/homelab refs/heads/main "$homelab_directory"
+  download_repository "$homelab_repository" "refs/heads/${HOMELAB_BRANCH:?HOMELAB_BRANCH is required}" "$homelab_directory"
 fi
 export HOMELAB_MACHINES="$homelab_directory/data/machines.yaml"
 
 # Use the same rendered route annotations as external monitoring. Never execute
 # scripts from the downloaded checkout or connect to another cluster's API.
 : > "$temporary_directory/routes.json"
-mini_apps_directory=${MINI_APPS_DIRECTORY:-}
+minilab_directory=${MINILAB_DIRECTORY:-}
 for overlay in "$kubelab_directory"/apps/overlays/*; do
   [ -d "$overlay" ] || continue
   cluster=${overlay##*/}
@@ -92,22 +109,18 @@ for overlay in "$kubelab_directory"/apps/overlays/*; do
     render_routes "$target" >> "$temporary_directory/routes.json"
     mini_apps_path=$(yq 'select(.kind == "Kustomization" and .metadata.name == "mini-apps") | .spec.path' "$temporary_directory/manifests.yaml")
     [ -n "$mini_apps_path" ] || continue
-    if [ -z "$mini_apps_directory" ]; then
-      mini_apps_url=$(yq 'select(.kind == "GitRepository" and .metadata.name == "mini-apps") | .spec.url' "$temporary_directory/manifests.yaml")
-      mini_apps_repository=${mini_apps_url#https://github.com/}
-      mini_apps_repository=${mini_apps_repository%.git}
-      case "$mini_apps_repository" in
-        '' | *[!a-zA-Z0-9_./-]* | *..*) echo 'Invalid mini-apps repository' >&2; exit 1 ;;
-      esac
-      mini_apps_revision=$(applied_revision mini-apps)
-      if [ -z "$mini_apps_revision" ]; then
-        mini_apps_branch=$(yq 'select(.kind == "GitRepository" and .metadata.name == "mini-apps") | .spec.ref.branch' "$temporary_directory/manifests.yaml")
-        mini_apps_revision="refs/heads/$mini_apps_branch"
+    if [ -z "$minilab_directory" ]; then
+      minilab_url=$(yq -e 'select(.kind == "GitRepository" and .metadata.name == "mini-apps") | .spec.url' "$temporary_directory/manifests.yaml")
+      minilab_repository=$(github_repository "$minilab_url")
+      minilab_revision=$(applied_revision mini-apps)
+      if [ -z "$minilab_revision" ]; then
+        minilab_branch=$(yq -e 'select(.kind == "GitRepository" and .metadata.name == "mini-apps") | .spec.ref.branch' "$temporary_directory/manifests.yaml")
+        minilab_revision="refs/heads/$minilab_branch"
       fi
-      mini_apps_directory="$temporary_directory/mini-apps"
-      download_repository "$mini_apps_repository" "$mini_apps_revision" "$mini_apps_directory"
+      minilab_directory="$temporary_directory/minilab"
+      download_repository "$minilab_repository" "$minilab_revision" "$minilab_directory"
     fi
-    render_routes "$mini_apps_directory/$mini_apps_path" > "$temporary_directory/mini-app-routes.json"
+    render_routes "$minilab_directory/$mini_apps_path" > "$temporary_directory/mini-app-routes.json"
     yq -p=json -o=json -I=0 '.annotations."gethomepage.dev/group" = "Mini Apps"' \
       "$temporary_directory/mini-app-routes.json" >> "$temporary_directory/routes.json"
   done
@@ -123,7 +136,6 @@ sh "$script_directory/route_nodes.sh" "$temporary_directory/routes.yaml" "$tempo
 
 mkdir "$temporary_directory/config"
 HOMEPAGE_CLUSTER_NAMES=$(yq -r 'map(.cluster) | unique | join(",")' "$temporary_directory/inventory.yaml") \
-HOMEPAGE_BESZEL_URL=$(yq -r 'map(select(.namespace == "beszel")) | .[0].annotations."gethomepage.dev/href" // ""' "$temporary_directory/inventory.yaml") \
   sh "$script_directory/render_services.sh" "$source_directory/services.yaml" \
   "$temporary_directory/external-services.yaml" "$homelab_directory"
 SERVICES="$temporary_directory/external-services.yaml" \
