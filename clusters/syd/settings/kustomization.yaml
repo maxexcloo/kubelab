@@ -160,6 +160,14 @@ replacements:
       fieldPath: data.bento_address
     targets:
       - select:
+          kind: ConfigMap
+          name: cluster-settings
+        fieldPaths:
+          - data.bento_llm_authority
+        options:
+          delimiter: ":"
+          index: 0
+      - select:
           kind: HelmRelease
           name: studio
           namespace: studio

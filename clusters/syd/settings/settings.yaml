@@ -6,8 +6,8 @@ metadata:
     config.kubernetes.io/local-config: "true"
 data:
   atvloadly_gateway_host: hsp.syd.excloo.net
-  bento_address: 100.73.126.15
-  bento_llm_authority: bento.mbk.excloo.net:8000
+  bento_address: bento.mbk.excloo.net
+  bento_llm_authority: host.invalid:8000
   cluster_name: syd
   dataset_root: /var/mnt/datasets
   grafana_host: grafana.excloo.com
