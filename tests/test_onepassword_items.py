@@ -715,16 +715,16 @@ class ReconcilerTests(unittest.TestCase):
                 },
             }
 
-        applications, mini_apps = kustomization("flux-system"), kustomization("mini-apps")
+        applications, minilab = kustomization("flux-system"), kustomization("minilab")
         sources = {
             name: {"status": {"artifact": {"revision": f"{name}@sha1:current"}}}
-            for name in ["flux-system", "mini-apps"]
+            for name in ["flux-system", "minilab"]
         }
         with (
             patch.object(
                 RECONCILER,
                 "kubernetes_list",
-                side_effect=lambda path: [applications, mini_apps],
+                side_effect=lambda path: [applications, minilab],
             ),
             patch.object(
                 RECONCILER,
@@ -733,17 +733,17 @@ class ReconcilerTests(unittest.TestCase):
             ),
         ):
             self.assertTrue(RECONCILER.kustomizations_ready())
-            for resource in [mini_apps, sources["mini-apps"]]:
+            for resource in [minilab, sources["minilab"]]:
                 resource.setdefault("spec", {})["suspend"] = True
                 self.assertFalse(RECONCILER.kustomizations_ready())
                 resource["spec"]["suspend"] = False
-            sources["mini-apps"]["status"]["artifact"]["revision"] = "mini-apps@sha1:new"
+            sources["minilab"]["status"]["artifact"]["revision"] = "minilab@sha1:new"
             self.assertFalse(RECONCILER.kustomizations_ready())
-            sources["mini-apps"]["status"]["artifact"]["revision"] = "mini-apps@sha1:current"
-            mini_apps["status"]["observedGeneration"] = 2
+            sources["minilab"]["status"]["artifact"]["revision"] = "minilab@sha1:current"
+            minilab["status"]["observedGeneration"] = 2
             self.assertFalse(RECONCILER.kustomizations_ready())
-            mini_apps["status"]["observedGeneration"] = 3
-            mini_apps["spec"]["sourceRef"]["kind"] = "OCIRepository"
+            minilab["status"]["observedGeneration"] = 3
+            minilab["spec"]["sourceRef"]["kind"] = "OCIRepository"
             self.assertFalse(RECONCILER.kustomizations_ready())
 
     def test_discovery_uses_secret_owner_and_explicit_route_item(self):

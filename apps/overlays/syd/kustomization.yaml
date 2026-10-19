@@ -18,7 +18,7 @@ resources:
   - ../../base/librechat-admin
   - ../../base/linkwarden
   - ../../base/litellm
-  - ../../base/mini-apps
+  - ../../base/minilab
   - ../../base/miniflux
   - ../../base/openspeedtest
   - ../../base/papra
@@ -56,7 +56,7 @@ patches:
   - path: atvloadly.yaml
   - path: beszel-agent.yaml
   - path: homepage.yaml
-  - path: mini-apps.yaml
+  - path: minilab.yaml
   - path: syncthing.yaml
 # Reapply hostname consumers after cluster settings resolve the private alias.
 transformers:
@@ -101,7 +101,7 @@ replacements:
     targets:
       - select:
           kind: Kustomization
-          name: mini-apps
+          name: minilab
           namespace: flux-system
         fieldPaths:
           - spec.postBuild.substitute.REDLIB_URL

@@ -199,7 +199,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(len(downloads.read_text().splitlines()), 3)
         self.assertEqual(before, {p.name: p.read_bytes() for p in self.output.iterdir()})
 
-    def test_mini_apps_follow_cluster_selection_and_homepage_annotations(self):
+    def test_minilab_follow_cluster_selection_and_homepage_annotations(self):
         minilab = self.directory / "minilab"
         for cluster, name in (("mbk", "Budget"), ("syd", "Feeds")):
             directory = minilab / "clusters" / cluster
@@ -208,12 +208,12 @@ cp "$ARCHIVE_FIXTURE" "$2"
             (directory / "app.yaml").write_text(json.dumps(route(name)))
             source = {
                 "apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository",
-                "metadata": {"name": "mini-apps", "namespace": "flux-system"},
+                "metadata": {"name": "minilab", "namespace": "flux-system"},
                 "spec": {"url": "https://github.com/example/minilab.git", "ref": {"branch": "deploy"}},
             }
             selection = {
                 "apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization",
-                "metadata": {"name": "mini-apps", "namespace": "flux-system"},
+                "metadata": {"name": "minilab", "namespace": "flux-system"},
                 "spec": {"path": f"./clusters/{cluster}"},
             }
             self.write_routes(cluster, [route("Existing"), selection, source])
@@ -225,7 +225,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Existing", services)
         self.assertEqual(services["Feeds"]["href"], "https://feeds.example.net")
         groups = self.groups()
-        self.assertEqual([next(iter(card)) for card in groups["Mini Apps"]], ["Budget", "Feeds"])
+        self.assertEqual([next(iter(card)) for card in groups["Minilab"]], ["Budget", "Feeds"])
         self.assertNotIn("Feeds", [next(iter(card)) for card in groups["Applications"]])
         self.assertEqual(read_yaml(self.output / "settings.yaml")["layout"]["Home"]["tab"], "Home")
         # Newly deployed apps appear on refresh; removed apps disappear without

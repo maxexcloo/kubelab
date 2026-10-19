@@ -40,7 +40,7 @@ rules:
       - kustomize.toolkit.fluxcd.io
     resourceNames:
       - apps
-      - mini-apps
+      - minilab
     resources:
       - kustomizations
     verbs:

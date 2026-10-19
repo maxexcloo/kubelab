@@ -169,7 +169,7 @@ def kustomization_ready(resource):
 
 
 def kustomizations_ready():
-    # Credential consumers come from several Kustomizations, including mini-apps.
+    # Credential consumers come from several Kustomizations, including minilab.
     kustomizations = kubernetes_list(
         "/apis/kustomize.toolkit.fluxcd.io/v1/namespaces/flux-system/kustomizations"
     )

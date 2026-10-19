@@ -45,7 +45,7 @@ replacements:
           create: true
       - select:
           kind: Kustomization
-          name: mini-apps
+          name: minilab
           namespace: flux-system
         fieldPaths:
           - spec.path

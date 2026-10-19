@@ -107,21 +107,21 @@ for overlay in "$kubelab_directory"/apps/overlays/*; do
   cluster=${overlay##*/}
   for target in "$overlay" "$kubelab_directory/clusters/$cluster/platform"; do
     render_routes "$target" >> "$temporary_directory/routes.json"
-    mini_apps_path=$(yq 'select(.kind == "Kustomization" and .metadata.name == "mini-apps") | .spec.path' "$temporary_directory/manifests.yaml")
-    [ -n "$mini_apps_path" ] || continue
+    minilab_path=$(yq 'select(.kind == "Kustomization" and .metadata.name == "minilab") | .spec.path' "$temporary_directory/manifests.yaml")
+    [ -n "$minilab_path" ] || continue
     if [ -z "$minilab_directory" ]; then
-      minilab_url=$(yq -e 'select(.kind == "GitRepository" and .metadata.name == "mini-apps") | .spec.url' "$temporary_directory/manifests.yaml")
+      minilab_url=$(yq -e 'select(.kind == "GitRepository" and .metadata.name == "minilab") | .spec.url' "$temporary_directory/manifests.yaml")
       minilab_repository=$(github_repository "$minilab_url")
-      minilab_revision=$(applied_revision mini-apps)
+      minilab_revision=$(applied_revision minilab)
       if [ -z "$minilab_revision" ]; then
-        minilab_branch=$(yq -e 'select(.kind == "GitRepository" and .metadata.name == "mini-apps") | .spec.ref.branch' "$temporary_directory/manifests.yaml")
+        minilab_branch=$(yq -e 'select(.kind == "GitRepository" and .metadata.name == "minilab") | .spec.ref.branch' "$temporary_directory/manifests.yaml")
         minilab_revision="refs/heads/$minilab_branch"
       fi
       minilab_directory="$temporary_directory/minilab"
       download_repository "$minilab_repository" "$minilab_revision" "$minilab_directory"
     fi
-    render_routes "$minilab_directory/$mini_apps_path" > "$temporary_directory/mini-app-routes.json"
-    yq -p=json -o=json -I=0 '.annotations."gethomepage.dev/group" = "Mini Apps"' \
+    render_routes "$minilab_directory/$minilab_path" > "$temporary_directory/mini-app-routes.json"
+    yq -p=json -o=json -I=0 '.annotations."gethomepage.dev/group" = "Minilab"' \
       "$temporary_directory/mini-app-routes.json" >> "$temporary_directory/routes.json"
   done
 done
