@@ -81,23 +81,6 @@ spec:
                 managementPolicies: [Create, LateInitialize, Observe, Update]
                 forProvider:
                   expectedResponseCheck:
-                    logic: |-
-                      .response.statusCode == 200
-                      and .response.body.success == true
-                      and (
-                        .payload.body as $wanted
-                        | ([
-                            .response.body.result.rules[]?
-                            | select(.ref == $wanted.ref)
-                            | {
-                                action,
-                                description,
-                                enabled,
-                                expression,
-                                ref
-                              }
-                          ] | first) == $wanted
-                      )
                     type: CUSTOM
                   headers:
                     Content-Type: [application/json]
@@ -196,3 +179,22 @@ spec:
                     - fromFieldPath: spec.rule.expression
                     - fromFieldPath: spec.rule.ref
                 toFieldPath: spec.forProvider.payload.body
+              # The provider resolves secret references in the check logic but not in
+              # .payload, so inline the wanted rule to compare resolved expressions.
+              - type: CombineFromComposite
+                combine:
+                  strategy: string
+                  string:
+                    fmt: >-
+                      .response.statusCode == 200
+                      and .response.body.success == true
+                      and (([.response.body.result.rules[]? | select(.ref == %q) | {action, description, enabled, expression, ref}] | first)
+                      == {"action":%q,"description":%q,"enabled":%t,"expression":%q,"ref":%q})
+                  variables:
+                    - fromFieldPath: spec.rule.ref
+                    - fromFieldPath: spec.rule.action
+                    - fromFieldPath: spec.rule.description
+                    - fromFieldPath: spec.rule.enabled
+                    - fromFieldPath: spec.rule.expression
+                    - fromFieldPath: spec.rule.ref
+                toFieldPath: spec.forProvider.expectedResponseCheck.logic
