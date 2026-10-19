@@ -88,7 +88,7 @@ spec:
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-syncthing
           gethomepage.dev/name: &title Syncthing
-          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_SYNCTHING_KEY}}" }}'
+          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_SYNCTHING_API_KEY}}" }}'
           gethomepage.dev/widget.type: syncthing
           gethomepage.dev/widget.url: https://app.invalid
           monitoring.excloo.dev/enabled: "true"

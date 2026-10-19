@@ -126,7 +126,7 @@ spec:
           gethomepage.dev/icon: sh-linkwarden
           gethomepage.dev/name: &title Linkwarden
           gethomepage.dev/pod-selector: app.kubernetes.io/name=linkwarden,app.kubernetes.io/controller=linkwarden
-          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_FILE_LINKWARDEN_KEY}}" }}'
+          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_LINKWARDEN_ACCESS_TOKEN}}" }}'
           gethomepage.dev/widget.type: linkwarden
           gethomepage.dev/widget.url: https://app.invalid
           monitoring.excloo.dev/enabled: "true"

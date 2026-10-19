@@ -270,7 +270,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         annotations = route("Library", group="Media", **{
             "description": "Photo Manager",
             "widget.type": "immich",
-            "widget.key": '{{ "{{HOMEPAGE_FILE_IMMICH_KEY}}" }}',
+            "widget.key": '{{ "{{HOMEPAGE_VAR_IMMICH_API_KEY}}" }}',
             "widget.version": "2",
             "widget.headers.X-Example": "value",
         })["metadata"]["annotations"]
@@ -290,7 +290,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(groups["Media"][0]["Library"]["description"], "Photo Manager • SYD")
         self.assertEqual(groups["syd"][0]["Library"]["description"], "Photo Manager")
         widget = self.services()["Library"]["widget"]
-        self.assertEqual(widget["key"], "{{HOMEPAGE_FILE_IMMICH_KEY}}")
+        self.assertEqual(widget["key"], "{{HOMEPAGE_VAR_IMMICH_API_KEY}}")
         self.assertEqual(widget["headers"], {"X-Example": "value"})
         self.assertEqual(widget["version"], 2)
         self.assertIn("Media", read_yaml(self.output / "settings.yaml")["layout"]["Home"])
@@ -341,11 +341,11 @@ cp "$ARCHIVE_FIXTURE" "$2"
         providers["providers"].update({
             "cloudflare": {
                 "description": "Cloudflare Tunnel", "icon": "cloudflare", "name": "Cloudflare Tunnel",
-                "widget": {"type": "cloudflared", "key": "{{HOMEPAGE_FILE_CLOUDFLARE_KEY}}"},
+                "widget": {"type": "cloudflared", "key": "{{HOMEPAGE_VAR_CLOUDFLARE_API_TOKEN}}"},
             },
             "tailscale": {
                 "description": "VPN", "icon": "tailscale", "name": "Tailscale",
-                "widget": {"type": "tailscale", "key": "{{HOMEPAGE_FILE_TAILSCALE_KEY}}"},
+                "widget": {"type": "tailscale", "key": "{{HOMEPAGE_VAR_TAILSCALE_API_TOKEN}}"},
             },
         })
         for name in ("Cloudflare", "Tailscale"):
@@ -384,9 +384,9 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
         self.assertEqual(groups["mbk"]["Cloudflare"]["widget"]["tunnelid"], "cluster-tunnel")
         self.assertEqual(groups["mbk"]["Tailscale"]["widget"]["deviceid"], "cluster-device")
-        self.assertEqual(node["Tailscale"]["widget"]["key"], "{{HOMEPAGE_FILE_TAILSCALE_KEY}}")
+        self.assertEqual(node["Tailscale"]["widget"]["key"], "{{HOMEPAGE_VAR_TAILSCALE_API_TOKEN}}")
         self.assertEqual(node["Tailscale"]["href"], "https://login.tailscale.com/admin/machines/node-device")
-        self.assertEqual(node["Beszel"]["widget"]["password"], "{{HOMEPAGE_FILE_BESZEL_PASSWORD}}")
+        self.assertEqual(node["Beszel"]["widget"]["password"], "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}")
         self.assertEqual(node["Beszel"]["widget"]["fields"], ["status", "cpu", "memory", "network"])
         self.assertEqual(node["Beszel"]["weight"], -100)
         self.assertEqual(node["Beszel"]["icon"], "sh-beszel")
