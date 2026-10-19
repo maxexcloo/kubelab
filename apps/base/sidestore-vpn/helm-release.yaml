@@ -26,14 +26,14 @@ spec:
               - net.ipv4.ip_forward=1
             image: &tailscale-image
               repository: ghcr.io/tailscale/tailscale
-              tag: v1.104.1@sha256:87c55d6be56ad85b3d8bceca5f87f73de288c609131460dd1be1874c250cc41d
+              tag: v1.104.1
             securityContext:
               privileged: true
         containers:
           reflector:
             image:
               repository: ghcr.io/xddxdd/sidestore-vpn
-              tag: latest
+              tag: sha-1cb5f5d
             resources:
               limits:
                 memory: 32Mi

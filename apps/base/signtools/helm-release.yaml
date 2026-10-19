@@ -28,7 +28,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/signtools/signtools
-              tag: 3.0.12@sha256:7d0110b6138ca7d3ae3b4e5d303dc53fa20f6d803faf3ce29ff38f062cd8c8bb
+              tag: 3.0.12
             probes:
               liveness: &health
                 type: TCP
