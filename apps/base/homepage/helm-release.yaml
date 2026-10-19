@@ -61,19 +61,6 @@ spec:
                   - ALL
             env:
               HOMEPAGE_ALLOWED_HOSTS: app.invalid,alias.invalid
-              HOMEPAGE_FILE_BESZEL_PASSWORD: /secrets/beszel-password
-              HOMEPAGE_FILE_BESZEL_USERNAME: /secrets/beszel-username
-              HOMEPAGE_FILE_CLOUDFLARE_KEY: /secrets/cloudflare-key
-              HOMEPAGE_FILE_GRAFANA_PASSWORD: /secrets/grafana-password
-              HOMEPAGE_FILE_GRAFANA_USERNAME: /secrets/grafana-username
-              HOMEPAGE_FILE_HOME_ASSISTANT_KEY: /secrets/home-assistant-key
-              HOMEPAGE_FILE_IMMICH_KEY: /secrets/immich-key
-              HOMEPAGE_FILE_LINKWARDEN_KEY: /secrets/linkwarden-key
-              HOMEPAGE_FILE_MINIFLUX_KEY: /secrets/miniflux-key
-              HOMEPAGE_FILE_SYNCTHING_KEY: /secrets/syncthing-key
-              HOMEPAGE_FILE_TAILSCALE_KEY: /secrets/tailscale-key
-              HOMEPAGE_FILE_TRUENAS_KEY: /secrets/truenas-key
-              HOMEPAGE_FILE_UNIFI_KEY: /secrets/unifi-key
             envFrom:
               - secretRef:
                   name: homepage
@@ -206,14 +193,6 @@ spec:
           homepage:
             endpoints:
               - path: /routes
-                readOnly: true
-      secrets:
-        name: homepage
-        type: secret
-        advancedMounts:
-          homepage:
-            homepage:
-              - path: /secrets
                 readOnly: true
       temporary:
         type: emptyDir
