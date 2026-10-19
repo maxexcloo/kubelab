@@ -32,7 +32,8 @@ load(strenv(PROVIDERS)).providers as $providers |
   .value + {"name": .key, "group": $group}] +
  [$hosts[] | select(.machine.type != null) | . as $host |
   (.machine.services // {}) | to_entries[] |
-  select(.key != "management" and (.value.description != null or .value.icon != null or .value.group != null)) |
+  # A grouped management panel also appears in its Home group.
+  select(.value.group != null or (.key != "management" and (.value.description != null or .value.icon != null))) |
   ("homelab://" + $host.network + "/" + $host.key + "/" + .key) as $reference |
   {"description": .value.description, "icon": .value.icon, "name": (.value.name // .key), "group": (.value.group // "Infrastructure"),
     "href": $reference, "siteMonitor": (.value.siteMonitor // $reference)}]) |
