@@ -166,8 +166,8 @@ webSearch:
 mcpSettings:
   allowedAddresses:
     - litellm.litellm.svc.cluster.local:4000
-# MCP servers are registered in LiteLLM's UI. Its /mcp combines every server the
-# shared key may use; grant the key access there to offer a server here.
+# MCP servers are registered in LiteLLM's UI, which serves each at /<alias>/mcp.
+# Grant the shared key access there and add an entry here to offer a server.
 mcpServers:
   ai-control:
     type: streamable-http
@@ -184,32 +184,34 @@ mcpServers:
         title: Admin API Key
     headers:
       x-litellm-api-key: "Bearer {{AI_CONTROL_API_KEY}}"
-  litellm:
+  home-assistant:
     type: streamable-http
-    description: Tools from the MCP servers LiteLLM offers to chat.
+    description: Inspect and control home devices, automations and dashboards.
     requiresOAuth: false
-    serverInstructions: true
-    # Studio waits up to 31 minutes for generation results.
-    timeout: 1860000
-    title: LiteLLM
-    url: http://litellm.litellm.svc.cluster.local:4000/mcp
+    title: Home Assistant
+    url: http://litellm.litellm.svc.cluster.local:4000/home_assistant/mcp
     headers:
-      X-AI-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
-      X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
-  # Hidden from the chat menu; the Studio model spec pins it to keep its tool list small.
   studio:
     type: streamable-http
-    chatMenu: false
     description: Create and manage images and videos in Studio.
     requiresOAuth: false
     # The Studio spec prompt carries the workflow rules, so the server's instructions are not resent each step.
+    # Studio waits up to 31 minutes for generation results.
     timeout: 1860000
     title: Studio
     url: http://litellm.litellm.svc.cluster.local:4000/studio/mcp
     headers:
       X-AI-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
       X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
+      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+  unifi-network:
+    type: streamable-http
+    description: Inspect and manage UniFi networks, devices and clients.
+    requiresOAuth: false
+    title: UniFi Network
+    url: http://litellm.litellm.svc.cluster.local:4000/unifi_network/mcp
+    headers:
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
 # Specs build an agent per request from the preset, MCP servers and background tools.
 modelSpecs:
