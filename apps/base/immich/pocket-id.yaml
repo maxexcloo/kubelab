@@ -12,3 +12,4 @@ spec:
     id: immich-au-truenas
     launchURL: https://app.invalid
     name: Immich
+  item: Immich

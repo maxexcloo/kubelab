@@ -132,7 +132,7 @@ class ReconcilerTests(unittest.TestCase):
 
         with patch.object(RECONCILER, "connect", side_effect=connect), \
                 patch.object(RECONCILER, "discover_items", return_value=desired), \
-                patch.object(RECONCILER, "kustomizations_ready", return_value=True), \
+                patch.object(RECONCILER, "flux_ready", return_value=True), \
                 patch.object(RECONCILER, "is_dry_run", return_value=False), \
                 contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
@@ -307,57 +307,6 @@ class ReconcilerTests(unittest.TestCase):
         self.assertNotEqual(
             RECONCILER.comparable(current), RECONCILER.comparable(wanted)
         )
-
-    def test_declared_values_overwrite_existing_field_values(self):
-        desired = item_configuration(
-            fields={"object-storage-secret-access-key"},
-            values={"object-storage-secret-access-key": "fresh-value"},
-        )
-        current = {
-            "fields": [
-                {
-                    "id": "stored",
-                    "label": "object-storage-secret-access-key",
-                    "value": "stale-value",
-                },
-            ]
-        }
-        result = RECONCILER.normalise_item(current, "Beszel", desired, "vault")
-        fields = {field["label"]: field for field in result["fields"]}
-        self.assertEqual(
-            fields["object-storage-secret-access-key"]["value"], "fresh-value"
-        )
-        self.assertEqual(fields["object-storage-secret-access-key"]["id"], "stored")
-
-    def test_secret_values_resolve_declared_fields(self):
-        resource = {"metadata": {"namespace": "beszel"}}
-        secret = {
-            "data": {"secret-access-key": base64.b64encode(b"fresh-value").decode()}
-        }
-        with patch.object(
-            RECONCILER, "kubernetes_request", return_value=secret
-        ) as request:
-            resolved = RECONCILER.secret_values(
-                resource,
-                {
-                    "object-storage-secret-access-key": "b2-application-key/secret-access-key"
-                },
-            )
-        self.assertEqual(resolved, {"object-storage-secret-access-key": "fresh-value"})
-        request.assert_called_once_with(
-            "/api/v1/namespaces/beszel/secrets/b2-application-key"
-        )
-
-    def test_missing_secret_values_stop_the_reconcile(self):
-        resource = {"metadata": {"namespace": "beszel"}}
-        with patch.object(RECONCILER, "kubernetes_request", return_value={"data": {}}):
-            with self.assertRaisesRegex(RuntimeError, "needs key access-key-id"):
-                RECONCILER.secret_values(
-                    resource,
-                    {
-                        "object-storage-access-key-id": "b2-application-key/access-key-id"
-                    },
-                )
 
     def test_interpolated_tokens_use_only_letters_and_digits(self):
         desired = item_configuration(
@@ -594,7 +543,7 @@ class ReconcilerTests(unittest.TestCase):
             "title": "Application",
         }
         with (
-            patch.object(RECONCILER, "kustomizations_ready", return_value=True),
+            patch.object(RECONCILER, "flux_ready", return_value=True),
             patch.object(RECONCILER, "is_dry_run", return_value=False),
             patch.object(
                 RECONCILER,
@@ -631,7 +580,7 @@ class ReconcilerTests(unittest.TestCase):
             return copy.deepcopy(items[item_id])
 
         with (
-            patch.object(RECONCILER, "kustomizations_ready", return_value=True),
+            patch.object(RECONCILER, "flux_ready", return_value=True),
             patch.object(RECONCILER, "is_dry_run", return_value=False),
             patch.object(RECONCILER, "discover_items", return_value={}),
             patch.object(RECONCILER, "connect", side_effect=connect),
@@ -684,14 +633,14 @@ class ReconcilerTests(unittest.TestCase):
             urls={"https://id.excloo.com"},
         )
         originals = {
-            "kustomizations_ready": RECONCILER.kustomizations_ready,
+            "flux_ready": RECONCILER.flux_ready,
             "connect": RECONCILER.connect,
             "discover_items": RECONCILER.discover_items,
             "is_dry_run": RECONCILER.is_dry_run,
         }
         for name, value in originals.items():
             self.addCleanup(setattr, RECONCILER, name, value)
-        RECONCILER.kustomizations_ready = lambda: False
+        RECONCILER.flux_ready = lambda: False
         RECONCILER.connect = connect
         RECONCILER.discover_items = lambda cluster=None: {"Pocket ID": desired}
         RECONCILER.is_dry_run = lambda: False
@@ -743,6 +692,105 @@ class ReconcilerTests(unittest.TestCase):
             minilab["status"]["observedGeneration"] = 3
             minilab["spec"]["sourceRef"]["kind"] = "OCIRepository"
             self.assertFalse(RECONCILER.kustomizations_ready())
+
+    def test_helm_releases_ready_require_current_unsuspended_ready_releases(self):
+        release = {
+            "metadata": {"generation": 2},
+            "status": {
+                "conditions": [{"status": "True", "type": "Ready"}],
+                "observedGeneration": 2,
+            },
+        }
+        with patch.object(RECONCILER, "kubernetes_list", return_value=[release]):
+            self.assertTrue(RECONCILER.helm_releases_ready())
+            release["status"]["observedGeneration"] = 1
+            self.assertFalse(RECONCILER.helm_releases_ready())
+            release["status"]["observedGeneration"] = 2
+            release["spec"] = {"suspend": True}
+            self.assertFalse(RECONCILER.helm_releases_ready())
+            release["spec"]["suspend"] = False
+            release["status"]["conditions"][0]["status"] = "False"
+            self.assertFalse(RECONCILER.helm_releases_ready())
+
+    def test_flux_readiness_needs_kustomizations_and_helm_releases(self):
+        for kustomizations, releases in [(True, False), (False, True)]:
+            with (
+                patch.object(RECONCILER, "kustomizations_ready", return_value=kustomizations),
+                patch.object(RECONCILER, "helm_releases_ready", return_value=releases),
+            ):
+                self.assertFalse(RECONCILER.flux_ready())
+
+    def test_items_edited_during_reconciliation_are_skipped(self):
+        current = {
+            "category": "SERVER",
+            "fields": [],
+            "id": "item-id",
+            "tags": ["Kubelab"],
+            "title": "Application",
+            "version": 1,
+        }
+        writes = []
+
+        def connect(path, *, body=None, method="GET"):
+            if path == "/vaults":
+                return [{"id": "vault"}]
+            if path == "/vaults/vault/items":
+                return [{"id": "item-id", "title": "Application"}]
+            if method == "PUT":
+                writes.append(body)
+                return body
+            # A person saves the item between the reconciler's read and write.
+            item = copy.deepcopy(current)
+            current["version"] += 1
+            return item
+
+        desired = {"Application": item_configuration(generate={"api-key"})}
+        output = io.StringIO()
+        with (
+            patch.object(RECONCILER, "connect", side_effect=connect),
+            patch.object(RECONCILER, "discover_items", return_value=desired),
+            patch.object(RECONCILER, "flux_ready", return_value=False),
+            patch.object(RECONCILER, "is_dry_run", return_value=False),
+            contextlib.redirect_stdout(output),
+        ):
+            RECONCILER.main()
+        self.assertEqual(writes, [])
+        self.assertIn("Application changed during reconciliation; skipped", output.getvalue())
+
+    def test_extracted_items_keep_unreferenced_fields(self):
+        desired = item_configuration(defaults={"provider-api-key": ""}, extracted=True)
+        current = {
+            "fields": [
+                {"id": "declared", "label": "provider-api-key", "value": "keep"},
+                {"id": "manual", "label": "provider-new-api-key", "value": "keep"},
+            ]
+        }
+        result = RECONCILER.normalise_item(
+            current, "Homepage", desired, "vault", allow_removal=True
+        )
+        self.assertEqual(
+            {field["id"] for field in result["fields"]}, {"declared", "manual"}
+        )
+
+    def test_owner_email_fields_default_to_the_owner_email(self):
+        resource = {
+            "metadata": {
+                "annotations": {
+                    "onepassword.excloo.dev/defaults": '{"token":""}',
+                    "onepassword.excloo.dev/owner-email-fields": "email,username",
+                },
+                "namespace": "app",
+            }
+        }
+        with patch.dict(RECONCILER.os.environ, {"OWNER_EMAIL": "owner@example.net"}):
+            configuration = RECONCILER.item_configuration(resource)
+        self.assertEqual(
+            configuration["defaults"],
+            {"email": "owner@example.net", "token": "", "username": "owner@example.net"},
+        )
+        with patch.dict(RECONCILER.os.environ, clear=True):
+            with self.assertRaisesRegex(KeyError, "OWNER_EMAIL"):
+                RECONCILER.item_configuration(resource)
 
     def test_discovery_uses_secret_owner_and_explicit_route_item(self):
         resources = [
@@ -825,6 +873,7 @@ class ReconcilerTests(unittest.TestCase):
         desired = RECONCILER.discover_items()
         self.assertEqual(set(desired), {"Homepage"})
         self.assertEqual(desired["Homepage"]["defaults"], {"widget-key": ""})
+        self.assertTrue(desired["Homepage"]["extracted"])
         self.assertFalse(desired["Homepage"]["login"])
 
     def test_discovery_seeds_only_explicit_route_items(self):
@@ -954,14 +1003,14 @@ class ReconcilerTests(unittest.TestCase):
             self.fail(f"unexpected Connect request: {method} {path}")
 
         originals = {
-            "kustomizations_ready": RECONCILER.kustomizations_ready,
+            "flux_ready": RECONCILER.flux_ready,
             "connect": RECONCILER.connect,
             "discover_items": RECONCILER.discover_items,
             "is_dry_run": RECONCILER.is_dry_run,
         }
         for name, value in originals.items():
             self.addCleanup(setattr, RECONCILER, name, value)
-        RECONCILER.kustomizations_ready = lambda: False
+        RECONCILER.flux_ready = lambda: False
         RECONCILER.connect = connect
         RECONCILER.discover_items = lambda cluster=None: {}
         RECONCILER.is_dry_run = lambda: False

@@ -11,3 +11,4 @@ spec:
     launchURL: https://app.invalid
     name: AIOStreams
     pkceEnabled: true
+  item: AIOStreams

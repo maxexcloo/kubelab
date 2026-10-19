@@ -1,0 +1,50 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: reloader
+  namespace: reloader
+spec:
+  interval: 30m
+  releaseName: reloader
+  chart:
+    spec:
+      chart: reloader
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: flux-system
+      version: 2.2.18
+  values:
+    # Workloads read Secrets as environment variables, so restart them when ESO
+    # refreshes a value. Jobs read Secrets when they start.
+    reloader:
+      autoReloadAll: true
+      ignoreConfigMaps: true
+      ignoreCronJobs: true
+      ignoreJobs: true
+      readOnlyRootFileSystem: true
+      reloadStrategy: annotations
+      deployment:
+        affinity:
+          nodeAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                preference:
+                  matchExpressions:
+                    - key: node.excloo.dev/network
+                      operator: In
+                      values:
+                        - internal
+        containerSecurityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 5m
+            memory: 64Mi

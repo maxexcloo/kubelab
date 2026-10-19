@@ -2,7 +2,6 @@ apiVersion: automation.excloo.dev/v1alpha1
 kind: PocketIDClient
 metadata:
   name: grafana
-  namespace: observability
 spec:
   client:
     callbackURLs:
@@ -12,3 +11,4 @@ spec:
     launchURL: https://app.invalid
     name: Grafana
     pkceEnabled: true
+  item: Grafana

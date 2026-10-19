@@ -21,8 +21,9 @@ spec:
               kind: Request
               metadata:
                 name: pocket-id-client
+                namespace: pocket-id
               spec:
-                managementPolicies: [LateInitialize, Observe, Update]
+                managementPolicies: [Create, LateInitialize, Observe, Update]
                 forProvider:
                   expectedResponseCheck:
                     logic: |-
@@ -64,20 +65,13 @@ spec:
                   name: pocket-id
             patches:
               - type: FromCompositeFieldPath
-                fromFieldPath: metadata.namespace
-                toFieldPath: metadata.namespace
-              # Only public clients can be created without capturing a client secret.
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.client.isPublic
-                toFieldPath: spec.managementPolicies
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
                 transforms:
-                  - type: convert
-                    convert:
-                      toType: string
-                  - type: map
-                    map:
-                      "false": [LateInitialize, Observe, Update]
-                      "true": [Create, LateInitialize, Observe, Update]
+                  - type: string
+                    string:
+                      fmt: pocket-id-client-%s
+                      type: Format
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.client
                 toFieldPath: spec.forProvider.payload.body
@@ -92,6 +86,7 @@ spec:
               kind: Request
               metadata:
                 name: pocket-id-client-groups
+                namespace: pocket-id
               spec:
                 managementPolicies: [LateInitialize, Observe, Update]
                 forProvider:
@@ -117,8 +112,13 @@ spec:
                   name: pocket-id
             patches:
               - type: FromCompositeFieldPath
-                fromFieldPath: metadata.namespace
-                toFieldPath: metadata.namespace
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: pocket-id-client-groups-%s
+                      type: Format
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.client.id
                 toFieldPath: spec.forProvider.payload.baseUrl
@@ -147,3 +147,104 @@ spec:
                     map:
                       all-services: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}"]}'
                       books: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}","{{ pocket-id-group-books:pocket-id:id }}"]}'
+          # Confidential clients get one generated secret; Pocket ID keeps earlier
+          # secrets valid, so replacing this Request never breaks a signed-in app.
+          - name: client-secret
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: pocket-id-client-secret
+                namespace: pocket-id
+              spec:
+                managementPolicies: [Create, Observe]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: "true"
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                    X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
+                  mappings:
+                    - action: CREATE
+                      body: "{}"
+                      method: POST
+                      url: .payload.baseUrl
+                    # Until a create succeeds there is no secret to observe, so the
+                    # null URL makes the provider create one.
+                    - action: OBSERVE
+                      url: if (.response.statusCode // 0) >= 200 and .response.statusCode < 300 then .payload.baseUrl else null end
+                  payload:
+                    baseUrl: http://pocket-id.invalid/api/oidc/clients/placeholder/secrets
+                    body: "{}"
+                  secretInjectionConfigs:
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: .body.secret
+                          secretKey: client-secret
+                      secretRef:
+                        name: placeholder
+                        namespace: pocket-id
+                      setOwnerReference: true
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: pocket-id
+            patches:
+              - &secret-name
+                type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: pocket-id-client-secret-%s
+                      type: Format
+              - <<: *secret-name
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.client.id
+                toFieldPath: spec.forProvider.payload.baseUrl
+                transforms:
+                  - type: string
+                    string:
+                      fmt: http://pocket-id.invalid/api/oidc/clients/%s/secrets
+                      type: Format
+              # Public clients have no item, so their secret resources are skipped.
+              - &item
+                type: FromCompositeFieldPath
+                fromFieldPath: spec.item
+                toFieldPath: metadata.annotations[automation.excloo.dev/item]
+                policy:
+                  fromFieldPath: Required
+          - name: onepassword-item
+            base:
+              apiVersion: external-secrets.io/v1alpha1
+              kind: PushSecret
+              metadata:
+                name: pocket-id-client-secret
+                namespace: pocket-id
+              spec:
+                data:
+                  - match:
+                      secretKey: client-secret
+                      remoteRef:
+                        property: oidc-client-secret
+                        remoteKey: placeholder
+                    metadata:
+                      apiVersion: kubernetes.external-secrets.io/v1alpha1
+                      kind: PushSecretMetadata
+                      spec:
+                        tags: [Kubelab]
+                secretStoreRefs:
+                  - kind: ClusterSecretStore
+                    name: onepassword
+                selector:
+                  secret:
+                    name: placeholder
+            patches:
+              - *secret-name
+              - <<: *secret-name
+                toFieldPath: spec.selector.secret.name
+              - <<: *item
+                toFieldPath: spec.data[0].match.remoteRef.remoteKey

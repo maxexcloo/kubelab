@@ -10,3 +10,4 @@ spec:
     id: actual-budget-au-truenas
     launchURL: https://app.invalid
     name: Actual Budget
+  item: Actual Budget

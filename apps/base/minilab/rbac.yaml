@@ -1,0 +1,71 @@
+# Minilab applies only the kinds its apps use; admission-policy.yaml confines it
+# to the namespaces it created.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: minilab
+  namespace: flux-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: minilab
+rules:
+  - apiGroups: [""]
+    resources: [configmaps, namespaces, persistentvolumeclaims, serviceaccounts, services]
+    verbs: &manage [create, delete, get, list, patch, update, watch]
+  - apiGroups: [external-secrets.io]
+    resources: [externalsecrets]
+    verbs: *manage
+  - apiGroups: [helm.toolkit.fluxcd.io]
+    resources: [helmreleases]
+    verbs: *manage
+  - apiGroups: [networking.k8s.io]
+    resources: [networkpolicies]
+    verbs: *manage
+  - apiGroups: [rbac.authorization.k8s.io]
+    resources: [rolebindings]
+    verbs: *manage
+  - apiGroups: [rbac.authorization.k8s.io]
+    resourceNames: [minilab-release]
+    resources: [clusterroles]
+    verbs: [bind]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: minilab
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: minilab
+subjects:
+  - kind: ServiceAccount
+    name: minilab
+    namespace: flux-system
+---
+# Each mini app namespace binds this role to its own minilab ServiceAccount, which
+# Helm impersonates to install app-template.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: minilab-release
+rules:
+  - apiGroups: [""]
+    resources: [configmaps, persistentvolumeclaims, secrets, serviceaccounts, services]
+    verbs: &manage [create, delete, get, list, patch, update, watch]
+  - apiGroups: [apps]
+    resources: [daemonsets, deployments, statefulsets]
+    verbs: *manage
+  - apiGroups: [batch]
+    resources: [cronjobs, jobs]
+    verbs: *manage
+  - apiGroups: [gateway.networking.k8s.io]
+    resources: [httproutes]
+    verbs: *manage
+  - apiGroups: [networking.k8s.io]
+    resources: [networkpolicies]
+    verbs: *manage
+  - apiGroups: [policy]
+    resources: [poddisruptionbudgets]
+    verbs: *manage

@@ -13,6 +13,8 @@ spec:
               ANALYTICS_DISABLED: "true"
               APP_NAME: Pocket ID
               APP_URL: https://app.invalid
+              # PocketIDClient compositions create each client's secret.
+              AUTO_CREATE_OIDC_CLIENT_SECRET: "false"
               EMAILS_VERIFIED: "true"
               FILE_BACKEND: database
               REQUIRE_USER_EMAIL: "true"

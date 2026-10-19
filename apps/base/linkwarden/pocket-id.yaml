@@ -10,3 +10,4 @@ spec:
     id: linkwarden-au-truenas
     launchURL: https://app.invalid
     name: Linkwarden
+  item: Linkwarden

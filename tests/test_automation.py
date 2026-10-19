@@ -72,18 +72,52 @@ class PocketIDClientTests(unittest.TestCase):
         mapping = next(m for m in self.parameters["mappings"] if m["action"] == "CREATE")
         self.assertEqual(evaluate(mapping["body"], {"payload": {"body": client}}), client)
 
-    def test_only_public_clients_can_be_created_and_neither_kind_can_be_deleted(self):
-        patch = next(p for p in self.resource["patches"]
-                     if p.get("toFieldPath") == "spec.managementPolicies")
-        self.assertEqual(patch["fromFieldPath"], "spec.client.isPublic")
-        self.assertEqual(patch["transforms"][0]["convert"]["toType"], "string")
-        policies = patch["transforms"][1]["map"]
-        self.assertIn("Create", policies["true"])
-        self.assertNotIn("Create", policies["false"])
-        for value in policies.values():
-            self.assertIn("Observe", value)
-            self.assertIn("Update", value)
-            self.assertNotIn("Delete", value)
+    def test_clients_can_be_created_but_never_deleted(self):
+        self.assertIn("Create", self.resource["base"]["spec"]["managementPolicies"])
+        self.assertNotIn("Delete", self.resource["base"]["spec"]["managementPolicies"])
+        secret = composition_resource(
+            "platform/automation/pocket-id/composition.yaml", "client-secret", base=False
+        )
+        self.assertEqual(secret["base"]["spec"]["managementPolicies"], ["Create", "Observe"])
+
+    def test_requests_stay_beside_the_pocket_id_api_key(self):
+        for name in ["client", "client-secret", "group-access", "onepassword-item"]:
+            resource = composition_resource(
+                "platform/automation/pocket-id/composition.yaml", name, base=False
+            )
+            self.assertEqual(resource["base"]["metadata"]["namespace"], "pocket-id")
+            self.assertNotIn(
+                "metadata.namespace",
+                [patch.get("toFieldPath") for patch in resource["patches"]],
+            )
+
+    def test_only_confidential_clients_publish_a_secret(self):
+        for name in ["client-secret", "onepassword-item"]:
+            resource = composition_resource(
+                "platform/automation/pocket-id/composition.yaml", name, base=False
+            )
+            gate = next(p for p in resource["patches"] if p.get("fromFieldPath") == "spec.item")
+            self.assertEqual(gate["policy"]["fromFieldPath"], "Required")
+
+    def test_secret_is_created_until_a_create_succeeds(self):
+        secret = composition_resource(
+            "platform/automation/pocket-id/composition.yaml", "client-secret", base=False
+        )
+        mapping = next(
+            m for m in secret["base"]["spec"]["forProvider"]["mappings"]
+            if m["action"] == "OBSERVE"
+        )
+        payload = {"baseUrl": "https://id.example/api/oidc/clients/app/secrets"}
+        for response, url in [
+            ({}, None),
+            ({"statusCode": 404}, None),
+            ({"statusCode": 201}, payload["baseUrl"]),
+            ({"statusCode": 200}, payload["baseUrl"]),
+        ]:
+            with self.subTest(response=response):
+                self.assertEqual(
+                    evaluate(mapping["url"], {"payload": payload, "response": response}), url
+                )
 
     def test_public_client_response_detects_callback_and_pkce_drift(self):
         client = {

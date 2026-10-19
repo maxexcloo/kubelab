@@ -11,3 +11,4 @@ spec:
     launchURL: https://app.invalid
     name: Beszel
     pkceEnabled: true
+  item: Beszel

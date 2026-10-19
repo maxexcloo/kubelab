@@ -4,6 +4,7 @@ resources:
   - certificates/cert-manager
   - identity/headlamp
   - maintenance/failed-pods
+  - maintenance/reloader
   - networking/cilium
   - networking/coredns
   - networking/cloudflared

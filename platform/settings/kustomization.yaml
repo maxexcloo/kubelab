@@ -52,7 +52,6 @@ replacements:
       - select:
           kind: PocketIDClient
           name: beszel
-          namespace: beszel
         fieldPaths:
           - spec.client.callbackURLs.0
           - spec.client.launchURL
@@ -100,7 +99,6 @@ replacements:
       - select:
           kind: PocketIDClient
           name: headlamp
-          namespace: headlamp
         fieldPaths:
           - spec.client.id
   - source:
@@ -352,115 +350,12 @@ replacements:
           name: letsencrypt-dns01
         fieldPaths:
           - spec.acme.email
-      # Defaults are JSON strings; the index counts quote-delimited tokens.
       - select:
-          kind: ExternalSecret
-          name: actual-up
-          namespace: actual-up
+          kind: CronJob
+          name: onepassword-items
+          namespace: external-secrets
         fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 3
-      - select:
-          kind: ExternalSecret
-          name: aiostreams
-          namespace: aiostreams
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 3
-      - select:
-          kind: ExternalSecret
-          name: beszel
-          namespace: beszel
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 3
-      - select:
-          kind: ExternalSecret
-          name: bookorbit
-          namespace: bookorbit
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 3
-      - select:
-          kind: ExternalSecret
-          name: bookorbit
-          namespace: bookorbit
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 7
-      - select:
-          kind: ExternalSecret
-          name: immich-login
-          namespace: immich
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 3
-      - select:
-          kind: ExternalSecret
-          name: librechat
-          namespace: librechat
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 7
-      - select:
-          kind: ExternalSecret
-          name: linkwarden
-          namespace: linkwarden
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 3
-      - select:
-          kind: ExternalSecret
-          name: litellm
-          namespace: litellm
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 27
-      - select:
-          kind: ExternalSecret
-          name: miniflux
-          namespace: miniflux
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 3
-      - select:
-          kind: ExternalSecret
-          name: grafana
-          namespace: observability
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 3
-      - select:
-          kind: ExternalSecret
-          name: syncthing
-          namespace: syncthing
-        fieldPaths:
-          - metadata.annotations.[onepassword.excloo.dev/defaults]
-        options:
-          delimiter: '"'
-          index: 3
+          - spec.jobTemplate.spec.template.spec.containers.[name=reconciler].env.[name=OWNER_EMAIL].value
       - select:
           kind: HelmRelease
           name: librechat
@@ -477,6 +372,8 @@ replacements:
           name: pocket-id-client
         fieldPaths:
           - spec.pipeline.[step=patch-and-transform].input.resources.[name=client].base.spec.forProvider.payload.baseUrl
+          - spec.pipeline.[step=patch-and-transform].input.resources.[name=client-secret].base.spec.forProvider.payload.baseUrl
+          - spec.pipeline.[step=patch-and-transform].input.resources.[name=client-secret].patches.[toFieldPath=spec.forProvider.payload.baseUrl].transforms.0.string.fmt
           - spec.pipeline.[step=patch-and-transform].input.resources.[name=group-access].base.spec.forProvider.payload.baseUrl
           - spec.pipeline.[step=patch-and-transform].input.resources.[name=group-access].patches.[toFieldPath=spec.forProvider.payload.baseUrl].transforms.0.string.fmt
         options:

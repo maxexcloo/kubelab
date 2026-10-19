@@ -2,7 +2,6 @@ apiVersion: automation.excloo.dev/v1alpha1
 kind: PocketIDClient
 metadata:
   name: headlamp
-  namespace: headlamp
 spec:
   client:
     description: Kubernetes Dashboard
