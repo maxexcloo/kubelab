@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: admin
-          image: ghcr.io/clickhouse/librechat-admin-panel:1.0.0@sha256:f889fb4fcec19ef90203cce11d66e8f34223d512957666a6a7c8967efb22a2de
+          image: ghcr.io/clickhouse/librechat-admin-panel:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

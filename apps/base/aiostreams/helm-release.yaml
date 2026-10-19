@@ -30,7 +30,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/viren070/aiostreams
-              tag: v2.36.0@sha256:83893d1c37eaaaf9ad1e9286bd857220a6b8f042a4f1eac3fa7356017aa2b184
+              tag: v2.36.0
             probes:
               liveness: &health
                 path: /api/v1/health
