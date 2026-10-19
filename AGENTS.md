@@ -29,7 +29,8 @@ settings in its own repository; Kubelab deploys its published image.
 - Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Reference 1Password items by title, never by UUID, in credential consumers and
   publishers, including mini-app ExternalSecrets. Routes alias
-  `onepassword.excloo.dev/item` to their `gethomepage.dev/name`. Renaming an item
+  `onepassword.excloo.dev/item` to their `gethomepage.dev/name`, optionally with
+  a bracketed qualifier that the card's location tag already shows. Renaming an item
   is a coordinated change: rename it in 1Password and every reference together.
   Keep Kubernetes resource identities independent of item titles.
 - Publish generated credentials to 1Password with PushSecrets. Confidential

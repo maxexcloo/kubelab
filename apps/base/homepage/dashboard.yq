@@ -38,9 +38,7 @@ map(
     with(select($route.annotations."monitoring.excloo.dev/path" != null);
       .siteMonitor = ("https://" + $route.hostnames[0] + $route.annotations."monitoring.excloo.dev/path"))) |
   # Clusters cards show placement; widgets stay on Home.
-  with(select($route.clusterView == true); del(.widget, .widgets)) |
-  .weight = 0 |
-  with(select(.widget != null or (.widgets | length > 0)); .weight = -100)
+  with(select($route.clusterView == true); del(.widget, .widgets))
 ) as $applications |
 [load(strenv(SERVICES)) | .[] | to_entries | .[] |
   .key as $group | .value[] | to_entries | .[] |
@@ -49,7 +47,10 @@ map(
       ($host_groups | map(select(. == $group)) | map("Servers")) +
       ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])}] as $external |
 ($external + $applications) | unique_by(.tab + "/" + .group + "/" + .name) |
-sort_by(.tab, .group, .weight // 0, .name) |
+# Larger cards lead each group so rows stay even: widgets, then extra widget rows.
+map(.weight = (([.widget] | map(select(. != null)) | length) + (.widgets // [] | length) +
+  (if .widget.enablePools == true then 1 else 0 end)) * -1) |
+sort_by(.tab, .group, .weight, .name) |
 group_by(.tab) |
 map({(.[0].tab): (group_by(.group) |
   map({(.[0].group): map(.name as $name | del(.name, .group, .tab) | {($name): .})}))})

@@ -12,5 +12,6 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/name: &title Syncthing (mbk-kimbap)
-          onepassword.excloo.dev/item: *title
+          gethomepage.dev/name: Syncthing
+          # The item names the synced host; the card's location tag already shows it.
+          onepassword.excloo.dev/item: Syncthing (mbk-kimbap)

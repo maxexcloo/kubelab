@@ -389,7 +389,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • mbk-hass")
         storage = groups["mbk-storage"]
-        self.assertEqual(list(storage), ["Beszel", "Cloudflare", "Tailscale", "TrueNAS"])
+        # Larger cards lead: TrueNAS adds pool rows to its widget.
+        self.assertEqual(list(storage), ["TrueNAS", "Beszel", "Cloudflare", "Tailscale"])
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])
@@ -404,7 +405,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(node["Tailscale"]["href"], "https://login.tailscale.com/admin/machines/node-device")
         self.assertEqual(node["Beszel"]["widget"]["password"], "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}")
         self.assertEqual(node["Beszel"]["widget"]["fields"], ["status", "cpu", "memory", "network"])
-        self.assertEqual(node["Beszel"]["weight"], -100)
+        self.assertEqual(node["Beszel"]["weight"], -1)
         self.assertEqual(node["Beszel"]["icon"], "sh-beszel")
         layout = read_yaml(self.output / "settings.yaml")["layout"]
         for group in ["mbk-storage", "mbk-taco"]:

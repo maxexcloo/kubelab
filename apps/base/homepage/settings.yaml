@@ -5,11 +5,12 @@ disableIndexing: true
 headerStyle: clean
 hideVersion: true
 iconStyle: theme
+language: en-AU
 statusStyle: dot
 theme: dark
 title: Homepage
 background:
-  brightness: 50
+  brightness: 60
   image: /images/background.jpg
 layout:
   Applications:
@@ -44,3 +45,7 @@ layout:
     columns: 4
     style: row
     tab: Home
+# Typing anywhere searches cards, including descriptions, before the web.
+quicklaunch:
+  searchDescriptions: true
+  showSearchSuggestions: true

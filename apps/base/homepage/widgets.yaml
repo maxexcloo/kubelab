@@ -1,3 +1,10 @@
+- datetime:
+    locale: en-AU
+    text_size: xl
+    format:
+      dateStyle: full
+      hourCycle: h23
+      timeStyle: short
 - search:
     provider: google
     target: _blank

@@ -8,6 +8,7 @@ import copy
 import importlib.util
 import io
 import json
+import re
 import subprocess
 import tempfile
 import unittest
@@ -60,7 +61,9 @@ class ReconcilerTests(unittest.TestCase):
         self.assertGreaterEqual(len(managed), 20)
         for route in managed:
             annotations = route["metadata"]["annotations"]
-            self.assertEqual(annotations["onepassword.excloo.dev/item"], annotations["gethomepage.dev/name"])
+            # Items may add a bracketed qualifier that the card's location tag shows.
+            self.assertRegex(annotations["onepassword.excloo.dev/item"],
+                             rf"^{re.escape(annotations['gethomepage.dev/name'])}( \(.+\))?$")
             self.assertNotIn("onepassword.excloo.dev/title", annotations)
         secrets = [r for r in resources if r["kind"] == "ExternalSecret" and r["spec"].get("secretStoreRef", {}).get("name") == "onepassword"]
         for secret in secrets:
@@ -89,7 +92,8 @@ class ReconcilerTests(unittest.TestCase):
             root = Path(temporary)
             copy_repository(root)
             path = root / "apps/overlays/syd/syncthing.yaml"
-            path.write_text(path.read_text().replace("Syncthing (mbk-kimbap)", "Syncthing (Archive)"))
+            path.write_text(path.read_text().replace("Syncthing (mbk-kimbap)", "Syncthing (Archive)").replace(
+                "gethomepage.dev/name: Syncthing", "gethomepage.dev/name: Syncthing (Archive)"))
             resources = render_resources(root / "apps/overlays/syd")
         release = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "syncthing")
         secret = next(r for r in resources if r["kind"] == "ExternalSecret" and r["metadata"]["namespace"] == "syncthing")

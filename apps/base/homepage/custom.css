@@ -2,8 +2,6 @@
 :root {
   --homepage-card-bg: rgba(0, 0, 0, 0.15);
   --homepage-card-radius: 15px;
-  --homepage-status-inset: 8px;
-  --homepage-status-width: 6px;
 }
 /* Typography */
 html,
@@ -40,9 +38,6 @@ body {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
-.service-title {
-  position: relative;
-}
 /* Widgets */
 .service-block {
   background: transparent !important;
@@ -53,25 +48,6 @@ body {
 }
 .service-container:empty {
   min-height: 3.25rem;
-}
-/* Status: a full-height pill on the title row's right edge. */
-.service-tags {
-  bottom: 0;
-}
-.service-tags > .service-tag {
-  align-self: stretch;
-}
-.k8s-status,
-.site-monitor-status {
-  background: transparent !important;
-  height: 100%;
-  padding: var(--homepage-status-inset) !important;
-}
-.k8s-status > .rounded-full,
-.site-monitor-status > .rounded-full {
-  border-radius: var(--homepage-card-radius) !important;
-  height: 100% !important;
-  width: var(--homepage-status-width) !important;
 }
 /* Location tags follow the card's name. */
 .service-locations {
