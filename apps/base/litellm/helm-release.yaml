@@ -176,7 +176,7 @@ spec:
           mcp_info:
             description: Inspect and manage UniFi networks, devices and clients.
       model_list:
-        - model_name: bento/*
+        - model_name: ai/*
           litellm_params:
             api_base: http://host.invalid:8000/v1
             api_key: os.environ/BENTO_API_KEY
@@ -222,6 +222,28 @@ spec:
             api_key: os.environ/OPENCODE_ZEN_API_KEY_2
             model: openai/*
             timeout: *generation-timeout
+        # LiteLLM pauses blocked deployments and hides them from model lists.
+        - model_name: openrouter/*
+          litellm_params:
+            api_key: os.environ/OPENROUTER_API_KEY
+            model: openrouter/*
+            timeout: *generation-timeout
+          model_info:
+            blocked: true
+      # Keenable, LibreChat's default search provider, has no LiteLLM integration.
+      search_tools:
+        - search_tool_name: firecrawl
+          litellm_params:
+            api_key: os.environ/FIRECRAWL_API_KEY
+            search_provider: firecrawl
+        - search_tool_name: serper
+          litellm_params:
+            api_key: os.environ/SERPER_API_KEY
+            search_provider: serper
+        - search_tool_name: tavily
+          litellm_params:
+            api_key: os.environ/TAVILY_API_KEY
+            search_provider: tavily
     resources:
       limits:
         memory: 2Gi

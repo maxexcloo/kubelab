@@ -19,6 +19,14 @@ layout:
     columns: 2
     style: row
     tab: Home
+  Hardware:
+    columns: 3
+    style: row
+    tab: Home
+  Infrastructure:
+    columns: 2
+    style: row
+    tab: Home
   Media:
     columns: 4
     style: row
@@ -35,10 +43,6 @@ layout:
     columns: 4
     style: row
     tab: Providers
-  Infrastructure:
-    columns: 2
-    style: row
-    tab: Home
   Smart Home:
     columns: 4
     style: row

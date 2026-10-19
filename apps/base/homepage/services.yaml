@@ -34,7 +34,12 @@
         href: &netboot homelab://mbk/kimbap/netboot
         icon: mdi-server-network-#ffffff
         siteMonitor: *netboot
-- Servers:
+- Hardware:
+    - NanoKVM:
+        description: Remote Console & Power Control
+        href: &nanokvm homelab://mbk/nanokvm/management
+        icon: sh-sipeed
+        siteMonitor: *nanokvm
     - TrueNAS:
         description: Storage Appliance
         href: &truenas homelab://mbk/kimbap/management
