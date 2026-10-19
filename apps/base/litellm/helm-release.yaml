@@ -230,6 +230,20 @@ spec:
             timeout: *generation-timeout
           model_info:
             blocked: true
+      # Keenable, LibreChat's default search provider, has no LiteLLM integration.
+      search_tools:
+        - search_tool_name: firecrawl
+          litellm_params:
+            api_key: os.environ/FIRECRAWL_API_KEY
+            search_provider: firecrawl
+        - search_tool_name: serper
+          litellm_params:
+            api_key: os.environ/SERPER_API_KEY
+            search_provider: serper
+        - search_tool_name: tavily
+          litellm_params:
+            api_key: os.environ/TAVILY_API_KEY
+            search_provider: tavily
     resources:
       limits:
         memory: 2Gi
