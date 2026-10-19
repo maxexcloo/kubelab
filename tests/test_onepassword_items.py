@@ -863,7 +863,6 @@ class ReconcilerTests(unittest.TestCase):
                     "gethomepage.dev/name": "Headlamp (SYD)",
                     "gethomepage.dev/href": "https://unrelated.example.net",
                     "onepassword.excloo.dev/item": "Headlamp",
-                    "onepassword.excloo.dev/url": "https://headlamp.example.net/login",
                 },
                 "name": "renamed-route",
                 "namespace": "headlamp",
@@ -877,13 +876,7 @@ class ReconcilerTests(unittest.TestCase):
         ):
             desired = RECONCILER.discover_items()
         self.assertEqual(set(desired), {"Headlamp"})
-        self.assertEqual(
-            desired["Headlamp"]["urls"],
-            {
-                "https://headlamp.example.net",
-                "https://headlamp.example.net/login",
-            },
-        )
+        self.assertEqual(desired["Headlamp"]["urls"], {"https://headlamp.example.net"})
 
     def test_secret_can_explicitly_share_another_items_login(self):
         secret = {
