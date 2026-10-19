@@ -72,7 +72,8 @@ settings in its own repository; Kubelab deploys its published image.
   resources underneath.
 - The 1Password item reconciler in `platform/secrets/onepassword-items` is the
   approved narrow exception: a scheduled job that updates referenced items and
-  archives unreferenced Kubelab-tagged items. Its contract lives beside it.
+  prunes unreferenced fields and archives unreferenced Kubelab-tagged items. Its
+  contract lives beside it.
 - Use Kustomize for composition and small patches. Use `configMapGenerator` only
   to mount checked-in app configuration, scripts or assets; do not use
   `secretGenerator`. Keep executable code in its own source file.

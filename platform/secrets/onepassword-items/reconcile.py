@@ -107,9 +107,6 @@ def item_configuration(resource):
                 None, values.get(f"{ANNOTATION_PREFIX}generate-fields", "").split(",")
             )
         ),
-        "remove": set(
-            filter(None, values.get(f"{ANNOTATION_PREFIX}remove-fields", "").split(","))
-        ),
         "values": secret_values(
             resource, json.loads(values.get(f"{ANNOTATION_PREFIX}values", "{}"))
         ),
@@ -123,7 +120,6 @@ def merge_configuration(item, resource):
     item["defaults"].update(configuration["defaults"])
     item["formats"].update(configuration["formats"])
     item["generate"].update(configuration["generate"])
-    item["remove"].update(configuration["remove"])
     item["values"].update(configuration["values"])
 
 
@@ -136,7 +132,6 @@ def new_item():
         "formats": {},
         "generate": set(),
         "login": False,
-        "remove": set(),
         "urls": set(),
         "values": {},
     }
@@ -420,8 +415,6 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
         | set(desired["defaults"])
         | set(desired.get("values", {}))
     )
-    if desired["remove"] & required_fields:
-        raise RuntimeError(f"1Password item {title} cannot remove referenced fields")
     if set(desired["formats"].values()) - {"alphanumeric", "laravel"}:
         raise RuntimeError(f"1Password item {title} has unsupported field formats")
     current["category"] = "LOGIN" if desired["login"] else "SERVER"
@@ -430,8 +423,16 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
     reconcile_urls(current, desired["urls"], allow_removal=allow_removal)
     fields = current.setdefault("fields", [])
     if allow_removal:
+        # Unreferenced credentials go once every consumer is current; sign-in
+        # details, notes and specialised fields, such as one-time passwords, remain.
         fields[:] = [
-            field for field in fields if field_label(field) not in desired["remove"]
+            field
+            for field in fields
+            if field_label(field) in required_fields
+            or field.get("purpose")
+            or field.get("id") == "notesPlain"
+            or field_label(field).casefold() in {"password", "username"}
+            or field.get("type", "STRING") not in {"CONCEALED", "STRING"}
         ]
     if not desired["login"]:
         # Server items have no empty sign-in placeholders; retain real credentials.

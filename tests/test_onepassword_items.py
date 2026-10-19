@@ -33,7 +33,6 @@ def item_configuration(**overrides):
         "formats": {},
         "generate": set(),
         "login": False,
-        "remove": set(),
         "urls": set(),
     }
     configuration.update(overrides)
@@ -433,20 +432,23 @@ class ReconcilerTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "unsupported field formats"):
             RECONCILER.normalise_item({}, "LaraPaper", desired, "vault")
 
-    def test_explicit_field_removal_requires_readiness_and_preserves_unrelated_fields(
-        self,
-    ):
-        desired = item_configuration(remove={"duplicate-password"})
+    def test_unreferenced_fields_are_pruned_only_when_ready(self):
+        desired = item_configuration(fields={"provider-api-key"}, login=True)
         current = {
             "fields": [
-                {"id": "old", "label": "duplicate-password", "value": "old-value"},
-                {"id": "personal", "label": "personal-token", "value": "keep-me"},
+                {"id": "notesPlain", "label": "notesPlain", "purpose": "NOTES"},
+                {"id": "username", "label": "username", "purpose": "USERNAME"},
+                {"id": "password", "label": "password", "purpose": "PASSWORD"},
+                {"id": "otp", "label": "one-time password", "type": "OTP"},
+                {"id": "kept", "label": "provider-api-key", "value": "keep"},
+                {"id": "old", "label": "retired-api-key", "value": "old"},
+                {"id": "note", "label": "retired-note", "type": "STRING"},
             ]
         }
         pending = RECONCILER.normalise_item(
             copy.deepcopy(current), "Application", desired, "vault"
         )
-        self.assertEqual(len(pending["fields"]), 2)
+        self.assertEqual(len(pending["fields"]), 7)
         ready = RECONCILER.normalise_item(
             copy.deepcopy(current),
             "Application",
@@ -455,13 +457,9 @@ class ReconcilerTests(unittest.TestCase):
             allow_removal=True,
         )
         self.assertEqual(
-            [field["label"] for field in ready["fields"]], ["personal-token"]
+            {field["id"] for field in ready["fields"]},
+            {"kept", "notesPlain", "otp", "password", "username"},
         )
-        desired["fields"].add("duplicate-password")
-        with self.assertRaisesRegex(RuntimeError, "cannot remove referenced fields"):
-            RECONCILER.normalise_item(
-                current, "Application", desired, "vault", allow_removal=True
-            )
 
     def test_papra_provider_template_preserves_settings_and_escapes_credentials(self):
         manifests = subprocess.check_output(
