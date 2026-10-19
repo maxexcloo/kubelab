@@ -1,0 +1,151 @@
+# Public clients have no secret to publish; function-patch-and-transform marks a
+# composite unready when it skips a resource, so they use this subset.
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: pocket-id-public-client
+spec:
+  compositeTypeRef:
+    apiVersion: automation.excloo.dev/v1alpha1
+    kind: PocketIDClient
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: crossplane-contrib-function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: client
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: pocket-id-client
+                namespace: pocket-id
+              spec:
+                managementPolicies: [Create, LateInitialize, Observe, Update]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: |-
+                      .response.statusCode == 200
+                      and .response.body.accessTokenDurationMinutes == .payload.body.accessTokenDurationMinutes
+                      and (.response.body.callbackURLs | sort) == (.payload.body.callbackURLs | sort)
+                      and .response.body.description == .payload.body.description
+                      and .response.body.isGroupRestricted == .payload.body.isGroupRestricted
+                      and .response.body.isPublic == .payload.body.isPublic
+                      and .response.body.launchURL == .payload.body.launchURL
+                      and (.response.body.logoutCallbackURLs | sort) == (.payload.body.logoutCallbackURLs | sort)
+                      and .response.body.name == .payload.body.name
+                      and .response.body.pkceEnabled == .payload.body.pkceEnabled
+                      and .response.body.refreshTokenDurationMinutes == .payload.body.refreshTokenDurationMinutes
+                      and .response.body.requiresPushedAuthorizationRequests == .payload.body.requiresPushedAuthorizationRequests
+                      and .response.body.requiresReauthentication == .payload.body.requiresReauthentication
+                      and .response.body.skipConsent == .payload.body.skipConsent
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                    X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
+                  mappings:
+                    - action: CREATE
+                      body: .payload.body
+                      method: POST
+                      url: .payload.baseUrl
+                    - action: OBSERVE
+                      url: .payload.baseUrl + "/" + .payload.body.id
+                    - action: UPDATE
+                      body: .payload.body | del(.id)
+                      method: PUT
+                      url: .payload.baseUrl + "/" + .payload.body.id
+                  payload:
+                    baseUrl: http://pocket-id.invalid/api/oidc/clients
+                    body: "{}"
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: pocket-id
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: pocket-id-client-%s
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.client
+                toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: string
+                    string:
+                      convert: ToJson
+                      type: Convert
+          - name: group-access
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: pocket-id-client-groups
+                namespace: pocket-id
+              spec:
+                managementPolicies: [LateInitialize, Observe, Update]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: "false"
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                    X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
+                  mappings:
+                    - action: OBSERVE
+                      url: .payload.baseUrl
+                    - action: UPDATE
+                      body: .payload.body
+                      method: PUT
+                      url: .payload.baseUrl + "/allowed-user-groups"
+                  payload:
+                    baseUrl: http://pocket-id.invalid/api/oidc/clients/placeholder
+                    body: "{}"
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: pocket-id
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: pocket-id-client-groups-%s
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.client.id
+                toFieldPath: spec.forProvider.payload.baseUrl
+                transforms:
+                  - type: string
+                    string:
+                      fmt: http://pocket-id.invalid/api/oidc/clients/%s
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.accessPolicy
+                toFieldPath: spec.forProvider.expectedResponseCheck.logic
+                transforms:
+                  - type: map
+                    map:
+                      all-services: |-
+                        .response.statusCode == 200
+                        and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}"] | sort)
+                      books: |-
+                        .response.statusCode == 200
+                        and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}", "{{ pocket-id-group-books:pocket-id:id }}"] | sort)
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.accessPolicy
+                toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: map
+                    map:
+                      all-services: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}"]}'
+                      books: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}","{{ pocket-id-group-books:pocket-id:id }}"]}'

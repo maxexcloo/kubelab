@@ -380,6 +380,16 @@ replacements:
           delimiter: /
           index: 2
       - select:
+          kind: Composition
+          name: pocket-id-public-client
+        fieldPaths:
+          - spec.pipeline.[step=patch-and-transform].input.resources.[name=client].base.spec.forProvider.payload.baseUrl
+          - spec.pipeline.[step=patch-and-transform].input.resources.[name=group-access].base.spec.forProvider.payload.baseUrl
+          - spec.pipeline.[step=patch-and-transform].input.resources.[name=group-access].patches.[toFieldPath=spec.forProvider.payload.baseUrl].transforms.0.string.fmt
+        options:
+          delimiter: /
+          index: 2
+      - select:
           kind: Request
           name: pocket-id-group-all-services
           namespace: pocket-id

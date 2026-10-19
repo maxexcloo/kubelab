@@ -14,3 +14,6 @@ spec:
     launchURL: https://app.invalid
     name: LibreChat
     pkceEnabled: true
+  crossplane:
+    compositionRef:
+      name: pocket-id-public-client
