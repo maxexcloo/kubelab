@@ -395,6 +395,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Home Assistant", groups["Smart Home"])
         self.assertNotIn("widget", groups["Smart Home"]["Home Assistant"])
         self.assertEqual(groups["Overview"]["Home Assistant"]["widget"], groups["mbk-hass"]["Home Assistant"]["widget"])
+        # Taller cards end the Overview grid: TrueNAS adds pool rows to its widget.
+        self.assertEqual(list(groups["Overview"])[-1], "TrueNAS")
         self.assertEqual(groups["Smart Home"]["Home Assistant"]["description"], "Smart Home & Automations • mbk-hass")
         storage = groups["mbk-storage"]
         # Larger cards lead: TrueNAS adds pool rows to its widget.
