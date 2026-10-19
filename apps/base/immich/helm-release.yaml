@@ -15,7 +15,7 @@ spec:
           main:
             env:
               IMMICH_LOG_FORMAT: json
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:

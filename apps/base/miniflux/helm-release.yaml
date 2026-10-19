@@ -17,7 +17,7 @@ spec:
               OAUTH2_REDIRECT_URL: https://app.invalid/oauth2/oidc/callback
               OAUTH2_USER_CREATION: "1"
               RUN_MIGRATIONS: "1"
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"

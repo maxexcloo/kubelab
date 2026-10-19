@@ -19,7 +19,7 @@ spec:
               OIDC_GROUP_PERMISSIONS: all_services=admin
               OIDC_ISSUER: https://identity.invalid
               REDIS_URL: redis://localhost:6379
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"

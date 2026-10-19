@@ -46,7 +46,7 @@ spec:
                   key: SESSION_SECRET
                   name: librechat-admin
             - name: TZ
-              value: Australia/Sydney
+              value: time-zone.invalid
             - name: VITE_API_BASE_URL
               value: https://librechat.invalid
           livenessProbe:

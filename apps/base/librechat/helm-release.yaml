@@ -50,7 +50,7 @@ spec:
         OPENID_USE_PKCE: "true"
         SCHEDULES_SINGLE_PROCESS: "true"
         SEARCH: "true"
-        TZ: Australia/Sydney
+        TZ: time-zone.invalid
       existingConfigYaml: librechat-config
       imageVolume:
         enabled: false

@@ -28,7 +28,7 @@ spec:
               PGID: "568"
               PUID: "568"
               SESSION_COOKIE_SECURE: "true"
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
               USE_CF_BYPASS: "true"
               USING_EXTERNAL_BYPASSER: "false"
               WELIB_MIRROR_URLS: ""

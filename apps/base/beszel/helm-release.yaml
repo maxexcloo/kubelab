@@ -10,7 +10,7 @@ spec:
           main:
             env:
               APP_URL: https://app.invalid
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
               USER_CREATION: "true"
             envFrom:
               - secretRef:

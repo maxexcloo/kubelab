@@ -52,7 +52,7 @@ spec:
       # Provider discovery uses the shared HTTP client; chat requests use the deployment timeout.
       REQUEST_TIMEOUT: "5"
       STORE_MODEL_IN_DB: "True"
-      TZ: Australia/Sydney
+      TZ: time-zone.invalid
       UNIFI_NETWORK_HOST: host.invalid
       UV_CACHE_DIR: /tmp/uv-cache
       UV_LINK_MODE: copy

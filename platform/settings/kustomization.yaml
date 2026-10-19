@@ -253,3 +253,132 @@ replacements:
           namespace: pocket-id
         fieldPaths:
           - spec.hostname
+  - source:
+      kind: ConfigMap
+      name: shared-settings
+      fieldPath: data.time_zone
+    targets:
+      - select:
+          kind: CronJob
+        fieldPaths:
+          - spec.timeZone
+      - select:
+          kind: Deployment
+          name: librechat-admin
+          namespace: librechat-admin
+        fieldPaths:
+          - spec.template.spec.containers.[name=admin].env.[name=TZ].value
+      - select:
+          kind: HelmRelease
+          name: actual-budget
+          namespace: actual-budget
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: actual-up
+          namespace: actual-up
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: aiometadata
+          namespace: aiometadata
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: atvloadly
+          namespace: atvloadly
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: beszel
+          namespace: beszel
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: bichon
+          namespace: bichon
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: bookorbit
+          namespace: bookorbit
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: cliproxyapi
+          namespace: cliproxyapi
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: immich
+          namespace: immich
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: linkwarden
+          namespace: linkwarden
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: miniflux
+          namespace: miniflux
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: papra
+          namespace: papra
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: romm
+          namespace: romm
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: shelfmark
+          namespace: shelfmark
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: syncthing
+          namespace: syncthing
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.TZ
+      - select:
+          kind: HelmRelease
+          name: larapaper
+          namespace: larapaper
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.APP_TIMEZONE
+      - select:
+          kind: HelmRelease
+          name: librechat
+          namespace: librechat
+        fieldPaths:
+          - spec.values.librechat.configEnv.TZ
+      - select:
+          kind: HelmRelease
+          name: linkwarden
+          namespace: linkwarden
+        fieldPaths:
+          - spec.values.controllers.meilisearch.containers.meilisearch.env.TZ
+      - select:
+          kind: HelmRelease
+          name: litellm
+          namespace: litellm
+        fieldPaths:
+          - spec.values.envVars.TZ

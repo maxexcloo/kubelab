@@ -13,7 +13,7 @@ spec:
               BICHON_HTTP_PORT: "15630"
               BICHON_PUBLIC_URL: https://app.invalid
               BICHON_ROOT_DIR: /data/bichon-data
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"

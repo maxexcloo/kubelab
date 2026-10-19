@@ -21,7 +21,7 @@ spec:
               OPENROUTER_MODEL: openrouter/auto
               PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
               PORT: "3000"
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
@@ -51,7 +51,7 @@ spec:
               MEILI_NO_ANALYTICS: "true"
               MEILI_SERVER_PROVIDER: docker
               MEILI_UPGRADE_DB: "true"
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
               MEILI_MASTER_KEY:
                 valueFrom:
                   secretKeyRef:

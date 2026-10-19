@@ -24,7 +24,7 @@ spec:
               IS_FREE_PLAN_UNLIMITED: "true"
               PORT: "21221"
               PROCESS_MODE: all
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"

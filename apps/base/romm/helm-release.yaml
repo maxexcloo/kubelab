@@ -45,7 +45,7 @@ spec:
               SMTP_USERNAME: resend
               STEAM_API_ENABLED: "true"
               TGDB_API_ENABLED: "true"
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
               DB_PASSWD:
                 valueFrom:
                   secretKeyRef:

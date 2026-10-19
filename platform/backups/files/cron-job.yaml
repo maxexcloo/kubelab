@@ -6,7 +6,7 @@ metadata:
     backup.excloo.dev/component: state
 spec:
   schedule: 0 3 * * *
-  timeZone: Australia/Sydney
+  timeZone: time-zone.invalid
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1

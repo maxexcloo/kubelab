@@ -23,7 +23,7 @@ def rendered_resources(test, root):
             for resource in read_resources(path):
                 if resource["kind"] != "Composition":
                     match = PLACEHOLDER.search(json.dumps(resource))
-                    test.assertIsNone(match, f"{path.relative_to(output)}: {resource['kind']}/{resource['metadata']['name']}")
+                    test.assertIsNone(match, f"{path.relative_to(output)}: {resource['kind']}/{resource['metadata']['name']}: {json.dumps(resource)[max(0, match.start() - 80):match.end()] if match else ''}")
                 resources.append(resource)
         return resources
 

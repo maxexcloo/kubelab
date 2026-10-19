@@ -17,7 +17,7 @@ spec:
               HOME: /var/syncthing
               STGUIADDRESS: http://0.0.0.0:8384
               STHOMEDIR: /var/syncthing/config
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
             image: &syncthing-image
               pullPolicy: IfNotPresent
               repository: docker.io/syncthing/syncthing

@@ -9,7 +9,7 @@ spec:
         containers:
           main:
             env:
-              TZ: Australia/Sydney
+              TZ: time-zone.invalid
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/eceasy/cli-proxy-api
