@@ -12,7 +12,7 @@ interface:
   generalChatRetention: 8760
   retainAgentFiles: true
   retentionMode: all
-  # Scheduled chats run in this single replica; multi-replica writes would need shared Redis streams.
+  # Scheduled chats run in this single replica; Redis now holds the shared streams.
   schedules:
     create: true
     use: true
@@ -23,6 +23,9 @@ registration:
 endpoints:
   agents:
     activityLabel: false
+    # Stop also ends ordinary background tool waits, such as HEISS MCP Result.
+    backgroundTasks:
+      ordinaryToolCancellation: true
     # File search, execute_code and ocr need the RAG API, the Code API and a Mistral OCR service.
     capabilities:
       - actions
@@ -50,7 +53,7 @@ endpoints:
         userIdQuery: true
       titleConvo: true
       titleModel: current_model
-      modelDisplayLabel: Bento
+      modelDisplayLabel: AI
     - name: CLI Proxy API
       apiKey: ${CLI_PROXY_API_KEY}
       baseURL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317/v1

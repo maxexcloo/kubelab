@@ -154,8 +154,28 @@ spec:
       periodSeconds: 10
       timeoutSeconds: 5
     replicaCount: 1
+    # Redis keeps resumable streams, steers and background tasks across pod restarts.
+    # The password comes from the managed librechat-redis secret, so upgrades never generate one.
     redis:
-      enabled: false
+      enabled: true
+      architecture: standalone
+      auth:
+        enabled: true
+        existingSecret: librechat-redis
+        existingSecretPasswordKey: redis-password
+      master:
+        nodeSelector:
+          node.excloo.dev/network: internal
+        persistence:
+          enabled: true
+          size: 1Gi
+          storageClass: local-path
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            cpu: 25m
+            memory: 64Mi
     resources:
       limits:
         memory: 1Gi
