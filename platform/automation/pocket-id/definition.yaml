@@ -94,6 +94,11 @@ spec:
                   description: Title of the existing 1Password item that receives a confidential client's oidc-client-secret.
                   minLength: 1
                   type: string
+                itemTag:
+                  default: Kubelab
+                  description: Ownership tag the push writes to the item; Homelab-owned items keep their tag.
+                  enum: [Homelab, Kubelab]
+                  type: string
               required: [client]
               x-kubernetes-validations:
                 - message: Confidential clients need an item for their secret; public clients have none and use pocket-id-public-client.

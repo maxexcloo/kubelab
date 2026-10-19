@@ -1,0 +1,8 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cloudflare-access-integrations
+spec:
+  path: ./clusters/syd/platform/cloudflare-access/integrations
+  dependsOn:
+    - name: automation

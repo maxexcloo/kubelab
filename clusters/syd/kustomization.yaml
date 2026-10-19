@@ -4,6 +4,7 @@ namespace: flux-system
 resources:
   - apps.yaml
   - automation.yaml
+  - cloudflare-access-integrations.yaml
   - flux-system
   - headlamp-integrations.yaml
   - observability-integrations.yaml
