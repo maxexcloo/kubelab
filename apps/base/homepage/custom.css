@@ -73,18 +73,16 @@ body {
   height: 100% !important;
   width: var(--homepage-status-width) !important;
 }
-/* Location tags hang from the top edge, just left of the status pill. */
+/* Location tags follow the card's name. */
 .service-locations {
-  display: flex;
+  display: inline-flex;
   gap: 0.25rem;
-  position: absolute;
-  right: calc(var(--homepage-status-inset) * 2 + var(--homepage-status-width));
-  top: 0;
-  z-index: 20;
+  margin-left: 0.375rem;
+  vertical-align: 0.1rem;
 }
 .service-location {
   background-color: rgb(var(--color-900) / 0.5);
-  border-radius: 0 0 3px 3px;
+  border-radius: 3px;
   color: rgb(var(--color-300));
   font-size: 0.6rem;
   font-weight: 600;
