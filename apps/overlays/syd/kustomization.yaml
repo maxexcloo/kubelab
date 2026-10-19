@@ -29,11 +29,11 @@ resources:
   - ../../base/sidestore-vpn
   - ../../base/signtools
   - ../../base/syncthing
-  - openspeedtest-internal
+  - openspeedtest-hsp
+  - openspeedtest-kimbap
   - redlib-multi-backup
   - homepage-private-dns.yaml
   - immich-private-route.yaml
-  - openspeedtest-route.yaml
 patches:
   - path: external-placement.yaml
     target:
@@ -57,7 +57,6 @@ patches:
   - path: beszel-agent.yaml
   - path: homepage.yaml
   - path: mini-apps.yaml
-  - path: openspeedtest.yaml
   - path: syncthing.yaml
 # Reapply hostname consumers after cluster settings resolve the private alias.
 transformers:
@@ -65,13 +64,28 @@ transformers:
 replacements:
   - source:
       kind: HTTPRoute
-      name: openspeedtest-internal
+      name: openspeedtest-hsp
       namespace: openspeedtest
       fieldPath: spec.hostnames.0
     targets:
       - select:
           kind: HTTPRoute
-          name: openspeedtest-internal
+          name: openspeedtest-hsp
+          namespace: openspeedtest
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: HTTPRoute
+      name: openspeedtest-kimbap
+      namespace: openspeedtest
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: openspeedtest-kimbap
           namespace: openspeedtest
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
@@ -90,21 +104,6 @@ replacements:
           namespace: flux-system
         fieldPaths:
           - spec.postBuild.substitute.REDLIB_URL
-        options:
-          delimiter: /
-          index: 2
-  - source:
-      kind: HTTPRoute
-      name: openspeedtest
-      namespace: openspeedtest
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: openspeedtest
-          namespace: openspeedtest
-        fieldPaths:
-          - metadata.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
           index: 2
