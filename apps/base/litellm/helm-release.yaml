@@ -88,8 +88,22 @@ spec:
         require_key_mcp_access_defined: true
       litellm_settings:
         check_provider_endpoint: true
-      # An empty list replaces the chart's example models; models live in the UI.
-      model_list: []
+      # Other models live in the UI. Radiance answers with its loaded model under
+      # any name and fails fast when its text runtime is off, so chat falls back
+      # to Grok through the UI-registered CLIProxyAPI models.
+      model_list:
+        - model_name: ai/text
+          litellm_params:
+            api_base: http://host.invalid:8000/v1
+            api_key: os.environ/BENTO_API_KEY
+            max_retries: 0
+            model: openai/text
+            num_retries: 0
+            timeout: 300
+      router_settings:
+        fallbacks:
+          - ai/text:
+              - cli-proxy-api/grok-4.7
       # UI-registered search tools cannot read os.environ/ keys, so these stay here.
       # Keenable, LibreChat's default search provider, has no LiteLLM integration.
       search_tools:
