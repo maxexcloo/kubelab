@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - account-seed.yaml
   - external-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
@@ -16,6 +17,10 @@ components:
   - ../../../platform/backups/postgres
   - ../../components/private-dns-control-d-only
   - ../../components/app-namespace
+configMapGenerator:
+  - name: account-seed
+    files:
+      - seed-account.mjs
 patches:
   - path: helm-release.yaml
     target:
@@ -37,5 +42,25 @@ replacements:
         options:
           delimiter: /
           index: 2
+      - select:
+          kind: Job
+          name: account-seed
+        fieldPaths:
+          - spec.template.spec.containers.[name=seed].env.[name=APP_URL].value
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.controllers.main.containers.main.image.tag
+    targets:
+      - select:
+          kind: Job
+          name: account-seed
+        fieldPaths:
+          - spec.template.spec.containers.[name=seed].image
+        options:
+          delimiter: ":"
+          index: 1
 transformers:
   - ../../transformers/route-public

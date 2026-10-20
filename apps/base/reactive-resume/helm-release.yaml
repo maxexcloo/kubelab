@@ -12,6 +12,7 @@ spec:
               APP_URL: https://app.invalid
               OAUTH_DISCOVERY_URL: https://identity.invalid/.well-known/openid-configuration
               OAUTH_PROVIDER_NAME: Pocket ID
+              REDIS_URL: redis://localhost:6379
               SMTP_FROM: reactive-resume@mail-domain.invalid
               SMTP_HOST: smtp.resend.com
               SMTP_PORT: "465"
@@ -19,6 +20,7 @@ spec:
               SMTP_USER: resend
               # Keep the health storage check inside the 5-second probe timeout.
               STORAGE_HEALTHCHECK_TIMEOUT_MS: "4000"
+              WEB_ACCESS_PROVIDER: tavily
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
@@ -38,12 +40,51 @@ spec:
               requests:
                 cpu: 50m
                 memory: 512Mi
+          # Holds only resumable assistant streams, rate limits and live updates.
+          valkey:
+            args:
+              - valkey-server
+              - --appendonly
+              - "no"
+              - --save
+              - ""
+            image:
+              pullPolicy: IfNotPresent
+              repository: docker.io/valkey/valkey
+              tag: 9.1.2
+            probes:
+              liveness: &valkey-health
+                enabled: true
+                port: 6379
+                spec:
+                  timeoutSeconds: 5
+              readiness: *valkey-health
+            resources:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 10m
+                memory: 32Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
     persistence:
       data:
         existingClaim: data
         type: persistentVolumeClaim
-        globalMounts:
-          - path: /app/data
+        advancedMounts:
+          main:
+            main:
+              - path: /app/data
+      valkey:
+        type: emptyDir
+        advancedMounts:
+          main:
+            valkey:
+              - path: /data
     route:
       private:
         hostnames:

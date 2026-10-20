@@ -196,6 +196,21 @@ mcpServers:
     url: http://litellm.litellm.svc.cluster.local:4000/home_assistant/mcp
     headers:
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+  reactive-resume:
+    type: streamable-http
+    description: Read and edit resumes, cover letters and job applications in Reactive Resume.
+    requiresOAuth: false
+    startup: false
+    title: Reactive Resume
+    url: http://litellm.litellm.svc.cluster.local:4000/reactive_resume/mcp
+    # LiteLLM holds the owner's Reactive Resume API key, so only authorised personal keys reach it.
+    customUserVars:
+      REACTIVE_RESUME_API_KEY:
+        description: Your personal LiteLLM virtual key authorised for Reactive Resume. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Reactive Resume API Key
+    headers:
+      x-litellm-api-key: "Bearer {{REACTIVE_RESUME_API_KEY}}"
   studio:
     type: streamable-http
     description: Create and manage images and videos in Studio.
