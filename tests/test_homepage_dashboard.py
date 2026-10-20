@@ -213,7 +213,8 @@ cp "$ARCHIVE_FIXTURE" "$2"
             directory = minilab / "clusters" / cluster
             directory.mkdir(parents=True)
             (directory / "kustomization.yaml").write_text("resources: [app.yaml]\n")
-            app = route(f"Minilab: {name}", href=f"https://{name.lower()}.example.net")
+            # Flux substitutes the domain; the dashboard must render it too.
+            app = route(f"Minilab: {name}", href=f"https://{name.lower()}.${{MINILAB_DOMAIN}}")
             app["metadata"].update({"name": name.lower(), "namespace": name.lower()})
             (directory / "app.yaml").write_text(json.dumps(app))
             source = {
@@ -224,7 +225,10 @@ cp "$ARCHIVE_FIXTURE" "$2"
             selection = {
                 "apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization",
                 "metadata": {"name": "minilab", "namespace": "flux-system"},
-                "spec": {"path": f"./clusters/{cluster}"},
+                "spec": {
+                    "path": f"./clusters/{cluster}",
+                    "postBuild": {"substitute": {"MINILAB_DOMAIN": "example.net"}},
+                },
             }
             self.write_routes(cluster, [route("Existing"), selection, source])
         result = self.render(MINILAB_DIRECTORY=str(minilab))
@@ -247,6 +251,14 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(self.render(MINILAB_DIRECTORY=str(minilab)).returncode, 0)
         self.assertIn("New Tool", self.services())
         self.assertNotIn("Feeds", self.services())
+        # Like Flux's strict substitution, a missing variable fails the refresh.
+        before = (self.output / "services.yaml").read_bytes()
+        path.write_text(json.dumps(route("Unset", href="https://unset.${UNSET}")))
+        result = self.render(MINILAB_DIRECTORY=str(minilab))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("${UNSET}", result.stderr)
+        self.assertEqual((self.output / "services.yaml").read_bytes(), before)
+        path.write_text(json.dumps(route("New Tool")))
         before = (self.output / "services.yaml").read_bytes()
         (minilab / "clusters/syd/app.yaml").unlink()
         self.assertNotEqual(self.render(MINILAB_DIRECTORY=str(minilab)).returncode, 0)

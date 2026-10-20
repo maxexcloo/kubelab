@@ -120,7 +120,22 @@ for overlay in "$kubelab_directory"/apps/overlays/*; do
       minilab_directory="$temporary_directory/minilab"
       download_repository "$minilab_repository" "$minilab_revision" "$minilab_directory"
     fi
+    # Apply the minilab Kustomization's postBuild substitution, as Flux does,
+    # and fail like its strict mode when a variable is missing.
+    substitute=$(yq -o=json -I=0 'select(.kind == "Kustomization" and .metadata.name == "minilab") |
+      .spec.postBuild.substitute // {}' "$temporary_directory/manifests.yaml")
     render_routes "$minilab_directory/$minilab_path" > "$temporary_directory/mini-app-routes.json"
+    # shellcheck disable=SC2016
+    SUBSTITUTE="$substitute" yq -i -p=json -o=json -I=0 '
+      (strenv(SUBSTITUTE) | from_json | to_entries) as $variables |
+      (.. | select(tag == "!!str")) |= (. as $value | $variables[] as $variable ireduce ($value;
+        split("${" + $variable.key + "}") | join($variable.value)))
+    ' "$temporary_directory/mini-app-routes.json"
+    # shellcheck disable=SC2016
+    if grep -o '\${[^}]*}' "$temporary_directory/mini-app-routes.json" >&2; then
+      echo 'Missing Minilab substitution variables' >&2
+      exit 1
+    fi
     # Minilab prefixes its route names, which the Home group already states.
     yq -p=json -o=json -I=0 '.annotations."gethomepage.dev/group" = "Mini" |
       .homeName = (.annotations."gethomepage.dev/name" | sub("^[^:]*: "; ""))' \
