@@ -252,6 +252,15 @@ replacements:
           - spec.values.route.public.hostnames.0
       - select:
           kind: HelmRelease
+          name: reactive-resume
+          namespace: reactive-resume
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.OAUTH_DISCOVERY_URL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HelmRelease
           name: romm
           namespace: romm
         fieldPaths:
