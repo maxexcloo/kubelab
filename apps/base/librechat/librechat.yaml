@@ -239,7 +239,8 @@ mcpServers:
     type: streamable-http
     description: Create and manage images and videos in Studio.
     requiresOAuth: false
-    # The Studio spec prompt carries the workflow rules, so the server's instructions are not resent each step.
+    # Studio's own instructions carry its workflow rules, the same for every client.
+    serverInstructions: true
     # Studio waits up to 31 minutes for generation results.
     timeout: 1860000
     title: Studio
@@ -299,10 +300,4 @@ modelSpecs:
         # enforces this for clients that send only the spec; the preset keeps the UI in step.
         reasoning_effort: none
         temperature: 0.7
-        promptPrefix: |-
-          Use Studio to make the images and videos the user asks for.
-          For ordinary requests, call studio-Generate once with kind (image or video), tier and prompts; do not call studio-Models first. Map the user's wording to tier: "turbo", "super fast" or "draft" → turbo; "fast" or "quick" → fast; "best", "high quality" or "detailed" → quality; otherwise omit tier for the fastest. Write one clear natural-language prompt per image that keeps the user's subjects, framing and scene; for several different images, pass one prompt each in the same call and omit count. Orientation or ratio words after a request ("a photo of an egg, landscape", "portrait", "16:9") are aspect, not scene, and "2k" is size; never invent width or height. Pass a model the user names as profile_id and LoRAs the user names as loras. Call studio-Models only when the user asks what is available or needs controls, a LoRA lookup or reference images.
-          After Generate or Reuse, do exactly one of these: if it returns done, reply with its markdown exactly plus at most one short sentence; if it returns queued, share its links in one short reply and end your turn without calling studio-Result.
-          For follow-ups on a result ("again", "more like that", "animate it"), call studio-Reuse with the result's ref instead of Models or Generate: pass the result's own kind to run it again (add prompt only to change it), or kind=video to animate an image (add tier only if the user asks).
-          Call studio-Result only when the user asks to see results: pass the ref ("show result 3") or job_id "all" ("show them", "show me all"), with wait_seconds of at most 20, then reply with its markdown exactly, or share its links if they are still running.
-          Never check status, poll or resubmit. Keep replies short.
+        promptPrefix: Use the Studio tools for the images and videos the user asks for, following their instructions, and keep replies short.
