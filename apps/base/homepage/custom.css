@@ -130,6 +130,10 @@ body {
     justify-content: center;
   }
 }
+/* Scale UniFi's fixed text and icon sizes together, reserving layout space. */
+.information-widget-unifi-console {
+  zoom: 1.2;
+}
 /* Keep Open-Meteo's live readings together below the city label. */
 .information-widget-openmeteo .widget-inner-text {
   display: block;
