@@ -160,6 +160,9 @@ spec:
             num_retries: 0
             reasoning_effort: low
             timeout: 300
+          model_info:
+            max_input_tokens: 262144
+            supports_vision: true
         - model_name: ai/text
           litellm_params:
             api_base: http://host.invalid:8000/v1
@@ -168,6 +171,9 @@ spec:
             model: openai/text
             num_retries: 0
             timeout: 300
+          model_info:
+            max_input_tokens: 262144
+            supports_vision: true
         - model_name: ai/text-quick
           litellm_params:
             api_base: http://host.invalid:8000/v1
