@@ -90,7 +90,9 @@ spec:
         check_provider_endpoint: true
       # Other models live in the UI. Radiance answers with its loaded model under
       # any name and fails fast when its text runtime is off, so chat falls back
-      # to Grok through the UI-registered CLIProxyAPI models.
+      # to Grok through the UI-registered CLIProxyAPI models. ai/text-quick is
+      # the same deployment without reasoning, for short helper calls such as
+      # titles; it has no fallback.
       model_list:
         - model_name: ai/text
           litellm_params:
@@ -100,6 +102,15 @@ spec:
             model: openai/text
             num_retries: 0
             timeout: 300
+        - model_name: ai/text-quick
+          litellm_params:
+            api_base: http://host.invalid:8000/v1
+            api_key: os.environ/BENTO_API_KEY
+            max_retries: 0
+            model: openai/text
+            num_retries: 0
+            reasoning_effort: none
+            timeout: 60
       router_settings:
         fallbacks:
           - ai/text:
