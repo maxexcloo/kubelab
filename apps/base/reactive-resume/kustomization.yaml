@@ -5,6 +5,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - resend.yaml
   - storage.yaml
 components:
   - ../../../platform/databases/postgres-minimal

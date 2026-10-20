@@ -10,9 +10,13 @@ spec:
           main:
             env:
               APP_URL: https://app.invalid
-              FLAG_DISABLE_EMAIL_AUTH: "true"
               OAUTH_DISCOVERY_URL: https://identity.invalid/.well-known/openid-configuration
               OAUTH_PROVIDER_NAME: Pocket ID
+              SMTP_FROM: reactive-resume@mail-domain.invalid
+              SMTP_HOST: smtp.resend.com
+              SMTP_PORT: "465"
+              SMTP_SECURE: "true"
+              SMTP_USER: resend
               # Keep the health storage check inside the 5-second probe timeout.
               STORAGE_HEALTHCHECK_TIMEOUT_MS: "4000"
             envFrom:
