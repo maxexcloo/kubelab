@@ -173,6 +173,21 @@ mcpSettings:
 # MCP servers are registered in LiteLLM's UI, which serves each at /<alias>/mcp.
 # Grant the shared key access there and add an entry here to offer a server.
 mcpServers:
+  actual-budget:
+    type: streamable-http
+    description: Review accounts, transactions, budgets and spending in Actual Budget.
+    requiresOAuth: false
+    startup: false
+    title: Actual Budget
+    url: http://litellm.litellm.svc.cluster.local:4000/actual_budget/mcp
+    # The budget is personal, so it needs an individually authorised key rather than the shared chat key.
+    customUserVars:
+      ACTUAL_BUDGET_API_KEY:
+        description: Your personal LiteLLM virtual key authorised for Actual Budget. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Personal API Key
+    headers:
+      x-litellm-api-key: "Bearer {{ACTUAL_BUDGET_API_KEY}}"
   ai-control:
     type: streamable-http
     description: Manage AI workloads and preview GPU allocation changes.

@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base/actual-budget
+  - ../../base/actual-budget-mcp
   - ../../base/actual-up
   - ../../base/aiometadata
   - ../../base/aiostreams
