@@ -6,7 +6,6 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
-  - public-route.yaml
   - route.yaml
   - source.yaml
 replacements:
@@ -35,11 +34,6 @@ replacements:
         options:
           delimiter: /
           index: 2
-      - select:
-          kind: HTTPRoute
-          name: litellm-public
-        fieldPaths:
-          - spec.hostnames.0
       - select:
           kind: PrivateDNSRecord
         fieldPaths:
