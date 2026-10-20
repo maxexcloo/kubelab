@@ -115,6 +115,7 @@ def new_item():
         "formats": {},
         "generate": set(),
         "login": False,
+        "pushed": set(),
         "urls": set(),
     }
 
@@ -244,6 +245,8 @@ def discover_items():
                     login_items[title] = login_item
             if field:
                 item["fields"].add(field)
+                if resource["kind"] == "PushSecret":
+                    item["pushed"].add(field)
     # References are item titles in the cluster vault.
     for route in routes:
         namespace = route["metadata"]["namespace"]
@@ -506,6 +509,16 @@ def comparable(item):
     return result
 
 
+# ESO creates a missing item as a SERVER item when a PushSecret publishes first.
+# Such an item holds nothing but published values, so it can be replaced safely.
+def replaceable(item, desired):
+    return item.get("tags") == ["Kubelab"] and all(
+        field_label(field) in desired.get("pushed", set())
+        for field in item.get("fields", [])
+        if field.get("value") or field.get("generate")
+    )
+
+
 def item_ids(desired, summaries):
     ids = {}
     for summary in summaries:
@@ -550,7 +563,8 @@ def main():
             vault_id,
             allow_removal=archive_ready,
         )
-        if current.get("category") != wanted["category"]:
+        replace = current.get("category") != wanted["category"]
+        if replace and not replaceable(current, configuration):
             # Connect cannot change a category in place; replacing the item would
             # discard its history and generated credentials.
             raise RuntimeError(f"1Password item {title} has the wrong category")
@@ -562,14 +576,22 @@ def main():
             if latest.get("version") != current.get("version"):
                 print(f"{title} changed during reconciliation; skipped")
                 continue
-            connect(
-                f"/vaults/{vault_id}/items/{ids[title]}",
-                body=wanted,
-                method="PUT",
-            )
+            if replace:
+                # Create first; consumers retry while both titles briefly exist.
+                for key in ("createdAt", "id", "lastEditedBy", "updatedAt", "version"):
+                    wanted.pop(key, None)
+                connect(f"/vaults/{vault_id}/items", body=wanted, method="POST")
+                connect(f"/vaults/{vault_id}/items/{ids[title]}", method="DELETE")
+            else:
+                connect(
+                    f"/vaults/{vault_id}/items/{ids[title]}",
+                    body=wanted,
+                    method="PUT",
+                )
         changed += 1
         prefix = "would be " if dry_run else ""
-        print(f"{wanted['title']} {prefix}updated")
+        action = "recreated" if replace else "updated"
+        print(f"{wanted['title']} {prefix}{action}")
     if not archive_ready:
         print(f"reconciled {len(desired)} items; changed {changed}")
         return
