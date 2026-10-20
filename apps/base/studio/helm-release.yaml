@@ -28,6 +28,8 @@ spec:
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(LITELLM_HOST),studio.studio.svc.cluster.local
               HEISS_COMFY_ROOT: /comfy
               HEISS_DATA_DIR: /data
+              # A chat call queues up to four images at once.
+              STUDIO_ACCOUNT_MAX_OUTSTANDING_JOBS: "4"
               STUDIO_ENABLE_BUILTIN_PROFILES: "0"
               STUDIO_ENABLE_PRESETS: "1"
               STUDIO_MODEL_MANIFEST: /data/config/models.json
@@ -54,7 +56,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio
-              tag: 0.29.0
+              tag: 0.30.0
             probes:
               liveness:
                 path: /api/ping
