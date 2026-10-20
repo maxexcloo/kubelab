@@ -67,7 +67,7 @@ endpoints:
       titleTiming: final
       modelDisplayLabel: AI
     - name: Bento
-      apiKey: ${BENTO_API_KEY}
+      apiKey: ${AI_API_KEY}
       baseURL: ${BENTO_API_URL}
       models:
         # LibreChat requires a fallback entry; fetched models replace this placeholder.
