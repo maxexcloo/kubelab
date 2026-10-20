@@ -320,6 +320,15 @@ replacements:
           index: 1
       - select:
           kind: HelmRelease
+          name: reactive-resume
+          namespace: reactive-resume
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.SMTP_FROM
+        options:
+          delimiter: "@"
+          index: 1
+      - select:
+          kind: HelmRelease
           name: romm
           namespace: romm
         fieldPaths:
