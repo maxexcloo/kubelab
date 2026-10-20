@@ -155,7 +155,7 @@ spec:
         - model_name: ai/studio
           litellm_params:
             api_base: http://host.invalid:8000/v1
-            api_key: os.environ/BENTO_API_KEY
+            api_key: os.environ/AI_API_KEY
             max_retries: 0
             model: openai/text
             num_retries: 0
@@ -164,7 +164,7 @@ spec:
         - model_name: ai/text
           litellm_params:
             api_base: http://host.invalid:8000/v1
-            api_key: os.environ/BENTO_API_KEY
+            api_key: os.environ/AI_API_KEY
             max_retries: 0
             model: openai/text
             num_retries: 0
@@ -172,7 +172,7 @@ spec:
         - model_name: ai/text-quick
           litellm_params:
             api_base: http://host.invalid:8000/v1
-            api_key: os.environ/BENTO_API_KEY
+            api_key: os.environ/AI_API_KEY
             max_retries: 0
             model: openai/text
             num_retries: 0
@@ -182,7 +182,7 @@ spec:
         - model_name: gemma-4-31b-heretic
           litellm_params:
             api_base: http://host.invalid:8000/v1
-            api_key: os.environ/BENTO_API_KEY
+            api_key: os.environ/AI_API_KEY
             max_retries: 0
             model: openai/gemma-4-31b-heretic
             num_retries: 0
