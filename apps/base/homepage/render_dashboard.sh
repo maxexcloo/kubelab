@@ -194,7 +194,11 @@ for file in custom.css custom.js docker.yaml kubernetes.yaml; do
 done
 printf '\n:root { --homepage-cluster: "%s"; }\n' "$HOMEPAGE_CLUSTER" >> "$temporary_directory/config/custom.css"
 yq '(.[] | select(has("kubernetes"))).kubernetes.cluster.label = strenv(HOMEPAGE_CLUSTER)' \
-  "$source_directory/widgets.yaml" > "$temporary_directory/config/widgets.yaml"
+  "$source_directory/widgets.yaml" > "$temporary_directory/widgets.yaml"
+MACHINES="$homelab_directory/data/machines.yaml" DOMAINS="$homelab_directory/data/domains.yaml" \
+  INFRASTRUCTURE="$HOMELAB_INFRASTRUCTURE_FILE" \
+  yq --from-file "$script_directory/resolve_endpoints.yq" \
+  "$temporary_directory/widgets.yaml" > "$temporary_directory/config/widgets.yaml"
 
 SERVICES="$temporary_directory/config/services.yaml" \
   yq --from-file "$script_directory/layout.yq" "$source_directory/settings.yaml" \

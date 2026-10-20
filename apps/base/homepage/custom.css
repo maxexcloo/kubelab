@@ -88,7 +88,7 @@ body {
 .service-container:empty {
   min-height: 3.25rem;
 }
-/* Header: search fills the left, then cluster status, weather and the time
+/* Header: search fills the left, then UniFi, cluster status, weather and the time
    stacked over the date. Homepage keeps the cluster widget in its own block,
    so its right-hand block joins the same grid. */
 @media (min-width: 640px) {
@@ -96,7 +96,7 @@ body {
     align-items: center;
     column-gap: 2.5rem;
     display: grid;
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr auto auto auto auto;
   }
   #information-widgets-right {
     display: contents;
@@ -105,16 +105,20 @@ body {
     grid-column: 1;
     grid-row: 1 / span 2;
   }
-  #widgets-wrap > .information-widget-kubernetes {
+  #widgets-wrap .information-widget-unifi-console {
     grid-column: 2;
     grid-row: 1 / span 2;
   }
-  #widgets-wrap .information-widget-openmeteo {
+  #widgets-wrap > .information-widget-kubernetes {
     grid-column: 3;
     grid-row: 1 / span 2;
   }
-  #widgets-wrap .information-widget-datetime {
+  #widgets-wrap .information-widget-openmeteo {
     grid-column: 4;
+    grid-row: 1 / span 2;
+  }
+  #widgets-wrap .information-widget-datetime {
+    grid-column: 5;
     line-height: 1.1;
   }
   #widgets-wrap .information-widget-datetime > div {

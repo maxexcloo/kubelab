@@ -531,6 +531,10 @@ cp "$ARCHIVE_FIXTURE" "$2"
                 result = self.render(HOMEPAGE_CLUSTER=cluster)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 widgets = read_yaml(self.output / "widgets.yaml")
+                self.assertEqual(widgets[0]["unifi_console"], {
+                    "key": "{{HOMEPAGE_VAR_UNIFI_API_KEY}}",
+                    "url": "https://gateway.mbk.example.net",
+                })
                 kubernetes = next(widget["kubernetes"] for widget in widgets if "kubernetes" in widget)
                 self.assertEqual(kubernetes["cluster"]["label"], cluster)
                 self.assertIn(f'--homepage-cluster: "{cluster}"', (self.output / "custom.css").read_text())

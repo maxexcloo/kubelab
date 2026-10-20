@@ -1,3 +1,6 @@
+- unifi_console:
+    key: "{{HOMEPAGE_VAR_UNIFI_API_KEY}}"
+    url: homelab://mbk/gateway/management
 # Node names, Ready state and usage come from the local Kubernetes API and metrics-server.
 - kubernetes:
     cluster:
