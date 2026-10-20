@@ -145,11 +145,9 @@ spec:
           transport: http
           url: http://unifi-network-mcp.unifi-network-mcp.svc.cluster.local:3000/mcp
       # Other models live in the UI. Radiance answers with whichever text model AI Control
-      # has loaded, under any name, and fails fast while its text runtime is off; ai/studio
-      # and ai/text then fall back to Grok through the UI-registered CLIProxyAPI models.
+      # has loaded, under any name, and fails fast while its text runtime is off.
       # ai/studio plans Studio's tool calls with low reasoning, whatever the client sends.
-      # ai/text-quick has no reasoning, for short helper calls such as titles, and has no
-      # fallback.
+      # ai/text-quick has no reasoning, for short helper calls such as titles.
       model_list:
         - model_name: ai/studio
           litellm_params:
@@ -183,12 +181,7 @@ spec:
             num_retries: 0
             reasoning_effort: none
             timeout: 60
-      router_settings:
-        fallbacks:
-          - ai/studio:
-              - cli-proxy-api/grok-4.7
-          - ai/text:
-              - cli-proxy-api/grok-4.7
+      # No fallbacks: Grok is disabled (2026-10-21) until its CLIProxyAPI access works again.
       # UI-registered search tools cannot read os.environ/ keys, so these stay here.
       # Keenable, LibreChat's default search provider, has no LiteLLM integration.
       search_tools:
