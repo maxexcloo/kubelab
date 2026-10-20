@@ -34,6 +34,7 @@ def item_configuration(**overrides):
         "formats": {},
         "generate": set(),
         "login": False,
+        "pushed": set(),
         "urls": set(),
     }
     configuration.update(overrides)
@@ -541,7 +542,10 @@ class ReconcilerTests(unittest.TestCase):
         item_id = "a" * 26
         current = {
             "category": "SERVER",
-            "fields": [],
+            "fields": [
+                {"id": "password", "label": "password", "value": "preserve-me"},
+                {"id": "oidc-client-id", "label": "oidc-client-id", "value": "pushed"},
+            ],
             "id": item_id,
             "tags": ["Kubelab"],
             "title": "Application",
@@ -552,7 +556,11 @@ class ReconcilerTests(unittest.TestCase):
             patch.object(
                 RECONCILER,
                 "discover_items",
-                return_value={"Application": item_configuration(login=True)},
+                return_value={
+                    "Application": item_configuration(
+                        login=True, pushed={"oidc-client-id"}
+                    )
+                },
             ),
             patch.object(
                 RECONCILER,
@@ -563,6 +571,64 @@ class ReconcilerTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "wrong category"):
                 RECONCILER.main()
         self.assertEqual(connect.call_count, 3)
+
+    def test_pushed_server_item_is_recreated_with_the_route_category(self):
+        current = {
+            "category": "SERVER",
+            "fields": [
+                {"id": "notesPlain", "label": "notesPlain", "type": "STRING"},
+                {"id": "x", "label": "oidc-client-secret", "value": "pushed"},
+            ],
+            "id": "old",
+            "tags": ["Kubelab"],
+            "title": "Application",
+            "vault": {"id": "vault"},
+            "version": 2,
+        }
+        calls = []
+
+        def connect(path, *, body=None, method="GET"):
+            calls.append((method, path, copy.deepcopy(body)))
+            if path == "/vaults":
+                return [{"id": "vault"}]
+            if path == "/vaults/vault/items" and method == "GET":
+                return [{"id": "old", "title": "Application"}]
+            if path == "/vaults/vault/items/old" and method == "GET":
+                return copy.deepcopy(current)
+            if method in {"DELETE", "POST"}:
+                return None
+            self.fail(f"unexpected Connect request: {method} {path}")
+
+        desired = item_configuration(
+            fields={"auth-secret", "oidc-client-secret"},
+            generate={"auth-secret"},
+            login=True,
+            pushed={"oidc-client-secret"},
+            urls={"https://app.excloo.com"},
+        )
+        with (
+            patch.object(RECONCILER, "flux_ready", return_value=False),
+            patch.object(RECONCILER, "is_dry_run", return_value=False),
+            patch.object(
+                RECONCILER, "discover_items", return_value={"Application": desired}
+            ),
+            patch.object(RECONCILER, "connect", side_effect=connect),
+            contextlib.redirect_stdout(io.StringIO()) as output,
+        ):
+            RECONCILER.main()
+        writes = [call for call in calls if call[0] != "GET"]
+        self.assertEqual(
+            [(method, path) for method, path, _ in writes],
+            [("POST", "/vaults/vault/items"), ("DELETE", "/vaults/vault/items/old")],
+        )
+        created = writes[0][2]
+        self.assertEqual(created["category"], "LOGIN")
+        self.assertNotIn("id", created)
+        self.assertNotIn("version", created)
+        fields = {field["label"]: field for field in created["fields"]}
+        self.assertEqual(fields["oidc-client-secret"]["value"], "pushed")
+        self.assertTrue(fields["auth-secret"]["generate"])
+        self.assertIn("Application recreated", output.getvalue())
 
     def test_archival_only_removes_unreferenced_exclusively_managed_items(self):
         items = {

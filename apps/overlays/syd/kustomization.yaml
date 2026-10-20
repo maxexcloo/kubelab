@@ -39,6 +39,20 @@ resources:
   - homepage-private-dns.yaml
   - immich-private-route.yaml
 patches:
+  # Retry installs that outwait new credentials; failed upgrades are not rolled
+  # back over migrated data.
+  - patch: |-
+      apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      metadata:
+        name: _
+      spec:
+        install:
+          remediation:
+            retries: 3
+    target:
+      group: helm.toolkit.fluxcd.io
+      kind: HelmRelease
   - path: external-placement.yaml
     target:
       kind: HelmRelease
