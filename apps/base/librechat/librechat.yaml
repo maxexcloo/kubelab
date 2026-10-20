@@ -298,8 +298,7 @@ modelSpecs:
         # Beyond this, LibreChat summarises older messages with the chat model.
         maxContextTokens: 65536
         model: ai/studio
-        # Low reasoning plans Studio's tool calls. A client-sent effort overrides ai/studio's
-        # own, so the preset must match it.
-        reasoning_effort: low
+        # No reasoning_effort here: a client-sent effort overrides ai/studio's own, and
+        # LiteLLM's ai/studio sets the level for Studio's tool calls for every client.
         temperature: 0.7
         promptPrefix: Use the Studio tools for the images and videos the user asks for, following their instructions, and keep replies short.
