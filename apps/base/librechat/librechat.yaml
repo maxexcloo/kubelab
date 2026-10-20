@@ -177,7 +177,7 @@ mcpSettings:
 mcpServers:
   actual-budget:
     type: streamable-http
-    description: Review accounts, transactions, budgets and spending in Actual Budget.
+    description: Review and manage accounts, transactions, budgets and spending in Actual Budget.
     requiresOAuth: false
     startup: false
     title: Actual Budget
