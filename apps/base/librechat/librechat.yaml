@@ -172,17 +172,24 @@ webSearch:
 mcpSettings:
   allowedAddresses:
     - litellm.litellm.svc.cluster.local:4000
-# MCP servers are registered in LiteLLM's UI, which serves each at /<alias>/mcp.
-# Grant the shared key access there and add an entry here to offer a server.
+# LiteLLM's config declares the MCP servers and serves each at /<alias>/mcp.
+# Grant keys access in LiteLLM's UI and add an entry here to offer a server.
 mcpServers:
   actual-budget:
     type: streamable-http
     description: Review and manage accounts, transactions, budgets and spending in Actual Budget.
     requiresOAuth: false
+    startup: false
     title: Actual Budget
     url: http://litellm.litellm.svc.cluster.local:4000/actual_budget/mcp
+    # The budget is personal, so it needs an individually authorised key rather than the shared chat key.
+    customUserVars:
+      ACTUAL_BUDGET_API_KEY:
+        description: Your personal LiteLLM virtual key authorised for Actual Budget. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Personal API Key
     headers:
-      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+      x-litellm-api-key: "Bearer {{ACTUAL_BUDGET_API_KEY}}"
   ai-control:
     type: streamable-http
     description: Manage AI workloads and preview GPU allocation changes.
@@ -202,10 +209,17 @@ mcpServers:
     type: streamable-http
     description: Inspect and control home devices, automations and dashboards.
     requiresOAuth: false
+    startup: false
     title: Home Assistant
     url: http://litellm.litellm.svc.cluster.local:4000/home_assistant/mcp
+    # Home control needs an individually authorised key rather than the shared chat key.
+    customUserVars:
+      HOME_ASSISTANT_API_KEY:
+        description: Your personal LiteLLM virtual key authorised for Home Assistant. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Personal API Key
     headers:
-      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+      x-litellm-api-key: "Bearer {{HOME_ASSISTANT_API_KEY}}"
   reactive-resume:
     type: streamable-http
     description: Read and edit resumes, cover letters and job applications in Reactive Resume.
@@ -238,10 +252,17 @@ mcpServers:
     type: streamable-http
     description: Inspect and manage UniFi networks, devices and clients.
     requiresOAuth: false
+    startup: false
     title: UniFi Network
     url: http://litellm.litellm.svc.cluster.local:4000/unifi_network/mcp
+    # Network control needs an individually authorised key rather than the shared chat key.
+    customUserVars:
+      UNIFI_NETWORK_API_KEY:
+        description: Your personal LiteLLM virtual key authorised for UniFi Network. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Personal API Key
     headers:
-      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+      x-litellm-api-key: "Bearer {{UNIFI_NETWORK_API_KEY}}"
 # Specs build an agent per request from the preset and MCP servers.
 modelSpecs:
   enforce: false

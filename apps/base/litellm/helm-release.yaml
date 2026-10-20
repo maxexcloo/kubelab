@@ -81,13 +81,69 @@ spec:
       general_settings:
         disable_env_credential_login: true
         master_key: os.environ/LITELLM_MASTER_KEY
-        # Models and MCP servers are registered in the UI. Models read provider
-        # keys from this pod as os.environ/<NAME>; MCP servers keep copies of
-        # Studio's mcp-api-key and this item's provider-ai-control-api-key, so
-        # update them there after rotating either.
+        # Models are registered in the UI and read provider keys from this pod
+        # as os.environ/<NAME>.
         require_key_mcp_access_defined: true
       litellm_settings:
         check_provider_endpoint: true
+      # Key grants in the UI name these pinned server IDs. Servers without an
+      # auth_type accept only this pod through their network policies.
+      mcp_servers:
+        actual_budget:
+          alias: actual_budget
+          description: Review and manage accounts, transactions, budgets and spending in Actual Budget.
+          server_id: actual-budget
+          transport: http
+          url: http://actual-budget-mcp.actual-budget-mcp.svc.cluster.local:3000/mcp
+        ai_control:
+          alias: ai_control
+          auth_type: bearer_token
+          authentication_token: os.environ/AI_CONTROL_API_KEY
+          description: Manage AI workloads and preview GPU allocation changes.
+          server_id: ai-control
+          transport: http
+          url: http://studio.studio.svc.cluster.local:8787/mcp
+        home_assistant:
+          alias: home_assistant
+          description: Inspect and control home devices, automations and dashboards.
+          server_id: home-assistant
+          transport: http
+          url: http://home-assistant-mcp.home-assistant-mcp.svc.cluster.local:8086/mcp
+        reactive_resume:
+          alias: reactive_resume
+          auth_type: api_key
+          authentication_token: os.environ/REACTIVE_RESUME_API_KEY
+          description: Read and edit resumes, cover letters and job applications in Reactive Resume.
+          server_id: reactive-resume
+          transport: http
+          url: http://reactive-resume.reactive-resume.svc.cluster.local:3000/mcp
+        studio:
+          alias: studio
+          allow_all_keys: true
+          auth_type: bearer_token
+          authentication_token: os.environ/STUDIO_MCP_API_KEY
+          description: Create and manage images and videos in Studio.
+          server_id: studio
+          # Studio waits up to 31 minutes for generation results.
+          timeout: 1860
+          transport: http
+          url: http://studio.studio.svc.cluster.local:8787/mcp
+          allowed_tools:
+            - Cancel
+            - Generate
+            - Models
+            - Result
+            - Reuse
+            - Upload
+          extra_headers:
+            - X-AI-User-Email
+            - X-AI-User-Id
+        unifi_network:
+          alias: unifi_network
+          description: Inspect and manage UniFi networks, devices and clients.
+          server_id: unifi-network
+          transport: http
+          url: http://unifi-network-mcp.unifi-network-mcp.svc.cluster.local:3000/mcp
       # Other models live in the UI. Radiance answers with its loaded model under
       # any name and fails fast when its text runtime is off, so chat falls back
       # to Grok through the UI-registered CLIProxyAPI models. ai/studio is the
