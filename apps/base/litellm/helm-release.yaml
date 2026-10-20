@@ -147,9 +147,9 @@ spec:
       # Other models live in the UI. Radiance answers with its loaded model under
       # any name and fails fast when its text runtime is off, so chat falls back
       # to Grok through the UI-registered CLIProxyAPI models. ai/studio is the
-      # same chat without reasoning, whatever the client sends. ai/text-quick is
-      # also without reasoning, for short helper calls such as titles; it fails
-      # fast and has no fallback. The named Radiance models describe their
+      # same chat with low reasoning, whatever the client sends, so tool calls
+      # are planned. ai/text-quick has no reasoning, for short helper calls such
+      # as titles; it fails fast and has no fallback. The named Radiance models describe their
       # workloads but still reach whichever one AI Control has loaded.
       model_list:
         - model_name: ai/studio
@@ -159,7 +159,7 @@ spec:
             max_retries: 0
             model: openai/text
             num_retries: 0
-            reasoning_effort: none
+            reasoning_effort: low
             timeout: 300
         - model_name: ai/text
           litellm_params:
