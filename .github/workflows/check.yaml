@@ -1,15 +1,19 @@
 name: Check
+
 on:
   pull_request:
   workflow_dispatch:
   push:
     branches:
       - main
+
 permissions:
   contents: read
+
 concurrency:
   cancel-in-progress: true
   group: check-${{ github.ref }}
+
 jobs:
   check:
     name: Check
@@ -25,8 +29,8 @@ jobs:
           tools: actionlint gh helm hk jq kubeconform kubectl node oxfmt node@24 npm:renovate python shellcheck yq
       - name: Run Checks
         run: mise run check
-      - name: Refresh External Monitoring
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        name: Refresh External Monitoring
         env:
           GH_TOKEN: ${{ secrets.HOMELAB_FLY_DEPLOY_TOKEN }}
           KUBELAB_REVISION: ${{ github.sha }}
