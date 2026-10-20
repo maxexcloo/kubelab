@@ -19,7 +19,7 @@
     target: _blank
 # Weather, then the time over the date at the right-hand end.
 - openmeteo:
-    label: Sydney
+    # The city label is styled above the readings in custom.css.
     latitude: -33.8688
     longitude: 151.2093
     units: metric

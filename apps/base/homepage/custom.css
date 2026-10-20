@@ -97,6 +97,7 @@ body {
     column-gap: 2.5rem;
     display: grid;
     grid-template-columns: 1fr auto auto auto auto;
+    row-gap: 0;
   }
   #information-widgets-right {
     display: contents;
@@ -118,12 +119,32 @@ body {
     grid-row: 1 / span 2;
   }
   #widgets-wrap .information-widget-datetime {
+    align-self: end;
     grid-column: 5;
     line-height: 1.1;
+  }
+  #widgets-wrap .information-widget-datetime + .information-widget-datetime {
+    align-self: start;
   }
   #widgets-wrap .information-widget-datetime > div {
     justify-content: center;
   }
+}
+/* Keep Open-Meteo's live readings together below the city label. */
+.information-widget-openmeteo .widget-inner-text {
+  display: block;
+  white-space: nowrap;
+}
+.information-widget-openmeteo .widget-inner-text:has(.primary-text + .secondary-text)::before {
+  content: "Sydney";
+  display: block;
+  font-size: 0.875rem;
+}
+.information-widget-openmeteo .primary-text {
+  font-size: 0.75rem;
+}
+.information-widget-openmeteo .secondary-text::before {
+  content: ", ";
 }
 /* Kubernetes widget: the widget supplies node names; the renderer supplies the cluster. */
 .information-widget-kubernetes > div > div:nth-child(n + 2) .pt-1.text-center::before {
