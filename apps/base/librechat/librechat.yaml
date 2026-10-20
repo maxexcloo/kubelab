@@ -66,9 +66,9 @@ endpoints:
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
       modelDisplayLabel: AI
-    - name: Bento
+    - name: AI Direct
       apiKey: ${AI_API_KEY}
-      baseURL: ${BENTO_API_URL}
+      baseURL: ${AI_API_URL}
       models:
         # LibreChat requires a fallback entry; fetched models replace this placeholder.
         default:

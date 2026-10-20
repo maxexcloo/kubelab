@@ -67,7 +67,7 @@ class ClusterSettingsTests(unittest.TestCase):
             self.assertTrue(dns_records)
             self.assertEqual({r["spec"]["target"] for r in dns_records}, {"private.renamed.changed.example"})
             librechat = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "librechat")
-            self.assertEqual(librechat["spec"]["values"]["librechat"]["configEnv"]["BENTO_API_URL"],
+            self.assertEqual(librechat["spec"]["values"]["librechat"]["configEnv"]["AI_API_URL"],
                              "http://bento.changed.example:8000/v1")
             def main_env(name):
                 release = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == name)
@@ -75,7 +75,7 @@ class ClusterSettingsTests(unittest.TestCase):
             self.assertEqual(main_env("home-assistant-mcp")["HOMEASSISTANT_URL"], "https://hass.changed.example")
             self.assertEqual(main_env("unifi-network-mcp")["UNIFI_NETWORK_HOST"], "gateway.changed.example")
             env = main_env("studio")
-            self.assertEqual(env["BENTO_ADDRESS"], "bento.changed.example")
+            self.assertEqual(env["AI_ADDRESS"], "bento.changed.example")
             self.assertEqual(env["STUDIO_OIDC_ISSUER"], "https://id.changed.example")
             self.assertEqual(env["ROUTE_ALIAS_HOST"], "studio.renamed.excloo.dev")
             volumes = [r for r in resources if r["kind"] == "PersistentVolume"]
