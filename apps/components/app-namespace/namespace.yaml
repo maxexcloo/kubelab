@@ -30,6 +30,8 @@ targets:
   - <<: *namespaced
     select: { kind: HTTPRoute }
   - <<: *namespaced
+    select: { kind: Job }
+  - <<: *namespaced
     select: { kind: Middleware }
   - <<: *namespaced
     select: { kind: NetworkPolicy }

@@ -7,6 +7,16 @@ metadata:
 spec:
   ingress:
     - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: account-seed
+        # LiteLLM's MCP gateway serves the app's /mcp endpoint.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: litellm
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: litellm
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking
