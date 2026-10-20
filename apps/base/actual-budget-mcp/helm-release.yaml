@@ -8,9 +8,9 @@ spec:
       main:
         containers:
           main:
-            # --sse serves streamable HTTP at /mcp alongside legacy SSE. Tools stay
-            # read-only without --enable-write.
+            # --sse serves streamable HTTP at /mcp alongside legacy SSE.
             args:
+              - --enable-write
               - --sse
             env:
               ACTUAL_DATA_DIR: /data
