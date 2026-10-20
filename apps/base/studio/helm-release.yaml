@@ -10,16 +10,16 @@ spec:
           main:
             env:
               # Address parts compose the URLs below; Studio ignores them.
-              BENTO_ADDRESS: bento.invalid
+              AI_ADDRESS: bento.invalid
               COMFY_URL:
-                dependsOn: BENTO_ADDRESS
-                value: http://$(BENTO_ADDRESS):8190
+                dependsOn: AI_ADDRESS
+                value: http://$(AI_ADDRESS):8190
               COMFY_VIDEO_URL:
-                dependsOn: BENTO_ADDRESS
-                value: http://$(BENTO_ADDRESS):8191
+                dependsOn: AI_ADDRESS
+                value: http://$(AI_ADDRESS):8191
               CONTROL_URL:
-                dependsOn: BENTO_ADDRESS
-                value: http://$(BENTO_ADDRESS):1337
+                dependsOn: AI_ADDRESS
+                value: http://$(AI_ADDRESS):1337
               HEISS_ALLOWED_HOSTS:
                 dependsOn:
                   - LITELLM_HOST

@@ -172,7 +172,7 @@ replacements:
           name: studio
           namespace: studio
         fieldPaths:
-          - spec.values.controllers.main.containers.main.env.BENTO_ADDRESS
+          - spec.values.controllers.main.containers.main.env.AI_ADDRESS
   - source:
       kind: ConfigMap
       name: cluster-settings
@@ -183,7 +183,7 @@ replacements:
           name: librechat
           namespace: librechat
         fieldPaths:
-          - spec.values.librechat.configEnv.BENTO_API_URL
+          - spec.values.librechat.configEnv.AI_API_URL
         options:
           delimiter: /
           index: 2
