@@ -26,7 +26,7 @@ registration:
     - openid
 endpoints:
   agents:
-    # Stop also ends ordinary background tool waits, such as Studio MCP Result.
+    # Stop also ends ordinary background tool waits.
     backgroundTasks:
       ordinaryToolCancellation: true
     # File search, execute_code and ocr need the RAG API, the Code API and a Mistral OCR service.
@@ -53,10 +53,14 @@ endpoints:
       models:
         default:
           - ai/text
-      # A live heading summarises long reasoning while it streams; labels run on the chat's own model.
+      # A live heading summarises long reasoning while it streams. Reasoning labels
+      # fall back to titleModel, so both run on Radiance without thinking; Radiance
+      # otherwise spends their 256-token label cap on reasoning and returns no text.
       reasoningLabel: true
       titleConvo: true
-      titleModel: current_model
+      titleModel: ai/text-quick
+      # A title started alongside the turn is cancelled when the turn stops or is replaced.
+      titleTiming: final
       modelDisplayLabel: AI
     - name: Bento
       apiKey: ${BENTO_API_KEY}
@@ -213,7 +217,7 @@ mcpServers:
     url: http://litellm.litellm.svc.cluster.local:4000/unifi_network/mcp
     headers:
       x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
-# Specs build an agent per request from the preset, MCP servers and background tools.
+# Specs build an agent per request from the preset and MCP servers.
 modelSpecs:
   enforce: false
   prioritize: false
@@ -225,24 +229,27 @@ modelSpecs:
       describeIntent:
         - studio-Generate_mcp_studio
         - studio-Models_mcp_studio
+        - studio-Result_mcp_studio
         - studio-Reuse_mcp_studio
       conversation_starters:
         - Animate my last image
         - Fast video of waves rolling onto a beach at sunset
         - Quality portrait of an old fisherman in soft window light
         - Turbo photo of a lighthouse on a stormy coast
+      # Result waits in the foreground: LibreChat v0.8.8 tells the model to poll
+      # check_background_task until any backgrounded MCP tool completes.
       mcpServers:
         - studio
       preset:
         endpoint: AI
+        # Beyond this, LibreChat summarises older messages with the chat model.
+        maxContextTokens: 16000
         model: ai/text
         reasoning_effort: low
         temperature: 0.7
         promptPrefix: |-
           Use Studio to make the images and videos the user asks for.
           For ordinary requests, call studio-Generate directly with kind (image or video), tier and prompts; do not call studio-Models first. Map the user's wording to tier: "turbo", "super fast" or "draft" → turbo; "fast" or "quick" → fast; "best", "high quality" or "detailed" → quality; otherwise omit tier for the default. Write one clear natural-language prompt that keeps the user's subjects, framing and scene; add no extra variations. Call studio-Models only when the user names a model, asks what is available, or needs controls, LoRAs or reference images.
-          If Generate returns done, reply with its markdown exactly plus at most one short sentence. If it returns queued, start one studio-Result per job with delivery=notification, wait_seconds=1500 and run_in_background=true, then end your turn; when the notification arrives, reply with its markdown exactly.
+          After Generate, do exactly one of these: if it returns done, reply with its markdown exactly plus at most one short sentence; if it returns queued, call studio-Result once per job with delivery=notification and wait_seconds=1500, which waits until the job finishes, then reply with its markdown exactly.
           For follow-ups on a result ("again", "more like that", "animate it"), call studio-Reuse with the result's ref instead of Models or Generate: pass the result's own kind to run it again (add prompt only to change it), or kind=video to animate an image (add tier only if the user asks).
-          Never poll, call Status unprompted or resubmit. Keep replies short.
-      runInBackground:
-        - studio-Result_mcp_studio
+          Never check status, repeat studio-Result for a job or resubmit. Keep replies short.
