@@ -133,12 +133,14 @@ body {
 /* Keep Open-Meteo's live readings together below the city label. */
 .information-widget-openmeteo .widget-inner-text {
   display: block;
+  line-height: 1rem;
   white-space: nowrap;
 }
 .information-widget-openmeteo .widget-inner-text:has(.primary-text + .secondary-text)::before {
   content: "Sydney";
   display: block;
-  font-size: 0.875rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
 }
 .information-widget-openmeteo .primary-text {
   font-size: 0.75rem;
