@@ -180,22 +180,12 @@ replacements:
     targets:
       - select:
           kind: HelmRelease
-          name: librechat
-          namespace: librechat
-        fieldPaths:
-          - spec.values.librechat.configEnv.AI_API_URL
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: HelmRelease
           name: litellm
           namespace: litellm
         fieldPaths:
           - spec.values.proxy_config.model_list.[model_name=ai/studio].litellm_params.api_base
           - spec.values.proxy_config.model_list.[model_name=ai/text].litellm_params.api_base
           - spec.values.proxy_config.model_list.[model_name=ai/text-quick].litellm_params.api_base
-          - spec.values.proxy_config.model_list.[model_name=gemma-4-31b-heretic].litellm_params.api_base
         options:
           delimiter: /
           index: 2

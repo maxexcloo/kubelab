@@ -46,9 +46,8 @@ endpoints:
       - tools
       - web_search
   custom:
-    # LiteLLM's ai/text uses Radiance on Bento and falls back to Grok while its text runtime is off.
-    # ai/studio is the same chat with low reasoning for Studio's tools. The named Radiance
-    # model has no fallback and answers with whichever workload AI Control has loaded.
+    # LiteLLM's ai/text and ai/studio reach the text model AI Control has loaded on Bento and
+    # fall back to Grok while the text runtime is off; LiteLLM sets their reasoning.
     - name: AI
       apiKey: ${LITELLM_API_KEY}
       baseURL: http://litellm.litellm.svc.cluster.local:4000/v1
@@ -56,28 +55,13 @@ endpoints:
         default:
           - ai/text
           - ai/studio
-          - gemma-4-31b-heretic
-      # A live heading summarises long reasoning while it streams. Reasoning labels
-      # fall back to titleModel, so both run on Radiance without thinking; Radiance
-      # otherwise spends their 256-token label cap on reasoning and returns no text.
+      # A live heading summarises long reasoning while it streams. Titles and reasoning
+      # labels use ai/text-quick, which has no reasoning, so its short output cap holds text.
       reasoningLabel: true
       titleConvo: true
       titleModel: ai/text-quick
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
-      modelDisplayLabel: AI
-    - name: AI Direct
-      apiKey: ${AI_API_KEY}
-      baseURL: ${AI_API_URL}
-      models:
-        # LibreChat requires a fallback entry; fetched models replace this placeholder.
-        default:
-          - "*"
-        fetch: true
-        # GPU allocation changes the available models; bypass the shared two-minute model cache.
-        userIdQuery: true
-      titleConvo: true
-      titleModel: current_model
       modelDisplayLabel: AI
     - name: CLI Proxy API
       apiKey: ${CLI_PROXY_API_KEY}

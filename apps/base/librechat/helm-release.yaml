@@ -35,7 +35,6 @@ spec:
         ALLOW_REGISTRATION: "false"
         ALLOW_SOCIAL_LOGIN: "true"
         ALLOW_SOCIAL_REGISTRATION: "true"
-        AI_API_URL: http://host.invalid:8000/v1
         DOMAIN_CLIENT: https://app.invalid
         DOMAIN_SERVER: https://app.invalid
         ENDPOINTS: custom,agents

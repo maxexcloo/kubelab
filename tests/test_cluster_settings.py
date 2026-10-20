@@ -66,9 +66,10 @@ class ClusterSettingsTests(unittest.TestCase):
             dns_records = [r for r in resources if r["kind"] == "PrivateDNSRecord"]
             self.assertTrue(dns_records)
             self.assertEqual({r["spec"]["target"] for r in dns_records}, {"private.renamed.changed.example"})
-            librechat = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "librechat")
-            self.assertEqual(librechat["spec"]["values"]["librechat"]["configEnv"]["AI_API_URL"],
-                             "http://bento.changed.example:8000/v1")
+            litellm = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == "litellm")
+            bases = {m["model_name"]: m["litellm_params"]["api_base"] for m in litellm["spec"]["values"]["proxy_config"]["model_list"]
+                     if m["litellm_params"].get("api_base", "").endswith(":8000/v1")}
+            self.assertEqual(bases, {name: "http://bento.changed.example:8000/v1" for name in ("ai/studio", "ai/text", "ai/text-quick")})
             def main_env(name):
                 release = next(r for r in resources if r["kind"] == "HelmRelease" and r["metadata"]["name"] == name)
                 return release["spec"]["values"]["controllers"]["main"]["containers"]["main"]["env"]
