@@ -10,6 +10,8 @@ spec:
           main:
             env:
               APP_URL: https://app.invalid
+              # The owner account exists; Pocket ID users cannot create new accounts either.
+              FLAG_DISABLE_SIGNUPS: "true"
               OAUTH_DISCOVERY_URL: https://identity.invalid/.well-known/openid-configuration
               OAUTH_PROVIDER_NAME: Pocket ID
               REDIS_URL: redis://localhost:6379
