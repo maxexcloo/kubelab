@@ -106,7 +106,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
-          gethomepage.dev/icon: sh-reactive-resume
+          gethomepage.dev/icon: sh-reactive-resume-light
           gethomepage.dev/name: &title Reactive Resume
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: *title
