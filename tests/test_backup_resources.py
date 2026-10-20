@@ -38,7 +38,7 @@ class BackupResourceTests(unittest.TestCase):
 
     def test_s3_backups_cover_databases_and_exclude_bulk_media(self):
         stores = [item for item in self.resources if item["kind"] == "ObjectStore"]
-        self.assertEqual(len(stores), 7)
+        self.assertEqual(len(stores), 8)
         for item in stores:
             self.assertEqual(item["spec"]["retentionPolicy"], "14d")
             self.assertEqual(item["spec"]["configuration"]["endpointURL"], "https://kimbap.mbk.excloo.net:9000")
@@ -64,7 +64,7 @@ class BackupResourceTests(unittest.TestCase):
         self.assertTrue(all(item["spec"]["storageClassName"] in ["", "local-path", "atvloadly-local"] for item in claims))
         policies = {(item["metadata"]["namespace"], item["metadata"]["name"])
                     for item in self.resources if item["kind"] == "NetworkPolicy"}
-        for namespace in ["bookorbit", "immich", "linkwarden", "miniflux", "pocket-id", "romm"]:
+        for namespace in ["bookorbit", "immich", "linkwarden", "miniflux", "pocket-id", "reactive-resume", "romm"]:
             self.assertIn((namespace, namespace + "-database"), policies)
         self.assertNotIn(("litellm", "postgres-backup"), policies)
 

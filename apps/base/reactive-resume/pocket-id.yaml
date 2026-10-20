@@ -1,0 +1,13 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: application
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/api/auth/callback/custom
+    description: Resume Builder
+    id: reactive-resume
+    launchURL: https://app.invalid
+    name: Reactive Resume
+  item: Reactive Resume

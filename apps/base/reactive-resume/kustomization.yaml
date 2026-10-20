@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - external-secrets.yaml
+  - namespace.yaml
+  - network-policy.yaml
+  - pocket-id.yaml
+  - storage.yaml
+components:
+  - ../../../platform/databases/postgres-minimal
+  - ../../components/application
+  - ../../components/database-colocation
+  - ../../../platform/backups/credentials
+  - ../../../platform/backups/files
+  - ../../../platform/backups/postgres
+  - ../../components/private-dns-control-d-only
+  - ../../components/app-namespace
+patches:
+  - path: helm-release.yaml
+    target:
+      kind: HelmRelease
+  - path: backup.yaml
+    target:
+      kind: CronJob
+      name: state-backup
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.APP_URL
+          - spec.values.route.public.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+transformers:
+  - ../../transformers/route-public

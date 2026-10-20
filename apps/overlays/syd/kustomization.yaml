@@ -25,6 +25,7 @@ resources:
   - ../../base/openspeedtest
   - ../../base/papra
   - ../../base/pocket-id
+  - ../../base/reactive-resume
   - ../../base/redlib
   - ../../base/romm
   - ../../base/shelfmark
