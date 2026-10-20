@@ -47,12 +47,14 @@ endpoints:
       - web_search
   custom:
     # LiteLLM's ai/text uses Radiance on Bento and falls back to Grok while its text runtime is off.
+    # ai/studio is the same chat without reasoning, whatever the client sends.
     - name: AI
       apiKey: ${LITELLM_API_KEY}
       baseURL: http://litellm.litellm.svc.cluster.local:4000/v1
       models:
         default:
           - ai/text
+          - ai/studio
       # A live heading summarises long reasoning while it streams. Reasoning labels
       # fall back to titleModel, so both run on Radiance without thinking; Radiance
       # otherwise spends their 256-token label cap on reasoning and returns no text.
@@ -260,8 +262,9 @@ modelSpecs:
         endpoint: AI
         # Beyond this, LibreChat summarises older messages with the chat model.
         maxContextTokens: 16000
-        model: ai/text
-        # Radiance spends no reasoning tokens on Studio's single tool calls.
+        model: ai/studio
+        # Radiance spends no reasoning tokens on Studio's single tool calls. ai/studio
+        # enforces this for clients that send only the spec; the preset keeps the UI in step.
         reasoning_effort: none
         temperature: 0.7
         promptPrefix: |-

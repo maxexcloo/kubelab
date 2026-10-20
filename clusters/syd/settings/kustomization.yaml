@@ -192,6 +192,7 @@ replacements:
           name: litellm
           namespace: litellm
         fieldPaths:
+          - spec.values.proxy_config.model_list.[model_name=ai/studio].litellm_params.api_base
           - spec.values.proxy_config.model_list.[model_name=ai/text].litellm_params.api_base
           - spec.values.proxy_config.model_list.[model_name=ai/text-quick].litellm_params.api_base
         options:
