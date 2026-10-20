@@ -1,21 +1,21 @@
 # Kubelab
 
-Kubernetes workloads and application integrations managed through Flux and
-Kustomize. The repository contains the desired configuration, validation tools
-and deployment tasks.
+Kubernetes workloads and application integrations for my homelab, managed with
+Flux and Kustomize. This repository has the desired configuration, the validation
+tools and the deployment tasks.
 
 ## Ownership
 
 This repository owns in-cluster controllers, workloads, routes, application DNS
 and app-scoped integrations. `homelab` owns the infrastructure needed to rebuild
-or reach a cluster while Kubernetes is unavailable.
+or reach a cluster while Kubernetes is down.
 
-The shared `minilab` repository owns mini-app source and workload manifests.
-Kubelab selects its Flux entry point and supplies shared integration settings.
+Mini-app source and workload manifests live in the shared `minilab` repository.
+Kubelab picks its Flux entry point and supplies the shared integration settings.
 
-Read the owning configuration for current placement, endpoints, storage and
-credentials. The README describes general workflows; `AGENTS.md` contains project
-invariants and editing conventions.
+Current placement, endpoints, storage and credentials are in the configuration
+that owns them. This README covers the general workflows, and `AGENTS.md` has the
+project invariants and editing conventions.
 
 ## Repository Layout
 
@@ -39,20 +39,21 @@ mise run setup
 mise run check
 ```
 
-Deployment requires a kubeconfig context matching the selected configuration in
-`clusters/`. Credentials, kubeconfigs and rendered Secrets stay outside Git.
+Deploying needs a kubeconfig context that matches the selected configuration in
+`clusters/`. Credentials, kubeconfigs and rendered Secrets stay out of Git.
 
 ## Configuration Changes
 
 Edit workload configuration in `apps/base/<application>` and select it through
-`apps/overlays/<cluster>`; `AGENTS.md` describes the editing conventions. Local
-manifest checks cover Kustomize output, so render changed Helm charts separately.
+`apps/overlays/<cluster>`. `AGENTS.md` describes the editing conventions. Local
+manifest checks only cover Kustomize output, so render changed Helm charts
+separately.
 
 ## Deployment
 
-Merge reviewed pull requests into `main`; Flux reconciles it automatically.
-Use the deployment task to fetch and reconcile immediately. Select an existing
-cluster and optionally a configured reconciliation component.
+Merge reviewed pull requests into `main` and Flux reconciles them automatically.
+To fetch and reconcile straight away, use the deploy task with an existing
+cluster and, optionally, a configured reconciliation component.
 
 | Command                                   | Purpose                                                              |
 | ----------------------------------------- | -------------------------------------------------------------------- |
@@ -63,31 +64,31 @@ cluster and optionally a configured reconciliation component.
 | `mise run setup`                          | Install configured tools and Git hooks                               |
 | `mise run status <cluster> [application]` | Show reconciliation status or watch an application's Helm release    |
 
-Bootstrap is a separate operation after infrastructure provisioning; routine
-application upgrades do not require it. The deploy task waits for its selected
+Bootstrap is a separate step after infrastructure provisioning, and routine
+application upgrades don't need it. The deploy task waits for the selected
 reconciliation stage. Check the affected release and application separately to
-verify the workload has recovered and its important workflow works.
+make sure the workload has recovered and its main workflow works.
 
 CI validates changes and refreshes external monitoring through the configured
-delivery workflow. Flux performs routine cluster deployments.
+delivery workflow. Flux handles routine cluster deployments.
 
 ## Updates & Recovery
 
 PostgreSQL uses the CloudNativePG Barman plugin for online S3 backups and WAL
-archiving. App-state jobs briefly stop their application, copy selected volumes,
-resume it and upload the copy with Restic. Schedules, retention and volume
-selection live beside their owning resources. Dedicated TrueNAS app datasets,
-bulk media and caches are excluded.
+archiving. App-state jobs briefly stop their application, copy the selected
+volumes, start it again and upload the copy with Restic. Schedules, retention and
+volume selection sit beside the resources they belong to. Dedicated TrueNAS app
+datasets, bulk media and caches aren't backed up.
 
 Credentials and Restic encryption passwords stay in 1Password. Restore PostgreSQL
-through the Barman plugin and app state through Restic into fresh volumes before
-switching the workload. Initial backup uploads are verified separately from restore
-tests.
+through the Barman plugin, and app state through Restic, into fresh volumes before
+switching the workload over. The first backup uploads are checked separately from
+restore tests.
 
-Check upstream migration requirements before upgrading. Preserve persistent data
-and the credentials needed to restore it. Reverting an image does not reverse a
-database migration. External-resource deletion and credential archival follow
-their owning declarations; removing a workload does not necessarily delete its
+Check upstream migration requirements before upgrading. Keep persistent data and
+the credentials needed to restore it. Rolling back an image doesn't undo a
+database migration. Deleting external resources and archiving credentials follow
+their own declarations, so removing a workload doesn't necessarily delete its
 external resources.
 
 ## Licence
