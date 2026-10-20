@@ -149,7 +149,8 @@ spec:
       # to Grok through the UI-registered CLIProxyAPI models. ai/studio is the
       # same chat without reasoning, whatever the client sends. ai/text-quick is
       # also without reasoning, for short helper calls such as titles; it fails
-      # fast and has no fallback.
+      # fast and has no fallback. The named Radiance models describe their
+      # workloads but still reach whichever one AI Control has loaded.
       model_list:
         - model_name: ai/studio
           litellm_params:
@@ -177,6 +178,31 @@ spec:
             num_retries: 0
             reasoning_effort: none
             timeout: 60
+        # Control workload gemma-31b-heretic, on one GPU.
+        - model_name: gemma-4-31b-heretic
+          litellm_params:
+            api_base: http://host.invalid:8000/v1
+            api_key: os.environ/BENTO_API_KEY
+            max_retries: 0
+            model: openai/gemma-4-31b-heretic
+            num_retries: 0
+            timeout: 300
+          model_info:
+            max_input_tokens: 262144
+            supports_vision: true
+        # Control workload ornith-35b, on both GPUs. Thinking is on unless a request
+        # sets chat_template_kwargs.
+        - model_name: ornith-1.5-35b-a3b
+          litellm_params:
+            api_base: http://host.invalid:8000/v1
+            api_key: os.environ/BENTO_API_KEY
+            max_retries: 0
+            model: openai/ornith-1.5-35b-a3b
+            num_retries: 0
+            timeout: 300
+          model_info:
+            max_input_tokens: 262144
+            supports_vision: true
       router_settings:
         fallbacks:
           - ai/studio:
