@@ -41,7 +41,6 @@ spec:
           main:
             env:
               REDLIB_DEFAULT_REMOVE_DEFAULT_FEEDS: "on"
-              REDLIB_DEFAULT_SHOW_NSFW: "on"
               REDLIB_DEFAULT_SUBSCRIPTIONS: '{{ join "+" .Values.subscriptions }}'
               REDLIB_DEFAULT_USE_HLS: "on"
               REDLIB_FULL_URL: https://app.invalid
@@ -136,7 +135,6 @@ spec:
           http:
             port: 8080
     subscriptions:
-      - anime_titties
       - apple
       - askanaustralian
       - askhistorians
