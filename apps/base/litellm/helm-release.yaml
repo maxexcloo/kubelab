@@ -190,19 +190,6 @@ spec:
           model_info:
             max_input_tokens: 262144
             supports_vision: true
-        # Control workload ornith-35b, on both GPUs. Thinking is on unless a request
-        # sets chat_template_kwargs.
-        - model_name: ornith-1.5-35b-a3b
-          litellm_params:
-            api_base: http://host.invalid:8000/v1
-            api_key: os.environ/BENTO_API_KEY
-            max_retries: 0
-            model: openai/ornith-1.5-35b-a3b
-            num_retries: 0
-            timeout: 300
-          model_info:
-            max_input_tokens: 262144
-            supports_vision: true
       router_settings:
         fallbacks:
           - ai/studio:
