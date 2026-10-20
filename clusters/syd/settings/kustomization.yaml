@@ -196,7 +196,6 @@ replacements:
           - spec.values.proxy_config.model_list.[model_name=ai/text].litellm_params.api_base
           - spec.values.proxy_config.model_list.[model_name=ai/text-quick].litellm_params.api_base
           - spec.values.proxy_config.model_list.[model_name=gemma-4-31b-heretic].litellm_params.api_base
-          - spec.values.proxy_config.model_list.[model_name=ornith-1.5-35b-a3b].litellm_params.api_base
         options:
           delimiter: /
           index: 2
