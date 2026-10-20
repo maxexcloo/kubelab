@@ -57,10 +57,10 @@ arg "[application]"
 
 # Development
 [tasks.check]
-depends = ["check:updates", "hooks:check", "test:python"]
+depends = ["check:mise", "check:updates", "hooks:check", "test:python"]
 
 [tasks.fmt]
-depends = ["fmt:oxfmt"]
+depends = ["fmt:mise", "fmt:oxfmt"]
 
 # Dependencies
 # Cluster-compatible clients follow the platform policies.
