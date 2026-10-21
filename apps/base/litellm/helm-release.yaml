@@ -152,44 +152,24 @@ spec:
           server_id: unifi-network
           transport: http
           url: http://unifi-network-mcp.unifi-network-mcp.svc.cluster.local:3000/mcp
-      # Other models live in the UI. Radiance answers with whichever text model AI Control
-      # has loaded, under any name, and fails fast while its text runtime is off.
-      # ai/studio plans Studio's tool calls with low reasoning, whatever the client sends.
-      # ai/text-quick has no reasoning, for short helper calls such as titles.
+      # These aliases use whichever local text model AI Control has loaded.
+      # Fast helper calls disable reasoning; other requests use the model's defaults.
       model_list:
-        - model_name: ai/studio
-          litellm_params:
-            api_base: http://host.invalid:8000/v1
-            api_key: os.environ/AI_API_KEY
-            max_retries: 0
-            model: openai/text
-            num_retries: 0
-            reasoning_effort: low
-            timeout: 300
-          model_info:
-            max_input_tokens: 262144
-            supports_vision: true
         - model_name: ai/text
           litellm_params:
             api_base: http://host.invalid:8000/v1
             api_key: os.environ/AI_API_KEY
-            max_retries: 0
             model: openai/text
-            num_retries: 0
-            timeout: 300
           model_info:
-            max_input_tokens: 262144
             supports_vision: true
-        - model_name: ai/text-quick
+        - model_name: ai/text-fast
           litellm_params:
             api_base: http://host.invalid:8000/v1
             api_key: os.environ/AI_API_KEY
-            max_retries: 0
             model: openai/text
-            num_retries: 0
             reasoning_effort: none
-            timeout: 60
-      # No fallbacks: Grok is disabled (2026-10-21) until its CLIProxyAPI access works again.
+          model_info:
+            supports_vision: true
       # UI-registered search tools cannot read os.environ/ keys, so these stay here.
       # Keenable, LibreChat's default search provider, has no LiteLLM integration.
       search_tools:
