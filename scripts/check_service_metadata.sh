@@ -41,6 +41,7 @@ jq -e \
     })) as $pocket_id |
     ($resources | map(select(.kind == "PrivateDNSRecord") | {
       cluster, hostname: .spec.hostname, namespace: .metadata.namespace,
+      composition: (.spec.crossplane.compositionRef.name // "private-dns-record"),
       source: ("PrivateDNSRecord/" + .metadata.namespace + "/" + .metadata.name)
     })) as $private_dns |
     def public_route:
@@ -124,6 +125,23 @@ jq -e \
       ) | not)) |
       map(.source)
     ) as $missing_private_dns_routes |
+    (
+      $private_dns |
+      map(. as $dns |
+        ($route_inventory | any(
+          .cluster == $dns.cluster and public_route and
+          (.hostnames | index($dns.hostname)) != null
+        )) as $public |
+        select(
+          if $public then .composition != "private-dns-record-control-d-only"
+          else .composition != "private-dns-record"
+          end
+        ) |
+        .source + " (" + .hostname + "): use " +
+        (if $public then "private-dns-control-d-only for a public hostname"
+         else "private-dns to publish a private hostname in Cloudflare" end)
+      )
+    ) as $incorrect_private_dns_compositions |
     ($inventory | map(.cluster) | unique) as $clusters |
     if ($clusters | length) == 0 then
       error("service inventory is empty")
@@ -151,6 +169,8 @@ jq -e \
       error("Pocket ID launch URL has no enabled route: " + ($missing_pocket_id_routes | join(", ")))
     elif ($missing_private_dns_routes | length) > 0 then
       error("private DNS hostname has no matching private route: " + ($missing_private_dns_routes | join(", ")))
+    elif ($incorrect_private_dns_compositions | length) > 0 then
+      error("DNS publishing mode does not match route access: " + ($incorrect_private_dns_compositions | join("; ")))
     else
       true
     end
