@@ -12,6 +12,9 @@ resources:
 configurations:
   - name-reference.yaml
 configMapGenerator:
+  - name: librechat-backup
+    files:
+      - snapshot.sh
   - name: librechat-config
     files:
       - librechat.yaml

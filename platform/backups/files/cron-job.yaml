@@ -12,6 +12,7 @@ spec:
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 3600
       backoffLimit: 1
       template:
         metadata:
@@ -19,6 +20,7 @@ spec:
             app.kubernetes.io/name: state-backup
         spec:
           serviceAccountName: state-backup
+          terminationGracePeriodSeconds: 180
           restartPolicy: Never
           initContainers:
             - name: kubectl

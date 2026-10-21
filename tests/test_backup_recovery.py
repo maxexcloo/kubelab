@@ -21,6 +21,7 @@ from pathlib import Path
 path = Path(os.environ["BACKUP_TEST_STATE"])
 state = json.loads(path.read_text())
 args = sys.argv[1:]
+assert args.pop(0) == "--request-timeout=30s"
 mutation = False
 if args[0] == "get":
     output = args[-1]
@@ -52,6 +53,8 @@ elif args[0] == "patch":
         sys.exit(1)
     mutation = True
     state["suspended"] = json.loads(args[-1])["spec"]["suspend"]
+elif args[0] == "wait" and state.get("fail_wait"):
+    sys.exit(1)
 elif args[0] != "wait":
     raise AssertionError(args)
 if mutation:
@@ -85,6 +88,9 @@ class BackupRecoveryTests(unittest.TestCase):
         kubectl = directory / "kubectl"
         kubectl.write_text(f"#!{sys.executable}\n" + KUBECTL)
         kubectl.chmod(0o755)
+        timeout = directory / "timeout"
+        timeout.write_text('#!/bin/sh\n[ "$1" = 600 ] || exit 2\nshift\nexec "$@"\n')
+        timeout.chmod(0o755)
         restic = directory / "restic"
         restic.write_text('#!/bin/sh\nprintf "%s\\n" "$*" >> "$BACKUP_TEST_STATE.restic"\n')
         restic.chmod(0o755)
@@ -93,6 +99,7 @@ class BackupRecoveryTests(unittest.TestCase):
         (directory / "snapshot").mkdir()
         source = (ROOT / "platform/backups/files/backup.sh").read_text()
         source = source.replace("/tools/kubectl", str(kubectl))
+        source = source.replace("/scripts/snapshot.sh", str(directory / "hook.sh"))
         source = source.replace("/sources", str(directory / "sources"))
         source = source.replace("/snapshot", str(directory / "snapshot"))
         (directory / "backup.sh").write_text(source)
@@ -127,6 +134,30 @@ class BackupRecoveryTests(unittest.TestCase):
                         self.assertNotIn("resume_state", restored)
                         self.assertEqual((directory / "snapshot/data/data.db").read_text(), "retained application data")
                         self.assertIn("backup --host example/test", Path(str(state) + ".restic").read_text())
+
+    def test_snapshot_failure_restores_workload_without_uploading(self):
+        for phase in ["snapshot", "wait"]:
+            with self.subTest(phase=phase), tempfile.TemporaryDirectory() as temporary:
+                directory = Path(temporary)
+                self.prepare(directory)
+                state = directory / "state.json"
+                state.write_text(json.dumps({
+                    "fail_wait": phase == "wait",
+                    "replicas": 2,
+                    "suspended": False,
+                }))
+                (directory / "hook.sh").write_text(
+                    "grep -q '\"replicas\": 0' \"$BACKUP_TEST_STATE\" || exit 2\n"
+                    'touch "$BACKUP_TEST_STATE.quiesced"\nexit 1\n'
+                )
+                result = self.run_backup(directory, state)
+                self.assertEqual(Path(str(state) + ".quiesced").exists(), phase == "snapshot")
+                self.assertNotEqual(result.returncode, 0)
+                restored = json.loads(state.read_text())
+                self.assertEqual(restored["replicas"], 2)
+                self.assertFalse(restored["suspended"])
+                self.assertNotIn("resume_state", restored)
+                self.assertFalse(Path(str(state) + ".restic").exists())
 
     def test_missing_cluster_fails_before_quiescing_the_workload(self):
         with tempfile.TemporaryDirectory() as temporary:
