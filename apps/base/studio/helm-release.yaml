@@ -20,22 +20,20 @@ spec:
               CONTROL_URL:
                 dependsOn: AI_ADDRESS
                 value: http://$(AI_ADDRESS):1337
-              HEISS_ALLOWED_HOSTS:
+              # A chat call queues up to ten images at once.
+              STUDIO_ACCOUNT_MAX_OUTSTANDING_JOBS: "10"
+              STUDIO_ALLOWED_HOSTS:
                 dependsOn:
                   - LITELLM_HOST
                   - ROUTE_ALIAS_HOST
                   - ROUTE_HOST
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(LITELLM_HOST),studio.studio.svc.cluster.local
-              HEISS_DATA_DIR: /data
-              # A chat call queues up to ten images at once.
-              STUDIO_ACCOUNT_MAX_OUTSTANDING_JOBS: "10"
               STUDIO_ENABLE_BUILTIN_PROFILES: "0"
               STUDIO_ENABLE_PRESETS: "1"
               STUDIO_MODEL_MANIFEST: /data/config/models.json
               STUDIO_MODEL_MANIFEST_PREFIX: models/comfyui/
               STUDIO_MODEL_STORAGE: worker
               STUDIO_MULTI_USER: "1"
-              HEISS_NO_BROWSER: "1"
               STUDIO_OIDC_CLIENT_ID: client.invalid
               STUDIO_OIDC_ISSUER: https://identity.invalid
               STUDIO_OIDC_LABEL: Pocket ID
