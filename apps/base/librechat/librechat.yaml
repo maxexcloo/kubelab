@@ -52,20 +52,19 @@ endpoints:
       - tools
       - web_search
   custom:
-    # LiteLLM's ai/text and ai/studio reach the text model AI Control has loaded on Bento and
-    # fail fast while the text runtime is off; LiteLLM sets their reasoning.
+    # LiteLLM reaches the local text model AI Control has loaded on Bento.
     - name: AI
       apiKey: ${LITELLM_API_KEY}
       baseURL: http://litellm.litellm.svc.cluster.local:4000/v1
       models:
         default:
           - ai/text
-          - ai/studio
+          - ai/text-fast
       # A live heading summarises long reasoning while it streams. Titles and reasoning
-      # labels use ai/text-quick, which has no reasoning, so its short output cap holds text.
+      # labels use ai/text-fast, which has no reasoning, so its short output cap holds text.
       reasoningLabel: true
       titleConvo: true
-      titleModel: ai/text-quick
+      titleModel: ai/text-fast
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
       modelDisplayLabel: AI
@@ -287,7 +286,4 @@ modelSpecs:
         endpoint: AI
         # Beyond this, LibreChat summarises older messages with the chat model.
         maxContextTokens: 65536
-        model: ai/studio
-        # No reasoning_effort here: a client-sent effort overrides ai/studio's own, and
-        # LiteLLM's ai/studio sets the level for Studio's tool calls for every client.
-        temperature: 0.7
+        model: ai/text
