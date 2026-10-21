@@ -17,7 +17,7 @@ remote_schema_cache_directory="${schema_cache_directory}/remote"
 kubernetes_version="$(mise exec -- kubectl version --client -o json | yq -r '.clientVersion.gitVersion')"
 kubernetes_version="${kubernetes_version#v}"
 # renovate: datasource=git-refs depName=https://github.com/datreeio/CRDs-catalog
-crd_catalog_revision="63669a570e231d4f1f8396d229a1de512bcf0a34"
+crd_catalog_revision="501527ab9c40c827144c8f45945b25a023e344ce"
 mkdir -p \
   "${remote_schema_cache_directory}" \
   "${schema_directory}"
