@@ -38,14 +38,6 @@ replacements:
         fieldPaths:
           - spec.zoneName
       - select:
-          kind: ConfigMap
-          name: cluster-settings
-        fieldPaths:
-          - data.home_assistant_remote_host
-        options:
-          delimiter: remote-hass.
-          index: 1
-      - select:
           kind: HelmRelease
           name: external-dns-private
           namespace: external-dns
