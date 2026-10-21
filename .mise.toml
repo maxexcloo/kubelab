@@ -35,7 +35,21 @@ wait_for = ["bootstrap:cilium"]
 # Deploy
 [tasks.deploy]
 description = "Verify An Application At The Exact Main Revision"
-run = 'python scripts/deploy.py "$usage_cluster" "$usage_application" ${usage_revision:+"$usage_revision"}'
+run = """
+set -eu
+namespace="${usage_application%%/*}"
+release="${usage_application##*/}"
+revision="${usage_revision:-$(git ls-remote --exit-code origin refs/heads/main)}"
+revision="${revision%%[[:space:]]*}"
+printf '%s\\n' "$revision" | grep -Eq '^[0-9a-f]{40}$' || { echo "Expected a full Git commit SHA" >&2; exit 1; }
+expected="main@sha1:$revision"
+flux --context "$usage_cluster" reconcile kustomization apps --with-source
+test "$(kubectl --context "$usage_cluster" -n flux-system get gitrepository flux-system -o jsonpath='{.status.artifact.revision}')" = "$expected"
+flux --context "$usage_cluster" -n "$namespace" reconcile helmrelease "$release"
+test "$(kubectl --context "$usage_cluster" -n flux-system get gitrepository flux-system -o jsonpath='{.status.artifact.revision}')" = "$expected"
+test "$(kubectl --context "$usage_cluster" -n flux-system get kustomization apps -o jsonpath='{.status.lastAppliedRevision}')" = "$expected"
+echo "$usage_application Ready at $revision"
+"""
 usage = '''
 arg "<cluster>"
 arg "<application>" help="HelmRelease name, or namespace/name"

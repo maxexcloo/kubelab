@@ -54,8 +54,8 @@ separately.
 Merge reviewed pull requests into `main` and Flux reconciles them automatically.
 To fetch and reconcile straight away, use the deploy task with an existing
 cluster and the affected application. Verification checks the exact remote `main`
-revision, the HelmRelease generation and its workload rollouts. Supply a full
-commit SHA to verify a particular merge; a superseding revision fails explicitly.
+revision and the HelmRelease at its current generation. Helm retains its workload
+health checks. Supply a full commit SHA to verify a particular merge; a superseding revision fails explicitly.
 For releases in a different namespace, use `namespace/release` as the application.
 
 | Command                                              | Purpose                                                              |
@@ -71,7 +71,8 @@ Bootstrap is a separate step after infrastructure provisioning, and routine
 application upgrades don't need it. Delivery waits for the affected application
 without waiting for unrelated releases. The reported duration measures the
 verification command, not merge-to-readiness time. Check the application's main
-workflow separately.
+workflow separately. For an explicit controller check, use
+`kubectl --context <cluster> -n <namespace> rollout status deployment/<name>`.
 
 CI validates changes and refreshes external monitoring through the configured
 delivery workflow. Flux handles routine cluster deployments.
