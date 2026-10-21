@@ -24,7 +24,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/miniflux/miniflux
-              tag: 2.3.3
+              tag: 2.3.4
             probes:
               liveness: null
               readiness: &ready
