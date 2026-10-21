@@ -49,7 +49,7 @@ spec:
               values:
                 - storage-node.invalid
 ---
-# The ComfyUI model library; Bento's workers receive a synced copy.
+# Retained mirror of Bento's active model library; Studio accesses models through its worker.
 apiVersion: v1
 kind: PersistentVolume
 metadata:
