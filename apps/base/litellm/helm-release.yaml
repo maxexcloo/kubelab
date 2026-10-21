@@ -56,6 +56,11 @@ spec:
       repository: ghcr.io/berriai/litellm
       tag: v1.106.0
     migrationJob:
+      # Run the same migration checks without regenerating the image's baked client.
+      args:
+        - --skip_server_startup
+      command:
+        - litellm
       hooks:
         argocd:
           enabled: false
