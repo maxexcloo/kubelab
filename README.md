@@ -53,21 +53,25 @@ separately.
 
 Merge reviewed pull requests into `main` and Flux reconciles them automatically.
 To fetch and reconcile straight away, use the deploy task with an existing
-cluster and, optionally, a configured reconciliation component.
+cluster and the affected application. Verification checks the exact remote `main`
+revision, the HelmRelease generation and its workload rollouts. Supply a full
+commit SHA to verify a particular merge; a superseding revision fails explicitly.
+For releases in a different namespace, use `namespace/release` as the application.
 
-| Command                                   | Purpose                                                              |
-| ----------------------------------------- | -------------------------------------------------------------------- |
-| `mise run bootstrap <cluster>`            | Install networking, bootstrap credentials and start Flux             |
-| `mise run check`                          | Validate manifests, metadata, formatting, scripts and reconciliation |
-| `mise run deploy <cluster> [component]`   | Fetch Git and reconcile the entry point or selected component        |
-| `mise run fmt`                            | Format project files                                                 |
-| `mise run setup`                          | Install configured tools and Git hooks                               |
-| `mise run status <cluster> [application]` | Show reconciliation status or watch an application's Helm release    |
+| Command                                              | Purpose                                                              |
+| ---------------------------------------------------- | -------------------------------------------------------------------- |
+| `mise run bootstrap <cluster>`                       | Install networking, bootstrap credentials and start Flux             |
+| `mise run check`                                     | Validate manifests, metadata, formatting, scripts and reconciliation |
+| `mise run deploy <cluster> <application> [revision]` | Fetch Git, reconcile apps and verify the selected workload           |
+| `mise run fmt`                                       | Format project files                                                 |
+| `mise run setup`                                     | Install configured tools and Git hooks                               |
+| `mise run status <cluster> [application]`            | Show reconciliation status or watch an application's Helm release    |
 
 Bootstrap is a separate step after infrastructure provisioning, and routine
-application upgrades don't need it. The deploy task waits for the selected
-reconciliation stage. Check the affected release and application separately to
-make sure the workload has recovered and its main workflow works.
+application upgrades don't need it. Delivery waits for the affected application
+without waiting for unrelated releases. The reported duration measures the
+verification command, not merge-to-readiness time. Check the application's main
+workflow separately.
 
 CI validates changes and refreshes external monitoring through the configured
 delivery workflow. Flux handles routine cluster deployments.
