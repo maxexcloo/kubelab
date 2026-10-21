@@ -134,10 +134,12 @@ spec:
             - Models
             - Result
             - Reuse
+            - Review
             - Upload
           extra_headers:
             - X-AI-User-Email
             - X-AI-User-Id
+            - X-Studio-Conversation-Id
         unifi_network:
           alias: unifi_network
           description: Inspect and manage UniFi networks, devices and clients.

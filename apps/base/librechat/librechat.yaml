@@ -21,6 +21,12 @@ interface:
     create: true
     use: true
   temporaryChatRetention: 720
+# LibreChat owns context usage and exposes Copy Summary; Studio supplies result handovers.
+summarization:
+  enabled: true
+  trigger:
+    type: token_ratio
+    value: 0.9
 registration:
   socialLogins:
     - openid
@@ -232,7 +238,7 @@ mcpServers:
     title: Studio
     url: http://litellm.litellm.svc.cluster.local:4000/studio/mcp
     # Studio numbers results ("result 1") per conversation. LiteLLM forwards these through
-    # the extra_headers of its database-registered studio server.
+    # the extra_headers of its configured Studio server.
     headers:
       X-AI-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
       X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
@@ -285,4 +291,3 @@ modelSpecs:
         # No reasoning_effort here: a client-sent effort overrides ai/studio's own, and
         # LiteLLM's ai/studio sets the level for Studio's tool calls for every client.
         temperature: 0.7
-        promptPrefix: Use the Studio tools for the images and videos the user asks for, following their instructions, and keep replies short.
