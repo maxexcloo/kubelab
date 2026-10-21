@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: litellm
         namespace: flux-system
-      version: 1.106.0
+      version: 1.106.2
   values:
     fullnameOverride: litellm
     masterkeySecretKey: LITELLM_MASTER_KEY
