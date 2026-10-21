@@ -13,7 +13,7 @@ data:
   grafana_host: grafana.excloo.com
   headlamp_host: headlamp.cluster.excloo.dev
   home_assistant_host: hass.mbk.excloo.net
-  home_assistant_remote_host: remote-hass.excloo.com
+  home_assistant_public_host: home-assistant.excloo.com
   pod_subnet: 10.100.0.0/22
   private_dns_host: private.cluster.excloo.dev
   public_direct_address: 10.20.0.4
