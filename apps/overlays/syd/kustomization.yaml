@@ -231,6 +231,19 @@ replacements:
           namespace: studio
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.ROUTE_ALIAS_HOST
+  # Studio's Refine in Chat links to LibreChat's host.
+  - source:
+      kind: HTTPRoute
+      name: librechat
+      namespace: librechat
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+          name: studio
+          namespace: studio
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.CHAT_HOST
   - source:
       kind: HTTPRoute
       name: litellm
