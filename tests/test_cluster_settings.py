@@ -53,11 +53,21 @@ class ClusterSettingsTests(unittest.TestCase):
                     "grafana_host": "grafana.changed.example",
                     "headlamp_host": "headlamp.cluster.changed.example",
                     "home_assistant_host": "hass.changed.example",
+                    "home_assistant_public_host": "ha.changed.example",
                     "private_dns_host": "private.cluster.changed.example",
                     "unifi_host": "gateway.changed.example",
                 })
                 path.write_text(json.dumps(settings))
             resources = rendered_resources(self, root)
+            mtls = next(r["spec"]["rule"] for r in resources
+                        if r["kind"] == "CloudflareWAFPolicy"
+                        and r["metadata"]["name"] == "home-assistant")
+            self.assertEqual(mtls["action"], "block")
+            self.assertTrue(mtls["enabled"])
+            self.assertEqual(mtls["expression"], '(http.host eq "ha.changed.example" and '
+                             'not (starts_with(http.request.uri.path, "/api/webhook/") and '
+                             'http.request.uri.path ne "/api/webhook/") and '
+                             '(not cf.tls_client_auth.cert_verified or cf.tls_client_auth.cert_revoked))')
             rendered = json.dumps(resources)
             for unresolved in ("id.excloo.com", "grafana.excloo.com"):
                 self.assertNotIn(unresolved, rendered)

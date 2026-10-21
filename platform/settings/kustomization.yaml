@@ -33,6 +33,11 @@ replacements:
         fieldPaths:
           - spec.zoneName
       - select:
+          kind: CloudflareWAFPolicy
+          name: home-assistant
+        fieldPaths:
+          - spec.zoneName
+      - select:
           kind: HelmRelease
           name: external-dns-private
           namespace: external-dns
