@@ -400,8 +400,9 @@ def reconcile_urls(item, desired, *, allow_removal):
                 and target.hostname
                 and urlsplit(old).hostname.split(".")[0]
                 == target.hostname.split(".")[0]
-                and urlsplit(old).hostname.endswith(".excloo.dev")
-                and target.hostname.endswith(".excloo.dev")
+                and len(target.hostname.split(".")) >= 4
+                and urlsplit(old).hostname.split(".", 2)[2:]
+                == target.hostname.split(".", 2)[2:]
             ]
             website = copy.deepcopy(previous[0]) if len(previous) == 1 else {}
             website["href"] = href

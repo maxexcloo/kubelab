@@ -196,7 +196,7 @@ class ReconcilerTests(unittest.TestCase):
         current = {
             "urls": [
                 {
-                    "href": "https://app.mbk.excloo.dev",
+                    "href": "https://app.mbk.internal.example.net",
                     "label": "Private",
                     "primary": True,
                 },
@@ -204,13 +204,13 @@ class ReconcilerTests(unittest.TestCase):
             ]
         }
         desired = item_configuration(
-            urls={"https://app.syd.excloo.dev", "https://app.excloo.com"}
+            urls={"https://app.syd.internal.example.net", "https://app.excloo.com"}
         )
         pending = RECONCILER.normalise_item(
             copy.deepcopy(current), "App", desired, "vault"
         )
         self.assertIn(
-            "https://app.mbk.excloo.dev", [url["href"] for url in pending["urls"]]
+            "https://app.mbk.internal.example.net", [url["href"] for url in pending["urls"]]
         )
         result = RECONCILER.normalise_item(
             copy.deepcopy(current), "App", desired, "vault", allow_removal=True
@@ -220,7 +220,7 @@ class ReconcilerTests(unittest.TestCase):
             [
                 {"href": "https://app.excloo.com", "label": "Public"},
                 {
-                    "href": "https://app.syd.excloo.dev",
+                    "href": "https://app.syd.internal.example.net",
                     "label": "Private",
                     "primary": True,
                 },
