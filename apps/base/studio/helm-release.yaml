@@ -26,7 +26,6 @@ spec:
                   - ROUTE_ALIAS_HOST
                   - ROUTE_HOST
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(LITELLM_HOST),studio.studio.svc.cluster.local
-              HEISS_COMFY_ROOT: /comfy
               HEISS_DATA_DIR: /data
               # A chat call queues up to ten images at once.
               STUDIO_ACCOUNT_MAX_OUTSTANDING_JOBS: "10"
@@ -34,6 +33,7 @@ spec:
               STUDIO_ENABLE_PRESETS: "1"
               STUDIO_MODEL_MANIFEST: /data/config/models.json
               STUDIO_MODEL_MANIFEST_PREFIX: models/comfyui/
+              STUDIO_MODEL_STORAGE: worker
               STUDIO_MULTI_USER: "1"
               HEISS_NO_BROWSER: "1"
               STUDIO_OIDC_CLIENT_ID: client.invalid
@@ -59,7 +59,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio
-              tag: 0.37.0
+              tag: 0.38.0
             probes:
               liveness:
                 path: /api/ping
@@ -84,11 +84,6 @@ spec:
         type: persistentVolumeClaim
         globalMounts:
           - path: /data
-      models:
-        existingClaim: models
-        type: persistentVolumeClaim
-        globalMounts:
-          - path: /comfy/models
     route:
       private:
         annotations:
