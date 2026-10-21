@@ -57,6 +57,10 @@ rules:
   - apiGroups: [apps]
     resources: [daemonsets, deployments, statefulsets]
     verbs: *manage
+  # Helm checks a Deployment's ReplicaSets while waiting for readiness.
+  - apiGroups: [apps]
+    resources: [replicasets]
+    verbs: [get, list, watch]
   - apiGroups: [batch]
     resources: [cronjobs, jobs]
     verbs: *manage

@@ -40,6 +40,26 @@ def evaluate(expression, data):
     return json.loads(result.stdout)
 
 
+class MinilabReadinessTests(unittest.TestCase):
+    def test_helm_can_observe_replicasets_without_managing_them_cluster_wide(self):
+        resources = repository_resources("apps/base/minilab")
+        role = next(resource for resource in resources
+                    if resource["kind"] == "ClusterRole"
+                    and resource["metadata"]["name"] == "minilab-release")
+        verbs = {
+            verb for rule in role["rules"]
+            if {"*", "apps"} & set(rule["apiGroups"])
+            and {"*", "replicasets"} & set(rule["resources"])
+            for verb in rule["verbs"]
+        }
+        self.assertEqual(verbs, {"get", "list", "watch"})
+        self.assertFalse(any(
+            resource["kind"] == "ClusterRoleBinding"
+            and resource["roleRef"]["name"] == "minilab-release"
+            for resource in resources
+        ))
+
+
 class ResendIdentityTests(unittest.TestCase):
     def test_publishing_uses_the_existing_item_title_and_retains_the_api_key_identity(self):
         publisher = composition_resource(
