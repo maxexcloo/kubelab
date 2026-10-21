@@ -57,7 +57,7 @@ components:
   - ../../../platform/databases/postgres
   - ../../../platform/backups/credentials
   - ../../../platform/backups/postgres
-  - ../../components/private-dns-control-d-only
+  - ../../components/private-dns
   - ../../components/app-namespace
 patches:
   - path: database.yaml

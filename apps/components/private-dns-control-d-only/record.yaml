@@ -3,6 +3,8 @@ kind: PrivateDNSRecord
 metadata:
   name: application
 spec:
+  # Public routes own Cloudflare DNS; this composition only overrides private DNS.
+  # Switching a hostname to private also requires the private-dns component.
   ipv6Enabled: false
   crossplane:
     compositionRef:
