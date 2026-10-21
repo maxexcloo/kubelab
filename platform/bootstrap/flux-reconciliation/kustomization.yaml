@@ -31,7 +31,19 @@ patches:
     target:
       group: kustomize.toolkit.fluxcd.io
       kind: Kustomization
-      name: (automation|crossplane-runtime|flux-system|platform)
+      name: (apps|automation|crossplane-runtime|flux-system|platform)
+  # Bootstrap dependencies must be healthy at their current generation; unrelated
+  # application revisions do not need to reconcile the whole platform in lockstep.
+  - patch: |-
+      - op: add
+        path: /spec/dependsOn/0/readyExpr
+        value: >-
+          dep.metadata.generation == dep.status.observedGeneration &&
+          dep.status.conditions.exists(c, c.type == 'Ready' && c.status == 'True')
+    target:
+      group: kustomize.toolkit.fluxcd.io
+      kind: Kustomization
+      name: (apps|automation|cloudflare-access-integrations|crossplane-runtime|headlamp-integrations|observability-integrations|platform)
   - patch: |-
       apiVersion: kustomize.toolkit.fluxcd.io/v1
       kind: Kustomization

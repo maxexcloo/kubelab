@@ -34,10 +34,12 @@ wait_for = ["bootstrap:cilium"]
 
 # Deploy
 [tasks.deploy]
-run = 'flux --context "$usage_cluster" reconcile kustomization "${usage_component:-flux-system}" --with-source'
+description = "Verify An Application At The Exact Main Revision"
+run = 'python scripts/deploy.py "$usage_cluster" "$usage_application" ${usage_revision:+"$usage_revision"}'
 usage = '''
 arg "<cluster>"
-arg "[component]"
+arg "<application>" help="HelmRelease name, or namespace/name"
+arg "[revision]" help="Full commit SHA; defaults to remote main"
 '''
 
 [tasks.status]
