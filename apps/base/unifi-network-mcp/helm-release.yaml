@@ -22,7 +22,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/sirkirby/unifi-network-mcp
-              tag: 0.39.0
+              tag: 0.39.1
             # The server has no health endpoint.
             probes:
               liveness: &health
