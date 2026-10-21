@@ -26,6 +26,7 @@ spec:
     ports:
       web:
         expose:
+          lan: true
           private: true
       webdirect:
         exposedPort: 80
@@ -42,6 +43,7 @@ spec:
               to: websecuredirect
       websecure:
         expose:
+          lan: true
           private: true
       websecuredirect:
         exposedPort: 443
@@ -60,6 +62,12 @@ spec:
             externalTrafficPolicy: Local
             externalIPs:
               - public-direct-address.invalid
+            internalTrafficPolicy: Local
+            type: ClusterIP
+        lan:
+          spec:
+            externalIPs:
+              - private-lan-address.invalid
             internalTrafficPolicy: Local
             type: ClusterIP
         private:

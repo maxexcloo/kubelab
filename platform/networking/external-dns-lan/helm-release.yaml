@@ -1,0 +1,62 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns-lan
+  namespace: external-dns
+spec:
+  releaseName: external-dns-lan
+  values:
+    managedRecordTypes:
+      - A
+      - AAAA
+    sources:
+      - gateway-httproute
+    txtOwnerId: name.invalid-lan
+    txtPrefix: kubelab-lan-%{record_type}-
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: node.excloo.dev/network
+                  operator: In
+                  values:
+                    - internal
+    extraArgs:
+      gateway-name: private
+      gateway-namespace: networking
+    provider:
+      webhook:
+        image:
+          repository: ghcr.io/home-operations/external-dns-unifi-webhook
+          tag: 0.10.13
+        env:
+          - name: UNIFI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: api-key
+                name: unifi-api-key
+          - name: UNIFI_HOST
+            value: https://unifi.invalid
+          - name: UNIFI_REQUEST_TIMEOUT
+            value: 4s
+          - name: UNIFI_SKIP_TLS_VERIFY
+            value: "false"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http-webhook
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: http-webhook
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi

@@ -5,17 +5,75 @@ resources:
   - ../../../platform/automation/crossplane
   - ../../../platform/databases/cloudnative-pg
   - ../../../platform/networking/external-dns-private
+  - ../../../platform/networking/external-dns-lan
   - observability
   - certificate.yaml
   - grafana.yaml
   - gateway-public-direct.yaml
   - headlamp
 patches:
+  - patch: |-
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: Gateway
+      metadata:
+        name: private
+        namespace: networking
+        annotations:
+          # An A override alone lets UniFi forward AAAA to public DNS.
+          external-dns.alpha.kubernetes.io/target: "private-lan-address.invalid,::"
   - path: crossplane.yaml
   - path: secret-store.yaml
   - path: tailscale.yaml
   - path: traefik.yaml
 replacements:
+  - source:
+      kind: ConfigMap
+      name: cluster-settings
+      fieldPath: data.private_lan_address
+    targets:
+      - select:
+          kind: HelmRelease
+          name: traefik
+          namespace: networking
+        fieldPaths:
+          - spec.values.service.additionalServices.lan.spec.externalIPs.0
+      - select:
+          kind: Gateway
+          name: private
+          namespace: networking
+        fieldPaths:
+          - metadata.annotations.[external-dns.alpha.kubernetes.io/target]
+        options:
+          delimiter: ","
+          index: 0
+  - source:
+      kind: ConfigMap
+      name: cluster-settings
+      fieldPath: data.unifi_host
+    targets:
+      - select:
+          kind: HelmRelease
+          name: external-dns-lan
+          namespace: external-dns
+        fieldPaths:
+          - spec.values.provider.webhook.env.[name=UNIFI_HOST].value
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: ConfigMap
+      name: cluster-settings
+      fieldPath: data.cluster_name
+    targets:
+      - select:
+          kind: HelmRelease
+          name: external-dns-lan
+          namespace: external-dns
+        fieldPaths:
+          - spec.values.txtOwnerId
+        options:
+          delimiter: "-"
+          index: 0
   # Cluster settings resolve before this kustomization's patches add the address.
   - source:
       kind: ConfigMap

@@ -31,6 +31,39 @@ def rendered_resources(test, root):
 
 
 class ClusterSettingsTests(unittest.TestCase):
+    def test_lan_dns_only_publishes_private_routes_to_unifi(self):
+        resources = rendered_resources(self, ROOT)
+        releases = {r["metadata"]["name"]: r["spec"]["values"]
+                    for r in resources if r["kind"] == "HelmRelease"}
+        lan = releases["external-dns-lan"]
+        self.assertEqual(lan["provider"]["name"], "webhook")
+        self.assertEqual(lan["env"], [])
+        self.assertEqual(lan["registry"], "txt")
+        self.assertEqual(lan["policy"], "upsert-only")
+        self.assertEqual(lan["sources"], ["gateway-httproute"])
+        self.assertEqual(lan["managedRecordTypes"], ["A", "AAAA"])
+        self.assertEqual(lan["extraArgs"], {
+            "gateway-name": "private", "gateway-namespace": "networking",
+        })
+        for name in ("external-dns", "external-dns-private"):
+            self.assertEqual(releases[name]["provider"]["name"], "cloudflare")
+        settings = read_yaml(ROOT / "clusters/syd/settings/settings.yaml")["data"]
+        gateways = [r for r in resources if r["kind"] == "Gateway"]
+        targets = {r["metadata"]["name"]: r["metadata"].get("annotations", {}).get(
+            "external-dns.alpha.kubernetes.io/target") for r in gateways}
+        self.assertEqual(targets["private"], settings["private_lan_address"] + ",::")
+        self.assertNotEqual(targets.get("public-direct"), targets["private"])
+        traefik = releases["traefik"]
+        self.assertEqual(traefik["service"]["additionalServices"]["lan"]["spec"], {
+            "externalIPs": [settings["private_lan_address"]],
+            "internalTrafficPolicy": "Local", "type": "ClusterIP",
+        })
+        self.assertEqual(traefik["service"]["additionalServices"]["private"]["spec"][
+            "loadBalancerClass"], "tailscale")
+        for port in ("web", "websecure"):
+            self.assertTrue(traefik["ports"][port]["expose"]["lan"])
+            self.assertTrue(traefik["ports"][port]["expose"]["private"])
+
     def test_every_flux_path_resolves_placeholders(self):
         self.assertTrue(rendered_resources(self, ROOT))
 

@@ -13,6 +13,8 @@ data:
   grafana_host: grafana.excloo.com
   headlamp_host: headlamp.cluster.excloo.dev
   home_assistant_host: hass.mbk.excloo.net
+  # Homelab owns this Talos container address.
+  private_lan_address: 10.4.0.7
   pod_subnet: 10.100.0.0/22
   private_dns_host: private.cluster.excloo.dev
   public_direct_address: 10.20.0.4

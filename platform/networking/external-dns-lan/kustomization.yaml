@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - external-secret.yaml
+  - helm-release.yaml
+components:
+  - ../../components/external-dns
+  - ../../components/helm-remediation
+patches:
+  # Apply after the shared Cloudflare defaults.
+  - target:
+      kind: HelmRelease
+      name: external-dns-lan
+    patch: |-
+      - op: replace
+        path: /spec/values/env
+        value: []
+      - op: remove
+        path: /spec/values/extraArgs/cloudflare-dns-records-per-page
+      - op: remove
+        path: /spec/values/extraArgs/cloudflare-record-comment
+      - op: replace
+        path: /spec/values/provider/name
+        value: webhook
+      - op: replace
+        path: /spec/values/registry
+        value: txt
