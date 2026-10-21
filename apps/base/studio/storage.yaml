@@ -12,19 +12,6 @@ spec:
   volumeName: studio-data
 ---
 apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: models
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Ti
-  storageClassName: ""
-  volumeName: studio-models
----
-apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: studio-data
@@ -39,32 +26,6 @@ spec:
   storageClassName: ""
   hostPath:
     path: /dataset-root.invalid/truenas-nvme/studio
-    type: Directory
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - storage-node.invalid
----
-# Retained mirror of Bento's active model library; Studio accesses models through its worker.
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: studio-models
-  labels:
-    app.kubernetes.io/name: application
-spec:
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 2Ti
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
-  hostPath:
-    path: /dataset-root.invalid/truenas/ai/models/comfyui
     type: Directory
   nodeAffinity:
     required:
