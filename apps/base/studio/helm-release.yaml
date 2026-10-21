@@ -41,6 +41,11 @@ spec:
               # Studio writes chat prompts through LiteLLM with its own key (external-secrets.yaml).
               STUDIO_PROMPT_WRITER_MODEL: ai/text
               STUDIO_PROMPT_WRITER_URL: http://litellm.litellm.svc.cluster.local:4000
+              # Refine in Chat opens LibreChat with the prompt filled in (?prompt=).
+              CHAT_HOST: chat.invalid
+              STUDIO_CHAT_URL:
+                dependsOn: CHAT_HOST
+                value: https://$(CHAT_HOST)
               HOST: 0.0.0.0
               LITELLM_HOST: litellm.invalid
               MCP_PROMPTING_PATH: /data/config/prompting.json
@@ -57,7 +62,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio
-              tag: 0.41.0
+              tag: 0.42.0
             probes:
               liveness:
                 path: /api/ping
