@@ -7,7 +7,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-from support import CLUSTERS, read_resources
+from support import CLUSTERS, read_resources, repository_resources
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -354,6 +354,24 @@ class PrivateDNSCompositionTests(unittest.TestCase):
 
 
 class CloudflareZoneTests(unittest.TestCase):
+    def test_app_updates_preserve_the_home_assistant_mtls_rule(self):
+        resource = composition_resource("platform/automation/cloudflare/composition.yaml", "waf")
+        expression = next(mapping["body"] for mapping in resource["spec"]["forProvider"]["mappings"]
+                          if mapping["action"] == "UPDATE")
+        mtls = next(resource["spec"]["rule"] for resource in repository_resources("apps/overlays/syd")
+                    if resource["kind"] == "CloudflareWAFPolicy"
+                    and resource["metadata"]["namespace"] == "home-assistant")
+        other = {"action": "js_challenge", "enabled": True, "expression": "false", "ref": "other-app"}
+        for current, wanted in ((mtls, other), (other, mtls)):
+            with self.subTest(updating=wanted["ref"]):
+                result = evaluate(expression, {
+                    "payload": {"body": wanted},
+                    "response": {"body": {"result": {
+                        "rules": [dict(current, id="existing", version="1")],
+                    }}},
+                })
+                self.assertEqual(result["rules"], [current, wanted])
+
     def test_zone_lookup_requires_one_successful_matching_result(self):
         resource = composition_resource(
             "platform/automation/cloudflare/composition.yaml", "zone"

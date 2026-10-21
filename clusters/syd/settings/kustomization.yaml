@@ -26,6 +26,20 @@ replacements:
   - source:
       kind: ConfigMap
       name: cluster-settings
+      fieldPath: data.home_assistant_remote_host
+    targets:
+      - select:
+          kind: CloudflareWAFPolicy
+          name: home-assistant
+          namespace: home-assistant
+        fieldPaths:
+          - spec.rule.expression
+        options:
+          delimiter: '"'
+          index: 1
+  - source:
+      kind: ConfigMap
+      name: cluster-settings
       fieldPath: data.cluster_name
     targets:
       - select:

@@ -14,6 +14,7 @@ resources:
   - ../../base/cliproxyapi
   - ../../base/studio
   - ../../base/homepage
+  - ../../base/home-assistant
   - ../../base/home-assistant-mcp
   - ../../base/immich
   - ../../base/larapaper

@@ -1,0 +1,14 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareWAFPolicy
+metadata:
+  name: application
+spec:
+  rule:
+    action: block
+    description: Require a valid non-revoked client certificate for remote Home Assistant
+    enabled: true
+    # The webhook hostname and direct LAN endpoint are deliberately outside this rule.
+    # cert_verified remains true for revoked certificates, so check both fields.
+    expression: (http.host eq "remote-host.invalid" and (not cf.tls_client_auth.cert_verified or cf.tls_client_auth.cert_revoked))
+    ref: homelab-hass-mtls
+  zoneName: public-domain.invalid
