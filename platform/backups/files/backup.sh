@@ -1,7 +1,8 @@
 #!/bin/sh
 set -eu
 : "${CLUSTER:?CLUSTER is required}"
-kubectl() { /tools/kubectl --request-timeout=30s "$@"; }
+# Bound calls with timeout: any kubectl client flag disables in-cluster configuration.
+kubectl() { timeout 180 /tools/kubectl "$@"; }
 export RESTIC_REPOSITORY="s3:${BACKUP_ENDPOINT}/${BACKUP_BUCKET}/files/${POD_NAMESPACE}"
 resume_state="$(kubectl get deployment "$DEPLOYMENT" -o jsonpath='{.metadata.annotations.backup\.excloo\.dev/resume-state}')"
 if [ -n "$resume_state" ]; then
@@ -41,10 +42,10 @@ kubectl scale deployment "$DEPLOYMENT" --replicas=0
 if [ -n "$pods" ]; then
   # Each token is a kubectl pod resource name, never shell input.
   # shellcheck disable=SC2086
-  kubectl wait --for=delete $pods --request-timeout=150s --timeout=120s
+  kubectl wait --for=delete $pods --timeout=120s
 fi
-if [ -f /scripts/snapshot.sh ]; then
-  /bin/sh /scripts/snapshot.sh
+if [ -f /hooks/snapshot.sh ]; then
+  /bin/sh /hooks/snapshot.sh
 fi
 timeout 600 cp -R /sources/. /snapshot/data/
 resume
