@@ -62,7 +62,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio
-              tag: 0.47.0
+              tag: 0.48.0
             probes:
               liveness:
                 path: /api/ping
