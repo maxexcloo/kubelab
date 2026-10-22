@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Flylab's Gatus renderer consumes this inventory and --manifest-directory.
+# Flylab's Gatus renderer consumes this inventory.
 all_routes=false
 clusters=()
 manifest_directory=""
