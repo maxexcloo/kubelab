@@ -34,6 +34,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.HOMELAB_FLY_DEPLOY_TOKEN }}
           KUBELAB_REVISION: ${{ github.sha }}
-        run: |
-          gh workflow run deploy.yaml --field deployment=excloo-gatus \
-            --field kubelab_revision="$KUBELAB_REVISION" --ref main --repo maxexcloo/flylab
+        run: gh workflow run deploy.yaml --field kubelab_revision="$KUBELAB_REVISION" --ref main --repo maxexcloo/flylab
