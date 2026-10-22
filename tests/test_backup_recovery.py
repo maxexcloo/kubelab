@@ -21,7 +21,8 @@ from pathlib import Path
 path = Path(os.environ["BACKUP_TEST_STATE"])
 state = json.loads(path.read_text())
 args = sys.argv[1:]
-assert args.pop(0) == "--request-timeout=30s"
+# Client flags such as --request-timeout disable in-cluster configuration.
+assert not any(arg.startswith("--request-timeout") for arg in args)
 mutation = False
 if args[0] == "get":
     output = args[-1]
@@ -89,7 +90,7 @@ class BackupRecoveryTests(unittest.TestCase):
         kubectl.write_text(f"#!{sys.executable}\n" + KUBECTL)
         kubectl.chmod(0o755)
         timeout = directory / "timeout"
-        timeout.write_text('#!/bin/sh\n[ "$1" = 600 ] || exit 2\nshift\nexec "$@"\n')
+        timeout.write_text('#!/bin/sh\ncase "$1" in 180|600) ;; *) exit 2 ;; esac\nshift\nexec "$@"\n')
         timeout.chmod(0o755)
         restic = directory / "restic"
         restic.write_text('#!/bin/sh\nprintf "%s\\n" "$*" >> "$BACKUP_TEST_STATE.restic"\n')
@@ -99,7 +100,7 @@ class BackupRecoveryTests(unittest.TestCase):
         (directory / "snapshot").mkdir()
         source = (ROOT / "platform/backups/files/backup.sh").read_text()
         source = source.replace("/tools/kubectl", str(kubectl))
-        source = source.replace("/scripts/snapshot.sh", str(directory / "hook.sh"))
+        source = source.replace("/hooks/snapshot.sh", str(directory / "hook.sh"))
         source = source.replace("/sources", str(directory / "sources"))
         source = source.replace("/snapshot", str(directory / "snapshot"))
         (directory / "backup.sh").write_text(source)

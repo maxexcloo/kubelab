@@ -20,8 +20,7 @@ spec:
                       name: mongodb
               volumeMounts:
                 - name: snapshot-script
-                  mountPath: /scripts/snapshot.sh
-                  subPath: snapshot.sh
+                  mountPath: /hooks
                   readOnly: true
                 - name: uploads
                   mountPath: /sources/uploads
