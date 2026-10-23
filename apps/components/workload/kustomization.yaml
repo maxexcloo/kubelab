@@ -3,7 +3,7 @@ kind: Component
 resources:
   - helm-release.yaml
 components:
-  - ../app-template
+  - ../../../platform/components/app-template
 # Match chart resource names to the namespace-derived Flux release name.
 replacements:
   - source:

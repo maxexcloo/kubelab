@@ -35,6 +35,9 @@ resources:
   - ../../base/signtools
   - ../../base/syncthing
   - ../../base/unifi-network-mcp
+  - ../../../platform/identity/cloudflare-access
+  - ../../../platform/identity/headlamp/integrations
+  - ../../../platform/observability/grafana/integrations
   - openspeedtest-hsp
   - openspeedtest-kimbap
   - redlib-multi-backup

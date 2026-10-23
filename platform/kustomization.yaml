@@ -1,24 +1,26 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - automation/crossplane
   - certificates/cert-manager
+  - databases/cloudnative-pg
   - identity/headlamp
   - maintenance/failed-pods
   - maintenance/reloader
   - networking/cilium
-  - networking/coredns
   - networking/cloudflared
+  - networking/coredns
   - networking/external-dns
+  - networking/external-dns-private
   - networking/tailscale
   - networking/traefik
+  - observability/grafana
+  - observability/metrics-server
+  - observability/victoria-metrics
   - secrets/external-secrets
   - secrets/onepassword-items
   - sources/bjw-s.yaml
-  - sources/cilium.yaml
   - sources/external-dns.yaml
-  - sources/headlamp.yaml
-  - sources/tailscale.yaml
-  - sources/traefik.yaml
 components:
   - components/helm-remediation
 replacements:
