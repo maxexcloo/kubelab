@@ -24,10 +24,10 @@ spec:
               STUDIO_ACCOUNT_MAX_OUTSTANDING_JOBS: "10"
               STUDIO_ALLOWED_HOSTS:
                 dependsOn:
-                  - LITELLM_HOST
+                  - BIFROST_HOST
                   - ROUTE_ALIAS_HOST
                   - ROUTE_HOST
-                value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(LITELLM_HOST),studio.studio.svc.cluster.local
+                value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
               STUDIO_ENABLE_BUILTIN_PROFILES: "0"
               STUDIO_ENABLE_PRESETS: "1"
               STUDIO_MODEL_MANIFEST: /data/config/models.json
@@ -38,20 +38,20 @@ spec:
               STUDIO_OIDC_ISSUER: https://${identity_host}
               STUDIO_OIDC_LABEL: Pocket ID
               STUDIO_OIDC_REDIRECT_URI: https://app.invalid/api/accounts/oidc/callback
-              # Studio writes chat prompts through LiteLLM with its own key (external-secrets.yaml).
+              # Studio writes chat prompts through Bifrost with its own key (external-secrets.yaml).
               STUDIO_PROMPT_WRITER_MODEL: ai/text
-              STUDIO_PROMPT_WRITER_URL: http://litellm.litellm.svc.cluster.local:4000
+              STUDIO_PROMPT_WRITER_URL: http://bifrost.bifrost.svc.cluster.local:8080
+              BIFROST_HOST: bifrost.invalid
               # Refine in Chat opens LibreChat with the prompt filled in (?prompt=).
               CHAT_HOST: chat.invalid
               STUDIO_CHAT_URL:
                 dependsOn: CHAT_HOST
                 value: https://$(CHAT_HOST)
               HOST: 0.0.0.0
-              LITELLM_HOST: litellm.invalid
               MCP_PROMPTING_PATH: /data/config/prompting.json
               MCP_PUBLIC_URL:
-                dependsOn: LITELLM_HOST
-                value: https://$(LITELLM_HOST)/studio
+                dependsOn: BIFROST_HOST
+                value: https://$(BIFROST_HOST)/studio
               PORT: "8787"
               ROUTE_ALIAS_HOST: studio.${cluster_name}.excloo.dev
               ROUTE_HOST: app.invalid

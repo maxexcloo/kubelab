@@ -1,13 +1,13 @@
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: litellm-results
+  name: bifrost-results
 spec:
-  # LiteLLM's routes serve signed MCP result links from the studio.
+  # Bifrost's route serve signed MCP result links from the studio.
   from:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: litellm
+      namespace: bifrost
   to:
     - group: ""
       kind: Service

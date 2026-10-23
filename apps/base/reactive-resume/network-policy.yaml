@@ -8,13 +8,13 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: account-seed
-        # LiteLLM's MCP gateway serves the app's /mcp endpoint.
+        # Bifrost's MCP gateway serves the app's /mcp endpoint.
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: litellm
+              kubernetes.io/metadata.name: bifrost
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: litellm
+              app.kubernetes.io/name: bifrost
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking

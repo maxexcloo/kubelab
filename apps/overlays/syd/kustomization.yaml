@@ -10,6 +10,7 @@ resources:
   - ../../base/beszel
   - ../../base/beszel-agent
   - ../../base/bichon
+  - ../../base/bifrost
   - ../../base/bookorbit
   - ../../base/cliproxyapi
   - ../../base/studio
@@ -21,7 +22,6 @@ resources:
   - ../../base/librechat
   - ../../base/librechat-admin
   - ../../base/linkwarden
-  - ../../base/litellm
   - ../../base/minilab
   - ../../base/miniflux
   - ../../base/openspeedtest
@@ -165,11 +165,11 @@ replacements:
           namespace: studio
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.CHAT_HOST
-  # Studio serves result links on LiteLLM's host.
+  # Studio serves result links on Bifrost's host.
   - source:
       kind: HTTPRoute
-      name: litellm
-      namespace: litellm
+      name: bifrost
+      namespace: bifrost
       fieldPath: spec.hostnames.0
     targets:
       - select:
@@ -177,7 +177,7 @@ replacements:
           name: studio
           namespace: studio
         fieldPaths:
-          - spec.values.controllers.main.containers.main.env.LITELLM_HOST
+          - spec.values.controllers.main.containers.main.env.BIFROST_HOST
   # The cluster's Syncthing item is named for its host.
   - source:
       kind: HelmRelease

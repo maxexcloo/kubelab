@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: litellm
+  name: bifrost
 spec:
   ingress:
     - from:
@@ -25,10 +25,10 @@ spec:
             matchLabels:
               app.kubernetes.io/name: traefik
       ports:
-        - port: 4000
+        - port: 8080
           protocol: TCP
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: litellm
+      app.kubernetes.io/name: bifrost
   policyTypes:
     - Ingress

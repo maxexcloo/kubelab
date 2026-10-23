@@ -1,14 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: litellm
+namespace: bifrost
 resources:
   - external-secrets.yaml
   - helm-release.yaml
   - namespace.yaml
   - network-policy.yaml
-  - pocket-id.yaml
   - route.yaml
   - source.yaml
+  - storage.yaml
 replacements:
   # The chart source lives in the namespace the release references.
   - source:
@@ -21,12 +21,12 @@ replacements:
           - metadata.namespace
   - source:
       kind: HTTPRoute
-      name: litellm
+      name: bifrost
       fieldPath: spec.hostnames.0
     targets:
       - select:
           kind: HTTPRoute
-          name: litellm
+          name: bifrost
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
         options:
@@ -39,25 +39,9 @@ replacements:
       - select:
           kind: HelmRelease
         fieldPaths:
-          - spec.values.envVars.PROXY_BASE_URL
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: PocketIDClient
-        fieldPaths:
-          - spec.client.callbackURLs.0
-          - spec.client.launchURL
+          - spec.values.bifrost.client.allowedOrigins.0
         options:
           delimiter: /
           index: 2
 components:
-  - ../../../platform/databases/postgres
-  - ../../../platform/backups/credentials
   - ../../components/private-dns
-patches:
-  - path: database.yaml
-    target:
-      kind: Cluster
-transformers:
-  - ../../transformers/cluster-scoped

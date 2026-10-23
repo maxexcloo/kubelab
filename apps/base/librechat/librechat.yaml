@@ -52,19 +52,17 @@ endpoints:
       - tools
       - web_search
   custom:
-    # LiteLLM reaches the local text model AI Control has loaded on Bento.
+    # Bifrost reaches the local text model AI Control has loaded on Bento.
     - name: AI
-      apiKey: ${LITELLM_API_KEY}
-      baseURL: http://litellm.litellm.svc.cluster.local:4000/v1
+      apiKey: ${BIFROST_API_KEY}
+      baseURL: http://bifrost.bifrost.svc.cluster.local:8080/v1
       models:
         default:
           - ai/text
-          - ai/text-fast
-      # A live heading summarises long reasoning while it streams. Titles and reasoning
-      # labels use ai/text-fast, which has no reasoning, so its short output cap holds text.
+      # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
       titleConvo: true
-      titleModel: ai/text-fast
+      titleModel: ai/text
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
       modelDisplayLabel: AI
@@ -159,12 +157,12 @@ webSearch:
   searchProvider: keenable
   serperApiKey: ${SERPER_API_KEY}
   tavilyApiKey: ${TAVILY_API_KEY}
-# LiteLLM's MCP gateway is an internal service; exempt just that host and port.
+# Bifrost's MCP gateway is an internal service; exempt just that host and port.
 mcpSettings:
   allowedAddresses:
-    - litellm.litellm.svc.cluster.local:4000
-# LiteLLM's config declares the MCP servers and serves each at /<alias>/mcp.
-# Grant keys access in LiteLLM's UI and add an entry here to offer a server.
+    - bifrost.bifrost.svc.cluster.local:8080
+# Bifrost's config declares the MCP servers and serves each at /mcp/<slug>.
+# Grant keys access in Bifrost's config and add an entry here to offer a server.
 mcpServers:
   actual-budget:
     type: streamable-http
@@ -172,60 +170,60 @@ mcpServers:
     requiresOAuth: false
     startup: false
     title: Actual Budget
-    url: http://litellm.litellm.svc.cluster.local:4000/actual_budget/mcp
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/actual-budget
     # The budget is personal, so it needs an individually authorised key rather than the shared chat key.
     customUserVars:
       ACTUAL_BUDGET_API_KEY:
-        description: Your personal LiteLLM virtual key authorised for Actual Budget. Ordinary chat keys cannot access these tools.
+        description: Your personal Bifrost virtual key authorised for Actual Budget. Ordinary chat keys cannot access these tools.
         sensitive: true
         title: Personal API Key
     headers:
-      x-litellm-api-key: "Bearer {{ACTUAL_BUDGET_API_KEY}}"
+      x-bf-vk: "{{ACTUAL_BUDGET_API_KEY}}"
   ai-control:
     type: streamable-http
     description: Manage AI workloads and preview GPU allocation changes.
     requiresOAuth: false
     startup: false
     title: AI Control
-    url: http://litellm.litellm.svc.cluster.local:4000/ai_control/mcp
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/ai-control
     # Admin access stays with individually authorised keys, never the shared chat key.
     customUserVars:
       AI_CONTROL_API_KEY:
-        description: Your personal LiteLLM virtual key authorised for AI Control. Ordinary chat keys cannot access these tools.
+        description: Your personal Bifrost virtual key authorised for AI Control. Ordinary chat keys cannot access these tools.
         sensitive: true
         title: Admin API Key
     headers:
-      x-litellm-api-key: "Bearer {{AI_CONTROL_API_KEY}}"
+      x-bf-vk: "{{AI_CONTROL_API_KEY}}"
   home-assistant:
     type: streamable-http
     description: Inspect and control home devices, automations and dashboards.
     requiresOAuth: false
     startup: false
     title: Home Assistant
-    url: http://litellm.litellm.svc.cluster.local:4000/home_assistant/mcp
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/home-assistant
     # Home control needs an individually authorised key rather than the shared chat key.
     customUserVars:
       HOME_ASSISTANT_API_KEY:
-        description: Your personal LiteLLM virtual key authorised for Home Assistant. Ordinary chat keys cannot access these tools.
+        description: Your personal Bifrost virtual key authorised for Home Assistant. Ordinary chat keys cannot access these tools.
         sensitive: true
         title: Personal API Key
     headers:
-      x-litellm-api-key: "Bearer {{HOME_ASSISTANT_API_KEY}}"
+      x-bf-vk: "{{HOME_ASSISTANT_API_KEY}}"
   reactive-resume:
     type: streamable-http
     description: Read and edit resumes, cover letters and job applications in Reactive Resume.
     requiresOAuth: false
     startup: false
     title: Reactive Resume
-    url: http://litellm.litellm.svc.cluster.local:4000/reactive_resume/mcp
-    # LiteLLM holds the owner's Reactive Resume API key, so only authorised personal keys reach it.
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/reactive-resume
+    # Bifrost holds the owner's Reactive Resume API key, so only authorised personal keys reach it.
     customUserVars:
       REACTIVE_RESUME_API_KEY:
-        description: Your personal LiteLLM virtual key authorised for Reactive Resume. Ordinary chat keys cannot access these tools.
+        description: Your personal Bifrost virtual key authorised for Reactive Resume. Ordinary chat keys cannot access these tools.
         sensitive: true
         title: Reactive Resume API Key
     headers:
-      x-litellm-api-key: "Bearer {{REACTIVE_RESUME_API_KEY}}"
+      x-bf-vk: "{{REACTIVE_RESUME_API_KEY}}"
   studio:
     type: streamable-http
     description: Create and manage images and videos in Studio.
@@ -235,29 +233,29 @@ mcpServers:
     # Studio waits up to 31 minutes for generation results.
     timeout: 1860000
     title: Studio
-    url: http://litellm.litellm.svc.cluster.local:4000/studio/mcp
-    # Studio numbers results ("result 1") per conversation. LiteLLM forwards these through
-    # the extra_headers of its configured Studio server.
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/studio
+    # Studio numbers results ("result 1") per conversation. Bifrost forwards these through
+    # the allowed extra headers of its configured Studio server.
     headers:
       X-AI-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
       X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
       X-Studio-Conversation-Id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
-      x-litellm-api-key: "Bearer ${LITELLM_API_KEY}"
+      x-bf-vk: "${BIFROST_API_KEY}"
   unifi-network:
     type: streamable-http
     description: Inspect and manage UniFi networks, devices and clients.
     requiresOAuth: false
     startup: false
     title: UniFi Network
-    url: http://litellm.litellm.svc.cluster.local:4000/unifi_network/mcp
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/unifi-network
     # Network control needs an individually authorised key rather than the shared chat key.
     customUserVars:
       UNIFI_NETWORK_API_KEY:
-        description: Your personal LiteLLM virtual key authorised for UniFi Network. Ordinary chat keys cannot access these tools.
+        description: Your personal Bifrost virtual key authorised for UniFi Network. Ordinary chat keys cannot access these tools.
         sensitive: true
         title: Personal API Key
     headers:
-      x-litellm-api-key: "Bearer {{UNIFI_NETWORK_API_KEY}}"
+      x-bf-vk: "{{UNIFI_NETWORK_API_KEY}}"
 # Specs build an agent per request from the preset and MCP servers.
 modelSpecs:
   enforce: false

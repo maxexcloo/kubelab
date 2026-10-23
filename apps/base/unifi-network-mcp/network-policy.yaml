@@ -3,15 +3,15 @@ kind: NetworkPolicy
 metadata:
   name: unifi-network-mcp
 spec:
-  # The MCP endpoint has no caller authentication; LiteLLM is its only client.
+  # The MCP endpoint has no caller authentication; Bifrost is its only client.
   ingress:
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: litellm
+              kubernetes.io/metadata.name: bifrost
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: litellm
+              app.kubernetes.io/name: bifrost
       ports:
         - port: 3000
           protocol: TCP

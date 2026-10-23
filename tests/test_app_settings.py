@@ -58,8 +58,6 @@ class AppSettingsTests(unittest.TestCase):
                 values = release["spec"]["values"]
                 if namespace == "immich":
                     affinity = values["server"]["defaultPodOptions"]["affinity"]
-                elif namespace == "litellm":
-                    affinity = values["affinity"]
                 else:
                     affinity = values["defaultPodOptions"]["affinity"]
                 rules = affinity["podAffinity"][
