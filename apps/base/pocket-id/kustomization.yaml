@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: pocket-id
 resources:
   - external-secrets.yaml
   - groups.yaml
@@ -12,7 +13,6 @@ components:
   - ../../components/database-colocation
   - ../../../platform/backups/credentials
   - ../../components/private-dns-control-d-only
-  - ../../components/app-namespace
 patches:
   - path: database.yaml
     target:

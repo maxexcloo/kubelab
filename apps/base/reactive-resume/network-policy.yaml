@@ -1,9 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: application
-  labels:
-    app.kubernetes.io/name: application
+  name: reactive-resume
 spec:
   ingress:
     - from:
@@ -36,8 +34,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: reactive-resume-database
-  labels:
-    app.kubernetes.io/name: application
 spec:
   ingress:
     - from:

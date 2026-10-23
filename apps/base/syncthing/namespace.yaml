@@ -3,7 +3,6 @@ kind: Namespace
 metadata:
   name: syncthing
   labels:
-    app.kubernetes.io/name: application
     gateway.excloo.dev/private-access: "true"
     pod-security.kubernetes.io/audit: privileged
     pod-security.kubernetes.io/enforce: privileged

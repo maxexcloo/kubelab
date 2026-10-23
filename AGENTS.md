@@ -87,8 +87,10 @@ settings in its own repository; Kubelab deploys its published image.
 - Keep shared chart policy in native Kustomize components and app-specific values
   in the app's Flux `HelmRelease` patch; use overlay patches for cluster
   differences.
-- The `app-namespace` component derives app-local namespaces and Flux release
-  identity from the app's Namespace. The `application` component supplies
+- Each app kustomization sets its native `namespace:` and names its resources
+  literally; shared components name their resources after the app's Namespace.
+  Resources in another namespace derive it from what references them, and
+  Pocket ID clients stay cluster-scoped. The `application` component supplies
   standard probes, security and scratch storage. Specialised app-template
   workloads use the `workload` component without the application defaults.
 - Use `main` for the primary controller, container and service; preserve deployed

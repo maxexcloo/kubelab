@@ -4,7 +4,7 @@ resources:
   - helm-release.yaml
 components:
   - ../../../platform/components/app-template
-# Match chart resource names to the namespace-derived Flux release name.
+# Name the release and its chart resources after the app's Namespace.
 replacements:
   - source:
       kind: Namespace
@@ -13,6 +13,8 @@ replacements:
       - select:
           kind: HelmRelease
         fieldPaths:
+          - metadata.name
+          - spec.releaseName
           - spec.values.global.nameOverride
         options:
           create: true

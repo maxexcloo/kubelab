@@ -1,7 +1,7 @@
 apiVersion: automation.excloo.dev/v1alpha1
 kind: CloudflareWAFPolicy
 metadata:
-  name: application
+  name: home-assistant
 spec:
   rule:
     action: block

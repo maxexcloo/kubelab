@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: litellm
 resources:
   - external-secrets.yaml
   - helm-release.yaml
@@ -9,13 +10,22 @@ resources:
   - route.yaml
   - source.yaml
 replacements:
+  # The chart source lives in the namespace the release references.
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.chart.spec.sourceRef.namespace
+    targets:
+      - select:
+          kind: HelmRepository
+        fieldPaths:
+          - metadata.namespace
   - source:
       kind: Namespace
       fieldPath: metadata.name
     targets:
       - select:
           kind: HTTPRoute
-          name: application
+          name: litellm
         fieldPaths:
           - spec.hostnames.1
         options:
@@ -57,8 +67,9 @@ components:
   - ../../../platform/databases/postgres
   - ../../../platform/backups/credentials
   - ../../components/private-dns
-  - ../../components/app-namespace
 patches:
   - path: database.yaml
     target:
       kind: Cluster
+transformers:
+  - ../../transformers/cluster-scoped

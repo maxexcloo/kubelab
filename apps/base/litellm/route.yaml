@@ -1,7 +1,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: application
+  name: litellm
   annotations:
     gethomepage.dev/description: MCP Gateway
     gethomepage.dev/enabled: "true"
@@ -13,7 +13,7 @@ metadata:
     monitoring.excloo.dev/path: /health/liveliness
     onepassword.excloo.dev/item: *title
   labels:
-    app.kubernetes.io/name: application
+    app.kubernetes.io/name: litellm
     gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:

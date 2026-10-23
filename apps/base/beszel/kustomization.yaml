@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: beszel
 resources:
   - external-secrets.yaml
   - namespace.yaml
@@ -13,7 +14,6 @@ components:
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
   - ../../components/private-dns
-  - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
     target:
@@ -23,4 +23,5 @@ patches:
       kind: CronJob
       name: state-backup
 transformers:
+  - ../../transformers/cluster-scoped
   - ../../transformers/internal-alias

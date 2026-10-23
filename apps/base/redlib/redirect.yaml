@@ -5,7 +5,7 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
   labels:
-    app.kubernetes.io/name: application
+    app.kubernetes.io/name: redlib
     gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:

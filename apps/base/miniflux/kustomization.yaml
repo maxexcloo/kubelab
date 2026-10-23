@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: miniflux
 resources:
   - external-secrets.yaml
   - namespace.yaml
@@ -11,7 +12,6 @@ components:
   - ../../components/database-colocation
   - ../../../platform/backups/credentials
   - ../../components/private-dns
-  - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
     target:

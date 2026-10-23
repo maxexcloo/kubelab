@@ -3,7 +3,7 @@ kind: HTTPRoute
 metadata:
   name: redlib-www-private
   labels:
-    app.kubernetes.io/name: application
+    app.kubernetes.io/name: redlib
 spec:
   hostnames:
     - www.app.invalid
