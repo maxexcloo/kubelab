@@ -132,8 +132,6 @@ spec:
             mcp_configs:
               - mcp_client_name: actual_budget
                 tools_to_execute: ["*"]
-              - mcp_client_name: ai_control
-                tools_to_execute: ["*"]
               - mcp_client_name: home_assistant
                 tools_to_execute: ["*"]
               - mcp_client_name: reactive_resume
@@ -159,15 +157,6 @@ spec:
               url: http://actual-budget-mcp.actual-budget-mcp.svc.cluster.local:3000/mcp
             connectionType: http
             endpointSlug: actual-budget
-            toolsToExecute: ["*"]
-          - name: ai_control
-            authType: headers
-            httpConfig:
-              url: http://studio.studio.svc.cluster.local:8787/mcp
-            connectionType: http
-            endpointSlug: ai-control
-            headers:
-              Authorization: env.AI_CONTROL_AUTHORIZATION
             toolsToExecute: ["*"]
           - name: home_assistant
             authType: none
