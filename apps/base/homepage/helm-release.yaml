@@ -19,7 +19,7 @@ spec:
                 custom: true
                 enabled: true
                 spec:
-                  httpGet:
+                  httpGet: &healthcheck
                     path: /api/healthcheck
                     port: 3000
                     httpHeaders:
@@ -29,24 +29,14 @@ spec:
                 custom: true
                 enabled: true
                 spec:
-                  httpGet:
-                    path: /api/healthcheck
-                    port: 3000
-                    httpHeaders:
-                      - name: Host
-                        value: alias.invalid
+                  httpGet: *healthcheck
               startup:
                 custom: true
                 enabled: true
                 spec:
                   failureThreshold: 30
                   periodSeconds: 5
-                  httpGet:
-                    path: /api/healthcheck
-                    port: 3000
-                    httpHeaders:
-                      - name: Host
-                        value: alias.invalid
+                  httpGet: *healthcheck
             resources:
               limits:
                 memory: 512Mi
@@ -61,6 +51,8 @@ spec:
                   - ALL
             env:
               HOMEPAGE_ALLOWED_HOSTS: app.invalid,alias.invalid
+              PGID: "1000"
+              PUID: "1000"
             envFrom:
               - secretRef:
                   name: homepage
@@ -91,7 +83,6 @@ spec:
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
               HOMEPAGE_CACHE_DIRECTORY: /tmp/homepage
               HOMEPAGE_REVALIDATE_URL: http://127.0.0.1:3000/api/revalidate
-              HOMEPAGE_ROUTE_SCRIPT: /routes/service_routes.yq
               KUBECTL: /tools/kubectl
             image:
               repository: docker.io/mikefarah/yq
@@ -185,14 +176,6 @@ spec:
             endpoints:
               - path: /infrastructure
                 readOnly: true
-      route-script:
-        name: homepage-route-script
-        type: configMap
-        advancedMounts:
-          homepage:
-            endpoints:
-              - path: /routes
-                readOnly: true
       temporary:
         type: emptyDir
         globalMounts:
@@ -209,7 +192,17 @@ spec:
     route:
       private:
         annotations:
+          gethomepage.dev/description: Application Dashboard
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
           gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-homepage
+          gethomepage.dev/name: &title Homepage
+          monitoring.excloo.dev/enabled: "true"
+          onepassword.excloo.dev/category: SERVER
+          onepassword.excloo.dev/item: *title
+        hostnames:
+          - home.excloo.com
         labels:
           app.kubernetes.io/name: homepage
         parentRefs:

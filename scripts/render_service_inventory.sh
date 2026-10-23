@@ -3,11 +3,10 @@ set -euo pipefail
 
 # Flylab's Gatus renderer consumes this inventory.
 all_routes=false
-clusters=()
 manifest_directory=""
 
 usage() {
-  echo "Usage: $0 [--all-routes] [--manifest-directory directory] [cluster ...]" >&2
+  echo "Usage: $0 [--all-routes] [--manifest-directory directory]" >&2
 }
 
 while (($# > 0)); do
@@ -19,22 +18,13 @@ while (($# > 0)); do
       manifest_directory="${2:?--manifest-directory requires a directory}"
       shift
       ;;
-    -*)
+    *)
       usage
       exit 2
-      ;;
-    *)
-      clusters+=("$1")
       ;;
   esac
   shift
 done
-
-if ((${#clusters[@]} == 0)); then
-  while IFS= read -r cluster_directory; do
-    clusters+=("${cluster_directory##*/}")
-  done < <(find clusters -maxdepth 1 -mindepth 1 -type d | sort)
-fi
 
 temporary_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-service-inventory.XXXXXX")"
 
@@ -46,7 +36,7 @@ trap cleanup EXIT
 
 if [[ -z "${manifest_directory}" ]]; then
   manifest_directory="${temporary_directory}/manifests"
-  scripts/render_manifests.sh "${manifest_directory}" "${clusters[@]}"
+  scripts/render_manifests.sh "${manifest_directory}"
 fi
 
 inventory_file="${temporary_directory}/inventory.jsonl"
@@ -54,14 +44,12 @@ secret_file="${temporary_directory}/secrets.jsonl"
 : >"${inventory_file}"
 : >"${secret_file}"
 
-for cluster in "${clusters[@]}"; do
-  if [[ ! -d "apps/overlays/${cluster}" || ! -d "clusters/${cluster}/platform" ]]; then
-    echo "Unknown or incomplete cluster: ${cluster}" >&2
-    exit 2
-  fi
-  for target in "apps/overlays/${cluster}" "clusters/${cluster}/platform"; do
+for cluster_file in "${manifest_directory}"/clusters/*.yaml; do
+  cluster="$(basename "${cluster_file}" .yaml)"
+  while IFS= read -r target; do
+    target="${target#./}"
     # shellcheck disable=SC2016
-    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval --from-file scripts/service-routes/service_routes.yq -I=0 -N -o=json \
+    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval --from-file apps/base/homepage/service_routes.yq -I=0 -N -o=json \
       "${manifest_directory}/${target}.yaml" |
       ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -o=yaml -p=json -r '
         select(
@@ -100,7 +88,10 @@ for cluster in "${clusters[@]}"; do
       select(.kind == "ClusterSecretStore" or .kind == "ExternalSecret" or .kind == "SecretStore") |
       .cluster = strenv(CLUSTER)
     ' "${manifest_directory}/${target}.yaml" | sed '/^null$/d; /^$/d' >>"${secret_file}"
-  done
+  done < <(
+    yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization") | .spec.path' "${cluster_file}" |
+      sort -u
+  )
 done
 
-jq -s --slurpfile resources "${secret_file}" --from-file scripts/service-routes/monitoring_headers.jq "${inventory_file}"
+jq -s --slurpfile resources "${secret_file}" --from-file scripts/monitoring_headers.jq "${inventory_file}"

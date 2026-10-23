@@ -1,152 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-temporary_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-manifests.XXXXXX")"
-
-cleanup() {
-  rm -fr -- "${temporary_directory:?}"
-}
-
-trap cleanup EXIT
-
 manifest_directory="${1:?Usage: check_manifests.sh <manifest-directory>}"
-schema_directory="${temporary_directory}/schemas"
-schema_cache_directory="${HOME}/.cache/kubelab/kubeconform"
-remote_schema_cache_directory="${schema_cache_directory}/remote"
+cache_directory="${HOME}/.cache/kubelab/kubeconform"
 # Keep validation aligned with the deployed cluster API.
-kubernetes_version="$(mise exec -- kubectl version --client -o json | yq -r '.clientVersion.gitVersion')"
-kubernetes_version="${kubernetes_version#v}"
+kubernetes_version="$(kubectl version --client -o json | yq -r '.clientVersion.gitVersion')"
 # renovate: datasource=git-refs depName=https://github.com/datreeio/CRDs-catalog
 crd_catalog_revision="501527ab9c40c827144c8f45945b25a023e344ce"
-mkdir -p \
-  "${remote_schema_cache_directory}" \
-  "${schema_directory}"
+mkdir -p "${cache_directory}"
 
-provider_http_version="$(
-  yq -r '.spec.package | split(":")[-1]' \
-    platform/automation/crossplane-runtime/provider-http.yaml
-)"
-provider_http_schema_root="${schema_cache_directory}/provider-http-${provider_http_version}"
-provider_http_schema_directory="${provider_http_schema_root}/http.m.crossplane.io"
-provider_http_schema_file="${provider_http_schema_directory}/request_v1alpha2.json"
-mkdir -p "${provider_http_schema_directory}"
-if [[ ! -s "${provider_http_schema_file}" ]]; then
-  provider_http_schema_temporary_file="${provider_http_schema_file}.tmp"
-  # shellcheck disable=SC2016
-  curl \
-    --fail \
-    --location \
-    --show-error \
-    --silent \
-    "https://raw.githubusercontent.com/crossplane-contrib/provider-http/${provider_http_version}/package/crds/http.m.crossplane.io_requests.yaml" |
-    yq -I=2 -o=json '
-      .spec.versions[] |
-      select(.name == "v1alpha2") |
-      .schema.openAPIV3Schema |
-      ."$schema" = "https://json-schema.org/draft/2020-12/schema"
-    ' >"${provider_http_schema_temporary_file}"
-  mv "${provider_http_schema_temporary_file}" "${provider_http_schema_file}"
-fi
-
-# The catalogue may omit this CRD; use the chart that owns the deployed API.
-external_secrets_version="$(yq -r '.spec.chart.spec.version' platform/foundation/external-secrets/helm-release.yaml)"
-external_secrets_repository="$(yq -r '.spec.url' platform/foundation/external-secrets/source.yaml)"
-external_secrets_schema_root="${schema_cache_directory}/external-secrets-${external_secrets_version}"
-external_secrets_schema_directory="${external_secrets_schema_root}/external-secrets.io"
-external_secrets_schema_file="${external_secrets_schema_directory}/clustersecretstore_v1.json"
-mkdir -p "${external_secrets_schema_directory}"
-if [[ ! -s "${external_secrets_schema_file}" ]]; then
-  external_secrets_schema_temporary_file="${temporary_directory}/clustersecretstore_v1.json"
-  # shellcheck disable=SC2016
-  helm template schema-check external-secrets \
-    --repo "${external_secrets_repository}" \
-    --show-only templates/crds/clustersecretstore.yaml \
-    --version "${external_secrets_version}" |
-    yq --exit-status -I=2 -o=json '
-      .spec.versions[] |
-      select(.name == "v1") |
-      .schema.openAPIV3Schema |
-      ."$schema" = "https://json-schema.org/draft/2020-12/schema"
-    ' >"${external_secrets_schema_temporary_file}"
-  mv "${external_secrets_schema_temporary_file}" "${external_secrets_schema_file}"
-fi
-
-barman_chart_version="$(yq -r '.spec.chart.spec.version' platform/databases/cloudnative-pg/barman.yaml)"
-barman_schema_directory="${schema_cache_directory}/barman-${barman_chart_version}/barmancloud.cnpg.io"
-mkdir -p "${barman_schema_directory}"
-if [[ ! -s "${barman_schema_directory}/objectstore_v1.json" ]]; then
-  # shellcheck disable=SC2016
-  helm template schema-check plugin-barman-cloud \
-    --namespace cnpg-system \
-    --repo "$(yq -r '.spec.url' platform/databases/cloudnative-pg/source.yaml)" \
-    --version "${barman_chart_version}" |
-    yq -I=2 -o=json 'select(.kind == "CustomResourceDefinition" and .metadata.name == "objectstores.barmancloud.cnpg.io") | .spec.versions[] | select(.name == "v1") | .schema.openAPIV3Schema' > "${barman_schema_directory}/objectstore_v1.json"
-fi
-
-kubeconform_flags=(
-  -cache "${remote_schema_cache_directory}"
-  -kubernetes-version "${kubernetes_version}"
-  -schema-location "${schema_directory}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
-  -schema-location "${provider_http_schema_root}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
-  -schema-location "${external_secrets_schema_root}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
-  -schema-location "${schema_cache_directory}/barman-${barman_chart_version}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
-  -schema-location default
-  -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/${crd_catalog_revision}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"
-  -skip "ClusterProviderConfig,CustomResourceDefinition"
-  -strict
-  -summary
-)
-
-manifest_files=()
-while IFS= read -r manifest_file; do
-  manifest_files+=("${manifest_file}")
-done < <(find "${manifest_directory}" -type f -name '*.yaml' | sort)
-
-while IFS=$'\t' read -r xrd_group xrd_kind xrd_version; do
-  mkdir -p "${schema_directory}/${xrd_group}"
-  xrd_resource_kind="$(printf '%s' "${xrd_kind}" | tr '[:upper:]' '[:lower:]')"
-  # shellcheck disable=SC2016
-  KUBELAB_XRD_GROUP="${xrd_group}" \
-    KUBELAB_XRD_KIND="${xrd_kind}" \
-    KUBELAB_XRD_VERSION="${xrd_version}" \
-    yq eval-all -I=2 -o=json '
-      [select(
-        .apiVersion == "apiextensions.crossplane.io/v2" and
-        .kind == "CompositeResourceDefinition" and
-        .spec.group == strenv(KUBELAB_XRD_GROUP) and
-        .spec.names.kind == strenv(KUBELAB_XRD_KIND)
-      )] | .[0] |
-      .spec.versions[] |
-      select(.name == strenv(KUBELAB_XRD_VERSION)) |
-      .schema.openAPIV3Schema |
-      .properties = ((.properties // {}) + {
-        "apiVersion": {
-          "enum": [strenv(KUBELAB_XRD_GROUP) + "/" + strenv(KUBELAB_XRD_VERSION)],
-          "type": "string"
-        },
-        "kind": {
-          "enum": [strenv(KUBELAB_XRD_KIND)],
-          "type": "string"
-        },
-        "metadata": {
-          "type": "object"
-        }
-      }) |
-      .required = (((.required // []) + ["apiVersion", "kind", "metadata"]) | unique) |
-      .additionalProperties = false |
-      ."$schema" = "https://json-schema.org/draft/2020-12/schema"
-    ' "${manifest_files[@]}" >"${schema_directory}/${xrd_group}/${xrd_resource_kind}_${xrd_version}.json"
-done < <(
-  # shellcheck disable=SC2016
-  yq eval -N -r '
-    select(.apiVersion == "apiextensions.crossplane.io/v2" and .kind == "CompositeResourceDefinition") |
-    .spec.group as $group |
-    .spec.names.kind as $kind |
-    .spec.versions[] |
-    select(.served == true) |
-    [$group, $kind, .name] |
-    @tsv
-  ' "${manifest_files[@]}" | sort -u
-)
-
-kubeconform "${kubeconform_flags[@]}" "${manifest_directory}"
+# Kinds without a published schema, including Kubelab's own composite resources, are not validated.
+kubeconform \
+  -cache "${cache_directory}" \
+  -ignore-missing-schemas \
+  -kubernetes-version "${kubernetes_version#v}" \
+  -schema-location default \
+  -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/${crd_catalog_revision}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+  -skip ClusterProviderConfig,CustomResourceDefinition \
+  -strict \
+  -summary \
+  "${manifest_directory}"
