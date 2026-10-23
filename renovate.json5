@@ -14,7 +14,7 @@
     },
     {
       description: "Kubernetes clients follow the cluster version in Homelab",
-      groupName: "Kubernetes clients",
+      groupName: "Kubernetes Clients",
       matchDepNames: ["docker.io/alpine/k8s", "kubectl"],
     },
     {

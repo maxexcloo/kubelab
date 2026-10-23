@@ -6,12 +6,14 @@ kubectl = "1.37.1"
 
 # Bootstrap
 [tasks.bootstrap]
+description = "Bootstrap A Cluster"
 interactive = true
-run = [
-  'scripts/bootstrap_cilium.sh "$usage_cluster"',
-  'scripts/bootstrap_cluster_secrets.sh "$usage_cluster"',
-  'scripts/bootstrap_flux.sh "$usage_cluster"',
-]
+run = """
+set -eu
+scripts/bootstrap_cilium.sh "$usage_cluster"
+scripts/bootstrap_cluster_secrets.sh "$usage_cluster"
+scripts/bootstrap_flux.sh "$usage_cluster"
+"""
 usage = 'arg "<cluster>"'
 
 # Deploy
