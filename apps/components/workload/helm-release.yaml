@@ -12,3 +12,7 @@ spec:
           app.kubernetes.io/controller: "{{ .Release.Name }}"
         labels:
           app.kubernetes.io/controller: "{{ .Release.Name }}"
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      nodeSelector:
+        node.excloo.dev/network: internal

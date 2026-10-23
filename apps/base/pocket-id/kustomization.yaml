@@ -11,7 +11,6 @@ components:
   - ../../components/application
   - ../../components/database-colocation
   - ../../../platform/backups/credentials
-  - ../../../platform/backups/postgres
   - ../../components/private-dns-control-d-only
   - ../../components/app-namespace
 patches:

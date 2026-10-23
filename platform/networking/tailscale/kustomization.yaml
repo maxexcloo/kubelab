@@ -8,3 +8,4 @@ resources:
   - pod-disruption-budget.yaml
   - proxy-class.yaml
   - proxy-group.yaml
+  - source.yaml

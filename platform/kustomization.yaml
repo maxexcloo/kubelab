@@ -14,11 +14,7 @@ resources:
   - secrets/external-secrets
   - secrets/onepassword-items
   - sources/bjw-s.yaml
-  - sources/cilium.yaml
   - sources/external-dns.yaml
-  - sources/headlamp.yaml
-  - sources/tailscale.yaml
-  - sources/traefik.yaml
 components:
   - components/helm-remediation
 replacements:
