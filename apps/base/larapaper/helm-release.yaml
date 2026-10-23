@@ -23,7 +23,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/usetrmnl/larapaper
-              tag: 0.45.0
+              tag: 0.45.1
             probes:
               liveness: null
               readiness: &ready
