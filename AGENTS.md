@@ -19,14 +19,12 @@ settings in its own repository; Kubelab deploys its published image.
   deletion behaviour, networking, storage or secrets.
 - Treat app and cluster configuration as authoritative for current workload
   ownership and `homelab` configuration as authoritative for substrate details.
-- Omit trailing slashes from project-owned base URLs.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
 - Pin remote manifests to stable release versions. Renovate previews upgrades
   locally and opens pull requests for review.
 - Upgrade Flux manually with `flux install --export`; Renovate ignores
   `gotk-components.yaml`.
-- Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Reference 1Password items by title, never by UUID, in credential consumers and
   publishers, including mini-app ExternalSecrets. Routes alias
   `onepassword.excloo.dev/item` to their `gethomepage.dev/name`, optionally with
@@ -143,7 +141,6 @@ alphabetise within each group. Preserve deliberate grouping and workflow order.
 
 ## Verification & Delivery
 
-- Run Kubelab's checks whenever its configuration changes.
 - Render changed Helm charts and use small response fixtures for changed API
   comparisons; avoid adding a general validation framework.
 - Deliver changes through a pull request; Flux deploys `main` once it merges.
