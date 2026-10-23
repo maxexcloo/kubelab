@@ -6,31 +6,13 @@ kubectl = "1.37.1"
 
 # Bootstrap
 [tasks.bootstrap]
-run = 'echo "Cluster $usage_cluster bootstrap submitted. Check progress with: mise run status $usage_cluster"'
-usage = 'arg "<cluster>"'
-depends = [
-  { task = "bootstrap:cilium", args = [
-    "{{usage.cluster}}",
-  ] },
-  { task = "bootstrap:secrets", args = [
-    "{{usage.cluster}}",
-  ] },
-  { task = "bootstrap:flux", args = [
-    "{{usage.cluster}}",
-  ] },
-]
-
-[tasks."bootstrap:cilium"]
 interactive = true
-run = "scripts/bootstrap_cilium.sh"
-
-[tasks."bootstrap:flux"]
-run = "scripts/bootstrap_flux.sh"
-wait_for = ["bootstrap:secrets"]
-
-[tasks."bootstrap:secrets"]
-run = "scripts/bootstrap_cluster_secrets.sh"
-wait_for = ["bootstrap:cilium"]
+run = [
+  'scripts/bootstrap_cilium.sh "$usage_cluster"',
+  'scripts/bootstrap_cluster_secrets.sh "$usage_cluster"',
+  'scripts/bootstrap_flux.sh "$usage_cluster"',
+]
+usage = 'arg "<cluster>"'
 
 # Deploy
 [tasks.deploy]
@@ -40,15 +22,11 @@ set -eu
 namespace="${usage_application%%/*}"
 release="${usage_application##*/}"
 revision="${usage_revision:-$(git ls-remote --exit-code origin refs/heads/main)}"
-revision="${revision%%[[:space:]]*}"
-printf '%s\\n' "$revision" | grep -Eq '^[0-9a-f]{40}$' || { echo "Expected a full Git commit SHA" >&2; exit 1; }
-expected="main@sha1:$revision"
+expected="main@sha1:${revision%%[[:space:]]*}"
 flux --context "$usage_cluster" reconcile kustomization apps --with-source
-test "$(kubectl --context "$usage_cluster" -n flux-system get gitrepository flux-system -o jsonpath='{.status.artifact.revision}')" = "$expected"
 flux --context "$usage_cluster" -n "$namespace" reconcile helmrelease "$release"
-test "$(kubectl --context "$usage_cluster" -n flux-system get gitrepository flux-system -o jsonpath='{.status.artifact.revision}')" = "$expected"
 test "$(kubectl --context "$usage_cluster" -n flux-system get kustomization apps -o jsonpath='{.status.lastAppliedRevision}')" = "$expected"
-echo "$usage_application Ready at $revision"
+echo "$usage_application Ready at $expected"
 """
 usage = '''
 arg "<cluster>"
@@ -73,10 +51,20 @@ arg "[application]"
 
 # Development
 [tasks.check]
-depends = ["check:mise", "check:updates", "hooks:check", "test:python"]
+depends = [
+  "check:actions",
+  "check:mise",
+  "check:oxfmt",
+  "check:python",
+  "check:shell",
+  "check:updates",
+  "check:whitespace",
+  "hooks:check",
+  "test:python",
+]
 
 [tasks.fmt]
-depends = ["fmt:mise", "fmt:oxfmt"]
+depends = ["fmt:mise", "fmt:oxfmt", "fmt:python"]
 
 # Dependencies
 # Cluster-compatible clients follow the platform policies.

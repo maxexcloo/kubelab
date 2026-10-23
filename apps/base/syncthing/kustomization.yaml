@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: syncthing
 resources:
   - external-secrets.yaml
   - namespace.yaml
@@ -8,7 +9,6 @@ resources:
 components:
   - ../../components/application
   - ../../components/private-dns
-  - ../../components/app-namespace
 configMapGenerator:
   - name: syncthing-auth
     files:
@@ -27,7 +27,6 @@ replacements:
       - select:
           kind: HelmRelease
         fieldPaths:
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
           - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
         options:
           delimiter: /

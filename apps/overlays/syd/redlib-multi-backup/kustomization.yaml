@@ -11,10 +11,13 @@ components:
 patches:
   - target:
       kind: CronJob
-    patch: '[{"op": "replace", "path": "/spec/schedule", "value": "54 3 * * *"}, {"op": "replace", "path": "/spec/jobTemplate/spec/template/spec/volumes/0/persistentVolumeClaim/claimName", "value": "data"}]'
-  - target:
-      kind: CronJob
     patch: |
+      - op: replace
+        path: /spec/schedule
+        value: 54 3 * * *
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/volumes/0/persistentVolumeClaim/claimName
+        value: data
       - op: replace
         path: /spec/jobTemplate/spec/template/spec/securityContext
         value:

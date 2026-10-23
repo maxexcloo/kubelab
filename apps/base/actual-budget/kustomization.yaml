@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: actual-budget
 resources:
   - external-secrets.yaml
   - namespace.yaml
@@ -11,7 +12,6 @@ components:
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
   - ../../components/private-dns
-  - ../../components/app-namespace
 patches:
   - path: helm-release.yaml
     target:
@@ -29,7 +29,6 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.ACTUAL_OPENID_SERVER_HOSTNAME
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
           index: 2

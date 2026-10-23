@@ -19,14 +19,12 @@ settings in its own repository; Kubelab deploys its published image.
   deletion behaviour, networking, storage or secrets.
 - Treat app and cluster configuration as authoritative for current workload
   ownership and `homelab` configuration as authoritative for substrate details.
-- Omit trailing slashes from project-owned base URLs.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
 - Pin remote manifests to stable release versions. Renovate previews upgrades
   locally and opens pull requests for review.
 - Upgrade Flux manually with `flux install --export`; Renovate ignores
   `gotk-components.yaml`.
-- Keep credentials, kubeconfigs, and rendered Secret values out of Git.
 - Reference 1Password items by title, never by UUID, in credential consumers and
   publishers, including mini-app ExternalSecrets. Routes alias
   `onepassword.excloo.dev/item` to their `gethomepage.dev/name`, optionally with
@@ -89,8 +87,10 @@ settings in its own repository; Kubelab deploys its published image.
 - Keep shared chart policy in native Kustomize components and app-specific values
   in the app's Flux `HelmRelease` patch; use overlay patches for cluster
   differences.
-- The `app-namespace` component derives app-local namespaces and Flux release
-  identity from the app's Namespace. The `application` component supplies
+- Each app kustomization sets its native `namespace:` and names its resources
+  literally; shared components name their resources after the app's Namespace.
+  Resources in another namespace derive it from what references them, and
+  Pocket ID clients stay cluster-scoped. The `application` component supplies
   standard probes, security and scratch storage. Specialised app-template
   workloads use the `workload` component without the application defaults.
 - Use `main` for the primary controller, container and service; preserve deployed
@@ -112,8 +112,9 @@ Define each value once and derive consumers with Kustomize replacements:
   cluster, such as zones and Tailscale devices and tags, from `cluster_name`.
 - Write derived values as `.invalid` placeholders; the checks fail when one
   survives rendering. Flux substitution is strict, so missing variables fail.
-- App hostnames: the app's route; app replacements and `apps/transformers`
-  derive URLs, DNS records and Pocket ID clients.
+- App hostnames: the app's route. The shared route transformers derive its
+  Homepage link, DNS record and Pocket ID client; app replacements derive only
+  the app's own URL settings.
 - 1Password item titles: once per manifest, using YAML anchors for repeats.
 - The app-template chart version: `platform/components/app-template`.
 - Kubernetes client versions: Homelab's cluster data. Renovate groups the kubectl
@@ -143,7 +144,6 @@ alphabetise within each group. Preserve deliberate grouping and workflow order.
 
 ## Verification & Delivery
 
-- Run Kubelab's checks whenever its configuration changes.
 - Render changed Helm charts and use small response fixtures for changed API
   comparisons; avoid adding a general validation framework.
 - Deliver changes through a pull request; Flux deploys `main` once it merges.

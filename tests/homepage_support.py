@@ -25,17 +25,28 @@ def route(name, **annotations):
                 "gethomepage.dev/group": "Applications",
                 "gethomepage.dev/href": f"https://{name.lower()}.example.net",
                 "gethomepage.dev/name": name,
-                **{f"gethomepage.dev/{key}": value for key, value in annotations.items()},
+                **{
+                    f"gethomepage.dev/{key}": value
+                    for key, value in annotations.items()
+                },
             },
         },
     }
 
 
 def beszel_route():
-    beszel = route("Beszel", description="System Monitoring", icon="sh-beszel", **{
-        "widget.password": '{{ "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}" }}', "widget.type": "beszel",
-        "widget.url": "https://beszel.example.net",
-        "widget.username": '{{ "{{HOMEPAGE_VAR_BESZEL_USERNAME}}" }}', "widget.version": "2"})
+    beszel = route(
+        "Beszel",
+        description="System Monitoring",
+        icon="sh-beszel",
+        **{
+            "widget.password": '{{ "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}" }}',
+            "widget.type": "beszel",
+            "widget.url": "https://beszel.example.net",
+            "widget.username": '{{ "{{HOMEPAGE_VAR_BESZEL_USERNAME}}" }}',
+            "widget.version": "2",
+        },
+    )
     beszel["metadata"]["namespace"] = "beszel"
     return beszel
 
@@ -50,10 +61,18 @@ class HomepageDashboardFixture:
         self.placements.write_text("{}")
         self.queries = self.directory / "queries.jsonl"
         self.gatus = self.directory / "gatus.json"
-        self.gatus.write_text(json.dumps([
-            {"group": "Providers", "key": "providers_example", "name": "Example",
-             "results": [{"duration": 12000000, "success": True}]},
-        ]))
+        self.gatus.write_text(
+            json.dumps(
+                [
+                    {
+                        "group": "Providers",
+                        "key": "providers_example",
+                        "name": "Example",
+                        "results": [{"duration": 12000000, "success": True}],
+                    },
+                ]
+            )
+        )
         self.kubectl = self.directory / "kubectl"
         self.kubectl.write_text("""#!/usr/bin/env python3
 import json
@@ -78,35 +97,40 @@ else:
                 directory.mkdir(parents=True)
                 (directory / "kustomization.yaml").write_text("resources: []\n")
         self.write_routes("mbk", [route("Local"), route("Shared")])
-        self.write_routes("syd", [route("Remote"), route("Shared"), route("Hidden", enabled="false")])
-
+        self.write_routes(
+            "syd", [route("Remote"), route("Shared"), route("Hidden", enabled="false")]
+        )
 
     def write_routes(self, cluster, resources):
         directory = self.directory / f"apps/overlays/{cluster}"
         (directory / "kustomization.yaml").write_text("resources: [routes.yaml]\n")
-        (directory / "routes.yaml").write_text("\n---\n".join(json.dumps(r) for r in resources))
-
+        (directory / "routes.yaml").write_text(
+            "\n---\n".join(json.dumps(r) for r in resources)
+        )
 
     def render(self, **environment):
         return subprocess.run(
             ["sh", str(APP / "render_dashboard.sh"), str(APP), str(self.output)],
-            env=os.environ | {
+            env=os.environ
+            | {
                 "HOMELAB_DIRECTORY": str(HOMELAB),
-                "HOMELAB_INFRASTRUCTURE_FILE": str(ROOT / "tests/fixtures/homepage/infrastructure.json"),
+                "HOMELAB_INFRASTRUCTURE_FILE": str(
+                    ROOT / "tests/fixtures/homepage/infrastructure.json"
+                ),
                 "HOMEPAGE_CLUSTER": "mbk",
                 "HOMEPAGE_GATUS_STATUSES_FILE": str(self.gatus),
-                "HOMEPAGE_ROUTE_SCRIPT": str(ROOT / "scripts/service-routes/service_routes.yq"),
                 "KUBELAB_DIRECTORY": str(self.directory),
                 "KUBECTL": str(self.kubectl),
                 "POD_PLACEMENTS": str(self.placements),
                 "POD_QUERIES": str(self.queries),
                 "REAL_KUBECTL": shutil.which("kubectl"),
                 "SYSTEM_KUBECTL": shutil.which("kubectl"),
-            } | environment,
+            }
+            | environment,
             capture_output=True,
             text=True,
+            check=False,
         )
-
 
     def groups(self, tab=None):
         groups = read_yaml(self.output / "services.yaml")
@@ -124,7 +148,6 @@ else:
                         yield name, cards
 
         return dict(leaves(groups))
-
 
     def services(self):
         return {

@@ -3,7 +3,6 @@ kind: Namespace
 metadata:
   name: sidestore-vpn
   labels:
-    app.kubernetes.io/name: application
     pod-security.kubernetes.io/audit: privileged
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/warn: privileged

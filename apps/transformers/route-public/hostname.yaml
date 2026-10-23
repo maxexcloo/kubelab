@@ -1,0 +1,33 @@
+apiVersion: builtin
+kind: ReplacementTransformer
+metadata:
+  name: route-public
+# Public apps also answer privately on their public hostname.
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.public.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.route.private.hostnames.0
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.route.public.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PrivateDNSRecord
+        fieldPaths:
+          - spec.hostname

@@ -3,7 +3,7 @@ set -euo pipefail
 umask 077
 
 if [[ $# -ne 1 ]]; then
-  echo "Usage: mise run bootstrap:secrets <cluster>" >&2
+  echo "Usage: mise run bootstrap <cluster>" >&2
   exit 1
 fi
 

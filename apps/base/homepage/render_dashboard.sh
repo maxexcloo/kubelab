@@ -1,7 +1,6 @@
 #!/bin/sh
 set -eu
 : "${HOMEPAGE_CLUSTER:?HOMEPAGE_CLUSTER is required}"
-: "${HOMEPAGE_ROUTE_SCRIPT:?HOMEPAGE_ROUTE_SCRIPT is required}"
 : "${KUBECTL:?KUBECTL is required}"
 export HOMEPAGE_CLUSTER
 # KUBELAB_DIRECTORY, HOMELAB_DIRECTORY, MINILAB_DIRECTORY and
@@ -66,7 +65,7 @@ applied_revision() (
 )
 render_routes() {
   "$KUBECTL" kustomize "$1" > "$temporary_directory/manifests.yaml"
-  CLUSTER="$cluster" yq --from-file "$HOMEPAGE_ROUTE_SCRIPT" -I=0 -N -o=json \
+  CLUSTER="$cluster" yq --from-file "$script_directory/service_routes.yq" -I=0 -N -o=json \
     "$temporary_directory/manifests.yaml"
 }
 

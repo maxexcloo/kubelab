@@ -3,7 +3,6 @@ kind: Namespace
 metadata:
   name: librechat-admin
   labels:
-    app.kubernetes.io/name: application
     gateway.excloo.dev/private-access: "true"
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/enforce: restricted

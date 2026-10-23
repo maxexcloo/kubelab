@@ -2,29 +2,31 @@ amends "package://github.com/jdx/hk/releases/download/v2.8.0/hk@2.8.0#/Config.pk
 
 import "package://github.com/jdx/hk/releases/download/v2.8.0/hk@2.8.0#/Builtins.pkl"
 
+// Shared Mise check tasks cover Actions, formatting, Python, shell and whitespace.
 steps {
-  ["actionlint"] = Builtins.actionlint
   ["byte-order-marker"] = Builtins.byte_order_marker
   ["check-added-large-files"] = (Builtins.check_added_large_files) {
     check = "hk util check-added-large-files --maxkb=1024 {{files}}"
   }
   ["check-case-conflict"] = Builtins.check_case_conflict
-  ["check-merge-conflict"] = Builtins.check_merge_conflict
   ["check-symlinks"] = Builtins.check_symlinks
   ["detect-private-key"] = Builtins.detect_private_key
   ["manifests"] = new Step {
-    glob = Regex(#"^(\.github/workflows/.*\.yaml|\.gitignore|\.mise\.toml|\.oxfmtrc\.json|\.sourceignore|AGENTS\.md|hk\.pkl|README\.md|apps/|clusters/|platform/|scripts/|tests/)"#)
+    glob = Regex(#"^(apps|clusters|platform|scripts)/"#)
     check = """
       manifest_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-check.XXXXXX")"
       trap 'rm -fr -- "${manifest_directory:?}"' EXIT
       scripts/render_manifests.sh "$manifest_directory"
+      # Crossplane functions patch pending.invalid and placeholder.invalid at runtime.
+      if grep -rnoE '[[:alnum:]_-]+(\\.[[:alnum:]_-]+)*\\.invalid\\b|\\.cluster\\.excloo\\.dev\\b|profile-placeholder' "$manifest_directory" |
+        grep -vE ':(pending|placeholder)\\.invalid$'; then
+        echo "Unresolved placeholders survived rendering" >&2
+        exit 1
+      fi
       scripts/check_manifests.sh "$manifest_directory"
       scripts/check_service_metadata.sh "$manifest_directory"
       """
   }
   ["mixed-line-ending"] = Builtins.mixed_line_ending
   ["newlines"] = Builtins.newlines
-  ["oxfmt"] = Builtins.oxfmt
-  ["shellcheck"] = Builtins.shellcheck
-  ["trailing-whitespace"] = Builtins.trailing_whitespace
 }

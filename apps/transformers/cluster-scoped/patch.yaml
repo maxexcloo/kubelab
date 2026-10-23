@@ -1,0 +1,10 @@
+apiVersion: builtin
+kind: PatchTransformer
+metadata:
+  name: cluster-scoped
+# Kustomize assumes custom kinds are namespaced; Pocket ID clients are cluster-scoped.
+patch: |-
+  - op: remove
+    path: /metadata/namespace
+target:
+  kind: PocketIDClient

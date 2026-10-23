@@ -194,7 +194,9 @@ def discover_items():
     for route in routes:
         reference = annotations(route).get(f"{ANNOTATION_PREFIX}item")
         if reference:
-            namespace_items.setdefault(route["metadata"]["namespace"], set()).add(reference)
+            namespace_items.setdefault(route["metadata"]["namespace"], set()).add(
+                reference
+            )
     resources = kubernetes_list(
         "/apis/external-secrets.io/v1/externalsecrets"
     ) + kubernetes_list("/apis/external-secrets.io/v1alpha1/pushsecrets")
@@ -229,7 +231,9 @@ def discover_items():
         owning_items = titles & namespace_items.get(namespace, set())
         owner_title = annotations(resource).get(f"{ANNOTATION_PREFIX}item")
         if owner_title and owner_title not in titles:
-            raise RuntimeError("1Password secret owner must be one of its item references")
+            raise RuntimeError(
+                "1Password secret owner must be one of its item references"
+            )
         if not owner_title and len(owning_items) == 1:
             owner_title = next(iter(owning_items))
         for reference in references:
@@ -529,7 +533,9 @@ def item_ids(desired, summaries):
         ids[title] = summary["id"]
     missing = sorted(set(desired) - set(ids))
     if missing:
-        raise RuntimeError(f"referenced 1Password items are missing: {', '.join(missing)}")
+        raise RuntimeError(
+            f"referenced 1Password items are missing: {', '.join(missing)}"
+        )
     return ids
 
 
