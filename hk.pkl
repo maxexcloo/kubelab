@@ -4,12 +4,9 @@ import "package://github.com/jdx/hk/releases/download/v2.8.0/hk@2.8.0#/Builtins.
 
 // Shared Mise check tasks cover Actions, formatting, Python, shell and whitespace.
 steps {
-  ["byte-order-marker"] = Builtins.byte_order_marker
   ["check-added-large-files"] = (Builtins.check_added_large_files) {
     check = "hk util check-added-large-files --maxkb=1024 {{files}}"
   }
-  ["check-case-conflict"] = Builtins.check_case_conflict
-  ["check-symlinks"] = Builtins.check_symlinks
   ["detect-private-key"] = Builtins.detect_private_key
   ["manifests"] = new Step {
     glob = Regex(#"^(apps|clusters|platform|scripts)/"#)
@@ -27,6 +24,4 @@ steps {
       scripts/check_service_metadata.sh "$manifest_directory"
       """
   }
-  ["mixed-line-ending"] = Builtins.mixed_line_ending
-  ["newlines"] = Builtins.newlines
 }
