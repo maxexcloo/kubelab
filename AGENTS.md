@@ -2,14 +2,6 @@
 
 ## Project Overview
 
-This repository owns Kubernetes resources reconciled by Flux and app-scoped
-integrations. `README.md` describes purpose and general usage; owning
-configuration records current deployment details. The separate `homelab`
-repository owns everything required to rebuild or reach a cluster while
-Kubernetes is unavailable.
-
-The `minilab` repository owns mini-app source and native workload manifests.
-Kubelab owns its Flux source, cluster selection and shared integration settings.
 Actual Up keeps its dependencies, serial operation queue, schedules and encrypted
 settings in its own repository; Kubelab deploys its published image.
 
@@ -21,15 +13,12 @@ settings in its own repository; Kubelab deploys its published image.
   ownership and `homelab` configuration as authoritative for substrate details.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
-- Pin remote manifests to stable release versions. Renovate previews upgrades
-  locally and opens pull requests for review.
 - Upgrade Flux manually with `flux install --export`; Renovate ignores
   `gotk-components.yaml`.
-- Reference 1Password items by title, never by UUID, in credential consumers and
-  publishers, including mini-app ExternalSecrets. Routes alias
-  `onepassword.excloo.dev/item` to their `gethomepage.dev/name`, optionally with
-  a bracketed qualifier that the card's location tag already shows. Renaming an item
-  is a coordinated change: rename it in 1Password and every reference together.
+- Routes alias `onepassword.excloo.dev/item` to their `gethomepage.dev/name`,
+  optionally with a bracketed qualifier that the card's location tag already
+  shows. Renaming a 1Password item is a coordinated change: rename it in
+  1Password and every reference together.
   Keep Kubernetes resource identities independent of item titles.
 - Publish generated credentials to 1Password with PushSecrets. Confidential
   PocketIDClients name the item that receives their generated
@@ -121,13 +110,6 @@ Define each value once:
 - The app-template chart version: `platform/components/app-template`.
 - Kubernetes client versions: Homelab's cluster data. Renovate groups the kubectl
   pins; merge them only once Homelab runs that Kubernetes version.
-
-### Documentation
-
-Keep root Markdown limited to `AGENTS.md` and `README.md`. Keep `README.md`
-focused on purpose and general usage; do not duplicate deployment inventories,
-application runbooks or instance-specific settings. Explain non-obvious behaviour
-near its owning configuration. Do not add a `docs/` tree.
 
 ## Sorting Exceptions
 

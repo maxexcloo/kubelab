@@ -22,11 +22,11 @@ project invariants and editing conventions.
 Install the [shared Mise configuration](https://github.com/maxexcloo/dotfiles#shared-tools--tasks)
 before running local Mise tasks.
 
-Install jq, wget and [Mise](https://mise.jdx.dev/), then install the configured tools
+Install wget and [Mise](https://mise.jdx.dev/), then install the configured tools
 and Git hooks:
 
 ```shell
-mise trust
+mise install
 mise run setup
 mise run check
 ```
@@ -54,7 +54,7 @@ releases in a different namespace, use `namespace/release` as the application.
 | `mise run check`                                     | Validate manifests, metadata, formatting, scripts and tests       |
 | `mise run deploy <cluster> <application> [revision]` | Fetch Git, reconcile apps and verify the selected workload        |
 | `mise run fmt`                                       | Format project files                                              |
-| `mise run setup`                                     | Install configured tools and Git hooks                            |
+| `mise run setup`                                     | Install Git hooks                                                 |
 | `mise run status <cluster> [application]`            | Show reconciliation status or watch an application's Helm release |
 
 Bootstrap is a separate step after infrastructure provisioning, and routine
