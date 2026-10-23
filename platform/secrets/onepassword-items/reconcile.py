@@ -366,6 +366,9 @@ def generated_field(label, *, field_format=None, value=None):
         field["purpose"] = label.upper()
     if value is None and field_format == "laravel":
         field["value"] = "base64:" + base64.b64encode(secrets.token_bytes(32)).decode()
+    elif value is None and field_format == "bifrost":
+        # Bifrost accepts virtual keys only with its own prefix.
+        field["value"] = "sk-bf-" + secrets.token_hex(24)
     elif value is None:
         field["generate"] = True
         field["recipe"] = {
@@ -429,7 +432,7 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
         | set(desired["constants"])
         | set(desired["defaults"])
     )
-    if set(desired["formats"].values()) - {"alphanumeric", "laravel"}:
+    if set(desired["formats"].values()) - {"alphanumeric", "bifrost", "laravel"}:
         raise RuntimeError(f"1Password item {title} has unsupported field formats")
     current["category"] = "LOGIN" if desired["login"] else "SERVER"
     current.setdefault("tags", ["Kubelab"])

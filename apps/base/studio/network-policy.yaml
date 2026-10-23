@@ -5,13 +5,13 @@ metadata:
 spec:
   ingress:
     - from:
-        # LiteLLM calls the MCP endpoint; Traefik serves the studio and result links.
+        # Bifrost calls the MCP endpoint; Traefik serves the studio and result links.
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: litellm
+              kubernetes.io/metadata.name: bifrost
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: litellm
+              app.kubernetes.io/name: bifrost
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking

@@ -1,0 +1,270 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bifrost
+spec:
+  releaseName: bifrost
+  interval: 30m
+  chart:
+    spec:
+      chart: bifrost
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: bifrost
+        namespace: flux-system
+      version: 2.1.45
+  values:
+    fullnameOverride: bifrost
+    envFrom:
+      - secretRef:
+          name: bifrost
+    extraEnv:
+      TZ: ${time_zone}
+    image:
+      pullPolicy: IfNotPresent
+      repository: docker.io/maximhq/bifrost
+      tag: v2.3.2
+    nodeSelector:
+      node.excloo.dev/network: internal
+    podSecurityContext:
+      fsGroup: 1000
+      fsGroupChangePolicy: OnRootMismatch
+      runAsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    rbac:
+      podDiscovery:
+        enabled: false
+    resources:
+      limits:
+        cpu: null
+        memory: 1Gi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      capabilities:
+        drop:
+          - ALL
+    serviceAccount:
+      automount: false
+      create: true
+    strategy:
+      type: Recreate
+    volumeMounts:
+      - name: temporary
+        mountPath: /tmp
+    volumes:
+      - name: temporary
+        emptyDir:
+          sizeLimit: 1Gi
+    # The startup probe replaces the chart's initial delays.
+    livenessProbe: &probe
+      httpGet:
+        path: /health
+        port: http
+      failureThreshold: 3
+      initialDelaySeconds: null
+      periodSeconds: 10
+      timeoutSeconds: 5
+    readinessProbe: *probe
+    startupProbe:
+      httpGet:
+        path: /health
+        port: http
+      failureThreshold: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+    # config.json seeds the SQLite store; dashboard edits persist until the matching
+    # entry here changes. Removing an entry here leaves it in the store.
+    bifrost:
+      client:
+        allowedOrigins:
+          - https://app.invalid
+        disableDbPingsInHealth: true
+        logRetentionDays: 30
+        # Chat requests carry only the tools their client sends; MCP stays on /mcp.
+        mcpDisableAutoToolInject: true
+      governance:
+        authConfig:
+          existingSecret: bifrost
+          isEnabled: true
+        virtualKeys:
+          - id: claude
+            name: Claude
+            value: env.VIRTUAL_KEY_CLAUDE
+            mcp_configs: &agent-mcp
+              - mcp_client_name: actual_budget
+                tools_to_execute: ["*"]
+              - mcp_client_name: home_assistant
+                tools_to_execute: ["*"]
+              - mcp_client_name: reactive_resume
+                tools_to_execute: ["*"]
+              - mcp_client_name: unifi_network
+                tools_to_execute: ["*"]
+          - id: codex
+            name: Codex
+            value: env.VIRTUAL_KEY_CODEX
+            mcp_configs: *agent-mcp
+          - id: librechat
+            name: LibreChat
+            value: env.VIRTUAL_KEY_LIBRECHAT
+            provider_configs: &local-text
+              - provider: ai
+                allowed_models: ["*"]
+                key_ids: ["*"]
+          - id: opencode
+            name: OpenCode
+            value: env.VIRTUAL_KEY_OPENCODE
+            mcp_configs: *agent-mcp
+          # The owner's personal key for LibreChat's restricted MCP servers.
+          - id: owner
+            name: Owner
+            allow_all_providers: true
+            value: env.VIRTUAL_KEY_OWNER
+            mcp_configs:
+              - mcp_client_name: actual_budget
+                tools_to_execute: ["*"]
+              - mcp_client_name: ai_control
+                tools_to_execute: ["*"]
+              - mcp_client_name: home_assistant
+                tools_to_execute: ["*"]
+              - mcp_client_name: reactive_resume
+                tools_to_execute: ["*"]
+              - mcp_client_name: unifi_network
+                tools_to_execute: ["*"]
+          - id: pi
+            name: Pi
+            value: env.VIRTUAL_KEY_PI
+            mcp_configs: *agent-mcp
+          - id: studio
+            name: Studio
+            value: env.VIRTUAL_KEY_STUDIO
+            provider_configs: *local-text
+      # Each server is served at /mcp/<endpointSlug>. Servers without headers accept
+      # only this pod through their network policies.
+      mcp:
+        enabled: true
+        clientConfigs:
+          - name: actual_budget
+            authType: none
+            httpConfig:
+              url: http://actual-budget-mcp.actual-budget-mcp.svc.cluster.local:3000/mcp
+            connectionType: http
+            endpointSlug: actual-budget
+            toolsToExecute: ["*"]
+          - name: ai_control
+            authType: headers
+            httpConfig:
+              url: http://studio.studio.svc.cluster.local:8787/mcp
+            connectionType: http
+            endpointSlug: ai-control
+            headers:
+              Authorization: env.AI_CONTROL_AUTHORIZATION
+            toolsToExecute: ["*"]
+          - name: home_assistant
+            authType: none
+            httpConfig:
+              url: http://home-assistant-mcp.home-assistant-mcp.svc.cluster.local:8086/mcp
+            connectionType: http
+            endpointSlug: home-assistant
+            toolsToExecute: ["*"]
+          - name: reactive_resume
+            authType: headers
+            httpConfig:
+              url: http://reactive-resume.reactive-resume.svc.cluster.local:3000/mcp
+            connectionType: http
+            endpointSlug: reactive-resume
+            headers:
+              X-API-Key: env.REACTIVE_RESUME_API_KEY
+            toolsToExecute: ["*"]
+          # Studio maps the forwarded user and conversation headers to its own accounts.
+          - name: studio
+            allowByDefault: true
+            allowedExtraHeaders:
+              - X-AI-User-Email
+              - X-AI-User-Id
+              - X-Studio-Conversation-Id
+            authType: headers
+            httpConfig:
+              url: http://studio.studio.svc.cluster.local:8787/mcp
+            connectionType: http
+            endpointSlug: studio
+            headers:
+              Authorization: env.STUDIO_MCP_AUTHORIZATION
+            # Studio waits up to 31 minutes for generation results.
+            toolExecutionTimeout: 1860
+            toolsToExecute:
+              - Cancel
+              - Generate
+              - Handover
+              - Models
+              - Result
+              - Reuse
+              - Review
+              - Upload
+          - name: unifi_network
+            authType: none
+            httpConfig:
+              url: http://unifi-network-mcp.unifi-network-mcp.svc.cluster.local:3000/mcp
+            connectionType: http
+            endpointSlug: unifi-network
+            toolsToExecute: ["*"]
+      providers:
+        # AI Control serves whichever local text model it has loaded as "text".
+        ai:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: ai
+              models: ["*"]
+              value: env.AI_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://${bento_address}:8000
+        cliproxyapi:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxyapi
+              models: ["*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        deepseek:
+          keys:
+            - name: deepseek
+              models: ["*"]
+              value: env.DEEPSEEK_API_KEY
+        opencode-go:
+          keys:
+            - name: opencode-go-1
+              models: ["*"]
+              value: env.OPENCODE_API_KEY_1
+            - name: opencode-go-2
+              models: ["*"]
+              value: env.OPENCODE_API_KEY_2
+        opencode-zen:
+          keys:
+            - name: opencode-zen-1
+              models: ["*"]
+              value: env.OPENCODE_API_KEY_1
+            - name: opencode-zen-2
+              models: ["*"]
+              value: env.OPENCODE_API_KEY_2
+        openrouter:
+          keys:
+            - name: openrouter
+              models: ["*"]
+              value: env.OPENROUTER_API_KEY
+    storage:
+      persistence:
+        existingClaim: data

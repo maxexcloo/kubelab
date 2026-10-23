@@ -10,7 +10,7 @@ spec:
           main:
             args:
               - ha-mcp-web
-            # The network policy restricts the default /mcp path to LiteLLM, so no
+            # The network policy restricts the default /mcp path to Bifrost, so no
             # secret path is needed.
             env:
               HA_MCP_DISABLE_SETTINGS_UI: "true"

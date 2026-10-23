@@ -393,6 +393,19 @@ class ReconcilerTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "unsupported field formats"):
             RECONCILER.normalise_item({}, "LaraPaper", desired, "vault")
 
+    def test_bifrost_virtual_key_is_generated_once_with_its_prefix(self):
+        desired = item_configuration(
+            fields={"virtual-key"},
+            formats={"virtual-key": "bifrost"},
+            generate={"virtual-key"},
+        )
+        current = RECONCILER.normalise_item({}, "Bifrost", desired, "vault")
+        self.assertRegex(current["fields"][0]["value"], r"^sk-bf-[0-9a-f]{48}$")
+        repeated = RECONCILER.normalise_item(
+            copy.deepcopy(current), "Bifrost", desired, "vault"
+        )
+        self.assertEqual(repeated, current)
+
     def test_unreferenced_fields_are_pruned_only_when_ready(self):
         desired = item_configuration(fields={"provider-api-key"}, login=True)
         current = {

@@ -19,11 +19,11 @@ spec:
     global:
       librechat:
         env:
-          - name: LITELLM_API_KEY
+          - name: BIFROST_API_KEY
             valueFrom:
               secretKeyRef:
-                key: LITELLM_API_KEY
-                name: litellm
+                key: BIFROST_API_KEY
+                name: bifrost
         existingSecretName: librechat
     image:
       pullPolicy: IfNotPresent

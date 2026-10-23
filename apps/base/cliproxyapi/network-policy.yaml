@@ -19,10 +19,10 @@ spec:
               app.kubernetes.io/name: librechat
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: litellm
+              kubernetes.io/metadata.name: bifrost
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: litellm
+              app.kubernetes.io/name: bifrost
       ports:
         - port: 8317
           protocol: TCP

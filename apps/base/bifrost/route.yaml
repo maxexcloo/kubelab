@@ -1,23 +1,23 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: litellm
+  name: bifrost
   annotations:
-    gethomepage.dev/description: MCP Gateway
+    gethomepage.dev/description: AI Gateway
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Artificial Intelligence
-    gethomepage.dev/href: https://app.invalid/ui/
-    gethomepage.dev/icon: sh-litellm
-    gethomepage.dev/name: &title LiteLLM
+    gethomepage.dev/href: https://app.invalid/
+    gethomepage.dev/icon: mdi-bridge-#ffffff
+    gethomepage.dev/name: &title Bifrost
     monitoring.excloo.dev/enabled: "true"
-    monitoring.excloo.dev/path: /health/liveliness
+    monitoring.excloo.dev/path: /health
     onepassword.excloo.dev/item: *title
   labels:
-    app.kubernetes.io/name: litellm
+    app.kubernetes.io/name: bifrost
 spec:
   hostnames:
-    - litellm.excloo.com
-    - litellm.${cluster_name}.excloo.dev
+    - bifrost.excloo.com
+    - bifrost.${cluster_name}.excloo.dev
   parentRefs:
     - name: private
       namespace: networking
@@ -37,5 +37,5 @@ spec:
             type: PathPrefix
             value: /studio/mcp/results
     - backendRefs:
-        - name: litellm
-          port: 4000
+        - name: bifrost
+          port: 8080
