@@ -3,7 +3,7 @@ kind: Kustomization
 metadata:
   name: crossplane-runtime
 spec:
-  path: ./platform/automation/crossplane-runtime
+  path: ./clusters/syd/crossplane-runtime
   dependsOn:
     - name: platform
   healthChecks:
