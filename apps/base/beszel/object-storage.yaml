@@ -20,7 +20,7 @@ spec:
 apiVersion: automation.excloo.dev/v1alpha1
 kind: B2ObjectStorage
 metadata:
-  name: application
+  name: beszel
 spec:
   item: Beszel
   keyName: kubelab-cluster-beszel

@@ -1,9 +1,9 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: application
+  name: librechat-admin
   labels:
-    app.kubernetes.io/name: application
+    app.kubernetes.io/name: librechat-admin
     gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:

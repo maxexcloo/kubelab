@@ -1,9 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: application
-  labels:
-    app.kubernetes.io/name: application
+  name: romm
 spec:
   ingress:
     - from:
@@ -28,8 +26,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: romm-database
-  labels:
-    app.kubernetes.io/name: application
 spec:
   ingress:
     - from:

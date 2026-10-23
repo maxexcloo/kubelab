@@ -1,8 +1,9 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: application
+  name: librechat
 spec:
+  releaseName: librechat
   interval: 30m
   chart:
     spec:

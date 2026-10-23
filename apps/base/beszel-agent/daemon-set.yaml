@@ -3,7 +3,7 @@ kind: DaemonSet
 metadata:
   name: beszel-agent
   labels:
-    app.kubernetes.io/name: application
+    app.kubernetes.io/name: beszel-agent
 spec:
   selector:
     matchLabels:

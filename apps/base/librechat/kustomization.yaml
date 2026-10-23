@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: librechat
 resources:
   - external-secrets.yaml
   - helm-release.yaml
@@ -19,6 +20,15 @@ configMapGenerator:
     files:
       - librechat.yaml
 replacements:
+  # The chart source lives in the namespace the release references.
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.chart.spec.sourceRef.namespace
+    targets:
+      - select:
+          kind: HelmRepository
+        fieldPaths:
+          - metadata.namespace
   - source:
       kind: Namespace
       fieldPath: metadata.name
@@ -74,9 +84,10 @@ components:
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
   - ../../components/private-dns
-  - ../../components/app-namespace
 patches:
   - path: backup.yaml
     target:
       kind: CronJob
       name: state-backup
+transformers:
+  - ../../transformers/cluster-scoped

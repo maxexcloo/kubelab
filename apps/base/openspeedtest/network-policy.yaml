@@ -1,9 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: application
-  labels:
-    app.kubernetes.io/name: application
+  name: openspeedtest
+  namespace: openspeedtest
 spec:
   ingress:
     - from:
