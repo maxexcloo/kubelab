@@ -24,6 +24,8 @@ spec:
     args:
       # Talos kubelets use self-signed serving certificates without IP SANs.
       - --kubelet-insecure-tls
+    nodeSelector:
+      node.excloo.dev/network: internal
     resources:
       limits:
         memory: 256Mi

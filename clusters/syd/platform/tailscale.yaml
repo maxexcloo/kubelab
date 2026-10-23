@@ -6,16 +6,6 @@ metadata:
 spec:
   values:
     operatorConfig:
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: node.excloo.dev/network
-                    operator: In
-                    values:
-                      - internal
       hostname: name.invalid-operator
       defaultTags:
         - tag:cluster-name.invalid-operator

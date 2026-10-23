@@ -26,3 +26,5 @@ spec:
                   drop: [ALL]
                 seccompProfile:
                   type: RuntimeDefault
+          nodeSelector:
+            node.excloo.dev/network: internal
