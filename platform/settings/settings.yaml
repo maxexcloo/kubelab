@@ -5,14 +5,9 @@ metadata:
   annotations:
     config.kubernetes.io/local-config: "true"
 data:
-  control_d_profile: 653224sydwhf
-  headlamp_client_id: headlamp
-  homelab_branch: main
-  homelab_repository: https://github.com/maxexcloo/homelab
   identity_host: id.excloo.com
   mail_domain: excloo.dev
   minilab_domain: mini.public-domain.invalid
   owner_email: max@excloo.com
-  pocket_id_api_authority: pocket-id.pocket-id.svc.cluster.local:1411
   public_domain: excloo.com
   time_zone: Australia/Sydney

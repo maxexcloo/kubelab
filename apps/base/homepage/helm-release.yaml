@@ -80,7 +80,9 @@ spec:
               - /source
               - /output
             env:
+              HOMELAB_BRANCH: main
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
+              HOMELAB_REPOSITORY: https://github.com/maxexcloo/homelab
               HOMEPAGE_CACHE_DIRECTORY: /tmp/homepage
               HOMEPAGE_REVALIDATE_URL: http://127.0.0.1:3000/api/revalidate
               KUBECTL: /tools/kubectl

@@ -26,20 +26,6 @@ replacements:
   - source:
       kind: ConfigMap
       name: cluster-settings
-      fieldPath: data.home_assistant_public_host
-    targets:
-      - select:
-          kind: CloudflareWAFPolicy
-          name: home-assistant
-          namespace: home-assistant
-        fieldPaths:
-          - spec.rule.expression
-        options:
-          delimiter: '"'
-          index: 1
-  - source:
-      kind: ConfigMap
-      name: cluster-settings
       fieldPath: data.cluster_name
     targets:
       - select:
@@ -405,3 +391,13 @@ replacements:
           kind: PersistentVolume
         fieldPaths:
           - spec.nodeAffinity.required.nodeSelectorTerms.0.matchExpressions.0.values.0
+  - source:
+      kind: ConfigMap
+      name: cluster-settings
+      fieldPath: data.control_d_profile
+    targets:
+      - select:
+          kind: CompositeResourceDefinition
+          name: privatednsrecords.automation.excloo.dev
+        fieldPaths:
+          - spec.versions.0.schema.openAPIV3Schema.properties.spec.properties.controlDProfileID.default

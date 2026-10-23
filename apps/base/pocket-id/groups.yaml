@@ -30,7 +30,7 @@ spec:
         method: POST
         url: .payload.baseUrl
     payload:
-      baseUrl: http://pocket-id.invalid/api/user-groups
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
       body: '{"friendlyName":"All Services","name":"all_services"}'
     secretInjectionConfigs:
       - keyMappings:
@@ -72,7 +72,7 @@ spec:
         method: PUT
         url: .payload.baseUrl + "/" + .payload.body.id
     payload:
-      baseUrl: http://pocket-id.invalid/api/user-groups
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
       body: '{"friendlyName":"All Services","id":"{{ pocket-id-group-all-services:pocket-id:id }}","name":"all_services"}'
   providerConfigRef:
     kind: ClusterProviderConfig
@@ -110,7 +110,7 @@ spec:
         method: POST
         url: .payload.baseUrl
     payload:
-      baseUrl: http://pocket-id.invalid/api/user-groups
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
       body: '{"friendlyName":"Books","name":"books"}'
     secretInjectionConfigs:
       - keyMappings:
@@ -152,7 +152,7 @@ spec:
         method: PUT
         url: .payload.baseUrl + "/" + .payload.body.id
     payload:
-      baseUrl: http://pocket-id.invalid/api/user-groups
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
       body: '{"friendlyName":"Books","id":"{{ pocket-id-group-books:pocket-id:id }}","name":"books"}'
   providerConfigRef:
     kind: ClusterProviderConfig
@@ -190,7 +190,7 @@ spec:
         method: POST
         url: .payload.baseUrl
     payload:
-      baseUrl: http://pocket-id.invalid/api/user-groups
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
       body: '{"friendlyName":"LLM","name":"llm"}'
     secretInjectionConfigs:
       - keyMappings:
@@ -232,7 +232,7 @@ spec:
         method: PUT
         url: .payload.baseUrl + "/" + .payload.body.id
     payload:
-      baseUrl: http://pocket-id.invalid/api/user-groups
+      baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
       body: '{"friendlyName":"LLM","id":"{{ pocket-id-group-llm:pocket-id:id }}","name":"llm"}'
   providerConfigRef:
     kind: ClusterProviderConfig

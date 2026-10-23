@@ -6,8 +6,8 @@ metadata:
 spec:
   values:
     operatorConfig:
-      hostname: name.invalid-operator
+      hostname: syd-operator
       defaultTags:
-        - tag:cluster-name.invalid-operator
+        - tag:cluster-syd-operator
     proxyConfig:
-      defaultTags: tag:cluster-name.invalid
+      defaultTags: tag:cluster-syd

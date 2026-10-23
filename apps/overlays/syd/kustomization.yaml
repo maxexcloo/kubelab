@@ -187,40 +187,6 @@ replacements:
           name: immich-private
         fieldPaths:
           - spec.hostnames.0
-  # Cluster settings resolve before this overlay's patches add these fields.
-  - source:
-      kind: ConfigMap
-      name: cluster-settings
-      fieldPath: data.atvloadly_gateway_host
-    targets:
-      - select:
-          kind: HelmRelease
-          name: atvloadly
-          namespace: atvloadly
-        fieldPaths:
-          - spec.values.controllers.main.containers.proxy.env.GATEWAY_HOST
-  - source:
-      kind: ConfigMap
-      name: cluster-settings
-      fieldPath: data.pod_subnet
-    targets:
-      - select:
-          kind: HelmRelease
-          name: atvloadly
-          namespace: atvloadly
-        fieldPaths:
-          - spec.values.controllers.main.containers.proxy.env.POD_SUBNET
-  - source:
-      kind: ConfigMap
-      name: cluster-settings
-      fieldPath: data.storage_node
-    targets:
-      - select:
-          kind: HelmRelease
-          name: syncthing
-          namespace: syncthing
-        fieldPaths:
-          - spec.values.defaultPodOptions.nodeSelector.[kubernetes.io/hostname]
   # Studio accepts its resolved private alias and serves result links on LiteLLM's host.
   - source:
       kind: HelmRelease

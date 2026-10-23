@@ -106,10 +106,11 @@ settings in its own repository; Kubelab deploys its published image.
 
 Define each value once and derive consumers with Kustomize replacements:
 
-- Cross-cluster settings: `platform/settings/settings.yaml`.
-- Cluster name and cluster-specific hosts, addresses and endpoints:
-  `clusters/<cluster>/settings/settings.yaml`. Derive names that embed the
-  cluster, such as zones and Tailscale devices and tags, from `cluster_name`.
+- Cross-cluster settings with several consumers: `platform/settings/settings.yaml`.
+- Cluster name and cluster-specific values with several consumers:
+  `clusters/<cluster>/settings/settings.yaml`.
+- A value with one consumer lives where it is used; cluster-specific files write
+  it directly.
 - Write derived values as `.invalid` placeholders; the checks fail when one
   survives rendering. Flux substitution is strict, so missing variables fail.
 - App hostnames: the app's route. The shared route transformers derive its

@@ -59,14 +59,14 @@ spec:
           spec:
             externalTrafficPolicy: Local
             externalIPs:
-              - public-direct-address.invalid
+              - 10.20.0.4
             internalTrafficPolicy: Local
             type: ClusterIP
         private:
           annotations:
-            tailscale.com/hostname: name.invalid-ingress
+            tailscale.com/hostname: syd-ingress
             tailscale.com/proxy-group: ingress
-            tailscale.com/tags: tag:cluster-name.invalid
+            tailscale.com/tags: tag:cluster-syd
           spec:
             allocateLoadBalancerNodePorts: false
             internalTrafficPolicy: Local
