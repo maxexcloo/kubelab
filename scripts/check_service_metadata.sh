@@ -15,18 +15,18 @@ resources_file="${temporary_directory}/resources.jsonl"
 route_file="${temporary_directory}/routes.json"
 scripts/render_service_inventory.sh --all-routes --manifest-directory "${manifest_directory}" >"${route_file}"
 : >"${resources_file}"
-while IFS= read -r cluster_directory; do
-  cluster="${cluster_directory##*/}"
+for cluster_file in "${manifest_directory}"/clusters/*.yaml; do
+  cluster="$(basename "${cluster_file}" .yaml)"
   while IFS= read -r target; do
     CLUSTER="${cluster}" yq eval -I=0 -N -o=json '
       select(.kind == "Namespace" or .kind == "PocketIDClient" or .kind == "PrivateDNSRecord") |
       .cluster = strenv(CLUSTER)
     ' "${manifest_directory}/${target#./}.yaml" | sed '/^null$/d; /^$/d' >>"${resources_file}"
   done < <(
-    yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .spec.sourceRef.name == "flux-system") | .spec.path' "${manifest_directory}/clusters/${cluster}.yaml" |
+    yq eval -N -r 'select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization") | .spec.path' "${cluster_file}" |
       sort -u
   )
-done < <(find clusters -maxdepth 1 -mindepth 1 -type d | sort)
+done
 
 jq -e \
   --slurpfile resources "${resources_file}" '

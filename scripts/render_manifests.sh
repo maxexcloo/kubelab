@@ -2,21 +2,11 @@
 set -euo pipefail
 
 # Flylab's Gatus renderer reads the per-cluster app and platform outputs.
-manifest_directory="${1:?Usage: render_manifests.sh <directory> [cluster ...]}"
-shift
-clusters=("$@")
-if ((${#clusters[@]} == 0)); then
-  while IFS= read -r cluster_directory; do
-    clusters+=("${cluster_directory##*/}")
-  done < <(find clusters -maxdepth 1 -mindepth 1 -type d | sort)
-fi
+manifest_directory="${1:?Usage: render_manifests.sh <directory>}"
 
-for cluster in "${clusters[@]}"; do
-  if [[ ! -d "apps/overlays/${cluster}" || ! -d "clusters/${cluster}/platform" ]]; then
-    echo "Unknown or incomplete cluster: ${cluster}" >&2
-    exit 2
-  fi
-  mkdir -p "${manifest_directory}/clusters"
+mkdir -p "${manifest_directory}/clusters"
+for cluster_directory in clusters/*/; do
+  cluster="$(basename "${cluster_directory}")"
   kubectl kustomize "clusters/${cluster}" >"${manifest_directory}/clusters/${cluster}.yaml"
 done
 

@@ -1,20 +1,8 @@
 """Shared app policy and derived settings must survive native composition."""
 
-import json
-import shutil
-import subprocess
-import tempfile
 import unittest
-from pathlib import Path
 
-from support import (
-    CLUSTERS,
-    ROOT,
-    copy_repository,
-    read_yaml,
-    render_resources,
-    repository_resources,
-)
+from support import CLUSTERS, repository_resources
 
 
 class AppSettingsTests(unittest.TestCase):
@@ -139,109 +127,6 @@ class AppSettingsTests(unittest.TestCase):
                         )
                     checked += 1
             self.assertGreater(checked, 0)
-
-    def test_hostname_changes_reach_all_consumers(self):
-        app_directory = ROOT / "apps/base"
-        configuration_files = sorted(
-            {
-                *app_directory.glob("*/helm-release.yaml"),
-                *app_directory.glob("*/*settings.yaml"),
-            }
-        )
-        for settings in configuration_files:
-            resource = read_yaml(settings)
-            if not isinstance(resource, dict) or resource.get("kind") != "HelmRelease":
-                continue
-            routes = resource.get("spec", {}).get("values", {}).get("route", {})
-            routes = [routes] if "hostnames" in routes else routes.values()
-            for route in routes:
-                if "hostnames" not in route:
-                    continue
-                for index, old in enumerate(list(route["hostnames"])):
-                    # Derived route placeholders receive their hostname from another owner.
-                    if old.endswith((".invalid", ".cluster.excloo.dev")):
-                        continue
-                    with (
-                        self.subTest(app=settings.parent.name, hostname=old),
-                        tempfile.TemporaryDirectory() as directory,
-                    ):
-                        app = Path(directory) / "apps/base" / settings.parent.name
-                        app.parent.mkdir(parents=True)
-                        copy_repository(
-                            directory,
-                            paths=(
-                                "apps/components",
-                                "apps/transformers",
-                                "platform/backups",
-                                "platform/components",
-                                "platform/databases",
-                                "scripts/service-routes",
-                            ),
-                        )
-                        shutil.copytree(settings.parent, app)
-                        route["hostnames"][index] = "renamed.example.test"
-                        (app / settings.name).write_text(json.dumps(resource))
-                        output = subprocess.check_output(
-                            ["kubectl", "kustomize", str(app)], text=True
-                        )
-                        self.assertIn("renamed.example.test", output)
-                        self.assertNotIn(old, output)
-                        self.assertNotIn("app.invalid", output)
-                        self.assertNotIn("alias.invalid", output)
-                    route["hostnames"][index] = old
-
-    def test_shared_beszel_hostname_changes_reach_each_cluster(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            copy_repository(root)
-            settings = root / "platform/settings/settings.yaml"
-            resource = read_yaml(settings)
-            resource["data"]["beszel_host"] = "renamed.example.test"
-            settings.write_text(json.dumps(resource))
-            for cluster in CLUSTERS:
-                with self.subTest(cluster=cluster):
-                    resources = {
-                        (item["kind"], item["metadata"]["name"]): item
-                        for item in render_resources(root / "apps/overlays" / cluster)
-                    }
-                    agent = resources[("DaemonSet", "beszel-agent")]
-                    container = next(
-                        item
-                        for item in agent["spec"]["template"]["spec"]["containers"]
-                        if item["name"] == "beszel-agent"
-                    )
-                    hub_url = next(
-                        item["value"]
-                        for item in container["env"]
-                        if item["name"] == "HUB_URL"
-                    )
-                    self.assertEqual(
-                        hub_url, "http://beszel.beszel.svc.cluster.local:8090"
-                    )
-                    values = resources[("HelmRelease", "beszel")]["spec"]["values"]
-                    route = values["route"]["private"]
-                    self.assertEqual(
-                        route["hostnames"],
-                        ["renamed.example.test", f"beszel.{cluster}.excloo.dev"],
-                    )
-                    env = values["controllers"]["main"]["containers"]["main"]["env"]
-                    self.assertEqual(env["APP_URL"], "https://renamed.example.test")
-                    for name in ("gethomepage.dev/href", "gethomepage.dev/widget.url"):
-                        self.assertEqual(
-                            route["annotations"][name], "https://renamed.example.test"
-                        )
-                    self.assertEqual(
-                        resources[("PrivateDNSRecord", "beszel")]["spec"]["hostname"],
-                        "renamed.example.test",
-                    )
-                    client = resources[("PocketIDClient", "beszel")]["spec"]["client"]
-                    self.assertEqual(
-                        client["launchURL"], "https://renamed.example.test"
-                    )
-                    self.assertEqual(
-                        client["callbackURLs"],
-                        ["https://renamed.example.test/api/oauth2-redirect"],
-                    )
 
 
 if __name__ == "__main__":

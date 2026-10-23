@@ -17,14 +17,6 @@ Current placement, endpoints, storage and credentials are in the configuration
 that owns them. This README covers the general workflows, and `AGENTS.md` has the
 project invariants and editing conventions.
 
-## Repository Layout
-
-- `apps/`: workload bases, integration declarations and cluster overlays.
-- `clusters/`: Flux entry points and cluster-specific configuration.
-- `platform/`: shared controllers, sources and automation implementations.
-- `scripts/`: bootstrap, rendering and validation commands.
-- `tests/`: focused configuration and integration checks.
-
 ## Setup
 
 Install the [shared Mise configuration](https://github.com/maxexcloo/dotfiles#shared-tools--tasks)
@@ -52,30 +44,22 @@ separately.
 ## Deployment
 
 Merge reviewed pull requests into `main` and Flux reconciles them automatically.
-To fetch and reconcile straight away, use the deploy task with an existing
-cluster and the affected application. Verification checks the exact remote `main`
-revision and the HelmRelease at its current generation. Helm retains its workload
-health checks. Supply a full commit SHA to verify a particular merge; a superseding revision fails explicitly.
-For releases in a different namespace, use `namespace/release` as the application.
+To reconcile straight away and verify the application at the merged revision,
+use the deploy task with an existing cluster and the affected application. For
+releases in a different namespace, use `namespace/release` as the application.
 
-| Command                                              | Purpose                                                              |
-| ---------------------------------------------------- | -------------------------------------------------------------------- |
-| `mise run bootstrap <cluster>`                       | Install networking, bootstrap credentials and start Flux             |
-| `mise run check`                                     | Validate manifests, metadata, formatting, scripts and reconciliation |
-| `mise run deploy <cluster> <application> [revision]` | Fetch Git, reconcile apps and verify the selected workload           |
-| `mise run fmt`                                       | Format project files                                                 |
-| `mise run setup`                                     | Install configured tools and Git hooks                               |
-| `mise run status <cluster> [application]`            | Show reconciliation status or watch an application's Helm release    |
+| Command                                              | Purpose                                                           |
+| ---------------------------------------------------- | ----------------------------------------------------------------- |
+| `mise run bootstrap <cluster>`                       | Install networking, bootstrap credentials and start Flux          |
+| `mise run check`                                     | Validate manifests, metadata, formatting, scripts and tests       |
+| `mise run deploy <cluster> <application> [revision]` | Fetch Git, reconcile apps and verify the selected workload        |
+| `mise run fmt`                                       | Format project files                                              |
+| `mise run setup`                                     | Install configured tools and Git hooks                            |
+| `mise run status <cluster> [application]`            | Show reconciliation status or watch an application's Helm release |
 
 Bootstrap is a separate step after infrastructure provisioning, and routine
-application upgrades don't need it. Delivery waits for the affected application
-without waiting for unrelated releases. The reported duration measures the
-verification command, not merge-to-readiness time. Check the application's main
-workflow separately. For an explicit controller check, use
-`kubectl --context <cluster> -n <namespace> rollout status deployment/<name>`.
-
-CI validates changes and refreshes external monitoring through the configured
-delivery workflow. Flux handles routine cluster deployments.
+application upgrades don't need it. CI validates changes and refreshes external
+monitoring; Flux handles routine cluster deployments.
 
 ## Updates & Recovery
 

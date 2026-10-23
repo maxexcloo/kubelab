@@ -8,10 +8,14 @@ spec:
       main:
         containers:
           main:
+            # SignTools writes this configuration, including the GitHub token, at
+            # startup; restart the workload after credential changes.
             args:
               - -config
               - /tmp/signer-cfg.yaml
             env:
+              # Only devices that reach the private gateway can use the web UI;
+              # worker endpoints keep SignTools' generated bearer key.
               BASIC_AUTH_ENABLE: "false"
               BUILDER_GITHUB_ENABLE: "true"
               BUILDER_GITHUB_ORG_NAME: maxexcloo
@@ -50,6 +54,7 @@ spec:
         name: signtools-profile
         type: secret
         globalMounts:
+          # A stable profile ID keeps saved apps associated across restarts.
           - path: /data/profiles/developer
             readOnly: true
       temporary:

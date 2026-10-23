@@ -49,7 +49,9 @@ cp "$ARCHIVE_FIXTURE" "$2"
         def snapshot():
             with tarfile.open(archive, "w:gz") as output:
                 for directory in ("apps", "clusters"):
-                    output.add(self.directory / directory, arcname="snapshot/" + directory)
+                    output.add(
+                        self.directory / directory, arcname="snapshot/" + directory
+                    )
 
         first = "a" * 40
         second = "b" * 40
@@ -58,9 +60,12 @@ cp "$ARCHIVE_FIXTURE" "$2"
         result = self.render(**environment)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Local", self.services())
-        self.assertEqual(downloads.read_text().splitlines(), [
-            "https://codeload.github.com/example/kubelab/tar.gz/" + first,
-        ])
+        self.assertEqual(
+            downloads.read_text().splitlines(),
+            [
+                "https://codeload.github.com/example/kubelab/tar.gz/" + first,
+            ],
+        )
         self.write_routes("mbk", [route("Future")])
         snapshot()
         result = self.render(**environment)
@@ -73,18 +78,25 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Future", self.services())
         self.assertNotIn("Local", self.services())
-        self.assertEqual(downloads.read_text().splitlines()[-1],
-                         "https://codeload.github.com/example/kubelab/tar.gz/" + second)
+        self.assertEqual(
+            downloads.read_text().splitlines()[-1],
+            "https://codeload.github.com/example/kubelab/tar.gz/" + second,
+        )
         before = {p.name: p.read_bytes() for p in self.output.iterdir()}
         revision_file.write_text("main@sha1:" + "c" * 40)
-        self.assertNotEqual(self.render(**(environment | {"FAIL_DOWNLOAD": "true"})).returncode, 0)
+        self.assertNotEqual(
+            self.render(**(environment | {"FAIL_DOWNLOAD": "true"})).returncode, 0
+        )
         self.assertEqual((cache / "revision").read_text().strip(), second)
-        self.assertEqual(before, {p.name: p.read_bytes() for p in self.output.iterdir()})
+        self.assertEqual(
+            before, {p.name: p.read_bytes() for p in self.output.iterdir()}
+        )
         revision_file.write_text("main@sha1:invalid")
         self.assertNotEqual(self.render(**environment).returncode, 0)
         self.assertEqual(len(downloads.read_text().splitlines()), 3)
-        self.assertEqual(before, {p.name: p.read_bytes() for p in self.output.iterdir()})
-
+        self.assertEqual(
+            before, {p.name: p.read_bytes() for p in self.output.iterdir()}
+        )
 
     def test_minilab_follow_cluster_selection_and_homepage_annotations(self):
         minilab = self.directory / "minilab"
@@ -93,16 +105,23 @@ cp "$ARCHIVE_FIXTURE" "$2"
             directory.mkdir(parents=True)
             (directory / "kustomization.yaml").write_text("resources: [app.yaml]\n")
             # Flux substitutes the domain; the dashboard must render it too.
-            app = route(f"Minilab: {name}", href=f"https://{name.lower()}.${{MINILAB_DOMAIN}}")
+            app = route(
+                f"Minilab: {name}", href=f"https://{name.lower()}.${{MINILAB_DOMAIN}}"
+            )
             app["metadata"].update({"name": name.lower(), "namespace": name.lower()})
             (directory / "app.yaml").write_text(json.dumps(app))
             source = {
-                "apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository",
+                "apiVersion": "source.toolkit.fluxcd.io/v1",
+                "kind": "GitRepository",
                 "metadata": {"name": "minilab", "namespace": "flux-system"},
-                "spec": {"url": "https://github.com/example/minilab.git", "ref": {"branch": "deploy"}},
+                "spec": {
+                    "url": "https://github.com/example/minilab.git",
+                    "ref": {"branch": "deploy"},
+                },
             }
             selection = {
-                "apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization",
+                "apiVersion": "kustomize.toolkit.fluxcd.io/v1",
+                "kind": "Kustomization",
                 "metadata": {"name": "minilab", "namespace": "flux-system"},
                 "spec": {
                     "path": f"./clusters/{cluster}",
@@ -118,11 +137,18 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Existing", services)
         self.assertEqual(services["Feeds"]["href"], "https://feeds.example.net")
         groups = self.groups()
-        self.assertEqual([next(iter(card)) for card in groups["Mini"]], ["Budget", "Feeds"])
+        self.assertEqual(
+            [next(iter(card)) for card in groups["Mini"]], ["Budget", "Feeds"]
+        )
         # Only the Home group states the source; cluster groups keep the prefix.
-        self.assertIn("Minilab: Feeds", [next(iter(card)) for card in self.groups("Clusters")["syd"]])
+        self.assertIn(
+            "Minilab: Feeds",
+            [next(iter(card)) for card in self.groups("Clusters")["syd"]],
+        )
         self.assertNotIn("Feeds", [next(iter(card)) for card in groups["Applications"]])
-        self.assertEqual(read_yaml(self.output / "settings.yaml")["layout"]["Home"]["tab"], "Home")
+        self.assertEqual(
+            read_yaml(self.output / "settings.yaml")["layout"]["Home"]["tab"], "Home"
+        )
         # Newly deployed apps appear on refresh; removed apps disappear without
         # maintaining a second list of dashboard cards.
         path = minilab / "clusters/syd/app.yaml"
@@ -143,26 +169,39 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertNotEqual(self.render(MINILAB_DIRECTORY=str(minilab)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
 
-
     def test_required_inputs_fail_without_publishing(self):
-        for name in ("HOMELAB_INFRASTRUCTURE_FILE", "HOMEPAGE_ROUTE_SCRIPT", "KUBECTL"):
+        for name in ("HOMELAB_INFRASTRUCTURE_FILE", "KUBECTL"):
             with self.subTest(name=name):
                 result = self.render(**{name: ""})
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(f"{name} is required", result.stderr)
                 self.assertFalse(self.output.exists())
 
-
     def test_unchanged_refresh_and_invalid_input_preserve_files(self):
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
-        before = {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.output.iterdir()}
+        before = {
+            p.name: (p.read_bytes(), p.stat().st_mtime_ns)
+            for p in self.output.iterdir()
+        }
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(before, {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.output.iterdir()})
+        self.assertEqual(
+            before,
+            {
+                p.name: (p.read_bytes(), p.stat().st_mtime_ns)
+                for p in self.output.iterdir()
+            },
+        )
         (self.directory / "apps/overlays/syd/routes.yaml").write_text("[broken yaml\n")
         self.assertNotEqual(self.render().returncode, 0)
-        self.assertEqual(before, {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in self.output.iterdir()})
+        self.assertEqual(
+            before,
+            {
+                p.name: (p.read_bytes(), p.stat().st_mtime_ns)
+                for p in self.output.iterdir()
+            },
+        )
 
 
 if __name__ == "__main__":
