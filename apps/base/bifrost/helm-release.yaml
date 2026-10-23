@@ -118,7 +118,7 @@ spec:
             value: env.VIRTUAL_KEY_LIBRECHAT
             provider_configs: &local-text
               - provider: ai
-                allowed_models: ["*"]
+                allowed_models: ["text"]
                 key_ids: ["*"]
           - id: opencode
             name: OpenCode
@@ -218,13 +218,14 @@ spec:
             endpointSlug: unifi-network
             toolsToExecute: ["*"]
       providers:
-        # AI Control serves whichever local text model it has loaded as "text".
+        # AI Control serves whichever local text model it has loaded as "text", which it
+        # does not list. Bifrost resolves "*" against listed models, so name it explicitly.
         ai:
           custom_provider_config:
             base_provider_type: openai
           keys:
             - name: ai
-              models: ["*"]
+              models: ["text"]
               value: env.AI_API_KEY
           network_config:
             allow_private_network: true
