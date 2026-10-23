@@ -179,21 +179,6 @@ mcpServers:
         title: Personal API Key
     headers:
       x-bf-vk: "{{ACTUAL_BUDGET_API_KEY}}"
-  ai-control:
-    type: streamable-http
-    description: Manage AI workloads and preview GPU allocation changes.
-    requiresOAuth: false
-    startup: false
-    title: AI Control
-    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/ai-control
-    # Admin access stays with individually authorised keys, never the shared chat key.
-    customUserVars:
-      AI_CONTROL_API_KEY:
-        description: Your personal Bifrost virtual key authorised for AI Control. Ordinary chat keys cannot access these tools.
-        sensitive: true
-        title: Admin API Key
-    headers:
-      x-bf-vk: "{{AI_CONTROL_API_KEY}}"
   home-assistant:
     type: streamable-http
     description: Inspect and control home devices, automations and dashboards.
