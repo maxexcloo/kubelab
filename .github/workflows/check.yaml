@@ -26,7 +26,7 @@ jobs:
       - name: Set Up Shared Tools & Tasks
         uses: maxexcloo/dotfiles/.github/actions/mise@main
         with:
-          tools: actionlint gh helm hk jq kubeconform kubectl node@24 npm:renovate oxfmt python ruff shellcheck yq
+          tools: actionlint flux2 gh helm hk jq kubeconform kubectl node@24 npm:renovate oxfmt python ruff shellcheck yq
       - name: Run Checks
         run: mise run check
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
