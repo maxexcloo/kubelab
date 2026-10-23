@@ -58,7 +58,7 @@ spec:
             main:
               image:
                 repository: ghcr.io/immich-app/immich-machine-learning
-                tag: &version v3.3.4
+                tag: &version v3.3.5
               resources:
                 limits:
                   memory: 4Gi
