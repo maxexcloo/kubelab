@@ -1,8 +1,11 @@
 """Small helpers for native manifest fixtures and repository renders."""
 
+import atexit
 import copy
 import json
+import shutil
 import subprocess
+import tempfile
 from functools import cache
 from pathlib import Path
 
@@ -29,17 +32,20 @@ def read_resources(path):
     return [document for document in json.loads(documents) if document]
 
 
-def render_resources(path):
-    rendered = subprocess.check_output(["kubectl", "kustomize", str(path)], text=True)
-    documents = subprocess.check_output(
-        ["yq", "ea", "-o=json", "[.]"], input=rendered, text=True
+@cache
+def _rendered_manifests():
+    # Render as Flux builds each path, including its postBuild substitutions.
+    directory = Path(tempfile.mkdtemp(prefix="kubelab-render."))
+    atexit.register(shutil.rmtree, directory, ignore_errors=True)
+    subprocess.run(
+        [ROOT / "scripts/render_manifests.sh", directory], check=True, cwd=ROOT
     )
-    return [document for document in json.loads(documents) if document]
+    return directory
 
 
 @cache
 def _repository_resources(relative):
-    return render_resources(ROOT / relative)
+    return read_resources(_rendered_manifests() / f"{relative}.yaml")
 
 
 def repository_resources(relative):
