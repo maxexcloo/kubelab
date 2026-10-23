@@ -61,7 +61,8 @@ spec:
             command:
               - /bin/cp
               - /usr/local/bin/kubectl
-              - /tools/kubectl
+              - /usr/local/bin/flux
+              - /tools/
             image:
               repository: ghcr.io/fluxcd/flux-cli
               tag: v2.9.6
@@ -80,6 +81,7 @@ spec:
               - /source
               - /output
             env:
+              FLUX: /tools/flux
               HOMELAB_BRANCH: main
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
               HOMELAB_REPOSITORY: https://github.com/maxexcloo/homelab

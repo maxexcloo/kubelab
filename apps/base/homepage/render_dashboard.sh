@@ -2,6 +2,7 @@
 set -eu
 : "${HOMEPAGE_CLUSTER:?HOMEPAGE_CLUSTER is required}"
 : "${KUBECTL:?KUBECTL is required}"
+: "${FLUX:?FLUX is required}"
 export HOMEPAGE_CLUSTER
 # KUBELAB_DIRECTORY, HOMELAB_DIRECTORY, MINILAB_DIRECTORY and
 # HOMEPAGE_GATUS_STATUSES_FILE select local inputs for tests. Unset or empty,
@@ -63,11 +64,15 @@ applied_revision() (
   fi
   printf '%s' "$revision"
 )
-render_routes() {
-  "$KUBECTL" kustomize "$1" > "$temporary_directory/manifests.yaml"
+render_routes() (
+  name=$(yq -r '.metadata.name' "$1")
+  target=$(yq -r '.spec.path' "$1")
+  cd "$2"
+  "$FLUX" build kustomization "$name" --dry-run --strict-substitute --in-memory-build \
+    --kustomization-file "$1" --path "$target" > "$temporary_directory/manifests.yaml"
   CLUSTER="$cluster" yq --from-file "$script_directory/service_routes.yq" -I=0 -N -o=json \
     "$temporary_directory/manifests.yaml"
-}
+)
 
 kubelab_directory=${KUBELAB_DIRECTORY:-}
 
@@ -104,8 +109,13 @@ minilab_directory=${MINILAB_DIRECTORY:-}
 for overlay in "$kubelab_directory"/apps/overlays/*; do
   [ -d "$overlay" ] || continue
   cluster=${overlay##*/}
+  "$KUBECTL" kustomize "$kubelab_directory/clusters/$cluster" > "$temporary_directory/cluster.yaml"
   for target in "$overlay" "$kubelab_directory/clusters/$cluster/platform"; do
-    render_routes "$target" >> "$temporary_directory/routes.json"
+    # Match Flux's postBuild substitutions before reading paths or route metadata.
+    TARGET="./${target#"$kubelab_directory/"}" yq -e '
+      select(.kind == "Kustomization" and .spec.path == strenv(TARGET))
+    ' "$temporary_directory/cluster.yaml" > "$temporary_directory/kustomization.yaml"
+    render_routes "$temporary_directory/kustomization.yaml" "$kubelab_directory" >> "$temporary_directory/routes.json"
     minilab_path=$(yq 'select(.kind == "Kustomization" and .metadata.name == "minilab") | .spec.path' "$temporary_directory/manifests.yaml")
     [ -n "$minilab_path" ] || continue
     if [ -z "$minilab_directory" ]; then
@@ -119,22 +129,10 @@ for overlay in "$kubelab_directory"/apps/overlays/*; do
       minilab_directory="$temporary_directory/minilab"
       download_repository "$minilab_repository" "$minilab_revision" "$minilab_directory"
     fi
-    # Apply the minilab Kustomization's postBuild substitution, as Flux does,
-    # and fail like its strict mode when a variable is missing.
-    substitute=$(yq -o=json -I=0 'select(.kind == "Kustomization" and .metadata.name == "minilab") |
-      .spec.postBuild.substitute // {}' "$temporary_directory/manifests.yaml")
-    render_routes "$minilab_directory/$minilab_path" > "$temporary_directory/mini-app-routes.json"
-    # shellcheck disable=SC2016
-    SUBSTITUTE="$substitute" yq -i -p=json -o=json -I=0 '
-      (strenv(SUBSTITUTE) | from_json | to_entries) as $variables |
-      (.. | select(tag == "!!str")) |= (. as $value | $variables[] as $variable ireduce ($value;
-        split("${" + $variable.key + "}") | join($variable.value)))
-    ' "$temporary_directory/mini-app-routes.json"
-    # shellcheck disable=SC2016
-    if grep -o '\${[^}]*}' "$temporary_directory/mini-app-routes.json" >&2; then
-      echo 'Missing Minilab substitution variables' >&2
-      exit 1
-    fi
+    yq 'select(.kind == "Kustomization" and .metadata.name == "minilab")' \
+      "$temporary_directory/manifests.yaml" > "$temporary_directory/minilab-kustomization.yaml"
+    render_routes "$temporary_directory/minilab-kustomization.yaml" "$minilab_directory" \
+      > "$temporary_directory/mini-app-routes.json"
     # Minilab prefixes its route names, which the Home group already states.
     yq -p=json -o=json -I=0 '.annotations."gethomepage.dev/group" = "Mini" |
       .homeName = (.annotations."gethomepage.dev/name" | sub("^[^:]*: "; ""))' \

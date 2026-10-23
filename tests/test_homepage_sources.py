@@ -124,8 +124,10 @@ cp "$ARCHIVE_FIXTURE" "$2"
                 "kind": "Kustomization",
                 "metadata": {"name": "minilab", "namespace": "flux-system"},
                 "spec": {
-                    "path": f"./clusters/{cluster}",
-                    "postBuild": {"substitute": {"MINILAB_DOMAIN": "example.net"}},
+                    "path": "./clusters/${cluster_name}",
+                    "postBuild": {
+                        "substitute": {"MINILAB_DOMAIN": "mini.${public_domain}"}
+                    },
                 },
             }
             self.write_routes(cluster, [route("Existing"), selection, source])
@@ -135,7 +137,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertIn("Budget", services)
         self.assertIn("Feeds", services)
         self.assertIn("Existing", services)
-        self.assertEqual(services["Feeds"]["href"], "https://feeds.example.net")
+        self.assertEqual(services["Feeds"]["href"], "https://feeds.mini.example.net")
         groups = self.groups()
         self.assertEqual(
             [next(iter(card)) for card in groups["Mini"]], ["Budget", "Feeds"]
@@ -161,7 +163,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         path.write_text(json.dumps(route("Unset", href="https://unset.${UNSET}")))
         result = self.render(MINILAB_DIRECTORY=str(minilab))
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("${UNSET}", result.stderr)
+        self.assertIn("UNSET", result.stderr)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
         path.write_text(json.dumps(route("New Tool")))
         before = (self.output / "services.yaml").read_bytes()
@@ -170,7 +172,7 @@ cp "$ARCHIVE_FIXTURE" "$2"
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
 
     def test_required_inputs_fail_without_publishing(self):
-        for name in ("HOMELAB_INFRASTRUCTURE_FILE", "KUBECTL"):
+        for name in ("FLUX", "HOMELAB_INFRASTRUCTURE_FILE", "KUBECTL"):
             with self.subTest(name=name):
                 result = self.render(**{name: ""})
                 self.assertNotEqual(result.returncode, 0)
