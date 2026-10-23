@@ -6,9 +6,9 @@ metadata:
 spec:
   secretName: wildcard
   dnsNames:
-    - "*.public-domain.invalid"
-    - "*.minilab-domain.invalid"
-    - "*.cluster.excloo.dev"
+    - "*.${public_domain}"
+    - "*.mini.${public_domain}"
+    - "*.syd.excloo.dev"
   issuerRef:
     kind: ClusterIssuer
     name: letsencrypt-dns01

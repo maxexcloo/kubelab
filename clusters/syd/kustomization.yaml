@@ -61,3 +61,5 @@ patches:
       group: kustomize.toolkit.fluxcd.io
       kind: Kustomization
       name: flux-system
+components:
+  - settings

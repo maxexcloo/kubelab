@@ -7,17 +7,16 @@ metadata:
     gethomepage.dev/description: Network Speed Test
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Operations
-    gethomepage.dev/href: https://app.invalid
+    gethomepage.dev/href: https://openspeedtest-kimbap.syd.excloo.dev
     gethomepage.dev/icon: sh-openspeedtest
     gethomepage.dev/name: OpenSpeedTest (syd/kimbap)
     gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-kimbap
     monitoring.excloo.dev/enabled: "true"
   labels:
     app.kubernetes.io/name: openspeedtest-kimbap
-    gateway.excloo.dev/internal-alias: primary
 spec:
   hostnames:
-    - openspeedtest-kimbap.cluster.excloo.dev
+    - openspeedtest-kimbap.syd.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

@@ -17,7 +17,7 @@ spec:
                   values:
                     - internal
     domainFilters:
-      - public-domain.invalid
+      - ${public_domain}
     labelFilter: gateway.excloo.dev/private-dns=true
     managedRecordTypes:
       - CNAME

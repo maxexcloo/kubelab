@@ -10,7 +10,7 @@ spec:
           main:
             env:
               APP_URL: https://app.invalid
-              TZ: time-zone.invalid
+              TZ: ${time_zone}
               USER_CREATION: "true"
             envFrom:
               - secretRef:

@@ -24,5 +24,17 @@ patches:
     target:
       kind: CronJob
       name: state-backup
-transformers:
-  - routing
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.main.containers.main.env.ACTUAL_UP_PUBLIC_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+          - spec.values.route.private.annotations.[gethomepage.dev/siteMonitor]
+        options:
+          delimiter: /
+          index: 2

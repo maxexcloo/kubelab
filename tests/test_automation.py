@@ -352,30 +352,15 @@ class PrivateDNSCompositionTests(unittest.TestCase):
     def test_each_cluster_discovers_its_own_tailscale_addresses(self):
         for cluster in CLUSTERS:
             with self.subTest(cluster=cluster):
-                rendered = subprocess.run(
-                    [
-                        "kubectl",
-                        "kustomize",
-                        ROOT / "clusters" / cluster / "automation",
-                    ],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                result = subprocess.run(
-                    [
-                        "yq",
-                        "-N",
-                        "-r",
-                        'select(.kind == "Request") | .spec.forProvider.payload.baseUrl',
-                    ],
-                    input=rendered.stdout,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
+                requests = [
+                    resource["spec"]["forProvider"]["payload"]["baseUrl"]
+                    for resource in repository_resources(
+                        f"clusters/{cluster}/automation"
+                    )
+                    if resource["kind"] == "Request"
+                ]
                 self.assertEqual(
-                    set(result.stdout.splitlines()),
+                    set(requests),
                     {
                         f"https://cloudflare-dns.com/dns-query?name=private.{cluster}.excloo.dev&type={record_type}"
                         for record_type in ["A", "AAAA"]

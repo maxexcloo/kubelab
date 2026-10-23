@@ -423,20 +423,13 @@ class ReconcilerTests(unittest.TestCase):
         )
 
     def test_papra_provider_template_preserves_settings_and_escapes_credentials(self):
-        manifests = subprocess.check_output(
-            ["kubectl", "kustomize", str(REPOSITORY_ROOT / "apps/overlays/syd")],
-            text=True,
-        )
-        resource = json.loads(
-            subprocess.check_output(
-                [
-                    "yq",
-                    "-o=json",
-                    'select(.kind == "ExternalSecret" and .metadata.name == "papra")',
-                ],
-                input=manifests,
-                text=True,
-            )
+        from support import repository_resources
+
+        resource = next(
+            resource
+            for resource in repository_resources("apps/overlays/syd")
+            if resource["kind"] == "ExternalSecret"
+            and resource["metadata"]["name"] == "papra"
         )
         credentials = {
             "AUTH_SECRET": "fixture-auth-secret",

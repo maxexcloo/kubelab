@@ -3,7 +3,7 @@ kind: ExternalSecret
 metadata:
   name: beszel-object-storage
   annotations:
-    onepassword.excloo.dev/defaults: '{"object-storage-bucket":"excloo-cluster-beszel"}'
+    onepassword.excloo.dev/defaults: '{"object-storage-bucket":"excloo-${cluster_name}-beszel"}'
 spec:
   refreshInterval: 1h
   data:
@@ -23,6 +23,6 @@ metadata:
   name: beszel
 spec:
   item: Beszel
-  keyName: kubelab-cluster-beszel
+  keyName: kubelab-${cluster_name}-beszel
   secretRef:
     name: beszel-object-storage

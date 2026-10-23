@@ -1,5 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: homepage
 resources:
   - external-secrets.yaml
   - helm-release.yaml
@@ -37,8 +38,20 @@ configMapGenerator:
       - service_routes.yq
 configurations:
   - name-reference.yaml
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.homepage.containers.homepage.env.HOMEPAGE_ALLOWED_HOSTS
+        options:
+          delimiter: ","
+          index: 0
 transformers:
-  - ../../transformers/internal-alias
-  - routing
+  - ../../transformers/route-private
 components:
   - ../../../platform/components/app-template
+  - ../../components/private-dns

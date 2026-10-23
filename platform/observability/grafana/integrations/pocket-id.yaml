@@ -5,10 +5,10 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/login/generic_oauth
+      - https://${grafana_host}/login/generic_oauth
     description: Infrastructure Observability
     id: grafana
-    launchURL: https://app.invalid
+    launchURL: https://${grafana_host}
     name: Grafana
     pkceEnabled: true
   item: Grafana

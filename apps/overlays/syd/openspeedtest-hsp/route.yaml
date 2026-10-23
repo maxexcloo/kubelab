@@ -7,17 +7,16 @@ metadata:
     gethomepage.dev/description: Network Speed Test
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Operations
-    gethomepage.dev/href: https://app.invalid
+    gethomepage.dev/href: https://openspeedtest-hsp.syd.excloo.dev
     gethomepage.dev/icon: sh-openspeedtest
     gethomepage.dev/name: OpenSpeedTest (syd/hsp)
     gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-hsp
     monitoring.excloo.dev/enabled: "true"
   labels:
     app.kubernetes.io/name: openspeedtest-hsp
-    gateway.excloo.dev/internal-alias: primary
 spec:
   hostnames:
-    - openspeedtest-hsp.cluster.excloo.dev
+    - openspeedtest-hsp.syd.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

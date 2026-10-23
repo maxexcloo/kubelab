@@ -4,7 +4,7 @@ metadata:
   name: public-direct
   namespace: networking
   annotations:
-    external-dns.alpha.kubernetes.io/target: public.cluster.excloo.dev
+    external-dns.alpha.kubernetes.io/target: public.syd.excloo.dev
 spec:
   gatewayClassName: traefik
   listeners:

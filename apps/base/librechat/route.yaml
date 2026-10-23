@@ -13,11 +13,10 @@ metadata:
     onepassword.excloo.dev/item: *title
   labels:
     app.kubernetes.io/name: librechat
-    gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:
     - chat.excloo.com
-    - app.cluster.excloo.dev
+    - librechat.${cluster_name}.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

@@ -10,13 +10,13 @@ spec:
           main:
             env:
               ACTUAL_HOSTNAME: 0.0.0.0
-              ACTUAL_OPENID_DISCOVERY_URL: https://identity.invalid/.well-known/openid-configuration
+              ACTUAL_OPENID_DISCOVERY_URL: https://${identity_host}/.well-known/openid-configuration
               ACTUAL_OPENID_SERVER_HOSTNAME: https://app.invalid
               ACTUAL_PORT: "5006"
               ACTUAL_SERVER_FILES: /data/server-files
               ACTUAL_USER_CREATION_MODE: login
               ACTUAL_USER_FILES: /data/user-files
-              TZ: time-zone.invalid
+              TZ: ${time_zone}
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"

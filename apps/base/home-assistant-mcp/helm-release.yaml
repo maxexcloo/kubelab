@@ -14,7 +14,7 @@ spec:
             # secret path is needed.
             env:
               HA_MCP_DISABLE_SETTINGS_UI: "true"
-              HOMEASSISTANT_URL: https://host.invalid
+              HOMEASSISTANT_URL: https://${home_assistant_host}
               MCP_HEALTHZ: "true"
               MCP_PORT: "8086"
             envFrom:

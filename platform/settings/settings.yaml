@@ -1,13 +1,13 @@
-apiVersion: v1
-kind: ConfigMap
+# Flux substitutes these cross-cluster ${variables} when it builds each cluster.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
 metadata:
-  name: shared-settings
-  annotations:
-    config.kubernetes.io/local-config: "true"
-data:
-  identity_host: id.excloo.com
-  mail_domain: excloo.dev
-  minilab_domain: mini.public-domain.invalid
-  owner_email: max@excloo.com
-  public_domain: excloo.com
-  time_zone: Australia/Sydney
+  name: _
+spec:
+  postBuild:
+    substitute:
+      identity_host: id.excloo.com
+      mail_domain: excloo.dev
+      owner_email: max@excloo.com
+      public_domain: excloo.com
+      time_zone: Australia/Sydney

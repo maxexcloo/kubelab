@@ -14,11 +14,10 @@ metadata:
     onepassword.excloo.dev/item: *title
   labels:
     app.kubernetes.io/name: litellm
-    gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:
     - litellm.excloo.com
-    - litellm.cluster.excloo.dev
+    - litellm.${cluster_name}.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

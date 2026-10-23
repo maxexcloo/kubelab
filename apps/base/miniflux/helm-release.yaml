@@ -11,13 +11,13 @@ spec:
             env:
               BASE_URL: https://app.invalid
               CREATE_ADMIN: "1"
-              OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://identity.invalid
+              OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://${identity_host}
               OAUTH2_OIDC_PROVIDER_NAME: Pocket ID
               OAUTH2_PROVIDER: oidc
               OAUTH2_REDIRECT_URL: https://app.invalid/oauth2/oidc/callback
               OAUTH2_USER_CREATION: "1"
               RUN_MIGRATIONS: "1"
-              TZ: time-zone.invalid
+              TZ: ${time_zone}
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"

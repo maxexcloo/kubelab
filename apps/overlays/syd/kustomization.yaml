@@ -41,7 +41,6 @@ resources:
   - openspeedtest-hsp
   - openspeedtest-kimbap
   - redlib-multi-backup
-  - homepage-private-dns.yaml
   - immich-private-route.yaml
 patches:
   # Retry installs that outwait new credentials; failed upgrades are not rolled
@@ -81,41 +80,7 @@ patches:
   - path: homepage.yaml
   - path: minilab.yaml
   - path: syncthing.yaml
-# Reapply hostname consumers after cluster settings resolve the private alias.
-transformers:
-  - ../../base/actual-up/routing
-  - ../../base/homepage/routing
 replacements:
-  - source:
-      kind: HTTPRoute
-      name: openspeedtest-hsp
-      namespace: openspeedtest
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: openspeedtest-hsp
-          namespace: openspeedtest
-        fieldPaths:
-          - metadata.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
-  - source:
-      kind: HTTPRoute
-      name: openspeedtest-kimbap
-      namespace: openspeedtest
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: openspeedtest-kimbap
-          namespace: openspeedtest
-        fieldPaths:
-          - metadata.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
   - source:
       kind: HelmRelease
       name: redlib
@@ -187,19 +152,6 @@ replacements:
           name: immich-private
         fieldPaths:
           - spec.hostnames.0
-  # Studio accepts its resolved private alias and serves result links on LiteLLM's host.
-  - source:
-      kind: HelmRelease
-      name: studio
-      namespace: studio
-      fieldPath: spec.values.route.private.hostnames.1
-    targets:
-      - select:
-          kind: HelmRelease
-          name: studio
-          namespace: studio
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.ROUTE_ALIAS_HOST
   # Studio's Refine in Chat links to LibreChat's host.
   - source:
       kind: HTTPRoute
@@ -213,6 +165,7 @@ replacements:
           namespace: studio
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.CHAT_HOST
+  # Studio serves result links on LiteLLM's host.
   - source:
       kind: HTTPRoute
       name: litellm
@@ -238,5 +191,3 @@ replacements:
           namespace: syncthing
         fieldPaths:
           - spec.data.*.remoteRef.key
-components:
-  - ../../../clusters/syd/settings

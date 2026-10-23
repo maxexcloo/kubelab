@@ -17,9 +17,9 @@ spec:
               MAL_WARMUP_ENABLED: "false"
               OIDC_ENABLED: "true"
               OIDC_GROUP_PERMISSIONS: all_services=admin
-              OIDC_ISSUER: https://identity.invalid
+              OIDC_ISSUER: https://${identity_host}
               REDIS_URL: redis://localhost:6379
-              TZ: time-zone.invalid
+              TZ: ${time_zone}
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"

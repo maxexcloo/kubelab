@@ -39,18 +39,18 @@ spec:
         DOMAIN_CLIENT: https://app.invalid
         DOMAIN_SERVER: https://app.invalid
         ENDPOINTS: custom,agents
-        OPENID_ADMIN_ROLE: owner@example.invalid
+        OPENID_ADMIN_ROLE: ${owner_email}
         OPENID_ADMIN_ROLE_PARAMETER_PATH: email
         OPENID_ADMIN_ROLE_TOKEN_KIND: id
         OPENID_BUTTON_LABEL: Pocket ID
         OPENID_CALLBACK_URL: /oauth/openid/callback
         OPENID_CLIENT_ID: librechat
-        OPENID_ISSUER: https://identity.invalid/.well-known/openid-configuration
+        OPENID_ISSUER: https://${identity_host}/.well-known/openid-configuration
         OPENID_SCOPE: openid profile email
         OPENID_USE_PKCE: "true"
         SCHEDULES_SINGLE_PROCESS: "true"
         SEARCH: "true"
-        TZ: time-zone.invalid
+        TZ: ${time_zone}
       existingConfigYaml: librechat-config
       imageVolume:
         enabled: false
