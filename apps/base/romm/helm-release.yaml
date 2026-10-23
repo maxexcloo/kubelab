@@ -62,7 +62,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/rommapp/romm
-              tag: 5.4.0
+              tag: 5.4.1
             probes:
               liveness: &health
                 path: /api/heartbeat
