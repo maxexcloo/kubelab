@@ -23,7 +23,6 @@ replacements:
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.BICHON_CORS_ORIGINS
           - spec.values.controllers.main.containers.main.env.BICHON_PUBLIC_URL
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
           index: 2

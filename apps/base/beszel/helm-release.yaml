@@ -58,7 +58,7 @@ spec:
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: *title
         hostnames:
-          - app.invalid
+          - beszel.excloo.com
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

@@ -31,7 +31,6 @@ replacements:
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.OIDC_REDIRECT_URI
           - spec.values.controllers.main.containers.main.env.ROMM_BASE_URL
-          - spec.values.route.public.annotations.[gethomepage.dev/href]
           - spec.values.route.public.annotations.[gethomepage.dev/widget.url]
         options:
           delimiter: /

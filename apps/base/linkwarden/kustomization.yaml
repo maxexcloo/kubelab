@@ -33,7 +33,6 @@ replacements:
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.BASE_URL
           - spec.values.controllers.main.containers.main.env.NEXTAUTH_URL
-          - spec.values.route.public.annotations.[gethomepage.dev/href]
           - spec.values.route.public.annotations.[gethomepage.dev/widget.url]
         options:
           delimiter: /

@@ -26,7 +26,6 @@ replacements:
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.BASE_URL
           - spec.values.controllers.main.containers.main.env.OAUTH2_REDIRECT_URL
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
           - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
         options:
           delimiter: /
