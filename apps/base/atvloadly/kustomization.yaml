@@ -11,18 +11,6 @@ configMapGenerator:
       - proxy-gateway.envsh
 configurations:
   - name-reference.yaml
-replacements:
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.private.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
 components:
   - ../../components/workload
   - ../../../platform/backups/credentials

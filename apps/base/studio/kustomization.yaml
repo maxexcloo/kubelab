@@ -36,7 +36,6 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.STUDIO_OIDC_REDIRECT_URI
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
           index: 2

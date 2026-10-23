@@ -42,7 +42,6 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.APP_BASE_URL
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
           index: 2

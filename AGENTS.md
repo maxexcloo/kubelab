@@ -112,8 +112,9 @@ Define each value once and derive consumers with Kustomize replacements:
   cluster, such as zones and Tailscale devices and tags, from `cluster_name`.
 - Write derived values as `.invalid` placeholders; the checks fail when one
   survives rendering. Flux substitution is strict, so missing variables fail.
-- App hostnames: the app's route; app replacements and `apps/transformers`
-  derive URLs, DNS records and Pocket ID clients.
+- App hostnames: the app's route. The shared route transformers derive its
+  Homepage link, DNS record and Pocket ID client; app replacements derive only
+  the app's own URL settings.
 - 1Password item titles: once per manifest, using YAML anchors for repeats.
 - The app-template chart version: `platform/components/app-template`.
 - Kubernetes client versions: Homelab's cluster data. Renovate groups the kubectl

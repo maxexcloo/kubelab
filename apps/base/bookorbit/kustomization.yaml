@@ -33,7 +33,6 @@ replacements:
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.APP_URL
           - spec.values.controllers.main.containers.main.env.CLIENT_URL
-          - spec.values.route.public.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
           index: 2
