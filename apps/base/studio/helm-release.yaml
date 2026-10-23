@@ -17,9 +17,6 @@ spec:
               COMFY_VIDEO_URL:
                 dependsOn: AI_ADDRESS
                 value: http://$(AI_ADDRESS):8191
-              CONTROL_URL:
-                dependsOn: AI_ADDRESS
-                value: http://$(AI_ADDRESS):1337
               # A chat call queues up to ten images at once.
               STUDIO_ACCOUNT_MAX_OUTSTANDING_JOBS: "10"
               STUDIO_ALLOWED_HOSTS:
