@@ -31,7 +31,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/papra-hq/papra
-              tag: 26.7.0-rootless
+              tag: 26.7.1-rootless
             probes:
               liveness: &health
                 path: /api/health
