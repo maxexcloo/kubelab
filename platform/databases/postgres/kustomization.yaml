@@ -2,6 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 resources:
   - cluster.yaml
+  - object-store.yaml
+  - scheduled-backup.yaml
 # Database identities follow the app namespace; preserve the database suffix.
 replacements:
   - source:
@@ -21,3 +23,11 @@ replacements:
         options:
           delimiter: -database
           index: 0
+  - source:
+      kind: Cluster
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: ScheduledBackup
+        fieldPaths:
+          - spec.cluster.name

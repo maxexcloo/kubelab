@@ -56,7 +56,6 @@ replacements:
 components:
   - ../../../platform/databases/postgres
   - ../../../platform/backups/credentials
-  - ../../../platform/backups/postgres
   - ../../components/private-dns
   - ../../components/app-namespace
 patches:
