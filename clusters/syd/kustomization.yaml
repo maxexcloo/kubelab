@@ -4,12 +4,9 @@ namespace: flux-system
 resources:
   - apps.yaml
   - automation.yaml
-  - cloudflare-access-integrations.yaml
   - crossplane-runtime.yaml
   - flux-system
   - foundation.yaml
-  - headlamp-integrations.yaml
-  - observability-integrations.yaml
   - platform.yaml
 patches:
   - patch: |-
@@ -51,7 +48,7 @@ patches:
     target:
       group: kustomize.toolkit.fluxcd.io
       kind: Kustomization
-      name: (apps|automation|cloudflare-access-integrations|crossplane-runtime|headlamp-integrations|observability-integrations|platform)
+      name: (apps|automation|crossplane-runtime|platform)
   - patch: |-
       apiVersion: kustomize.toolkit.fluxcd.io/v1
       kind: Kustomization
@@ -64,16 +61,3 @@ patches:
       group: kustomize.toolkit.fluxcd.io
       kind: Kustomization
       name: flux-system
-  # The apps Kustomization adopts these objects next; removing these
-  # Kustomizations must leave their Pocket ID clients, DNS record and secret.
-  - patch: |-
-      apiVersion: kustomize.toolkit.fluxcd.io/v1
-      kind: Kustomization
-      metadata:
-        name: _
-      spec:
-        prune: false
-    target:
-      group: kustomize.toolkit.fluxcd.io
-      kind: Kustomization
-      name: (cloudflare-access-integrations|headlamp-integrations|observability-integrations)

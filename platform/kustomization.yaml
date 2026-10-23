@@ -14,7 +14,7 @@ resources:
   - networking/external-dns-private
   - networking/tailscale
   - networking/traefik
-  - observability/grafana-credentials
+  - observability/grafana
   - observability/metrics-server
   - observability/victoria-metrics
   - secrets/external-secrets
