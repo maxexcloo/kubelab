@@ -96,6 +96,31 @@ else:
                 directory = self.directory / target
                 directory.mkdir(parents=True)
                 (directory / "kustomization.yaml").write_text("resources: []\n")
+            directory = self.directory / f"clusters/{cluster}"
+            resources = [
+                {
+                    "apiVersion": "kustomize.toolkit.fluxcd.io/v1",
+                    "kind": "Kustomization",
+                    "metadata": {"name": name, "namespace": "flux-system"},
+                    "spec": {
+                        "path": "./" + target,
+                        "postBuild": {
+                            "substitute": {
+                                "cluster_name": cluster,
+                                "public_domain": "example.net",
+                            }
+                        },
+                    },
+                }
+                for name, target in (
+                    ("apps", f"apps/overlays/{cluster}"),
+                    ("platform", f"clusters/{cluster}/platform"),
+                )
+            ]
+            (directory / "kustomization.yaml").write_text("resources: [flux.yaml]\n")
+            (directory / "flux.yaml").write_text(
+                "\n---\n".join(json.dumps(r) for r in resources)
+            )
         self.write_routes("mbk", [route("Local"), route("Shared")])
         self.write_routes(
             "syd", [route("Remote"), route("Shared"), route("Hidden", enabled="false")]
@@ -113,6 +138,7 @@ else:
             ["sh", str(APP / "render_dashboard.sh"), str(APP), str(self.output)],
             env=os.environ
             | {
+                "FLUX": shutil.which("flux"),
                 "HOMELAB_DIRECTORY": str(HOMELAB),
                 "HOMELAB_INFRASTRUCTURE_FILE": str(
                     ROOT / "tests/fixtures/homepage/infrastructure.json"
