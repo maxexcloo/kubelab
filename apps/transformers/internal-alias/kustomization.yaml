@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
   - patch.yaml
   - hostname.yaml
-  - label.yaml

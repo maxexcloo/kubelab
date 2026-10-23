@@ -1,21 +1,20 @@
-apiVersion: v1
-kind: ConfigMap
+# Flux substitutes these cluster ${variables} when it builds the cluster.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
 metadata:
-  name: cluster-settings
-  annotations:
-    config.kubernetes.io/local-config: "true"
-data:
-  bento_address: bento.mbk.excloo.net
-  bento_llm_authority: host.invalid:8000
-  cluster_name: syd
-  control_d_profile: 653224sydwhf
-  dataset_root: /var/mnt/datasets
-  grafana_host: grafana.excloo.com
-  headlamp_host: headlamp.cluster.excloo.dev
-  home_assistant_host: hass.mbk.excloo.net
-  private_dns_host: private.cluster.excloo.dev
-  storage_node: kimbap
-  unifi_host: gateway.mbk.excloo.net
-  private_dns_lookup: https://cloudflare-dns.com/dns-query?name=app.invalid
-  backup_endpoint: https://kimbap.mbk.excloo.net:9000
-  backup_destination: s3://syd-backups/postgres
+  name: _
+spec:
+  postBuild:
+    substitute:
+      backup_destination: s3://syd-backups/postgres
+      backup_endpoint: https://kimbap.mbk.excloo.net:9000
+      bento_address: bento.mbk.excloo.net
+      cluster_name: syd
+      control_d_profile: 653224sydwhf
+      dataset_root: /var/mnt/datasets
+      grafana_host: grafana.excloo.com
+      home_assistant_host: hass.mbk.excloo.net
+      # The cluster is IPv4-only; Tailscale ingress needs dual-stack Services for IPv6.
+      private_dns_ipv6: "false"
+      storage_node: kimbap
+      unifi_host: gateway.mbk.excloo.net

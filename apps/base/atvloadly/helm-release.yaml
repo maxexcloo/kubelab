@@ -12,7 +12,7 @@ spec:
             nameOverride: "{{ .Release.Name }}"
             env:
               SERVICE_PORT: "5533"
-              TZ: time-zone.invalid
+              TZ: ${time_zone}
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/atvloadly

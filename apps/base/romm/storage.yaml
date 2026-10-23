@@ -36,7 +36,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   hostPath:
-    path: /dataset-root.invalid/truenas-nvme/romm
+    path: ${dataset_root}/truenas-nvme/romm
     type: Directory
   nodeAffinity:
     required:
@@ -45,7 +45,7 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - storage-node.invalid
+                - ${storage_node}
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -59,7 +59,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   hostPath:
-    path: /dataset-root.invalid/truenas/games
+    path: ${dataset_root}/truenas/games
     type: Directory
   nodeAffinity:
     required:
@@ -68,4 +68,4 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - storage-node.invalid
+                - ${storage_node}

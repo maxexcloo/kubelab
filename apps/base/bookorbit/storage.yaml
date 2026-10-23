@@ -52,7 +52,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   hostPath:
-    path: /dataset-root.invalid/truenas-nvme/bookorbit/bookdrop
+    path: ${dataset_root}/truenas-nvme/bookorbit/bookdrop
     type: Directory
   nodeAffinity:
     required:
@@ -61,7 +61,7 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - storage-node.invalid
+                - ${storage_node}
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -75,7 +75,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   hostPath:
-    path: /dataset-root.invalid/truenas-nvme/bookorbit/books
+    path: ${dataset_root}/truenas-nvme/bookorbit/books
     type: Directory
   nodeAffinity:
     required:
@@ -84,4 +84,4 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - storage-node.invalid
+                - ${storage_node}

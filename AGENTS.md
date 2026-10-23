@@ -50,8 +50,8 @@ settings in its own repository; Kubelab deploys its published image.
 
 - Private browser and API routes include `<app>.<cluster>.excloo.dev` alongside
   existing primary addresses. Keep aliases on private gateways.
-- App-template routes derive aliases through the shared route transformers;
-  upstream charts use their native route shape.
+- The shared route transformers add the alias to app-template routes;
+  hand-written routes list `<app>.${cluster_name}.excloo.dev` themselves.
 - Public routes on external nodes attach to the `public-direct` gateway once the
   zone reaches origins over HTTPS (Cloudflare SSL/TLS mode Full), so Cloudflare
   connects to the public address instead of the tunnel. Routes whose origin is
@@ -82,8 +82,9 @@ settings in its own repository; Kubelab deploys its published image.
 - Use Kustomize for composition and small patches. Use `configMapGenerator` only
   to mount checked-in app configuration, scripts or assets; do not use
   `secretGenerator`. Keep executable code in its own source file.
-- Flux `postBuild` substitution also rewrites `${...}` in ConfigMaps, including
-  mounted mini-app scripts and assets.
+- Flux `postBuild` substitution rewrites `${...}` in everything it applies,
+  ConfigMaps included. Mark mounted scripts and assets
+  `kustomize.toolkit.fluxcd.io/substitute: disabled`.
 - Keep shared chart policy in native Kustomize components and app-specific values
   in the app's Flux `HelmRelease` patch; use overlay patches for cluster
   differences.
@@ -99,23 +100,23 @@ settings in its own repository; Kubelab deploys its published image.
 - Keep databases, external secrets, integrations, namespaces, network policies
   and storage in files named for their purpose rather than mixed `resources.yaml`
   files.
-- Use standard Kustomize replacements for derived hostnames and URLs.
 - Homepage retains its existing configuration layout and probe timings.
 
 ### Shared Values
 
-Define each value once and derive consumers with Kustomize replacements:
+Define each value once:
 
-- Cross-cluster settings with several consumers: `platform/settings/settings.yaml`.
-- Cluster name and cluster-specific values with several consumers:
-  `clusters/<cluster>/settings/settings.yaml`.
+- Settings shared across apps: `${variables}` that Flux substitutes, defined in
+  `platform/settings/settings.yaml` (cross-cluster) and
+  `clusters/<cluster>/settings/settings.yaml`. Consumers write the variable
+  where they need it. Substitution is strict, so a missing variable fails the
+  render and the reconciliation.
 - A value with one consumer lives where it is used; cluster-specific files write
   it directly.
-- Write derived values as `.invalid` placeholders; the checks fail when one
-  survives rendering. Flux substitution is strict, so missing variables fail.
 - App hostnames: the app's route. The shared route transformers derive its
-  Homepage link, DNS record and Pocket ID client; app replacements derive only
-  the app's own URL settings.
+  Homepage link, DNS record and Pocket ID client; Kustomize replacements in the
+  app derive its own URL settings from `.invalid` placeholders, and the checks
+  fail when one survives rendering.
 - 1Password item titles: once per manifest, using YAML anchors for repeats.
 - The app-template chart version: `platform/components/app-template`.
 - Kubernetes client versions: Homelab's cluster data. Renovate groups the kubectl

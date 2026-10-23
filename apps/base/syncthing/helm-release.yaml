@@ -17,7 +17,7 @@ spec:
               HOME: /var/syncthing
               STGUIADDRESS: http://0.0.0.0:8384
               STHOMEDIR: /var/syncthing/config
-              TZ: time-zone.invalid
+              TZ: ${time_zone}
             image: &syncthing-image
               pullPolicy: IfNotPresent
               repository: docker.io/syncthing/syncthing
@@ -74,7 +74,7 @@ spec:
         globalMounts:
           - path: /var/syncthing
       files:
-        hostPath: /dataset-root.invalid/truenas
+        hostPath: ${dataset_root}/truenas
         hostPathType: Directory
         type: hostPath
         globalMounts:

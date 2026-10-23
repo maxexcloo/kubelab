@@ -38,8 +38,8 @@ Deploying needs a kubeconfig context that matches the selected configuration in
 
 Edit workload configuration in `apps/base/<application>` and select it through
 `apps/overlays/<cluster>`. `AGENTS.md` describes the editing conventions. Local
-manifest checks only cover Kustomize output, so render changed Helm charts
-separately.
+manifest checks cover what Flux builds, including its variable substitutions,
+but not Helm output, so render changed Helm charts separately.
 
 ## Deployment
 

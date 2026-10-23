@@ -4,7 +4,7 @@ metadata:
   name: public-tunnel
   namespace: networking
   annotations:
-    external-dns.alpha.kubernetes.io/target: tunnel.cluster.excloo.dev
+    external-dns.alpha.kubernetes.io/target: tunnel.${cluster_name}.excloo.dev
 spec:
   gatewayClassName: traefik
   listeners:

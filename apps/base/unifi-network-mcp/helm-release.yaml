@@ -14,7 +14,7 @@ spec:
               UNIFI_MCP_HOST: 0.0.0.0
               UNIFI_MCP_HTTP_ENABLED: "true"
               UNIFI_MCP_PORT: "3000"
-              UNIFI_NETWORK_HOST: host.invalid
+              UNIFI_NETWORK_HOST: ${unifi_host}
               UNIFI_NETWORK_VERIFY_SSL: "true"
             envFrom:
               - secretRef:

@@ -22,7 +22,7 @@ spec:
               type: object
               properties:
                 controlDProfileID:
-                  default: profile-placeholder
+                  default: ${control_d_profile}
                   maxLength: 128
                   minLength: 1
                   pattern: ^[A-Za-z0-9_-]+$
@@ -33,10 +33,10 @@ spec:
                   minLength: 1
                   type: string
                 ipv6Enabled:
-                  default: true
+                  default: ${private_dns_ipv6}
                   type: boolean
                 target:
-                  default: app.invalid
+                  default: private.${cluster_name}.excloo.dev
                   format: hostname
                   maxLength: 253
                   minLength: 1

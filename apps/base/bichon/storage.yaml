@@ -23,7 +23,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   hostPath:
-    path: /dataset-root.invalid/truenas-nvme/bichon
+    path: ${dataset_root}/truenas-nvme/bichon
     type: Directory
   nodeAffinity:
     required:
@@ -32,4 +32,4 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - storage-node.invalid
+                - ${storage_node}

@@ -38,10 +38,10 @@ spec:
     environmentSecrets:
       - litellm
     envVars:
-      GENERIC_AUTHORIZATION_ENDPOINT: https://identity.invalid/authorize
+      GENERIC_AUTHORIZATION_ENDPOINT: https://${identity_host}/authorize
       GENERIC_CLIENT_USE_PKCE: "true"
-      GENERIC_TOKEN_ENDPOINT: https://identity.invalid/api/oidc/token
-      GENERIC_USERINFO_ENDPOINT: https://identity.invalid/api/oidc/userinfo
+      GENERIC_TOKEN_ENDPOINT: https://${identity_host}/api/oidc/token
+      GENERIC_USERINFO_ENDPOINT: https://${identity_host}/api/oidc/userinfo
       GENERIC_USER_DISPLAY_NAME_ATTRIBUTE: name
       GENERIC_USER_FIRST_NAME_ATTRIBUTE: given_name
       GENERIC_USER_ID_ATTRIBUTE: sub
@@ -51,7 +51,7 @@ spec:
       # Provider discovery uses the shared HTTP client; chat requests use the deployment timeout.
       REQUEST_TIMEOUT: "5"
       STORE_MODEL_IN_DB: "True"
-      TZ: time-zone.invalid
+      TZ: ${time_zone}
     image:
       pullPolicy: IfNotPresent
       repository: ghcr.io/berriai/litellm
@@ -158,14 +158,14 @@ spec:
       model_list:
         - model_name: ai/text
           litellm_params:
-            api_base: http://host.invalid:8000/v1
+            api_base: http://${bento_address}:8000/v1
             api_key: os.environ/AI_API_KEY
             model: openai/text
           model_info:
             supports_vision: true
         - model_name: ai/text-fast
           litellm_params:
-            api_base: http://host.invalid:8000/v1
+            api_base: http://${bento_address}:8000/v1
             api_key: os.environ/AI_API_KEY
             model: openai/text
             reasoning_effort: none

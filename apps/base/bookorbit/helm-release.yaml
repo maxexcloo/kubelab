@@ -15,7 +15,7 @@ spec:
               CLIENT_URL: https://app.invalid
               LIBRARY_BROWSE_ROOT: /books
               PORT: "3000"
-              TZ: time-zone.invalid
+              TZ: ${time_zone}
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"

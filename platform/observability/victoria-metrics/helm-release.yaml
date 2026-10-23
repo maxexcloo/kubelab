@@ -88,21 +88,21 @@ spec:
           enabled: true
         auth.generic_oauth:
           allow_sign_up: true
-          api_url: https://identity.invalid/api/oidc/userinfo
-          auth_url: https://identity.invalid/authorize
+          api_url: https://${identity_host}/api/oidc/userinfo
+          auth_url: https://${identity_host}/authorize
           auto_login: false
           client_id: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_ID}
           client_secret: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
           enabled: true
           name: Pocket ID
           scopes: openid profile email
-          token_url: https://identity.invalid/api/oidc/token
+          token_url: https://${identity_host}/api/oidc/token
           use_pkce: true
         security:
           disable_gravatar: true
         server:
-          domain: app.invalid
-          root_url: https://app.invalid
+          domain: ${grafana_host}
+          root_url: https://${grafana_host}
         users:
           auto_assign_org_role: Admin
           default_theme: system
@@ -260,7 +260,7 @@ spec:
         scrapeInterval: 60s
         useStrictSecurity: true
         externalLabels:
-          cluster: _
+          cluster: ${cluster_name}
         nodeSelector:
           node.excloo.dev/network: internal
         resources:

@@ -18,7 +18,7 @@ spec:
               EMAILS_VERIFIED: "true"
               FILE_BACKEND: database
               REQUIRE_USER_EMAIL: "true"
-              SMTP_FROM: pocket-id@mail-domain.invalid
+              SMTP_FROM: pocket-id@${mail_domain}
               SMTP_HOST: smtp.resend.com
               SMTP_PORT: "465"
               SMTP_TLS: tls
@@ -79,7 +79,7 @@ spec:
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: *title
         hostnames:
-          - identity.invalid
+          - ${identity_host}
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
           gateway.excloo.dev/public-access: "true"

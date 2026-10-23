@@ -4,11 +4,10 @@ metadata:
   name: librechat-admin
   labels:
     app.kubernetes.io/name: librechat-admin
-    gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:
     - librechat-admin.excloo.com
-    - app.cluster.excloo.dev
+    - librechat-admin.${cluster_name}.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

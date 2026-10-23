@@ -4,8 +4,8 @@ metadata:
   name: backups
 spec:
   configuration:
-    destinationPath: s3://backup.invalid/postgres
-    endpointURL: https://backup.invalid
+    destinationPath: ${backup_destination}
+    endpointURL: ${backup_endpoint}
     s3Credentials:
       accessKeyId:
         name: backup-credentials

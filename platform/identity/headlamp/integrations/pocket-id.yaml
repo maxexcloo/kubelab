@@ -7,11 +7,11 @@ spec:
     description: Kubernetes Dashboard
     id: headlamp
     isPublic: true
-    launchURL: https://app.invalid
+    launchURL: https://headlamp.${cluster_name}.excloo.dev
     name: Headlamp
     pkceEnabled: true
     callbackURLs:
-      - https://app.invalid/oidc-callback
+      - https://headlamp.${cluster_name}.excloo.dev/oidc-callback
   crossplane:
     compositionRef:
       name: pocket-id-public-client

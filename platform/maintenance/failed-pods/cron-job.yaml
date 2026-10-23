@@ -7,7 +7,7 @@ spec:
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 1
   schedule: "*/15 * * * *"
-  timeZone: time-zone.invalid
+  timeZone: ${time_zone}
   successfulJobsHistoryLimit: 1
   jobTemplate:
     spec:

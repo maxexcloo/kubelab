@@ -6,6 +6,7 @@ metadata:
 spec:
   postBuild:
     substitute:
+      MINILAB_DOMAIN: mini.${public_domain}
       REDLIB_CHECK_URL: http://redlib.redlib.svc.cluster.local:8080
       REDLIB_URL: https://app.invalid
   # Mini apps run on external nodes, like external-placement.yaml; Flux patches

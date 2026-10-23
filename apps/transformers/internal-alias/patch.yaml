@@ -5,6 +5,6 @@ metadata:
 patch: |-
   - op: add
     path: /spec/values/route/private/hostnames/1
-    value: app.cluster.excloo.dev
+    value: app.${cluster_name}.excloo.dev
 target:
   kind: HelmRelease

@@ -9,12 +9,12 @@ spec:
         containers:
           main:
             env:
-              APP_TIMEZONE: time-zone.invalid
+              APP_TIMEZONE: ${time_zone}
               APP_URL: https://app.invalid
               DB_DATABASE: database/storage/database.sqlite
               FORCE_HTTPS: "1"
               OIDC_ENABLED: "true"
-              OIDC_ENDPOINT: https://identity.invalid
+              OIDC_ENDPOINT: https://${identity_host}
               PHP_OPCACHE_ENABLE: "1"
               REGISTRATION_ENABLED: "0"
             envFrom:

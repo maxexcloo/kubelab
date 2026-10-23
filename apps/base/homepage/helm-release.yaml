@@ -24,7 +24,7 @@ spec:
                     port: 3000
                     httpHeaders:
                       - name: Host
-                        value: alias.invalid
+                        value: homepage.${cluster_name}.excloo.dev
               readiness:
                 custom: true
                 enabled: true
@@ -50,7 +50,7 @@ spec:
                 drop:
                   - ALL
             env:
-              HOMEPAGE_ALLOWED_HOSTS: app.invalid,alias.invalid
+              HOMEPAGE_ALLOWED_HOSTS: app.invalid,homepage.${cluster_name}.excloo.dev
               PGID: "1000"
               PUID: "1000"
             envFrom:
@@ -84,6 +84,7 @@ spec:
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
               HOMELAB_REPOSITORY: https://github.com/maxexcloo/homelab
               HOMEPAGE_CACHE_DIRECTORY: /tmp/homepage
+              HOMEPAGE_CLUSTER: ${cluster_name}
               HOMEPAGE_REVALIDATE_URL: http://127.0.0.1:3000/api/revalidate
               KUBECTL: /tools/kubectl
             image:

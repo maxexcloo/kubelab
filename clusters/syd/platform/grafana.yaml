@@ -7,25 +7,24 @@ metadata:
     gethomepage.dev/description: Infrastructure Observability
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Operations
-    gethomepage.dev/href: https://app.invalid
+    gethomepage.dev/href: https://${grafana_host}
     gethomepage.dev/icon: sh-grafana
     gethomepage.dev/name: &title Grafana
     # Dashboards and alert rules are not provisioned; only firing alerts matter.
     gethomepage.dev/widget.fields: '["datasources", "alertstriggered"]'
     gethomepage.dev/widget.password: "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}"
     gethomepage.dev/widget.type: grafana
-    gethomepage.dev/widget.url: https://app.invalid
+    gethomepage.dev/widget.url: https://${grafana_host}
     gethomepage.dev/widget.username: "{{HOMEPAGE_VAR_GRAFANA_USERNAME}}"
     gethomepage.dev/widget.version: "2"
     monitoring.excloo.dev/enabled: "true"
     onepassword.excloo.dev/item: *title
   labels:
     app.kubernetes.io/name: grafana
-    gateway.excloo.dev/internal-alias: "true"
 spec:
   hostnames:
-    - app.invalid
-    - grafana.cluster.excloo.dev
+    - ${grafana_host}
+    - grafana.syd.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

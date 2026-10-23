@@ -4,7 +4,7 @@ metadata:
   name: letsencrypt-dns01
 spec:
   acme:
-    email: owner@example.invalid
+    email: ${owner_email}
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-dns01-account

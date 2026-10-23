@@ -25,5 +25,8 @@ replacements:
           - rules.0.resourceNames.0
           - rules.1.resourceNames.0
 generatorOptions:
+  # The mounted script uses shell ${...} expansions.
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
   labels:
     backup.excloo.dev/component: state

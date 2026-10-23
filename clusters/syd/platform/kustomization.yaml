@@ -34,5 +34,3 @@ replacements:
           - spec.statefulSet.pod.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution
         options:
           create: true
-components:
-  - ../settings

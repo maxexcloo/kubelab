@@ -16,7 +16,7 @@ spec:
           main:
             env:
               IMMICH_LOG_FORMAT: json
-              TZ: time-zone.invalid
+              TZ: ${time_zone}
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:

@@ -14,7 +14,7 @@ spec:
               AIOSTREAMS_OIDC_AUTO_REDIRECT: "false"
               AIOSTREAMS_OIDC_ENABLED: "true"
               AIOSTREAMS_OIDC_GROUP_PERMISSIONS: all_services=admin
-              AIOSTREAMS_OIDC_ISSUER: https://identity.invalid
+              AIOSTREAMS_OIDC_ISSUER: https://${identity_host}
               AIOSTREAMS_OIDC_SCOPES: openid profile email groups
               BASE_URL: https://app.invalid
               DATABASE_URI: sqlite://./data/db.sqlite
