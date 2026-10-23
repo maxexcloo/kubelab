@@ -5,6 +5,3 @@ resources:
   - ../../../../platform/observability/metrics-server
   - ../../../../platform/observability/victoria-metrics
   - backups
-patches:
-  - path: helm-release.yaml
-  - path: metrics-server.yaml

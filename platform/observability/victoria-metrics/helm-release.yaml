@@ -114,6 +114,8 @@ spec:
         size: 1Gi
         storageClassName: local-path
         type: pvc
+      nodeSelector:
+        node.excloo.dev/network: internal
       rbac:
         create: false
         namespaced: true
@@ -164,6 +166,8 @@ spec:
         requests:
           cpu: 20m
           memory: 128Mi
+      nodeSelector:
+        node.excloo.dev/network: internal
     kubeApiServer:
       enabled: true
       vmScrape:
@@ -203,6 +207,8 @@ spec:
       env:
         - name: VM_ENABLESTRICTSECURITY
           value: "true"
+      nodeSelector:
+        node.excloo.dev/network: internal
       operator:
         disable_prometheus_converter: true
       podSecurityContext:
@@ -234,6 +240,8 @@ spec:
         useStrictSecurity: true
         extraArgs:
           memory.allowedPercent: "40"
+        nodeSelector:
+          node.excloo.dev/network: internal
         resources:
           limits:
             memory: 512Mi
@@ -253,6 +261,8 @@ spec:
         useStrictSecurity: true
         externalLabels:
           cluster: _
+        nodeSelector:
+          node.excloo.dev/network: internal
         resources:
           limits:
             memory: 1Gi
@@ -266,6 +276,8 @@ spec:
       spec:
         retentionPeriod: 7d
         useStrictSecurity: true
+        nodeSelector:
+          node.excloo.dev/network: internal
         resources:
           limits:
             memory: 1Gi
