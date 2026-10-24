@@ -121,7 +121,7 @@ spec:
               - mcp_client_name: studio
                 tools_to_execute: ["*"]
             provider_configs: &local-text
-              - provider: ai
+              - provider: local
                 allowed_models: ["text"]
                 key_ids: ["*"]
           - id: opencode
@@ -129,7 +129,7 @@ spec:
             value: env.VIRTUAL_KEY_OPENCODE
             mcp_configs: *agent-mcp
             provider_configs: &live-text
-              - provider: bento
+              - provider: ai
                 allowed_models: ["*"]
                 key_ids: ["*"]
           # The owner's personal key for LibreChat's restricted MCP servers.
@@ -216,24 +216,24 @@ spec:
             endpointSlug: unifi-network
             toolsToExecute: ["*"]
       providers:
-        # AI Control serves whichever local text model it has loaded. The stable "text"
-        # alias keeps LibreChat and Studio working across switches; "bento" lists the
+        # AI Control serves whichever local text model it has loaded. "local" keeps the
+        # stable text alias for LibreChat and Studio across switches; "ai" lists the
         # checkpoint under Radiance's own name for clients that show it to a person.
-        ai:
+        local:
           custom_provider_config:
             base_provider_type: openai
           keys:
-            - name: ai
+            - name: local
               models: ["text"]
               value: env.AI_API_KEY
           network_config:
             allow_private_network: true
             base_url: http://${bento_address}:8000
-        bento:
+        ai:
           custom_provider_config:
             base_provider_type: openai
           keys:
-            - name: bento
+            - name: ai
               models: ["*"]
               value: env.AI_API_KEY
           network_config:

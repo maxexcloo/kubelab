@@ -58,11 +58,11 @@ endpoints:
       baseURL: http://bifrost.bifrost.svc.cluster.local:8080/v1
       models:
         default:
-          - ai/text
+          - local/text
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
       titleConvo: true
-      titleModel: ai/text
+      titleModel: local/text
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
       modelDisplayLabel: AI
@@ -270,7 +270,7 @@ modelSpecs:
         # Beyond this, LibreChat summarises older messages with the chat model. The smallest
         # single-GPU text context in ai's workloads is 167,344 tokens; keep headroom for replies.
         maxContextTokens: 160000
-        model: ai/text
+        model: local/text
         # Studio's own MCP instructions carry its workflow rules; only LibreChat's tool naming is added here.
         promptPrefix: |
           Use the exact Studio tool names supplied by this chat, including the
