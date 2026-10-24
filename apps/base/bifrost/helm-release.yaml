@@ -116,6 +116,10 @@ spec:
           - id: librechat
             name: LibreChat
             value: env.VIRTUAL_KEY_LIBRECHAT
+            # Studio trusts the forwarded user headers, so only LibreChat may call it.
+            mcp_configs:
+              - mcp_client_name: studio
+                tools_to_execute: ["*"]
             provider_configs: &local-text
               - provider: ai
                 allowed_models: ["text"]
@@ -176,7 +180,6 @@ spec:
             toolsToExecute: ["*"]
           # Studio maps the forwarded user and conversation headers to its own accounts.
           - name: studio
-            allowByDefault: true
             allowedExtraHeaders:
               - X-AI-User-Email
               - X-AI-User-Id
