@@ -122,13 +122,12 @@ spec:
                 tools_to_execute: ["*"]
             provider_configs: &local-text
               - provider: ai
-                allowed_models: ["*"]
+                allowed_models: ["text"]
                 key_ids: ["*"]
           - id: opencode
             name: OpenCode
             value: env.VIRTUAL_KEY_OPENCODE
             mcp_configs: *agent-mcp
-            provider_configs: *local-text
           # The owner's personal key for LibreChat's restricted MCP servers.
           - id: owner
             name: Owner
@@ -213,14 +212,14 @@ spec:
             endpointSlug: unifi-network
             toolsToExecute: ["*"]
       providers:
-        # AI Control serves whichever local text model it has loaded, under both the
-        # stable alias "text" and the checkpoint's own name from Radiance's list.
+        # AI Control serves whichever local text model it has loaded as "text", which it
+        # does not list. Bifrost resolves "*" against listed models, so name it explicitly.
         ai:
           custom_provider_config:
             base_provider_type: openai
           keys:
             - name: ai
-              models: ["text", "*"]
+              models: ["text"]
               value: env.AI_API_KEY
           network_config:
             allow_private_network: true
