@@ -121,17 +121,14 @@ spec:
               - mcp_client_name: studio
                 tools_to_execute: ["*"]
             provider_configs: &local-text
-              - provider: local
+              - provider: ai
                 allowed_models: ["text"]
                 key_ids: ["*"]
           - id: opencode
             name: OpenCode
             value: env.VIRTUAL_KEY_OPENCODE
             mcp_configs: *agent-mcp
-            provider_configs: &live-text
-              - provider: ai
-                allowed_models: ["*"]
-                key_ids: ["*"]
+            provider_configs: *local-text
           # The owner's personal key for LibreChat's restricted MCP servers.
           - id: owner
             name: Owner
@@ -150,8 +147,8 @@ spec:
             name: Pi
             value: env.VIRTUAL_KEY_PI
             mcp_configs: *agent-mcp
-            # Pi calls Bento's loaded text model only; cloud plans keep their own keys.
-            provider_configs: *live-text
+            # Pi calls the local text model only; cloud plans keep their own keys.
+            provider_configs: *local-text
           - id: studio
             name: Studio
             value: env.VIRTUAL_KEY_STUDIO
@@ -216,25 +213,14 @@ spec:
             endpointSlug: unifi-network
             toolsToExecute: ["*"]
       providers:
-        # AI Control serves whichever local text model it has loaded. "local" keeps the
-        # stable text alias for LibreChat and Studio across switches; "ai" lists the
-        # checkpoint under Radiance's own name for clients that show it to a person.
-        local:
-          custom_provider_config:
-            base_provider_type: openai
-          keys:
-            - name: local
-              models: ["text"]
-              value: env.AI_API_KEY
-          network_config:
-            allow_private_network: true
-            base_url: http://${bento_address}:8000
+        # AI Control serves whichever local text model it has loaded as "text", which it
+        # does not list. Bifrost resolves "*" against listed models, so name it explicitly.
         ai:
           custom_provider_config:
             base_provider_type: openai
           keys:
             - name: ai
-              models: ["*"]
+              models: ["text"]
               value: env.AI_API_KEY
           network_config:
             allow_private_network: true

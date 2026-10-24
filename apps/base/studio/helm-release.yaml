@@ -36,7 +36,7 @@ spec:
               STUDIO_OIDC_LABEL: Pocket ID
               STUDIO_OIDC_REDIRECT_URI: https://app.invalid/api/accounts/oidc/callback
               # Studio writes chat prompts through Bifrost with its own key (external-secrets.yaml).
-              STUDIO_PROMPT_WRITER_MODEL: local/text
+              STUDIO_PROMPT_WRITER_MODEL: ai/text
               STUDIO_PROMPT_WRITER_URL: http://bifrost.bifrost.svc.cluster.local:8080
               BIFROST_HOST: bifrost.invalid
               # Refine in Chat opens LibreChat with the prompt filled in (?prompt=).
