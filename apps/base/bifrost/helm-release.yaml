@@ -128,6 +128,10 @@ spec:
             name: OpenCode
             value: env.VIRTUAL_KEY_OPENCODE
             mcp_configs: *agent-mcp
+            provider_configs: &live-text
+              - provider: bento
+                allowed_models: ["*"]
+                key_ids: ["*"]
           # The owner's personal key for LibreChat's restricted MCP servers.
           - id: owner
             name: Owner
@@ -146,8 +150,8 @@ spec:
             name: Pi
             value: env.VIRTUAL_KEY_PI
             mcp_configs: *agent-mcp
-            # Pi calls the local text model only; cloud plans keep their own keys.
-            provider_configs: *local-text
+            # Pi calls Bento's loaded text model only; cloud plans keep their own keys.
+            provider_configs: *live-text
           - id: studio
             name: Studio
             value: env.VIRTUAL_KEY_STUDIO
@@ -212,14 +216,25 @@ spec:
             endpointSlug: unifi-network
             toolsToExecute: ["*"]
       providers:
-        # AI Control serves whichever local text model it has loaded as "text", which it
-        # does not list. Bifrost resolves "*" against listed models, so name it explicitly.
+        # AI Control serves whichever local text model it has loaded. The stable "text"
+        # alias keeps LibreChat and Studio working across switches; "bento" lists the
+        # checkpoint under Radiance's own name for clients that show it to a person.
         ai:
           custom_provider_config:
             base_provider_type: openai
           keys:
             - name: ai
               models: ["text"]
+              value: env.AI_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://${bento_address}:8000
+        bento:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: bento
+              models: ["*"]
               value: env.AI_API_KEY
           network_config:
             allow_private_network: true
