@@ -146,21 +146,8 @@ spec:
             name: Pi
             value: env.VIRTUAL_KEY_PI
             mcp_configs: *agent-mcp
-            # Pi is the owner's coding agent, so it reaches the local text model and
-            # the coding plans; OpenRouter and CLIProxy stay out of reach.
-            provider_configs:
-              - provider: ai
-                allowed_models: ["text"]
-                key_ids: ["*"]
-              - provider: deepseek
-                allowed_models: ["*"]
-                key_ids: ["*"]
-              - provider: opencode-go
-                allowed_models: ["*"]
-                key_ids: ["*"]
-              - provider: opencode-zen
-                allowed_models: ["*"]
-                key_ids: ["*"]
+            # Pi calls the local text model only; cloud plans keep their own keys.
+            provider_configs: *local-text
           - id: studio
             name: Studio
             value: env.VIRTUAL_KEY_STUDIO
