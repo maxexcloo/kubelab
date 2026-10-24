@@ -3,6 +3,7 @@ kind: ProxyGroup
 metadata:
   name: ingress
 spec:
+  hostnamePrefix: ${cluster_name}-ingress
   proxyClass: ingress
   replicas: 2
   type: ingress

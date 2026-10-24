@@ -6,6 +6,5 @@ resources:
   - ingress-proxy-class.yaml
   - namespace.yaml
   - pod-disruption-budget.yaml
-  - proxy-class.yaml
   - proxy-group.yaml
   - source.yaml
