@@ -267,18 +267,11 @@ modelSpecs:
         - studio
       preset:
         endpoint: AI
-        # Beyond this, LibreChat summarises older messages with the chat model.
-        maxContextTokens: 65536
+        # Beyond this, LibreChat summarises older messages with the chat model. The smallest
+        # single-GPU text context in ai's workloads is 167,344 tokens; keep headroom for replies.
+        maxContextTokens: 160000
         model: ai/text
+        # Studio's own MCP instructions carry its workflow rules; only LibreChat's tool naming is added here.
         promptPrefix: |
           Use the exact Studio tool names supplied by this chat, including the
           _mcp_studio suffix. Do not shorten them to gateway names.
-          Generate accepts either request or prompts, never both. Use request
-          for the user's description and let Studio write the prompt. Use prompts
-          for supplied prompts; count is the number of variations per prompt.
-          Queue each set sharing a profile and LoRA stack in one Generate call,
-          with count and/or prompts, up to 10 images total per call. Submit sets
-          sequentially: wait for one Generate response before calling Generate
-          for the next profile or LoRA stack. This keeps each set together and
-          avoids reloading models and LoRAs between alternating sets. Follow the
-          response's result instructions; a queued set needs no Result polling.
