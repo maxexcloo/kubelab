@@ -153,10 +153,13 @@ spec:
                 allowed_models: ["text"]
                 key_ids: ["*"]
               - provider: deepseek
+                allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: opencode-go
+                allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: opencode-zen
+                allowed_models: ["*"]
                 key_ids: ["*"]
           - id: studio
             name: Studio
