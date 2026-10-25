@@ -8,9 +8,3 @@ spec:
     defaultPodOptions:
       nodeSelector:
         kubernetes.io/hostname: kimbap
-    controllers:
-      main:
-        containers:
-          proxy:
-            env:
-              POD_SUBNET: 10.100.0.0/22
