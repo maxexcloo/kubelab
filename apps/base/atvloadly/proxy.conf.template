@@ -16,13 +16,9 @@ http {
         '' close;
     }
     server {
-        listen 5534;
-        # Gateway traffic from another node arrives masqueraded to that node's
-        # Tailscale address. Tailscale ACLs govern its range; the LAN stays out.
-        allow 100.64.0.0/10;
-        allow ${POD_SUBNET};
-        allow 127.0.0.1;
-        deny all;
+        # Host networking exposes every node interface; listen only on the
+        # Tailscale address the gateway reaches, keeping the LAN out.
+        listen ${NODE_IP}:5534;
         client_max_body_size 0;
         location / {
             proxy_pass http://127.0.0.1:5533;
