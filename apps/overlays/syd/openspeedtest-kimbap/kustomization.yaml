@@ -5,3 +5,17 @@ resources:
   - route.yaml
 components:
   - ../../../base/openspeedtest/chart
+replacements:
+  - source:
+      kind: HTTPRoute
+      name: openspeedtest-kimbap
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: openspeedtest-kimbap
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
