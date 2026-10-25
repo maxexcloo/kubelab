@@ -53,7 +53,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/redlib
-              tag: sha-8183b5954c70d6094a54ff91a76baf93e4274aaa
+              tag: sha-e08d4b1bf80c0b5d6c22d654fe401f9b0f2473d7
             probes:
               liveness: &health
                 path: /settings
