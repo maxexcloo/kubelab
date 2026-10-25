@@ -1,9 +1,9 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: radiance
+  name: text
 spec:
-  releaseName: radiance
+  releaseName: text
   # kubectl scale switches GPU workloads, so the chart never sets replicas.
   postRenderers:
     - kustomize:
@@ -23,7 +23,7 @@ spec:
             - -c
           envFrom:
             - secretRef:
-                name: radiance
+                name: text
           image:
             pullPolicy: IfNotPresent
             repository: docker.io/stilldeadcode/radiance
@@ -35,9 +35,9 @@ spec:
           main:
             args:
               - >-
-                exec radiance --api-key "$(RADIANCE_API_KEY)" --gpu-headroom-mib 192 --host 0.0.0.0
+                exec radiance --api-key "$(API_KEY)" --gpu-headroom-mib 192 --host 0.0.0.0
                 --kv-cache-dtype fp8 --max-model-len 169328 --max-num-batched-tokens 2048 --max-num-seqs 2
-                --model /models/gemma4-31b-heretic-ara-w4a8-df.rad --num-speculative-tokens auto --port 8000
+                --model /models/radiance/gemma4-31b-heretic-ara-w4a8-df.rad --num-speculative-tokens auto --port 8000
                 --served-model-name gemma-4-31b-heretic --tp 1 --vision-tower-placement vram
             # Readiness only: models take up to 15 minutes to load, and a restart would
             # start over.
@@ -52,7 +52,7 @@ spec:
                   timeoutSeconds: 5
         pod:
           labels:
-            radiance.excloo.dev/model: gemma
+            text.excloo.dev/model: gemma
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-1
@@ -62,33 +62,74 @@ spec:
           main:
             args:
               - >-
-                exec radiance --api-key "$(RADIANCE_API_KEY)" --gpu-headroom-mib 192 --host 0.0.0.0
+                exec radiance --api-key "$(API_KEY)" --gpu-headroom-mib 192 --host 0.0.0.0
                 --kv-cache-dtype fp8 --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
-                --model /models/gemma4-31b-heretic-ara-w4a8-df.rad --num-speculative-tokens auto --port 8000
+                --model /models/radiance/gemma4-31b-heretic-ara-w4a8-df.rad --num-speculative-tokens auto --port 8000
                 --served-model-name gemma-4-31b-heretic --tp 2 --vision-tower-placement vram
             probes: *probes
         pod:
           labels:
-            radiance.excloo.dev/model: gemma
+            text.excloo.dev/model: gemma
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-2
+      maya:
+        containers:
+          main:
+            args:
+              - --api-key
+              - $(API_KEY)
+              - --config
+              - /config/maya.json
+              - --engine
+              - strata
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8000"
+            command:
+              - python
+              - serve/server.py
+            envFrom:
+              - secretRef:
+                  name: text
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/maxexcloo/maya-rocm
+              tag: sha-a3a2d4a40319738dd4f5209dc58589eda77649a0
+            probes: *probes
+            resources:
+              claims:
+                - name: gpu
+            # The engine pins most free RAM for its expert tier.
+            securityContext:
+              capabilities:
+                add:
+                  - IPC_LOCK
+        pod:
+          labels:
+            text.excloo.dev/model: maya
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-2
+          # Maya waits up to 150 s for a running answer and the engine's shutdown.
+          terminationGracePeriodSeconds: 150
       qwen-flash-next:
         defaultContainerOptions: *container
         containers:
           main:
             args:
               - >-
-                exec radiance --api-key "$(RADIANCE_API_KEY)" --attn-prefill-fp8 off --control-vector on
+                exec radiance --api-key "$(API_KEY)" --attn-prefill-fp8 off --control-vector on
                 --draft-coupling on --draft-window adaptive --gpu-headroom-mib 192 --host 0.0.0.0
                 --host-pool-mib 12288 --kv-cache-dtype fp8 --max-model-len 262144 --max-num-batched-tokens 2048
-                --max-num-seqs 8 --model /models/qwen3.8-next-flash-fp8-iq4r-moe.rad --num-speculative-tokens 3
+                --max-num-seqs 8 --model /models/radiance/qwen3.8-next-flash-fp8-iq4r-moe.rad --num-speculative-tokens 3
                 --placement expert_tiered --port 8000 --prefix-cache-mib 4096 --served-model-name qwen3.8-flash-next
                 --tp 2 --tp-wire wht6
             probes: *probes
         pod:
           labels:
-            radiance.excloo.dev/model: qwen-flash-next
+            text.excloo.dev/model: qwen-flash-next
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-2
@@ -98,14 +139,14 @@ spec:
           main:
             args:
               - >-
-                exec radiance --api-key "$(RADIANCE_API_KEY)" --attn-prefill-fp8 both --gpu-headroom-mib 192
+                exec radiance --api-key "$(API_KEY)" --attn-prefill-fp8 both --gpu-headroom-mib 192
                 --host 0.0.0.0 --kv-cache-dtype k6_v4 --max-model-len 167344 --max-num-batched-tokens 2048
-                --max-num-seqs 2 --model /models/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192
+                --max-num-seqs 2 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192
                 --served-model-name qwen3.8-27b-uncensored-fp8 --tp 1
             probes: *probes
         pod:
           labels:
-            radiance.excloo.dev/model: qwen-fp8
+            text.excloo.dev/model: qwen-fp8
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-1
@@ -115,14 +156,14 @@ spec:
           main:
             args:
               - >-
-                exec radiance --api-key "$(RADIANCE_API_KEY)" --attn-prefill-fp8 both --gpu-headroom-mib 192
+                exec radiance --api-key "$(API_KEY)" --attn-prefill-fp8 both --gpu-headroom-mib 192
                 --host 0.0.0.0 --kv-cache-dtype k6_v4 --max-model-len 262144 --max-num-batched-tokens 2048
-                --max-num-seqs 8 --model /models/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192
+                --max-num-seqs 8 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192
                 --served-model-name qwen3.8-27b-uncensored-fp8 --tp 2
             probes: *probes
         pod:
           labels:
-            radiance.excloo.dev/model: qwen-fp8
+            text.excloo.dev/model: qwen-fp8
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-2
@@ -132,15 +173,15 @@ spec:
           main:
             args:
               - >-
-                exec radiance --api-key "$(RADIANCE_API_KEY)" --attn-prefill-fp8 both --embedding-placement ram
+                exec radiance --api-key "$(API_KEY)" --attn-prefill-fp8 both --embedding-placement ram
                 --gpu-headroom-mib 192 --host 0.0.0.0 --host-pool-mib 3072 --kv-cache-dtype fp8
                 --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
-                --model /models/qwen3.8-27b-uncensored-mxfp4-df2.rad --draft-short-from 8 --port 8000
+                --model /models/radiance/qwen3.8-27b-uncensored-mxfp4-df2.rad --draft-short-from 8 --port 8000
                 --served-model-name qwen3.8-27b-uncensored-mxfp4 --tp 1
             probes: *probes
         pod:
           labels:
-            radiance.excloo.dev/model: qwen-mxfp4
+            text.excloo.dev/model: qwen-mxfp4
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-1
@@ -157,16 +198,48 @@ spec:
           operator: Equal
           value: gpu
     persistence:
-      data:
-        hostPath: ${dataset_root}/ai/radiance/data
+      maya-config:
+        name: text-maya
+        type: configMap
+        advancedMounts:
+          maya:
+            main:
+              - path: /config/maya.json
+                readOnly: true
+                subPath: maya.json
+      maya-data:
+        hostPath: ${dataset_root}/ai/maya/data
         hostPathType: Directory
         type: hostPath
-        globalMounts:
-          - path: /data
+        advancedMounts:
+          maya:
+            main:
+              - path: /data
+      maya-shm:
+        medium: Memory
+        sizeLimit: 2Gi
+        type: emptyDir
+        advancedMounts:
+          maya:
+            main:
+              - path: /dev/shm
       models:
-        hostPath: ${dataset_root}/ai/models/radiance
+        hostPath: ${dataset_root}/ai/models
         hostPathType: Directory
         type: hostPath
         globalMounts:
           - path: /models
             readOnly: true
+      radiance-data:
+        hostPath: ${dataset_root}/ai/radiance/data
+        hostPathType: Directory
+        type: hostPath
+        advancedMounts:
+          gemma: &radiance-data
+            main:
+              - path: /data
+          gemma-tp2: *radiance-data
+          qwen-flash-next: *radiance-data
+          qwen-fp8: *radiance-data
+          qwen-fp8-tp2: *radiance-data
+          qwen-mxfp4: *radiance-data

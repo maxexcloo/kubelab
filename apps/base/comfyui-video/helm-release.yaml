@@ -81,12 +81,17 @@ spec:
         globalMounts:
           - path: /root/ComfyUI/input
       models:
-        hostPath: ${dataset_root}/ai/models/comfyui
+        hostPath: ${dataset_root}/ai/models
         hostPathType: Directory
         type: hostPath
         globalMounts:
           - path: /root/ComfyUI/models
             readOnly: true
+            subPath: comfyui
+          # Radiance H3 profiles load their .rad packages from here.
+          - path: /models/radiance-video
+            readOnly: true
+            subPath: radiance
       shm:
         medium: Memory
         type: emptyDir

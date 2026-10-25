@@ -29,7 +29,6 @@ resources:
   - ../../base/openspeedtest
   - ../../base/papra
   - ../../base/pocket-id
-  - ../../base/radiance
   - ../../base/reactive-resume
   - ../../base/redlib
   - ../../base/romm
@@ -37,6 +36,7 @@ resources:
   - ../../base/sidestore-vpn
   - ../../base/signtools
   - ../../base/syncthing
+  - ../../base/text
   - ../../base/unifi-network-mcp
   - ../../../platform/identity/cloudflare-access
   - ../../../platform/identity/headlamp/integrations

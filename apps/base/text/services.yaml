@@ -10,7 +10,7 @@ spec:
       port: 8000
       protocol: TCP
   selector:
-    app.kubernetes.io/name: radiance
+    app.kubernetes.io/name: text
 ---
 apiVersion: v1
 kind: Service
@@ -22,7 +22,19 @@ spec:
       port: 8000
       protocol: TCP
   selector:
-    radiance.excloo.dev/model: gemma
+    text.excloo.dev/model: gemma
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maya
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    text.excloo.dev/model: maya
 ---
 apiVersion: v1
 kind: Service
@@ -34,7 +46,7 @@ spec:
       port: 8000
       protocol: TCP
   selector:
-    radiance.excloo.dev/model: qwen-flash-next
+    text.excloo.dev/model: qwen-flash-next
 ---
 apiVersion: v1
 kind: Service
@@ -46,7 +58,7 @@ spec:
       port: 8000
       protocol: TCP
   selector:
-    radiance.excloo.dev/model: qwen-fp8
+    text.excloo.dev/model: qwen-fp8
 ---
 apiVersion: v1
 kind: Service
@@ -58,4 +70,4 @@ spec:
       port: 8000
       protocol: TCP
   selector:
-    radiance.excloo.dev/model: qwen-mxfp4
+    text.excloo.dev/model: qwen-mxfp4
