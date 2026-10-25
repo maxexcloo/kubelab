@@ -2,8 +2,14 @@
 
 ## Project Overview
 
-Actual Up keeps its dependencies, serial operation queue, schedules and encrypted
-settings in its own repository; Kubelab deploys its published image.
+This repository owns the Kubernetes resources reconciled by Flux: app bases and
+cluster overlays in `apps/`, Flux entry points in `clusters/`, and cluster
+controllers and shared configuration in `platform/`. `README.md` describes
+purpose and usage. The separate `homelab` repository owns the substrate that
+rebuilds or reaches a cluster while Kubernetes is unavailable, and `minilab`
+owns mini-app source. Actual Up keeps its dependencies, serial operation queue,
+schedules and encrypted settings in its own repository; Kubelab deploys its
+published image.
 
 ## Conventions
 
