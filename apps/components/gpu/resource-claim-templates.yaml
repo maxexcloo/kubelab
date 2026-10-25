@@ -1,0 +1,26 @@
+# Workloads claim a GPU count, never a specific GPU.
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: gpu-1
+spec:
+  spec:
+    devices:
+      requests:
+        - name: gpu
+          exactly:
+            count: 1
+            deviceClassName: gpu.excloo.dev
+---
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: gpu-2
+spec:
+  spec:
+    devices:
+      requests:
+        - name: gpu
+          exactly:
+            count: 2
+            deviceClassName: gpu.excloo.dev

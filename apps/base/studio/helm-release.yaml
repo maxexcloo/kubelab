@@ -9,14 +9,8 @@ spec:
         containers:
           main:
             env:
-              # Address parts compose the URLs below; Studio ignores them.
-              AI_ADDRESS: ${bento_address}
-              COMFY_URL:
-                dependsOn: AI_ADDRESS
-                value: http://$(AI_ADDRESS):8190
-              COMFY_VIDEO_URL:
-                dependsOn: AI_ADDRESS
-                value: http://$(AI_ADDRESS):8191
+              COMFY_URL: http://comfyui.comfyui.svc.cluster.local:8188
+              COMFY_VIDEO_URL: http://comfyui-video.comfyui-video.svc.cluster.local:8188
               # A chat call queues up to ten images at once.
               STUDIO_ACCOUNT_MAX_OUTSTANDING_JOBS: "10"
               STUDIO_ALLOWED_HOSTS:

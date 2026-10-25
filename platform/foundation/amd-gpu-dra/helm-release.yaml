@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: amd-gpu-dra
+  namespace: kube-system
+spec:
+  interval: 30m
+  releaseName: amd-gpu-dra
+  chart:
+    spec:
+      chart: k8s-gpu-dra-driver
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: amd-gpu-dra
+        namespace: flux-system
+      version: v1.0.1
+  values:
+    # Talos's containerd reads CDI specs from /run/cdi.
+    cdi:
+      dynamicPath: /run/cdi
+    kubeletPlugin:
+      # The image is amd64-only; nodes without AMD GPUs publish no devices.
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      tolerations:
+        - key: node.excloo.dev/dedicated
+          operator: Exists

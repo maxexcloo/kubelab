@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: comfyui
+spec:
+  ingress:
+    - from:
+        # Studio queues jobs and fetches outputs; Traefik serves the editor.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: studio
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: studio
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - port: 8188
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: comfyui
+  policyTypes:
+    - Ingress

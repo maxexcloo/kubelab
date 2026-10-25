@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: comfyui
+resources:
+  - external-secrets.yaml
+  - namespace.yaml
+  - network-policy.yaml
+components:
+  - ../../components/gpu
+  - ../../components/private-dns
+  - ../../components/workload
+patches:
+  - path: helm-release.yaml
+    target:
+      kind: HelmRelease
+transformers:
+  - ../../transformers/route-private
