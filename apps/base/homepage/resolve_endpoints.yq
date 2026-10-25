@@ -19,7 +19,9 @@ with(select($domain == null or $domain == false); error("Missing infrastructure 
   ($service.path // "") as $path |
   with(select($path != "" and ($path | test("^/[^?#]*$") | not));
     error("Invalid service path: " + $reference)) |
-  {"authority": ($service.hostname // (($machine.hostname // $parts.machine) + "." + $parts.network + "." + $domain))} |
+  # A LAN-only hostname resolves to a private LAN address; use the machine's name.
+  {"authority": ((if $service.dns_lan == true then null else $service.hostname end) //
+    (($machine.hostname // $parts.machine) + "." + $parts.network + "." + $domain))} |
   # Published Tailscale hosts are needed for HTTP; HTTPS keeps its certificate DNS.
   with(select($service.hostname == null and $service.scheme == "http" and ($infra.hosts[$parts.machine] // "") != "");
     .authority = $infra.hosts[$parts.machine]) |

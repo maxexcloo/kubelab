@@ -56,7 +56,7 @@ map(.size = ([.widget] | map(select(. != null)) | length) + (.widgets // [] | le
 map(with(select(.tab == "Home"); del(.widget, .widgets) | .size = 0)) |
 # Elsewhere larger cards lead so rows stay even.
 map(.weight = .size * -1) + $overview | map(del(.size)) |
-sort_by(.tab, .group, .weight, .name) |
+sort_by(.tab, .group, .weight, (.name | downcase)) |
 group_by(.tab) |
 # Homepage shows nested groups in file order, so Overview goes first.
 map({(.[0].tab): (group_by(.group) |
