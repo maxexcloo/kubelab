@@ -6,10 +6,14 @@ metadata:
   annotations:
     # Bypass Cloudflare so tests measure the internet path to HSP itself.
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-    # Homepage omits this route; the group places its Gatus check beside the private one.
+    gethomepage.dev/description: Network Speed Test
+    gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Operations
+    gethomepage.dev/href: https://openspeedtest-hsp.excloo.com
+    gethomepage.dev/icon: sh-openspeedtest
+    gethomepage.dev/name: OpenSpeedTest Public (syd/hsp)
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-hsp
     monitoring.excloo.dev/enabled: "true"
-    monitoring.excloo.dev/name: OpenSpeedTest Public (syd/hsp)
   labels:
     app.kubernetes.io/name: openspeedtest-hsp
     gateway.excloo.dev/public-access: "true"
