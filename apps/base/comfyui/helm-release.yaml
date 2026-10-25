@@ -19,13 +19,10 @@ spec:
       main:
         strategy: Recreate
         containers:
-          main:
+          main: &container
             env:
               CLI_ARGS: --enable-assets --use-ck-attention --force-non-blocking --disable-pinned-memory --disable-mmap
-              CLIPROXYAPI_KEY: ""
-              CLIPROXYAPI_URL: ""
               HSA_OVERRIDE_GFX_VERSION: 12.0.1
-              PATH: /root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
@@ -39,6 +36,7 @@ spec:
               readiness:
                 enabled: true
                 path: /system_stats
+                port: 8188
                 type: HTTP
                 spec:
                   timeoutSeconds: 5
@@ -86,6 +84,7 @@ spec:
         hostPathType: Directory
         type: hostPath
         globalMounts:
+          # Writable only here: Studio's model downloads land in this worker.
           - path: /root/ComfyUI/models
             subPath: comfyui
           - path: /models/radiance-image
@@ -110,11 +109,7 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
-    service:
-      main:
-        controller: main
-        forceRename: "{{ .Release.Name }}"
-        ports:
-          http:
-            port: 8188
-            protocol: HTTP
+        rules:
+          - backendRefs:
+              - name: comfyui
+                port: 8188

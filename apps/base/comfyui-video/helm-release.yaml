@@ -23,7 +23,6 @@ spec:
             env:
               CLI_ARGS: --cache-classic --disable-mmap --disable-pinned-memory --enable-assets --force-non-blocking --use-ck-attention
               HSA_OVERRIDE_GFX_VERSION: 12.0.1
-              PYTHONDONTWRITEBYTECODE: "1"
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
