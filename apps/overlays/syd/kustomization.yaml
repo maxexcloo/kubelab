@@ -13,6 +13,8 @@ resources:
   - ../../base/bifrost
   - ../../base/bookorbit
   - ../../base/cliproxyapi
+  - ../../base/comfyui
+  - ../../base/comfyui-video
   - ../../base/studio
   - ../../base/homepage
   - ../../base/home-assistant
@@ -27,6 +29,7 @@ resources:
   - ../../base/openspeedtest
   - ../../base/papra
   - ../../base/pocket-id
+  - ../../base/radiance
   - ../../base/reactive-resume
   - ../../base/redlib
   - ../../base/romm

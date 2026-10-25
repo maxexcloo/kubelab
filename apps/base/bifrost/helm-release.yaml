@@ -124,6 +124,18 @@ spec:
               - provider: ai
                 allowed_models: ["text"]
                 key_ids: ["*"]
+              - provider: gemma
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: qwen-flash-next
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: qwen-fp8
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: qwen-mxfp4
+                allowed_models: ["*"]
+                key_ids: ["*"]
           - id: opencode
             name: OpenCode
             value: env.VIRTUAL_KEY_OPENCODE
@@ -213,8 +225,9 @@ spec:
             endpointSlug: unifi-network
             toolsToExecute: ["*"]
       providers:
-        # AI Control serves whichever local text model it has loaded as "text", which it
-        # does not list. Bifrost resolves "*" against listed models, so name it explicitly.
+        # "text" reaches whichever local text models are running; each also has its own
+        # provider. They serve any model name but list only their own, and Bifrost
+        # resolves "*" against listed models, so every provider names its model.
         ai:
           custom_provider_config:
             base_provider_type: openai
@@ -224,7 +237,7 @@ spec:
               value: env.AI_API_KEY
           network_config:
             allow_private_network: true
-            base_url: http://${bento_address}:8000
+            base_url: http://text.radiance.svc.cluster.local:8000
         cliproxyapi:
           custom_provider_config:
             base_provider_type: openai
@@ -240,6 +253,16 @@ spec:
             - name: deepseek
               models: ["*"]
               value: env.DEEPSEEK_API_KEY
+        gemma:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: gemma
+              models: ["gemma-4-31b-heretic"]
+              value: env.AI_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://gemma.radiance.svc.cluster.local:8000
         opencode-go:
           keys:
             - name: opencode-go-1
@@ -261,6 +284,36 @@ spec:
             - name: openrouter
               models: ["*"]
               value: env.OPENROUTER_API_KEY
+        qwen-flash-next:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: qwen-flash-next
+              models: ["qwen3.8-flash-next"]
+              value: env.AI_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://qwen-flash-next.radiance.svc.cluster.local:8000
+        qwen-fp8:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: qwen-fp8
+              models: ["qwen3.8-27b-uncensored-fp8"]
+              value: env.AI_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://qwen-fp8.radiance.svc.cluster.local:8000
+        qwen-mxfp4:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: qwen-mxfp4
+              models: ["qwen3.8-27b-uncensored-mxfp4"]
+              value: env.AI_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://qwen-mxfp4.radiance.svc.cluster.local:8000
     storage:
       persistence:
         existingClaim: data

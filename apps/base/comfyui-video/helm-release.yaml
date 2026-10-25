@@ -1,0 +1,116 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  # kubectl scale switches GPU workloads, so the chart never sets replicas.
+  postRenderers:
+    - kustomize:
+        patches:
+          - patch: |-
+              - op: remove
+                path: /spec/replicas
+            target:
+              kind: Deployment
+  values:
+    controllers:
+      main:
+        strategy: Recreate
+        containers:
+          main:
+            env:
+              CLI_ARGS: --cache-classic --disable-mmap --disable-pinned-memory --enable-assets --force-non-blocking --use-ck-attention
+              HSA_OVERRIDE_GFX_VERSION: 12.0.1
+              PYTHONDONTWRITEBYTECODE: "1"
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
+            image:
+              pullPolicy: IfNotPresent
+              # Keep the tested Studio SDK; the core version tag can also advance its SDK.
+              repository: ghcr.io/maxexcloo/comfyui-radiance
+              tag: sha-4c33f505b56c4927d5fe6df3c10a2962e3d48048
+            # Readiness only, as under Docker: loading never restarts the worker.
+            probes:
+              readiness:
+                enabled: true
+                path: /system_stats
+                type: HTTP
+                spec:
+                  timeoutSeconds: 5
+            resources:
+              claims:
+                - name: gpu
+            securityContext:
+              capabilities:
+                add:
+                  - SYS_PTRACE
+        pod:
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-1
+    defaultPodOptions:
+      nodeSelector:
+        node.excloo.dev/dedicated: gpu
+      securityContext:
+        seccompProfile:
+          type: Unconfined
+      tolerations:
+        - key: node.excloo.dev/dedicated
+          operator: Equal
+          value: gpu
+    persistence:
+      data:
+        hostPath: ${dataset_root}/ai/comfyui-video/data
+        hostPathType: Directory
+        type: hostPath
+        globalMounts:
+          - path: /root/.cache
+            subPath: cache
+          - path: /root/.config
+            subPath: config
+          - path: /root/ComfyUI/output
+            subPath: output
+          - path: /root/ComfyUI/user
+            subPath: user
+      # Video reads the image worker's uploads, so Studio stages inputs once.
+      input:
+        hostPath: ${dataset_root}/ai/comfyui-image/data/input
+        hostPathType: Directory
+        type: hostPath
+        globalMounts:
+          - path: /root/ComfyUI/input
+      models:
+        hostPath: ${dataset_root}/ai/models/comfyui
+        hostPathType: Directory
+        type: hostPath
+        globalMounts:
+          - path: /root/ComfyUI/models
+            readOnly: true
+      shm:
+        medium: Memory
+        type: emptyDir
+        globalMounts:
+          - path: /dev/shm
+    route:
+      private:
+        annotations:
+          gethomepage.dev/description: Video Workflows
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Artificial Intelligence
+          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: sh-comfyui
+          gethomepage.dev/name: ComfyUI Video
+        hostnames:
+          - comfy-video.excloo.com
+        parentRefs:
+          - name: private
+            namespace: networking
+    service:
+      main:
+        controller: main
+        forceRename: "{{ .Release.Name }}"
+        ports:
+          http:
+            port: 8188
+            protocol: HTTP

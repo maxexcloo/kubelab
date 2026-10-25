@@ -52,13 +52,17 @@ endpoints:
       - tools
       - web_search
   custom:
-    # Bifrost reaches the local text model AI Control has loaded on Bento.
+    # ai/text reaches whichever local text models are running; the others pick one.
     - name: AI
       apiKey: ${BIFROST_API_KEY}
       baseURL: http://bifrost.bifrost.svc.cluster.local:8080/v1
       models:
         default:
           - ai/text
+          - gemma/gemma-4-31b-heretic
+          - qwen-flash-next/qwen3.8-flash-next
+          - qwen-fp8/qwen3.8-27b-uncensored-fp8
+          - qwen-mxfp4/qwen3.8-27b-uncensored-mxfp4
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
       titleConvo: true
@@ -268,7 +272,7 @@ modelSpecs:
       preset:
         endpoint: AI
         # Beyond this, LibreChat summarises older messages with the chat model. The smallest
-        # single-GPU text context in ai's workloads is 167,344 tokens; keep headroom for replies.
+        # single-GPU text context in Radiance's controllers is 167,344 tokens; keep headroom for replies.
         maxContextTokens: 160000
         model: ai/text
         # Studio's own MCP instructions carry its workflow rules; only LibreChat's tool naming is added here.

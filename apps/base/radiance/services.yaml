@@ -1,0 +1,61 @@
+# Each model has its own Service; "text" reaches every running model, so
+# ai/text answers from whichever is up.
+apiVersion: v1
+kind: Service
+metadata:
+  name: text
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: radiance
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gemma
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    radiance.excloo.dev/model: gemma
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qwen-flash-next
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    radiance.excloo.dev/model: qwen-flash-next
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qwen-fp8
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    radiance.excloo.dev/model: qwen-fp8
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qwen-mxfp4
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    radiance.excloo.dev/model: qwen-mxfp4

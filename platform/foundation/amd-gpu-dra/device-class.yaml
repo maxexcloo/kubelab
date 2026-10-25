@@ -1,0 +1,13 @@
+# Discrete AMD GPUs. Integrated GPUs carve out at most a few GiB of VRAM and
+# drive host displays, so claims never receive them.
+apiVersion: resource.k8s.io/v1
+kind: DeviceClass
+metadata:
+  name: gpu.excloo.dev
+spec:
+  selectors:
+    - cel:
+        expression: >-
+          device.driver == "gpu.amd.com" &&
+          device.attributes["gpu.amd.com"].type == "amdgpu" &&
+          device.capacity["gpu.amd.com"].memory.compareTo(quantity("8Gi")) >= 0
