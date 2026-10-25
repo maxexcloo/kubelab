@@ -52,6 +52,8 @@ jq -e \
       [.monitor, .name] | any(. == "");
     def invalid_url:
       (.monitor | test("^https?://[^[:space:]]+$") | not);
+    def invalid_href:
+      (.href | test("^[a-z][a-z0-9+.-]*://[^/]*\\.invalid([/:]|$)"));
     def url_hostname:
       try capture("^https?://(?<hostname>[^/:]+)").hostname catch "";
     . as $route_inventory |
@@ -96,6 +98,7 @@ jq -e \
     ) as $missing_private_namespace_labels |
     ($inventory | map(select(missing_required)) | map(.source)) as $missing |
     ($inventory | map(select(invalid_url)) | map(.source)) as $invalid |
+    ($route_inventory | map(select(invalid_href)) | map(.source)) as $invalid_hrefs |
     (
       $inventory |
       map(select((.monitor | url_hostname) as $hostname | (.hostnames | index($hostname)) == null)) |
@@ -161,6 +164,8 @@ jq -e \
       error("missing service metadata: " + ($missing | join(", ")))
     elif ($invalid | length) > 0 then
       error("invalid service URL: " + ($invalid | join(", ")))
+    elif ($invalid_hrefs | length) > 0 then
+      error("unresolved service href placeholder: " + ($invalid_hrefs | join(", ")))
     elif ($hostname_mismatches | length) > 0 then
       error("service href does not match a route hostname: " + ($hostname_mismatches | join(", ")))
     elif ($duplicates | length) > 0 then
