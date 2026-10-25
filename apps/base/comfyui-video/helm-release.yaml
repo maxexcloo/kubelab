@@ -17,7 +17,7 @@ spec:
       main:
         strategy: Recreate
         containers:
-          main:
+          main: &container
             env:
               CLI_ARGS: --cache-classic --disable-mmap --disable-pinned-memory --enable-assets --force-non-blocking --use-ck-attention
               HSA_OVERRIDE_GFX_VERSION: 12.0.1
@@ -49,6 +49,15 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-1
+      # Radiance H3 profiles split across both GPUs.
+      tp2:
+        strategy: Recreate
+        containers:
+          main: *container
+        pod:
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-2
     defaultPodOptions:
       nodeSelector:
         node.excloo.dev/dedicated: gpu
@@ -111,11 +120,7 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
-    service:
-      main:
-        controller: main
-        forceRename: "{{ .Release.Name }}"
-        ports:
-          http:
-            port: 8188
-            protocol: HTTP
+        rules:
+          - backendRefs:
+              - name: comfyui-video
+                port: 8188
