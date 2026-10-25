@@ -56,6 +56,46 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-1
+      # The llama.cpp models run on a gaming node's 16 GB GPU while it is free. Their
+      # vision encoders stay on the CPU, because on the GPU they spill VRAM and slow
+      # generation, and an image token cap keeps reading an image to about 10 s.
+      gemma-26b:
+        defaultContainerOptions: &llama-cpp
+          command:
+            - /bin/sh
+            - -c
+          envFrom:
+            - secretRef:
+                name: text
+          image:
+            pullPolicy: IfNotPresent
+            repository: ghcr.io/ggml-org/llama.cpp
+            tag: server-rocm-b11870
+          resources:
+            claims:
+              - name: gpu
+        containers:
+          main:
+            args:
+              - >-
+                exec /app/llama-server --alias gemma-4-26b-a4b --api-key "$(API_KEY)" --batch-size 2048
+                --ctx-size 131072 --flash-attn on --host 0.0.0.0 --image-max-tokens 560 --jinja
+                --mmproj /models/llama.cpp/gemma-4-26B-A4B-it-mmproj-F16.gguf
+                --model /models/llama.cpp/gemma-4-26B-A4B-it-UD-IQ4_XS.gguf --no-mmproj-offload --port 8000
+                --ubatch-size 2048
+            probes: *probes
+        pod:
+          labels:
+            text.excloo.dev/model: gemma-26b
+          nodeSelector: &gaming
+            node.excloo.dev/dedicated: gaming
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-1
+          tolerations: &gaming-tolerations
+            - key: node.excloo.dev/dedicated
+              operator: Equal
+              value: gaming
       gemma-tp2:
         defaultContainerOptions: *container
         containers:
@@ -114,6 +154,27 @@ spec:
               resourceClaimTemplateName: gpu-2
           # Maya waits up to 150 s for a running answer and the engine's shutdown.
           terminationGracePeriodSeconds: 150
+      qwen-35b:
+        defaultContainerOptions: *llama-cpp
+        containers:
+          main:
+            # MTP drafting needs a single sequence.
+            args:
+              - >-
+                exec /app/llama-server --alias qwen3.6-35b-a3b --api-key "$(API_KEY)" --batch-size 2048
+                --ctx-size 131072 --flash-attn on --host 0.0.0.0 --image-max-tokens 1024 --jinja
+                --mmproj /models/llama.cpp/Qwen3.6-35B-A3B-mmproj-F16.gguf
+                --model /models/llama.cpp/Qwen3.6-35B-A3B-MTP-UD-IQ4_XS.gguf --no-mmproj-offload --parallel 1
+                --port 8000 --spec-draft-n-max 2 --spec-type draft-mtp --ubatch-size 2048
+            probes: *probes
+        pod:
+          labels:
+            text.excloo.dev/model: qwen-35b
+          nodeSelector: *gaming
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-1
+          tolerations: *gaming-tolerations
       qwen-flash-next:
         defaultContainerOptions: *container
         containers:

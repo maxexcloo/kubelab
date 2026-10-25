@@ -127,7 +127,13 @@ spec:
               - provider: gemma
                 allowed_models: ["*"]
                 key_ids: ["*"]
+              - provider: gemma-26b
+                allowed_models: ["*"]
+                key_ids: ["*"]
               - provider: maya
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: qwen-35b
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: qwen-flash-next
@@ -266,6 +272,16 @@ spec:
           network_config:
             allow_private_network: true
             base_url: http://gemma.text.svc.cluster.local:8000
+        gemma-26b:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: gemma-26b
+              models: ["gemma-4-26b-a4b"]
+              value: env.AI_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://gemma-26b.text.svc.cluster.local:8000
         maya:
           custom_provider_config:
             base_provider_type: openai
@@ -297,6 +313,16 @@ spec:
             - name: openrouter
               models: ["*"]
               value: env.OPENROUTER_API_KEY
+        qwen-35b:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: qwen-35b
+              models: ["qwen3.6-35b-a3b"]
+              value: env.AI_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://qwen-35b.text.svc.cluster.local:8000
         qwen-flash-next:
           custom_provider_config:
             base_provider_type: openai
