@@ -1,0 +1,12 @@
+# Both controllers serve the same editor and Studio worker address.
+apiVersion: v1
+kind: Service
+metadata:
+  name: comfyui-video
+spec:
+  ports:
+    - name: http
+      port: 8188
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: comfyui-video
