@@ -17,10 +17,10 @@ http {
     }
     server {
         listen 5534;
-        # Gateway traffic can be masqueraded to its node's Tailscale address.
-        allow ${GATEWAY_IP};
+        # Gateway traffic from another node arrives masqueraded to that node's
+        # Tailscale address. Tailscale ACLs govern its range; the LAN stays out.
+        allow 100.64.0.0/10;
         allow ${POD_SUBNET};
-        allow ${NODE_IP};
         allow 127.0.0.1;
         deny all;
         client_max_body_size 0;
