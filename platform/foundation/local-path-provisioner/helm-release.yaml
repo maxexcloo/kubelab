@@ -36,7 +36,8 @@ spec:
           create: true
           defaultClass: true
           defaultVolumeType: hostPath
-          reclaimPolicy: Delete
+          # Deleting a claim keeps its data; remove released volumes by hand.
+          reclaimPolicy: Retain
           volumeBindingMode: WaitForFirstConsumer
       atvloadly-local:
         nodePathMap:
