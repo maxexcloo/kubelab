@@ -35,6 +35,7 @@ spec:
               readiness:
                 enabled: true
                 path: /system_stats
+                port: 8188
                 type: HTTP
                 spec:
                   timeoutSeconds: 5
