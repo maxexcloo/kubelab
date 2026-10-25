@@ -6,3 +6,30 @@ resources:
   - route.yaml
 components:
   - ../../../base/openspeedtest/chart
+replacements:
+  - source:
+      kind: HTTPRoute
+      name: openspeedtest-hsp
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: openspeedtest-hsp
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: HTTPRoute
+      name: openspeedtest-hsp-public
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: openspeedtest-hsp-public
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
