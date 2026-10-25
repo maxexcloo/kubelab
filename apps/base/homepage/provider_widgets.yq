@@ -10,7 +10,7 @@ with(select(($expected - $available) | length > 0); error("Missing Gatus provide
    (select(.value.dns != null) |
      {"probe": (.value.dns.name // (.value.name + " DNS")), "provider": $provider}))
 ] as $catalogue |
-map(select(.group == "Providers")) | sort_by(.name) |
+map(select(.group == "Providers")) | sort_by(.name | downcase) |
 map(. as $endpoint |
   ($catalogue | map(select(.probe == $endpoint.name)) | .[0]) as $entry |
   {(.name): {

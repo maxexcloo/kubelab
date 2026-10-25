@@ -6,7 +6,7 @@ metadata:
     gethomepage.dev/description: AI Gateway
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Artificial Intelligence
-    gethomepage.dev/href: https://app.invalid/
+    gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: mdi-bridge-#ffffff
     gethomepage.dev/name: &title Bifrost
     monitoring.excloo.dev/enabled: "true"

@@ -85,5 +85,5 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
     "widget": ($tailscale.widget + {"deviceid": .value})}
 ] as $cluster_devices |
 ($existing + $management + $monitoring + $cluster_tunnels + $cluster_devices) |
-sort_by(.group, .name) | group_by(.group) |
+sort_by(.group, (.name | downcase)) | group_by(.group) |
 map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})

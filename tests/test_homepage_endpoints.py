@@ -235,6 +235,18 @@ class HomepageEndpointsTests(unittest.TestCase):
         edit_inventory(
             self.homelab,
             lambda machines: machines["mbk"]["kimbap"]["services"]["management"].update(
+                dns_lan=True
+            ),
+        )
+        self.assertEqual(
+            resolved({"href": "homelab://mbk/kimbap/management"}, homelab=self.homelab)[
+                "href"
+            ],
+            "https://storage.mbk.example.net:8443",
+        )
+        edit_inventory(
+            self.homelab,
+            lambda machines: machines["mbk"]["kimbap"]["services"]["management"].update(
                 hostname="https://invalid.example/path"
             ),
         )
