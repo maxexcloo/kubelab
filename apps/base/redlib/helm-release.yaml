@@ -44,6 +44,11 @@ spec:
               REDLIB_DEFAULT_SUBSCRIPTIONS: '{{ join "+" .Values.subscriptions }}'
               REDLIB_DEFAULT_USE_HLS: "on"
               REDLIB_FULL_URL: https://app.invalid
+              REDLIB_REDDIT_COOKIE:
+                valueFrom:
+                  secretKeyRef:
+                    key: reddit-cookie
+                    name: "{{ .Release.Name }}"
               REDLIB_ROBOTS_DISABLE_INDEXING: "on"
             image:
               pullPolicy: IfNotPresent
