@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: radiance
+  name: text
 spec:
   ingress:
     - from:
@@ -16,6 +16,6 @@ spec:
           protocol: TCP
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: radiance
+      app.kubernetes.io/name: text
   policyTypes:
     - Ingress

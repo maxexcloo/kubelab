@@ -60,6 +60,7 @@ endpoints:
         default:
           - ai/text
           - gemma/gemma-4-31b-heretic
+          - maya/glm-5.3-flash
           - qwen-flash-next/qwen3.8-flash-next
           - qwen-fp8/qwen3.8-27b-uncensored-fp8
           - qwen-mxfp4/qwen3.8-27b-uncensored-mxfp4
@@ -272,7 +273,7 @@ modelSpecs:
       preset:
         endpoint: AI
         # Beyond this, LibreChat summarises older messages with the chat model. The smallest
-        # single-GPU text context in Radiance's controllers is 167,344 tokens; keep headroom for replies.
+        # single-GPU text context in the text app's controllers is 167,344 tokens; keep headroom for replies.
         maxContextTokens: 160000
         model: ai/text
         # Studio's own MCP instructions carry its workflow rules; only LibreChat's tool naming is added here.

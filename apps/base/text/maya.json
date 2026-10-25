@@ -1,0 +1,43 @@
+{
+  "backend": "hip",
+  "cwd": "/opt/maya",
+  "exe": "/opt/maya/build-hip/maya",
+  "log": "/data/maya.log",
+  "model_name": "glm-5.3-flash",
+  "reasoning_effort": "high",
+  "tokenizer": "/models/maya/GLM-5.3-Flash-Maya-M-Derisked/pack/tokenizer",
+  "args": [
+    "--glm-pack",
+    "/models/maya/GLM-5.3-Flash-Maya-M-Derisked/pack",
+    "--max-context",
+    "262144",
+    "--expert-cache",
+    "auto",
+    "--expert-profile",
+    "/opt/maya/data/expert-profile-glm.bin",
+    "--kv-streaming",
+    "on",
+    "--parallel",
+    "2",
+    "--prefill",
+    "auto",
+    "--vram-reserve-later-mib",
+    "770"
+  ],
+  "env": {
+    "MAYA_GLM_KV_INT8": "1",
+    "MAYA_GLM_PREFILL_MB": "4096",
+    "MAYA_GLM_PREFILL_SUB": "1024",
+    "MAYA_GLM_RAM_HEADROOM_GB": "8",
+    "MAYA_GLM_RESERVE_MB": "512",
+    "MAYA_GLM_SLOT_DIR": "/data/slots",
+    "MAYA_GLM_SLOT_KEEP": "1",
+    "MAYA_HIPBLASLT_TUNING": "/opt/maya/tools/hip/gfx1201-glm-hipblaslt-100401.txt"
+  },
+  "gpu": [0, 1],
+  "lib_dirs": ["/opt/rocm/lib"],
+  "sampling": {
+    "temperature": 1.0,
+    "top_p": 0.95
+  }
+}
