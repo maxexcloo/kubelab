@@ -1,0 +1,33 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: amd-gpu
+  namespace: kube-system
+spec:
+  interval: 30m
+  releaseName: amd-gpu
+  chart:
+    spec:
+      chart: amd-gpu
+      interval: 24h
+      sourceRef:
+        kind: HelmRepository
+        name: amd-gpu
+        namespace: flux-system
+      version: 0.22.0
+  values:
+    dp:
+      resources:
+        limits:
+          memory: 64Mi
+        requests:
+          cpu: 10m
+          memory: 32Mi
+    # The image is amd64-only; nodes without AMD GPUs advertise none.
+    node_selector_enabled: true
+    node_selector:
+      feature.node.kubernetes.io/pci-0300_1002.present: null
+      kubernetes.io/arch: amd64
+    tolerations:
+      - key: node.excloo.dev/dedicated
+        operator: Exists
