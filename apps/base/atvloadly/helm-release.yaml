@@ -49,10 +49,6 @@ spec:
               - daemon off;
             env:
               NGINX_ENVSUBST_OUTPUT_DIR: /tmp
-              NODE_IP:
-                valueFrom:
-                  fieldRef:
-                    fieldPath: status.hostIP
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/library/nginx
@@ -84,15 +80,11 @@ spec:
             main:
               - path: /data
       proxy-config:
-        defaultMode: 0555
         name: atvloadly-proxy
         type: configMap
         advancedMounts:
           main:
             proxy:
-              - path: /docker-entrypoint.d/15-proxy-gateway.envsh
-                readOnly: true
-                subPath: proxy-gateway.envsh
               - path: /etc/nginx/templates/nginx.conf.template
                 readOnly: true
                 subPath: nginx.conf.template
