@@ -3,7 +3,9 @@ kind: HelmRelease
 metadata:
   name: application
 spec:
-  # kubectl scale switches GPU workloads, so the chart never sets replicas.
+  # kubectl scale switches GPU workloads, so the chart never sets replicas and
+  # upgrades do not wait: a new Deployment starts with one replica, and its GPU
+  # may be busy.
   postRenderers:
     - kustomize:
         patches:
@@ -12,6 +14,8 @@ spec:
                 path: /spec/replicas
             target:
               kind: Deployment
+  upgrade:
+    disableWait: true
   values:
     controllers:
       main:
