@@ -60,6 +60,12 @@ spec:
             authentication:
               - path: /scripts
                 readOnly: true
+      backups:
+        hostPath: ${dataset_root}/truenas/backups
+        hostPathType: Directory
+        type: hostPath
+        globalMounts:
+          - path: /mnt/truenas/backups
       credentials:
         name: "{{ .Release.Name }}"
         type: secret
@@ -73,12 +79,30 @@ spec:
         type: persistentVolumeClaim
         globalMounts:
           - path: /var/syncthing
-      files:
-        hostPath: ${dataset_root}/truenas
+      documents:
+        hostPath: ${dataset_root}/truenas/documents
         hostPathType: Directory
         type: hostPath
         globalMounts:
-          - path: /mnt/truenas
+          - path: /mnt/truenas/documents
+      games:
+        hostPath: ${dataset_root}/truenas/games
+        hostPathType: Directory
+        type: hostPath
+        globalMounts:
+          - path: /mnt/truenas/games
+      projects:
+        hostPath: ${dataset_root}/truenas/projects
+        hostPathType: Directory
+        type: hostPath
+        globalMounts:
+          - path: /mnt/truenas/projects
+      public:
+        hostPath: ${dataset_root}/truenas/public
+        hostPathType: Directory
+        type: hostPath
+        globalMounts:
+          - path: /mnt/truenas/public
     route:
       private:
         annotations:
