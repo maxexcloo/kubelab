@@ -18,6 +18,11 @@
       matchDepNames: ["docker.io/alpine/k8s", "kubectl"],
     },
     {
+      description: "llama.cpp tags its images by variant and build number",
+      matchPackageNames: ["ghcr.io/ggml-org/llama.cpp"],
+      versioning: "regex:^server-rocm-b(?<major>\\d+)$",
+    },
+    {
       description: "PostgreSQL major upgrades need a data migration",
       enabled: false,
       matchPackageNames: ["ghcr.io/cloudnative-pg/postgresql"],

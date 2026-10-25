@@ -27,6 +27,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: gemma-26b
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    text.excloo.dev/model: gemma-26b
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: maya
 spec:
   ports:
@@ -35,6 +47,18 @@ spec:
       protocol: TCP
   selector:
     text.excloo.dev/model: maya
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qwen-35b
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    text.excloo.dev/model: qwen-35b
 ---
 apiVersion: v1
 kind: Service
