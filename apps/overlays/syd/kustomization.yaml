@@ -62,7 +62,7 @@ patches:
   - path: external-placement.yaml
     target:
       kind: HelmRelease
-      name: (aiometadata|aiostreams|cliproxyapi|redlib)
+      name: (aiometadata|aiostreams|cliproxyapi|homepage|redlib)
   - path: external-ingress.yaml
     target:
       kind: HelmRelease
@@ -78,7 +78,6 @@ patches:
       kind: ConfigMap
   - path: actual-budget.yaml
   - path: beszel-agent.yaml
-  - path: homepage.yaml
   - path: minilab.yaml
   - path: syncthing.yaml
 replacements:
