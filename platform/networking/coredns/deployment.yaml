@@ -1,0 +1,26 @@
+# Talos owns CoreDNS and only prefers spreading it, which still let both
+# replicas land on kimbap; require one per schedulable node. The selector and
+# container name only satisfy schema validation.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  selector:
+    matchLabels:
+      k8s-app: kube-dns
+  template:
+    spec:
+      containers:
+        - name: coredns
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              k8s-app: kube-dns
+          matchLabelKeys: [pod-template-hash]
+          maxSkew: 1
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
