@@ -6,5 +6,6 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - oidc-cluster-role-binding.yaml
+  - route.yaml
   - service-account.yaml
   - source.yaml

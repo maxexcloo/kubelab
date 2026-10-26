@@ -24,7 +24,7 @@ metadata:
 spec:
   hostnames:
     - ${grafana_host}
-    - grafana.syd.excloo.dev
+    - grafana.${cluster_name}.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

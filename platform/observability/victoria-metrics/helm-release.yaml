@@ -227,6 +227,10 @@ spec:
         useStrictSecurity: true
         k8sCollector:
           enabled: true
+        # Collect logs from dedicated nodes too.
+        tolerations:
+          - key: node.excloo.dev/dedicated
+            operator: Exists
         resources:
           limits:
             memory: 256Mi
