@@ -78,7 +78,6 @@ patches:
     target:
       kind: ConfigMap
   - path: actual-budget.yaml
-  - path: atvloadly.yaml
   - path: beszel-agent.yaml
   - path: homepage.yaml
   - path: minilab.yaml

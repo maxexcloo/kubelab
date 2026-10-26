@@ -21,27 +21,11 @@ spec:
     crds: CreateReplace
   values:
     installCRDs: true
-    affinity:
-      nodeAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            preference:
-              matchExpressions:
-                - key: node.excloo.dev/network
-                  operator: In
-                  values:
-                    - internal
+    nodeSelector:
+      node.excloo.dev/network: internal
     certController:
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: node.excloo.dev/network
-                    operator: In
-                    values:
-                      - internal
+      nodeSelector:
+        node.excloo.dev/network: internal
       resources:
         limits:
           memory: 256Mi
@@ -55,16 +39,8 @@ spec:
         cpu: 20m
         memory: 256Mi
     webhook:
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: node.excloo.dev/network
-                    operator: In
-                    values:
-                      - internal
+      nodeSelector:
+        node.excloo.dev/network: internal
       resources:
         limits:
           memory: 256Mi

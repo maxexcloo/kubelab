@@ -22,16 +22,8 @@ spec:
     skipCRDs: true
   values:
     connect:
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: node.excloo.dev/network
-                    operator: In
-                    values:
-                      - internal
+      nodeSelector:
+        node.excloo.dev/network: internal
       credentialsName: onepassword-connect
       api:
         resources:
