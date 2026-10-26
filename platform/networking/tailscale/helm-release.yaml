@@ -21,16 +21,8 @@ spec:
       mode: "false"
     operatorConfig:
       logging: info
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: node.excloo.dev/network
-                    operator: In
-                    values:
-                      - internal
+      nodeSelector:
+        node.excloo.dev/network: internal
       image:
         pullPolicy: IfNotPresent
       resources:
