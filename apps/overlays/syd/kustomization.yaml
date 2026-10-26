@@ -43,7 +43,6 @@ resources:
   - ../../../platform/observability/grafana/integrations
   - openspeedtest-hsp
   - openspeedtest-kimbap
-  - redlib-multi-backup
   - immich-private-route.yaml
 patches:
   # Retry installs that outwait new credentials; failed upgrades are not rolled
