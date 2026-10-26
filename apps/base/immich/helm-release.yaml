@@ -101,14 +101,6 @@ spec:
                 requests:
                   cpu: 500m
                   memory: 3Gi
-      defaultPodOptions:
-        affinity:
-          podAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchLabels:
-                    cnpg.io/instanceRole: primary
-                topologyKey: kubernetes.io/hostname
       persistence:
         cli:
           enabled: true

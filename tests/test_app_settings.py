@@ -56,10 +56,7 @@ class AppSettingsTests(unittest.TestCase):
                     and item["metadata"]["namespace"] == namespace
                 )
                 values = release["spec"]["values"]
-                if namespace == "immich":
-                    affinity = values["server"]["defaultPodOptions"]["affinity"]
-                else:
-                    affinity = values["defaultPodOptions"]["affinity"]
+                affinity = values["defaultPodOptions"]["affinity"]
                 rules = affinity["podAffinity"][
                     "requiredDuringSchedulingIgnoredDuringExecution"
                 ]

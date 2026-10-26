@@ -27,8 +27,10 @@ spec:
         names:
           # Paths can carry capability URLs, such as mini-app list links.
           RequestPath: drop
+    # A DaemonSet runs ingress on every untainted node; dedicated taints keep
+    # it off the GPU nodes, and surge updates keep it available while rolling.
     deployment:
-      replicas: 2
+      kind: DaemonSet
     gateway:
       enabled: false
     gatewayClass:
@@ -39,9 +41,6 @@ spec:
     log:
       format: json
       level: INFO
-    podDisruptionBudget:
-      enabled: true
-      minAvailable: 1
     ports:
       web:
         http:
@@ -74,13 +73,9 @@ spec:
       additionalServices:
         tunnel:
           spec:
-            internalTrafficPolicy: Local
+            # Fall back to another node's ingress instead of failing locally.
+            trafficDistribution: PreferSameNode
             type: ClusterIP
       spec:
-        internalTrafficPolicy: Local
+        trafficDistribution: PreferSameNode
         type: ClusterIP
-    updateStrategy:
-      type: RollingUpdate
-      rollingUpdate:
-        maxSurge: 0
-        maxUnavailable: 1
