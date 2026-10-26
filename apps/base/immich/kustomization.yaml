@@ -50,6 +50,7 @@ replacements:
 components:
   - ../../../platform/databases/postgres
   - ../../../platform/backups/credentials
+  - ../../components/database-colocation
   - ../../components/private-dns-control-d-only
 patches:
   - path: database.yaml
