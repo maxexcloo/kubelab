@@ -5,24 +5,6 @@ metadata:
   namespace: networking
 spec:
   values:
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                # Ingress stays on always-online nodes when GPU workers join.
-                - key: kubernetes.io/hostname
-                  operator: In
-                  values:
-                    - hsp
-                    - kimbap
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                app.kubernetes.io/instance: traefik-networking
-                app.kubernetes.io/name: traefik
-            topologyKey: kubernetes.io/hostname
     ports:
       web:
         expose:
@@ -69,7 +51,7 @@ spec:
             tailscale.com/tags: tag:cluster-syd
           spec:
             allocateLoadBalancerNodePorts: false
-            internalTrafficPolicy: Local
+            trafficDistribution: PreferSameNode
             loadBalancerClass: tailscale
             type: LoadBalancer
       spec:
