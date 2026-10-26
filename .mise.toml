@@ -68,14 +68,6 @@ depends = [
 [tasks.fmt]
 depends = ["fmt:mise", "fmt:oxfmt", "fmt:python"]
 
-# Dependencies
-# Cluster-compatible clients follow the platform policies.
-[tasks."dependencies:mise:check"]
-run = "mise upgrade --bump --dry-run --exclude kubectl --local --no-prune"
-
-[tasks."dependencies:mise:update"]
-run = "mise upgrade --bump --exclude kubectl --local --no-prune"
-
 # Setup
 [tasks.setup]
 depends = ["hooks:install"]
