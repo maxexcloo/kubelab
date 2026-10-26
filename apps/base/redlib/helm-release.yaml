@@ -51,9 +51,9 @@ spec:
                     name: "{{ .Release.Name }}"
               REDLIB_ROBOTS_DISABLE_INDEXING: "on"
             image:
-              pullPolicy: Always
+              pullPolicy: IfNotPresent
               repository: ghcr.io/nachtalb/redlib
-              tag: latest
+              tag: latest@sha256:a1047e06ecd2d0ecbbafeb387e6d2a53bf570dd29e51b8bcf1fcf0ecba8ddf50
             probes:
               liveness: &health
                 path: /settings
