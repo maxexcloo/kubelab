@@ -28,5 +28,4 @@ spec:
               gateway.excloo.dev/public-access: "true"
       tls:
         certificateRefs:
-          - name: redlib-www
           - name: wildcard
