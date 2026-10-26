@@ -40,7 +40,7 @@ arg "[revision]" help="Full commit SHA; defaults to remote main"
 description = "Show Cluster Reconciliation Or Watch An Application's Helm Release"
 run = '''
 if [ -n "${usage_application:-}" ]; then
-  flux --context "$usage_cluster" get helmreleases "$usage_application" --namespace "$usage_application" --watch
+  flux --context "$usage_cluster" get helmreleases "${usage_application##*/}" --namespace "${usage_application%%/*}" --watch
 else
   flux --context "$usage_cluster" get kustomizations
   flux --context "$usage_cluster" get helmreleases --all-namespaces
@@ -48,7 +48,7 @@ fi
 '''
 usage = '''
 arg "<cluster>"
-arg "[application]"
+arg "[application]" help="HelmRelease name, or namespace/name"
 '''
 
 # Development
