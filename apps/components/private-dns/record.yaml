@@ -7,5 +7,3 @@ spec:
     compositionRef:
       name: private-dns-record
   hostname: app.invalid
-  ipv6Enabled: ${private_dns_ipv6}
-  target: private.${cluster_name}.excloo.dev

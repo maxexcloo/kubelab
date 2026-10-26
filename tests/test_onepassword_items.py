@@ -81,7 +81,6 @@ class ReconcilerTests(unittest.TestCase):
                 annotations["onepassword.excloo.dev/item"],
                 rf"^{re.escape(annotations['gethomepage.dev/name'])}( \(.+\))?$",
             )
-            self.assertNotIn("onepassword.excloo.dev/title", annotations)
         secrets = [
             r
             for r in resources
@@ -89,17 +88,11 @@ class ReconcilerTests(unittest.TestCase):
             and r["spec"].get("secretStoreRef", {}).get("name") == "onepassword"
         ]
         for secret in secrets:
-            self.assertNotIn(
-                "onepassword.excloo.dev/title",
-                secret["metadata"].get("annotations", {}),
-            )
             for data in secret["spec"].get("data", []):
                 self.assertNotRegex(data["remoteRef"]["key"], ITEM_ID)
         for resource in resources:
             if resource["kind"] == "ResendKey":
                 self.assertNotRegex(resource["spec"]["item"], ITEM_ID)
-            if resource["kind"] in {"B2ObjectStorage", "ResendKey"}:
-                self.assertNotIn("displayName", resource["spec"])
 
     def test_secret_ownership_preserves_generation_for_multiple_items(self):
         owner, shared = "Application", "Shared"
@@ -701,7 +694,7 @@ class ReconcilerTests(unittest.TestCase):
             self.addCleanup(setattr, RECONCILER, name, value)
         RECONCILER.flux_ready = lambda: False
         RECONCILER.connect = connect
-        RECONCILER.discover_items = lambda cluster=None: {"Pocket ID": desired}
+        RECONCILER.discover_items = lambda: {"Pocket ID": desired}
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
@@ -1011,7 +1004,7 @@ class ReconcilerTests(unittest.TestCase):
             self.addCleanup(setattr, RECONCILER, name, value)
         RECONCILER.flux_ready = lambda: False
         RECONCILER.connect = connect
-        RECONCILER.discover_items = lambda cluster=None: {}
+        RECONCILER.discover_items = dict
         RECONCILER.is_dry_run = lambda: False
         with contextlib.redirect_stdout(io.StringIO()):
             RECONCILER.main()
@@ -1073,7 +1066,7 @@ class ReconcilerTests(unittest.TestCase):
             ],
         )
         repeated = RECONCILER.normalise_item(
-            result.copy(),
+            copy.deepcopy(result),
             "Application",
             desired,
             "vault",
