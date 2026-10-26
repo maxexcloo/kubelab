@@ -149,7 +149,6 @@ else:
                 "KUBECTL": str(self.kubectl),
                 "POD_PLACEMENTS": str(self.placements),
                 "POD_QUERIES": str(self.queries),
-                "REAL_KUBECTL": shutil.which("kubectl"),
                 "SYSTEM_KUBECTL": shutil.which("kubectl"),
             }
             | environment,

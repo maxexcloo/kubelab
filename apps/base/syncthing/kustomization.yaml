@@ -12,8 +12,8 @@ configMapGenerator:
   - name: syncthing-auth
     files:
       - configure_auth.sh
-generatorOptions:
-  disableNameSuffixHash: true
+configurations:
+  - name-reference.yaml
 patches:
   - path: helm-release.yaml
     target:

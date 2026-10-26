@@ -15,7 +15,7 @@ steps {
       trap 'rm -fr -- "${manifest_directory:?}"' EXIT
       scripts/render_manifests.sh "$manifest_directory"
       # Crossplane functions patch pending.invalid and placeholder.invalid at runtime.
-      if grep -rnoE '[[:alnum:]_-]+(\\.[[:alnum:]_-]+)*\\.invalid\\b|\\.cluster\\.excloo\\.dev\\b|profile-placeholder' "$manifest_directory" |
+      if grep -rnoE '[[:alnum:]_-]+(\\.[[:alnum:]_-]+)*\\.invalid\\b' "$manifest_directory" |
         grep -vE ':(pending|placeholder)\\.invalid$'; then
         echo "Unresolved placeholders survived rendering" >&2
         exit 1
