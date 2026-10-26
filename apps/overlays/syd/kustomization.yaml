@@ -76,7 +76,6 @@ patches:
           kustomize.toolkit.fluxcd.io/substitute: disabled
     target:
       kind: ConfigMap
-  - path: actual-budget.yaml
   - path: beszel-agent.yaml
   - path: minilab.yaml
   - path: syncthing.yaml
