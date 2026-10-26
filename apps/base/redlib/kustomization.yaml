@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: redlib
 resources:
-  - certificate.yaml
   - cloudflare.yaml
   - external-secrets.yaml
   - namespace.yaml
@@ -17,29 +16,10 @@ patches:
     target:
       kind: HelmRelease
 replacements:
-  # The certificate lives beside the gateway that serves the redirect.
-  - source:
-      kind: HTTPRoute
-      name: redlib-www
-      fieldPath: spec.parentRefs.0.namespace
-    targets:
-      - select:
-          kind: Certificate
-        fieldPaths:
-          - metadata.namespace
   - source:
       kind: HelmRelease
       fieldPath: spec.values.route.public.hostnames.0
     targets:
-      - select:
-          kind: Certificate
-          name: redlib-www
-          namespace: networking
-        fieldPaths:
-          - spec.dnsNames.0
-        options:
-          delimiter: www.
-          index: 1
       - select:
           kind: HTTPRoute
           name: redlib-www-private

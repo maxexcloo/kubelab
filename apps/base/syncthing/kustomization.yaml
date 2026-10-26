@@ -4,7 +4,6 @@ namespace: syncthing
 resources:
   - external-secrets.yaml
   - namespace.yaml
-  - network-policy.yaml
   - storage.yaml
 components:
   - ../../components/application
