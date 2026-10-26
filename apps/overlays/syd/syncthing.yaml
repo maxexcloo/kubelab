@@ -6,9 +6,9 @@ metadata:
 spec:
   values:
     defaultPodOptions:
-      # Synced folders are mounted from kimbap's TrueNAS datasets.
+      # Synced folders are mounted from the storage node's TrueNAS datasets.
       nodeSelector:
-        kubernetes.io/hostname: kimbap
+        kubernetes.io/hostname: ${storage_node}
     route:
       private:
         annotations:
