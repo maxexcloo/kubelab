@@ -17,16 +17,8 @@ spec:
       version: 0.46.0
   values:
     automountServiceAccountToken: true
-    affinity:
-      nodeAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            preference:
-              matchExpressions:
-                - key: node.excloo.dev/network
-                  operator: In
-                  values:
-                    - internal
+    nodeSelector:
+      node.excloo.dev/network: internal
     clusterRoleBinding:
       create: false
     config:
