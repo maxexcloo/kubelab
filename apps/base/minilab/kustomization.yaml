@@ -2,6 +2,20 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - admission-policy.yaml
+  - backups.yaml
   - rbac.yaml
   - reconciliation.yaml
   - source.yaml
+replacements:
+  - source:
+      kind: Secret
+      name: minilab-backups
+      fieldPath: stringData.bucket
+    targets:
+      - select:
+          kind: Kustomization
+          name: minilab
+        fieldPaths:
+          - spec.postBuild.substitute.MINILAB_BACKUP_BUCKET
+        options:
+          create: true

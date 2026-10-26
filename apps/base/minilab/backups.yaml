@@ -1,0 +1,21 @@
+# Minilab apps back up to their own bucket. The B2 key's PushSecrets create the
+# "Minilab: Backups" item, which Minilab ExternalSecrets may read; Minilab
+# declares the item's restic password.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minilab-backups
+  namespace: crossplane-system
+stringData:
+  bucket: excloo-${cluster_name}-minilab
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: B2ObjectStorage
+metadata:
+  name: minilab-backups
+  namespace: crossplane-system
+spec:
+  item: "Minilab: Backups"
+  keyName: kubelab-${cluster_name}-minilab-backups
+  secretRef:
+    name: minilab-backups
