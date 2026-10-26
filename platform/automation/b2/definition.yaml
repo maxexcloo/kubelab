@@ -51,3 +51,7 @@ spec:
               properties:
                 apiUrl:
                   type: string
+                bucket:
+                  description: Latest B2 bucket response; its bucket ID gates creating the application key.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
