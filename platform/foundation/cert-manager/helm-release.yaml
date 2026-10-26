@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: jetstack
         namespace: flux-system
-      version: v1.21.2
+      version: v1.21.3
   install:
     crds: CreateReplace
   upgrade:
@@ -22,27 +22,11 @@ spec:
   values:
     dns01RecursiveNameservers: 1.1.1.1:53,1.0.0.1:53
     dns01RecursiveNameserversOnly: true
-    affinity:
-      nodeAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            preference:
-              matchExpressions:
-                - key: node.excloo.dev/network
-                  operator: In
-                  values:
-                    - internal
+    nodeSelector:
+      node.excloo.dev/network: internal
     cainjector:
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: node.excloo.dev/network
-                    operator: In
-                    values:
-                      - internal
+      nodeSelector:
+        node.excloo.dev/network: internal
       resources:
         limits:
           memory: 256Mi
@@ -64,16 +48,8 @@ spec:
         cpu: 20m
         memory: 128Mi
     webhook:
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: node.excloo.dev/network
-                    operator: In
-                    values:
-                      - internal
+      nodeSelector:
+        node.excloo.dev/network: internal
       resources:
         limits:
           memory: 256Mi
