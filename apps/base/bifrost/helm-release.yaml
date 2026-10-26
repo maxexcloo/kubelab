@@ -155,15 +155,7 @@ spec:
             name: Owner
             allow_all_providers: true
             value: env.VIRTUAL_KEY_OWNER
-            mcp_configs:
-              - mcp_client_name: actual_budget
-                tools_to_execute: ["*"]
-              - mcp_client_name: home_assistant
-                tools_to_execute: ["*"]
-              - mcp_client_name: reactive_resume
-                tools_to_execute: ["*"]
-              - mcp_client_name: unifi_network
-                tools_to_execute: ["*"]
+            mcp_configs: *agent-mcp
           - id: pi
             name: Pi
             value: env.VIRTUAL_KEY_PI
