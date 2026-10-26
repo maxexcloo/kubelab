@@ -205,6 +205,14 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: status.apiUrl
                 toFieldPath: spec.forProvider.payload.baseUrl
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.response.body
+                toFieldPath: status.bucket
+                transforms:
+                  - type: convert
+                    convert:
+                      format: json
+                      toType: object
               - type: CombineFromComposite
                 combine:
                   strategy: string
@@ -271,6 +279,13 @@ spec:
                   kind: ClusterProviderConfig
                   name: b2
             patches:
+              # A key created before its bucket exists gets HTTP 400, which the
+              # provider still reports as Ready; wait for the listed bucket.
+              - type: FromCompositeFieldPath
+                fromFieldPath: status.bucket.buckets[0].bucketId
+                toFieldPath: metadata.annotations[automation.excloo.dev/bucket-id]
+                policy:
+                  fromFieldPath: Required
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: metadata.namespace
