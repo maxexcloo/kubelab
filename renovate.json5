@@ -29,6 +29,14 @@
       matchUpdateTypes: ["major"],
     },
     {
+      automerge: true,
+      description: "Studio releases every verified commit as YYYY.M.D.N; deploy each release without review",
+      groupName: "Studio",
+      matchPackageNames: ["ghcr.io/maxexcloo/studio", "ghcr.io/maxexcloo/studio-worker"],
+      // The optional build part also accepts the 1.0.12 pin that predates date versions.
+      versioning: "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:\\.(?<build>\\d+))?$",
+    },
+    {
       description: "The registry's tag list is incomplete; GitHub releases match published packages",
       matchPackageNames: ["xpkg.upbound.io/crossplane-contrib/provider-http"],
       overrideDatasource: "github-releases",
