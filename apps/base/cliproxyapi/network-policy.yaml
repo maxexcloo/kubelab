@@ -11,6 +11,12 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: traefik
+      ports:
+        - port: 4180
+          protocol: TCP
+        - port: 8317
+          protocol: TCP
+    - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: librechat

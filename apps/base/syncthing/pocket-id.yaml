@@ -1,0 +1,14 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: syncthing
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/oauth2/callback
+    description: File Synchronisation
+    id: syncthing
+    launchURL: https://app.invalid
+    name: Syncthing
+    pkceEnabled: true
+  item: Syncthing
