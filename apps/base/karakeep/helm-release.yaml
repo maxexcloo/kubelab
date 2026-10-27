@@ -39,7 +39,7 @@ spec:
               startup: *health
             resources:
               limits:
-                memory: 1Gi
+                memory: 2Gi
               requests:
                 cpu: 25m
                 memory: 384Mi
