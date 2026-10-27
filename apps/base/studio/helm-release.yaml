@@ -94,6 +94,8 @@ spec:
     defaultPodOptions:
       # Studio's service account scales the GPU workloads.
       automountServiceAccountToken: true
+      # Studio drains in-flight requests for up to 30 s on SIGTERM (backend/shutdown.js); leave it room.
+      terminationGracePeriodSeconds: 45
       # Files on the TrueNAS datasets belong to the image's node user.
       securityContext:
         fsGroup: 1000
