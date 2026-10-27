@@ -35,6 +35,13 @@ replacements:
           delimiter: /
           index: 2
       - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.immich.configuration.server.externalDomain
+        options:
+          delimiter: /
+          index: 2
+      - select:
           kind: PrivateDNSRecord
         fieldPaths:
           - spec.hostname

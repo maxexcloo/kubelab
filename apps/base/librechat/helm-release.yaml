@@ -42,6 +42,7 @@ spec:
         OPENID_ADMIN_ROLE: ${owner_email}
         OPENID_ADMIN_ROLE_PARAMETER_PATH: email
         OPENID_ADMIN_ROLE_TOKEN_KIND: id
+        OPENID_AUTO_REDIRECT: "true"
         OPENID_BUTTON_LABEL: Pocket ID
         OPENID_CALLBACK_URL: /oauth/openid/callback
         OPENID_CLIENT_ID: librechat

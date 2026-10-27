@@ -25,6 +25,7 @@ spec:
               HASHEOUS_API_ENABLED: "true"
               HLTB_API_ENABLED: "true"
               LAUNCHBOX_API_ENABLED: "true"
+              OIDC_AUTOLOGIN: "true"
               OIDC_ENABLED: "true"
               OIDC_PROVIDER: Pocket ID
               OIDC_REDIRECT_URI: https://app.invalid/api/oauth/openid
