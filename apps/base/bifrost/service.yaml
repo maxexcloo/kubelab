@@ -1,0 +1,17 @@
+# The chart's Service exposes only Bifrost's own port.
+apiVersion: v1
+kind: Service
+metadata:
+  name: bifrost-oauth2-proxy
+  labels:
+    app.kubernetes.io/name: bifrost
+spec:
+  ports:
+    - name: http
+      port: 4180
+      protocol: TCP
+      targetPort: proxy
+  selector:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/instance: bifrost
+    app.kubernetes.io/name: bifrost
