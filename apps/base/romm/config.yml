@@ -16,7 +16,7 @@ streaming:
   enabled: true
   containers:
     - protocol: webstation
-      host: https://streaming.excloo.com
+      host: https://play.excloo.com
       broker_host: http://romm-streaming.romm-streaming.svc.cluster.local:3000
       label: Mandu
       # Every library platform with a standalone emulator or a default RetroArch core.

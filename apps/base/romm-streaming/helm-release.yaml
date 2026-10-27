@@ -111,7 +111,7 @@ spec:
           # No Homepage card: sessions only open from RomM.
           gethomepage.dev/href: https://app.invalid
         hostnames:
-          - streaming.excloo.com
+          - play.excloo.com
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
           gateway.excloo.dev/public-access: "true"
