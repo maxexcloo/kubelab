@@ -1,0 +1,14 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: karakeep
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/api/auth/callback/custom
+    description: Bookmark Manager
+    id: karakeep
+    launchURL: https://app.invalid
+    name: Karakeep
+    pkceEnabled: true
+  item: Karakeep

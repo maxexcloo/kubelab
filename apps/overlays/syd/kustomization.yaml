@@ -20,6 +20,7 @@ resources:
   - ../../base/home-assistant
   - ../../base/home-assistant-mcp
   - ../../base/immich
+  - ../../base/karakeep
   - ../../base/larapaper
   - ../../base/librechat
   - ../../base/librechat-admin
