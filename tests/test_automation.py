@@ -595,5 +595,78 @@ class B2ComparisonTests(unittest.TestCase):
         self.assertEqual(evaluate(expression, self.data), self.data["payload"]["body"])
 
 
+class ResendKeyTests(unittest.TestCase):
+    def setUp(self):
+        self.parameters = composition_resource(
+            "platform/automation/resend/composition.yaml", "api-key"
+        )["spec"]["forProvider"]
+        self.mappings = {m["action"]: m for m in self.parameters["mappings"]}
+        self.data = {
+            "payload": {
+                "baseUrl": "https://api.resend.com/api-keys",
+                "body": {"name": "cluster-syd-romm", "permission": "sending_access"},
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {
+                    "data": [
+                        {"id": "other", "name": "cluster-syd-immich"},
+                        {"id": "first", "name": "cluster-syd-romm"},
+                        {"id": "second", "name": "cluster-syd-romm"},
+                    ]
+                },
+            },
+        }
+
+    def test_key_is_missing_only_when_a_successful_list_omits_it(self):
+        expression = self.parameters["isRemovedCheck"]["logic"]
+        self.assertFalse(evaluate(expression, self.data))
+        self.data["response"]["body"]["data"] = self.data["response"]["body"]["data"][
+            :1
+        ]
+        self.assertTrue(evaluate(expression, self.data))
+        for response in [
+            {"statusCode": 429, "body": {"message": "rate limited"}},
+            {"statusCode": 200, "body": {}},
+        ]:
+            self.data["response"] = response
+            self.assertFalse(evaluate(expression, self.data))
+
+    def test_keys_are_created_once_and_deleted_by_name(self):
+        self.assertEqual(self.mappings["CREATE"]["method"], "POST")
+        self.assertNotIn("UPDATE", self.mappings)
+        self.assertEqual(
+            evaluate(self.mappings["CREATE"]["body"], self.data),
+            self.data["payload"]["body"],
+        )
+        self.assertEqual(self.mappings["REMOVE"]["method"], "DELETE")
+        self.assertEqual(
+            evaluate(self.mappings["REMOVE"]["url"], self.data),
+            "https://api.resend.com/api-keys/first",
+        )
+
+
+class PrivateDNSRemovalTests(unittest.TestCase):
+    def test_rule_is_deleted_by_hostname(self):
+        mappings = {
+            m["action"]: m
+            for m in composition_resource(
+                "platform/automation/private-dns/composition/composition.yaml",
+                "control-d-rule",
+            )["spec"]["forProvider"]["mappings"]
+        }
+        data = {
+            "payload": {
+                "baseUrl": "https://api.controld.com/profiles/profile/rules",
+                "body": {"hostname": "reader.example.com"},
+            }
+        }
+        self.assertEqual(mappings["REMOVE"]["method"], "DELETE")
+        self.assertEqual(
+            evaluate(mappings["REMOVE"]["url"], data),
+            "https://api.controld.com/profiles/profile/rules/reader.example.com",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -34,7 +34,8 @@ published image.
 - Minilab reconciles as `flux-system/minilab`; its admission policy limits it to
   namespaces it creates and items titled `Minilab: <App>`. Grant it new kinds in
   `apps/base/minilab` before mini apps use them.
-- Default Crossplane external resources to orphan-on-delete.
+- Crossplane resources owned by an app's manifest delete their external resource
+  with it; shared or bootstrap resources orphan.
 - Do not change a live route without explicit approval and a reviewed plan.
 
 ## File Organisation

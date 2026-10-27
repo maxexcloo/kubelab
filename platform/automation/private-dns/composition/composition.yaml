@@ -51,7 +51,7 @@ spec:
               metadata:
                 name: private-dns
               spec:
-                managementPolicies: [Create, LateInitialize, Observe, Update]
+                managementPolicies: [Create, Delete, LateInitialize, Observe, Update]
                 forProvider:
                   expectedResponseCheck:
                     logic: |-
@@ -97,6 +97,9 @@ spec:
                       url: .payload.baseUrl
                     - action: OBSERVE
                       url: .payload.baseUrl
+                    - action: REMOVE
+                      method: DELETE
+                      url: .payload.baseUrl + "/" + .payload.body.hostname
                     - action: UPDATE
                       body: |-
                         {

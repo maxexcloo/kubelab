@@ -15,8 +15,9 @@ spec:
       version: 1.23.0
   values:
     logFormat: json
-    policy: upsert-only
-    registry: noop
+    # TXT ownership records let sync delete only the records each instance created.
+    policy: sync
+    registry: txt
     triggerLoopOnEvent: true
     env:
       - name: CF_API_TOKEN

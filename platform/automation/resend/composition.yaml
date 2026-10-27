@@ -22,21 +22,35 @@ spec:
               metadata:
                 name: resend
               spec:
-                managementPolicies: [Create, LateInitialize, Observe, Update]
+                managementPolicies: [Create, Delete, LateInitialize, Observe]
                 forProvider:
+                  # A key exists while a successful list shows its name; failed lists change nothing.
                   expectedResponseCheck:
-                    logic: .payload.body.name as $name | any(.response.body.data[]?; .name == $name)
+                    logic: "true"
                     type: CUSTOM
                   headers:
                     Content-Type: [application/json]
                     User-Agent: [kubelab-crossplane/1.0]
+                  isRemovedCheck:
+                    logic: |-
+                      .payload.body.name as $name |
+                      .response.statusCode == 200
+                      and (.response.body.data | type) == "array"
+                      and (any(.response.body.data[]; .name == $name) | not)
+                    type: CUSTOM
                   mappings:
-                    - action: OBSERVE
-                      url: .payload.baseUrl
-                    - action: UPDATE
+                    - action: CREATE
                       body: "{name: .payload.body.name, permission: .payload.body.permission}"
                       method: POST
                       url: .payload.baseUrl
+                    - action: OBSERVE
+                      url: .payload.baseUrl
+                    # Deletion repeats until no key carries the name, which also clears duplicates.
+                    - action: REMOVE
+                      method: DELETE
+                      url: |-
+                        .payload.body.name as $name |
+                        .payload.baseUrl + "/" + first(.response.body.data[] | select(.name == $name) | .id)
                   payload:
                     baseUrl: https://api.resend.com/api-keys
                     body: "{}"
