@@ -1,0 +1,22 @@
+injectRequestHeaders: ${UPSTREAM_REQUEST_HEADERS:-[]}
+providers:
+  - clientID: ${OIDC_CLIENT_ID}
+    clientSecret: ${OIDC_CLIENT_SECRET}
+    code_challenge_method: S256
+    id: pocket-id
+    name: Pocket ID
+    oidcConfig:
+      emailClaim: email
+      groupsClaim: groups
+      issuerURL: ${OIDC_ISSUER_URL}
+      userIDClaim: email
+      audienceClaims:
+        - aud
+    provider: oidc
+server:
+  bindAddress: 0.0.0.0:4180
+upstreamConfig:
+  upstreams:
+    - id: main
+      path: /
+      uri: ${UPSTREAM_URI}

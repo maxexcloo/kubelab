@@ -51,7 +51,7 @@ spec:
               # Over-the-air installs, signed files and the builder work without a
               # browser session (SignTools INSTALL.md, Reverse proxy).
               OAUTH2_PROXY_SKIP_AUTH_ROUTES: ^/apps/[^/]+/,^/files/,^/jobs(/|$)
-              OAUTH2_PROXY_UPSTREAMS: http://127.0.0.1:8080
+              UPSTREAM_URI: http://127.0.0.1:8080
     persistence:
       data:
         existingClaim: data

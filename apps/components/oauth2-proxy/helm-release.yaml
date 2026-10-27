@@ -9,16 +9,14 @@ spec:
         containers:
           oauth2-proxy:
             args:
-              - --code-challenge-method=S256
+              - --alpha-config=/config/oauth2-proxy.yaml
               - --email-domain=*
-              - --http-address=0.0.0.0:4180
-              - --oidc-issuer-url=https://${identity_host}
-              - --provider=oidc
-              - --provider-display-name=Pocket ID
               - --reverse-proxy=true
               - --silence-ping-logging=true
               # Pocket ID's client groups decide access, so skip oauth2-proxy's own page.
               - --skip-provider-button=true
+            env:
+              OIDC_ISSUER_URL: https://${identity_host}
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}-oauth2-proxy"
@@ -52,6 +50,15 @@ spec:
               capabilities:
                 drop:
                   - ALL
+    persistence:
+      oauth2-proxy:
+        name: oauth2-proxy
+        type: configMap
+        advancedMounts:
+          main:
+            oauth2-proxy:
+              - path: /config
+                readOnly: true
     service:
       main:
         ports:
