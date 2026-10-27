@@ -2,10 +2,6 @@ apiVersion: apiextensions.crossplane.io/v2
 kind: CompositeResourceDefinition
 metadata:
   name: pocketidclients.automation.excloo.dev
-  annotations:
-    # Scope is immutable; Flux recreates the definition, which deletes its clients'
-    # Requests without deleting the clients in Pocket ID.
-    kustomize.toolkit.fluxcd.io/force: Enabled
 spec:
   defaultCompositionRef:
     name: pocket-id-client
