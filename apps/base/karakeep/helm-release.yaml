@@ -14,6 +14,7 @@ spec:
               DATA_DIR: /data
               DISABLE_NEW_RELEASE_CHECK: "true"
               DISABLE_PASSWORD_AUTH: "true"
+              INFERENCE_ENABLE_AUTO_SUMMARIZATION: "true"
               INFERENCE_IMAGE_MODEL: openrouter/auto
               # OpenRouter's automatic routing may pick models without structured output support.
               INFERENCE_OUTPUT_SCHEMA: json
