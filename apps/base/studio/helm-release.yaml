@@ -26,12 +26,13 @@ spec:
               # Studio scales these GPU deployments (apps/components/gpu/studio-runtime.yaml).
               # Pools: the GPU node's two GPUs and the gaming node's one.
               STUDIO_KUBERNETES_GPUS: '{"gpu": 2, "gaming": 1}'
-              # Text workloads take the text runtimes' key (external-secrets.yaml), so
-              # Studio can ask the running one whether it reads images.
+              # Each image and video address is one Studio worker; its ids primary and video
+              # keep recorded jobs on their worker. Text workloads take the text runtimes' key
+              # (external-secrets.yaml), so Studio can ask the running one whether it reads images.
               STUDIO_KUBERNETES_WORKLOADS: >-
                 {
-                "comfyui": {"kind": "image", "label": "Image", "namespace": "comfyui", "deployment": "comfyui", "pool": "gpu", "gpus": 1, "url": "http://comfyui.comfyui.svc.cluster.local:8188"},
-                "comfyui-video": {"kind": "video", "label": "Video", "namespace": "comfyui-video", "deployment": "comfyui-video", "pool": "gpu", "gpus": 1, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188"},
+                "comfyui": {"kind": "image", "label": "Image", "namespace": "comfyui", "deployment": "comfyui", "pool": "gpu", "gpus": 1, "url": "http://comfyui.comfyui.svc.cluster.local:8188", "worker": "primary", "capabilities": ["image", "upscale", "models"]},
+                "comfyui-video": {"kind": "video", "label": "Video", "namespace": "comfyui-video", "deployment": "comfyui-video", "pool": "gpu", "gpus": 1, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188", "worker": "video"},
                 "comfyui-video-tp2": {"kind": "video", "label": "Video · 2 GPUs", "namespace": "comfyui-video", "deployment": "comfyui-video-tp2", "pool": "gpu", "gpus": 2, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188"},
                 "text-gemma": {"kind": "text", "label": "Gemma 4 31B", "namespace": "text", "deployment": "text-gemma", "pool": "gpu", "gpus": 1, "url": "http://gemma.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY"},
                 "text-gemma-tp2": {"kind": "text", "label": "Gemma 4 31B · 2 GPUs", "namespace": "text", "deployment": "text-gemma-tp2", "pool": "gpu", "gpus": 2, "url": "http://gemma.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY"},
@@ -61,10 +62,6 @@ spec:
               # Automatic control starts and stops image and video workloads; text
               # workloads change only from Settings › Workers (Bifrost calls them directly).
               STUDIO_RUNTIME_AUTOMATIC: "1"
-              # Ids primary and video are the ones COMFY_URL and COMFY_VIDEO_URL gave: recorded jobs keep their worker.
-              STUDIO_WORKERS: >-
-                [{"id":"primary","name":"Image Worker","url":"http://comfyui.comfyui.svc.cluster.local:8188","capabilities":["image","upscale","models"]},
-                {"id":"video","name":"Video Worker","url":"http://comfyui-video.comfyui-video.svc.cluster.local:8188","capabilities":["video"]}]
               BIFROST_HOST: bifrost.invalid
               # Refine in Chat opens LibreChat with the prompt filled in (?prompt=).
               CHAT_HOST: chat.invalid
