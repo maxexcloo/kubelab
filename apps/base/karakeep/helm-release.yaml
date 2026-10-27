@@ -15,7 +15,8 @@ spec:
               CRAWLER_VIDEO_DOWNLOAD_ON_DEMAND: "true"
               DATA_DIR: /data
               DISABLE_NEW_RELEASE_CHECK: "true"
-              DISABLE_PASSWORD_AUTH: "true"
+              # Accounts come from Pocket ID or the 1Password login; nobody else may sign up.
+              DISABLE_SIGNUPS: "true"
               INFERENCE_ENABLE_AUTO_SUMMARIZATION: "true"
               INFERENCE_IMAGE_MODEL: openrouter/auto
               # OpenRouter's automatic routing may pick models without structured output support.
@@ -23,7 +24,6 @@ spec:
               INFERENCE_TEXT_MODEL: openrouter/auto
               MEILI_ADDR: "http://{{ .Release.Name }}-meilisearch:7700"
               NEXTAUTH_URL: https://app.invalid
-              OAUTH_AUTO_REDIRECT: "true"
               OAUTH_PROVIDER_NAME: Pocket ID
               OAUTH_WELLKNOWN_URL: https://${identity_host}/.well-known/openid-configuration
               OPENAI_BASE_URL: https://openrouter.ai/api/v1
