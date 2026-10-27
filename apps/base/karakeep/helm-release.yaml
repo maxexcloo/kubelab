@@ -154,21 +154,39 @@ spec:
               - path: /meili_data
     route:
       private:
+        hostnames:
+          - app.invalid
+        labels:
+          app.kubernetes.io/name: "{{ .Release.Name }}"
+        parentRefs:
+          - name: private
+            namespace: networking
+        rules:
+          - backendRefs:
+              - name: "{{ .Release.Name }}"
+                port: 3000
+      public:
         annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: Bookmark Manager
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-karakeep
           gethomepage.dev/name: &title Karakeep
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=karakeep,app.kubernetes.io/controller=karakeep
+          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_KARAKEEP_API_KEY}}" }}'
+          gethomepage.dev/widget.type: karakeep
+          gethomepage.dev/widget.url: https://app.invalid
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: *title
         hostnames:
-          - karakeep.${cluster_name}.excloo.dev
+          - links.excloo.com
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
+          gateway.excloo.dev/public-access: "true"
         parentRefs:
-          - name: private
+          - name: public-tunnel
             namespace: networking
         rules:
           - backendRefs:

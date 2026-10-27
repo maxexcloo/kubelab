@@ -24,7 +24,6 @@ resources:
   - ../../base/larapaper
   - ../../base/librechat
   - ../../base/librechat-admin
-  - ../../base/linkwarden
   - ../../base/minilab
   - ../../base/miniflux
   - ../../base/openspeedtest

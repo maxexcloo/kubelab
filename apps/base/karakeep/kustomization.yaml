@@ -11,6 +11,7 @@ components:
   - ../../components/application
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
+  - ../../components/private-dns-control-d-only
 patches:
   - path: helm-release.yaml
     target:
@@ -22,23 +23,15 @@ patches:
 replacements:
   - source:
       kind: HelmRelease
-      fieldPath: spec.values.route.private.hostnames.0
+      fieldPath: spec.values.route.public.hostnames.0
     targets:
       - select:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.NEXTAUTH_URL
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: PocketIDClient
-        fieldPaths:
-          - spec.client.callbackURLs.0
-          - spec.client.launchURL
+          - spec.values.route.public.annotations.[gethomepage.dev/widget.url]
         options:
           delimiter: /
           index: 2
 transformers:
-  - ../../transformers/cluster-scoped
+  - ../../transformers/route-public
