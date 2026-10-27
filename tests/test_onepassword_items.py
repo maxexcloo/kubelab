@@ -440,6 +440,7 @@ class ReconcilerTests(unittest.TestCase):
         credentials = {
             "AUTH_SECRET": "fixture-auth-secret",
             "OPENROUTER_API_KEY": "fixture-api-key",
+            "oidc-client-id": "papra",
             "oidc-client-secret": 'fixture"\\secret',
         }
         templates = resource["spec"]["target"]["template"]["data"]
