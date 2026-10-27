@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: romm-streaming
+spec:
+  ingress:
+    - from:
+        # RomM drives the broker; Traefik serves the token-gated stream.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: networking
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: romm
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: romm
+      ports:
+        - port: 3000
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: romm-streaming
+  policyTypes:
+    - Ingress
