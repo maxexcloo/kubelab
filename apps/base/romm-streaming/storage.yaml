@@ -9,3 +9,39 @@ spec:
     requests:
       storage: 50Gi
   storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: roms
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Ti
+  storageClassName: ""
+  volumeName: romm-streaming-roms
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: romm-streaming-roms
+spec:
+  accessModes:
+    - ReadOnlyMany
+  capacity:
+    storage: 1Ti
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  hostPath:
+    path: ${dataset_root}/roms
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node.excloo.dev/dedicated
+              operator: In
+              values:
+                - gaming
