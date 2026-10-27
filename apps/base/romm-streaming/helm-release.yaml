@@ -57,6 +57,14 @@ spec:
           operator: Equal
           value: gaming
     persistence:
+      # Syncthing keeps Mandu's RetroDECK BIOS folder, RetroArch's shared system
+      # directory; standalone emulators are pointed at its subfolders once.
+      bios:
+        existingClaim: bios
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /config/.config/retroarch/system
+            readOnly: true
       config:
         existingClaim: config
         type: persistentVolumeClaim

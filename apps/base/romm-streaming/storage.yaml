@@ -1,6 +1,19 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  name: bios
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: ""
+  volumeName: romm-streaming-bios
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
   name: config
 spec:
   accessModes:
@@ -36,6 +49,29 @@ spec:
   storageClassName: ""
   hostPath:
     path: ${dataset_root}/roms
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node.excloo.dev/dedicated
+              operator: In
+              values:
+                - gaming
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: romm-streaming-bios
+spec:
+  accessModes:
+    - ReadOnlyMany
+  capacity:
+    storage: 10Gi
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  hostPath:
+    path: ${dataset_root}/bios
     type: Directory
   nodeAffinity:
     required:
