@@ -72,7 +72,7 @@ spec:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: TRMNL Server
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Smart Home
+          gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-trmnl
           gethomepage.dev/name: &title LaraPaper
