@@ -3,7 +3,6 @@ kind: PocketIDClient
 metadata:
   name: shelfmark
 spec:
-  accessPolicy: books
   client:
     callbackURLs:
       - https://app.invalid/api/auth/oidc/callback

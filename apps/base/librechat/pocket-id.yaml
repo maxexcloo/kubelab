@@ -3,7 +3,6 @@ kind: PocketIDClient
 metadata:
   name: librechat
 spec:
-  accessPolicy: llm
   client:
     # The admin panel reuses the LibreChat admin OAuth callback for its SSO login.
     callbackURLs:

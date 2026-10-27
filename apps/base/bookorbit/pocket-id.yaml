@@ -3,7 +3,6 @@ kind: PocketIDClient
 metadata:
   name: bookorbit
 spec:
-  accessPolicy: books
   client:
     callbackURLs:
       - https://app.invalid/oauth2-callback

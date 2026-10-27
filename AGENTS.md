@@ -28,7 +28,9 @@ published image.
   Keep Kubernetes resource identities independent of item titles.
 - Publish generated credentials to 1Password with PushSecrets. Confidential
   PocketIDClients name the item that receives their generated
-  `oidc-client-secret`; never copy client secrets by hand.
+  `oidc-client-secret`; never copy client secrets by hand. Each PocketIDClient
+  admits the `all_services` group and its own group, named after the client;
+  group membership is managed in Pocket ID, not in this repository.
 - Minilab reconciles as `flux-system/minilab`; its admission policy limits it to
   namespaces it creates and items titled `Minilab: <App>`. Grant it new kinds in
   `apps/base/minilab` before mini apps use them.
