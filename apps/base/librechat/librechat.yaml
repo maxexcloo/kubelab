@@ -10,10 +10,6 @@ interface:
   # Expiry covers regular chats as well as temporary ones. Drop the general
   # retention deadlines before returning to the temporary-only mode.
   generalChatRetention: 8760
-  # Model specs otherwise hide the endpoint picker, parameters and presets.
-  modelSelect: true
-  parameters: true
-  presets: true
   retainAgentFiles: true
   retentionMode: all
   # Scheduled chats run in this single replica; Redis now holds the shared streams.
@@ -248,37 +244,3 @@ mcpServers:
         title: Personal API Key
     headers:
       x-bf-vk: "{{UNIFI_NETWORK_API_KEY}}"
-# Specs build an agent per request from the preset and MCP servers.
-modelSpecs:
-  enforce: false
-  prioritize: false
-  list:
-    - name: studio
-      description: Studio images and videos, with quick images inline.
-      label: Studio
-      # Status lines for the calls that keep a chat waiting; each costs a short schema field.
-      describeIntent:
-        - studio-Generate_mcp_studio
-        - studio-Models_mcp_studio
-        - studio-Result_mcp_studio
-        - studio-Reuse_mcp_studio
-      conversation_starters:
-        - Animate my last image
-        - Fast video of waves rolling onto a beach at sunset
-        - Quality portrait of an old fisherman in soft window light
-        - Turbo photo of a lighthouse on a stormy coast
-      # Queued jobs end the turn with result links; Result runs only on request, with a
-      # short foreground wait, since LibreChat v0.8.8 makes the model poll
-      # check_background_task until any backgrounded MCP tool completes.
-      mcpServers:
-        - studio
-      preset:
-        endpoint: AI
-        # Beyond this, LibreChat summarises older messages with the chat model. The smallest
-        # single-GPU text context in the text app's controllers is 167,344 tokens; keep headroom for replies.
-        maxContextTokens: 160000
-        model: ai/text
-        # Studio's own MCP instructions carry its workflow rules; only LibreChat's tool naming is added here.
-        promptPrefix: |
-          Use the exact Studio tool names supplied by this chat, including the
-          _mcp_studio suffix. Do not shorten them to gateway names.
