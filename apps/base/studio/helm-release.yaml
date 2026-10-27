@@ -17,6 +17,8 @@ spec:
                   - ROUTE_ALIAS_HOST
                   - ROUTE_HOST
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
+              # Every ai text profile is refusal-reduced, so Spicy uses the same route.
+              STUDIO_ASSISTANT_SPICY_MODEL: ai/text
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
               STUDIO_CLIPROXYAPI_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
               STUDIO_ENABLE_BUILTIN_PROFILES: "0"
