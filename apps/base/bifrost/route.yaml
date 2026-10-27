@@ -36,6 +36,41 @@ spec:
         - path:
             type: PathPrefix
             value: /studio/mcp/results
+    # Dashboard pages and their admin API sign in with Pocket ID through oauth2-proxy.
+    # Everything else, including inference, MCP and its OAuth endpoints, carries its own
+    # keys and reaches Bifrost directly; an /api call that bypassed the proxy would still
+    # be refused without the setup token.
+    - backendRefs:
+        - name: bifrost-oauth2-proxy
+          port: 4180
+      matches:
+        - path:
+            type: Exact
+            value: /
+        - path:
+            type: PathPrefix
+            value: /agent
+        - path:
+            type: PathPrefix
+            value: /api
+        - path:
+            type: PathPrefix
+            value: /login
+        - path:
+            type: PathPrefix
+            value: /oauth
+        - path:
+            type: PathPrefix
+            value: /oauth2-proxy
+        - path:
+            type: PathPrefix
+            value: /pprof
+        - path:
+            type: PathPrefix
+            value: /workspace
+        - path:
+            type: PathPrefix
+            value: /ws
     - backendRefs:
         - name: bifrost
           port: 8080
