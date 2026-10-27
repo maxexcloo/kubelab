@@ -90,7 +90,7 @@ endpoints:
       titleModel: current_model
       modelDisplayLabel: DeepSeek
     - name: OpenCode Go
-      apiKey: ${OPENCODE_GO_API_KEY_1}
+      apiKey: ${OPENCODE_API_KEY_1}
       baseURL: https://opencode.ai/zen/go/v1
       models:
         default:
@@ -100,7 +100,7 @@ endpoints:
       titleModel: current_model
       modelDisplayLabel: OpenCode Go
     - name: OpenCode Go (Account 2)
-      apiKey: ${OPENCODE_GO_API_KEY_2}
+      apiKey: ${OPENCODE_API_KEY_2}
       baseURL: https://opencode.ai/zen/go/v1
       models:
         default:
@@ -110,7 +110,7 @@ endpoints:
       titleModel: current_model
       modelDisplayLabel: OpenCode Go (Account 2)
     - name: OpenCode Zen
-      apiKey: ${OPENCODE_ZEN_API_KEY_1}
+      apiKey: ${OPENCODE_API_KEY_1}
       baseURL: https://opencode.ai/zen/v1
       models:
         default:
@@ -120,7 +120,7 @@ endpoints:
       titleModel: current_model
       modelDisplayLabel: OpenCode Zen
     - name: OpenCode Zen (Account 2)
-      apiKey: ${OPENCODE_ZEN_API_KEY_2}
+      apiKey: ${OPENCODE_API_KEY_2}
       baseURL: https://opencode.ai/zen/v1
       models:
         default:
