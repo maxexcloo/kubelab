@@ -12,7 +12,7 @@ spec:
             matchLabels:
               app.kubernetes.io/name: traefik
       ports:
-        - port: 8080
+        - port: 4180
           protocol: TCP
   podSelector:
     matchLabels:
