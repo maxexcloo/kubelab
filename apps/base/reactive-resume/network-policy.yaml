@@ -5,9 +5,6 @@ metadata:
 spec:
   ingress:
     - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: account-seed
         # Bifrost's MCP gateway serves the app's /mcp endpoint.
         - namespaceSelector:
             matchLabels:
