@@ -14,8 +14,8 @@ spec:
               - -config
               - /tmp/signer-cfg.yaml
             env:
-              # Only devices that reach the private gateway can use the web UI;
-              # worker endpoints keep SignTools' generated bearer key.
+              # oauth2-proxy signs browsers in with Pocket ID; worker endpoints keep
+              # SignTools' generated bearer key.
               BASIC_AUTH_ENABLE: "false"
               BUILDER_GITHUB_ENABLE: "true"
               BUILDER_GITHUB_ORG_NAME: maxexcloo
@@ -35,6 +35,7 @@ spec:
               tag: 3.0.12
             probes:
               liveness: &health
+                port: 8080
                 type: TCP
               readiness: *health
               startup: *health
@@ -44,6 +45,13 @@ spec:
               requests:
                 cpu: 20m
                 memory: 128Mi
+          oauth2-proxy:
+            env:
+              OAUTH2_PROXY_REDIRECT_URL: https://app.invalid/oauth2/callback
+              # Over-the-air installs, signed files and the builder work without a
+              # browser session (SignTools INSTALL.md, Reverse proxy).
+              OAUTH2_PROXY_SKIP_AUTH_ROUTES: ^/apps/[^/]+/,^/files/,^/jobs(/|$)
+              OAUTH2_PROXY_UPSTREAMS: http://127.0.0.1:8080
     persistence:
       data:
         existingClaim: data
@@ -68,6 +76,9 @@ spec:
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: mdi-apple-#ffffff
           gethomepage.dev/name: &title SignTools
+          monitoring.excloo.dev/enabled: "true"
+          # oauth2-proxy answers /ping without a session.
+          monitoring.excloo.dev/path: /ping
           onepassword.excloo.dev/item: *title
         hostnames:
           - signtools.excloo.com
@@ -76,8 +87,3 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
-    service:
-      main:
-        ports:
-          http:
-            port: 8080
