@@ -172,7 +172,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
-          gethomepage.dev/icon: sh-karakeep
+          gethomepage.dev/icon: sh-karakeep-light
           gethomepage.dev/name: &title Karakeep
           gethomepage.dev/pod-selector: app.kubernetes.io/name=karakeep,app.kubernetes.io/controller=karakeep
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_KARAKEEP_API_KEY}}" }}'
