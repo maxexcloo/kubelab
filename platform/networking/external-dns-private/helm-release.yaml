@@ -11,6 +11,7 @@ spec:
     domainFilters:
       - ${public_domain}
     labelFilter: gateway.excloo.dev/private-dns=true
+    txtOwnerId: kubelab-${cluster_name}-private
     managedRecordTypes:
       - CNAME
     sources:

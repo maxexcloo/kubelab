@@ -7,6 +7,7 @@ spec:
   releaseName: external-dns
   values:
     labelFilter: gateway.excloo.dev/public-access=true
+    txtOwnerId: kubelab-${cluster_name}-public
     nodeSelector:
       node.excloo.dev/network: internal
     managedRecordTypes:
