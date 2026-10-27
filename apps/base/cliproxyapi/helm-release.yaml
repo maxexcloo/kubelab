@@ -17,6 +17,7 @@ spec:
             probes:
               liveness: &health
                 path: /
+                port: 8317
               readiness: *health
               startup: *health
             resources:
@@ -25,6 +26,16 @@ spec:
               requests:
                 cpu: 10m
                 memory: 32Mi
+          oauth2-proxy:
+            env:
+              OAUTH2_PROXY_REDIRECT_URL: https://app.invalid/oauth2/callback
+              UPSTREAM_AUTHORIZATION:
+                valueFrom:
+                  secretKeyRef:
+                    key: authorization
+                    name: "{{ .Release.Name }}"
+              UPSTREAM_REQUEST_HEADERS: "[{name: Authorization, values: [{secretSource: {fromEnv: UPSTREAM_AUTHORIZATION}}]}]"
+              UPSTREAM_URI: http://127.0.0.1:8317
     persistence:
       config:
         name: "{{ .Release.Name }}"
@@ -54,7 +65,7 @@ spec:
           gethomepage.dev/icon: mdi-api-#ffffff
           gethomepage.dev/name: &title CLI Proxy API
           monitoring.excloo.dev/enabled: "true"
-          monitoring.excloo.dev/path: /management.html
+          monitoring.excloo.dev/path: /healthz
           onepassword.excloo.dev/item: *title
         hostnames:
           - cliproxy.excloo.com
@@ -63,8 +74,33 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+        # The proxy injects the management key, so client APIs, which carry their own
+        # keys, and the health check reach the app directly.
+        rules:
+          - backendRefs:
+              - identifier: main
+                port: 8317
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /backend-api/codex
+              - path:
+                  type: Exact
+                  value: /healthz
+              - path:
+                  type: PathPrefix
+                  value: /openai/v1
+              - path:
+                  type: PathPrefix
+                  value: /v1
+              - path:
+                  type: PathPrefix
+                  value: /v1beta
+          - backendRefs:
+              - identifier: main
+                port: 4180
     service:
       main:
         ports:
-          http:
+          app:
             port: 8317

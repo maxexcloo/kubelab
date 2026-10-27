@@ -1,11 +1,25 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 # Puts oauth2-proxy in front of the main container and signs browsers in with the
-# app's PocketIDClient. The app sets OAUTH2_PROXY_UPSTREAMS, OAUTH2_PROXY_REDIRECT_URL
-# and any OAUTH2_PROXY_SKIP_AUTH_ROUTES, gives its main probes an explicit port, and
-# admits only the proxy port (4180) in its NetworkPolicy.
+# app's PocketIDClient. The app sets UPSTREAM_URI and OAUTH2_PROXY_REDIRECT_URL, gives
+# its main probes an explicit port and admits Traefik on the proxy port (4180).
+# Optionally it sets OAUTH2_PROXY_SKIP_AUTH_ROUTES, or UPSTREAM_REQUEST_HEADERS to pass
+# its own credential upstream, for example
+# [{name: Authorization, values: [{secretSource: {fromEnv: UPSTREAM_AUTHORIZATION}}]}].
+# Injected headers also reach skipped routes, so an app that injects one routes its
+# API paths straight to the app port instead of skipping them here.
 resources:
   - external-secret.yaml
+configMapGenerator:
+  - name: oauth2-proxy
+    files:
+      - oauth2-proxy.yaml
+    options:
+      # oauth2-proxy expands the ${...} references itself.
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
+configurations:
+  - name-reference.yaml
 patches:
   - path: helm-release.yaml
     target:

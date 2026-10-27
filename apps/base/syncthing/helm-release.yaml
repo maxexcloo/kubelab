@@ -25,6 +25,7 @@ spec:
             probes:
               liveness: &health
                 path: /rest/noauth/health
+                port: 8384
               readiness: *health
               startup: *health
             resources:
@@ -33,6 +34,16 @@ spec:
               requests:
                 cpu: 100m
                 memory: 256Mi
+          oauth2-proxy:
+            env:
+              OAUTH2_PROXY_REDIRECT_URL: https://app.invalid/oauth2/callback
+              UPSTREAM_AUTHORIZATION:
+                valueFrom:
+                  secretKeyRef:
+                    key: authorization
+                    name: "{{ .Release.Name }}"
+              UPSTREAM_REQUEST_HEADERS: "[{name: Authorization, values: [{secretSource: {fromEnv: UPSTREAM_AUTHORIZATION}}]}]"
+              UPSTREAM_URI: http://127.0.0.1:8384
         initContainers:
           authentication:
             command:
@@ -125,8 +136,25 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+        # The proxy injects the owner's GUI login, so API-key clients such as the
+        # Homepage widget and the health check reach the GUI port directly.
+        rules:
+          - backendRefs:
+              - identifier: main
+                port: 8384
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /rest/noauth/
+              - headers:
+                  - name: X-API-Key
+                    type: RegularExpression
+                    value: .+
+          - backendRefs:
+              - identifier: main
+                port: 4180
     service:
       main:
         ports:
-          http:
+          gui:
             port: 8384

@@ -1,0 +1,14 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: cliproxyapi
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/oauth2/callback
+    description: Subscription Proxy
+    id: cliproxyapi
+    launchURL: https://app.invalid/management.html
+    name: CLI Proxy API
+    pkceEnabled: true
+  item: CLI Proxy API

@@ -4,9 +4,11 @@ namespace: syncthing
 resources:
   - external-secrets.yaml
   - namespace.yaml
+  - pocket-id.yaml
   - storage.yaml
 components:
   - ../../components/application
+  - ../../components/oauth2-proxy
   - ../../components/private-dns
 configMapGenerator:
   - name: syncthing-auth
@@ -26,6 +28,7 @@ replacements:
       - select:
           kind: HelmRelease
         fieldPaths:
+          - spec.values.controllers.main.containers.oauth2-proxy.env.OAUTH2_PROXY_REDIRECT_URL
           - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
         options:
           delimiter: /
