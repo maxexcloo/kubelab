@@ -25,7 +25,7 @@ spec:
       inCluster: true
       # OIDC adds a sign-in choice alongside Kubernetes token authentication.
       oidc:
-        callbackURL: https://headlamp.${cluster_name}.excloo.dev/oidc-callback
+        callbackURL: https://app.invalid/oidc-callback
         clientID: headlamp
         issuerURL: https://${identity_host}
         scopes: profile,email,groups
