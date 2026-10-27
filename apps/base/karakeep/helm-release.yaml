@@ -43,6 +43,9 @@ spec:
               requests:
                 cpu: 25m
                 memory: 384Mi
+            # s6-overlay needs the image's /run, which is writable only by its node user.
+            securityContext:
+              readOnlyRootFilesystem: null
       chrome:
         containers:
           chrome:
@@ -124,6 +127,11 @@ spec:
               capabilities:
                 drop:
                   - ALL
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
     persistence:
       data:
         existingClaim: data
@@ -141,13 +149,6 @@ spec:
           meilisearch:
             meilisearch:
               - path: /meili_data
-      # s6-overlay copies its executables into /run at startup.
-      run:
-        type: emptyDir
-        advancedMounts:
-          main:
-            main:
-              - path: /run
     route:
       private:
         annotations:
