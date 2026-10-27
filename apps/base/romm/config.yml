@@ -19,24 +19,50 @@ streaming:
       host: https://streaming.excloo.com
       broker_host: http://romm-streaming.romm-streaming.svc.cluster.local:3000
       label: Mandu
+      # Every library platform with a standalone emulator or a default RetroArch core.
       platforms:
         3ds: azahar
+        amiga: retroarch
+        atari-st: retroarch
+        atari2600: retroarch
+        atari5200: retroarch
+        atari7800: retroarch
+        c64: retroarch
+        colecovision: retroarch
         dc: flycast
+        fds: retroarch
         gamegear: retroarch
         gb: retroarch
         gba: retroarch
         gbc: retroarch
         genesis: retroarch
+        intellivision: retroarch
+        jaguar: retroarch
+        lynx: retroarch
+        msx: retroarch
+        msx2: retroarch
         n64: retroarch
         nds: retroarch
+        neo-geo-pocket: retroarch
+        neo-geo-pocket-color: retroarch
         nes: retroarch
         ngc: dolphin
+        odyssey-2: retroarch
         ps2: pcsx2
         psp: ppsspp
         psx: duckstation
         saturn: retroarch
+        sega32: retroarch
+        sg1000: retroarch
         sms: retroarch
         snes: retroarch
+        supergrafx: retroarch
         switch: eden
         tg16: retroarch
+        turbografx-cd: retroarch
+        vectrex: retroarch
+        virtualboy: retroarch
         wii: dolphin
+        wonderswan: retroarch
+        wonderswan-color: retroarch
+        zxs: retroarch
