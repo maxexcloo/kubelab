@@ -9,3 +9,22 @@ resources:
   - route.yaml
   - service-account.yaml
   - source.yaml
+replacements:
+  - source:
+      kind: HTTPRoute
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.config.oidc.callbackURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: HTTPRoute
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

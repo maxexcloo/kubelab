@@ -7,7 +7,7 @@ metadata:
     gethomepage.dev/description: Kubernetes Dashboard
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Operations
-    gethomepage.dev/href: https://headlamp.${cluster_name}.excloo.dev
+    gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-headlamp
     gethomepage.dev/name: Headlamp
     monitoring.excloo.dev/enabled: "true"

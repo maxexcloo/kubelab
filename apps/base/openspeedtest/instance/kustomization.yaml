@@ -1,0 +1,58 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - route.yaml
+patches:
+  - path: helm-release.yaml
+    target:
+      kind: HelmRelease
+# Each instance's private route takes its names and host from its HelmRelease.
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: application
+        fieldPaths:
+          - metadata.labels.[app.kubernetes.io/name]
+          - spec.rules.0.backendRefs.0.name
+      - select:
+          kind: HTTPRoute
+          name: application
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/pod-selector]
+        options:
+          delimiter: "="
+          index: 1
+      - select:
+          kind: HTTPRoute
+          name: application
+        fieldPaths:
+          - spec.hostnames.0
+        options:
+          delimiter: .
+          index: 0
+  - source:
+      kind: HTTPRoute
+      name: application
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: application
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: HelmRelease
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: application
+        fieldPaths:
+          - metadata.name
