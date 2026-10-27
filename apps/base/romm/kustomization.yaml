@@ -14,6 +14,12 @@ components:
   - ../../components/database-colocation
   - ../../../platform/backups/credentials
   - ../../components/private-dns-control-d-only
+configurations:
+  - name-reference.yaml
+configMapGenerator:
+  - name: romm-config
+    files:
+      - config.yml
 patches:
   - path: database.yaml
     target:

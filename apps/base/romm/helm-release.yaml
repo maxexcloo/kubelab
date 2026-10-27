@@ -108,6 +108,16 @@ spec:
               drop:
                 - ALL
     persistence:
+      # Settings live in the repository, so RomM's settings page is read-only.
+      configuration:
+        name: romm-config
+        type: configMap
+        advancedMounts:
+          main:
+            main:
+              - path: /romm/config/config.yml
+                readOnly: true
+                subPath: config.yml
       data:
         existingClaim: data
         type: persistentVolumeClaim
