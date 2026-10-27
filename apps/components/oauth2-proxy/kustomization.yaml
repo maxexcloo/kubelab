@@ -8,45 +8,9 @@ kind: Component
 # [{name: Authorization, values: [{secretSource: {fromEnv: UPSTREAM_AUTHORIZATION}}]}].
 # Injected headers also reach skipped routes, so an app that injects one routes its
 # API paths straight to the app port instead of skipping them here.
-resources:
-  - external-secret.yaml
-configMapGenerator:
-  - name: oauth2-proxy
-    files:
-      - oauth2-proxy.yaml
-    options:
-      # oauth2-proxy expands the ${...} references itself.
-      annotations:
-        kustomize.toolkit.fluxcd.io/substitute: disabled
-configurations:
-  - name-reference.yaml
+components:
+  - ../oauth2-proxy-config
 patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
-replacements:
-  # Fill the item before renaming, while the selector still matches.
-  - source:
-      kind: PocketIDClient
-      fieldPath: spec.item
-    targets:
-      - select:
-          kind: ExternalSecret
-          name: application-oauth2-proxy
-        fieldPaths:
-          - spec.data.0.remoteRef.key
-          - spec.data.1.remoteRef.key
-          - spec.data.2.remoteRef.key
-  - source:
-      kind: Namespace
-      fieldPath: metadata.name
-    targets:
-      - select:
-          kind: ExternalSecret
-          name: application-oauth2-proxy
-        fieldPaths:
-          - metadata.name
-          - spec.target.name
-        options:
-          delimiter: "-"
-          index: 0

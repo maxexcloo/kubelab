@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+# The oauth2-proxy configuration and Pocket ID credentials, named after the app's
+# Namespace and read from its PocketIDClient item. The oauth2-proxy component adds the
+# sidecar to app-template releases; apps on other charts add the same container themselves.
+resources:
+  - external-secret.yaml
+configMapGenerator:
+  - name: oauth2-proxy
+    files:
+      - oauth2-proxy.yaml
+    options:
+      # oauth2-proxy expands the ${...} references itself.
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
+configurations:
+  - name-reference.yaml
+replacements:
+  # Fill the item before renaming, while the selector still matches.
+  - source:
+      kind: PocketIDClient
+      fieldPath: spec.item
+    targets:
+      - select:
+          kind: ExternalSecret
+          name: application-oauth2-proxy
+        fieldPaths:
+          - spec.data.0.remoteRef.key
+          - spec.data.1.remoteRef.key
+          - spec.data.2.remoteRef.key
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: ExternalSecret
+          name: application-oauth2-proxy
+        fieldPaths:
+          - metadata.name
+          - spec.target.name
+        options:
+          delimiter: "-"
+          index: 0

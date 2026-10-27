@@ -5,3 +5,6 @@ nameReference:
       - group: helm.toolkit.fluxcd.io
         kind: HelmRelease
         path: spec/values/persistence/oauth2-proxy/name
+      - group: helm.toolkit.fluxcd.io
+        kind: HelmRelease
+        path: spec/values/volumes/configMap/name
