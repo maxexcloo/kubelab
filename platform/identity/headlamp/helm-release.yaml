@@ -23,8 +23,9 @@ spec:
       create: false
     config:
       inCluster: true
-      # OIDC adds a sign-in choice alongside Kubernetes token authentication.
+      # OIDC signs in automatically; ?logout=true still offers Kubernetes token authentication.
       oidc:
+        autoLogin: true
         callbackURL: https://app.invalid/oidc-callback
         clientID: headlamp
         issuerURL: https://${identity_host}
