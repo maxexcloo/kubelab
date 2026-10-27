@@ -82,9 +82,10 @@ spec:
       failureThreshold: 30
       periodSeconds: 10
       timeoutSeconds: 5
-    # config.json seeds the SQLite store; dashboard edits persist until the matching
-    # entry here changes. Removing an entry here leaves it in the store.
     bifrost:
+      # config.json is authoritative: each restart reverts dashboard edits and prunes
+      # entries removed here. The SQLite store still backs dashboard auth and MCP grants.
+      sourceOfTruth: config.json
       client:
         allowedOrigins:
           - https://app.invalid

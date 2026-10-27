@@ -11,7 +11,7 @@ spec:
             env:
               AIOSTREAMS_AUTH_REQUIRED: "true"
               AIOSTREAMS_OIDC_ALLOW_LOCAL_LOGIN: "true"
-              AIOSTREAMS_OIDC_AUTO_REDIRECT: "false"
+              AIOSTREAMS_OIDC_AUTO_REDIRECT: "true"
               AIOSTREAMS_OIDC_ENABLED: "true"
               AIOSTREAMS_OIDC_GROUP_PERMISSIONS: all_services=admin
               AIOSTREAMS_OIDC_ISSUER: https://${identity_host}

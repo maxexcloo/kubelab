@@ -22,19 +22,6 @@ patches:
       name: state-backup
 replacements:
   - source:
-      kind: PocketIDClient
-      fieldPath: spec.client.id
-    targets:
-      - select:
-          kind: ExternalSecret
-          name: papra
-        fieldPaths:
-          - spec.target.template.data.AUTH_PROVIDERS_CUSTOMS
-        options:
-          delimiter: '"'
-          # The client ID is the second quoted argument in the provider template.
-          index: 3
-  - source:
       kind: HelmRelease
       fieldPath: spec.values.route.private.hostnames.0
     targets:

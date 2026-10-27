@@ -8,7 +8,7 @@ metadata:
 spec:
   hostnames:
     - app.invalid
-    - immich.syd.excloo.dev
+    - immich.${cluster_name}.excloo.dev
   parentRefs:
     - name: private
       namespace: networking

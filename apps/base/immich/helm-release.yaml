@@ -48,6 +48,30 @@ spec:
         seccompProfile:
           type: RuntimeDefault
     immich:
+      # The file makes these settings read-only in the UI; valuesFrom adds the credentials.
+      configuration:
+        job:
+          thumbnailGeneration:
+            concurrency: 1
+        newVersionCheck:
+          enabled: false
+        notifications:
+          smtp:
+            enabled: true
+            from: Immich <immich@${mail_domain}>
+            transport:
+              host: smtp.resend.com
+              port: 465
+              secure: true
+              username: resend
+        oauth:
+          autoLaunch: true
+          buttonText: Login with Excloo ID
+          enabled: true
+          issuerUrl: https://${identity_host}
+        server:
+          externalDomain: https://app.invalid
+      configurationKind: Secret
       persistence:
         library:
           existingClaim: library
@@ -143,3 +167,16 @@ spec:
         data:
           existingClaim: valkey-data
           type: persistentVolumeClaim
+  valuesFrom:
+    - kind: Secret
+      name: immich-config
+      targetPath: immich.configuration.notifications.smtp.transport.password
+      valuesKey: smtp-password
+    - kind: Secret
+      name: immich-config
+      targetPath: immich.configuration.oauth.clientId
+      valuesKey: oidc-client-id
+    - kind: Secret
+      name: immich-config
+      targetPath: immich.configuration.oauth.clientSecret
+      valuesKey: oidc-client-secret

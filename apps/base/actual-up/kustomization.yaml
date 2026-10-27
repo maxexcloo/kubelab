@@ -11,7 +11,7 @@ components:
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
 configurations:
-  - kustomizeconfig.yaml
+  - name-reference.yaml
 configMapGenerator:
   - name: actual-up-config
     files:
