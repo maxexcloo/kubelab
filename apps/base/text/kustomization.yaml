@@ -7,12 +7,12 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - services.yaml
+configurations:
+  - name-reference.yaml
 configMapGenerator:
   - name: text-maya
     files:
       - maya.json
-generatorOptions:
-  disableNameSuffixHash: true
 components:
   - ../../components/gpu
   - ../../../platform/components/app-template
