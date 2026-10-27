@@ -1,10 +1,6 @@
 emulatorjs:
   netplay:
     enabled: true
-filesystem:
-  structure:
-    default: roms/{platform}/{game}
-    firmware: bios/{platform}
 scan:
   gamelist:
     export: true
