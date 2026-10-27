@@ -10,7 +10,6 @@ spec:
           main:
             env:
               BROWSER_WEB_URL: "http://{{ .Release.Name }}-chrome:9222"
-              CRAWLER_FULL_PAGE_ARCHIVE: "true"
               DATA_DIR: /data
               DISABLE_NEW_RELEASE_CHECK: "true"
               DISABLE_PASSWORD_AUTH: "true"
