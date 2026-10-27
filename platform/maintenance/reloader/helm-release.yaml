@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: stakater
         namespace: flux-system
-      version: 2.2.18
+      version: 2.2.19
   values:
     # Workloads read Secrets as environment variables, so restart them when ESO
     # refreshes a value. Jobs read Secrets when they start.

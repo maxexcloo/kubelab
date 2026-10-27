@@ -18,7 +18,7 @@ spec:
   values:
     function:
       # renovate: datasource=docker depName=xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform
-      packages: [xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform:v0.11.1]
+      packages: [xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform:v0.11.2]
     nodeSelector:
       node.excloo.dev/network: internal
     rbacManager:
