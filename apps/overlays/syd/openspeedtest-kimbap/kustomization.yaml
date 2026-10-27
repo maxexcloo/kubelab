@@ -2,20 +2,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - helm-release.yaml
-  - route.yaml
 components:
-  - ../../../base/openspeedtest/chart
-replacements:
-  - source:
+  - ../../../base/openspeedtest/instance
+patches:
+  - patch: |-
+      apiVersion: gateway.networking.k8s.io/v1
       kind: HTTPRoute
-      name: openspeedtest-kimbap
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: openspeedtest-kimbap
-        fieldPaths:
-          - metadata.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
+      metadata:
+        name: openspeedtest-kimbap
+        namespace: openspeedtest
+        annotations:
+          gethomepage.dev/name: OpenSpeedTest (syd/kimbap)
