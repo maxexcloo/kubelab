@@ -64,9 +64,8 @@ spec:
           - path: /config
       # Syncthing keeps Mandu's copy of RomM's ROM library, at the path RomM sees.
       roms:
-        hostPath: ${dataset_root}/roms
-        hostPathType: Directory
-        type: hostPath
+        existingClaim: roms
+        type: persistentVolumeClaim
         globalMounts:
           - path: /romm/library/roms
             readOnly: true
