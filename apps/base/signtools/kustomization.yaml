@@ -5,9 +5,11 @@ resources:
   - external-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
+  - pocket-id.yaml
   - storage.yaml
 components:
   - ../../components/application
+  - ../../components/oauth2-proxy
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
   - ../../components/private-dns
@@ -28,6 +30,7 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.SERVER_URL
+          - spec.values.controllers.main.containers.oauth2-proxy.env.OAUTH2_PROXY_REDIRECT_URL
         options:
           delimiter: /
           index: 2
