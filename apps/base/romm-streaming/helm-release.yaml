@@ -57,14 +57,22 @@ spec:
           operator: Equal
           value: gaming
     persistence:
-      # Syncthing keeps Mandu's RetroDECK BIOS folder, RetroArch's shared system
-      # directory; standalone emulators are pointed at its subfolders once.
+      # Syncthing keeps Mandu's RetroDECK BIOS folder; each emulator reads its
+      # part where it looks by default.
       bios:
         existingClaim: bios
         type: persistentVolumeClaim
         globalMounts:
+          - path: /config/.config/PCSX2/bios
+            readOnly: true
           - path: /config/.config/retroarch/system
             readOnly: true
+          - path: /config/.local/share/eden/keys
+            readOnly: true
+            subPath: switch/keys
+          - path: /config/.local/share/eden/nand/system/Contents/registered
+            readOnly: true
+            subPath: switch/firmware
       config:
         existingClaim: config
         type: persistentVolumeClaim
