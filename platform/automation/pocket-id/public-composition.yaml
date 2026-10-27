@@ -25,7 +25,7 @@ spec:
                 name: pocket-id-client
                 namespace: pocket-id
               spec:
-                managementPolicies: [Create, LateInitialize, Observe, Update]
+                managementPolicies: [Create, Delete, LateInitialize, Observe, Update]
                 forProvider:
                   expectedResponseCheck:
                     logic: |-
@@ -59,6 +59,9 @@ spec:
                       body: .payload.body | del(.id)
                       method: PUT
                       url: .payload.baseUrl + "/" + .payload.body.id
+                    - action: REMOVE
+                      method: DELETE
+                      url: .payload.baseUrl + "/" + .payload.body.id
                   payload:
                     baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/oidc/clients
                     body: "{}"
@@ -91,10 +94,14 @@ spec:
                 name: pocket-id-group
                 namespace: pocket-id
               spec:
-                managementPolicies: [Create, LateInitialize, Observe, Update]
+                managementPolicies: [Create, Delete, LateInitialize, Observe]
                 forProvider:
                   expectedResponseCheck:
                     logic: .payload.body.name as $name | .response.body.name == $name or any(.response.body.data[]?; .name == $name)
+                    type: CUSTOM
+                  # Only a successful listing proves the group is absent.
+                  isRemovedCheck:
+                    logic: .payload.body.name as $name | .response.statusCode == 200 and (any(.response.body.data[]?; .name == $name) | not)
                     type: CUSTOM
                   headers:
                     Content-Type: [application/json]
@@ -107,10 +114,9 @@ spec:
                       url: .payload.baseUrl
                     - action: OBSERVE
                       url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
-                    - action: UPDATE
-                      body: .payload.body
-                      method: POST
-                      url: .payload.baseUrl
+                    - action: REMOVE
+                      method: DELETE
+                      url: placeholder
                   payload:
                     baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
                     body: "{}"
@@ -122,6 +128,7 @@ spec:
                       secretRef:
                         name: placeholder
                         namespace: pocket-id
+                      setOwnerReference: true
                 providerConfigRef:
                   kind: ClusterProviderConfig
                   name: pocket-id
@@ -144,6 +151,13 @@ spec:
                   - type: string
                     string:
                       fmt: if .body.id then .body.id else first(.body.data[]? | select(.name == "%s") | .id) end
+                      type: Format
+              - <<: *group-name
+                toFieldPath: spec.forProvider.mappings[2].url
+                transforms:
+                  - type: string
+                    string:
+                      fmt: .payload.baseUrl + "/{{ pocket-id-group-%s:pocket-id:id }}"
                       type: Format
               - type: CombineFromComposite
                 combine:

@@ -146,6 +146,23 @@ class PocketIDClientTests(unittest.TestCase):
                 )
                 self.assertEqual(evaluate(f"[{response_jq}]", {"body": body}), group_id)
 
+    def test_client_group_is_removed_only_when_a_listing_omits_it(self):
+        group = composition_resource(
+            "platform/automation/pocket-id/composition.yaml", "group"
+        )
+        logic = group["spec"]["forProvider"]["isRemovedCheck"]["logic"]
+        payload = {"body": {"friendlyName": "Studio", "name": "studio"}}
+        for response, removed in [
+            ({"statusCode": 200, "body": {"data": [{"name": "all_services"}]}}, True),
+            ({"statusCode": 200, "body": {"data": [{"name": "studio"}]}}, False),
+            ({"statusCode": 201, "body": {"id": "2", "name": "studio"}}, False),
+            ({"statusCode": 500, "body": {"error": "internal_error"}}, False),
+        ]:
+            with self.subTest(response=response):
+                self.assertEqual(
+                    evaluate(logic, {"payload": payload, "response": response}), removed
+                )
+
 
 class PrivateDNSTargetDiscoveryTests(unittest.TestCase):
     @classmethod
