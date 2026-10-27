@@ -3,9 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: data
   annotations:
-    groupPattern: "568"
+    groupPattern: "1000"
     permPattern: "0700"
-    userPattern: "568"
+    userPattern: "1000"
 spec:
   accessModes:
     - ReadWriteOnce
