@@ -1,0 +1,46 @@
+emulatorjs:
+  netplay:
+    enabled: true
+filesystem:
+  structure:
+    default: roms/{platform}/{game}
+    firmware: bios/{platform}
+scan:
+  gamelist:
+    export: true
+  media:
+    - box2d
+    - box3d
+    - manual
+    - miximage
+    - physical
+    - screenshot
+    - title_screen
+streaming:
+  enabled: true
+  containers:
+    - protocol: webstation
+      host: https://streaming.excloo.com
+      broker_host: http://romm-streaming.romm-streaming.svc.cluster.local:3000
+      label: Mandu
+      platforms:
+        3ds: azahar
+        dc: flycast
+        gamegear: retroarch
+        gb: retroarch
+        gba: retroarch
+        gbc: retroarch
+        genesis: retroarch
+        n64: retroarch
+        nds: retroarch
+        nes: retroarch
+        ngc: dolphin
+        ps2: pcsx2
+        psp: ppsspp
+        psx: duckstation
+        saturn: retroarch
+        sms: retroarch
+        snes: retroarch
+        switch: eden
+        tg16: retroarch
+        wii: dolphin
