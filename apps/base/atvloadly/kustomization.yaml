@@ -4,12 +4,6 @@ namespace: atvloadly
 resources:
   - namespace.yaml
   - storage.yaml
-configMapGenerator:
-  - name: atvloadly-proxy
-    files:
-      - nginx.conf.template=proxy.conf.template
-configurations:
-  - name-reference.yaml
 components:
   - ../../components/workload
   - ../../../platform/backups/credentials

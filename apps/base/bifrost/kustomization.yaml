@@ -6,7 +6,9 @@ resources:
   - helm-release.yaml
   - namespace.yaml
   - network-policy.yaml
+  - pocket-id.yaml
   - route.yaml
+  - service.yaml
   - source.yaml
   - storage.yaml
 replacements:
@@ -33,6 +35,14 @@ replacements:
           delimiter: /
           index: 2
       - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
           kind: PrivateDNSRecord
         fieldPaths:
           - spec.hostname
@@ -40,8 +50,12 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.bifrost.client.allowedOrigins.0
+          - spec.values.extraContainers.[name=oauth2-proxy].env.[name=OAUTH2_PROXY_REDIRECT_URL].value
         options:
           delimiter: /
           index: 2
 components:
+  - ../../components/oauth2-proxy-config
   - ../../components/private-dns
+transformers:
+  - ../../transformers/cluster-scoped

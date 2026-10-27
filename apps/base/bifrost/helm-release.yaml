@@ -21,6 +21,67 @@ spec:
           name: bifrost
     extraEnv:
       TZ: ${time_zone}
+    # The chart has no app-template values, so this repeats the oauth2-proxy component's
+    # container. Bifrost serves its own MCP OAuth endpoints under /oauth2.
+    extraContainers:
+      - name: oauth2-proxy
+        args:
+          - --alpha-config=/config/oauth2-proxy.yaml
+          - --email-domain=*
+          - --reverse-proxy=true
+          - --silence-ping-logging=true
+          - --skip-provider-button=true
+        env:
+          - name: OAUTH2_PROXY_PROXY_PREFIX
+            value: /oauth2-proxy
+          - name: OAUTH2_PROXY_REDIRECT_URL
+            value: https://app.invalid/oauth2-proxy/callback
+          - name: OIDC_ISSUER_URL
+            value: https://${identity_host}
+          - name: UPSTREAM_REQUEST_HEADERS
+            value: "[{name: X-Bifrost-Setup-Token, values: [{secretSource: {fromEnv: UPSTREAM_SETUP_TOKEN}}]}]"
+          - name: UPSTREAM_SETUP_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: BIFROST_SETUP_TOKEN
+                name: bifrost
+          - name: UPSTREAM_URI
+            value: http://127.0.0.1:8080
+        envFrom:
+          - secretRef:
+              name: bifrost-oauth2-proxy
+        image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.5
+        imagePullPolicy: IfNotPresent
+        livenessProbe: &proxy-probe
+          httpGet:
+            path: /ping
+            port: proxy
+          periodSeconds: 10
+          timeoutSeconds: 5
+        ports:
+          - name: proxy
+            containerPort: 4180
+        readinessProbe: *proxy-probe
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop:
+              - ALL
+        startupProbe:
+          <<: *proxy-probe
+          failureThreshold: 30
+        volumeMounts:
+          - name: oauth2-proxy
+            mountPath: /config
+            readOnly: true
     image:
       pullPolicy: IfNotPresent
       repository: docker.io/maximhq/bifrost
@@ -62,6 +123,9 @@ spec:
       - name: temporary
         mountPath: /tmp
     volumes:
+      - name: oauth2-proxy
+        configMap:
+          name: oauth2-proxy
       - name: temporary
         emptyDir:
           sizeLimit: 1Gi
@@ -84,7 +148,7 @@ spec:
       timeoutSeconds: 5
     bifrost:
       # config.json is authoritative: each restart reverts dashboard edits and prunes
-      # entries removed here. The SQLite store still backs dashboard auth and MCP grants.
+      # entries removed here. The SQLite store still backs MCP grants.
       sourceOfTruth: config.json
       client:
         allowedOrigins:
@@ -94,9 +158,12 @@ spec:
         # Chat requests carry only the tools their client sends; MCP stays on /mcp.
         mcpDisableAutoToolInject: true
       governance:
+        # oauth2-proxy signs the dashboard in with Pocket ID and sends the setup token,
+        # which unlocks /api while dashboard auth is off. The credentials keep the
+        # disabled setting in config.json; virtual keys still guard inference.
         authConfig:
           existingSecret: bifrost
-          isEnabled: true
+          isEnabled: false
         virtualKeys:
           - id: claude
             name: Claude
