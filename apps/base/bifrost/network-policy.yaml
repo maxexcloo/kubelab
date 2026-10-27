@@ -18,6 +18,10 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: studio
+      ports:
+        - port: 8080
+          protocol: TCP
+    - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking
@@ -25,6 +29,8 @@ spec:
             matchLabels:
               app.kubernetes.io/name: traefik
       ports:
+        - port: 4180
+          protocol: TCP
         - port: 8080
           protocol: TCP
   podSelector:
