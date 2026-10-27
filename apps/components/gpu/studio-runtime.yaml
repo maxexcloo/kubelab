@@ -1,0 +1,30 @@
+# Studio switches the GPU workloads (Settings › Workers) by scaling their
+# Deployments: it reads Deployments and their Pods and updates only the scale
+# subresource.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: studio-runtime
+rules:
+  - apiGroups: [apps]
+    resources: [deployments]
+    verbs: [get, list, watch]
+  - apiGroups: [apps]
+    resources: [deployments/scale]
+    verbs: [get, patch, update]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: studio-runtime
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: studio-runtime
+subjects:
+  - kind: ServiceAccount
+    name: studio
+    namespace: studio

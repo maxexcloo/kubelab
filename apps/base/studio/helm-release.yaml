@@ -9,8 +9,6 @@ spec:
         containers:
           main:
             env:
-              COMFY_URL: http://comfyui.comfyui.svc.cluster.local:8188
-              COMFY_VIDEO_URL: http://comfyui-video.comfyui-video.svc.cluster.local:8188
               # A chat call queues up to ten images at once.
               STUDIO_ACCOUNT_MAX_OUTSTANDING_JOBS: "10"
               STUDIO_ALLOWED_HOSTS:
@@ -19,8 +17,32 @@ spec:
                   - ROUTE_ALIAS_HOST
                   - ROUTE_HOST
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
+              # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
+              STUDIO_CLIPROXYAPI_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
               STUDIO_ENABLE_BUILTIN_PROFILES: "0"
               STUDIO_ENABLE_PRESETS: "1"
+              # Studio scales these GPU deployments (apps/components/gpu/studio-runtime.yaml).
+              # Pools: the GPU node's two GPUs and the gaming node's one.
+              STUDIO_KUBERNETES_GPUS: '{"gpu": 2, "gaming": 1}'
+              STUDIO_KUBERNETES_WORKLOADS: >-
+                {
+                "comfyui": {"kind": "image", "label": "Image", "namespace": "comfyui", "deployment": "comfyui", "pool": "gpu", "gpus": 1, "url": "http://comfyui.comfyui.svc.cluster.local:8188"},
+                "comfyui-video": {"kind": "video", "label": "Video", "namespace": "comfyui-video", "deployment": "comfyui-video", "pool": "gpu", "gpus": 1, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188"},
+                "comfyui-video-tp2": {"kind": "video", "label": "Video · 2 GPUs", "namespace": "comfyui-video", "deployment": "comfyui-video-tp2", "pool": "gpu", "gpus": 2, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188"},
+                "text-gemma": {"kind": "text", "label": "Gemma 4 31B", "namespace": "text", "deployment": "text-gemma", "pool": "gpu", "gpus": 1, "url": "http://gemma.text.svc.cluster.local:8000"},
+                "text-gemma-tp2": {"kind": "text", "label": "Gemma 4 31B · 2 GPUs", "namespace": "text", "deployment": "text-gemma-tp2", "pool": "gpu", "gpus": 2, "url": "http://gemma.text.svc.cluster.local:8000"},
+                "text-gemma-26b": {"kind": "text", "label": "Gemma 26B · Gaming", "namespace": "text", "deployment": "text-gemma-26b", "pool": "gaming", "gpus": 1, "url": "http://gemma-26b.text.svc.cluster.local:8000"},
+                "text-maya": {"kind": "text", "label": "Maya · 2 GPUs", "namespace": "text", "deployment": "text-maya", "pool": "gpu", "gpus": 2, "url": "http://maya.text.svc.cluster.local:8000"},
+                "text-qwen-35b": {"kind": "text", "label": "Qwen 35B · Gaming", "namespace": "text", "deployment": "text-qwen-35b", "pool": "gaming", "gpus": 1, "url": "http://qwen-35b.text.svc.cluster.local:8000"},
+                "text-qwen-flash-next": {"kind": "text", "label": "Qwen Flash Next · 2 GPUs", "namespace": "text", "deployment": "text-qwen-flash-next", "pool": "gpu", "gpus": 2, "url": "http://qwen-flash-next.text.svc.cluster.local:8000"},
+                "text-qwen-fp8": {"kind": "text", "label": "Qwen FP8", "namespace": "text", "deployment": "text-qwen-fp8", "pool": "gpu", "gpus": 1, "url": "http://qwen-fp8.text.svc.cluster.local:8000"},
+                "text-qwen-fp8-tp2": {"kind": "text", "label": "Qwen FP8 · 2 GPUs", "namespace": "text", "deployment": "text-qwen-fp8-tp2", "pool": "gpu", "gpus": 2, "url": "http://qwen-fp8.text.svc.cluster.local:8000"},
+                "text-qwen-mxfp4": {"kind": "text", "label": "Qwen MXFP4", "namespace": "text", "deployment": "text-qwen-mxfp4", "pool": "gpu", "gpus": 1, "url": "http://qwen-mxfp4.text.svc.cluster.local:8000"}
+                }
+              STUDIO_MCP_PROMPTING_PATH: /data/config/prompting.json
+              STUDIO_MCP_PUBLIC_URL:
+                dependsOn: BIFROST_HOST
+                value: https://$(BIFROST_HOST)/studio
               STUDIO_MODEL_MANIFEST: /data/config/models.json
               STUDIO_MODEL_MANIFEST_PREFIX: models/comfyui/
               STUDIO_MODEL_STORAGE: worker
@@ -32,6 +54,14 @@ spec:
               # Studio writes chat prompts through Bifrost with its own key (external-secrets.yaml).
               STUDIO_PROMPT_WRITER_MODEL: ai/text
               STUDIO_PROMPT_WRITER_URL: http://bifrost.bifrost.svc.cluster.local:8080
+              STUDIO_RUNTIME_AUTOMATIC: "1"
+              # Required by automatic control. Bifrost still calls the text models
+              # directly, so Studio may stop one with a Bifrost request in flight.
+              STUDIO_TEXT_ADMISSION_ACKNOWLEDGED: "1"
+              # Ids primary and video are the ones COMFY_URL and COMFY_VIDEO_URL gave: recorded jobs keep their worker.
+              STUDIO_WORKERS: >-
+                [{"id":"primary","name":"Image Worker","url":"http://comfyui.comfyui.svc.cluster.local:8188","capabilities":["image","upscale","models"]},
+                {"id":"video","name":"Video Worker","url":"http://comfyui-video.comfyui-video.svc.cluster.local:8188","capabilities":["video"]}]
               BIFROST_HOST: bifrost.invalid
               # Refine in Chat opens LibreChat with the prompt filled in (?prompt=).
               CHAT_HOST: chat.invalid
@@ -39,10 +69,6 @@ spec:
                 dependsOn: CHAT_HOST
                 value: https://$(CHAT_HOST)
               HOST: 0.0.0.0
-              MCP_PROMPTING_PATH: /data/config/prompting.json
-              MCP_PUBLIC_URL:
-                dependsOn: BIFROST_HOST
-                value: https://$(BIFROST_HOST)/studio
               PORT: "8787"
               ROUTE_ALIAS_HOST: studio.${cluster_name}.excloo.dev
               ROUTE_HOST: app.invalid
@@ -53,7 +79,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio
-              tag: 0.51.0
+              tag: 1.0.0
             probes:
               liveness:
                 path: /api/ping
@@ -66,8 +92,10 @@ spec:
               requests:
                 cpu: 100m
                 memory: 512Mi
-    # Files on the TrueNAS datasets belong to the image's node user.
     defaultPodOptions:
+      # Studio's service account scales the GPU workloads.
+      automountServiceAccountToken: true
+      # Files on the TrueNAS datasets belong to the image's node user.
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000

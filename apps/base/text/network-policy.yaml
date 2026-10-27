@@ -5,12 +5,19 @@ metadata:
 spec:
   ingress:
     - from:
+        # Bifrost serves the models; Studio checks each model's /health.
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: bifrost
           podSelector:
             matchLabels:
               app.kubernetes.io/name: bifrost
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: studio
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: studio
       ports:
         - port: 8000
           protocol: TCP

@@ -28,9 +28,8 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               pullPolicy: IfNotPresent
-              # Keep the tested Studio SDK; the core version tag can also advance its SDK.
-              repository: ghcr.io/maxexcloo/comfyui-radiance
-              tag: sha-4c33f505b56c4927d5fe6df3c10a2962e3d48048
+              repository: ghcr.io/maxexcloo/studio-worker
+              tag: sha-d00bb72cb2c27a64440563b6b779de5d06272673
             # Readiness only, as under Docker: loading never restarts the worker.
             probes:
               readiness:

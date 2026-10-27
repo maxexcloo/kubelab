@@ -23,6 +23,12 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: bifrost
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: studio
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: studio
       ports:
         - port: 8317
           protocol: TCP
