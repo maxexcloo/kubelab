@@ -186,7 +186,11 @@ replacements:
     targets:
       - select:
           kind: ExternalSecret
-          name: syncthing
           namespace: syncthing
         fieldPaths:
           - spec.data.*.remoteRef.key
+      - select:
+          kind: PocketIDClient
+          name: syncthing
+        fieldPaths:
+          - spec.item
