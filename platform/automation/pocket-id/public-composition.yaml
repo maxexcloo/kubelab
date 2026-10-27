@@ -82,6 +82,78 @@ spec:
                     string:
                       convert: ToJson
                       type: Convert
+          # The client's own user group, adopted by name if it already exists.
+          - name: group
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: pocket-id-group
+                namespace: pocket-id
+              spec:
+                managementPolicies: [Create, LateInitialize, Observe, Update]
+                forProvider:
+                  expectedResponseCheck:
+                    logic: .payload.body.name as $name | .response.body.name == $name or any(.response.body.data[]?; .name == $name)
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                    X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
+                  mappings:
+                    - action: CREATE
+                      body: .payload.body
+                      method: POST
+                      url: .payload.baseUrl
+                    - action: OBSERVE
+                      url: .payload.baseUrl + "?pagination%5Blimit%5D=100"
+                    - action: UPDATE
+                      body: .payload.body
+                      method: POST
+                      url: .payload.baseUrl
+                  payload:
+                    baseUrl: http://pocket-id.pocket-id.svc.cluster.local:1411/api/user-groups
+                    body: "{}"
+                  secretInjectionConfigs:
+                    - keyMappings:
+                        - missingFieldStrategy: preserve
+                          responseJQ: placeholder
+                          secretKey: id
+                      secretRef:
+                        name: placeholder
+                        namespace: pocket-id
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: pocket-id
+            patches:
+              - &group-name
+                type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: pocket-id-group-%s
+                      type: Format
+              - <<: *group-name
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.name
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.forProvider.secretInjectionConfigs[0].keyMappings[0].responseJQ
+                transforms:
+                  - type: string
+                    string:
+                      fmt: if .body.id then .body.id else first(.body.data[]? | select(.name == "%s") | .id) end
+                      type: Format
+              - type: CombineFromComposite
+                combine:
+                  variables:
+                    - fromFieldPath: spec.client.name
+                    - fromFieldPath: metadata.name
+                  strategy: string
+                  string:
+                    fmt: '{"friendlyName":"%s","name":"%s"}'
+                toFieldPath: spec.forProvider.payload.body
           - name: group-access
             base:
               apiVersion: http.m.crossplane.io/v1alpha2
@@ -130,26 +202,20 @@ spec:
                       fmt: http://pocket-id.pocket-id.svc.cluster.local:1411/api/oidc/clients/%s
                       type: Format
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.accessPolicy
+                fromFieldPath: metadata.name
                 toFieldPath: spec.forProvider.expectedResponseCheck.logic
                 transforms:
-                  - type: map
-                    map:
-                      all-services: |-
+                  - type: string
+                    string:
+                      fmt: |-
                         .response.statusCode == 200
-                        and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}"] | sort)
-                      books: |-
-                        .response.statusCode == 200
-                        and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}", "{{ pocket-id-group-books:pocket-id:id }}"] | sort)
-                      llm: |-
-                        .response.statusCode == 200
-                        and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}", "{{ pocket-id-group-llm:pocket-id:id }}"] | sort)
+                        and ([.response.body.allowedUserGroups[]?.id] | sort) == (["{{ pocket-id-group-all-services:pocket-id:id }}", "{{ pocket-id-group-%s:pocket-id:id }}"] | sort)
+                      type: Format
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.accessPolicy
+                fromFieldPath: metadata.name
                 toFieldPath: spec.forProvider.payload.body
                 transforms:
-                  - type: map
-                    map:
-                      all-services: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}"]}'
-                      books: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}","{{ pocket-id-group-books:pocket-id:id }}"]}'
-                      llm: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}","{{ pocket-id-group-llm:pocket-id:id }}"]}'
+                  - type: string
+                    string:
+                      fmt: '{"userGroupIds":["{{ pocket-id-group-all-services:pocket-id:id }}","{{ pocket-id-group-%s:pocket-id:id }}"]}'
+                      type: Format

@@ -119,6 +119,33 @@ class PocketIDClientTests(unittest.TestCase):
             changed["response"]["body"][key] = value
             self.assertFalse(evaluate(expression, changed))
 
+    def test_client_group_is_found_by_name_and_publishes_its_id(self):
+        group = composition_resource(
+            "platform/automation/pocket-id/composition.yaml", "group", base=False
+        )
+        logic = group["base"]["spec"]["forProvider"]["expectedResponseCheck"]["logic"]
+        response_jq = next(
+            p["transforms"][0]["string"]["fmt"]
+            for p in group["patches"]
+            if p.get("toFieldPath", "").endswith("responseJQ")
+        ).replace("%s", "studio")
+        listed = {
+            "data": [{"id": "1", "name": "all_services"}, {"id": "2", "name": "studio"}]
+        }
+        payload = {"body": {"friendlyName": "Studio", "name": "studio"}}
+        for body, exists, group_id in [
+            ({"id": "2", "name": "studio"}, True, ["2"]),
+            (listed, True, ["2"]),
+            ({"data": listed["data"][:1]}, False, []),
+            ({"error": "already exists"}, False, []),
+        ]:
+            with self.subTest(body=body):
+                self.assertEqual(
+                    evaluate(logic, {"payload": payload, "response": {"body": body}}),
+                    exists,
+                )
+                self.assertEqual(evaluate(f"[{response_jq}]", {"body": body}), group_id)
+
 
 class PrivateDNSTargetDiscoveryTests(unittest.TestCase):
     @classmethod

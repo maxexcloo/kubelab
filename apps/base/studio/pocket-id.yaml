@@ -3,7 +3,6 @@ kind: PocketIDClient
 metadata:
   name: studio
 spec:
-  accessPolicy: llm
   client:
     callbackURLs:
       - https://app.invalid/api/accounts/oidc/callback
