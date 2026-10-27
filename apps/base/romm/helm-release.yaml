@@ -85,7 +85,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: docker.io/valkey/valkey
-              tag: 9.1.2
+              tag: 9.1.3
             probes:
               liveness: &valkey-health
                 enabled: true
