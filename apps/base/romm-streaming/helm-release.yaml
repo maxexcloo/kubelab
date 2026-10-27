@@ -13,8 +13,9 @@ spec:
               # Only RomM may frame the room; the broker mints each session's token.
               BROKER_CSP_ENFORCE: "true"
               BROKER_FRAME_ANCESTORS: https://app.invalid
-              PGID: "568"
-              PUID: "568"
+              # Mandu's owner, who owns the private ROM folder.
+              PGID: "1000"
+              PUID: "1000"
               TZ: ${time_zone}
             envFrom:
               - secretRef:
