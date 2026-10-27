@@ -11,19 +11,24 @@ spec:
           main:
             nameOverride: "{{ .Release.Name }}"
             env:
+              # Host networking exposes every node interface; listen only on the
+              # Tailscale address the gateway reaches, keeping the LAN out.
+              LISTEN_ADDR:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.hostIP
               SERVICE_PORT: "5533"
               TZ: ${time_zone}
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/atvloadly
-              tag: sha-0e8fa65d87697598dbb745f1f083dfcb7632b1a9
+              tag: sha-625ce66b7ff565470d8bd58f938b3a83709b68dc
             probes:
               liveness: &health
                 custom: true
                 enabled: true
                 spec: &health-spec
                   httpGet:
-                    host: 127.0.0.1
                     path: /
                     port: 5533
                   timeoutSeconds: 5
@@ -40,38 +45,6 @@ spec:
             securityContext:
               seccompProfile:
                 type: Unconfined
-          proxy:
-            args:
-              - nginx
-              - -c
-              - /tmp/nginx.conf
-              - -g
-              - daemon off;
-            env:
-              NGINX_ENVSUBST_OUTPUT_DIR: /tmp
-              NODE_IP:
-                valueFrom:
-                  fieldRef:
-                    fieldPath: status.hostIP
-            image:
-              pullPolicy: IfNotPresent
-              repository: docker.io/library/nginx
-              tag: 1.31.8-alpine
-            resources:
-              limits:
-                memory: 128Mi
-              requests:
-                cpu: 5m
-                memory: 16Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              runAsGroup: 568
-              runAsNonRoot: true
-              runAsUser: 568
-              capabilities:
-                drop:
-                  - ALL
     defaultPodOptions:
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
@@ -83,21 +56,6 @@ spec:
           main:
             main:
               - path: /data
-      proxy-config:
-        name: atvloadly-proxy
-        type: configMap
-        advancedMounts:
-          main:
-            proxy:
-              - path: /etc/nginx/templates/nginx.conf.template
-                readOnly: true
-                subPath: nginx.conf.template
-      proxy-temporary:
-        type: emptyDir
-        advancedMounts:
-          main:
-            proxy:
-              - path: /tmp
     route:
       private:
         annotations:
@@ -122,5 +80,5 @@ spec:
         forceRename: "{{ .Release.Name }}"
         ports:
           http:
-            port: 5534
+            port: 5533
             protocol: HTTP
