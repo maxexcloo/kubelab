@@ -8,6 +8,7 @@ resources:
   - network-policy.yaml
   - pocket-id.yaml
   - route.yaml
+  - service.yaml
   - source.yaml
   - storage.yaml
 replacements:
@@ -49,6 +50,7 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.bifrost.client.allowedOrigins.0
+          - spec.values.extraContainers.[name=oauth2-proxy].env.[name=OAUTH2_PROXY_REDIRECT_URL].value
         options:
           delimiter: /
           index: 2

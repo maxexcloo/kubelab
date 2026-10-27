@@ -5,7 +5,7 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/oauth2/callback
+      - https://app.invalid/oauth2-proxy/callback
     description: AI Gateway
     id: bifrost
     launchURL: https://app.invalid
