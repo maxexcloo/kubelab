@@ -6,6 +6,7 @@ resources:
   - helm-release.yaml
   - namespace.yaml
   - network-policy.yaml
+  - pocket-id.yaml
   - route.yaml
   - source.yaml
   - storage.yaml
@@ -33,6 +34,14 @@ replacements:
           delimiter: /
           index: 2
       - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
+      - select:
           kind: PrivateDNSRecord
         fieldPaths:
           - spec.hostname
@@ -44,4 +53,7 @@ replacements:
           delimiter: /
           index: 2
 components:
+  - ../../components/oauth2-proxy-config
   - ../../components/private-dns
+transformers:
+  - ../../transformers/cluster-scoped
