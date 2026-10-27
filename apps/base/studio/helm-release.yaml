@@ -54,10 +54,9 @@ spec:
               # Studio writes chat prompts through Bifrost with its own key (external-secrets.yaml).
               STUDIO_PROMPT_WRITER_MODEL: ai/text
               STUDIO_PROMPT_WRITER_URL: http://bifrost.bifrost.svc.cluster.local:8080
+              # Automatic control starts and stops image and video workloads; text
+              # workloads change only from Settings › Workers (Bifrost calls them directly).
               STUDIO_RUNTIME_AUTOMATIC: "1"
-              # Required by automatic control. Bifrost still calls the text models
-              # directly, so Studio may stop one with a Bifrost request in flight.
-              STUDIO_TEXT_ADMISSION_ACKNOWLEDGED: "1"
               # Ids primary and video are the ones COMFY_URL and COMFY_VIDEO_URL gave: recorded jobs keep their worker.
               STUDIO_WORKERS: >-
                 [{"id":"primary","name":"Image Worker","url":"http://comfyui.comfyui.svc.cluster.local:8188","capabilities":["image","upscale","models"]},
