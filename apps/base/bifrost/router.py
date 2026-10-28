@@ -14,15 +14,14 @@ import os
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-# Fields a level replaces, so a client's own setting cannot contradict the name.
-THINKING_FIELDS = (
-    "reasoning",
+BUDGET_FIELDS = (
     "reasoning_budget_tokens",
-    "reasoning_effort",
     "thinking_budget",
     "thinking_budget_tokens",
     "thinking_token_budget",
 )
+# Fields a level replaces, so a client's own setting cannot contradict the name.
+THINKING_FIELDS = ("reasoning", "reasoning_effort", *BUDGET_FIELDS)
 # Budgets cap thinking on templates that only switch it on or off.
 LEVELS = {
     "high": {"reasoning_effort": "high"},
@@ -103,7 +102,11 @@ class Handler(BaseHTTPRequestHandler):
             body = apply_level(body)
         if cloud:
             if model in SHARED:
-                body = json.dumps(json.loads(body) | {"model": CLOUD_MODEL}).encode()
+                request = json.loads(body) | {"model": CLOUD_MODEL}
+                # Abliteration grades effort itself and rejects medium with a budget.
+                for field in BUDGET_FIELDS:
+                    request.pop(field, None)
+                body = json.dumps(request).encode()
             upstream, response = self.cloud("POST", self.path, body)
             return self.relay(response, upstream)
         candidates = MODELS if model in SHARED else (model,)
