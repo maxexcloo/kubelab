@@ -52,7 +52,6 @@ spec:
                 value: https://$(BIFROST_HOST)/studio
               STUDIO_MODEL_MANIFEST: /data/config/models.json
               STUDIO_MODEL_MANIFEST_PREFIX: models/comfyui/
-              STUDIO_MODEL_STORAGE: worker
               STUDIO_MULTI_USER: "1"
               STUDIO_OIDC_CLIENT_ID: client.invalid
               STUDIO_OIDC_ISSUER: https://${identity_host}
