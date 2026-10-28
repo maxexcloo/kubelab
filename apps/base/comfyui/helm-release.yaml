@@ -29,7 +29,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio-worker
-              tag: 2026.10.28.27
+              tag: 2026.10.28.30
             # Readiness only, as under Docker: loading never restarts the worker.
             probes:
               readiness:
