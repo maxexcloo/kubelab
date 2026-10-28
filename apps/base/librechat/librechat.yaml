@@ -68,12 +68,22 @@ endpoints:
           - local/qwen-flash-next
           - local/qwen-fp8
           - local/qwen-mxfp4
+          - cloud/text
+          - cloud/high
+          - cloud/medium
+          - cloud/low
+          - cloud/off
+          - cloud/abliterated-model-large-flash
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
       # LibreChat assumes 32k for unknown models and summarises too early; every local model
-      # has at least 131k. Keys match as substrings, so this covers every local/ name.
+      # has at least 131k, as does the cloud model. Keys match as substrings, so these cover every local/ and cloud/ name.
       tokenConfig:
         local/:
+          prompt: 0
+          completion: 0
+          context: 131072
+        cloud/:
           prompt: 0
           completion: 0
           context: 131072
