@@ -1,4 +1,4 @@
-# One Service per model; Bifrost's router tries them in order for ai/text.
+# One Service per model; Bifrost's router tries them in order for local/text.
 apiVersion: v1
 kind: Service
 metadata:
