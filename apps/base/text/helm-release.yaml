@@ -187,7 +187,7 @@ spec:
                 --draft-coupling on --draft-window adaptive --gpu-headroom-mib 192 --host 0.0.0.0
                 --host-pool-mib 12288 --kv-cache-dtype fp8 --max-model-len 262144 --max-num-batched-tokens 2048
                 --max-num-seqs 8 --model /models/radiance/qwen3.8-next-flash-fp8-iq4r-moe.rad --num-speculative-tokens 3
-                --placement expert_tiered --port 8000 --prefix-cache-mib 4096 --served-model-name qwen3.8-flash-next
+                --placement expert_tiered --port 8000 --prefix-cache-mib 4096 --reasoning-effort-map high=xhigh --served-model-name qwen3.8-flash-next
                 --tp 2 --tp-wire wht6
             probes: *probes
         pod:
@@ -204,7 +204,7 @@ spec:
               - >-
                 exec radiance --api-key "$(API_KEY)" --attn-prefill-fp8 both --gpu-headroom-mib 192
                 --host 0.0.0.0 --kv-cache-dtype k6_v4 --max-model-len 167344 --max-num-batched-tokens 2048
-                --max-num-seqs 2 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192
+                --max-num-seqs 2 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192 --reasoning-effort-map high=xhigh
                 --served-model-name qwen3.8-27b-uncensored-fp8 --tp 1
             probes: *probes
         pod:
@@ -221,7 +221,7 @@ spec:
               - >-
                 exec radiance --api-key "$(API_KEY)" --attn-prefill-fp8 both --gpu-headroom-mib 192
                 --host 0.0.0.0 --kv-cache-dtype k6_v4 --max-model-len 262144 --max-num-batched-tokens 2048
-                --max-num-seqs 8 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192
+                --max-num-seqs 8 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192 --reasoning-effort-map high=xhigh
                 --served-model-name qwen3.8-27b-uncensored-fp8 --tp 2
             probes: *probes
         pod:
@@ -240,7 +240,7 @@ spec:
                 --gpu-headroom-mib 192 --host 0.0.0.0 --host-pool-mib 3072 --kv-cache-dtype fp8
                 --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
                 --model /models/radiance/qwen3.8-27b-uncensored-mxfp4-df2.rad --draft-short-from 8 --port 8000
-                --served-model-name qwen3.8-27b-uncensored-mxfp4 --tp 1
+                --reasoning-effort-map high=xhigh --served-model-name qwen3.8-27b-uncensored-mxfp4 --tp 1
             probes: *probes
         pod:
           labels:
