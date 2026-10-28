@@ -64,6 +64,12 @@ endpoints:
           - qwen-mxfp4/qwen3.8-27b-uncensored-mxfp4
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
+      # LibreChat assumes 32k for unknown models and summarises too early; every ai/text backend has at least 131k.
+      tokenConfig:
+        ai/text:
+          prompt: 0
+          completion: 0
+          context: 131072
       titleConvo: true
       titleModel: ai/text
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
