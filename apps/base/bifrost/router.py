@@ -1,7 +1,7 @@
-"""Routes Bifrost's ai/ models to the local text models.
+"""Routes Bifrost's local/ models to the local text models.
 
-ai/text and the thinking levels reach the first running model in MODELS, moving on
-when one is stopped or full; ai/<model> reaches that model alone. Levels set the
+local/text and the thinking levels reach the first running model in MODELS, moving on
+when one is stopped or full; local/<model> reaches that model alone. Levels set the
 request's reasoning fields; everything else passes through. Model lists name only
 running models, and requests nothing can serve fail fast with 503.
 """

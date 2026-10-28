@@ -48,37 +48,38 @@ endpoints:
       - tools
       - web_search
   custom:
-    # ai/text reaches the first running local text model, with its default thinking;
-    # ai/off, ai/low, ai/medium and ai/high set the thinking level. The others pick a model.
+    # local/text reaches the first running local text model, with its default thinking;
+    # local/off, local/low, local/medium and local/high set the thinking level. The others
+    # pick a model.
     - name: AI
       apiKey: ${BIFROST_API_KEY}
       baseURL: http://bifrost.bifrost.svc.cluster.local:8080/v1
       models:
         default:
-          - ai/text
-          - ai/high
-          - ai/medium
-          - ai/low
-          - ai/off
-          - ai/gemma
-          - ai/gemma-26b
-          - ai/maya
-          - ai/qwen-35b
-          - ai/qwen-flash-next
-          - ai/qwen-fp8
-          - ai/qwen-mxfp4
+          - local/text
+          - local/high
+          - local/medium
+          - local/low
+          - local/off
+          - local/gemma
+          - local/gemma-26b
+          - local/maya
+          - local/qwen-35b
+          - local/qwen-flash-next
+          - local/qwen-fp8
+          - local/qwen-mxfp4
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
       # LibreChat assumes 32k for unknown models and summarises too early; every local model
-      # has at least 131k. Keys match as substrings, so this covers every ai/ name.
+      # has at least 131k. Keys match as substrings, so this covers every local/ name.
       tokenConfig:
-        ai/:
+        local/:
           prompt: 0
           completion: 0
           context: 131072
       titleConvo: true
       # Titles need no thinking.
-      titleModel: ai/off
+      titleModel: local/off
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
       modelDisplayLabel: AI

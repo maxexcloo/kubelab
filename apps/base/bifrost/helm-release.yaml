@@ -82,7 +82,7 @@ spec:
           - name: oauth2-proxy
             mountPath: /config
             readOnly: true
-      # Routes ai/ models to the local text models; see router.py.
+      # Routes local/ models to the local text models; see router.py.
       - name: router
         command:
           - python
@@ -233,10 +233,10 @@ spec:
             mcp_configs:
               - mcp_client_name: studio
                 tools_to_execute: ["*"]
-            # ai/ names only; an explicit pattern lets requests for a stopped model reach
+            # local/ names only; an explicit pattern lets requests for a stopped model reach
             # the router, which "*" would reject once the model drops out of the list.
             provider_configs: &local-text
-              - provider: ai
+              - provider: local
                 allowed_models: ["regex:.*"]
                 key_ids: ["*"]
           - id: opencode
@@ -322,11 +322,11 @@ spec:
       providers:
         # The router sidecar serves the local text models and lists only those running;
         # a named key model would be listed regardless.
-        ai:
+        local:
           custom_provider_config:
             base_provider_type: openai
           keys:
-            - name: ai
+            - name: local
               models: ["*"]
               value: env.AI_API_KEY
           network_config:
