@@ -23,7 +23,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/homeassistant-ai/ha-mcp
-              tag: 8.7.0
+              tag: 9.0.0
             probes:
               liveness: &health
                 path: /healthz
