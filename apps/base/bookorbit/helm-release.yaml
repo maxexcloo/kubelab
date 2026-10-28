@@ -22,7 +22,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/bookorbit/bookorbit
-              tag: 3.5.0
+              tag: 3.6.0
             probes:
               liveness: null
               readiness: &ready
