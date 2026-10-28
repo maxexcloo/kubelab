@@ -25,7 +25,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: controldns/ctrld
-              tag: 1.5.8
+              tag: 1.5.9
             resources:
               limits:
                 memory: 128Mi
