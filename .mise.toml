@@ -2,7 +2,7 @@
 flux2 = "latest"
 kubeconform = "latest"
 # Match the Kubernetes API configured in Homelab; Renovate groups client updates.
-kubectl = "1.37.1"
+kubectl = "1.37.2"
 
 # Bootstrap
 [tasks.bootstrap]
