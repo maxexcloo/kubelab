@@ -59,7 +59,7 @@ spec:
               STUDIO_OIDC_LABEL: Pocket ID
               STUDIO_OIDC_REDIRECT_URI: https://app.invalid/api/accounts/oidc/callback
               # Studio writes chat prompts through Bifrost with its own key (external-secrets.yaml).
-              STUDIO_PROMPT_WRITER_MODEL: local/text
+              STUDIO_PROMPT_WRITER_MODEL: cloud/
               STUDIO_PROMPT_WRITER_URL: http://bifrost.bifrost.svc.cluster.local:8080
               # Automatic control starts and stops image and video workloads; text
               # workloads change only from Settings › Workers (Bifrost calls them directly).
@@ -76,7 +76,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio
-              tag: 2026.10.28.41
+              tag: 2026.10.28.42
             probes:
               liveness:
                 path: /api/ping
