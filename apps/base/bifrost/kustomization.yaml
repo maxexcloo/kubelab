@@ -11,6 +11,13 @@ resources:
   - service.yaml
   - source.yaml
   - storage.yaml
+configMapGenerator:
+  - name: router
+    files:
+      - router.py
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
 replacements:
   # The chart source lives in the namespace the release references.
   - source:

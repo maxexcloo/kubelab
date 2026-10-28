@@ -17,7 +17,7 @@ spec:
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
               # The Chat tab talks to the local text models through Bifrost with the prompt
               # writer's key (external-secrets.yaml).
-              STUDIO_CHAT_GATEWAY_MODELS: ai/*,gemma/*,gemma-26b/*,maya/*,qwen-35b/*,qwen-flash-next/*,qwen-fp8/*,qwen-mxfp4/*
+              STUDIO_CHAT_GATEWAY_MODELS: ai/*
               STUDIO_CHAT_GATEWAY_URL:
                 dependsOn: STUDIO_PROMPT_WRITER_URL
                 value: $(STUDIO_PROMPT_WRITER_URL)
@@ -36,15 +36,15 @@ spec:
                 "comfyui": {"kind": "image", "label": "Image", "namespace": "comfyui", "deployment": "comfyui", "pool": "gpu", "gpus": 1, "url": "http://comfyui.comfyui.svc.cluster.local:8188", "worker": "primary", "capabilities": ["image", "upscale", "models"]},
                 "comfyui-video": {"kind": "video", "label": "Video", "namespace": "comfyui-video", "deployment": "comfyui-video", "pool": "gpu", "gpus": 1, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188", "worker": "video"},
                 "comfyui-video-tp2": {"kind": "video", "label": "Video · 2 GPUs", "namespace": "comfyui-video", "deployment": "comfyui-video-tp2", "pool": "gpu", "gpus": 2, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188"},
-                "text-gemma": {"kind": "text", "label": "Gemma 4 31B", "namespace": "text", "deployment": "text-gemma", "pool": "gpu", "gpus": 1, "url": "http://gemma.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "gemma/gemma-4-31b-heretic"},
-                "text-gemma-tp2": {"kind": "text", "label": "Gemma 4 31B · 2 GPUs", "namespace": "text", "deployment": "text-gemma-tp2", "pool": "gpu", "gpus": 2, "url": "http://gemma.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "gemma/gemma-4-31b-heretic"},
-                "text-gemma-26b": {"kind": "text", "label": "Gemma 26B · Gaming", "namespace": "text", "deployment": "text-gemma-26b", "pool": "gaming", "gpus": 1, "url": "http://gemma-26b.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "gemma-26b/gemma-4-26b-a4b"},
-                "text-maya": {"kind": "text", "label": "Maya · 2 GPUs", "namespace": "text", "deployment": "text-maya", "pool": "gpu", "gpus": 2, "url": "http://maya.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "maya/glm-5.3-flash"},
-                "text-qwen-35b": {"kind": "text", "label": "Qwen 35B · Gaming", "namespace": "text", "deployment": "text-qwen-35b", "pool": "gaming", "gpus": 1, "url": "http://qwen-35b.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "qwen-35b/qwen3.6-35b-a3b"},
-                "text-qwen-flash-next": {"kind": "text", "label": "Qwen Flash Next · 2 GPUs", "namespace": "text", "deployment": "text-qwen-flash-next", "pool": "gpu", "gpus": 2, "url": "http://qwen-flash-next.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "qwen-flash-next/qwen3.8-flash-next"},
-                "text-qwen-fp8": {"kind": "text", "label": "Qwen FP8", "namespace": "text", "deployment": "text-qwen-fp8", "pool": "gpu", "gpus": 1, "url": "http://qwen-fp8.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "qwen-fp8/qwen3.8-27b-uncensored-fp8"},
-                "text-qwen-fp8-tp2": {"kind": "text", "label": "Qwen FP8 · 2 GPUs", "namespace": "text", "deployment": "text-qwen-fp8-tp2", "pool": "gpu", "gpus": 2, "url": "http://qwen-fp8.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "qwen-fp8/qwen3.8-27b-uncensored-fp8"},
-                "text-qwen-mxfp4": {"kind": "text", "label": "Qwen MXFP4", "namespace": "text", "deployment": "text-qwen-mxfp4", "pool": "gpu", "gpus": 1, "url": "http://qwen-mxfp4.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "qwen-mxfp4/qwen3.8-27b-uncensored-mxfp4"}
+                "text-gemma": {"kind": "text", "label": "Gemma 4 31B", "namespace": "text", "deployment": "text-gemma", "pool": "gpu", "gpus": 1, "url": "http://gemma.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "ai/gemma"},
+                "text-gemma-tp2": {"kind": "text", "label": "Gemma 4 31B · 2 GPUs", "namespace": "text", "deployment": "text-gemma-tp2", "pool": "gpu", "gpus": 2, "url": "http://gemma.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "ai/gemma"},
+                "text-gemma-26b": {"kind": "text", "label": "Gemma 26B · Gaming", "namespace": "text", "deployment": "text-gemma-26b", "pool": "gaming", "gpus": 1, "url": "http://gemma-26b.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "ai/gemma-26b"},
+                "text-maya": {"kind": "text", "label": "Maya · 2 GPUs", "namespace": "text", "deployment": "text-maya", "pool": "gpu", "gpus": 2, "url": "http://maya.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "ai/maya"},
+                "text-qwen-35b": {"kind": "text", "label": "Qwen 35B · Gaming", "namespace": "text", "deployment": "text-qwen-35b", "pool": "gaming", "gpus": 1, "url": "http://qwen-35b.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "ai/qwen-35b"},
+                "text-qwen-flash-next": {"kind": "text", "label": "Qwen Flash Next · 2 GPUs", "namespace": "text", "deployment": "text-qwen-flash-next", "pool": "gpu", "gpus": 2, "url": "http://qwen-flash-next.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "ai/qwen-flash-next"},
+                "text-qwen-fp8": {"kind": "text", "label": "Qwen FP8", "namespace": "text", "deployment": "text-qwen-fp8", "pool": "gpu", "gpus": 1, "url": "http://qwen-fp8.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "ai/qwen-fp8"},
+                "text-qwen-fp8-tp2": {"kind": "text", "label": "Qwen FP8 · 2 GPUs", "namespace": "text", "deployment": "text-qwen-fp8-tp2", "pool": "gpu", "gpus": 2, "url": "http://qwen-fp8.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "ai/qwen-fp8"},
+                "text-qwen-mxfp4": {"kind": "text", "label": "Qwen MXFP4", "namespace": "text", "deployment": "text-qwen-mxfp4", "pool": "gpu", "gpus": 1, "url": "http://qwen-mxfp4.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "ai/qwen-mxfp4"}
                 }
               STUDIO_MCP_PROMPTING_PATH: /data/config/prompting.json
               STUDIO_MCP_PUBLIC_URL:

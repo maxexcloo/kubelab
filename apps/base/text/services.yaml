@@ -1,17 +1,4 @@
-# Each model has its own Service; "text" reaches every running model, so
-# ai/text answers from whichever is up.
-apiVersion: v1
-kind: Service
-metadata:
-  name: text
-spec:
-  ports:
-    - name: http
-      port: 8000
-      protocol: TCP
-  selector:
-    app.kubernetes.io/name: text
----
+# One Service per model; Bifrost's router tries them in order for ai/text.
 apiVersion: v1
 kind: Service
 metadata:
