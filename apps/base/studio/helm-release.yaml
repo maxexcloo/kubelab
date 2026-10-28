@@ -9,8 +9,6 @@ spec:
         containers:
           main:
             env:
-              # A chat call queues up to ten images at once.
-              STUDIO_ACCOUNT_MAX_OUTSTANDING_JOBS: "10"
               STUDIO_ALLOWED_HOSTS:
                 dependsOn:
                   - BIFROST_HOST
@@ -19,9 +17,14 @@ spec:
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
               # Every ai text profile is refusal-reduced, so Spicy uses the same route.
               STUDIO_ASSISTANT_SPICY_MODEL: ai/text
+              # The Chat tab talks to the local text models through Bifrost with the prompt
+              # writer's key (external-secrets.yaml).
+              STUDIO_CHAT_GATEWAY_MODELS: ai/*
+              STUDIO_CHAT_GATEWAY_URL:
+                dependsOn: STUDIO_PROMPT_WRITER_URL
+                value: $(STUDIO_PROMPT_WRITER_URL)
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
               STUDIO_CLIPROXYAPI_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-              STUDIO_ENABLE_BUILTIN_PROFILES: "0"
               STUDIO_ENABLE_PRESETS: "1"
               # Studio scales these GPU deployments (apps/components/gpu/studio-runtime.yaml).
               # Pools: the GPU node's two GPUs and the gaming node's one.
@@ -63,11 +66,6 @@ spec:
               # workloads change only from Settings › Workers (Bifrost calls them directly).
               STUDIO_RUNTIME_AUTOMATIC: "1"
               BIFROST_HOST: bifrost.invalid
-              # Refine in Chat opens LibreChat with the prompt filled in (?prompt=).
-              CHAT_HOST: chat.invalid
-              STUDIO_CHAT_URL:
-                dependsOn: CHAT_HOST
-                value: https://$(CHAT_HOST)
               HOST: 0.0.0.0
               PORT: "8787"
               ROUTE_ALIAS_HOST: studio.${cluster_name}.excloo.dev

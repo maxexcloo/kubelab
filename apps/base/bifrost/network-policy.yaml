@@ -11,7 +11,7 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: librechat
-        # Studio writes chat prompts with its own virtual key.
+        # Studio writes prompts and chats with its own virtual key.
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: studio
