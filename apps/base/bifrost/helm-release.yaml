@@ -237,17 +237,22 @@ spec:
             mcp_configs:
               - mcp_client_name: studio
                 tools_to_execute: ["*"]
-            # local/ names only; an explicit pattern lets requests for a stopped model reach
-            # the router, which "*" would reject once the model drops out of the list.
-            provider_configs: &local-text
-              - provider: local
+            # LibreChat offers local/ and cloud/ names; an explicit pattern lets requests for a
+            # stopped model reach the router, which "*" would reject once the model drops out.
+            provider_configs:
+              - provider: cloud
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - &local-text-provider
+                provider: local
                 allowed_models: ["regex:.*"]
                 key_ids: ["*"]
           - id: opencode
             name: OpenCode
             value: env.VIRTUAL_KEY_OPENCODE
             mcp_configs: *agent-mcp
-            provider_configs: *local-text
+            provider_configs:
+              - *local-text-provider
           # The owner's personal key for LibreChat's restricted MCP servers.
           - id: owner
             name: Owner
@@ -259,7 +264,8 @@ spec:
             value: env.VIRTUAL_KEY_PI
             mcp_configs: *agent-mcp
             # Pi calls the local text model only; cloud plans keep their own keys.
-            provider_configs: *local-text
+            provider_configs:
+              - *local-text-provider
           - id: studio
             name: Studio
             value: env.VIRTUAL_KEY_STUDIO
