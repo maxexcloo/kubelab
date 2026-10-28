@@ -3,12 +3,15 @@
 local/text and the thinking levels reach the first running model in MODELS, moving on
 when one is stopped or full; local/<model> reaches that model alone. Levels set the
 request's reasoning fields; everything else passes through. Model lists name only
-running models, and requests nothing can serve fail fast with 503.
+running models, and requests nothing can serve fail fast with 503. Bifrost's cloud/
+provider reaches /cloud/..., forwarded to CLOUD_URL with the key Bifrost sends: the
+shared names use CLOUD_MODEL, and any other name is the provider's own model.
 """
 
 import http.client
 import json
 import os
+import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 # Fields a level replaces, so a client's own setting cannot contradict the name.
@@ -47,6 +50,8 @@ HOP_HEADERS = {
     "keep-alive",
     "transfer-encoding",
 }
+CLOUD_MODEL = os.environ["CLOUD_MODEL"]
+CLOUD_URL = urllib.parse.urlsplit(os.environ["CLOUD_URL"])
 PORT = int(os.environ["PORT"])
 UPSTREAM = os.environ["UPSTREAM"]
 
@@ -68,11 +73,13 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/healthz":
             return self.reply(200, {"status": "ok"})
-        if self.path == "/v1/models":
+        if self.path in ("/cloud/v1/models", "/v1/models"):
+            cloud = self.path.startswith("/cloud/")
+            names = (*SHARED, *self.cloud_models()) if cloud else running()
             return self.reply(
                 200,
                 {
-                    "data": [{"id": name, "object": "model"} for name in running()],
+                    "data": [{"id": name, "object": "model"} for name in names],
                     "object": "list",
                 },
             )
@@ -81,7 +88,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
         model = json.loads(body).get("model")
-        if model not in (*SHARED, *MODELS):
+        cloud = self.path.startswith("/cloud/")
+        if not cloud and model not in (*SHARED, *MODELS):
             return self.reply(
                 404,
                 {
@@ -93,14 +101,16 @@ class Handler(BaseHTTPRequestHandler):
             )
         if model in LEVELS:
             body = apply_level(body)
+        if cloud:
+            if model in SHARED:
+                body = json.dumps(json.loads(body) | {"model": CLOUD_MODEL}).encode()
+            upstream, response = self.cloud("POST", self.path, body)
+            return self.relay(response, upstream)
         candidates = MODELS if model in SHARED else (model,)
-        headers = {
-            k: v for k, v in self.headers.items() if k.lower() not in HOP_HEADERS
-        }
         for index, candidate in enumerate(candidates):
             if (upstream := connect(candidate)) is None:
                 continue
-            upstream.request("POST", self.path, body, headers)
+            upstream.request("POST", self.path, body, self.forwarded())
             response = upstream.getresponse()
             if response.status in BUSY and index < len(candidates) - 1:
                 upstream.close()
@@ -112,6 +122,23 @@ class Handler(BaseHTTPRequestHandler):
             else f"{model} is not running"
         )
         self.reply(503, {"error": {"message": message, "type": "service_unavailable"}})
+
+    def forwarded(self):
+        return {k: v for k, v in self.headers.items() if k.lower() not in HOP_HEADERS}
+
+    def cloud(self, method, path, body=None):
+        upstream = http.client.HTTPSConnection(CLOUD_URL.netloc)
+        path = CLOUD_URL.path + path.removeprefix("/cloud")
+        upstream.request(method, path, body, self.forwarded())
+        return upstream, upstream.getresponse()
+
+    def cloud_models(self):
+        upstream, response = self.cloud("GET", self.path)
+        listing = (
+            json.loads(response.read()) if response.status == 200 else {"data": []}
+        )
+        upstream.close()
+        return [model["id"] for model in listing["data"]]
 
     def relay(self, response, upstream):
         self.send_response(response.status)

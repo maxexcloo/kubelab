@@ -82,12 +82,16 @@ spec:
           - name: oauth2-proxy
             mountPath: /config
             readOnly: true
-      # Routes local/ models to the local text models; see router.py.
+      # Routes local/ models to the local text models and cloud/ to Abliteration; see router.py.
       - name: router
         command:
           - python
           - /app/router.py
         env:
+          - name: CLOUD_MODEL
+            value: abliterated-model-large-flash
+          - name: CLOUD_URL
+            value: https://api.abliteration.ai
           - name: PORT
             value: "8090"
           - name: UPSTREAM
@@ -259,7 +263,14 @@ spec:
           - id: studio
             name: Studio
             value: env.VIRTUAL_KEY_STUDIO
-            provider_configs: *local-text
+            # Studio alone also reaches cloud/, for when no local model runs.
+            provider_configs:
+              - provider: cloud
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: local
+                allowed_models: ["regex:.*"]
+                key_ids: ["*"]
       # Each server is served at /mcp/<endpointSlug>. Servers without headers accept
       # only this pod through their network policies.
       mcp:
@@ -320,6 +331,32 @@ spec:
             endpointSlug: unifi-network
             toolsToExecute: ["*"]
       providers:
+        cliproxyapi:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxyapi
+              models: ["*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        # Abliteration through the router, which applies the shared level names.
+        cloud:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cloud
+              models: ["*"]
+              value: env.ABLITERATION_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://127.0.0.1:8090/cloud
+        deepseek:
+          keys:
+            - name: deepseek
+              models: ["*"]
+              value: env.DEEPSEEK_API_KEY
         # The router sidecar serves the local text models and lists only those running;
         # a named key model would be listed regardless.
         local:
@@ -332,21 +369,6 @@ spec:
           network_config:
             allow_private_network: true
             base_url: http://127.0.0.1:8090
-        cliproxyapi:
-          custom_provider_config:
-            base_provider_type: openai
-          keys:
-            - name: cliproxyapi
-              models: ["*"]
-              value: env.CLIPROXY_API_KEY
-          network_config:
-            allow_private_network: true
-            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-        deepseek:
-          keys:
-            - name: deepseek
-              models: ["*"]
-              value: env.DEEPSEEK_API_KEY
         opencode-go:
           keys:
             - name: opencode-go-1

@@ -15,9 +15,9 @@ spec:
                   - ROUTE_ALIAS_HOST
                   - ROUTE_HOST
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
-              # The Chat tab talks to the local text models through Bifrost with the prompt
-              # writer's key (external-secrets.yaml).
-              STUDIO_CHAT_GATEWAY_MODELS: local/*
+              # The Chat tab talks to the local and cloud text models through Bifrost with
+              # the prompt writer's key (external-secrets.yaml).
+              STUDIO_CHAT_GATEWAY_MODELS: local/*,cloud/*
               STUDIO_CHAT_GATEWAY_URL:
                 dependsOn: STUDIO_PROMPT_WRITER_URL
                 value: $(STUDIO_PROMPT_WRITER_URL)
