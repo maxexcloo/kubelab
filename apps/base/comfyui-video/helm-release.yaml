@@ -17,6 +17,11 @@ spec:
   values:
     controllers:
       main:
+        annotations:
+          studio.excloo.dev/label: Video
+          studio.excloo.dev/worker: video
+        labels:
+          studio.excloo.dev/kind: video
         strategy: Recreate
         containers:
           main: &container
@@ -52,6 +57,10 @@ spec:
               resourceClaimTemplateName: gpu-1
       # Radiance H3 profiles split across both GPUs.
       tp2:
+        annotations:
+          studio.excloo.dev/label: Video · 2 GPUs
+        labels:
+          studio.excloo.dev/kind: video
         strategy: Recreate
         containers:
           main: *container
