@@ -82,20 +82,16 @@ spec:
           - name: oauth2-proxy
             mountPath: /config
             readOnly: true
-      # Routes local/ models to the local text models and cloud/ to Abliteration; see router.py.
+      # Serves the text models as ai/ and local/auto; see router.py.
       - name: router
         command:
           - python
           - /app/router.py
         env:
-          - name: CLOUD_MODEL
-            value: abliterated-model-large-flash
-          - name: CLOUD_URL
-            value: https://api.abliteration.ai
+          - name: NAMESPACE
+            value: text
           - name: PORT
             value: "8090"
-          - name: UPSTREAM
-            value: "{}.text.svc.cluster.local:8000"
         image: docker.io/library/python:3.15.2-alpine3.24
         imagePullPolicy: IfNotPresent
         livenessProbe: &router-probe
@@ -127,6 +123,9 @@ spec:
         volumeMounts:
           - name: router
             mountPath: /app
+            readOnly: true
+          - name: router-token
+            mountPath: /var/run/secrets/kubernetes.io/serviceaccount
             readOnly: true
     image:
       pullPolicy: IfNotPresent
@@ -175,6 +174,17 @@ spec:
       - name: router
         configMap:
           name: router
+      # Only the router reads the Kubernetes API (apps/base/text/rbac.yaml).
+      - name: router-token
+        projected:
+          sources:
+            - serviceAccountToken:
+                path: token
+            - configMap:
+                name: kube-root-ca.crt
+                items:
+                  - key: ca.crt
+                    path: ca.crt
       - name: temporary
         emptyDir:
           sizeLimit: 1Gi
@@ -213,6 +223,19 @@ spec:
         authConfig:
           existingSecret: bifrost
           isEnabled: false
+        # cloud/auto takes the first Refuseless model that answers.
+        routingRules:
+          - id: cloud
+            name: Cloud
+            cel_expression: "provider == 'cloud'"
+            enabled: true
+            fallbacks: ["refuseless/glm-5.3-flash-abliterated"]
+            priority: 0
+            scope: global
+            targets:
+              - provider: refuseless
+                model: deepseek-v4.1-flash-abliterated
+                weight: 1.0
         virtualKeys:
           - id: claude
             name: Claude
@@ -230,29 +253,33 @@ spec:
             name: Codex
             value: env.VIRTUAL_KEY_CODEX
             mcp_configs: *agent-mcp
+          # LibreChat offers a section per provider.
           - id: librechat
             name: LibreChat
+            allow_all_providers: true
             value: env.VIRTUAL_KEY_LIBRECHAT
             # Studio trusts the forwarded user headers, so only LibreChat may call it.
             mcp_configs:
               - mcp_client_name: studio
                 tools_to_execute: ["*"]
-            # LibreChat offers local/ and cloud/ names; an explicit pattern lets requests for a
-            # stopped model reach the router, which "*" would reject once the model drops out.
-            provider_configs:
-              - provider: cloud
-                allowed_models: ["*"]
-                key_ids: ["*"]
-              - &local-text-provider
-                provider: local
-                allowed_models: ["regex:.*"]
-                key_ids: ["*"]
           - id: opencode
             name: OpenCode
             value: env.VIRTUAL_KEY_OPENCODE
             mcp_configs: *agent-mcp
-            provider_configs:
-              - *local-text-provider
+            # Agents reach the models themselves; cloud/auto is for chat.
+            provider_configs: &agent-models
+              - provider: abliteration
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: ai
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: local
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: refuseless
+                allowed_models: ["*"]
+                key_ids: ["*"]
           # The owner's personal key for LibreChat's restricted MCP servers.
           - id: owner
             name: Owner
@@ -263,19 +290,20 @@ spec:
             name: Pi
             value: env.VIRTUAL_KEY_PI
             mcp_configs: *agent-mcp
-            # Pi calls the local text model only; cloud plans keep their own keys.
-            provider_configs:
-              - *local-text-provider
+            provider_configs: *agent-models
           - id: studio
             name: Studio
             value: env.VIRTUAL_KEY_STUDIO
-            # Studio alone also reaches cloud/, for when no local model runs.
+            # The cloud rule's targets need their own provider too.
             provider_configs:
               - provider: cloud
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: local
-                allowed_models: ["regex:.*"]
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: refuseless
+                allowed_models: ["*"]
                 key_ids: ["*"]
       # Each server is served at /mcp/<endpointSlug>. Servers without headers accept
       # only this pod through their network policies.
@@ -337,6 +365,26 @@ spec:
             endpointSlug: unifi-network
             toolsToExecute: ["*"]
       providers:
+        abliteration:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: abliteration
+              models: ["*"]
+              value: env.ABLITERATION_API_KEY
+          network_config:
+            base_url: https://api.abliteration.ai
+        # The router serves every local text model by name.
+        ai:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: ai
+              models: ["*"]
+              value: env.AI_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://127.0.0.1:8090/ai
         cliproxyapi:
           custom_provider_config:
             base_provider_type: openai
@@ -347,14 +395,14 @@ spec:
           network_config:
             allow_private_network: true
             base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-        # Abliteration through the router, which applies the shared level names.
+        # Only lists cloud/auto, which the cloud routing rule sends on.
         cloud:
           custom_provider_config:
             base_provider_type: openai
           keys:
             - name: cloud
               models: ["*"]
-              value: env.ABLITERATION_API_KEY
+              value: env.AI_API_KEY
           network_config:
             allow_private_network: true
             base_url: http://127.0.0.1:8090/cloud
@@ -363,8 +411,7 @@ spec:
             - name: deepseek
               models: ["*"]
               value: env.DEEPSEEK_API_KEY
-        # The router sidecar serves the local text models and lists only those running;
-        # a named key model would be listed regardless.
+        # The router sends local/auto to the first running local text model.
         local:
           custom_provider_config:
             base_provider_type: openai
@@ -374,7 +421,7 @@ spec:
               value: env.AI_API_KEY
           network_config:
             allow_private_network: true
-            base_url: http://127.0.0.1:8090
+            base_url: http://127.0.0.1:8090/local
         opencode-go:
           keys:
             - name: opencode-go-1
@@ -396,6 +443,15 @@ spec:
             - name: openrouter
               models: ["*"]
               value: env.OPENROUTER_API_KEY
+        refuseless:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: refuseless
+              models: ["*"]
+              value: env.REFUSELESS_API_KEY
+          network_config:
+            base_url: https://api.refuseless.com
     storage:
       persistence:
         existingClaim: data
