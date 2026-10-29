@@ -19,6 +19,11 @@ spec:
     # One controller per model and GPU count; services.yaml routes by model.
     controllers:
       gemma:
+        annotations:
+          studio.excloo.dev/label: Gemma 4 31B
+          studio.excloo.dev/vision: "true"
+        labels:
+          studio.excloo.dev/kind: text
         defaultContainerOptions: &container
           command:
             - /bin/sh
@@ -62,6 +67,11 @@ spec:
       # vision encoders stay on the CPU, because on the GPU they spill VRAM and slow
       # generation, and an image token cap keeps reading an image to about 10 s.
       gemma-26b:
+        annotations:
+          studio.excloo.dev/label: Gemma 26B · Gaming
+          studio.excloo.dev/vision: "true"
+        labels:
+          studio.excloo.dev/kind: text
         defaultContainerOptions: &llama-cpp
           command:
             - /bin/sh
@@ -99,6 +109,11 @@ spec:
               operator: Equal
               value: gaming
       gemma-tp2:
+        annotations:
+          studio.excloo.dev/label: Gemma 4 31B · 2 GPUs
+          studio.excloo.dev/vision: "true"
+        labels:
+          studio.excloo.dev/kind: text
         defaultContainerOptions: *container
         containers:
           main:
@@ -116,6 +131,10 @@ spec:
             - name: gpu
               resourceClaimTemplateName: gpu-2
       maya:
+        annotations:
+          studio.excloo.dev/label: Maya · 2 GPUs
+        labels:
+          studio.excloo.dev/kind: text
         containers:
           main:
             args:
@@ -157,6 +176,11 @@ spec:
           # Maya waits up to 150 s for a running answer and the engine's shutdown.
           terminationGracePeriodSeconds: 150
       qwen-35b:
+        annotations:
+          studio.excloo.dev/label: Qwen 35B · Gaming
+          studio.excloo.dev/vision: "true"
+        labels:
+          studio.excloo.dev/kind: text
         defaultContainerOptions: *llama-cpp
         containers:
           main:
@@ -178,6 +202,10 @@ spec:
               resourceClaimTemplateName: gpu-1
           tolerations: *gaming-tolerations
       qwen-flash-next:
+        annotations:
+          studio.excloo.dev/label: Qwen Flash Next · 2 GPUs
+        labels:
+          studio.excloo.dev/kind: text
         defaultContainerOptions: *container
         containers:
           main:
@@ -197,6 +225,10 @@ spec:
             - name: gpu
               resourceClaimTemplateName: gpu-2
       qwen-fp8:
+        annotations:
+          studio.excloo.dev/label: Qwen FP8
+        labels:
+          studio.excloo.dev/kind: text
         defaultContainerOptions: *container
         containers:
           main:
@@ -214,6 +246,10 @@ spec:
             - name: gpu
               resourceClaimTemplateName: gpu-1
       qwen-fp8-tp2:
+        annotations:
+          studio.excloo.dev/label: Qwen FP8 · 2 GPUs
+        labels:
+          studio.excloo.dev/kind: text
         defaultContainerOptions: *container
         containers:
           main:
@@ -231,6 +267,10 @@ spec:
             - name: gpu
               resourceClaimTemplateName: gpu-2
       qwen-mxfp4:
+        annotations:
+          studio.excloo.dev/label: Qwen MXFP4
+        labels:
+          studio.excloo.dev/kind: text
         defaultContainerOptions: *container
         containers:
           main:
