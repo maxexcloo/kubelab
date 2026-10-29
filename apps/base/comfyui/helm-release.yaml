@@ -18,6 +18,12 @@ spec:
     controllers:
       main:
         strategy: Recreate
+        annotations:
+          studio.excloo.dev/capabilities: image,upscale,models
+          studio.excloo.dev/label: Image
+          studio.excloo.dev/worker: primary
+        labels:
+          studio.excloo.dev/kind: image
         containers:
           main: &container
             env:
