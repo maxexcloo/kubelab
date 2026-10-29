@@ -13,7 +13,7 @@ spec:
         kind: HelmRepository
         name: bifrost
         namespace: flux-system
-      version: 2.1.45
+      version: 2.1.46
   values:
     fullnameOverride: bifrost
     envFrom:
@@ -130,7 +130,7 @@ spec:
     image:
       pullPolicy: IfNotPresent
       repository: docker.io/maximhq/bifrost
-      tag: v2.3.2
+      tag: v2.4.0
     nodeSelector:
       node.excloo.dev/network: internal
     podSecurityContext:
