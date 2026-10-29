@@ -1,8 +1,11 @@
-# One Service per model; Bifrost's router tries them in order for local/text.
+# One Service per model. Bifrost's router lists the running ones as ai/<name they report>
+# and tries them in priority order for local/auto.
 apiVersion: v1
 kind: Service
 metadata:
   name: gemma
+  annotations:
+    text.excloo.dev/priority: "5"
 spec:
   ports:
     - name: http
@@ -15,6 +18,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: gemma-26b
+  annotations:
+    text.excloo.dev/priority: "7"
 spec:
   ports:
     - name: http
@@ -27,6 +32,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: maya
+  annotations:
+    text.excloo.dev/priority: "1"
 spec:
   ports:
     - name: http
@@ -39,6 +46,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: qwen-35b
+  annotations:
+    text.excloo.dev/priority: "6"
 spec:
   ports:
     - name: http
@@ -51,6 +60,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: qwen-flash-next
+  annotations:
+    text.excloo.dev/priority: "2"
 spec:
   ports:
     - name: http
@@ -63,6 +74,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: qwen-fp8
+  annotations:
+    text.excloo.dev/priority: "3"
 spec:
   ports:
     - name: http
@@ -75,6 +88,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: qwen-mxfp4
+  annotations:
+    text.excloo.dev/priority: "4"
 spec:
   ports:
     - name: http
