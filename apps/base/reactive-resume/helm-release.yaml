@@ -28,7 +28,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/reactive-resume/reactive-resume
-              tag: v6.0.7
+              tag: v6.0.9
             # Upstream omits liveness because restarts cannot fix database or storage outages.
             probes:
               liveness: null
