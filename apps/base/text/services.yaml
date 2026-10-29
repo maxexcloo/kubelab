@@ -1,11 +1,10 @@
-# One Service per model, annotated with the name it serves. Bifrost's router lists each as
-# ai/<name> and tries the running ones in priority order for local/auto.
+# One Service per model. Bifrost's router lists the running ones as ai/<name they report>
+# and tries them in priority order for local/auto.
 apiVersion: v1
 kind: Service
 metadata:
   name: gemma
   annotations:
-    text.excloo.dev/name: gemma-4-31b-heretic
     text.excloo.dev/priority: "5"
 spec:
   ports:
@@ -20,7 +19,6 @@ kind: Service
 metadata:
   name: gemma-26b
   annotations:
-    text.excloo.dev/name: gemma-4-26b-a4b
     text.excloo.dev/priority: "7"
 spec:
   ports:
@@ -35,7 +33,6 @@ kind: Service
 metadata:
   name: maya
   annotations:
-    text.excloo.dev/name: glm-5.3-flash
     text.excloo.dev/priority: "1"
 spec:
   ports:
@@ -50,7 +47,6 @@ kind: Service
 metadata:
   name: qwen-35b
   annotations:
-    text.excloo.dev/name: qwen3.6-35b-a3b
     text.excloo.dev/priority: "6"
 spec:
   ports:
@@ -65,7 +61,6 @@ kind: Service
 metadata:
   name: qwen-flash-next
   annotations:
-    text.excloo.dev/name: qwen3.8-flash-next
     text.excloo.dev/priority: "2"
 spec:
   ports:
@@ -80,7 +75,6 @@ kind: Service
 metadata:
   name: qwen-fp8
   annotations:
-    text.excloo.dev/name: qwen3.8-27b-uncensored-fp8
     text.excloo.dev/priority: "3"
 spec:
   ports:
@@ -95,7 +89,6 @@ kind: Service
 metadata:
   name: qwen-mxfp4
   annotations:
-    text.excloo.dev/name: qwen3.8-27b-uncensored-mxfp4
     text.excloo.dev/priority: "4"
 spec:
   ports:

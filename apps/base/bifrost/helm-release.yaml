@@ -262,6 +262,13 @@ spec:
             mcp_configs:
               - mcp_client_name: studio
                 tools_to_execute: ["*"]
+            # A model started since Bifrost last listed ai/ is missing from its catalogue,
+            # which "*" checks; a pattern reaches it at once.
+            provider_configs:
+              - &running-models
+                provider: ai
+                allowed_models: ["regex:.*"]
+                key_ids: ["*"]
           - id: opencode
             name: OpenCode
             value: env.VIRTUAL_KEY_OPENCODE
@@ -271,9 +278,7 @@ spec:
               - provider: abliteration
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: ai
-                allowed_models: ["*"]
-                key_ids: ["*"]
+              - *running-models
               - provider: local
                 allowed_models: ["*"]
                 key_ids: ["*"]

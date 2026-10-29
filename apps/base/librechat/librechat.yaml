@@ -72,7 +72,6 @@ endpoints:
       titleModel: current_model
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
-      modelDisplayLabel: AI
     - &provider
       name: Abliteration
       apiKey: ${BIFROST_API_KEY}
@@ -85,39 +84,32 @@ endpoints:
         fetch: true
       titleConvo: true
       titleModel: current_model
-      modelDisplayLabel: Abliteration
     - <<: *provider
       name: CLI Proxy API
       headers:
         x-bf-model-provider: cliproxyapi
-      modelDisplayLabel: CLI Proxy API
     - <<: *provider
       name: DeepSeek
       headers:
         x-bf-model-provider: deepseek
-      modelDisplayLabel: DeepSeek
     - <<: *provider
       name: Local
       headers:
         x-bf-model-provider: ai
       reasoningLabel: true
       tokenConfig: *context
-      modelDisplayLabel: Local
     - <<: *provider
       name: OpenCode Go
       headers:
         x-bf-model-provider: opencode-go
-      modelDisplayLabel: OpenCode Go
     - <<: *provider
       name: OpenCode Zen
       headers:
         x-bf-model-provider: opencode-zen
-      modelDisplayLabel: OpenCode Zen
     - <<: *provider
       name: Refuseless
       headers:
         x-bf-model-provider: refuseless
-      modelDisplayLabel: Refuseless
 fileConfig:
   endpoints:
     agents:
