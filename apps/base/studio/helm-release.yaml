@@ -35,7 +35,7 @@ spec:
               STUDIO_KUBERNETES_WORKLOADS: >-
                 {
                 "comfyui": {"kind": "image", "label": "Image", "namespace": "comfyui", "deployment": "comfyui", "pool": "gpu", "gpus": 1, "url": "http://comfyui.comfyui.svc.cluster.local:8188", "worker": "primary", "capabilities": ["image", "upscale", "models"]},
-                "comfyui-video": {"kind": "video", "label": "Video", "namespace": "comfyui-video", "deployment": "comfyui-video", "pool": "gpu", "gpus": 1, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188", "worker": "video"},
+                "comfyui-video": {"kind": "video", "label": "Video", "namespace": "comfyui-video", "deployment": "comfyui-video", "pool": "gpu", "gpus": 1, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188", "worker": "video", "capabilities": ["image", "video"]},
                 "comfyui-video-tp2": {"kind": "video", "label": "Video · 2 GPUs", "namespace": "comfyui-video", "deployment": "comfyui-video-tp2", "pool": "gpu", "gpus": 2, "url": "http://comfyui-video.comfyui-video.svc.cluster.local:8188"},
                 "text-gemma": {"kind": "text", "label": "Gemma 4 31B", "namespace": "text", "deployment": "text-gemma", "pool": "gpu", "gpus": 1, "url": "http://gemma.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "local/gemma", "vision": true},
                 "text-gemma-tp2": {"kind": "text", "label": "Gemma 4 31B · 2 GPUs", "namespace": "text", "deployment": "text-gemma-tp2", "pool": "gpu", "gpus": 2, "url": "http://gemma.text.svc.cluster.local:8000", "apiKeyEnv": "STUDIO_TEXT_KEY", "model": "local/gemma", "vision": true},
