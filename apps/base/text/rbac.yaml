@@ -1,0 +1,25 @@
+# Bifrost's router lists the model Services and their readiness.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: bifrost-router
+rules:
+  - apiGroups: [""]
+    resources: [services]
+    verbs: [list]
+  - apiGroups: [discovery.k8s.io]
+    resources: [endpointslices]
+    verbs: [list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bifrost-router
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: bifrost-router
+subjects:
+  - kind: ServiceAccount
+    name: bifrost
+    namespace: bifrost

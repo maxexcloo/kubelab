@@ -48,42 +48,22 @@ endpoints:
       - tools
       - web_search
   custom:
-    # local/text reaches the first running local text model, with its default thinking;
-    # local/off, local/low, local/medium and local/high set the thinking level. The others
-    # pick a model.
+    # Every section reaches its provider through Bifrost, which lists that provider's models
+    # for x-bf-model-provider. cloud/auto and local/auto take the first cloud or running local
+    # model; set reasoning with the Reasoning Effort parameter.
     - name: AI
       apiKey: ${BIFROST_API_KEY}
-      baseURL: http://bifrost.bifrost.svc.cluster.local:8080/v1
+      baseURL: &bifrost http://bifrost.bifrost.svc.cluster.local:8080/openai/v1
       models:
         default:
-          - local/text
-          - local/high
-          - local/medium
-          - local/low
-          - local/off
-          - local/gemma
-          - local/gemma-26b
-          - local/maya
-          - local/qwen-35b
-          - local/qwen-flash-next
-          - local/qwen-fp8
-          - local/qwen-mxfp4
-          - cloud/text
-          - cloud/high
-          - cloud/medium
-          - cloud/low
-          - cloud/off
-          - cloud/abliterated-model-large-flash
+          - cloud/auto
+          - local/auto
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
-      # LibreChat assumes 32k for unknown models and summarises too early; every local model
-      # has at least 131k, as does the cloud model. Keys match as substrings, so these cover every local/ and cloud/ name.
-      tokenConfig:
-        local/:
-          prompt: 0
-          completion: 0
-          context: 131072
-        cloud/:
+      # LibreChat assumes 32k for unknown models and summarises too early; every local and cloud
+      # model has at least 131k. Keys match as substrings, so this covers every name here.
+      tokenConfig: &context
+        /:
           prompt: 0
           completion: 0
           context: 131072
@@ -92,67 +72,44 @@ endpoints:
       titleModel: current_model
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
-      modelDisplayLabel: AI
-    - name: CLI Proxy API
-      apiKey: ${CLI_PROXY_API_KEY}
-      baseURL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317/v1
+    - &provider
+      name: Abliteration
+      apiKey: ${BIFROST_API_KEY}
+      baseURL: *bifrost
+      headers:
+        x-bf-model-provider: abliteration
       models:
         default:
           - "*"
         fetch: true
       titleConvo: true
       titleModel: current_model
-      modelDisplayLabel: CLI Proxy API
-    - name: DeepSeek
-      apiKey: ${DEEPSEEK_API_KEY}
-      baseURL: https://api.deepseek.com/v1
-      models:
-        default:
-          - "*"
-        fetch: true
-      titleConvo: true
-      titleModel: current_model
-      modelDisplayLabel: DeepSeek
-    - name: OpenCode Go
-      apiKey: ${OPENCODE_API_KEY_1}
-      baseURL: https://opencode.ai/zen/go/v1
-      models:
-        default:
-          - "*"
-        fetch: true
-      titleConvo: true
-      titleModel: current_model
-      modelDisplayLabel: OpenCode Go
-    - name: OpenCode Go (Account 2)
-      apiKey: ${OPENCODE_API_KEY_2}
-      baseURL: https://opencode.ai/zen/go/v1
-      models:
-        default:
-          - "*"
-        fetch: true
-      titleConvo: true
-      titleModel: current_model
-      modelDisplayLabel: OpenCode Go (Account 2)
-    - name: OpenCode Zen
-      apiKey: ${OPENCODE_API_KEY_1}
-      baseURL: https://opencode.ai/zen/v1
-      models:
-        default:
-          - "*"
-        fetch: true
-      titleConvo: true
-      titleModel: current_model
-      modelDisplayLabel: OpenCode Zen
-    - name: OpenCode Zen (Account 2)
-      apiKey: ${OPENCODE_API_KEY_2}
-      baseURL: https://opencode.ai/zen/v1
-      models:
-        default:
-          - "*"
-        fetch: true
-      titleConvo: true
-      titleModel: current_model
-      modelDisplayLabel: OpenCode Zen (Account 2)
+    - <<: *provider
+      name: CLI Proxy API
+      headers:
+        x-bf-model-provider: cliproxyapi
+    - <<: *provider
+      name: DeepSeek
+      headers:
+        x-bf-model-provider: deepseek
+    - <<: *provider
+      name: Local
+      headers:
+        x-bf-model-provider: ai
+      reasoningLabel: true
+      tokenConfig: *context
+    - <<: *provider
+      name: OpenCode Go
+      headers:
+        x-bf-model-provider: opencode-go
+    - <<: *provider
+      name: OpenCode Zen
+      headers:
+        x-bf-model-provider: opencode-zen
+    - <<: *provider
+      name: Refuseless
+      headers:
+        x-bf-model-provider: refuseless
 fileConfig:
   endpoints:
     agents:
