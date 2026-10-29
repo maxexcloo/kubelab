@@ -88,8 +88,8 @@ endpoints:
           completion: 0
           context: 131072
       titleConvo: true
-      # Titles need no thinking.
-      titleModel: local/off
+      # Titles use the conversation's own model, so a cloud chat titles through cloud/ and a local one through local/.
+      titleModel: current_model
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
       modelDisplayLabel: AI
