@@ -23,7 +23,7 @@ spec:
               PORT: "30375"
               SEL_SYNC_ACCESS: all
               TEMPLATE_REFRESH_INTERVAL: "0"
-              TEMPLATE_URLS: '["https://raw.githubusercontent.com/Tam-Taro/SEL-Filtering-and-Sorting/b59f9124f2afd8c7860a5a15172490178c93e9b6/Tamtaro-All-Templates-for-AIOStreams.json", "https://raw.githubusercontent.com/Vidhin05/Releases-Regex/19c54e0afb3390ef82c86113416fe79da2e34a99/all-templates.json"]'
+              TEMPLATE_URLS: '["https://raw.githubusercontent.com/Tam-Taro/SEL-Filtering-and-Sorting/b59f9124f2afd8c7860a5a15172490178c93e9b6/Tamtaro-All-Templates-for-AIOStreams.json", "https://raw.githubusercontent.com/Vidhin05/Releases-Regex/d3778ec51aeb1b32f166e6923654270612e21c41/all-templates.json"]'
               WHITELISTED_SYNC_REFRESH_INTERVAL: "3600"
             envFrom:
               - secretRef:
