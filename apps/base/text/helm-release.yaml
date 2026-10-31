@@ -34,7 +34,7 @@ spec:
           image:
             pullPolicy: IfNotPresent
             repository: docker.io/stilldeadcode/radiance
-            tag: 1.14.0
+            tag: 1.15.0
           resources:
             claims:
               - name: gpu
