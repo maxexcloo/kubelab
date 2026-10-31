@@ -82,7 +82,7 @@ spec:
           image:
             pullPolicy: IfNotPresent
             repository: ghcr.io/ggml-org/llama.cpp
-            tag: server-rocm-b11960
+            tag: server-rocm-b12004
           resources:
             claims:
               - name: gpu
