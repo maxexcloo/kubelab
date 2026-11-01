@@ -19,7 +19,7 @@ spec:
           serviceAccountName: failed-pods
           containers:
             - name: cleanup
-              image: docker.io/alpine/k8s:1.37.1
+              image: docker.io/alpine/k8s:1.37.2
               command: [sh, /scripts/delete_failed_pods.sh]
               env:
                 - name: HOME
