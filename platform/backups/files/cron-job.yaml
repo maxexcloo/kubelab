@@ -24,7 +24,7 @@ spec:
           restartPolicy: Never
           initContainers:
             - name: kubectl
-              image: docker.io/alpine/k8s:1.37.1
+              image: docker.io/alpine/k8s:1.37.2
               command:
                 - /bin/sh
                 - -ec
