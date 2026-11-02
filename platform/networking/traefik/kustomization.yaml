@@ -4,5 +4,6 @@ resources:
   - gateway-public-tunnel.yaml
   - gateway.yaml
   - helm-release.yaml
+  - middleware.yaml
   - namespace.yaml
   - source.yaml

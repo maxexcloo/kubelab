@@ -49,6 +49,10 @@ spec:
               permanent: true
               scheme: https
               to: websecure
+      websecure:
+        http:
+          middlewares:
+            - networking-compress@kubernetescrd
       webtunnel:
         exposedPort: 80
         port: 8081
