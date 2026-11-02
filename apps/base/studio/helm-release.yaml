@@ -48,9 +48,6 @@ spec:
               STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
               STUDIO_PROMPT_WRITER_MODEL: cloud/auto
               STUDIO_PROMPT_WRITER_URL: http://bifrost.bifrost.svc.cluster.local:8080
-              # Automatic control starts and stops image and video workloads; text
-              # workloads change only from Settings › Workers (Bifrost calls them directly).
-              STUDIO_RUNTIME_AUTOMATIC: "1"
               BIFROST_HOST: bifrost.invalid
               HOST: 0.0.0.0
               PORT: "8787"
@@ -63,7 +60,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio
-              tag: 2026.11.2.39
+              tag: 2026.11.2.40
             probes:
               liveness:
                 path: /api/ping
