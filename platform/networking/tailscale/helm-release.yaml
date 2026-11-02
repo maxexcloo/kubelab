@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: tailscale
         namespace: flux-system
-      version: 1.104.2
+      version: 1.104.4
   values:
     installCRDs: true
     apiServerProxyConfig:
