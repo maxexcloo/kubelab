@@ -76,7 +76,6 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
                     },
                     "tailscale": {
                         "kimbap": "storage-device",
-                        "mbk": "cluster-device",
                         "taco": "node-device",
                         "personal": "personal-device",
                     },
@@ -128,9 +127,6 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
         self.assertEqual(
             groups["mbk"]["Cloudflare"]["widget"]["tunnelid"], "cluster-tunnel"
-        )
-        self.assertEqual(
-            groups["mbk"]["Tailscale"]["widget"]["deviceid"], "cluster-device"
         )
         self.assertEqual(
             node["Tailscale"]["widget"]["key"], "{{HOMEPAGE_VAR_TAILSCALE_API_TOKEN}}"
