@@ -9,10 +9,6 @@ configMapGenerator:
   - name: oauth2-proxy
     files:
       - oauth2-proxy.yaml
-    options:
-      # oauth2-proxy expands the ${...} references itself.
-      annotations:
-        kustomize.toolkit.fluxcd.io/substitute: disabled
 configurations:
   - name-reference.yaml
 replacements:
