@@ -1,0 +1,10 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: actual-up
+spec:
+  endpoints:
+    - port: http
+  selector:
+    matchLabels:
+      app.kubernetes.io/service: actual-up
