@@ -25,8 +25,8 @@ spec:
               STUDIO_CLIPROXYAPI_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
               STUDIO_ENABLE_PRESETS: "1"
               # Studio scales these GPU deployments (apps/components/gpu/studio-runtime.yaml).
-              # Pools: the GPU node's two GPUs and the gaming node's one.
-              STUDIO_KUBERNETES_GPUS: '{"gpu": 2, "gaming": 1}'
+              # Pools: the GPU node's two GPUs.
+              STUDIO_KUBERNETES_GPUS: '{"gpu": 2}'
               # Studio finds its workloads from the studio.excloo.dev labels on the GPU
               # Deployments in these namespaces; text ones serve local/auto.
               STUDIO_KUBERNETES_NAMESPACES: comfyui,comfyui-video,text
