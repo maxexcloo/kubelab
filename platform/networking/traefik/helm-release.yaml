@@ -31,6 +31,13 @@ spec:
     # it off the GPU nodes, and surge updates keep it available while rolling.
     deployment:
       kind: DaemonSet
+      # Pod labels set the Cilium identity, which Cilium writes into the
+      # packet mark. An identity with id % 256 == 8 matches Tailscale's bypass
+      # fwmark (0x80000/0xff0000), so its VXLAN packets skip tailscale0 and
+      # cross-node traffic fails. Change this value if a label change lands
+      # Traefik on such an identity again.
+      podLabels:
+        excloo.dev/cilium-identity: "2"
     gateway:
       enabled: false
     gatewayClass:
