@@ -22,7 +22,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/atvloadly
-              tag: sha-625ce66b7ff565470d8bd58f938b3a83709b68dc
+              tag: v0.8.2
             probes:
               liveness: &health
                 custom: true
