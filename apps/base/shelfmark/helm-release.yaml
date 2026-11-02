@@ -40,7 +40,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/calibrain/shelfmark
-              tag: v1.6.0
+              tag: v1.6.1
             probes:
               liveness: null
               readiness: &ready
