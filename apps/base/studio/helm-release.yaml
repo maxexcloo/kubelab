@@ -43,6 +43,9 @@ spec:
               STUDIO_OIDC_LABEL: Pocket ID
               STUDIO_OIDC_REDIRECT_URI: https://app.invalid/api/accounts/oidc/callback
               # Studio writes chat prompts through Bifrost with its own key (external-secrets.yaml).
+              # Being renamed to STUDIO_ASSISTANT_*; both are set until Studio reads only the new names.
+              STUDIO_ASSISTANT_CLOUD_MODEL: cloud/auto
+              STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
               STUDIO_PROMPT_WRITER_MODEL: cloud/auto
               STUDIO_PROMPT_WRITER_URL: http://bifrost.bifrost.svc.cluster.local:8080
               # Automatic control starts and stops image and video workloads; text
