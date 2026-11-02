@@ -1,7 +1,6 @@
 .machines as $inventory |
 load(strenv(INFRASTRUCTURE)) as $infra |
 load(strenv(PROVIDERS)).providers as $providers |
-(strenv(HOMEPAGE_CLUSTER_NAMES) | split(",") | map(select(. != ""))) as $cluster_names |
 # Tunnel origins and key expiry are noise beside connection health.
 ($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare"} |
   with(select(.widget != null); .widget.fields = ["status"])) as $cloudflare |
@@ -78,12 +77,6 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
    "href": ("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .value),
    "widget": ($cloudflare.widget + {"accountid": $infra.cloudflare.account_id, "tunnelid": .value})}
 ] as $cluster_tunnels |
-[($infra.tailscale // {}) | to_entries[] | .key as $name |
-  select($cluster_names | contains([$name])) | select($tailscale.widget != null) |
-  $tailscale + {"group": $name,
-    "href": ("https://login.tailscale.com/admin/machines/" + .value),
-    "widget": ($tailscale.widget + {"deviceid": .value})}
-] as $cluster_devices |
-($existing + $management + $monitoring + $cluster_tunnels + $cluster_devices) |
+($existing + $management + $monitoring + $cluster_tunnels) |
 sort_by(.group, (.name | downcase)) | group_by(.group) |
 map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})
