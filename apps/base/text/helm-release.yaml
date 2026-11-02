@@ -63,51 +63,6 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-1
-      # The llama.cpp models run on a gaming node's 16 GB GPU while it is free. Their
-      # vision encoders stay on the CPU, because on the GPU they spill VRAM and slow
-      # generation, and an image token cap keeps reading an image to about 10 s.
-      gemma-26b:
-        annotations:
-          studio.excloo.dev/label: Gemma 26B · Gaming
-          studio.excloo.dev/vision: "true"
-        labels:
-          studio.excloo.dev/kind: text
-        defaultContainerOptions: &llama-cpp
-          command:
-            - /bin/sh
-            - -c
-          envFrom:
-            - secretRef:
-                name: text
-          image:
-            pullPolicy: IfNotPresent
-            repository: ghcr.io/ggml-org/llama.cpp
-            tag: server-rocm-b11960
-          resources:
-            claims:
-              - name: gpu
-        containers:
-          main:
-            args:
-              - >-
-                exec /app/llama-server --alias gemma-4-26b-a4b --api-key "$(API_KEY)" --batch-size 2048
-                --ctx-size 131072 --flash-attn on --host 0.0.0.0 --image-max-tokens 560 --jinja
-                --mmproj /models/llama.cpp/gemma-4-26B-A4B-it-mmproj-F16.gguf
-                --model /models/llama.cpp/gemma-4-26B-A4B-it-UD-IQ4_XS.gguf --no-mmproj-offload --port 8000
-                --ubatch-size 2048
-            probes: *probes
-        pod:
-          labels:
-            text.excloo.dev/model: gemma-26b
-          nodeSelector: &gaming
-            node.excloo.dev/dedicated: gaming
-          resourceClaims:
-            - name: gpu
-              resourceClaimTemplateName: gpu-1
-          tolerations: &gaming-tolerations
-            - key: node.excloo.dev/dedicated
-              operator: Equal
-              value: gaming
       gemma-tp2:
         annotations:
           studio.excloo.dev/label: Gemma 4 31B · 2 GPUs
@@ -130,77 +85,6 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-2
-      maya:
-        annotations:
-          studio.excloo.dev/label: Maya · 2 GPUs
-        labels:
-          studio.excloo.dev/kind: text
-        containers:
-          main:
-            args:
-              - --api-key
-              - $(API_KEY)
-              - --config
-              - /config/maya.json
-              - --engine
-              - strata
-              - --host
-              - 0.0.0.0
-              - --port
-              - "8000"
-            command:
-              - python
-              - serve/server.py
-            envFrom:
-              - secretRef:
-                  name: text
-            image:
-              pullPolicy: IfNotPresent
-              repository: ghcr.io/maxexcloo/maya-rocm
-              tag: sha-a3a2d4a40319738dd4f5209dc58589eda77649a0
-            probes: *probes
-            resources:
-              claims:
-                - name: gpu
-            # The engine pins most free RAM for its expert tier.
-            securityContext:
-              capabilities:
-                add:
-                  - IPC_LOCK
-        pod:
-          labels:
-            text.excloo.dev/model: maya
-          resourceClaims:
-            - name: gpu
-              resourceClaimTemplateName: gpu-2
-          # Maya waits up to 150 s for a running answer and the engine's shutdown.
-          terminationGracePeriodSeconds: 150
-      qwen-35b:
-        annotations:
-          studio.excloo.dev/label: Qwen 35B · Gaming
-          studio.excloo.dev/vision: "true"
-        labels:
-          studio.excloo.dev/kind: text
-        defaultContainerOptions: *llama-cpp
-        containers:
-          main:
-            # MTP drafting needs a single sequence.
-            args:
-              - >-
-                exec /app/llama-server --alias qwen3.6-35b-a3b --api-key "$(API_KEY)" --batch-size 2048
-                --ctx-size 131072 --flash-attn on --host 0.0.0.0 --image-max-tokens 1024 --jinja
-                --mmproj /models/llama.cpp/Qwen3.6-35B-A3B-mmproj-F16.gguf
-                --model /models/llama.cpp/Qwen3.6-35B-A3B-MTP-UD-IQ4_XS.gguf --no-mmproj-offload --parallel 1
-                --port 8000 --spec-draft-n-max 2 --spec-type draft-mtp --ubatch-size 2048
-            probes: *probes
-        pod:
-          labels:
-            text.excloo.dev/model: qwen-35b
-          nodeSelector: *gaming
-          resourceClaims:
-            - name: gpu
-              resourceClaimTemplateName: gpu-1
-          tolerations: *gaming-tolerations
       qwen-flash-next:
         annotations:
           studio.excloo.dev/label: Qwen Flash Next · 2 GPUs
@@ -266,6 +150,28 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-2
+      qwen-iq4r:
+        annotations:
+          studio.excloo.dev/label: Qwen IQ4R
+        labels:
+          studio.excloo.dev/kind: text
+        defaultContainerOptions: *container
+        containers:
+          main:
+            args:
+              - >-
+                exec radiance --api-key "$(API_KEY)" --attn-prefill-fp8 both --embedding-placement ram
+                --gpu-headroom-mib 192 --host 0.0.0.0 --host-pool-mib 3072 --kv-cache-dtype fp8
+                --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
+                --model /models/radiance/qwen3.8-27b-iq4r-l-v3.rad --draft-short-from 8 --port 8000
+                --reasoning-effort-map high=xhigh --served-model-name qwen3.8-27b-iq4r --tp 1
+            probes: *probes
+        pod:
+          labels:
+            text.excloo.dev/model: qwen-iq4r
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-1
       qwen-mxfp4:
         annotations:
           studio.excloo.dev/label: Qwen MXFP4
@@ -301,31 +207,6 @@ spec:
           operator: Equal
           value: gpu
     persistence:
-      maya-config:
-        name: text-maya
-        type: configMap
-        advancedMounts:
-          maya:
-            main:
-              - path: /config/maya.json
-                readOnly: true
-                subPath: maya.json
-      maya-data:
-        hostPath: ${dataset_root}/ai/maya/data
-        hostPathType: Directory
-        type: hostPath
-        advancedMounts:
-          maya:
-            main:
-              - path: /data
-      maya-shm:
-        medium: Memory
-        sizeLimit: 2Gi
-        type: emptyDir
-        advancedMounts:
-          maya:
-            main:
-              - path: /dev/shm
       models:
         hostPath: ${dataset_root}/ai/models
         hostPathType: Directory
@@ -345,4 +226,5 @@ spec:
           qwen-flash-next: *radiance-data
           qwen-fp8: *radiance-data
           qwen-fp8-tp2: *radiance-data
+          qwen-iq4r: *radiance-data
           qwen-mxfp4: *radiance-data

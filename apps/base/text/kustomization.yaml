@@ -8,12 +8,6 @@ resources:
   - network-policy.yaml
   - rbac.yaml
   - services.yaml
-configurations:
-  - name-reference.yaml
-configMapGenerator:
-  - name: text-maya
-    files:
-      - maya.json
 components:
   - ../../components/gpu
   - ../../../platform/components/app-template
