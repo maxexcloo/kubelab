@@ -15,13 +15,8 @@ spec:
                   - ROUTE_ALIAS_HOST
                   - ROUTE_HOST
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
-              # The Chat tab talks to the local and cloud text models through Bifrost with
-              # the prompt writer's key (external-secrets.yaml).
-              STUDIO_CHAT_GATEWAY_MODELS: local/auto,cloud/auto
+              # The Chat tab uses the assistant's gateway with these models.
               STUDIO_CHAT_MODELS: local/auto,cloud/auto
-              STUDIO_CHAT_GATEWAY_URL:
-                dependsOn: STUDIO_ASSISTANT_URL
-                value: $(STUDIO_ASSISTANT_URL)
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
               STUDIO_CLIPROXYAPI_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
               STUDIO_ENABLE_PRESETS: "1"
@@ -58,7 +53,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio
-              tag: 2026.11.2.44
+              tag: 2026.11.2.48
             probes:
               liveness:
                 path: /api/ping
