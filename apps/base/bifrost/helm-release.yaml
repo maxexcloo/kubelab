@@ -13,7 +13,7 @@ spec:
         kind: HelmRepository
         name: bifrost
         namespace: flux-system
-      version: 2.1.46
+      version: 2.1.47
   values:
     fullnameOverride: bifrost
     envFrom:
