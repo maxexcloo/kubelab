@@ -38,7 +38,8 @@ endpoints:
       - ask_user_question
       - chain
       - context
-      - deferred_tools
+      # deferred_tools is off: in v0.8.8 a deferred MCP tool is called by its bare name (studio-Models)
+      # and the runner can't find it ("Tool not found. Available:" empty), so Studio's tools never ran.
       - memory
       - run_in_background
       - skills
