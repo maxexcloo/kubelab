@@ -3,6 +3,11 @@
   extends: ["github>maxexcloo/dotfiles//renovate/default.json5"],
   packageRules: [
     {
+      automerge: false,
+      description: "Actual Up's @actual-app/api must match the Actual server's major.minor, so release both by hand",
+      matchPackageNames: ["docker.io/actualbudget/actual-server"],
+    },
+    {
       description: "Flux components are upgraded with `flux install --export`",
       enabled: false,
       matchFileNames: ["platform/bootstrap/flux-system/gotk-components.yaml"],

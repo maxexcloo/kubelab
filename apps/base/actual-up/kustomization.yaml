@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - storage.yaml
+  - vm-service-scrape.yaml
 components:
   - ../../components/application
   - ../../../platform/backups/credentials
