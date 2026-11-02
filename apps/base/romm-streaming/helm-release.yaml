@@ -23,7 +23,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: lscr.io/linuxserver/webstation
-              tag: romm-v0.15.3-ls42
+              tag: romm-v0.15.3-ls43
             probes:
               liveness: &health
                 enabled: true

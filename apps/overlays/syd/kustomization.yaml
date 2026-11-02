@@ -15,17 +15,16 @@ resources:
   - ../../base/cliproxyapi
   - ../../base/comfyui
   - ../../base/comfyui-video
-  - ../../base/studio
-  - ../../base/homepage
   - ../../base/home-assistant
   - ../../base/home-assistant-mcp
+  - ../../base/homepage
   - ../../base/immich
   - ../../base/karakeep
   - ../../base/larapaper
   - ../../base/librechat
   - ../../base/librechat-admin
-  - ../../base/minilab
   - ../../base/miniflux
+  - ../../base/minilab
   - ../../base/openspeedtest
   - ../../base/papra
   - ../../base/pocket-id
@@ -36,6 +35,7 @@ resources:
   - ../../base/shelfmark
   - ../../base/sidestore-vpn
   - ../../base/signtools
+  - ../../base/studio
   - ../../base/syncthing
   - ../../base/text
   - ../../base/unifi-network-mcp

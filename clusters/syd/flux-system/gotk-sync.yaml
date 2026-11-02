@@ -8,9 +8,9 @@ spec:
   interval: 10m0s
   path: ./clusters/syd
   prune: true
-  retryInterval: 2m0s
+  retryInterval: 30s
   sourceRef:
     kind: GitRepository
     name: flux-system
   timeout: 2m0s
-  wait: true
+  wait: false

@@ -2,15 +2,47 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - settings.yaml
 components:
   - ../../../../../platform/backups/credentials
   - ../../../../../platform/backups/files
-  - ../../../../../platform/backups/workload
 patches:
+  # Grafana's names differ from the namespace the files component derives them from.
   - target:
       kind: CronJob
-    patch: '[{"op": "replace", "path": "/spec/schedule", "value": "57 3 * * *"}, {"op": "replace", "path": "/spec/jobTemplate/spec/template/spec/volumes/0/persistentVolumeClaim/claimName", "value": "victoria-metrics-k8s-stack-grafana"}]'
+    patch: |
+      - op: replace
+        path: /spec/schedule
+        value: 57 3 * * *
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/volumes/0/persistentVolumeClaim/claimName
+        value: &deployment victoria-metrics-k8s-stack-grafana
+      - op: test
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/1/name
+        value: DEPLOYMENT
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/1/value
+        value: *deployment
+      - op: test
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/2/name
+        value: HELM_RELEASE
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/2/value
+        value: victoria-metrics-k8s-stack
+  - target:
+      kind: Role
+    patch: |
+      - op: test
+        path: /rules/0/resources/0
+        value: deployments
+      - op: replace
+        path: /rules/0/resourceNames/0
+        value: victoria-metrics-k8s-stack-grafana
+      - op: test
+        path: /rules/1/resources/0
+        value: helmreleases
+      - op: replace
+        path: /rules/1/resourceNames/0
+        value: victoria-metrics-k8s-stack
   - target:
       labelSelector: backup.excloo.dev/component=state
     patch: |
