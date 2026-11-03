@@ -18,6 +18,50 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: qwen-27b-fp8
+  annotations:
+    text.excloo.dev/priority: "3"
+    text.excloo.dev/uncensored: "true"
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    text.excloo.dev/model: qwen-27b-fp8
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qwen-27b-iq4r
+  annotations:
+    text.excloo.dev/priority: "6"
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    text.excloo.dev/model: qwen-27b-iq4r
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qwen-27b-mxfp4
+  annotations:
+    text.excloo.dev/priority: "4"
+    text.excloo.dev/uncensored: "true"
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    text.excloo.dev/model: qwen-27b-mxfp4
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: qwen-flash-next
   annotations:
     text.excloo.dev/priority: "2"
@@ -28,47 +72,3 @@ spec:
       protocol: TCP
   selector:
     text.excloo.dev/model: qwen-flash-next
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: qwen-fp8
-  annotations:
-    text.excloo.dev/priority: "3"
-    text.excloo.dev/uncensored: "true"
-spec:
-  ports:
-    - name: http
-      port: 8000
-      protocol: TCP
-  selector:
-    text.excloo.dev/model: qwen-fp8
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: qwen-iq4r
-  annotations:
-    text.excloo.dev/priority: "6"
-spec:
-  ports:
-    - name: http
-      port: 8000
-      protocol: TCP
-  selector:
-    text.excloo.dev/model: qwen-iq4r
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: qwen-mxfp4
-  annotations:
-    text.excloo.dev/priority: "4"
-    text.excloo.dev/uncensored: "true"
-spec:
-  ports:
-    - name: http
-      port: 8000
-      protocol: TCP
-  selector:
-    text.excloo.dev/model: qwen-mxfp4
