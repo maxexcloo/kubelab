@@ -65,6 +65,23 @@ depends = [
   "test:python",
 ]
 
+[tasks."check:homelab"]
+description = "Render Homepage Services From Homelab Main Or HOMELAB_DIRECTORY"
+run = '''
+set -eu
+temporary_directory=$(mktemp -d)
+trap 'rm -fr -- "$temporary_directory"' EXIT
+homelab_directory=${HOMELAB_DIRECTORY:-}
+if [ -z "$homelab_directory" ]; then
+  homelab_directory="$temporary_directory/homelab"
+  mkdir "$homelab_directory"
+  curl -fsSL https://codeload.github.com/maxexcloo/homelab/tar.gz/refs/heads/main | tar -xz -C "$homelab_directory" --strip-components=1
+fi
+HOMELAB_INFRASTRUCTURE_FILE=tests/fixtures/homepage/infrastructure.json \
+  HOMEPAGE_BESZEL_ROUTES=tests/fixtures/homepage/beszel-routes.json \
+  sh apps/base/homepage/render_services.sh "$temporary_directory/services.yaml" "$homelab_directory"
+'''
+
 # Setup
 [tasks.setup]
 depends = ["hooks:install"]
