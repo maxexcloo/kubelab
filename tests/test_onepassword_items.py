@@ -474,6 +474,7 @@ class ReconcilerTests(unittest.TestCase):
                     current,
                 ],
             ) as connect,
+            contextlib.redirect_stdout(io.StringIO()),
             self.assertRaisesRegex(RuntimeError, "wrong category"),
         ):
             RECONCILER.main()
@@ -580,6 +581,32 @@ class ReconcilerTests(unittest.TestCase):
         ):
             RECONCILER.main()
         self.assertEqual(connect.call_count, 2)
+
+    def test_missing_items_are_created_with_empty_placeholders(self):
+        with (
+            patch.object(RECONCILER, "flux_ready", return_value=False),
+            patch.object(RECONCILER, "is_dry_run", return_value=False),
+            patch.object(
+                RECONCILER,
+                "discover_items",
+                return_value={
+                    "Application": item_configuration(fields={"external-token"})
+                },
+            ),
+            patch.object(
+                RECONCILER, "connect", side_effect=[[{"id": "vault"}], [], None]
+            ) as connect,
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            RECONCILER.main()
+        created = connect.call_args.kwargs["body"]
+        self.assertEqual(connect.call_args.kwargs["method"], "POST")
+        self.assertEqual(created["title"], "Application")
+        self.assertEqual(created["tags"], ["Kubelab"])
+        self.assertEqual(
+            [(field["label"], field["value"]) for field in created["fields"]],
+            [("external-token", "")],
+        )
 
     def test_main_leaves_externally_owned_existing_item_unchanged(self):
         existing = {
