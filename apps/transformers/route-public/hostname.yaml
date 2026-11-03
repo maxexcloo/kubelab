@@ -20,6 +20,10 @@ replacements:
           delimiter: /
           index: 2
       - select:
+          kind: CloudflareAccessApplication
+        fieldPaths:
+          - spec.hostname
+      - select:
           kind: PocketIDClient
         fieldPaths:
           - spec.client.callbackURLs.0

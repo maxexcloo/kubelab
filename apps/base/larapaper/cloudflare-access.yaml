@@ -1,0 +1,24 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: larapaper
+spec:
+  hostname: app.invalid
+  name: LaraPaper
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: larapaper-devices
+spec:
+  hostname: app.invalid
+  name: "LaraPaper: Devices"
+  # TRMNL devices authenticate with their MAC address and access token.
+  paths:
+    - api/current_screen
+    - api/display
+    - api/log
+    - api/screens
+    - api/setup
+    - storage/firmwares
+    - storage/images/generated

@@ -670,3 +670,135 @@ class PrivateDNSRemovalTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+ACCESS_ALLOW = [
+    "{{ cloudflare-access:crossplane-system:excloo-id }}",
+    "{{ cloudflare-access:crossplane-system:gatus }}",
+]
+ACCESS_BYPASS = ["{{ cloudflare-access:crossplane-system:bypass }}"]
+
+
+class CloudflareAccessApplicationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.resource = composition_resource(
+            "platform/automation/cloudflare-access/composition.yaml",
+            "application",
+            base=False,
+        )
+        cls.mappings = {
+            m["action"]: m
+            for m in cls.resource["base"]["spec"]["forProvider"]["mappings"]
+        }
+        cls.check = next(
+            patch["transforms"][1]["string"]["fmt"]
+            for patch in cls.resource["patches"]
+            if patch["toFieldPath"] == "spec.forProvider.expectedResponseCheck.logic"
+        )
+
+    def data(self, spec, apps):
+        return {
+            "payload": {
+                "baseUrl": "https://api.cloudflare.com/client/v4/accounts/account/access/apps",
+                "body": spec,
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {"success": True, "result": apps},
+            },
+        }
+
+    def application(self, spec, policies, **changes):
+        uris = [f"{spec['hostname']}/{path}" for path in spec.get("paths", [])] or [
+            spec["hostname"]
+        ]
+        app = {
+            "id": "app-id",
+            "name": spec["name"],
+            "type": "self_hosted",
+            "destinations": [{"type": "public", "uri": uri} for uri in uris],
+            "app_launcher_visible": not spec.get("paths"),
+            "auto_redirect_to_identity": True,
+            "policies": [
+                {"id": policy, "precedence": index + 1, "decision": "allow"}
+                for index, policy in enumerate(policies)
+            ],
+        }
+        return dict(app, **changes)
+
+    def in_sync(self, spec, apps):
+        return evaluate(self.check % json.dumps(spec), self.data(spec, apps))
+
+    def test_matching_applications_are_in_sync(self):
+        login = {"name": "BookOrbit", "hostname": "books.example.com"}
+        bypass = dict(login, name="BookOrbit: Clients", paths=["api/v1/opds*"])
+        other = self.application(login, ACCESS_ALLOW, id="other", name="Other")
+        self.assertTrue(
+            self.in_sync(login, [other, self.application(login, ACCESS_ALLOW)])
+        )
+        self.assertTrue(self.in_sync(bypass, [self.application(bypass, ACCESS_BYPASS)]))
+
+    def test_drift_duplicates_and_errors_are_out_of_sync(self):
+        spec = {"name": "RoMM", "hostname": "games.example.com"}
+        app = self.application(spec, ACCESS_ALLOW)
+        for apps in [
+            [],
+            [app, app],
+            [self.application(spec, ACCESS_ALLOW[::-1])],
+            [self.application(spec, ACCESS_BYPASS)],
+            [
+                self.application(
+                    spec, ACCESS_ALLOW, destinations=[{"uri": "other.example.com"}]
+                )
+            ],
+            [self.application(spec, ACCESS_ALLOW, app_launcher_visible=False)],
+        ]:
+            with self.subTest(apps=apps):
+                self.assertFalse(self.in_sync(spec, apps))
+        data = self.data(spec, [app])
+        data["response"] = {
+            "statusCode": 403,
+            "body": {"success": False, "result": None},
+        }
+        self.assertFalse(evaluate(self.check % json.dumps(spec), data))
+
+    def test_bodies_choose_policies_from_paths(self):
+        login = {"name": "Immich", "hostname": "photos.example.com"}
+        bypass = dict(login, name="Immich: Share", paths=["share", "api/v1/opds*"])
+        self.assertEqual(
+            self.mappings["CREATE"]["body"], self.mappings["UPDATE"]["body"]
+        )
+        body = evaluate(self.mappings["CREATE"]["body"], self.data(login, []))
+        self.assertEqual(body["domain"], "photos.example.com")
+        self.assertEqual([p["id"] for p in body["policies"]], ACCESS_ALLOW)
+        self.assertTrue(body["app_launcher_visible"])
+        body = evaluate(self.mappings["CREATE"]["body"], self.data(bypass, []))
+        self.assertEqual(
+            [d["uri"] for d in body["destinations"]],
+            ["photos.example.com/share", "photos.example.com/api/v1/opds*"],
+        )
+        self.assertEqual([p["id"] for p in body["policies"]], ACCESS_BYPASS)
+        self.assertFalse(body["app_launcher_visible"])
+
+    def test_applications_are_found_and_removed_by_name(self):
+        spec = {"name": "Reactive Resume: Public", "hostname": "resume.example.com"}
+        other = self.application(spec, ACCESS_ALLOW, id="other", name="Reactive Resume")
+        data = self.data(spec, [other, self.application(spec, ACCESS_BYPASS)])
+        self.assertEqual(
+            evaluate(self.mappings["OBSERVE"]["url"], data),
+            data["payload"]["baseUrl"] + "?name=Reactive%20Resume%3A%20Public",
+        )
+        for action in ["REMOVE", "UPDATE"]:
+            self.assertEqual(
+                evaluate(self.mappings[action]["url"], data),
+                data["payload"]["baseUrl"] + "/app-id",
+            )
+        removed = self.resource["base"]["spec"]["forProvider"]["isRemovedCheck"][
+            "logic"
+        ]
+        self.assertFalse(evaluate(removed, data))
+        data["response"]["body"]["result"] = [other]
+        self.assertTrue(evaluate(removed, data))
+        data["response"] = {"statusCode": 429, "body": {"success": False}}
+        self.assertFalse(evaluate(removed, data))
