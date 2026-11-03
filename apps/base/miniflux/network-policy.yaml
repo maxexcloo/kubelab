@@ -5,13 +5,6 @@ metadata:
 spec:
   ingress:
     - from:
-        # The Miniflux MCP server calls the API.
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: miniflux-mcp
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: miniflux-mcp
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking

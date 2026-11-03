@@ -289,8 +289,6 @@ spec:
                 tools_to_execute: ["*"]
               - mcp_client_name: larapaper
                 tools_to_execute: ["*"]
-              - mcp_client_name: miniflux
-                tools_to_execute: ["*"]
               - mcp_client_name: reactive_resume
                 tools_to_execute: ["*"]
               - mcp_client_name: unifi_network
@@ -409,15 +407,6 @@ spec:
             endpointSlug: larapaper
             headers:
               Authorization: env.LARAPAPER_MCP_AUTHORIZATION
-            toolsToExecute: ["*"]
-          - name: miniflux
-            authType: headers
-            httpConfig:
-              url: http://miniflux-mcp.miniflux-mcp.svc.cluster.local:8080/mcp
-            connectionType: http
-            endpointSlug: miniflux
-            headers:
-              Authorization: env.MINIFLUX_MCP_AUTHORIZATION
             toolsToExecute: ["*"]
           - name: reactive_resume
             authType: headers
