@@ -85,6 +85,92 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-2
+      qwen-27b-fp8:
+        annotations:
+          studio.excloo.dev/label: Qwen 27B FP8
+        labels:
+          studio.excloo.dev/kind: text
+        defaultContainerOptions: *container
+        containers:
+          main:
+            args:
+              - >-
+                exec radiance --api-key-env API_KEY --attn-prefill-fp8 both --gpu-headroom-mib 192
+                --host 0.0.0.0 --kv-cache-dtype k6_v4 --max-model-len 167344 --max-num-batched-tokens 2048
+                --max-num-seqs 2 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192 --reasoning-effort-map high=xhigh
+                --served-model-name qwen3.8-27b-uncensored-fp8 --tp 1
+            probes: *probes
+        pod:
+          labels:
+            text.excloo.dev/model: qwen-27b-fp8
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-1
+      qwen-27b-fp8-tp2:
+        annotations:
+          studio.excloo.dev/label: Qwen 27B FP8 · 2 GPUs
+        labels:
+          studio.excloo.dev/kind: text
+        defaultContainerOptions: *container
+        containers:
+          main:
+            args:
+              - >-
+                exec radiance --api-key-env API_KEY --attn-prefill-fp8 both --gpu-headroom-mib 192
+                --host 0.0.0.0 --kv-cache-dtype k6_v4 --max-model-len 262144 --max-num-batched-tokens 2048
+                --max-num-seqs 8 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192 --reasoning-effort-map high=xhigh
+                --served-model-name qwen3.8-27b-uncensored-fp8 --tp 2
+            probes: *probes
+        pod:
+          labels:
+            text.excloo.dev/model: qwen-27b-fp8
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-2
+      qwen-27b-iq4r:
+        annotations:
+          studio.excloo.dev/label: Qwen 27B IQ4R
+        labels:
+          studio.excloo.dev/kind: text
+        defaultContainerOptions: *container
+        containers:
+          main:
+            args:
+              - >-
+                exec radiance --api-key-env API_KEY --attn-prefill-fp8 both --embedding-placement ram
+                --gpu-headroom-mib 192 --host 0.0.0.0 --host-pool-mib 3072 --kv-cache-dtype fp8
+                --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
+                --model /models/radiance/qwen3.8-27b-iq4r-l-v3.rad --draft-short-from 8 --port 8000
+                --reasoning-effort-map high=xhigh --served-model-name qwen3.8-27b-iq4r --tp 1
+            probes: *probes
+        pod:
+          labels:
+            text.excloo.dev/model: qwen-27b-iq4r
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-1
+      qwen-27b-mxfp4:
+        annotations:
+          studio.excloo.dev/label: Qwen 27B MXFP4
+        labels:
+          studio.excloo.dev/kind: text
+        defaultContainerOptions: *container
+        containers:
+          main:
+            args:
+              - >-
+                exec radiance --api-key-env API_KEY --attn-prefill-fp8 both --embedding-placement ram
+                --gpu-headroom-mib 192 --host 0.0.0.0 --host-pool-mib 3072 --kv-cache-dtype fp8
+                --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
+                --model /models/radiance/qwen3.8-27b-uncensored-mxfp4-df2.rad --draft-short-from 8 --port 8000
+                --reasoning-effort-map high=xhigh --served-model-name qwen3.8-27b-uncensored-mxfp4 --tp 1
+            probes: *probes
+        pod:
+          labels:
+            text.excloo.dev/model: qwen-27b-mxfp4
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-1
       qwen-flash-next:
         annotations:
           studio.excloo.dev/label: Qwen Flash Next · 2 GPUs
@@ -108,92 +194,6 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-2
-      qwen-fp8:
-        annotations:
-          studio.excloo.dev/label: Qwen FP8
-        labels:
-          studio.excloo.dev/kind: text
-        defaultContainerOptions: *container
-        containers:
-          main:
-            args:
-              - >-
-                exec radiance --api-key-env API_KEY --attn-prefill-fp8 both --gpu-headroom-mib 192
-                --host 0.0.0.0 --kv-cache-dtype k6_v4 --max-model-len 167344 --max-num-batched-tokens 2048
-                --max-num-seqs 2 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192 --reasoning-effort-map high=xhigh
-                --served-model-name qwen3.8-27b-uncensored-fp8 --tp 1
-            probes: *probes
-        pod:
-          labels:
-            text.excloo.dev/model: qwen-fp8
-          resourceClaims:
-            - name: gpu
-              resourceClaimTemplateName: gpu-1
-      qwen-fp8-tp2:
-        annotations:
-          studio.excloo.dev/label: Qwen FP8 · 2 GPUs
-        labels:
-          studio.excloo.dev/kind: text
-        defaultContainerOptions: *container
-        containers:
-          main:
-            args:
-              - >-
-                exec radiance --api-key-env API_KEY --attn-prefill-fp8 both --gpu-headroom-mib 192
-                --host 0.0.0.0 --kv-cache-dtype k6_v4 --max-model-len 262144 --max-num-batched-tokens 2048
-                --max-num-seqs 8 --model /models/radiance/qwen3.8-27b-uncensored-fp8.rad --port 8000 --prefix-cache-mib 8192 --reasoning-effort-map high=xhigh
-                --served-model-name qwen3.8-27b-uncensored-fp8 --tp 2
-            probes: *probes
-        pod:
-          labels:
-            text.excloo.dev/model: qwen-fp8
-          resourceClaims:
-            - name: gpu
-              resourceClaimTemplateName: gpu-2
-      qwen-iq4r:
-        annotations:
-          studio.excloo.dev/label: Qwen IQ4R
-        labels:
-          studio.excloo.dev/kind: text
-        defaultContainerOptions: *container
-        containers:
-          main:
-            args:
-              - >-
-                exec radiance --api-key-env API_KEY --attn-prefill-fp8 both --embedding-placement ram
-                --gpu-headroom-mib 192 --host 0.0.0.0 --host-pool-mib 3072 --kv-cache-dtype fp8
-                --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
-                --model /models/radiance/qwen3.8-27b-iq4r-l-v3.rad --draft-short-from 8 --port 8000
-                --reasoning-effort-map high=xhigh --served-model-name qwen3.8-27b-iq4r --tp 1
-            probes: *probes
-        pod:
-          labels:
-            text.excloo.dev/model: qwen-iq4r
-          resourceClaims:
-            - name: gpu
-              resourceClaimTemplateName: gpu-1
-      qwen-mxfp4:
-        annotations:
-          studio.excloo.dev/label: Qwen MXFP4
-        labels:
-          studio.excloo.dev/kind: text
-        defaultContainerOptions: *container
-        containers:
-          main:
-            args:
-              - >-
-                exec radiance --api-key-env API_KEY --attn-prefill-fp8 both --embedding-placement ram
-                --gpu-headroom-mib 192 --host 0.0.0.0 --host-pool-mib 3072 --kv-cache-dtype fp8
-                --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
-                --model /models/radiance/qwen3.8-27b-uncensored-mxfp4-df2.rad --draft-short-from 8 --port 8000
-                --reasoning-effort-map high=xhigh --served-model-name qwen3.8-27b-uncensored-mxfp4 --tp 1
-            probes: *probes
-        pod:
-          labels:
-            text.excloo.dev/model: qwen-mxfp4
-          resourceClaims:
-            - name: gpu
-              resourceClaimTemplateName: gpu-1
     defaultPodOptions:
       automountServiceAccountToken: false
       nodeSelector:
@@ -223,8 +223,8 @@ spec:
             main:
               - path: /data
           gemma-tp2: *radiance-data
+          qwen-27b-fp8: *radiance-data
+          qwen-27b-fp8-tp2: *radiance-data
+          qwen-27b-iq4r: *radiance-data
+          qwen-27b-mxfp4: *radiance-data
           qwen-flash-next: *radiance-data
-          qwen-fp8: *radiance-data
-          qwen-fp8-tp2: *radiance-data
-          qwen-iq4r: *radiance-data
-          qwen-mxfp4: *radiance-data
