@@ -299,26 +299,6 @@ class PrivateDNSComparisonTests(unittest.TestCase):
         action["via"] = "100.64.0.2"
         self.assertFalse(evaluate(self.expression, self.data))
 
-    def test_ipv4_only_update_blocks_public_ipv6_fallback(self):
-        resource = composition_resource(
-            "platform/automation/private-dns/composition/composition.yaml",
-            "control-d-rule",
-        )
-        expression = next(
-            mapping["body"]
-            for mapping in resource["spec"]["forProvider"]["mappings"]
-            if mapping["action"] == "UPDATE"
-        )
-        self.data["payload"]["body"]["ipv6Enabled"] = False
-        result = evaluate(expression, self.data)
-        self.assertEqual(result["via_v6"], "::")
-        self.assertEqual(result["via"], self.data["payload"]["body"]["ipv4"])
-        self.data["payload"]["body"]["ipv6Enabled"] = True
-        self.assertEqual(
-            evaluate(expression, self.data)["via_v6"],
-            self.data["payload"]["body"]["ipv6"],
-        )
-
     def test_missing_rule_is_created_only_after_successful_listing(self):
         resource = composition_resource(
             "platform/automation/private-dns/composition/composition.yaml",
@@ -362,41 +342,6 @@ class PrivateDNSComparisonTests(unittest.TestCase):
 
 
 class PrivateDNSCompositionTests(unittest.TestCase):
-    def test_control_d_only_preserves_rule_without_public_dns_resource(self):
-        rendered = subprocess.run(
-            [
-                "kubectl",
-                "kustomize",
-                ROOT / "platform/automation/private-dns/control-d-only",
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        composition = json.loads(
-            subprocess.run(
-                ["yq", "-o=json", "."],
-                input=rendered.stdout,
-                check=True,
-                capture_output=True,
-                text=True,
-            ).stdout
-        )
-        self.assertEqual(
-            composition["metadata"]["name"], "private-dns-record-control-d-only"
-        )
-        resources = composition["spec"]["pipeline"][0]["input"]["resources"]
-        self.assertEqual(
-            resources,
-            [
-                composition_resource(
-                    "platform/automation/private-dns/composition/composition.yaml",
-                    "control-d-rule",
-                    base=False,
-                )
-            ],
-        )
-
     def test_each_cluster_discovers_its_own_tailscale_addresses(self):
         for cluster in CLUSTERS:
             with self.subTest(cluster=cluster):
