@@ -57,10 +57,6 @@ def kubernetes_list(path):
     return kubernetes_request(path).get("items", [])
 
 
-def kubernetes_get(path):
-    return kubernetes_request(path)
-
-
 def connect(path, *, body=None, method="GET"):
     host = os.environ["OP_CONNECT_HOST"].rstrip("/")
     token = os.environ["OP_CONNECT_TOKEN"]
@@ -97,12 +93,8 @@ def item_configuration(resource):
 
 
 def merge_configuration(item, resource):
-    configuration = item_configuration(resource)
-    item["concealed"].update(configuration["concealed"])
-    item["constants"].update(configuration["constants"])
-    item["defaults"].update(configuration["defaults"])
-    item["formats"].update(configuration["formats"])
-    item["generate"].update(configuration["generate"])
+    for key, values in item_configuration(resource).items():
+        item[key].update(values)
 
 
 def new_item():
@@ -120,29 +112,36 @@ def new_item():
     }
 
 
-def kustomization_ready(resource):
-    metadata = resource.get("metadata", {})
-    source_reference = resource.get("spec", {}).get("sourceRef", {})
+def flux_resource_ready(resource):
     status = resource.get("status", {})
+    return (
+        any(
+            condition.get("type") == "Ready" and condition.get("status") == "True"
+            for condition in status.get("conditions", [])
+        )
+        and not resource.get("spec", {}).get("suspend", False)
+        and status.get("observedGeneration")
+        == resource.get("metadata", {}).get("generation")
+    )
+
+
+def kustomization_ready(resource):
+    source_reference = resource.get("spec", {}).get("sourceRef", {})
     if source_reference.get("kind") != "GitRepository":
         return False
-    source_namespace = source_reference.get("namespace", metadata.get("namespace"))
-    source = kubernetes_get(
+    source_namespace = source_reference.get(
+        "namespace", resource.get("metadata", {}).get("namespace")
+    )
+    source = kubernetes_request(
         f"/apis/source.toolkit.fluxcd.io/v1/namespaces/{source_namespace}/"
         f"gitrepositories/{source_reference.get('name')}"
     )
     source_revision = source.get("status", {}).get("artifact", {}).get("revision")
-    ready = any(
-        condition.get("type") == "Ready" and condition.get("status") == "True"
-        for condition in status.get("conditions", [])
-    )
     return (
-        ready
-        and not resource.get("spec", {}).get("suspend", False)
+        flux_resource_ready(resource)
         and not source.get("spec", {}).get("suspend", False)
-        and status.get("observedGeneration") == metadata.get("generation")
         and bool(source_revision)
-        and status.get("lastAppliedRevision") == source_revision
+        and resource.get("status", {}).get("lastAppliedRevision") == source_revision
     )
 
 
@@ -154,23 +153,10 @@ def kustomizations_ready():
     return bool(kustomizations) and all(map(kustomization_ready, kustomizations))
 
 
-def helm_release_ready(resource):
-    metadata = resource.get("metadata", {})
-    status = resource.get("status", {})
-    return (
-        any(
-            condition.get("type") == "Ready" and condition.get("status") == "True"
-            for condition in status.get("conditions", [])
-        )
-        and not resource.get("spec", {}).get("suspend", False)
-        and status.get("observedGeneration") == metadata.get("generation")
-    )
-
-
 def helm_releases_ready():
     # Charts render ExternalSecrets, so an upgrade in progress can hide references.
     releases = kubernetes_list("/apis/helm.toolkit.fluxcd.io/v2/helmreleases")
-    return all(map(helm_release_ready, releases))
+    return all(map(flux_resource_ready, releases))
 
 
 def flux_ready():
@@ -293,19 +279,24 @@ def field_label(field):
     return field.get("label") or field.get("id")
 
 
+# Sign-in details and notes keep 1Password's own placement.
+def native_field(field):
+    return (
+        field.get("purpose")
+        or field.get("id") == "notesPlain"
+        or field_label(field).casefold() in {"password", "url", "username"}
+    )
+
+
 # Field names: provider-<provider>[-<number>]-api-key or -<token-type>-token for
 # upstream credentials in the consuming app's item; virtual-key-<consumer> and
 # master-key in the issuing gateway's item.
 def group_fields(item):
     sections = {section.get("label"): section for section in item.get("sections", [])}
     for field in item.get("fields", []):
-        label = field_label(field)
-        if (
-            field.get("purpose")
-            or field.get("id") == "notesPlain"
-            or label.casefold() in {"password", "url", "username"}
-        ):
+        if native_field(field):
             continue
+        label = field_label(field)
         if label.startswith("provider-"):
             group = "Providers"
         elif label.startswith("virtual-key-"):
@@ -333,11 +324,7 @@ def group_fields(item):
 def sort_fields(fields):
     sections = {}
     for index, field in enumerate(fields):
-        if (
-            field.get("purpose")
-            or field.get("id") == "notesPlain"
-            or field_label(field).casefold() in {"password", "url", "username"}
-        ):
+        if native_field(field):
             continue
         sections.setdefault((field.get("section") or {}).get("id"), []).append(index)
     for indices in sections.values():

@@ -27,12 +27,7 @@ while (($# > 0)); do
 done
 
 temporary_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-service-inventory.XXXXXX")"
-
-cleanup() {
-  rm -fr -- "${temporary_directory:?}"
-}
-
-trap cleanup EXIT
+trap 'rm -fr -- "${temporary_directory:?}"' EXIT
 
 if [[ -z "${manifest_directory}" ]]; then
   manifest_directory="${temporary_directory}/manifests"

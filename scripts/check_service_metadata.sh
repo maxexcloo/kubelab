@@ -2,12 +2,7 @@
 set -euo pipefail
 
 temporary_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-service-metadata.XXXXXX")"
-
-cleanup() {
-  rm -fr -- "${temporary_directory:?}"
-}
-
-trap cleanup EXIT
+trap 'rm -fr -- "${temporary_directory:?}"' EXIT
 
 manifest_directory="${1:?Usage: check_service_metadata.sh <manifest-directory>}"
 
