@@ -12,7 +12,7 @@ interface:
   generalChatRetention: 8760
   retainAgentFiles: true
   retentionMode: all
-  # Scheduled chats run in this single replica; Redis now holds the shared streams.
+  # Scheduled chats run in this single replica; Redis holds the shared streams.
   schedules:
     create: true
     use: true

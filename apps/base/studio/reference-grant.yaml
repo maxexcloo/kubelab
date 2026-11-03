@@ -3,7 +3,7 @@ kind: ReferenceGrant
 metadata:
   name: bifrost-results
 spec:
-  # Bifrost's route serve signed MCP result links from the studio.
+  # Bifrost's route serves signed MCP result links from the studio.
   from:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
