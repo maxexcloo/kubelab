@@ -223,13 +223,17 @@ spec:
         authConfig:
           existingSecret: bifrost
           isEnabled: false
-        # cloud/auto takes the first Refuseless model that answers.
+        # cloud/auto takes the first model that answers: Refuseless's abliterated models, then
+        # Deploy's originals.
         routingRules:
           - id: cloud
             name: Cloud
             cel_expression: "provider == 'cloud'"
             enabled: true
-            fallbacks: ["refuseless/glm-5.3-flash-abliterated"]
+            fallbacks:
+              - refuseless/glm-5.3-flash-abliterated
+              - deploy/deepseek-ai/deepseek-v4.1-flash-1017
+              - deploy/zai-org/glm-5.3-flash
             priority: 0
             scope: global
             targets:
@@ -302,6 +306,9 @@ spec:
             # The cloud rule's targets need their own provider too.
             provider_configs:
               - provider: cloud
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: deploy
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: local
@@ -416,6 +423,15 @@ spec:
             - name: deepseek
               models: ["*"]
               value: env.DEEPSEEK_API_KEY
+        deploy:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: deploy
+              models: ["*"]
+              value: env.DEPLOY_API_KEY
+          network_config:
+            base_url: https://api.deploy.com/api
         # The router sends local/auto to the first running local text model.
         local:
           custom_provider_config:
