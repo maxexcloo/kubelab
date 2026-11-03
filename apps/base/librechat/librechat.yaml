@@ -187,6 +187,66 @@ mcpServers:
         title: Personal API Key
     headers:
       x-bf-vk: "{{HOME_ASSISTANT_API_KEY}}"
+  immich:
+    type: streamable-http
+    description: Search, browse and organise photos, albums and people in Immich.
+    requiresOAuth: false
+    startup: false
+    title: Immich
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/immich
+    # Bifrost's server uses the owner's Immich API key, so only authorised personal keys reach it.
+    customUserVars:
+      IMMICH_API_KEY:
+        description: Your personal Bifrost virtual key authorised for Immich. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Personal API Key
+    headers:
+      x-bf-vk: "{{IMMICH_API_KEY}}"
+  karakeep:
+    type: streamable-http
+    description: Search, save and organise bookmarks, lists, tags and highlights in Karakeep.
+    requiresOAuth: false
+    startup: false
+    title: Karakeep
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/karakeep
+    # Bifrost's server uses the owner's Karakeep API key, so only authorised personal keys reach it.
+    customUserVars:
+      KARAKEEP_API_KEY:
+        description: Your personal Bifrost virtual key authorised for Karakeep. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Personal API Key
+    headers:
+      x-bf-vk: "{{KARAKEEP_API_KEY}}"
+  larapaper:
+    type: streamable-http
+    description: Create, edit and render TRMNL recipe plugins in LaraPaper.
+    requiresOAuth: false
+    startup: false
+    title: LaraPaper
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/larapaper
+    # Bifrost holds the owner's LaraPaper MCP token, so only authorised personal keys reach it.
+    customUserVars:
+      LARAPAPER_API_KEY:
+        description: Your personal Bifrost virtual key authorised for LaraPaper. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Personal API Key
+    headers:
+      x-bf-vk: "{{LARAPAPER_API_KEY}}"
+  miniflux:
+    type: streamable-http
+    description: Read and manage feeds, categories and entries in Miniflux.
+    requiresOAuth: false
+    startup: false
+    title: Miniflux
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/miniflux
+    # Bifrost's server uses the owner's Miniflux API key, so only authorised personal keys reach it.
+    customUserVars:
+      MINIFLUX_API_KEY:
+        description: Your personal Bifrost virtual key authorised for Miniflux. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Personal API Key
+    headers:
+      x-bf-vk: "{{MINIFLUX_API_KEY}}"
   reactive-resume:
     type: streamable-http
     description: Read and edit resumes, cover letters and job applications in Reactive Resume.

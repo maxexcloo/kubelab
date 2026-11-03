@@ -5,6 +5,13 @@ metadata:
 spec:
   ingress:
     - from:
+        # The Immich MCP server calls the API.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: immich-mcp
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: immich-mcp
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking

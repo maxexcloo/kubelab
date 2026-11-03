@@ -1,0 +1,34 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            env:
+              IMMICH_BASE_URL: http://immich-server.immich.svc.cluster.local:2283
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
+            image:
+              pullPolicy: IfNotPresent
+              repository: ghcr.io/barryw/immichmcp
+              tag: v3.3.5
+            # Readiness also pings Immich.
+            probes:
+              readiness:
+                path: /health/ready
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 10m
+                memory: 128Mi
+    service:
+      main:
+        ports:
+          http:
+            port: 5000
