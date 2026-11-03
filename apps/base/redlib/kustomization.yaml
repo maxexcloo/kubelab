@@ -7,7 +7,6 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - private-redirect.yaml
-  - redirect.yaml
 components:
   - ../../components/application
   - ../../components/private-dns-control-d-only
@@ -40,19 +39,6 @@ replacements:
         options:
           delimiter: /
           index: 2
-      - select:
-          kind: HTTPRoute
-          name: redlib-www
-        fieldPaths:
-          - spec.hostnames.0
-        options:
-          delimiter: www.
-          index: 1
-      - select:
-          kind: HTTPRoute
-          name: redlib-www
-        fieldPaths:
-          - spec.rules.0.filters.0.requestRedirect.hostname
       - select:
           kind: HelmRelease
         fieldPaths:

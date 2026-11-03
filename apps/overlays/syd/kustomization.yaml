@@ -64,10 +64,6 @@ patches:
     target:
       kind: HelmRelease
       name: (aiometadata|aiostreams|cliproxyapi|homepage|redlib)
-  - path: external-ingress.yaml
-    target:
-      kind: HelmRelease
-      name: (aiometadata|aiostreams|redlib)
   - patch: |-
       apiVersion: v1
       kind: ConfigMap
