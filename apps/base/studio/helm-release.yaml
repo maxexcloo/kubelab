@@ -6,7 +6,39 @@ spec:
   values:
     controllers:
       main:
+        defaultContainerOptionsStrategy: merge
         containers:
+          # Civitai refuses the cluster's egress (HTTP 451); Studio's Control D resolver
+          # redirects its domains, and ctrld sends cluster names to CoreDNS.
+          ctrld:
+            workingDir: /etc/controld
+            args:
+              - --cd=$(CTRLD_ENDPOINT)
+            command:
+              - /ctrld
+              - run
+            env:
+              CTRLD_ENDPOINT:
+                valueFrom:
+                  secretKeyRef:
+                    key: CTRLD_ENDPOINT
+                    name: "{{ .Release.Name }}"
+            image:
+              pullPolicy: IfNotPresent
+              repository: controldns/ctrld
+              tag: 1.5.9
+            resources:
+              limits:
+                memory: 128Mi
+              requests:
+                cpu: 10m
+                memory: 32Mi
+            securityContext:
+              runAsGroup: 65534
+              runAsUser: 65534
+              capabilities:
+                add:
+                  - NET_BIND_SERVICE
           main:
             env:
               STUDIO_ALLOWED_HOSTS:
@@ -65,9 +97,24 @@ spec:
               requests:
                 cpu: 100m
                 memory: 512Mi
+        defaultContainerOptions:
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
     defaultPodOptions:
       # Studio's service account scales the GPU workloads.
       automountServiceAccountToken: true
+      # ctrld answers first. It forwards *.local names to the private nameserver after
+      # it (kube-dns, in Homelab's service subnet), and Studio uses only FQDN cluster names.
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 127.0.0.1
+          - 10.100.4.10
       # Studio drains in-flight requests for up to 30 s on SIGTERM (backend/shutdown.js); leave it room.
       terminationGracePeriodSeconds: 45
       # Files on the TrueNAS datasets belong to the image's node user.
@@ -76,11 +123,19 @@ spec:
         runAsGroup: 1000
         runAsUser: 1000
     persistence:
+      controld:
+        type: emptyDir
+        advancedMounts:
+          main:
+            ctrld:
+              - path: /etc/controld
       data:
         existingClaim: data
         type: persistentVolumeClaim
-        globalMounts:
-          - path: /data
+        advancedMounts:
+          main:
+            main:
+              - path: /data
     route:
       private:
         annotations:
