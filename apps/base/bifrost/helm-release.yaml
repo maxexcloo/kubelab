@@ -223,38 +223,56 @@ spec:
         authConfig:
           existingSecret: bifrost
           isEnabled: false
-        # cloud/auto takes the first original model that answers, and cloud/uncensored the
-        # first abliterated one.
+        # Each cloud/ alias serves one model, falling back only to the same model elsewhere;
+        # auto and uncensored are DeepSeek's.
         routingRules:
-          - id: cloud
-            name: Cloud
-            cel_expression: "provider == 'cloud' && model == 'auto'"
+          - id: cloud-deepseek
+            name: Cloud DeepSeek
+            cel_expression: "provider == 'cloud' && model in ['auto', 'deepseek']"
             enabled: true
             fallbacks:
-              - model: zai-org/glm-5.3-flash
-                provider: deploy
               - model: deepseek-flash
                 provider: deepseek
+              - model: deepseek/deepseek-v4.1-flash-1017
+                provider: openrouter
             priority: 0
             scope: global
             targets:
               - provider: deploy
                 model: deepseek-ai/deepseek-v4.1-flash-1017
                 weight: 1.0
-          - id: cloud-uncensored
-            name: Cloud Uncensored
-            cel_expression: "provider == 'cloud' && model == 'uncensored'"
+          - id: cloud-deepseek-uncensored
+            name: Cloud DeepSeek Uncensored
+            cel_expression: "provider == 'cloud' && model in ['deepseek-uncensored', 'uncensored']"
             enabled: true
-            fallbacks:
-              - model: glm-5.3-flash-abliterated
-                provider: refuseless
-              - model: abliterated-model-large-v2
-                provider: abliteration
             priority: 1
             scope: global
             targets:
               - provider: refuseless
                 model: deepseek-v4.1-flash-abliterated
+                weight: 1.0
+          - id: cloud-glm
+            name: Cloud GLM
+            cel_expression: "provider == 'cloud' && model == 'glm'"
+            enabled: true
+            fallbacks:
+              - model: z-ai/glm-5.3-flash
+                provider: openrouter
+            priority: 2
+            scope: global
+            targets:
+              - provider: deploy
+                model: zai-org/glm-5.3-flash
+                weight: 1.0
+          - id: cloud-glm-uncensored
+            name: Cloud GLM Uncensored
+            cel_expression: "provider == 'cloud' && model == 'glm-uncensored'"
+            enabled: true
+            priority: 3
+            scope: global
+            targets:
+              - provider: refuseless
+                model: glm-5.3-flash-abliterated
                 weight: 1.0
         virtualKeys:
           - id: claude
@@ -324,9 +342,6 @@ spec:
             value: env.VIRTUAL_KEY_STUDIO
             # The cloud rules' targets and fallbacks need their own provider too.
             provider_configs:
-              - provider: abliteration
-                allowed_models: ["*"]
-                key_ids: ["*"]
               - provider: cloud
                 allowed_models: ["*"]
                 key_ids: ["*"]
@@ -337,6 +352,9 @@ spec:
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: local
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: openrouter
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: refuseless
@@ -432,7 +450,7 @@ spec:
           network_config:
             allow_private_network: true
             base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-        # Only lists cloud/auto and cloud/uncensored, which the cloud routing rules send on.
+        # Only lists the cloud/ aliases, which the cloud routing rules send on.
         cloud:
           custom_provider_config:
             base_provider_type: openai

@@ -49,8 +49,9 @@ endpoints:
       - web_search
   custom:
     # Every section reaches its provider through Bifrost, which lists that provider's models
-    # for x-bf-model-provider. cloud/ and local/ take the first cloud or running local model,
-    # with /uncensored limited to uncensored ones; set reasoning with the Reasoning Effort parameter.
+    # for x-bf-model-provider. Each cloud/ alias serves one model (auto and uncensored are
+    # DeepSeek's), and local/ takes the first running local model, with local/uncensored limited
+    # to uncensored ones; set reasoning with the Reasoning Effort parameter.
     - &ai
       name: AI
       apiKey: ${BIFROST_API_KEY}
@@ -58,6 +59,10 @@ endpoints:
       models:
         default:
           - cloud/auto
+          - cloud/deepseek
+          - cloud/deepseek-uncensored
+          - cloud/glm
+          - cloud/glm-uncensored
           - cloud/uncensored
           - local/auto
           - local/uncensored
