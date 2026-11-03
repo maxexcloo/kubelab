@@ -50,10 +50,8 @@ published image.
   existing primary addresses. Keep aliases on private gateways.
 - The shared route transformers add the alias to app-template routes;
   hand-written routes list `<app>.${cluster_name}.excloo.dev` themselves.
-- Public routes on external nodes attach to the `public-direct` gateway once the
-  zone reaches origins over HTTPS (Cloudflare SSL/TLS mode Full), so Cloudflare
-  connects to the public address instead of the tunnel. Routes whose origin is
-  behind NAT attach to the `public-tunnel` gateway.
+- Public routes attach to the `public-tunnel` gateway, so Cloudflare reaches
+  every origin through the tunnel and no node accepts public web traffic.
 - Mini apps use only `<name>.mini.excloo.com`.
 - Cluster applications default to internal nodes; cluster overlays select
   external workloads. Node network labels describe host locality, independently

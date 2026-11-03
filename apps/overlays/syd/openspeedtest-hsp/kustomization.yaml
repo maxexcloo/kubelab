@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - helm-release.yaml
-  - public-route.yaml
   - route.yaml
 components:
   - ../../../base/openspeedtest/instance
@@ -15,19 +14,6 @@ replacements:
       - select:
           kind: HTTPRoute
           name: openspeedtest-hsp
-        fieldPaths:
-          - metadata.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
-  - source:
-      kind: HTTPRoute
-      name: openspeedtest-hsp-public
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: openspeedtest-hsp-public
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
         options:
