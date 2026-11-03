@@ -43,7 +43,9 @@ class PocketIDClientTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.resource = composition_resource(
-            "platform/automation/pocket-id/composition.yaml", "client", base=False
+            "platform/automation/pocket-id/composition/composition.yaml",
+            "client",
+            base=False,
         )
         cls.parameters = cls.resource["base"]["spec"]["forProvider"]
 
@@ -64,7 +66,7 @@ class PocketIDClientTests(unittest.TestCase):
 
     def test_secret_is_created_until_a_create_succeeds(self):
         secret = composition_resource(
-            "platform/automation/pocket-id/composition.yaml",
+            "platform/automation/pocket-id/composition/composition.yaml",
             "client-secret",
             base=False,
         )
@@ -121,7 +123,9 @@ class PocketIDClientTests(unittest.TestCase):
 
     def test_client_group_is_found_by_name_and_publishes_its_id(self):
         group = composition_resource(
-            "platform/automation/pocket-id/composition.yaml", "group", base=False
+            "platform/automation/pocket-id/composition/composition.yaml",
+            "group",
+            base=False,
         )
         logic = group["base"]["spec"]["forProvider"]["expectedResponseCheck"]["logic"]
         response_jq = next(
@@ -148,7 +152,7 @@ class PocketIDClientTests(unittest.TestCase):
 
     def test_client_group_is_removed_only_when_a_listing_omits_it(self):
         group = composition_resource(
-            "platform/automation/pocket-id/composition.yaml", "group"
+            "platform/automation/pocket-id/composition/composition.yaml", "group"
         )
         logic = group["spec"]["forProvider"]["isRemovedCheck"]["logic"]
         payload = {"body": {"friendlyName": "Studio", "name": "studio"}}
