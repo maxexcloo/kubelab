@@ -1,0 +1,51 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: cloudflareaccessapplications.automation.excloo.dev
+spec:
+  defaultCompositionRef:
+    name: cloudflare-access-application
+  group: automation.excloo.dev
+  names:
+    kind: CloudflareAccessApplication
+    plural: cloudflareaccessapplications
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      referenceable: true
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: >-
+            A Cloudflare Access application owned by its app's manifest; deleting
+            the resource deletes the application. Without paths, the hostname
+            requires the Excloo ID login, and the Gatus service token also passes.
+            With paths, those paths bypass Access for clients that cannot log in.
+          properties:
+            spec:
+              type: object
+              properties:
+                hostname:
+                  description: Public hostname, derived from the app's route.
+                  format: hostname
+                  maxLength: 253
+                  minLength: 1
+                  type: string
+                name:
+                  description: Unique Cloudflare application name; the application is found by it.
+                  maxLength: 255
+                  minLength: 1
+                  type: string
+                paths:
+                  description: >-
+                    Path prefixes to bypass, without a leading slash. A path covers
+                    its subpaths; a trailing * also matches a partial segment.
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    pattern: ^[^/].*$
+                    type: string
+                  maxItems: 20
+                  type: array
+              required: [hostname, name]

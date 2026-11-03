@@ -1,0 +1,23 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: reactive-resume
+spec:
+  hostname: app.invalid
+  name: Reactive Resume
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: reactive-resume-public
+spec:
+  hostname: app.invalid
+  name: "Reactive Resume: Public"
+  # Shared resumes for maxexcloo, their downloads and preview cards.
+  paths:
+    - api/resumes/maxexcloo
+    - cards/maxexcloo
+    - favicon.ico
+    - favicon.svg
+    - maxexcloo
+    - opengraph/banner.jpg
