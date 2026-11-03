@@ -250,7 +250,7 @@ spec:
                 provider: refuseless
               - model: abliterated-model-large-v2
                 provider: abliteration
-            priority: 0
+            priority: 1
             scope: global
             targets:
               - provider: refuseless
