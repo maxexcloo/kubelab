@@ -5,3 +5,15 @@ metadata:
 spec:
   hostname: app.invalid
   name: RoMM
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: romm-clients
+spec:
+  hostname: app.invalid
+  name: "RoMM: Clients"
+  # Mobile and handheld clients authenticate to RoMM's API themselves.
+  paths:
+    - api
+    - assets
