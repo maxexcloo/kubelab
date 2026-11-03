@@ -1,11 +1,12 @@
 # One Service per model. Bifrost's router lists the running ones as ai/<name they report>
-# and tries them in priority order for local/auto.
+# and tries them in priority order for local/auto, and the uncensored ones for local/uncensored.
 apiVersion: v1
 kind: Service
 metadata:
   name: gemma
   annotations:
     text.excloo.dev/priority: "5"
+    text.excloo.dev/uncensored: "true"
 spec:
   ports:
     - name: http
@@ -34,6 +35,7 @@ metadata:
   name: qwen-fp8
   annotations:
     text.excloo.dev/priority: "3"
+    text.excloo.dev/uncensored: "true"
 spec:
   ports:
     - name: http
@@ -62,6 +64,7 @@ metadata:
   name: qwen-mxfp4
   annotations:
     text.excloo.dev/priority: "4"
+    text.excloo.dev/uncensored: "true"
 spec:
   ports:
     - name: http

@@ -1,9 +1,10 @@
-"""Serves Bifrost's ai/ and local/ providers from the text Services, and lists cloud/auto.
+"""Serves Bifrost's ai/ and local/ providers from the text Services, and lists cloud/'s aliases.
 
 Each Service in NAMESPACE annotated text.excloo.dev/priority serves one local text model.
 ai/ lists the running ones under the names they report and reaches each by name; local/auto
-reaches them in priority order, moving on when one is busy. Requests otherwise pass through
-unchanged, so clients set reasoning themselves. Requests nothing can serve fail fast with 503.
+reaches them in priority order, moving on when one is busy, and local/uncensored does the same
+for those annotated text.excloo.dev/uncensored. Requests otherwise pass through unchanged, so
+clients set reasoning themselves. Requests nothing can serve fail fast with 503.
 """
 
 import http.client
@@ -14,6 +15,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ACCOUNT = "/var/run/secrets/kubernetes.io/serviceaccount"
+ALIASES = ("auto", "uncensored")
 API = "https://kubernetes.default.svc"
 # Radiance answers 429 when its queue is full, and 503 while busy or reloading.
 BUSY = {429, 503}
@@ -37,7 +39,7 @@ def kubernetes(path):
         return json.load(response)["items"]
 
 
-def running(headers):
+def running(headers, uncensored=False):
     """Each running Service, in priority order, with the models it reports."""
     slices = kubernetes(
         f"/apis/discovery.k8s.io/v1/namespaces/{NAMESPACE}/endpointslices"
@@ -48,14 +50,12 @@ def running(headers):
         if any(e["conditions"].get("ready") for e in item.get("endpoints") or [])
     }
     services = sorted(
-        (int(priority), item["metadata"]["name"])
+        (int(annotations["text.excloo.dev/priority"]), item["metadata"]["name"])
         for item in kubernetes(f"/api/v1/namespaces/{NAMESPACE}/services")
-        if (
-            priority := item["metadata"]
-            .get("annotations", {})
-            .get("text.excloo.dev/priority")
-        )
+        if "text.excloo.dev/priority"
+        in (annotations := item["metadata"].get("annotations", {}))
         and item["metadata"]["name"] in ready
+        and (not uncensored or annotations.get("text.excloo.dev/uncensored") == "true")
     )
     found = []
     for _, service in services:
@@ -85,9 +85,9 @@ class Handler(BaseHTTPRequestHandler):
                 model for _, models in running(self.forwarded()) for model in models
             ]
             return self.reply(200, {"data": data, "object": "list"})
-        # Bifrost's cloud routing rule sends cloud/auto on before it reaches the router.
+        # Bifrost's cloud routing rules send cloud/ on before it reaches the router.
         if self.path in ("/cloud/v1/models", "/local/v1/models"):
-            data = [{"id": "auto", "object": "model"}]
+            data = [{"id": alias, "object": "model"} for alias in ALIASES]
             return self.reply(200, {"data": data, "object": "list"})
         self.reply(404, {"error": {"message": f"{self.path} is not served"}})
 
@@ -95,10 +95,13 @@ class Handler(BaseHTTPRequestHandler):
         provider, _, path = self.path.removeprefix("/").partition("/")
         body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
         model = body.get("model")
+        alias = provider == "local" and model in ALIASES
         served = [
-            (service, models[0]["id"] if model == "auto" else model)
-            for service, models in running(self.forwarded())
-            if (provider == "local" and model == "auto" and models)
+            (service, models[0]["id"] if alias else model)
+            for service, models in running(
+                self.forwarded(), alias and model == "uncensored"
+            )
+            if (alias and models)
             or (provider == "ai" and any(m["id"] == model for m in models))
         ]
         for index, (service, name) in enumerate(served):
