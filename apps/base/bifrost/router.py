@@ -15,7 +15,17 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ACCOUNT = "/var/run/secrets/kubernetes.io/serviceaccount"
-ALIASES = ("auto", "uncensored")
+ALIASES = {
+    "cloud": (
+        "auto",
+        "deepseek",
+        "deepseek-uncensored",
+        "glm",
+        "glm-uncensored",
+        "uncensored",
+    ),
+    "local": ("auto", "uncensored"),
+}
 API = "https://kubernetes.default.svc"
 # Radiance answers 429 when its queue is full, and 503 while busy or reloading.
 BUSY = {429, 503}
@@ -86,8 +96,9 @@ class Handler(BaseHTTPRequestHandler):
             ]
             return self.reply(200, {"data": data, "object": "list"})
         # Bifrost's cloud routing rules send cloud/ on before it reaches the router.
-        if self.path in ("/cloud/v1/models", "/local/v1/models"):
-            data = [{"id": alias, "object": "model"} for alias in ALIASES]
+        provider = self.path.removeprefix("/").removesuffix("/v1/models")
+        if provider in ALIASES:
+            data = [{"id": alias, "object": "model"} for alias in ALIASES[provider]]
             return self.reply(200, {"data": data, "object": "list"})
         self.reply(404, {"error": {"message": f"{self.path} is not served"}})
 
@@ -95,7 +106,7 @@ class Handler(BaseHTTPRequestHandler):
         provider, _, path = self.path.removeprefix("/").partition("/")
         body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
         model = body.get("model")
-        alias = provider == "local" and model in ALIASES
+        alias = provider == "local" and model in ALIASES["local"]
         served = [
             (service, models[0]["id"] if alias else model)
             for service, models in running(
