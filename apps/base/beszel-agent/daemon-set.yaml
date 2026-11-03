@@ -13,6 +13,14 @@ spec:
       labels:
         app.kubernetes.io/name: beszel-agent
     spec:
+      # Container nodes share a host whose own agent already reports it.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.excloo.dev/container
+                    operator: DoesNotExist
       automountServiceAccountToken: false
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
