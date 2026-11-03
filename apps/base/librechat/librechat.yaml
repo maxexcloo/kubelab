@@ -51,18 +51,20 @@ endpoints:
     # Every section reaches its provider through Bifrost, which lists that provider's models
     # for x-bf-model-provider. cloud/auto and local/auto take the first cloud or running local
     # model; set reasoning with the Reasoning Effort parameter.
-    - name: AI
+    - &ai
+      name: AI
       apiKey: ${BIFROST_API_KEY}
-      baseURL: &bifrost http://bifrost.bifrost.svc.cluster.local:8080/openai/v1
+      baseURL: http://bifrost.bifrost.svc.cluster.local:8080/openai/v1
       models:
         default:
           - cloud/auto
           - local/auto
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
-      # LibreChat assumes 32k for unknown models and summarises too early; every local and cloud
-      # model has at least 131k. Keys match as substrings, so this covers every name here.
-      tokenConfig: &context
+      # LibreChat assumes 32k for unknown models and summarises too early. Bifrost reports no
+      # context lengths, and every model here has at least 131k. Keys match as substrings, so
+      # this covers every name.
+      tokenConfig:
         /:
           prompt: 0
           completion: 0
@@ -72,18 +74,16 @@ endpoints:
       titleModel: current_model
       # A title started alongside the turn is cancelled when the turn stops or is replaced.
       titleTiming: final
+    # The provider sections share the AI section's settings and list their provider's models.
     - &provider
+      <<: *ai
       name: Abliteration
-      apiKey: ${BIFROST_API_KEY}
-      baseURL: *bifrost
       headers:
         x-bf-model-provider: abliteration
       models:
         default:
           - "*"
         fetch: true
-      titleConvo: true
-      titleModel: current_model
     - <<: *provider
       name: CLI Proxy API
       headers:
@@ -96,8 +96,6 @@ endpoints:
       name: Local
       headers:
         x-bf-model-provider: ai
-      reasoningLabel: true
-      tokenConfig: *context
     - <<: *provider
       name: OpenCode Go
       headers:
