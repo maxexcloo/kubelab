@@ -139,7 +139,7 @@ spec:
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: *title
         hostnames:
-          - signtools.excloo.com
+          - apps.excloo.com
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
           gateway.excloo.dev/public-access: "true"
