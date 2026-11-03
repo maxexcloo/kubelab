@@ -4,7 +4,7 @@ providers:
     clientSecret: ${OIDC_CLIENT_SECRET}
     code_challenge_method: S256
     id: pocket-id
-    name: Pocket ID
+    name: Excloo ID
     oidcConfig:
       emailClaim: email
       groupsClaim: groups

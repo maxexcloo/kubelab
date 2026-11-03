@@ -90,7 +90,7 @@ spec:
           auth_url: https://${identity_host}/authorize
           auto_login: true
           enabled: true
-          name: Pocket ID
+          name: Excloo ID
           scopes: openid profile email
           token_url: https://${identity_host}/api/oidc/token
           use_pkce: true

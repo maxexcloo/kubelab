@@ -13,7 +13,7 @@ spec:
               # The owner account exists; Pocket ID users cannot create new accounts either.
               FLAG_DISABLE_SIGNUPS: "true"
               OAUTH_DISCOVERY_URL: https://${identity_host}/.well-known/openid-configuration
-              OAUTH_PROVIDER_NAME: Pocket ID
+              OAUTH_PROVIDER_NAME: Excloo ID
               REDIS_URL: redis://localhost:6379
               SMTP_FROM: reactive-resume@${mail_domain}
               SMTP_HOST: smtp.resend.com
