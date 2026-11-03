@@ -25,12 +25,11 @@ spec:
               tag: v0.8.2
             probes:
               liveness: &health
-                custom: true
                 enabled: true
+                path: /
+                port: 5533
+                type: HTTP
                 spec: &health-spec
-                  httpGet:
-                    path: /
-                    port: 5533
                   timeoutSeconds: 5
               readiness: *health
               startup:
