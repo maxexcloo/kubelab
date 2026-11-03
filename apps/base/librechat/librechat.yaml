@@ -93,6 +93,10 @@ endpoints:
       headers:
         x-bf-model-provider: deepseek
     - <<: *provider
+      name: Deploy
+      headers:
+        x-bf-model-provider: deploy
+    - <<: *provider
       name: Local
       headers:
         x-bf-model-provider: ai
