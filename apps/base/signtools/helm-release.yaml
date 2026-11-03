@@ -95,13 +95,8 @@ spec:
       data:
         existingClaim: data
         type: persistentVolumeClaim
-        advancedMounts:
-          main:
-            listing:
-              - path: /data
-                readOnly: true
-            main:
-              - path: /data
+        globalMounts:
+          - path: /data
       listing:
         # Busybox httpd runs only executable CGI scripts (0555).
         defaultMode: 365
@@ -115,12 +110,10 @@ spec:
       profile:
         name: signtools-profile
         type: secret
-        advancedMounts:
-          main:
-            main:
-              # A stable profile ID keeps saved apps associated across restarts.
-              - path: /data/profiles/developer
-                readOnly: true
+        globalMounts:
+          # A stable profile ID keeps saved apps associated across restarts.
+          - path: /data/profiles/developer
+            readOnly: true
       temporary:
         medium: Memory
     route:
@@ -168,9 +161,6 @@ spec:
               - path:
                   type: RegularExpression
                   value: ^/apps/[^/]+/(install|manifest|signed)$
-              - path:
-                  type: Exact
-                  value: /favicon.png
     service:
       main:
         ports:
