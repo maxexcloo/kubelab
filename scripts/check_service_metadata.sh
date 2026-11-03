@@ -58,125 +58,62 @@ jq -e \
       try capture("^https?://(?<hostname>[^/:]+)").hostname catch "";
     . as $route_inventory |
     map(select(.monitoringEnabled)) as $inventory |
-    (
-      $route_inventory |
-      map(select(public_route and .publicAccess != "true") | .source)
-    ) as $missing_public_route_labels |
-    (
-      $route_inventory |
-      map(select(tunnel_route and .cloudflareProxied != "true") | .source)
-    ) as $missing_tunnel_proxy_annotations |
-    (
-      $route_inventory |
-      map(select((public_route | not) and .publicAccess == "true") | .source)
-    ) as $unexpected_public_route_labels |
-    (
-      $route_inventory |
-      map(
-        select(public_route) |
-        . as $route |
-        select(
-          $namespaces |
-          any(
-            .cluster == $route.cluster and
-            .name == $route.namespace and
-            .publicAccess == "true"
-          ) |
-          not
-        ) |
-        .source
-      )
-    ) as $missing_public_namespace_labels |
-    (
-      $route_inventory |
-      map(select((.parentRefs | index("private")) != null) |
-        . as $route |
-        select($namespaces | any(
-          .cluster == $route.cluster and .name == $route.namespace and
-          .privateAccess == "true"
-        ) | not) | .source)
-    ) as $missing_private_namespace_labels |
-    ($inventory | map(select(missing_required)) | map(.source)) as $missing |
-    ($inventory | map(select(invalid_url)) | map(.source)) as $invalid |
-    ($route_inventory | map(select(invalid_href)) | map(.source)) as $invalid_hrefs |
-    (
-      $inventory |
-      map(select((.monitor | url_hostname) as $hostname | (.hostnames | index($hostname)) == null)) |
-      map(.source)
-    ) as $hostname_mismatches |
-    (
-      $inventory |
-      sort_by(.cluster, .group, .name) |
-      group_by(.cluster, .group, .name) |
-      map(select(length > 1) | map(.source) | join(", "))
-    ) as $duplicates |
-    # External services such as Cloudflare Access have no route to match.
+    # Route domains limit the Pocket ID check; external services such as
+    # Cloudflare Access have no route to match.
     ($route_inventory | map(.hostnames[] | split(".") | .[-2:] | join(".")) | unique) as $route_domains |
-    (
-      $pocket_id |
-      map(select((.launchURL | url_hostname | split(".") | .[-2:] | join(".")) as $domain | $route_domains | index($domain))) |
-      map(select(.launchURL as $url | $inventory | any(.href == $url) | not)) |
-      map(.source)
-    ) as $missing_pocket_id_routes |
-    (
-      $private_dns |
-      map(select(. as $dns | $route_inventory | any(
-        .cluster == $dns.cluster and
-        .namespace == $dns.namespace and
-        (.parentRefs | index("private")) != null and
-        (.hostnames | index($dns.hostname)) != null
-      ) | not)) |
-      map(.source)
-    ) as $missing_private_dns_routes |
-    (
-      $private_dns |
-      map(. as $dns |
-        ($route_inventory | any(
-          .cluster == $dns.cluster and public_route and
+    def failure($message; $separator; $sources):
+      if ($sources | length) > 0 then $message + ": " + ($sources | join($separator)) else empty end;
+    if ($inventory | length) == 0 then error("service inventory is empty") else . end |
+    [
+      failure("public route missing public-access label"; ", ";
+        $route_inventory | map(select(public_route and .publicAccess != "true") | .source)),
+      failure("public route namespace missing public-access label"; ", ";
+        $route_inventory | map(select(public_route) | . as $route |
+          select($namespaces | any(
+            .cluster == $route.cluster and .name == $route.namespace and .publicAccess == "true"
+          ) | not) | .source)),
+      failure("public-tunnel route missing Cloudflare proxy annotation"; ", ";
+        $route_inventory | map(select(tunnel_route and .cloudflareProxied != "true") | .source)),
+      failure("non-public route has public-access label"; ", ";
+        $route_inventory | map(select((public_route | not) and .publicAccess == "true") | .source)),
+      failure("private route namespace missing private-access label"; ", ";
+        $route_inventory | map(select((.parentRefs | index("private")) != null) | . as $route |
+          select($namespaces | any(
+            .cluster == $route.cluster and .name == $route.namespace and .privateAccess == "true"
+          ) | not) | .source)),
+      failure("monitoring alerts must be true or false"; ", ";
+        $inventory | map(select(.alerts != "true" and .alerts != "false") | .source)),
+      failure("missing service metadata"; ", "; $inventory | map(select(missing_required) | .source)),
+      failure("invalid service URL"; ", "; $inventory | map(select(invalid_url) | .source)),
+      failure("unresolved service href placeholder"; ", "; $route_inventory | map(select(invalid_href) | .source)),
+      failure("service href does not match a route hostname"; ", ";
+        $inventory | map(select((.monitor | url_hostname) as $hostname | (.hostnames | index($hostname)) == null) | .source)),
+      failure("duplicate cluster, service group and name"; "; ";
+        $inventory | sort_by(.cluster, .group, .name) | group_by(.cluster, .group, .name) |
+          map(select(length > 1) | map(.source) | join(", "))),
+      failure("Pocket ID launch URL has no enabled route"; ", ";
+        $pocket_id |
+          map(select((.launchURL | url_hostname | split(".") | .[-2:] | join(".")) as $domain | $route_domains | index($domain))) |
+          map(select(.launchURL as $url | $inventory | any(.href == $url) | not) | .source)),
+      failure("private DNS hostname has no matching private route"; ", ";
+        $private_dns | map(select(. as $dns | $route_inventory | any(
+          .cluster == $dns.cluster and .namespace == $dns.namespace and
+          (.parentRefs | index("private")) != null and
           (.hostnames | index($dns.hostname)) != null
-        )) as $public |
-        select(
-          if $public then .composition != "private-dns-record-control-d-only"
-          else .composition != "private-dns-record"
-          end
-        ) |
-        .source + " (" + .hostname + "): use " +
-        (if $public then "private-dns-control-d-only for a public hostname"
-         else "private-dns to publish a private hostname in Cloudflare" end)
-      )
-    ) as $incorrect_private_dns_compositions |
-    ($inventory | map(.cluster) | unique) as $clusters |
-    if ($clusters | length) == 0 then
-      error("service inventory is empty")
-    elif ($missing_public_route_labels | length) > 0 then
-      error("public route missing public-access label: " + ($missing_public_route_labels | join(", ")))
-    elif ($missing_public_namespace_labels | length) > 0 then
-      error("public route namespace missing public-access label: " + ($missing_public_namespace_labels | join(", ")))
-    elif ($missing_tunnel_proxy_annotations | length) > 0 then
-      error("public-tunnel route missing Cloudflare proxy annotation: " + ($missing_tunnel_proxy_annotations | join(", ")))
-    elif ($unexpected_public_route_labels | length) > 0 then
-      error("non-public route has public-access label: " + ($unexpected_public_route_labels | join(", ")))
-    elif ($missing_private_namespace_labels | length) > 0 then
-      error("private route namespace missing private-access label: " + ($missing_private_namespace_labels | join(", ")))
-    elif ($inventory | any(.alerts != "true" and .alerts != "false")) then
-      error("monitoring alerts must be true or false")
-    elif ($missing | length) > 0 then
-      error("missing service metadata: " + ($missing | join(", ")))
-    elif ($invalid | length) > 0 then
-      error("invalid service URL: " + ($invalid | join(", ")))
-    elif ($invalid_hrefs | length) > 0 then
-      error("unresolved service href placeholder: " + ($invalid_hrefs | join(", ")))
-    elif ($hostname_mismatches | length) > 0 then
-      error("service href does not match a route hostname: " + ($hostname_mismatches | join(", ")))
-    elif ($duplicates | length) > 0 then
-      error("duplicate cluster, service group and name: " + ($duplicates | join("; ")))
-    elif ($missing_pocket_id_routes | length) > 0 then
-      error("Pocket ID launch URL has no enabled route: " + ($missing_pocket_id_routes | join(", ")))
-    elif ($missing_private_dns_routes | length) > 0 then
-      error("private DNS hostname has no matching private route: " + ($missing_private_dns_routes | join(", ")))
-    elif ($incorrect_private_dns_compositions | length) > 0 then
-      error("DNS publishing mode does not match route access: " + ($incorrect_private_dns_compositions | join("; ")))
-    else
-      true
-    end
+        ) | not) | .source)),
+      failure("DNS publishing mode does not match route access"; "; ";
+        $private_dns | map(. as $dns |
+          ($route_inventory | any(
+            .cluster == $dns.cluster and public_route and (.hostnames | index($dns.hostname)) != null
+          )) as $public |
+          select(
+            if $public then .composition != "private-dns-record-control-d-only"
+            else .composition != "private-dns-record"
+            end
+          ) |
+          .source + " (" + .hostname + "): use " +
+          (if $public then "private-dns-control-d-only for a public hostname"
+           else "private-dns to publish a private hostname in Cloudflare" end)))
+    ] |
+    if length > 0 then error(join("\n")) else true end
   ' "${route_file}" >/dev/null
