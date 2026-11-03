@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../composition
+# Public clients have no secret to publish; function-patch-and-transform marks a
+# composite unready when it skips a resource, so they use this subset.
+patches:
+  - patch: |-
+      - op: replace
+        path: /metadata/name
+        value: pocket-id-public-client
+      - op: test
+        path: /spec/pipeline/0/input/resources/3/name
+        value: client-secret
+      - op: test
+        path: /spec/pipeline/0/input/resources/5/name
+        value: onepassword-client-id
+      - op: remove
+        path: /spec/pipeline/0/input/resources/5
+      - op: remove
+        path: /spec/pipeline/0/input/resources/4
+      - op: remove
+        path: /spec/pipeline/0/input/resources/3
+    target:
+      kind: Composition
+      name: pocket-id-client
