@@ -27,7 +27,6 @@ spec:
               # Deployments in these namespaces; text ones serve local/auto.
               STUDIO_KUBERNETES_NAMESPACES: comfyui,comfyui-video,text
               STUDIO_LOCAL_TEXT_MODEL: local/auto
-              STUDIO_MCP_PROMPTING_PATH: /data/config/prompting.json
               STUDIO_MCP_PUBLIC_URL:
                 dependsOn: BIFROST_HOST
                 value: https://$(BIFROST_HOST)/studio
