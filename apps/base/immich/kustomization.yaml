@@ -31,7 +31,6 @@ replacements:
           kind: HTTPRoute
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
-          - metadata.annotations.[gethomepage.dev/widget.url]
         options:
           delimiter: /
           index: 2
