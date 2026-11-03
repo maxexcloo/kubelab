@@ -126,7 +126,7 @@ spec:
           gethomepage.dev/icon: sh-comfyui
           gethomepage.dev/name: ComfyUI Video
         hostnames:
-          - comfy-video.excloo.com
+          - comfyui-video.${cluster_name}.excloo.dev
         parentRefs:
           - name: private
             namespace: networking

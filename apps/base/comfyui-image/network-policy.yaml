@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: comfyui
+  name: comfyui-image
 spec:
   ingress:
     - from:
@@ -23,6 +23,6 @@ spec:
           protocol: TCP
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: comfyui
+      app.kubernetes.io/name: comfyui-image
   policyTypes:
     - Ingress

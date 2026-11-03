@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: actual-budget
 resources:
+  - cloudflare-access.yaml
   - external-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
@@ -11,7 +12,7 @@ components:
   - ../../components/application
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
-  - ../../components/private-dns
+  - ../../components/private-dns-control-d-only
 patches:
   - path: helm-release.yaml
     target:
@@ -23,7 +24,7 @@ patches:
 replacements:
   - source:
       kind: HelmRelease
-      fieldPath: spec.values.route.private.hostnames.0
+      fieldPath: spec.values.route.public.hostnames.0
     targets:
       - select:
           kind: HelmRelease
@@ -33,4 +34,4 @@ replacements:
           delimiter: /
           index: 2
 transformers:
-  - ../../transformers/route-private
+  - ../../transformers/route-public
