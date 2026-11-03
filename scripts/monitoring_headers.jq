@@ -32,6 +32,15 @@ def onepassword_reference($route; $reference):
 
 map(
   . as $route |
+  # Hostnames behind an Excloo ID Access application need the monitoring
+  # service token; bypass applications list paths.
+  .cloudflareAccess = any(
+    $resources[];
+    .kind == "CloudflareAccessApplication" and
+    .cluster == $route.cluster and
+    (.spec.paths // [] | length) == 0 and
+    .spec.hostname == (try ($route.monitor | capture("^https://(?<host>[^/:]+)").host) catch "")
+  ) |
   .headers |= with_entries(
     if (.key | test("^[!#$%&'*+.^_`|~0-9a-zA-Z-]+$") | not) then
       error("invalid monitoring header name: \($route.source)")
