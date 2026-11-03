@@ -46,7 +46,6 @@ resources:
   - ../../../platform/observability/grafana/integrations
   - openspeedtest-hsp
   - openspeedtest-kimbap
-  - immich-private-route.yaml
 patches:
   # Retry installs that outwait new credentials; failed upgrades are not rolled
   # back over migrated data.
@@ -139,17 +138,6 @@ replacements:
         options:
           delimiter: /
           index: 2
-  - source:
-      kind: HTTPRoute
-      name: immich
-      namespace: immich
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: immich-private
-        fieldPaths:
-          - spec.hostnames.0
   # Only RomM may frame the streaming room.
   - source:
       kind: HelmRelease

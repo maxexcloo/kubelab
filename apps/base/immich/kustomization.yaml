@@ -25,10 +25,12 @@ replacements:
           - metadata.namespace
   - source:
       kind: HTTPRoute
+      name: immich
       fieldPath: spec.hostnames.0
     targets:
       - select:
           kind: HTTPRoute
+          name: immich
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
         options:
@@ -41,6 +43,11 @@ replacements:
         options:
           delimiter: /
           index: 2
+      - select:
+          kind: HTTPRoute
+          name: immich-private
+        fieldPaths:
+          - spec.hostnames.0
       - select:
           kind: CloudflareAccessApplication
         fieldPaths:
