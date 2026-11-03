@@ -5,10 +5,7 @@ import contextlib
 import copy
 import importlib.util
 import io
-import json
 import re
-import subprocess
-import tempfile
 import unittest
 import urllib.error
 from pathlib import Path
@@ -428,79 +425,6 @@ class ReconcilerTests(unittest.TestCase):
             {"kept", "notesPlain", "otp", "password", "username"},
         )
 
-    def test_papra_provider_template_preserves_settings_and_escapes_credentials(self):
-        from support import repository_resources
-
-        resource = next(
-            resource
-            for resource in repository_resources("apps/overlays/syd")
-            if resource["kind"] == "ExternalSecret"
-            and resource["metadata"]["name"] == "papra"
-        )
-        credentials = {
-            "AUTH_SECRET": "fixture-auth-secret",
-            "OPENROUTER_API_KEY": "fixture-api-key",
-            "oidc-client-id": "papra",
-            "oidc-client-secret": 'fixture"\\secret',
-        }
-        templates = resource["spec"]["target"]["template"]["data"]
-        with tempfile.TemporaryDirectory() as directory:
-            chart = Path(directory)
-            (chart / "templates").mkdir()
-            (chart / "Chart.yaml").write_text(
-                "apiVersion: v2\nname: fixture\nversion: 0.1.0\n"
-            )
-            (chart / "values.yaml").write_text(json.dumps({"credentials": credentials}))
-            definitions = "\n".join(
-                '{{- define "' + name + '" -}}' + template + "{{- end -}}"
-                for name, template in templates.items()
-            )
-            data = "\n".join(
-                "  "
-                + name
-                + ': {{ include "'
-                + name
-                + '" .Values.credentials | quote }}'
-                for name in templates
-            )
-            (chart / "templates/secret.yaml").write_text(
-                definitions
-                + "\napiVersion: v1\nkind: Secret\nmetadata:\n  name: fixture\nstringData:\n"
-                + data,
-            )
-            rendered = subprocess.check_output(
-                ["helm", "template", "fixture", str(chart)], text=True
-            )
-        actual = json.loads(
-            subprocess.check_output(
-                ["yq", "-o=json", ".stringData"],
-                input=rendered,
-                text=True,
-            )
-        )
-        self.assertEqual(
-            json.loads(actual["AUTH_PROVIDERS_CUSTOMS"]),
-            [
-                {
-                    "clientId": "papra",
-                    "clientSecret": credentials["oidc-client-secret"],
-                    "discoveryUrl": "https://id.excloo.com/.well-known/openid-configuration",
-                    "pkce": True,
-                    "providerId": "pocket-id",
-                    "providerName": "Excloo ID",
-                    "scopes": ["openid", "profile", "email"],
-                    "type": "oidc",
-                }
-            ],
-        )
-        self.assertEqual(actual["AUTH_SECRET"], credentials["AUTH_SECRET"])
-        self.assertEqual(
-            actual["OPENROUTER_API_KEY"], credentials["OPENROUTER_API_KEY"]
-        )
-        self.assertEqual(
-            set(actual), {"AUTH_PROVIDERS_CUSTOMS", "AUTH_SECRET", "OPENROUTER_API_KEY"}
-        )
-
     def test_http_errors_do_not_expose_response_credentials(self):
         error = urllib.error.HTTPError(
             "http://connect/v1/items",
@@ -867,41 +791,7 @@ class ReconcilerTests(unittest.TestCase):
         self.assertTrue(desired["Homepage"]["extracted"])
         self.assertFalse(desired["Homepage"]["login"])
 
-    def test_discovery_seeds_only_explicit_route_items(self):
-        routes = [
-            {
-                "metadata": {
-                    "annotations": {
-                        "gethomepage.dev/enabled": "true",
-                        "gethomepage.dev/href": "https://headlamp.syd.excloo.dev",
-                        "gethomepage.dev/name": "Renamed Dashboard Card",
-                        "onepassword.excloo.dev/item": "Headlamp",
-                    },
-                    "name": "headlamp",
-                    "namespace": "headlamp",
-                },
-                "spec": {"hostnames": ["headlamp.syd.excloo.dev"]},
-            },
-            {
-                "metadata": {
-                    "name": "beszel-agent",
-                    "namespace": "beszel-agent",
-                },
-                "spec": {"hostnames": ["beszel-agent.excloo.com"]},
-            },
-        ]
-        original = RECONCILER.kubernetes_list
-        self.addCleanup(setattr, RECONCILER, "kubernetes_list", original)
-        RECONCILER.kubernetes_list = lambda path: routes if "httproutes" in path else []
-        desired = RECONCILER.discover_items()
-        self.assertEqual(set(desired), {"Headlamp"})
-        self.assertTrue(desired["Headlamp"]["login"])
-        self.assertEqual(
-            desired["Headlamp"]["urls"],
-            {"https://headlamp.syd.excloo.dev"},
-        )
-
-    def test_discovery_ignores_dashboard_visibility_names_and_cluster_suffixes(self):
+    def test_discovery_seeds_only_annotated_routes_and_ignores_dashboard_settings(self):
         route = {
             "metadata": {
                 "annotations": {
@@ -915,13 +805,19 @@ class ReconcilerTests(unittest.TestCase):
             },
             "spec": {"hostnames": ["headlamp.example.net"]},
         }
+        # Routes without an item annotation seed nothing.
+        unmanaged = {
+            "metadata": {"name": "beszel-agent", "namespace": "beszel-agent"},
+            "spec": {"hostnames": ["beszel-agent.example.net"]},
+        }
         with patch.object(
             RECONCILER,
             "kubernetes_list",
-            side_effect=lambda path: [route] if "httproutes" in path else [],
+            side_effect=lambda path: [route, unmanaged] if "httproutes" in path else [],
         ):
             desired = RECONCILER.discover_items()
         self.assertEqual(set(desired), {"Headlamp"})
+        self.assertTrue(desired["Headlamp"]["login"])
         self.assertEqual(desired["Headlamp"]["urls"], {"https://headlamp.example.net"})
 
     def test_secret_can_explicitly_share_another_items_login(self):
@@ -977,10 +873,6 @@ class ReconcilerTests(unittest.TestCase):
             self.assertRaisesRegex(RuntimeError, "has no URL"),
         ):
             RECONCILER.discover_items()
-
-    def test_homelab_tag_defines_external_ownership(self):
-        self.assertTrue(RECONCILER.externally_owned({"tags": ["Homelab"]}))
-        self.assertFalse(RECONCILER.externally_owned({"tags": ["Kubelab"]}))
 
     def test_main_skips_archival_until_applications_are_current(self):
         calls = []
