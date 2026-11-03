@@ -48,7 +48,7 @@ spec:
                 memory: 384Mi
             # s6-overlay needs the image's /run, which is writable only by its node user.
             securityContext:
-              readOnlyRootFilesystem: null
+              readOnlyRootFilesystem: false
       chrome:
         containers:
           chrome:

@@ -100,13 +100,6 @@ spec:
               requests:
                 cpu: 20m
                 memory: 128Mi
-        defaultContainerOptions:
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop:
-                - ALL
     persistence:
       # Settings live in the repository, so RomM's settings page is read-only.
       configuration:

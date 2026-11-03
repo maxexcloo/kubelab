@@ -38,12 +38,6 @@ spec:
               requests:
                 cpu: 5m
                 memory: 8Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
           main:
             # SignTools writes this configuration, including the GitHub token, at
             # startup; restart the workload after credential changes.

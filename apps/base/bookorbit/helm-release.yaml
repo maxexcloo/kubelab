@@ -35,7 +35,7 @@ spec:
                 cpu: 50m
                 memory: 256Mi
             securityContext:
-              readOnlyRootFilesystem: null
+              readOnlyRootFilesystem: false
     persistence:
       bookdrop:
         existingClaim: bookdrop

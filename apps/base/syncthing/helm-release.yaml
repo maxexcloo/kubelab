@@ -53,12 +53,6 @@ spec:
               HOME: /var/syncthing
               STHOMEDIR: /var/syncthing/config
             image: *syncthing-image
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
     defaultPodOptions:
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true

@@ -6,7 +6,6 @@ spec:
   values:
     controllers:
       main:
-        defaultContainerOptionsStrategy: merge
         containers:
           main:
             env:
@@ -81,12 +80,7 @@ spec:
               runAsUser: 999
         defaultContainerOptions:
           securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
             runAsNonRoot: true
-            capabilities:
-              drop:
-                - ALL
     defaultPodOptions:
       securityContext:
         fsGroup: null
