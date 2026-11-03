@@ -106,6 +106,9 @@ spec:
               drop:
                 - ALL
     defaultPodOptions:
+      # kubectl exec and logs reach Studio, not the ctrld sidecar listed before it.
+      annotations:
+        kubectl.kubernetes.io/default-container: studio
       # Studio's service account scales the GPU workloads.
       automountServiceAccountToken: true
       # ctrld answers first. It forwards *.local names to the private nameserver after
