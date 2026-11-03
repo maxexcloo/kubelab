@@ -85,7 +85,7 @@ for cluster_file in "${manifest_directory}"/clusters/*.yaml; do
         @json
       ' - | sed '/^null$/d; /^$/d' >>"${inventory_file}"
     CLUSTER="${cluster}" yq eval -I=0 -N -o=json '
-      select(.kind == "ClusterSecretStore" or .kind == "ExternalSecret" or .kind == "SecretStore") |
+      select(.kind == "ClusterSecretStore" or .kind == "CloudflareAccessApplication" or .kind == "ExternalSecret" or .kind == "SecretStore") |
       .cluster = strenv(CLUSTER)
     ' "${manifest_directory}/${target}.yaml" | sed '/^null$/d; /^$/d' >>"${secret_file}"
   done < <(
