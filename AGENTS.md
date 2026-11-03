@@ -57,7 +57,8 @@ published image.
 - Public apps that require a login before the app declare a
   `CloudflareAccessApplication` beside them, with bypass paths for clients that
   cannot log in. Homelab owns the identity provider, shared policies and token.
-  Tailnet clients never pass through Access.
+  Tailnet clients never pass through Access, so these apps' Homepage widgets
+  use the private `<app>.${cluster_name}.excloo.dev` alias.
 - Mini apps use only `<name>.mini.excloo.com`.
 - Cluster applications default to internal nodes; cluster overlays select
   external workloads. Node network labels describe host locality, independently
