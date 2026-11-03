@@ -17,6 +17,7 @@ spec:
               OIDC_ENDPOINT: https://${identity_host}
               PHP_OPCACHE_ENABLE: "1"
               REGISTRATION_ENABLED: "0"
+              TOGGLE_MCP: "true"
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
