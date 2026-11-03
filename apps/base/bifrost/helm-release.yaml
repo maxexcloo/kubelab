@@ -223,17 +223,33 @@ spec:
         authConfig:
           existingSecret: bifrost
           isEnabled: false
-        # cloud/auto takes the first model that answers: Refuseless's abliterated models, then
-        # Deploy's originals.
+        # cloud/auto takes the first original model that answers, and cloud/uncensored the
+        # first abliterated one.
         routingRules:
           - id: cloud
             name: Cloud
-            cel_expression: "provider == 'cloud'"
+            cel_expression: "provider == 'cloud' && model == 'auto'"
             enabled: true
             fallbacks:
-              - refuseless/glm-5.3-flash-abliterated
-              - deploy/deepseek-ai/deepseek-v4.1-flash-1017
-              - deploy/zai-org/glm-5.3-flash
+              - model: zai-org/glm-5.3-flash
+                provider: deploy
+              - model: deepseek-flash
+                provider: deepseek
+            priority: 0
+            scope: global
+            targets:
+              - provider: deploy
+                model: deepseek-ai/deepseek-v4.1-flash-1017
+                weight: 1.0
+          - id: cloud-uncensored
+            name: Cloud Uncensored
+            cel_expression: "provider == 'cloud' && model == 'uncensored'"
+            enabled: true
+            fallbacks:
+              - model: glm-5.3-flash-abliterated
+                provider: refuseless
+              - model: abliterated-model-large-v2
+                provider: abliteration
             priority: 0
             scope: global
             targets:
@@ -306,9 +322,15 @@ spec:
           - id: studio
             name: Studio
             value: env.VIRTUAL_KEY_STUDIO
-            # The cloud rule's targets need their own provider too.
+            # The cloud rules' targets and fallbacks need their own provider too.
             provider_configs:
+              - provider: abliteration
+                allowed_models: ["*"]
+                key_ids: ["*"]
               - provider: cloud
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: deepseek
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: deploy
@@ -410,7 +432,7 @@ spec:
           network_config:
             allow_private_network: true
             base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-        # Only lists cloud/auto, which the cloud routing rule sends on.
+        # Only lists cloud/auto and cloud/uncensored, which the cloud routing rules send on.
         cloud:
           custom_provider_config:
             base_provider_type: openai
@@ -435,7 +457,8 @@ spec:
               value: env.DEPLOY_API_KEY
           network_config:
             base_url: https://api.deploy.com/api
-        # The router sends local/auto to the first running local text model.
+        # The router sends local/auto and local/uncensored to the first running local text model
+        # that suits.
         local:
           custom_provider_config:
             base_provider_type: openai

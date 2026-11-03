@@ -49,8 +49,8 @@ endpoints:
       - web_search
   custom:
     # Every section reaches its provider through Bifrost, which lists that provider's models
-    # for x-bf-model-provider. cloud/auto and local/auto take the first cloud or running local
-    # model; set reasoning with the Reasoning Effort parameter.
+    # for x-bf-model-provider. cloud/ and local/ take the first cloud or running local model,
+    # with /uncensored limited to uncensored ones; set reasoning with the Reasoning Effort parameter.
     - &ai
       name: AI
       apiKey: ${BIFROST_API_KEY}
@@ -58,7 +58,9 @@ endpoints:
       models:
         default:
           - cloud/auto
+          - cloud/uncensored
           - local/auto
+          - local/uncensored
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
       # LibreChat assumes 32k for unknown models and summarises too early. Bifrost reports no
