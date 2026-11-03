@@ -6,7 +6,17 @@ spec:
   values:
     controllers:
       main:
+        # Every container in the controller, sidecars and init containers
+        # included, starts from this hardening and overrides only what it needs.
+        defaultContainerOptionsStrategy: merge
         strategy: Recreate
+        defaultContainerOptions:
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
         containers:
           main:
             nameOverride: "{{ .Release.Name }}"
@@ -30,12 +40,6 @@ spec:
                 spec:
                   failureThreshold: 30
                   timeoutSeconds: 5
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
     defaultPodOptions:
       securityContext:
         fsGroup: 568

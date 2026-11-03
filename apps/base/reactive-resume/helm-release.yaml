@@ -66,12 +66,6 @@ spec:
               requests:
                 cpu: 10m
                 memory: 32Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
     persistence:
       data:
         existingClaim: data

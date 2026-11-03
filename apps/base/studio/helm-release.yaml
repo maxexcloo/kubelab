@@ -6,7 +6,6 @@ spec:
   values:
     controllers:
       main:
-        defaultContainerOptionsStrategy: merge
         containers:
           # Civitai refuses the cluster's egress (HTTP 451); Studio's Control D resolver
           # redirects its domains, and ctrld sends cluster names to CoreDNS.
@@ -98,12 +97,7 @@ spec:
                 memory: 512Mi
         defaultContainerOptions:
           securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
             runAsNonRoot: true
-            capabilities:
-              drop:
-                - ALL
     defaultPodOptions:
       # kubectl exec and logs reach Studio, not the ctrld sidecar listed before it.
       annotations:
