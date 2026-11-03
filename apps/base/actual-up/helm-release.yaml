@@ -17,7 +17,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/actual-up
-              tag: 0.5.2
+              tag: 0.5.3
             probes:
               liveness:
                 path: /livez
