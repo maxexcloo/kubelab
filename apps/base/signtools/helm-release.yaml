@@ -7,6 +7,43 @@ spec:
     controllers:
       main:
         containers:
+          listing:
+            args:
+              - httpd
+              - -f
+              - -h
+              - /www
+              - -p
+              - "8090"
+            image:
+              pullPolicy: IfNotPresent
+              repository: docker.io/library/busybox
+              tag: 1.38.0
+            probes:
+              liveness: &listing-health
+                enabled: true
+                port: 8090
+                type: TCP
+                spec:
+                  timeoutSeconds: 5
+              readiness: *listing-health
+              startup:
+                <<: *listing-health
+                spec:
+                  failureThreshold: 30
+                  timeoutSeconds: 5
+            resources:
+              limits:
+                memory: 32Mi
+              requests:
+                cpu: 5m
+                memory: 8Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
           main:
             # SignTools writes this configuration, including the GitHub token, at
             # startup; restart the workload after credential changes.
@@ -24,7 +61,9 @@ spec:
               BUILDER_GITHUB_WORKFLOW_FILE_NAME: sign.yaml
               REDIRECT_HTTPS: "false"
               SAVE_DIR: /data
-              SERVER_URL: https://app.invalid
+              # SignTools gives this address to the Tailscale-connected builder; install
+              # links follow the request host.
+              SERVER_URL: https://signtools.${cluster_name}.excloo.dev
               SIGN_TIMEOUT_MINS: "30"
             envFrom:
               - secretRef:
@@ -48,9 +87,9 @@ spec:
           oauth2-proxy:
             env:
               OAUTH2_PROXY_REDIRECT_URL: https://app.invalid/oauth2/callback
-              # Over-the-air installs, signed files and the builder work without a
-              # browser session (SignTools INSTALL.md, Reverse proxy).
-              OAUTH2_PROXY_SKIP_AUTH_ROUTES: ^/apps/[^/]+/,^/files/,^/jobs(/|$)
+              # Over-the-air installs and the builder work without a browser session
+              # (SignTools INSTALL.md, Reverse proxy); other app paths change state.
+              OAUTH2_PROXY_SKIP_AUTH_ROUTES: ^/apps/[^/]+/(install|manifest|signed)$,^/files/,^/jobs(/|$)
               UPSTREAM_URI: http://127.0.0.1:8080
     persistence:
       data:
@@ -58,6 +97,16 @@ spec:
         type: persistentVolumeClaim
         globalMounts:
           - path: /data
+      listing:
+        # Busybox httpd runs only executable CGI scripts (0555).
+        defaultMode: 365
+        name: signtools-listing
+        type: configMap
+        advancedMounts:
+          main:
+            listing:
+              - path: /www/cgi-bin
+                readOnly: true
       profile:
         name: signtools-profile
         type: secret
@@ -69,7 +118,18 @@ spec:
         medium: Memory
     route:
       private:
+        hostnames:
+          - app.invalid
+        labels:
+          app.kubernetes.io/name: "{{ .Release.Name }}"
+        parentRefs:
+          - name: private
+            namespace: networking
+      # Publicly, only the app listing and install paths exist; the private route
+      # keeps the SignTools interface on the same hostname.
+      public:
         annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: iOS App Signing & Installation
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
@@ -77,13 +137,32 @@ spec:
           gethomepage.dev/icon: mdi-apple-#ffffff
           gethomepage.dev/name: &title SignTools
           monitoring.excloo.dev/enabled: "true"
-          # oauth2-proxy answers /ping without a session.
-          monitoring.excloo.dev/path: /ping
           onepassword.excloo.dev/item: *title
         hostnames:
-          - signtools.excloo.com
+          - apps.excloo.com
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
+          gateway.excloo.dev/public-access: "true"
         parentRefs:
-          - name: private
+          - name: public-tunnel
             namespace: networking
+        rules:
+          - backendRefs:
+              - identifier: main
+                port: 8090
+            matches:
+              - path:
+                  type: Exact
+                  value: /
+          - backendRefs:
+              - identifier: main
+                port: 4180
+            matches:
+              - path:
+                  type: RegularExpression
+                  value: ^/apps/[^/]+/(install|manifest|signed)$
+    service:
+      main:
+        ports:
+          listing:
+            port: 8090
