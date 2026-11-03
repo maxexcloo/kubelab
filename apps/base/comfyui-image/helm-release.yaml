@@ -110,7 +110,7 @@ spec:
           gethomepage.dev/icon: sh-comfyui
           gethomepage.dev/name: ComfyUI Image
         hostnames:
-          - comfy.excloo.com
+          - comfyui-image.${cluster_name}.excloo.dev
         parentRefs:
           - name: private
             namespace: networking

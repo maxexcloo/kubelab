@@ -13,7 +13,7 @@ resources:
   - ../../base/bifrost
   - ../../base/bookorbit
   - ../../base/cliproxyapi
-  - ../../base/comfyui
+  - ../../base/comfyui-image
   - ../../base/comfyui-video
   - ../../base/home-assistant
   - ../../base/home-assistant-mcp

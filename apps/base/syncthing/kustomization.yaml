@@ -9,7 +9,6 @@ resources:
 components:
   - ../../components/application
   - ../../components/oauth2-proxy
-  - ../../components/private-dns
 configMapGenerator:
   - name: syncthing-auth
     files:
@@ -29,9 +28,18 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.oauth2-proxy.env.OAUTH2_PROXY_REDIRECT_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
           - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
         options:
           delimiter: /
           index: 2
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
 transformers:
-  - ../../transformers/route-private
+  - ../../transformers/cluster-scoped

@@ -8,11 +8,20 @@ resources:
   - service.yaml
 components:
   - ../../components/gpu
-  - ../../components/private-dns
   - ../../components/workload
 patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
-transformers:
-  - ../../transformers/route-private
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2

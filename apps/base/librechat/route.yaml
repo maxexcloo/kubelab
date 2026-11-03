@@ -3,6 +3,7 @@ kind: HTTPRoute
 metadata:
   name: librechat
   annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
     gethomepage.dev/description: AI Chat
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Artificial Intelligence
@@ -13,9 +14,27 @@ metadata:
     onepassword.excloo.dev/item: *title
   labels:
     app.kubernetes.io/name: librechat
+    gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:
     - chat.excloo.com
+  parentRefs:
+    - name: public-tunnel
+      namespace: networking
+  rules:
+    - backendRefs:
+        - name: librechat
+          port: 3080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: librechat-private
+  labels:
+    app.kubernetes.io/name: librechat
+spec:
+  hostnames:
+    - app.invalid
     - librechat.${cluster_name}.excloo.dev
   parentRefs:
     - name: private

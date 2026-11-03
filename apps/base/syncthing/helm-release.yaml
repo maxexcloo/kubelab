@@ -130,7 +130,7 @@ spec:
           monitoring.excloo.dev/path: /rest/noauth/health
           onepassword.excloo.dev/item: *title
         hostnames:
-          - syncthing.excloo.com
+          - syncthing.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

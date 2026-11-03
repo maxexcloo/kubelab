@@ -68,7 +68,7 @@ spec:
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /
         hostnames:
-          - atvloadly.excloo.com
+          - atvloadly.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

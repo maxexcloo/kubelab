@@ -154,20 +154,7 @@ spec:
               - path: /meili_data
     route:
       private:
-        hostnames:
-          - app.invalid
-        labels:
-          app.kubernetes.io/name: "{{ .Release.Name }}"
-        parentRefs:
-          - name: private
-            namespace: networking
-        rules:
-          - backendRefs:
-              - name: "{{ .Release.Name }}"
-                port: 3000
-      public:
         annotations:
-          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: Bookmark Manager
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
@@ -185,9 +172,8 @@ spec:
           - links.excloo.com
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
-          gateway.excloo.dev/public-access: "true"
         parentRefs:
-          - name: public-tunnel
+          - name: private
             namespace: networking
         rules:
           - backendRefs:

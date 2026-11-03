@@ -8,7 +8,6 @@ resources:
   - storage.yaml
 components:
   - ../../components/application
-  - ../../components/private-dns
 patches:
   - path: helm-release.yaml
     target:
@@ -23,8 +22,7 @@ replacements:
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.BICHON_CORS_ORIGINS
           - spec.values.controllers.main.containers.main.env.BICHON_PUBLIC_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
         options:
           delimiter: /
           index: 2
-transformers:
-  - ../../transformers/route-private
