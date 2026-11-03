@@ -13,7 +13,8 @@ metadata:
 spec:
   hostname: app.invalid
   name: "Reactive Resume: Public"
-  # Shared resumes for maxexcloo, their downloads and preview cards.
+  # Shared resumes for maxexcloo, their downloads, preview cards and public
+  # pictures, which Reactive Resume stores under the account's user ID.
   paths:
     - api/resumes/maxexcloo
     - cards/maxexcloo
@@ -21,3 +22,4 @@ spec:
     - favicon.svg
     - maxexcloo
     - opengraph/banner.jpg
+    - uploads/01a15753-3c69-74b0-b591-2768e722a721/pictures
