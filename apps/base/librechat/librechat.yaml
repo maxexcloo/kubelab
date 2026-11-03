@@ -232,21 +232,6 @@ mcpServers:
         title: Personal API Key
     headers:
       x-bf-vk: "{{LARAPAPER_API_KEY}}"
-  miniflux:
-    type: streamable-http
-    description: Read and manage feeds, categories and entries in Miniflux.
-    requiresOAuth: false
-    startup: false
-    title: Miniflux
-    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/miniflux
-    # Bifrost's server uses the owner's Miniflux API key, so only authorised personal keys reach it.
-    customUserVars:
-      MINIFLUX_API_KEY:
-        description: Your personal Bifrost virtual key authorised for Miniflux. Ordinary chat keys cannot access these tools.
-        sensitive: true
-        title: Personal API Key
-    headers:
-      x-bf-vk: "{{MINIFLUX_API_KEY}}"
   reactive-resume:
     type: streamable-http
     description: Read and edit resumes, cover letters and job applications in Reactive Resume.

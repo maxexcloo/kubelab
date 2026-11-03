@@ -26,7 +26,6 @@ resources:
   - ../../base/librechat
   - ../../base/librechat-admin
   - ../../base/miniflux
-  - ../../base/miniflux-mcp
   - ../../base/minilab
   - ../../base/openspeedtest
   - ../../base/papra
