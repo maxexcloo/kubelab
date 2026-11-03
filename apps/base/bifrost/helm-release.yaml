@@ -283,6 +283,14 @@ spec:
                 tools_to_execute: ["*"]
               - mcp_client_name: home_assistant
                 tools_to_execute: ["*"]
+              - mcp_client_name: immich
+                tools_to_execute: ["*"]
+              - mcp_client_name: karakeep
+                tools_to_execute: ["*"]
+              - mcp_client_name: larapaper
+                tools_to_execute: ["*"]
+              - mcp_client_name: miniflux
+                tools_to_execute: ["*"]
               - mcp_client_name: reactive_resume
                 tools_to_execute: ["*"]
               - mcp_client_name: unifi_network
@@ -378,6 +386,38 @@ spec:
               url: http://home-assistant-mcp.home-assistant-mcp.svc.cluster.local:8086/mcp
             connectionType: http
             endpointSlug: home-assistant
+            toolsToExecute: ["*"]
+          - name: immich
+            authType: none
+            httpConfig:
+              url: http://immich-mcp.immich-mcp.svc.cluster.local:5000/mcp
+            connectionType: http
+            endpointSlug: immich
+            toolsToExecute: ["*"]
+          - name: karakeep
+            authType: none
+            httpConfig:
+              url: http://karakeep-mcp.karakeep-mcp.svc.cluster.local:8000/mcp
+            connectionType: http
+            endpointSlug: karakeep
+            toolsToExecute: ["*"]
+          - name: larapaper
+            authType: headers
+            httpConfig:
+              url: http://larapaper.larapaper.svc.cluster.local:8080/mcp
+            connectionType: http
+            endpointSlug: larapaper
+            headers:
+              Authorization: env.LARAPAPER_MCP_AUTHORIZATION
+            toolsToExecute: ["*"]
+          - name: miniflux
+            authType: headers
+            httpConfig:
+              url: http://miniflux-mcp.miniflux-mcp.svc.cluster.local:8080/mcp
+            connectionType: http
+            endpointSlug: miniflux
+            headers:
+              Authorization: env.MINIFLUX_MCP_AUTHORIZATION
             toolsToExecute: ["*"]
           - name: reactive_resume
             authType: headers

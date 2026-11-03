@@ -5,6 +5,13 @@ metadata:
 spec:
   ingress:
     - from:
+        # The Karakeep MCP server calls the API.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: karakeep-mcp
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: karakeep-mcp
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking

@@ -19,11 +19,14 @@ resources:
   - ../../base/home-assistant-mcp
   - ../../base/homepage
   - ../../base/immich
+  - ../../base/immich-mcp
   - ../../base/karakeep
+  - ../../base/karakeep-mcp
   - ../../base/larapaper
   - ../../base/librechat
   - ../../base/librechat-admin
   - ../../base/miniflux
+  - ../../base/miniflux-mcp
   - ../../base/minilab
   - ../../base/openspeedtest
   - ../../base/papra

@@ -1,0 +1,36 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            env:
+              MCP_TRANSPORT: streamable-http
+              MINIFLUX_URL: http://miniflux.miniflux.svc.cluster.local:8080
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}"
+            image:
+              pullPolicy: IfNotPresent
+              repository: docker.io/jwonder/miniflux-mcp
+              tag: 0.8.0
+            probes:
+              liveness: &health
+                path: /healthz
+              readiness: *health
+              startup: *health
+            resources:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 10m
+                memory: 32Mi
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
