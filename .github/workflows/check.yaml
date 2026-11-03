@@ -30,6 +30,8 @@ jobs:
           tools: actionlint gh helm hk jq node@24 npm:renovate oxfmt python ruff shellcheck yq
       - name: Run Checks
         run: mise run check
+      - name: Render Homepage Services From Homelab
+        run: mise run check:homelab
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         name: Refresh External Monitoring
         env:
