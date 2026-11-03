@@ -283,6 +283,9 @@ spec:
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - *running-models
+              - provider: deploy
+                allowed_models: ["*"]
+                key_ids: ["*"]
               - provider: local
                 allowed_models: ["*"]
                 key_ids: ["*"]
