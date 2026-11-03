@@ -9,14 +9,41 @@ spec:
       web:
         expose:
           private: true
+      webdirect:
+        exposedPort: 80
+        port: 8082
+        protocol: TCP
+        expose:
+          default: false
+          direct: true
+        http:
+          redirections:
+            entryPoint:
+              permanent: true
+              scheme: https
+              to: websecuredirect
       websecure:
         expose:
           private: true
+      websecuredirect:
+        exposedPort: 443
+        port: 8444
+        protocol: TCP
+        expose:
+          default: false
+          direct: true
     resources:
       requests:
         cpu: 25m
     service:
       additionalServices:
+        direct:
+          spec:
+            externalTrafficPolicy: Local
+            externalIPs:
+              - 10.20.0.4
+            internalTrafficPolicy: Local
+            type: ClusterIP
         private:
           annotations:
             tailscale.com/hostname: syd-ingress

@@ -45,7 +45,7 @@ jq -e \
       source: ("PrivateDNSRecord/" + .metadata.namespace + "/" + .metadata.name)
     })) as $private_dns |
     def public_route:
-      .parentRefs | any(. == "public-tunnel");
+      .parentRefs | any(. == "public-direct" or . == "public-tunnel");
     def tunnel_route:
       .parentRefs | any(. == "public-tunnel");
     def missing_required:

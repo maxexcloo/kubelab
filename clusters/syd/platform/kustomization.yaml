@@ -4,6 +4,7 @@ resources:
   - ../../../platform
   - observability/backups
   - certificate.yaml
+  - gateway-public-direct.yaml
 patches:
   - path: secret-store.yaml
   - path: tailscale.yaml
