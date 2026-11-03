@@ -116,6 +116,10 @@ endpoints:
       headers:
         x-bf-model-provider: opencode-zen
     - <<: *provider
+      name: OpenRouter
+      headers:
+        x-bf-model-provider: openrouter
+    - <<: *provider
       name: Refuseless
       headers:
         x-bf-model-provider: refuseless
