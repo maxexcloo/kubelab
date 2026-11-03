@@ -362,6 +362,15 @@ class ReconcilerTests(unittest.TestCase):
         self.assertEqual(fields["external-token"]["type"], "CONCEALED")
         self.assertNotIn("generate", fields["external-token"])
         self.assertEqual(fields["certificate-base64"]["type"], "CONCEALED")
+        # Connect returns a stored placeholder without a value; leave it unchanged.
+        stored = copy.deepcopy(result)
+        for field in stored["fields"]:
+            if field.get("value") == "":
+                del field["value"]
+        again = RECONCILER.normalise_item(
+            copy.deepcopy(stored), "Application", desired, "vault"
+        )
+        self.assertEqual(RECONCILER.comparable(again), RECONCILER.comparable(stored))
 
     def test_laravel_key_is_generated_once_with_the_required_encoding(self):
         desired = item_configuration(

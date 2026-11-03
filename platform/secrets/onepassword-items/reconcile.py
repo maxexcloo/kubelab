@@ -462,6 +462,9 @@ def normalise_item(current, title, desired, vault_id, *, allow_removal=False):
             replacement = generated_field(
                 label, field_format=desired["formats"].get(label)
             )
+        elif field is not None:
+            # Connect omits empty values, so an existing placeholder stays as stored.
+            continue
         else:
             # Referenced external credentials get a placeholder, never a random value.
             replacement = generated_field(label, value="")
