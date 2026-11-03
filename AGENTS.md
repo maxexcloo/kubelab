@@ -79,8 +79,9 @@ published image.
   integration logic; document the contract in its schema and compose standard
   resources underneath.
 - The 1Password item reconciler in `platform/secrets/onepassword-items` is the
-  approved narrow exception: a scheduled job that updates referenced items and
-  prunes unreferenced fields and archives unreferenced Kubelab-tagged items. Its
+  approved narrow exception: a scheduled job that creates missing referenced
+  items and fields, leaving external credentials as empty placeholders, prunes
+  unreferenced fields and archives unreferenced Kubelab-tagged items. Its
   contract lives beside it.
 - Use Kustomize for composition and small patches. Use `configMapGenerator` only
   to mount checked-in app configuration, scripts or assets; do not use

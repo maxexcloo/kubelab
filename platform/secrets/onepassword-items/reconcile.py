@@ -527,18 +527,13 @@ def replaceable(item, desired):
     )
 
 
-def item_ids(desired, summaries):
+def item_ids(summaries):
     ids = {}
     for summary in summaries:
         title = summary["title"]
         if title in ids:
             raise RuntimeError(f"duplicate 1Password item title: {title}")
         ids[title] = summary["id"]
-    missing = sorted(set(desired) - set(ids))
-    if missing:
-        raise RuntimeError(
-            f"referenced 1Password items are missing: {', '.join(missing)}"
-        )
     return ids
 
 
@@ -552,7 +547,7 @@ def main():
     vault_id = vaults[0]["id"]
     desired = discover_items()
     summaries = connect(f"/vaults/{vault_id}/items")
-    ids = item_ids(desired, summaries)
+    ids = item_ids(summaries)
     try:
         archive_ready = flux_ready()
     except RuntimeError as error:
@@ -562,7 +557,21 @@ def main():
         if not archive_ready:
             print("skipped removals because Flux resources are not fully reconciled")
     changed = 0
+    failed = []
+    prefix = "would be " if dry_run else ""
     for title, configuration in sorted(desired.items()):
+        if title not in ids:
+            # PushSecrets create their own items; creating one here too would race
+            # them into duplicate titles.
+            if configuration["pushed"]:
+                continue
+            # A missing item starts empty, so every referenced field gets a placeholder.
+            wanted = normalise_item({"title": title}, title, configuration, vault_id)
+            if not dry_run:
+                connect(f"/vaults/{vault_id}/items", body=wanted, method="POST")
+            changed += 1
+            print(f"{title} {prefix}created")
+            continue
         current = connect(f"/vaults/{vault_id}/items/{ids[title]}")
         if externally_owned(current):
             continue
@@ -577,7 +586,9 @@ def main():
         if replace and not replaceable(current, configuration):
             # Connect cannot change a category in place; replacing the item would
             # discard its history and generated credentials.
-            raise RuntimeError(f"1Password item {title} has the wrong category")
+            print(f"{title} has the wrong category; skipped")
+            failed.append(title)
+            continue
         if comparable(current) == comparable(wanted):
             continue
         if not dry_run:
@@ -599,9 +610,12 @@ def main():
                     method="PUT",
                 )
         changed += 1
-        prefix = "would be " if dry_run else ""
         action = "recreated" if replace else "updated"
         print(f"{wanted['title']} {prefix}{action}")
+    if failed:
+        raise RuntimeError(
+            f"1Password items have the wrong category: {', '.join(failed)}"
+        )
     if not archive_ready:
         print(f"reconciled {len(desired)} items; changed {changed}")
         return
@@ -615,7 +629,6 @@ def main():
         if not dry_run:
             connect(f"/vaults/{vault_id}/items/{summary['id']}", method="DELETE")
         changed += 1
-        prefix = "would be " if dry_run else ""
         print(f"{title} {prefix}archived")
     print(f"reconciled {len(desired)} items; changed {changed}")
 
