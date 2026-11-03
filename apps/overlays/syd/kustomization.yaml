@@ -115,11 +115,11 @@ replacements:
       fieldPath: spec.hostnames.0
     targets:
       - select:
-          kind: Deployment
+          kind: HelmRelease
           name: librechat-admin
           namespace: librechat-admin
         fieldPaths:
-          - spec.template.spec.containers.[name=admin].env.[name=VITE_API_BASE_URL].value
+          - spec.values.controllers.main.containers.main.env.VITE_API_BASE_URL
         options:
           delimiter: /
           index: 2
