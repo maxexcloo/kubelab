@@ -16,7 +16,7 @@ spec:
                   - ROUTE_HOST
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
               # The Chat tab uses the assistant's gateway with these models.
-              STUDIO_CHAT_MODELS: local/auto,cloud/auto
+              STUDIO_CHAT_MODELS: local/auto,local/uncensored,cloud/auto,cloud/uncensored
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
               STUDIO_CLIPROXYAPI_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
               STUDIO_ENABLE_PRESETS: "1"
@@ -39,7 +39,7 @@ spec:
               STUDIO_OIDC_LABEL: Pocket ID
               STUDIO_OIDC_REDIRECT_URI: https://app.invalid/api/accounts/oidc/callback
               # Studio's assistant writes through Bifrost with its own key (external-secrets.yaml).
-              STUDIO_ASSISTANT_CLOUD_MODEL: cloud/auto
+              STUDIO_ASSISTANT_CLOUD_MODEL: cloud/uncensored
               STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
               BIFROST_HOST: bifrost.invalid
               HOST: 0.0.0.0
