@@ -24,6 +24,12 @@ spec:
               secretKeyRef:
                 key: BIFROST_API_KEY
                 name: bifrost
+          # The owner's user override in the admin panel sends this key to the restricted MCP servers.
+          - name: BIFROST_OWNER_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: BIFROST_OWNER_API_KEY
+                name: bifrost
         existingSecretName: librechat
     image:
       pullPolicy: IfNotPresent

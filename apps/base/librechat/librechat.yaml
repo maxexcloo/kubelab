@@ -156,6 +156,8 @@ mcpSettings:
     - bifrost.bifrost.svc.cluster.local:8080
 # Bifrost's config declares the MCP servers and serves each at /mcp/<slug>.
 # Grant keys access in Bifrost's config and add an entry here to offer a server.
+# The owner's user override in the admin panel replaces each customUserVars key with
+# ${BIFROST_OWNER_API_KEY}; extend it when adding a restricted server.
 mcpServers:
   actual-budget:
     type: streamable-http
