@@ -1,0 +1,138 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: cloudflare-access-application
+spec:
+  compositeTypeRef:
+    apiVersion: automation.excloo.dev/v1alpha1
+    kind: CloudflareAccessApplication
+  mode: Pipeline
+  pipeline:
+    - step: patch-and-transform
+      functionRef:
+        name: crossplane-contrib-function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: application
+            base:
+              apiVersion: http.m.crossplane.io/v1alpha2
+              kind: Request
+              metadata:
+                name: cloudflare-access
+              spec:
+                managementPolicies: [Create, Delete, LateInitialize, Observe, Update]
+                forProvider:
+                  # The wanted application is inlined because the provider resolves
+                  # secret references in the check logic but not in .payload.
+                  expectedResponseCheck:
+                    logic: "false"
+                    type: CUSTOM
+                  headers:
+                    Content-Type: [application/json]
+                    User-Agent: [kubelab-crossplane/1.0]
+                  isRemovedCheck:
+                    logic: |-
+                      .payload.body.name as $name |
+                      .response.statusCode == 200
+                      and .response.body.success == true
+                      and (.response.body.result | type) == "array"
+                      and (any(.response.body.result[]; .name == $name) | not)
+                    type: CUSTOM
+                  mappings:
+                    - action: CREATE
+                      body: &application |-
+                        .payload.body.hostname as $hostname
+                        | (.payload.body.paths // []) as $paths
+                        | (if ($paths | length) > 0
+                            then [$paths[] | $hostname + "/" + .]
+                            else [$hostname]
+                          end) as $uris
+                        | {
+                            name: .payload.body.name,
+                            type: "self_hosted",
+                            domain: $uris[0],
+                            destinations: [$uris[] | {type: "public", uri: .}],
+                            app_launcher_visible: (($paths | length) == 0),
+                            auto_redirect_to_identity: true,
+                            policies: (if ($paths | length) > 0
+                              then [{id: "{{ cloudflare-access:crossplane-system:bypass }}", precedence: 1}]
+                              else [
+                                {id: "{{ cloudflare-access:crossplane-system:excloo-id }}", precedence: 1},
+                                {id: "{{ cloudflare-access:crossplane-system:gatus }}", precedence: 2}
+                              ]
+                            end)
+                          }
+                      method: POST
+                      url: .payload.baseUrl
+                    - action: OBSERVE
+                      url: .payload.baseUrl + "?name=" + (.payload.body.name | @uri)
+                    # Deletion repeats until no application carries the name, which also clears duplicates.
+                    - action: REMOVE
+                      method: DELETE
+                      url: &id |-
+                        .payload.body.name as $name
+                        | .payload.baseUrl + "/" + first(.response.body.result[] | select(.name == $name) | .id)
+                    - action: UPDATE
+                      body: *application
+                      method: PUT
+                      url: *id
+                  payload:
+                    baseUrl: https://api.cloudflare.com/client/v4/accounts/{{ cloudflare-access:crossplane-system:account-id }}/access/apps
+                    body: "{}"
+                providerConfigRef:
+                  kind: ClusterProviderConfig
+                  name: cloudflare-access
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "%s-access"
+                      type: Format
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec
+                toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: string
+                    string:
+                      convert: ToJson
+                      type: Convert
+              # One application must match the name, destinations and policies in order.
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec
+                toFieldPath: spec.forProvider.expectedResponseCheck.logic
+                transforms:
+                  - type: string
+                    string:
+                      convert: ToJson
+                      type: Convert
+                  - type: string
+                    string:
+                      fmt: >-
+                        %s as $spec
+                        | ($spec.paths // []) as $paths
+                        | (if ($paths | length) > 0
+                            then [$paths[] | $spec.hostname + "/" + .]
+                            else [$spec.hostname]
+                          end) as $uris
+                        | (if ($paths | length) > 0
+                            then ["{{ cloudflare-access:crossplane-system:bypass }}"]
+                            else ["{{ cloudflare-access:crossplane-system:excloo-id }}", "{{ cloudflare-access:crossplane-system:gatus }}"]
+                          end) as $policies
+                        | .response.statusCode == 200
+                        and .response.body.success == true
+                        and ([.response.body.result[]? | select(.name == $spec.name)] as $apps
+                          | ($apps | length) == 1
+                          and $apps[0].type == "self_hosted"
+                          and [$apps[0].destinations[]? | .uri] == $uris
+                          and $apps[0].app_launcher_visible == (($paths | length) == 0)
+                          and $apps[0].auto_redirect_to_identity == true
+                          and ([$apps[0].policies[]?] | sort_by(.precedence) | map(.id)) == $policies)
+                      type: Format

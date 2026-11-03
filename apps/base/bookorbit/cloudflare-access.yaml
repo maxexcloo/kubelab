@@ -1,0 +1,22 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: bookorbit
+spec:
+  hostname: app.invalid
+  name: BookOrbit
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: bookorbit-clients
+spec:
+  hostname: app.invalid
+  name: "BookOrbit: Clients"
+  # OPDS readers, KOReader sync and Kobo sync authenticate to BookOrbit themselves.
+  paths:
+    - api/UserStorage*
+    - api/v1/kobo/*
+    - api/v1/koreader*
+    - api/v1/opds*
+    - api/v3*

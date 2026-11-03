@@ -54,6 +54,10 @@ published image.
   them. Only routes that must bypass Cloudflare (unproxied DNS) attach to
   `public-direct`, which anyone can reach on the external node's address; keep
   them to services with nothing to protect.
+- Public apps that require a login before the app declare a
+  `CloudflareAccessApplication` beside them, with bypass paths for clients that
+  cannot log in. Homelab owns the identity provider, shared policies and token.
+  Tailnet clients never pass through Access.
 - Mini apps use only `<name>.mini.excloo.com`.
 - Cluster applications default to internal nodes; cluster overlays select
   external workloads. Node network labels describe host locality, independently

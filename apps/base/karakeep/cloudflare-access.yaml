@@ -1,0 +1,18 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: karakeep
+spec:
+  hostname: app.invalid
+  name: Karakeep
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: karakeep-api
+spec:
+  hostname: app.invalid
+  name: "Karakeep: API"
+  # API-key clients (MCP, SDK, RSS feeds); the web UI never calls this path.
+  paths:
+    - api/v1
