@@ -1,0 +1,7 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: librechat
+spec:
+  hostname: app.invalid
+  name: LibreChat

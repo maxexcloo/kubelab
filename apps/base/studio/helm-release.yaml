@@ -57,7 +57,7 @@ spec:
               STUDIO_KUBERNETES_GPUS: '{"gpu": 2}'
               # Studio finds its workloads from the studio.excloo.dev labels on the GPU
               # Deployments in these namespaces; text ones serve local/auto.
-              STUDIO_KUBERNETES_NAMESPACES: comfyui,comfyui-video,text
+              STUDIO_KUBERNETES_NAMESPACES: comfyui-image,comfyui-video,text
               STUDIO_LOCAL_TEXT_MODEL: local/auto
               STUDIO_MCP_PUBLIC_URL:
                 dependsOn: BIFROST_HOST
@@ -140,7 +140,16 @@ spec:
               - path: /data
     route:
       private:
+        hostnames:
+          - app.invalid
+        labels:
+          app.kubernetes.io/name: "{{ .Release.Name }}"
+        parentRefs:
+          - name: private
+            namespace: networking
+      public:
         annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           gethomepage.dev/description: Image & Video Studio
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
@@ -154,8 +163,9 @@ spec:
           - studio.excloo.com
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
+          gateway.excloo.dev/public-access: "true"
         parentRefs:
-          - name: private
+          - name: public-tunnel
             namespace: networking
     service:
       main:
