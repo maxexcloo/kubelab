@@ -148,6 +148,7 @@ spec:
       - carsaustralia
       - catastrophicfailure
       - chatgptcoding
+      - comfyui
       - crackwatch
       - cscareerquestionsoce
       - datahoarder
@@ -196,12 +197,11 @@ spec:
       - organizationporn
       - outoftheloop
       - pikvm
-      - comfyui
-      - stablediffusion
       - praisethecameraman
       - privacy
       - programming
       - proxmox
+      - qwen_ai
       - raspberry_pi
       - retroarch
       - retroid
@@ -213,6 +213,7 @@ spec:
       - sideloaded
       - solotravel
       - space
+      - stablediffusion
       - steamdeck
       - sydney
       - sydneyscene
