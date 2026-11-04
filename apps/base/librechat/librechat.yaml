@@ -154,11 +154,10 @@ webSearch:
   searchProvider: keenable
   serperApiKey: ${SERPER_API_KEY}
   tavilyApiKey: ${TAVILY_API_KEY}
-# The MCP servers are internal services; exempt just their hosts and ports.
+# Bifrost's MCP gateway is an internal service; exempt just that host and port.
 mcpSettings:
   allowedAddresses:
     - bifrost.bifrost.svc.cluster.local:8080
-    - reactive-resume.reactive-resume.svc.cluster.local:3000
 # Bifrost's config declares the MCP servers and serves each at /mcp/<slug>.
 # Grant keys access in Bifrost's config and add an entry here to offer a server.
 # The owner's user override in the admin panel replaces each customUserVars key with
@@ -244,11 +243,12 @@ mcpServers:
     type: streamable-http
     description: Read and edit resumes, cover letters and job applications in Reactive Resume.
     # Reactive Resume serves MCP with OAuth, so each user connects their own account;
-    # Bifrost lists a server's tools with one stored key and cannot do this.
+    # Bifrost lists a server's tools with one stored key and cannot do this. OAuth
+    # requires the public URL, which names the protected resource.
     requiresOAuth: true
     startup: false
     title: Reactive Resume
-    url: http://reactive-resume.reactive-resume.svc.cluster.local:3000/mcp
+    url: https://resume.excloo.com/mcp
   studio:
     type: streamable-http
     description: Create and manage images and videos in Studio.

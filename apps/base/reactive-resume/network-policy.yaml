@@ -12,13 +12,6 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: bifrost
-        # LibreChat connects each user with their own API key.
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: librechat
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: librechat
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking
