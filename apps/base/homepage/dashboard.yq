@@ -38,15 +38,22 @@ map(
     with(select($route.annotations."monitoring.excloo.dev/path" != null);
       .siteMonitor = ("https://" + $route.hostnames[0] + $route.annotations."monitoring.excloo.dev/path"))) |
   # Clusters cards show placement; widgets stay on Home.
-  with(select($route.clusterView == true); del(.widget, .widgets))
+  with(select($route.clusterView == true); del(.widget, .widgets)) |
+  .location = $cluster
 ) as $applications |
 [load(strenv(SERVICES)) | .[] | to_entries | .[] |
   .key as $group | .value[] | to_entries | .[] |
   .value + {"group": $group, "name": .key,
+    "location": ((.value.description // "") | split(" • ") | .[1:] | join(" • ")),
     "tab": (["Home"] +
       ($host_groups | map(select(. == $group)) | map("Servers")) +
       ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])}] as $external |
-($external + $applications) | unique_by(.tab + "/" + .group + "/" + .name) |
+# An app's routes collapse into one card. Homepage finds cards by group and
+# name, so same-named services elsewhere keep their location in the name.
+($external + $applications) | unique_by(.tab + "/" + .group + "/" + .name + "/" + .location) |
+group_by(.tab + "/" + .group + "/" + .name) |
+map(if length > 1 then map(with(select(.location != ""); .name += " (" + .location + ")")) else . end) |
+flatten | map(del(.location)) |
 # Card size: widgets, plus extra widget rows such as storage pools.
 map(.size = ([.widget] | map(select(. != null)) | length) + (.widgets // [] | length) +
   (if .widget.enablePools == true then 1 else 0 end)) |
