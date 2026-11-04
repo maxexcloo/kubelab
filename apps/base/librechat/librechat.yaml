@@ -154,10 +154,11 @@ webSearch:
   searchProvider: keenable
   serperApiKey: ${SERPER_API_KEY}
   tavilyApiKey: ${TAVILY_API_KEY}
-# Bifrost's MCP gateway is an internal service; exempt just that host and port.
+# The MCP servers are internal services; exempt just their hosts and ports.
 mcpSettings:
   allowedAddresses:
     - bifrost.bifrost.svc.cluster.local:8080
+    - reactive-resume.reactive-resume.svc.cluster.local:3000
 # Bifrost's config declares the MCP servers and serves each at /mcp/<slug>.
 # Grant keys access in Bifrost's config and add an entry here to offer a server.
 # The owner's user override in the admin panel replaces each customUserVars key with
@@ -246,8 +247,9 @@ mcpServers:
     requiresOAuth: false
     startup: false
     title: Reactive Resume
-    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/reactive-resume-user
-    # Bifrost forwards each user's own key, so the tools act on that user's account.
+    # Reactive Resume serves MCP itself, so each user connects with their own key; Bifrost
+    # lists a server's tools with one stored key and cannot do this.
+    url: http://reactive-resume.reactive-resume.svc.cluster.local:3000/mcp
     customUserVars:
       REACTIVE_RESUME_API_KEY:
         description: An API key from your Reactive Resume account settings.
@@ -255,7 +257,6 @@ mcpServers:
         title: Reactive Resume API Key
     headers:
       X-API-Key: "{{REACTIVE_RESUME_API_KEY}}"
-      x-bf-vk: "${BIFROST_API_KEY}"
   studio:
     type: streamable-http
     description: Create and manage images and videos in Studio.
