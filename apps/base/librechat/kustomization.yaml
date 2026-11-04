@@ -81,6 +81,18 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.librechat.configEnv.OPENID_CLIENT_ID
+  # The Pocket ID client's logo follows the app's Homepage icon.
+  - source:
+      kind: HTTPRoute
+      name: librechat
+      fieldPath: metadata.annotations.[gethomepage.dev/icon]
+    targets:
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.icon
+        options:
+          create: true
 components:
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files

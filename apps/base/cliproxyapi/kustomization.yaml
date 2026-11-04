@@ -34,4 +34,5 @@ replacements:
           delimiter: /
           index: 2
 transformers:
+  - ../../transformers/pocket-id-icon-private
   - ../../transformers/route-private
