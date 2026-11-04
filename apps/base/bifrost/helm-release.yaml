@@ -448,6 +448,10 @@ spec:
             connectionType: http
             endpointSlug: unifi-network
             toolsToExecute: ["*"]
+        # Clients discover tools through /mcp, so injecting them into inference requests
+        # only duplicates them and adds every server's tool definitions to each prompt.
+        toolManagerConfig:
+          disableAutoToolInject: true
       providers:
         abliteration:
           custom_provider_config:
