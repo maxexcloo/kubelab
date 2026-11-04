@@ -23,3 +23,19 @@ spec:
     - maxexcloo
     - opengraph/banner.jpg
     - uploads/01a15753-3c69-74b0-b591-2768e722a721/pictures
+---
+apiVersion: automation.excloo.dev/v1alpha1
+kind: CloudflareAccessApplication
+metadata:
+  name: reactive-resume-clients
+spec:
+  hostname: app.invalid
+  name: "Reactive Resume: Clients"
+  # MCP clients such as LibreChat discover, register and exchange OAuth tokens
+  # from their servers; users still sign in through Access in the browser.
+  paths:
+    - .well-known/oauth-authorization-server
+    - .well-known/oauth-protected-resource
+    - api/auth/jwks
+    - api/auth/oauth2/register
+    - api/auth/oauth2/token
