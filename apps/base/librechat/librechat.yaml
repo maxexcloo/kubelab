@@ -161,7 +161,9 @@ mcpSettings:
 # Bifrost's config declares the MCP servers and serves each at /mcp/<slug>.
 # Grant keys access in Bifrost's config and add an entry here to offer a server.
 # The owner's user override in the admin panel replaces each customUserVars key with
-# ${BIFROST_OWNER_API_KEY}; extend it when adding a restricted server.
+# ${BIFROST_OWNER_API_KEY}, and points Reactive Resume at Bifrost's owner-key server;
+# extend it when adding a restricted server. The USER role's override limits chat to
+# the two auto models; MCP servers here are offered to every role.
 mcpServers:
   actual-budget:
     type: streamable-http
@@ -244,15 +246,16 @@ mcpServers:
     requiresOAuth: false
     startup: false
     title: Reactive Resume
-    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/reactive-resume
-    # Bifrost holds the owner's Reactive Resume API key, so only authorised personal keys reach it.
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/reactive-resume-user
+    # Bifrost forwards each user's own key, so the tools act on that user's account.
     customUserVars:
       REACTIVE_RESUME_API_KEY:
-        description: Your personal Bifrost virtual key authorised for Reactive Resume. Ordinary chat keys cannot access these tools.
+        description: An API key from your Reactive Resume account settings.
         sensitive: true
         title: Reactive Resume API Key
     headers:
-      x-bf-vk: "{{REACTIVE_RESUME_API_KEY}}"
+      X-API-Key: "{{REACTIVE_RESUME_API_KEY}}"
+      x-bf-vk: "${BIFROST_API_KEY}"
   studio:
     type: streamable-http
     description: Create and manage images and videos in Studio.
