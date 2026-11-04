@@ -65,6 +65,18 @@ replacements:
         options:
           delimiter: /
           index: 2
+  # The Pocket ID client's logo follows the app's Homepage icon.
+  - source:
+      kind: HTTPRoute
+      name: immich
+      fieldPath: metadata.annotations.[gethomepage.dev/icon]
+    targets:
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.icon
+        options:
+          create: true
 components:
   - ../../../platform/databases/postgres
   - ../../../platform/backups/credentials

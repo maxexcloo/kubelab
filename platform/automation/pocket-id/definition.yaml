@@ -39,6 +39,9 @@ spec:
                       default: ""
                       maxLength: 150
                       type: string
+                    icon:
+                      description: Homepage icon name the client's Pocket ID logo comes from; mdi- and si- glyphs give no logo.
+                      type: string
                     id:
                       maxLength: 128
                       minLength: 2

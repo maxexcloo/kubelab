@@ -1,0 +1,16 @@
+apiVersion: builtin
+kind: ReplacementTransformer
+metadata:
+  name: pocket-id-icon-public
+# The Pocket ID client's logo follows the app's Homepage icon.
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.public.annotations.[gethomepage.dev/icon]
+    targets:
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.icon
+        options:
+          create: true

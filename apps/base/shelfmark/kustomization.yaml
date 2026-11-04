@@ -22,4 +22,5 @@ patches:
       kind: CronJob
       name: state-backup
 transformers:
+  - ../../transformers/pocket-id-icon-public
   - ../../transformers/route-public

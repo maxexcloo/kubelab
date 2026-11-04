@@ -7,6 +7,8 @@ spec:
     callbackURLs:
       - https://${grafana_host}/login/generic_oauth
     description: Infrastructure Observability
+    # Matches the route's Homepage icon.
+    icon: sh-grafana
     id: grafana
     launchURL: https://${grafana_host}
     name: Grafana
