@@ -23,7 +23,8 @@ published image.
   `gotk-components.yaml`.
 - Routes alias `onepassword.excloo.dev/item` to their `gethomepage.dev/name`,
   optionally with a bracketed qualifier that the card's location tag already
-  shows. Renaming a 1Password item is a coordinated change: rename it in
+  shows. Routes without a card name the item of the app they sign in with.
+  Renaming a 1Password item is a coordinated change: rename it in
   1Password and every reference together.
   Keep Kubernetes resource identities independent of item titles.
 - Publish generated credentials to 1Password with PushSecrets. Confidential

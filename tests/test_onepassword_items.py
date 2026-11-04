@@ -73,6 +73,9 @@ class ReconcilerTests(unittest.TestCase):
         self.assertGreaterEqual(len(managed), 20)
         for route in managed:
             annotations = route["metadata"]["annotations"]
+            # Routes without a card add their hostnames to another app's item.
+            if "gethomepage.dev/name" not in annotations:
+                continue
             # Items may add a bracketed qualifier that the card's location tag shows.
             self.assertRegex(
                 annotations["onepassword.excloo.dev/item"],
@@ -301,6 +304,36 @@ class ReconcilerTests(unittest.TestCase):
             {"username", "password", "token"},
         )
         self.assertTrue(all("purpose" not in field for field in result["fields"]))
+
+    def test_items_list_every_hostname_of_their_app(self):
+        def route(name, namespace, app, hostnames, item=None):
+            return {
+                "metadata": {
+                    "annotations": {"onepassword.excloo.dev/item": item}
+                    if item
+                    else {},
+                    "labels": {"app.kubernetes.io/name": app},
+                    "name": name,
+                    "namespace": namespace,
+                },
+                "spec": {"hostnames": hostnames},
+            }
+
+        routes = [
+            route("app", "app", "app", ["app.example.com"], item="App"),
+            route("app-private", "app", "app", ["app.example.com", "app.example.net"]),
+            route("other", "app", "other", ["other.example.net"]),
+            route("app", "elsewhere", "app", ["elsewhere.example.net"]),
+        ]
+        with patch.object(
+            RECONCILER,
+            "kubernetes_list",
+            side_effect=lambda path: routes if "httproutes" in path else [],
+        ):
+            self.assertEqual(
+                RECONCILER.discover_items()["App"]["urls"],
+                {"https://app.example.com", "https://app.example.net"},
+            )
 
     def test_explicit_route_category_and_conflicts(self):
         route = {
