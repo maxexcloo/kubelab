@@ -88,6 +88,7 @@ spec:
       qwen-27b-fp8:
         annotations:
           studio.excloo.dev/label: Qwen 27B FP8
+          studio.excloo.dev/vision: "true"
         labels:
           studio.excloo.dev/kind: text
         defaultContainerOptions: *container
@@ -109,6 +110,7 @@ spec:
       qwen-27b-fp8-tp2:
         annotations:
           studio.excloo.dev/label: Qwen 27B FP8 · 2 GPUs
+          studio.excloo.dev/vision: "true"
         labels:
           studio.excloo.dev/kind: text
         defaultContainerOptions: *container
@@ -130,6 +132,7 @@ spec:
       qwen-27b-iq4r:
         annotations:
           studio.excloo.dev/label: Qwen 27B IQ4R
+          studio.excloo.dev/vision: "true"
         labels:
           studio.excloo.dev/kind: text
         defaultContainerOptions: *container
@@ -175,6 +178,7 @@ spec:
       qwen-flash-next:
         annotations:
           studio.excloo.dev/label: Qwen Flash Next · 2 GPUs
+          studio.excloo.dev/vision: "true"
         labels:
           studio.excloo.dev/kind: text
         defaultContainerOptions: *container
