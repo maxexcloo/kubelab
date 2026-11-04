@@ -304,6 +304,8 @@ spec:
             value: env.VIRTUAL_KEY_LIBRECHAT
             # Studio trusts the forwarded user headers, so only LibreChat may call it.
             mcp_configs:
+              - mcp_client_name: reactive_resume_user
+                tools_to_execute: ["*"]
               - mcp_client_name: studio
                 tools_to_execute: ["*"]
             # A model started since Bifrost last listed ai/ is missing from its catalogue,
@@ -416,6 +418,16 @@ spec:
             endpointSlug: reactive-resume
             headers:
               X-API-Key: env.REACTIVE_RESUME_API_KEY
+            toolsToExecute: ["*"]
+          # LibreChat users send their own Reactive Resume API key.
+          - name: reactive_resume_user
+            allowedExtraHeaders:
+              - X-API-Key
+            authType: none
+            httpConfig:
+              url: http://reactive-resume.reactive-resume.svc.cluster.local:3000/mcp
+            connectionType: http
+            endpointSlug: reactive-resume-user
             toolsToExecute: ["*"]
           # Studio maps the forwarded user and conversation headers to its own accounts.
           - name: studio
