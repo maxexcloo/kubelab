@@ -10,8 +10,8 @@ spec:
           main:
             env:
               APP_URL: https://app.invalid
-              # The owner account exists; Pocket ID users cannot create new accounts either.
-              FLAG_DISABLE_SIGNUPS: "true"
+              # Accounts come from Pocket ID; this also closes password sign-ups.
+              FLAG_DISABLE_EMAIL_AUTH: "true"
               OAUTH_DISCOVERY_URL: https://${identity_host}/.well-known/openid-configuration
               OAUTH_PROVIDER_NAME: Excloo ID
               REDIS_URL: redis://localhost:6379
