@@ -152,6 +152,7 @@ spec:
       qwen-27b-mxfp4:
         annotations:
           studio.excloo.dev/label: Qwen 27B MXFP4
+          studio.excloo.dev/vision: "true"
         labels:
           studio.excloo.dev/kind: text
         defaultContainerOptions: *container
