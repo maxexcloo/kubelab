@@ -45,7 +45,7 @@ spec:
                 exec radiance --api-key-env API_KEY --gpu-headroom-mib 192 --host 0.0.0.0
                 --kv-cache-dtype fp8 --max-model-len 169328 --max-num-batched-tokens 2048 --max-num-seqs 2
                 --model /models/radiance/gemma4-31b-heretic-ara-w4a8-df.rad --num-speculative-tokens auto --port 8000
-                --served-model-name gemma-4-31b-heretic --tp 1 --vision-tower-placement vram
+                --served-model-name gemma-4-31b-heretic --tp 1
             # Readiness only: models take up to 15 minutes to load, and a restart would
             # start over.
             probes: &probes
@@ -77,7 +77,7 @@ spec:
                 exec radiance --api-key-env API_KEY --gpu-headroom-mib 192 --host 0.0.0.0
                 --kv-cache-dtype fp8 --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
                 --model /models/radiance/gemma4-31b-heretic-ara-w4a8-df.rad --num-speculative-tokens auto --port 8000
-                --served-model-name gemma-4-31b-heretic --tp 2 --vision-tower-placement vram
+                --served-model-name gemma-4-31b-heretic --tp 2
             probes: *probes
         pod:
           labels:
