@@ -237,6 +237,13 @@ def discover_items():
                 item["fields"].add(field)
                 if resource["kind"] == "PushSecret":
                     item["pushed"].add(field)
+    # Split public and private routes of one app share their item's URLs.
+    app_hostnames = {}
+    for route in routes:
+        app = route["metadata"].get("labels", {}).get("app.kubernetes.io/name")
+        app_hostnames.setdefault((route["metadata"]["namespace"], app), set()).update(
+            route.get("spec", {}).get("hostnames", [])
+        )
     # References are item titles in the cluster vault.
     for route in routes:
         namespace = route["metadata"]["namespace"]
@@ -244,10 +251,11 @@ def discover_items():
         title = route_annotations.get(f"{ANNOTATION_PREFIX}item")
         if not title:
             continue
-        urls = {
-            f"https://{hostname}"
-            for hostname in route.get("spec", {}).get("hostnames", [])
-        }
+        hostnames = set(route.get("spec", {}).get("hostnames", []))
+        app = route["metadata"].get("labels", {}).get("app.kubernetes.io/name")
+        if app:
+            hostnames |= app_hostnames[(namespace, app)]
+        urls = {f"https://{hostname}" for hostname in hostnames}
         if not urls:
             raise RuntimeError(
                 f"1Password route {namespace}/{route['metadata']['name']} has no URL"
