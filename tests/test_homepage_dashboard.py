@@ -28,6 +28,14 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
             list(read_yaml(self.output / "settings.yaml")["layout"])[-1], "Servers"
         )
 
+    def test_same_named_services_keep_their_locations(self):
+        self.write_routes("syd", [route("TrueNAS", group="Infrastructure")])
+        result = self.render()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        names = [name for entry in self.groups()["Infrastructure"] for name in entry]
+        self.assertIn("TrueNAS (syd)", names)
+        self.assertEqual(len([name for name in names if name.startswith("TrueNAS")]), 2)
+
     def test_helm_widget_and_moving_an_app_between_clusters(self):
         annotations = route(
             "Library",
