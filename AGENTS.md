@@ -30,7 +30,9 @@ published image.
   PocketIDClients name the item that receives their generated
   `oidc-client-secret`; never copy client secrets by hand. Each PocketIDClient
   admits the `all_services` group and its own group, named after the client;
-  group membership is managed in Pocket ID, not in this repository.
+  group membership is managed in Pocket ID, not in this repository. Apps let
+  admitted users sign up through OIDC; close password sign-ups only where the
+  app can do so without blocking OIDC.
 - Minilab reconciles as `flux-system/minilab`; its admission policy limits it to
   namespaces it creates and items titled `Minilab: <App>`. Grant it new kinds in
   `apps/base/minilab` before mini apps use them.
