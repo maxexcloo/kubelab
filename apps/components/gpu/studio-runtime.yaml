@@ -1,6 +1,6 @@
 # Studio finds the GPU workloads (Settings › Workers) from their labelled
 # Deployments, Services and GPU claims, and switches them by scaling: it updates
-# only the scale subresource.
+# only the scale subresource. It reads pod logs for its Workers log viewer.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -15,6 +15,9 @@ rules:
   - apiGroups: [""]
     resources: [pods]
     verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [pods/log]
+    verbs: [get]
   - apiGroups: [""]
     resources: [services]
     verbs: [list]
