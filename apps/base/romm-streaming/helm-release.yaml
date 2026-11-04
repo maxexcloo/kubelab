@@ -110,6 +110,7 @@ spec:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
           # No Homepage card: sessions only open from RomM.
           gethomepage.dev/href: https://app.invalid
+          onepassword.excloo.dev/item: RoMM
         hostnames:
           - games-streaming.excloo.com
         labels:
