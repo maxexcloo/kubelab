@@ -43,3 +43,4 @@ replacements:
           index: 2
 transformers:
   - ../../transformers/cluster-scoped
+  - ../../transformers/pocket-id-icon-private

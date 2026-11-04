@@ -123,6 +123,8 @@ Define each value once:
   Homepage link, DNS record and Pocket ID client; Kustomize replacements in the
   app derive its own URL settings from `.invalid` placeholders, and the checks
   fail when one survives rendering.
+- App icons: the route's Homepage icon. The `pocket-id-icon` transformers, or a
+  replacement beside a hand-written route, give it to the app's Pocket ID client.
 - 1Password item titles: once per manifest, using YAML anchors for repeats.
 - The app-template chart version: `platform/components/app-template`.
 - Kubernetes client versions: Homelab's cluster data. Renovate groups the kubectl

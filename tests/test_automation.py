@@ -64,6 +64,31 @@ class PocketIDClientTests(unittest.TestCase):
             evaluate(mapping["body"], {"payload": {"body": client}}), client
         )
 
+    def test_homepage_icons_become_logo_urls(self):
+        mapping = next(
+            m for m in self.parameters["mappings"] if m["action"] == "UPDATE"
+        )
+        selfhst = "https://cdn.jsdelivr.net/gh/selfhst/icons/png/"
+        dashboard = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/"
+        for icon, logos in [
+            ("sh-immich", {"logoUrl": selfhst + "immich.png"}),
+            (
+                "sh-karakeep-light",
+                {
+                    "logoUrl": selfhst + "karakeep.png",
+                    "darkLogoUrl": selfhst + "karakeep-light.png",
+                },
+            ),
+            ("bookorbit", {"logoUrl": dashboard + "bookorbit.png"}),
+            ("mdi-image-#ffffff", {}),
+        ]:
+            with self.subTest(icon=icon):
+                body = {"id": "app", "icon": icon, "name": "App"}
+                self.assertEqual(
+                    evaluate(mapping["body"], {"payload": {"body": body}}),
+                    {"name": "App", **logos},
+                )
+
     def test_secret_is_created_until_a_create_succeeds(self):
         secret = composition_resource(
             "platform/automation/pocket-id/composition/composition.yaml",
