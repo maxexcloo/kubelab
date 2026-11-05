@@ -79,6 +79,15 @@ for cluster_file in "${manifest_directory}"/clusters/*.yaml; do
         select(.source != null) |
         @json
       ' - | sed '/^null$/d; /^$/d' >>"${inventory_file}"
+    # Certificates without a route still need expiry monitoring.
+    yq eval -N -r '
+      select(.apiVersion == "cert-manager.io/v1" and .kind == "Certificate") |
+      .spec.dnsNames[] |
+      select(contains("*") | not)
+    ' "${manifest_directory}/${target}.yaml" |
+      jq -R -c --arg cluster "${cluster}" \
+        '{cluster: $cluster, headers: {}, hostname: ., type: "certificate"}' \
+        >>"${inventory_file}"
     CLUSTER="${cluster}" yq eval -I=0 -N -o=json '
       select(.kind == "ClusterSecretStore" or .kind == "CloudflareAccessApplication" or .kind == "ExternalSecret" or .kind == "SecretStore") |
       .cluster = strenv(CLUSTER)
