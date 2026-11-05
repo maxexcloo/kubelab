@@ -13,9 +13,7 @@ spec:
               app.kubernetes.io/name: traefik
       ports:
         - port: 4180
-          protocol: TCP
         - port: 8090
-          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/name: signtools

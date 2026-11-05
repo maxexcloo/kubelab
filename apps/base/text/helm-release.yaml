@@ -32,7 +32,6 @@ spec:
             - secretRef:
                 name: text
           image:
-            pullPolicy: IfNotPresent
             repository: docker.io/stilldeadcode/radiance
             tag: 1.17.0
           resources:

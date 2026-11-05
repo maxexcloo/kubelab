@@ -23,7 +23,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: docker.io/supercorp/supergateway
               tag: 4.2.1
             resources:

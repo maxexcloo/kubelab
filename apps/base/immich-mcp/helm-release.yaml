@@ -14,7 +14,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/barryw/immichmcp
               tag: v3.3.5
             # Readiness also pings Immich.

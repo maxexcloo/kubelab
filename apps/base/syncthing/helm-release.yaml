@@ -19,7 +19,6 @@ spec:
               STHOMEDIR: /var/syncthing/config
               TZ: ${time_zone}
             image: &syncthing-image
-              pullPolicy: IfNotPresent
               repository: docker.io/syncthing/syncthing
               tag: 2.1.7
             probes:

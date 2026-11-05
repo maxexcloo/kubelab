@@ -16,7 +16,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/henrygd/beszel/beszel
               tag: 0.21.1
             probes:

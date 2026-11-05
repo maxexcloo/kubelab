@@ -21,7 +21,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: lscr.io/linuxserver/webstation
               tag: romm-v0.15.3-ls44
             probes:

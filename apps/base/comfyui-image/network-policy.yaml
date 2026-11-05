@@ -20,7 +20,6 @@ spec:
               app.kubernetes.io/name: traefik
       ports:
         - port: 8188
-          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/name: comfyui-image
