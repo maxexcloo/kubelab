@@ -4,7 +4,7 @@ resources:
   - definition.yaml
   - composition
   - control-d-only
-  - external-secret.yaml
+  - external-secrets.yaml
   - provider-config.yaml
   - rbac.yaml
   - target-discovery.yaml
