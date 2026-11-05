@@ -78,11 +78,11 @@ replacements:
         options:
           create: true
 components:
-  - ../../components/default-deny
   - ../../../platform/databases/postgres
   - ../../../platform/backups/credentials
   - ../../components/database-colocation
   - ../../components/private-dns-control-d-only
+  - ../../components/default-deny
 patches:
   - path: database.yaml
     target:

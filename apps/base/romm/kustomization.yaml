@@ -10,9 +10,9 @@ resources:
   - resend.yaml
   - storage.yaml
 components:
-  - ../../components/default-deny
   - ../../../platform/databases/postgres
   - ../../components/application
+  - ../../components/default-deny
   - ../../components/database-colocation
   - ../../../platform/backups/credentials
   - ../../components/private-dns-control-d-only
