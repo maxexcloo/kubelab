@@ -60,8 +60,10 @@ endpoints:
         default:
           - cloud/auto
           - cloud/deepseek
+          - cloud/deepseek-flash
           - cloud/deepseek-uncensored
           - cloud/glm
+          - cloud/glm-flash
           - cloud/glm-uncensored
           - cloud/uncensored
           - local/auto
