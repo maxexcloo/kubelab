@@ -7,21 +7,15 @@ spec:
     controllers:
       main:
         containers:
-          # Civitai refuses the cluster's egress (HTTP 451); Studio's Control D resolver
-          # redirects its domains, and ctrld sends cluster names to CoreDNS.
+          # Civitai refuses the cluster's egress (HTTP 451); ctrld resolves only Civitai's names
+          # through Control D, which proxies them (external-secrets.yaml).
           ctrld:
             workingDir: /etc/controld
             args:
-              - --cd=$(CTRLD_ENDPOINT)
+              - --config=/etc/ctrld/ctrld.toml
             command:
               - /ctrld
               - run
-            env:
-              CTRLD_ENDPOINT:
-                valueFrom:
-                  secretKeyRef:
-                    key: CTRLD_ENDPOINT
-                    name: "{{ .Release.Name }}"
             image:
               repository: controldns/ctrld
               tag: 1.5.9
@@ -102,8 +96,8 @@ spec:
         kubectl.kubernetes.io/default-container: studio
       # Studio's service account scales the GPU workloads.
       automountServiceAccountToken: true
-      # ctrld answers first. It forwards *.local names to the private nameserver after
-      # it (kube-dns, in Homelab's service subnet), and Studio uses only FQDN cluster names.
+      # ctrld answers first and sends all but Civitai's names to kube-dns (Homelab's service
+      # subnet), listed after it as the fallback.
       dnsPolicy: None
       dnsConfig:
         nameservers:
@@ -123,6 +117,14 @@ spec:
           main:
             ctrld:
               - path: /etc/controld
+      ctrld:
+        name: "{{ .Release.Name }}-ctrld"
+        type: secret
+        advancedMounts:
+          main:
+            ctrld:
+              - path: /etc/ctrld
+                readOnly: true
       data:
         existingClaim: data
         type: persistentVolumeClaim
