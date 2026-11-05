@@ -20,7 +20,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/sirkirby/unifi-network-mcp
               tag: 0.44.0
             # The server has no health endpoint.

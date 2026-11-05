@@ -26,7 +26,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/reactive-resume/reactive-resume
               tag: v6.0.10
             # Upstream omits liveness because restarts cannot fix database or storage outages.
@@ -50,7 +49,6 @@ spec:
               - --save
               - ""
             image:
-              pullPolicy: IfNotPresent
               repository: docker.io/valkey/valkey
               tag: 9.1.3
             probes:

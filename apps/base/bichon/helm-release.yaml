@@ -18,7 +18,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: docker.io/rustmailer/bichon
               tag: 2.3.0
             probes:

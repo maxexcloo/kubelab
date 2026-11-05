@@ -13,7 +13,6 @@ spec:
               app.kubernetes.io/name: traefik
       ports:
         - port: 21221
-          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/name: papra

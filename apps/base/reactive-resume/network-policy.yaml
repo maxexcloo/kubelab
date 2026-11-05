@@ -20,7 +20,6 @@ spec:
               app.kubernetes.io/name: traefik
       ports:
         - port: 3000
-          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/controller: reactive-resume
@@ -39,14 +38,12 @@ spec:
               app.kubernetes.io/controller: reactive-resume
       ports:
         - port: 5432
-          protocol: TCP
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: cnpg-system
       ports:
         - port: 8000
-          protocol: TCP
   podSelector:
     matchLabels:
       cnpg.io/cluster: reactive-resume-database

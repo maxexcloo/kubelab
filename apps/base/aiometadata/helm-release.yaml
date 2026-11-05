@@ -23,7 +23,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/cedya77/aiometadata
               tag: 3.8.3
             probes:
@@ -55,7 +54,6 @@ spec:
               - --maxmemory-policy
               - volatile-lfu
             image:
-              pullPolicy: IfNotPresent
               repository: docker.io/library/redis
               tag: 8.10.3
             probes:

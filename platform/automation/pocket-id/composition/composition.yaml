@@ -386,7 +386,6 @@ spec:
                 template:
                   data:
                     oidc-client-id: placeholder
-                  engineVersion: v2
                   mergePolicy: Merge
             patches:
               - <<: *secret-name

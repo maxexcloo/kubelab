@@ -14,7 +14,6 @@ spec:
               app.kubernetes.io/name: bifrost
       ports:
         - port: 8000
-          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/name: karakeep-mcp

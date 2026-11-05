@@ -29,7 +29,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/viren070/aiostreams
               tag: v2.37.0
             probes:

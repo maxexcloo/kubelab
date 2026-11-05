@@ -18,7 +18,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/clickhouse/librechat-admin-panel
               tag: 1.0.0
             resources:

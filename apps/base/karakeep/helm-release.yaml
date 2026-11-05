@@ -30,7 +30,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/karakeep-app/karakeep
               tag: 0.34.1
             probes:
@@ -57,7 +56,6 @@ spec:
               - --disable-blink-features=AutomationControlled
               - --window-size=1440,900
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/karakeep-app/karakeep-chrome
               tag: 157.0.8103.38-r1
             probes:
@@ -100,7 +98,6 @@ spec:
                     key: MEILI_MASTER_KEY
                     name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: docker.io/getmeili/meilisearch
               tag: v1.56.1
             probes:
