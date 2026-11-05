@@ -13,9 +13,7 @@ spec:
               app.kubernetes.io/name: traefik
       ports:
         - port: 4180
-          protocol: TCP
         - port: 8317
-          protocol: TCP
     - from:
         - namespaceSelector:
             matchLabels:
@@ -31,7 +29,6 @@ spec:
               app.kubernetes.io/name: studio
       ports:
         - port: 8317
-          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/name: cliproxyapi

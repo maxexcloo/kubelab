@@ -13,7 +13,6 @@ spec:
               app.kubernetes.io/name: traefik
       ports:
         - port: 8080
-          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/name: miniflux
@@ -32,14 +31,12 @@ spec:
               app.kubernetes.io/name: miniflux
       ports:
         - port: 5432
-          protocol: TCP
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: cnpg-system
       ports:
         - port: 8000
-          protocol: TCP
   podSelector:
     matchLabels:
       cnpg.io/cluster: miniflux-database

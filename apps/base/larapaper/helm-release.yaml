@@ -22,7 +22,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/usetrmnl/larapaper
               tag: 0.45.1
             probes:

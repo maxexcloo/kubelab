@@ -13,7 +13,6 @@ spec:
               app.kubernetes.io/name: traefik
       ports:
         - port: 15630
-          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/name: bichon

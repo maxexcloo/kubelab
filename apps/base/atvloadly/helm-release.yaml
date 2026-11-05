@@ -20,7 +20,6 @@ spec:
               SERVICE_PORT: "5533"
               TZ: ${time_zone}
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/atvloadly
               tag: v0.8.2
             probes:

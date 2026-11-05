@@ -7,6 +7,5 @@ spec:
   ports:
     - name: http
       port: 8188
-      protocol: TCP
   selector:
     app.kubernetes.io/name: comfyui-video

@@ -20,7 +20,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/bookorbit/bookorbit
               tag: 3.6.0
             probes:

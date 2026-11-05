@@ -32,7 +32,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/pocket-id/pocket-id
               tag: v2.19.2
             probes:

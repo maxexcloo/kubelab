@@ -19,7 +19,6 @@ spec:
               app.kubernetes.io/name: redlib-multi
       ports:
         - port: 8080
-          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/name: redlib

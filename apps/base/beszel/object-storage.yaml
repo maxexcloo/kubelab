@@ -5,7 +5,6 @@ metadata:
   annotations:
     onepassword.excloo.dev/defaults: '{"object-storage-bucket":"excloo-${cluster_name}-beszel"}'
 spec:
-  refreshInterval: 1h
   data:
     - remoteRef:
         key: Beszel

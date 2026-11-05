@@ -32,7 +32,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/maxexcloo/studio-worker
               tag: 2026.11.5.1
             # Readiness only, as under Docker: loading never restarts the worker.

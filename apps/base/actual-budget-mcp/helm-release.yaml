@@ -22,7 +22,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: docker.io/sstefanov/actual-mcp
               tag: v1.15.1
             # The server has no health endpoint.

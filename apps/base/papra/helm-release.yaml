@@ -29,7 +29,6 @@ spec:
               - secretRef:
                   name: "{{ .Release.Name }}"
             image:
-              pullPolicy: IfNotPresent
               repository: ghcr.io/papra-hq/papra
               tag: 26.7.1-rootless
             probes:

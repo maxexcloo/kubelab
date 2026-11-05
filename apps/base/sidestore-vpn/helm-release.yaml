@@ -60,7 +60,6 @@ spec:
                     name: "{{ .Release.Name }}"
             image:
               <<: *tailscale-image
-              pullPolicy: IfNotPresent
             probes:
               readiness:
                 enabled: true

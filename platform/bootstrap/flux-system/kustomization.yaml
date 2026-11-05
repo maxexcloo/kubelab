@@ -22,13 +22,6 @@ patches:
     target:
       kind: Deployment
       labelSelector: app.kubernetes.io/part-of=flux
-  - patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/args/-
-        value: --requeue-dependency=1s
-    target:
-      kind: Deployment
-      name: (helm|kustomize)-controller
   # Apply a new revision without waiting out health checks still running for an older one.
   - patch: |-
       - op: add
