@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
 components:
+  - ../../components/default-deny
   - ../../components/workload
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files

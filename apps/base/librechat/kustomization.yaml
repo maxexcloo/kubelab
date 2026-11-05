@@ -94,6 +94,7 @@ replacements:
         options:
           create: true
 components:
+  - ../../components/default-deny
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
   - ../../components/private-dns-control-d-only
