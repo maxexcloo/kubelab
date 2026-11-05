@@ -59,8 +59,8 @@ replacements:
           delimiter: /
           index: 2
 components:
-  - ../../components/default-deny
   - ../../components/oauth2-proxy-config
   - ../../components/private-dns
+  - ../../components/default-deny
 transformers:
   - ../../transformers/cluster-scoped

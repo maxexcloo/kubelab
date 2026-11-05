@@ -6,8 +6,8 @@ resources:
   - namespace.yaml
   - network-policy.yaml
 components:
-  - ../../components/default-deny
   - ../../components/application
+  - ../../components/default-deny
 patches:
   - path: helm-release.yaml
     target:

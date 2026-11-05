@@ -8,8 +8,8 @@ resources:
   - pocket-id.yaml
   - storage.yaml
 components:
-  - ../../components/default-deny
   - ../../components/application
+  - ../../components/default-deny
   - ../../components/oauth2-proxy
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files

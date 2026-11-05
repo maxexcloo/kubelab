@@ -10,8 +10,8 @@ resources:
   - reference-grant.yaml
   - storage.yaml
 components:
-  - ../../components/default-deny
   - ../../components/application
+  - ../../components/default-deny
   - ../../components/private-dns-control-d-only
 patches:
   - path: helm-release.yaml

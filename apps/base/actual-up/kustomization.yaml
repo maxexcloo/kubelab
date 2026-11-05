@@ -8,8 +8,8 @@ resources:
   - storage.yaml
   - vm-service-scrape.yaml
 components:
-  - ../../components/default-deny
   - ../../components/application
+  - ../../components/default-deny
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
 configurations:
