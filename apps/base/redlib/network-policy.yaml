@@ -11,12 +11,6 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: traefik
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: redlib-multi
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: redlib-multi
       ports:
         - port: 8080
   podSelector:
