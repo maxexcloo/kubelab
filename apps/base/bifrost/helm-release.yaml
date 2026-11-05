@@ -525,6 +525,49 @@ spec:
           network_config:
             allow_private_network: true
             base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        # CLIProxyAPI merges every upstream's model names into one list, so each
+        # sibling shares its endpoint and key but lists a single prefix. The original
+        # provider keeps the full set for explicit provider/model IDs.
+        cliproxy-claude:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxy-claude
+              models: ["regex:^claude-.*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        cliproxy-gemini:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxy-gemini
+              models: ["regex:^gemini-.*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        cliproxy-gpt:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxy-gpt
+              models: ["regex:^(gpt|codex)-.*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        cliproxy-grok:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxy-grok
+              models: ["regex:^grok-.*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
         # Only lists the cloud/ aliases, which the cloud routing rules send on.
         cloud:
           custom_provider_config:
