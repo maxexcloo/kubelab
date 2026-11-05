@@ -1,10 +1,10 @@
-"""Serves Bifrost's ai/ and local/ providers from the text Services, and lists cloud/'s aliases.
+"""Serves Bifrost's local/ provider from the text Services, and lists cloud/'s aliases.
 
 Each Service in NAMESPACE annotated text.excloo.dev/priority serves one local text model.
-ai/ lists the running ones under the names they report and reaches each by name; local/auto
-reaches them in priority order, moving on when one is busy, and local/uncensored does the same
-for those annotated text.excloo.dev/uncensored. Requests otherwise pass through unchanged, so
-clients set reasoning themselves. Requests nothing can serve fail fast with 503.
+local/auto reaches them in priority order, moving on when one is busy, and local/uncensored
+does the same for those annotated text.excloo.dev/uncensored. local/<name> reaches the
+Service that reports that model name. Requests otherwise pass through unchanged, so clients
+set reasoning themselves. Requests nothing can serve fail fast with 503.
 """
 
 import http.client
@@ -90,14 +90,15 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/healthz":
             return self.reply(200, {"status": "ok"})
-        if self.path == "/ai/v1/models":
-            data = [
-                model for _, models in running(self.forwarded()) for model in models
+        if self.path == "/local/v1/models":
+            aliases = [{"id": alias, "object": "model"} for alias in ALIASES["local"]]
+            models = [
+                model for _, found in running(self.forwarded()) for model in found
             ]
-            return self.reply(200, {"data": data, "object": "list"})
+            return self.reply(200, {"data": aliases + models, "object": "list"})
         # Bifrost's cloud routing rules send cloud/ on before it reaches the router.
         provider = self.path.removeprefix("/").removesuffix("/v1/models")
-        if provider in ALIASES:
+        if provider == "cloud":
             data = [{"id": alias, "object": "model"} for alias in ALIASES[provider]]
             return self.reply(200, {"data": data, "object": "list"})
         self.reply(404, {"error": {"message": f"{self.path} is not served"}})
@@ -107,13 +108,13 @@ class Handler(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
         model = body.get("model")
         alias = provider == "local" and model in ALIASES["local"]
+        named = provider == "local" and not alias
         served = [
             (service, models[0]["id"] if alias else model)
             for service, models in running(
                 self.forwarded(), alias and model == "uncensored"
             )
-            if (alias and models)
-            or (provider == "ai" and any(m["id"] == model for m in models))
+            if (alias and models) or (named and any(m["id"] == model for m in models))
         ]
         for index, (service, name) in enumerate(served):
             upstream = http.client.HTTPConnection(f"{service}.{NAMESPACE}.svc", 8000)
