@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
   - definition.yaml
   - composition.yaml
-  - external-secret.yaml
+  - external-secrets.yaml
   - provider-config.yaml
