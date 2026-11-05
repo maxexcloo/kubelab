@@ -10,6 +10,7 @@ resources:
   - resend.yaml
   - storage.yaml
 components:
+  - ../../components/default-deny
   - ../../../platform/databases/postgres-minimal
   - ../../components/application
   - ../../components/database-colocation

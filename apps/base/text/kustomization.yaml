@@ -9,5 +9,6 @@ resources:
   - rbac.yaml
   - services.yaml
 components:
+  - ../../components/default-deny
   - ../../components/gpu
   - ../../../platform/components/app-template

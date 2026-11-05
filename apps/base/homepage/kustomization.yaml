@@ -53,5 +53,6 @@ replacements:
 transformers:
   - ../../transformers/route-private
 components:
+  - ../../components/default-deny
   - ../../../platform/components/app-template
   - ../../components/private-dns

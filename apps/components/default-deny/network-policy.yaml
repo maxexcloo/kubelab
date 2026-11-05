@@ -1,0 +1,9 @@
+# Namespace safety net: deny all ingress that the app's allow policies do not permit.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress

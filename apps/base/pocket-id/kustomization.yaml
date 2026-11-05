@@ -8,6 +8,7 @@ resources:
   - network-policy.yaml
   - resend.yaml
 components:
+  - ../../components/default-deny
   - ../../../platform/databases/postgres
   - ../../components/application
   - ../../components/database-colocation

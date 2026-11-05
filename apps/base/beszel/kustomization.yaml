@@ -10,6 +10,7 @@ resources:
   - resend.yaml
   - storage.yaml
 components:
+  - ../../components/default-deny
   - ../../components/application
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files

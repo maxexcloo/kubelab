@@ -24,3 +24,23 @@ spec:
       app.kubernetes.io/name: librechat
   policyTypes:
     - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: librechat-meilisearch
+spec:
+  # The bundled Meilisearch pod has no chart policy of its own.
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: librechat
+      ports:
+        - port: 7700
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: librechat
+      app.kubernetes.io/name: meilisearch
+  policyTypes:
+    - Ingress

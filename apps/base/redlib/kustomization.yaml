@@ -9,6 +9,7 @@ resources:
   - private-redirect.yaml
   - redirect.yaml
 components:
+  - ../../components/default-deny
   - ../../components/application
   - ../../components/private-dns-control-d-only
 patches:

@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - network-policy.yaml
+# Namespace the policy after the app's Namespace, including apps that do not set
+# a kustomization-wide namespace.
+replacements:
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: NetworkPolicy
+          name: default-deny
+        fieldPaths:
+          - metadata.namespace
+        options:
+          create: true

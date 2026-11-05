@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
 components:
+  - ../../components/default-deny
   - ../../components/gpu
   - ../../components/workload
 patches:
