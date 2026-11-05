@@ -4,7 +4,7 @@ kind: Component
 # Namespace and read from its PocketIDClient item. The oauth2-proxy component adds the
 # sidecar to app-template releases; apps on other charts add the same container themselves.
 resources:
-  - external-secret.yaml
+  - external-secrets.yaml
 configMapGenerator:
   - name: oauth2-proxy
     files:

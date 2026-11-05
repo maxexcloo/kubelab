@@ -20,7 +20,7 @@ configurations:
 configMapGenerator:
   - name: romm-config
     files:
-      - config.yml
+      - config.yml=config.yaml
 patches:
   - path: database.yaml
     target:
