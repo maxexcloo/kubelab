@@ -206,9 +206,10 @@ spec:
       periodSeconds: 10
       timeoutSeconds: 5
     bifrost:
-      # config.json is authoritative: each restart reverts dashboard edits and prunes
-      # entries removed here. The SQLite store still backs MCP grants.
-      sourceOfTruth: config.json
+      # Helm owns providers, virtual keys, MCP and routing rules. Split mode, the
+      # default, keeps dashboard edits to everything else (budgets, pricing
+      # overrides, teams) across restarts; changing a section here replaces it.
+      # The SQLite store still backs MCP grants.
       client:
         allowedOrigins:
           - https://app.invalid
@@ -223,12 +224,13 @@ spec:
         authConfig:
           existingSecret: bifrost
           isEnabled: false
-        # Each cloud/ alias serves one model, falling back only to the same model elsewhere;
-        # auto and uncensored are DeepSeek's.
+        # Each cloud/ alias serves one model, falling back in order to the same model
+        # elsewhere. auto and deepseek-flash are the fast DeepSeek; deepseek is the pro,
+        # and glm is the full GLM with glm-flash the fast one.
         routingRules:
-          - id: cloud-deepseek
-            name: Cloud DeepSeek
-            cel_expression: "provider == 'cloud' && model in ['auto', 'deepseek']"
+          - id: cloud-deepseek-flash
+            name: Cloud DeepSeek Flash
+            cel_expression: "provider == 'cloud' && model in ['auto', 'deepseek-flash']"
             enabled: true
             fallbacks:
               - model: deepseek-flash
@@ -241,11 +243,27 @@ spec:
               - provider: deploy
                 model: deepseek-ai/deepseek-v4.1-flash-1017
                 weight: 1.0
+          - id: cloud-deepseek
+            name: Cloud DeepSeek
+            cel_expression: "provider == 'cloud' && model in ['deepseek', 'deepseek-pro']"
+            enabled: true
+            fallbacks:
+              - model: deepseek/deepseek-v4-pro
+                provider: openrouter
+            priority: 1
+            scope: global
+            targets:
+              - provider: deepseek
+                model: deepseek-v4-pro
+                weight: 1.0
           - id: cloud-deepseek-uncensored
             name: Cloud DeepSeek Uncensored
             cel_expression: "provider == 'cloud' && model in ['deepseek-uncensored', 'uncensored']"
             enabled: true
-            priority: 1
+            fallbacks:
+              - model: deepseek-v4.1-flash-fast
+                provider: refuseless
+            priority: 2
             scope: global
             targets:
               - provider: refuseless
@@ -255,10 +273,20 @@ spec:
             name: Cloud GLM
             cel_expression: "provider == 'cloud' && model == 'glm'"
             enabled: true
+            priority: 3
+            scope: global
+            targets:
+              - provider: openrouter
+                model: z-ai/glm-5.3
+                weight: 1.0
+          - id: cloud-glm-flash
+            name: Cloud GLM Flash
+            cel_expression: "provider == 'cloud' && model == 'glm-flash'"
+            enabled: true
             fallbacks:
               - model: z-ai/glm-5.3-flash
                 provider: openrouter
-            priority: 2
+            priority: 4
             scope: global
             targets:
               - provider: deploy
@@ -268,7 +296,10 @@ spec:
             name: Cloud GLM Uncensored
             cel_expression: "provider == 'cloud' && model == 'glm-uncensored'"
             enabled: true
-            priority: 3
+            fallbacks:
+              - model: glm-5.3-abliterated
+                provider: refuseless
+            priority: 5
             scope: global
             targets:
               - provider: refuseless
