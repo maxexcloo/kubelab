@@ -63,7 +63,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: docker.io/signtools/signtools
-              tag: 3.0.12
+              tag: 3.0.13
             probes:
               liveness: &health
                 port: 8080
