@@ -92,9 +92,21 @@ endpoints:
           - "*"
         fetch: true
     - <<: *provider
-      name: CLI Proxy API
+      name: CLI Proxy - Claude
       headers:
-        x-bf-model-provider: cliproxyapi
+        x-bf-model-provider: cliproxy-claude
+    - <<: *provider
+      name: CLI Proxy - Gemini
+      headers:
+        x-bf-model-provider: cliproxy-gemini
+    - <<: *provider
+      name: CLI Proxy - GPT
+      headers:
+        x-bf-model-provider: cliproxy-gpt
+    - <<: *provider
+      name: CLI Proxy - Grok
+      headers:
+        x-bf-model-provider: cliproxy-grok
     - <<: *provider
       name: DeepSeek
       headers:
