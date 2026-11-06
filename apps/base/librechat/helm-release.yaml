@@ -97,7 +97,9 @@ spec:
           type: RuntimeDefault
       resources:
         limits:
-          memory: 512Mi
+          # The v1.55 data migration needs more than the 512Mi the chart's
+          # default suggests; the pod was OOMKilled (exit 137) on every start.
+          memory: 1Gi
         requests:
           cpu: 20m
           memory: 128Mi
