@@ -18,11 +18,12 @@ ACCOUNT = "/var/run/secrets/kubernetes.io/serviceaccount"
 ALIASES = {
     "cloud": (
         "auto",
-        "deepseek",
-        "deepseek-uncensored",
+        "deepseek-flash",
+        "deepseek-flash-uncensored",
         "glm",
+        "glm-flash",
+        "glm-flash-uncensored",
         "glm-uncensored",
-        "uncensored",
     ),
     "local": ("auto", "uncensored"),
 }
