@@ -688,7 +688,8 @@ spec:
               models: ["*"]
               value: env.XIAOMI_API_KEY
           network_config:
-            base_url: https://api.xiaomimimo.com/v1
+            # Bifrost appends /v1/chat/completions, so the base URL stops at the host.
+            base_url: https://api.xiaomimimo.com
     storage:
       persistence:
         existingClaim: data
