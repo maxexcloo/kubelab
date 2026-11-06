@@ -135,6 +135,16 @@ endpoints:
       name: Refuseless
       headers:
         x-bf-model-provider: refuseless
+    - <<: *provider
+      name: Xiaomi
+      headers:
+        x-bf-model-provider: xiaomi
+      # MiMo gates reasoning_content replay through tool calls on these two.
+      customParams:
+        reasoningFormat: reasoning_object
+        reasoningKey: reasoning_content
+        includeReasoningContent: true
+        includeReasoningHistory: true
 fileConfig:
   endpoints:
     agents:
