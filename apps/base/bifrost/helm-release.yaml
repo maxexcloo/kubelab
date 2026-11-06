@@ -314,6 +314,36 @@ spec:
               - provider: refuseless
                 model: glm-5.3-abliterated
                 weight: 1.0
+          - id: cloud-mimo
+            name: Cloud MiMo
+            cel_expression: "provider == 'cloud' && model == 'mimo'"
+            enabled: true
+            fallbacks:
+              - model: mimo-v2.6-pro
+                provider: opencode-go
+              - model: xiaomi/mimo-v2.6-pro
+                provider: openrouter
+            priority: 10
+            scope: global
+            targets:
+              - provider: xiaomi
+                model: mimo-v2.6-pro
+                weight: 1.0
+          - id: cloud-mimo-flash
+            name: Cloud MiMo Flash
+            cel_expression: "provider == 'cloud' && model == 'mimo-flash'"
+            enabled: true
+            fallbacks:
+              - model: mimo-v2.6-flash
+                provider: opencode-go
+              - model: xiaomi/mimo-v2.6-flash
+                provider: openrouter
+            priority: 11
+            scope: global
+            targets:
+              - provider: xiaomi
+                model: mimo-v2.6-flash
+                weight: 1.0
         virtualKeys:
           - id: claude
             name: Claude
@@ -380,6 +410,9 @@ spec:
               - provider: refuseless
                 allowed_models: ["*"]
                 key_ids: ["*"]
+              - provider: xiaomi
+                allowed_models: ["*"]
+                key_ids: ["*"]
           # The owner's personal key for LibreChat's restricted MCP servers.
           - id: owner
             name: Owner
@@ -415,6 +448,9 @@ spec:
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: refuseless
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: xiaomi
                 allowed_models: ["*"]
                 key_ids: ["*"]
       # Each server is served at /mcp/<endpointSlug>. Servers without headers accept
@@ -644,6 +680,15 @@ spec:
               value: env.REFUSELESS_API_KEY
           network_config:
             base_url: https://api.refuseless.com
+        xiaomi:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: xiaomi
+              models: ["*"]
+              value: env.XIAOMI_API_KEY
+          network_config:
+            base_url: https://api.xiaomimimo.com/v1
     storage:
       persistence:
         existingClaim: data
