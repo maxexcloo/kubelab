@@ -235,7 +235,11 @@ spec:
               - model: deepseek-flash
                 provider: deepseek
               - model: deepseek-v4.1-flash
+                provider: opencode-go
+              - model: deepseek-v4.1-flash
                 provider: opencode-zen
+              - model: deepseek/deepseek-v4.1-flash-1017
+                provider: openrouter
             priority: 0
             scope: global
             targets:
@@ -261,7 +265,11 @@ spec:
             enabled: true
             fallbacks:
               - model: glm-5.3-flash
+                provider: opencode-go
+              - model: glm-5.3-flash
                 provider: opencode-zen
+              - model: z-ai/glm-5.3-flash
+                provider: openrouter
             priority: 2
             scope: global
             targets:
