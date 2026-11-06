@@ -142,7 +142,7 @@ spec:
                 exec radiance --api-key-env API_KEY --attn-prefill-fp8 both --embedding-placement ram
                 --gpu-headroom-mib 192 --host 0.0.0.0 --host-pool-mib 3072 --kv-cache-dtype k6_v4
                 --max-model-len 262144 --max-num-batched-tokens 2048 --max-num-seqs 8
-                --model /models/radiance/qwen3.8-27b-iq4r-l-v3.rad --draft-short-from 8 --port 8000 --prefix-cache-mib 4096
+                --model /models/radiance/qwen3.8-27b-iq4r-l-v4.rad --draft-short-from 8 --port 8000 --prefix-cache-mib 4096
                 --reasoning-effort-map high=xhigh --served-model-name qwen3.8-27b-iq4r --tp 1
             probes: *probes
         pod:
