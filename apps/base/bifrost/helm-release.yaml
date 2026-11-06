@@ -235,8 +235,8 @@ spec:
             fallbacks:
               - model: deepseek-flash
                 provider: deepseek
-              - model: deepseek/deepseek-v4.1-flash-1017
-                provider: openrouter
+              - model: deepseek-v4.1-flash
+                provider: opencode-zen
             priority: 0
             scope: global
             targets:
@@ -245,11 +245,11 @@ spec:
                 weight: 1.0
           - id: cloud-deepseek
             name: Cloud DeepSeek
-            cel_expression: "provider == 'cloud' && model in ['deepseek', 'deepseek-pro']"
+            cel_expression: "provider == 'cloud' && model == 'deepseek'"
             enabled: true
             fallbacks:
-              - model: deepseek/deepseek-v4-pro
-                provider: openrouter
+              - model: deepseek-v4-pro
+                provider: opencode-zen
             priority: 1
             scope: global
             targets:
@@ -258,7 +258,7 @@ spec:
                 weight: 1.0
           - id: cloud-deepseek-uncensored
             name: Cloud DeepSeek Uncensored
-            cel_expression: "provider == 'cloud' && model in ['deepseek-uncensored', 'uncensored']"
+            cel_expression: "provider == 'cloud' && model == 'deepseek-uncensored'"
             enabled: true
             fallbacks:
               - model: deepseek-v4.1-flash-fast
@@ -276,16 +276,16 @@ spec:
             priority: 3
             scope: global
             targets:
-              - provider: openrouter
-                model: z-ai/glm-5.3
+              - provider: opencode-zen
+                model: glm-5.3
                 weight: 1.0
           - id: cloud-glm-flash
             name: Cloud GLM Flash
             cel_expression: "provider == 'cloud' && model == 'glm-flash'"
             enabled: true
             fallbacks:
-              - model: z-ai/glm-5.3-flash
-                provider: openrouter
+              - model: glm-5.3-flash
+                provider: opencode-zen
             priority: 4
             scope: global
             targets:

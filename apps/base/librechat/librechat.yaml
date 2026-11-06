@@ -65,7 +65,6 @@ endpoints:
           - cloud/glm
           - cloud/glm-flash
           - cloud/glm-uncensored
-          - cloud/uncensored
           - local/auto
           - local/uncensored
       # A live heading summarises long reasoning while it streams.
