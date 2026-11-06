@@ -50,9 +50,10 @@ endpoints:
   custom:
     # Every section reaches its provider through Bifrost, which lists that provider's models
     # for x-bf-model-provider. Each cloud/ alias serves one model (auto and uncensored are
-    # DeepSeek's), and local/ takes the first running local model, with local/uncensored limited
-    # to uncensored ones; set reasoning with the Reasoning Effort parameter.
-    - &ai
+    # DeepSeek's), and local/ takes the first running local model, with local/uncensored
+    # limited to uncensored ones and local/<name> reaching the model that reports that name;
+    # set reasoning with the Reasoning Effort parameter.
+    - &defaults
       name: AI
       apiKey: ${BIFROST_API_KEY}
       baseURL: http://bifrost.bifrost.svc.cluster.local:8080/openai/v1
@@ -83,7 +84,7 @@ endpoints:
       titleTiming: final
     # The provider sections share the AI section's settings and list their provider's models.
     - &provider
-      <<: *ai
+      <<: *defaults
       name: Abliteration
       headers:
         x-bf-model-provider: abliteration
@@ -106,7 +107,7 @@ endpoints:
     - <<: *provider
       name: Local
       headers:
-        x-bf-model-provider: ai
+        x-bf-model-provider: local
     - <<: *provider
       name: OpenCode Go
       headers:

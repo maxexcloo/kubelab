@@ -1,4 +1,4 @@
-# One Service per model. Bifrost's router lists the running ones as ai/<name they report>
+# One Service per model. Bifrost's router lists the running ones as local/<name they report>
 # and tries them in priority order for local/auto, and the uncensored ones for local/uncensored.
 apiVersion: v1
 kind: Service
