@@ -240,7 +240,7 @@ spec:
                 provider: opencode-zen
               - model: deepseek/deepseek-v4.1-flash-1017
                 provider: openrouter
-            priority: 0
+            priority: 4
             scope: global
             targets:
               - provider: deploy
@@ -253,7 +253,7 @@ spec:
             fallbacks:
               - model: abliterated-model-large-flash
                 provider: abliteration
-            priority: 1
+            priority: 5
             scope: global
             targets:
               - provider: refuseless
@@ -268,7 +268,7 @@ spec:
                 provider: opencode-zen
               - model: z-ai/glm-5.3
                 provider: openrouter
-            priority: 2
+            priority: 6
             scope: global
             targets:
               - provider: opencode-go
@@ -285,7 +285,7 @@ spec:
                 provider: opencode-zen
               - model: z-ai/glm-5.3-flash
                 provider: openrouter
-            priority: 3
+            priority: 7
             scope: global
             targets:
               - provider: deploy
@@ -295,7 +295,7 @@ spec:
             name: Cloud GLM Flash Uncensored
             cel_expression: "provider == 'cloud' && model == 'glm-flash-uncensored'"
             enabled: true
-            priority: 4
+            priority: 8
             scope: global
             targets:
               - provider: refuseless
@@ -308,7 +308,7 @@ spec:
             fallbacks:
               - model: abliterated-model-large-v2
                 provider: abliteration
-            priority: 5
+            priority: 9
             scope: global
             targets:
               - provider: refuseless
