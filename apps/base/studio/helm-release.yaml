@@ -40,7 +40,7 @@ spec:
                   - ROUTE_HOST
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
               # The Chat tab uses the assistant's gateway with these models.
-              STUDIO_CHAT_MODELS: local/auto,local/uncensored,cloud/auto,cloud/deepseek-flash,cloud/deepseek-flash-uncensored,cloud/glm-flash,cloud/glm-flash-uncensored,cloud/glm-uncensored
+              STUDIO_CHAT_MODELS: local/auto,local/uncensored,cloud/auto,cloud/deepseek-flash,cloud/deepseek-flash-uncensored,cloud/glm,cloud/glm-flash,cloud/glm-flash-uncensored,cloud/glm-uncensored
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
               STUDIO_CLIPROXYAPI_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
               STUDIO_ENABLE_PRESETS: "1"
