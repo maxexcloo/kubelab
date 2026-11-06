@@ -186,7 +186,10 @@ webSearch:
   firecrawlApiKey: ${FIRECRAWL_API_KEY}
   keenableApiKey: ${KEENABLE_API_KEY}
   rerankerType: none
-  scraperProvider: keenable
+  # Keenable's page fetch rate-limits a third of a five-link result set (HTTP 429),
+  # and the results are the reason web search is on. Firecrawl scrapes reliably,
+  # so search stays on Keenable's index and only the fetch moves.
+  scraperProvider: firecrawl
   searchProvider: keenable
   serperApiKey: ${SERPER_API_KEY}
   tavilyApiKey: ${TAVILY_API_KEY}
