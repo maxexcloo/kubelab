@@ -206,10 +206,12 @@ spec:
       periodSeconds: 10
       timeoutSeconds: 5
     bifrost:
-      # Helm owns providers, virtual keys, MCP and routing rules. Split mode, the
-      # default, keeps dashboard edits to everything else (budgets, pricing
-      # overrides, teams) across restarts; changing a section here replaces it.
-      # The SQLite store still backs MCP grants.
+      # Pruning needs config.json mode: each section the file declares becomes
+      # authoritative, so renaming a provider or rule removes the old row. Sections
+      # the file omits stay database-owned, so budgets, pricing overrides, teams and
+      # anything else created in the dashboard survive. Leave a section out of this
+      # file to manage it in the dashboard.
+      sourceOfTruth: config.json
       client:
         allowedOrigins:
           - https://app.invalid
@@ -240,7 +242,7 @@ spec:
                 provider: opencode-zen
               - model: deepseek/deepseek-v4.1-flash-1017
                 provider: openrouter
-            priority: 4
+            priority: 0
             scope: global
             targets:
               - provider: deploy
@@ -253,7 +255,7 @@ spec:
             fallbacks:
               - model: abliterated-model-large-flash
                 provider: abliteration
-            priority: 5
+            priority: 1
             scope: global
             targets:
               - provider: refuseless
@@ -268,7 +270,7 @@ spec:
                 provider: opencode-zen
               - model: z-ai/glm-5.3
                 provider: openrouter
-            priority: 6
+            priority: 2
             scope: global
             targets:
               - provider: opencode-go
@@ -285,7 +287,7 @@ spec:
                 provider: opencode-zen
               - model: z-ai/glm-5.3-flash
                 provider: openrouter
-            priority: 7
+            priority: 3
             scope: global
             targets:
               - provider: deploy
@@ -295,7 +297,7 @@ spec:
             name: Cloud GLM Flash Uncensored
             cel_expression: "provider == 'cloud' && model == 'glm-flash-uncensored'"
             enabled: true
-            priority: 8
+            priority: 4
             scope: global
             targets:
               - provider: refuseless
@@ -308,7 +310,7 @@ spec:
             fallbacks:
               - model: abliterated-model-large-v2
                 provider: abliteration
-            priority: 9
+            priority: 5
             scope: global
             targets:
               - provider: refuseless
@@ -323,7 +325,7 @@ spec:
                 provider: opencode-go
               - model: xiaomi/mimo-v2.6-pro
                 provider: openrouter
-            priority: 10
+            priority: 6
             scope: global
             targets:
               - provider: xiaomi
@@ -338,7 +340,7 @@ spec:
                 provider: opencode-go
               - model: xiaomi/mimo-v2.6-flash
                 provider: openrouter
-            priority: 11
+            priority: 7
             scope: global
             targets:
               - provider: xiaomi
