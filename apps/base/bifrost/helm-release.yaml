@@ -206,9 +206,10 @@ spec:
       periodSeconds: 10
       timeoutSeconds: 5
     bifrost:
-      # config.json is authoritative: each restart reverts dashboard edits and prunes
-      # entries removed here. The SQLite store still backs MCP grants.
-      sourceOfTruth: config.json
+      # Helm owns providers, virtual keys, MCP and routing rules. Split mode, the
+      # default, keeps dashboard edits to everything else (budgets, pricing
+      # overrides, teams) across restarts; changing a section here replaces it.
+      # The SQLite store still backs MCP grants.
       client:
         allowedOrigins:
           - https://app.invalid
@@ -223,16 +224,20 @@ spec:
         authConfig:
           existingSecret: bifrost
           isEnabled: false
-        # Each cloud/ alias serves one model, falling back only to the same model elsewhere;
-        # auto and uncensored are DeepSeek's.
+        # Each cloud/ alias serves one model, falling back in order to the same model
+        # elsewhere. The uncensored aliases name the model they abliterate.
         routingRules:
-          - id: cloud-deepseek
-            name: Cloud DeepSeek
-            cel_expression: "provider == 'cloud' && model in ['auto', 'deepseek']"
+          - id: cloud-deepseek-flash
+            name: Cloud DeepSeek Flash
+            cel_expression: "provider == 'cloud' && model in ['auto', 'deepseek-flash']"
             enabled: true
             fallbacks:
               - model: deepseek-flash
                 provider: deepseek
+              - model: deepseek-v4.1-flash
+                provider: opencode-go
+              - model: deepseek-v4.1-flash
+                provider: opencode-zen
               - model: deepseek/deepseek-v4.1-flash-1017
                 provider: openrouter
             priority: 0
@@ -241,10 +246,13 @@ spec:
               - provider: deploy
                 model: deepseek-ai/deepseek-v4.1-flash-1017
                 weight: 1.0
-          - id: cloud-deepseek-uncensored
-            name: Cloud DeepSeek Uncensored
-            cel_expression: "provider == 'cloud' && model in ['deepseek-uncensored', 'uncensored']"
+          - id: cloud-deepseek-flash-uncensored
+            name: Cloud DeepSeek Flash Uncensored
+            cel_expression: "provider == 'cloud' && model == 'deepseek-flash-uncensored'"
             enabled: true
+            fallbacks:
+              - model: abliterated-model-large-flash
+                provider: abliteration
             priority: 1
             scope: global
             targets:
@@ -256,23 +264,55 @@ spec:
             cel_expression: "provider == 'cloud' && model == 'glm'"
             enabled: true
             fallbacks:
-              - model: z-ai/glm-5.3-flash
+              - model: glm-5.3
+                provider: opencode-zen
+              - model: z-ai/glm-5.3
                 provider: openrouter
             priority: 2
+            scope: global
+            targets:
+              - provider: opencode-go
+                model: glm-5.3
+                weight: 1.0
+          - id: cloud-glm-flash
+            name: Cloud GLM Flash
+            cel_expression: "provider == 'cloud' && model == 'glm-flash'"
+            enabled: true
+            fallbacks:
+              - model: glm-5.3-flash
+                provider: opencode-go
+              - model: glm-5.3-flash
+                provider: opencode-zen
+              - model: z-ai/glm-5.3-flash
+                provider: openrouter
+            priority: 3
             scope: global
             targets:
               - provider: deploy
                 model: zai-org/glm-5.3-flash
                 weight: 1.0
-          - id: cloud-glm-uncensored
-            name: Cloud GLM Uncensored
-            cel_expression: "provider == 'cloud' && model == 'glm-uncensored'"
+          - id: cloud-glm-flash-uncensored
+            name: Cloud GLM Flash Uncensored
+            cel_expression: "provider == 'cloud' && model == 'glm-flash-uncensored'"
             enabled: true
-            priority: 3
+            priority: 4
             scope: global
             targets:
               - provider: refuseless
                 model: glm-5.3-flash-abliterated
+                weight: 1.0
+          - id: cloud-glm-uncensored
+            name: Cloud GLM Uncensored
+            cel_expression: "provider == 'cloud' && model == 'glm-uncensored'"
+            enabled: true
+            fallbacks:
+              - model: abliterated-model-large-v2
+                provider: abliteration
+            priority: 5
+            scope: global
+            targets:
+              - provider: refuseless
+                model: glm-5.3-abliterated
                 weight: 1.0
         virtualKeys:
           - id: claude
@@ -490,6 +530,49 @@ spec:
           keys:
             - name: cliproxyapi
               models: ["*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        # CLIProxyAPI merges every upstream's model names into one list, so each
+        # sibling shares its endpoint and key but lists a single prefix. The original
+        # provider keeps the full set for explicit provider/model IDs.
+        cliproxy-claude:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxy-claude
+              models: ["regex:^claude-.*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        cliproxy-gemini:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxy-gemini
+              models: ["regex:^gemini-.*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        cliproxy-gpt:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxy-gpt
+              models: ["regex:^(gpt|codex)-.*"]
+              value: env.CLIPROXY_API_KEY
+          network_config:
+            allow_private_network: true
+            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        cliproxy-grok:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: cliproxy-grok
+              models: ["regex:^grok-.*"]
               value: env.CLIPROXY_API_KEY
           network_config:
             allow_private_network: true
