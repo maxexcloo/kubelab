@@ -130,7 +130,7 @@ spec:
     image:
       pullPolicy: IfNotPresent
       repository: docker.io/maximhq/bifrost
-      tag: v2.4.0
+      tag: v2.5.0
     nodeSelector:
       node.excloo.dev/network: internal
     podSecurityContext:

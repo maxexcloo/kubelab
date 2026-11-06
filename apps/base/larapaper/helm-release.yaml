@@ -23,7 +23,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/usetrmnl/larapaper
-              tag: 0.45.1
+              tag: 0.46.0
             probes:
               liveness: null
               readiness: &ready
