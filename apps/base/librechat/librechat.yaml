@@ -49,12 +49,11 @@ endpoints:
       - web_search
   custom:
     # Every section reaches its provider through Bifrost, which lists that provider's models
-    # for x-bf-model-provider. Each cloud/ alias serves one model (auto and uncensored are
-    # DeepSeek's), and local/ takes the first running local model, with local/uncensored
-    # limited to uncensored ones and local/<name> reaching the model that reports that name;
-    # set reasoning with the Reasoning Effort parameter.
+    # for x-bf-model-provider. Cloud serves the cloud/ aliases and Local the local/ ones;
+    # the rest are direct providers, named after the upstream they front, so Anthropic,
+    # Google, OpenAI and xAI are CLIProxyAPI's channels there.
     - &defaults
-      name: AI
+      name: Cloud
       apiKey: ${BIFROST_API_KEY}
       baseURL: http://bifrost.bifrost.svc.cluster.local:8080/openai/v1
       models:
@@ -96,21 +95,21 @@ endpoints:
           - "*"
         fetch: true
     - <<: *provider
-      name: CLI Proxy - Claude
+      name: Anthropic
       headers:
-        x-bf-model-provider: cliproxy-claude
+        x-bf-model-provider: cliproxy-anthropic
     - <<: *provider
-      name: CLI Proxy - Gemini
+      name: Google
       headers:
-        x-bf-model-provider: cliproxy-gemini
+        x-bf-model-provider: cliproxy-google
     - <<: *provider
-      name: CLI Proxy - GPT
+      name: OpenAI
       headers:
-        x-bf-model-provider: cliproxy-gpt
+        x-bf-model-provider: cliproxy-openai
     - <<: *provider
-      name: CLI Proxy - Grok
+      name: xAI
       headers:
-        x-bf-model-provider: cliproxy-grok
+        x-bf-model-provider: cliproxy-xai
     - <<: *provider
       name: DeepSeek
       headers:
