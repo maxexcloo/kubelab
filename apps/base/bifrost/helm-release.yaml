@@ -370,8 +370,13 @@ spec:
       # only this pod through their network policies.
       mcp:
         enabled: true
+        # Code Mode exposes each agent server through four discovery and execution
+        # meta-tools, so clients load tool definitions on demand instead of all 500+
+        # up front. Studio stays direct: LibreChat's Studio tools need their native
+        # names and the set is small.
         clientConfigs:
           - name: actual_budget
+            isCodeModeClient: true
             authType: none
             httpConfig:
               url: http://actual-budget-mcp.actual-budget-mcp.svc.cluster.local:3000/mcp
@@ -379,6 +384,7 @@ spec:
             endpointSlug: actual-budget
             toolsToExecute: ["*"]
           - name: home_assistant
+            isCodeModeClient: true
             authType: none
             httpConfig:
               url: http://home-assistant-mcp.home-assistant-mcp.svc.cluster.local:8086/mcp
@@ -386,6 +392,7 @@ spec:
             endpointSlug: home-assistant
             toolsToExecute: ["*"]
           - name: immich
+            isCodeModeClient: true
             authType: none
             httpConfig:
               url: http://immich-mcp.immich-mcp.svc.cluster.local:5000/mcp
@@ -393,6 +400,7 @@ spec:
             endpointSlug: immich
             toolsToExecute: ["*"]
           - name: karakeep
+            isCodeModeClient: true
             authType: none
             httpConfig:
               url: http://karakeep-mcp.karakeep-mcp.svc.cluster.local:8000/mcp
@@ -400,6 +408,7 @@ spec:
             endpointSlug: karakeep
             toolsToExecute: ["*"]
           - name: larapaper
+            isCodeModeClient: true
             authType: headers
             httpConfig:
               url: http://larapaper.larapaper.svc.cluster.local:8080/mcp
@@ -409,6 +418,7 @@ spec:
               Authorization: env.LARAPAPER_MCP_AUTHORIZATION
             toolsToExecute: ["*"]
           - name: reactive_resume
+            isCodeModeClient: true
             authType: headers
             httpConfig:
               url: http://reactive-resume.reactive-resume.svc.cluster.local:3000/mcp
@@ -442,6 +452,7 @@ spec:
               - Review
               - Upload
           - name: unifi_network
+            isCodeModeClient: true
             authType: none
             httpConfig:
               url: http://unifi-network-mcp.unifi-network-mcp.svc.cluster.local:3000/mcp
