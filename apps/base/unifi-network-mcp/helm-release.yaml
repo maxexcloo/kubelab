@@ -21,7 +21,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/sirkirby/unifi-network-mcp
-              tag: 0.44.0
+              tag: 0.44.1
             # The server has no health endpoint.
             probes:
               liveness: &health
