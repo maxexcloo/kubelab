@@ -59,11 +59,10 @@ endpoints:
       models:
         default:
           - cloud/auto
-          - cloud/deepseek
           - cloud/deepseek-flash
-          - cloud/deepseek-uncensored
-          - cloud/glm
+          - cloud/deepseek-flash-uncensored
           - cloud/glm-flash
+          - cloud/glm-flash-uncensored
           - cloud/glm-uncensored
           - local/auto
           - local/uncensored
