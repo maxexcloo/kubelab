@@ -107,9 +107,20 @@ endpoints:
       headers:
         x-bf-model-provider: cliproxy-openai
     - <<: *provider
-      name: xAI
-      headers:
-        x-bf-model-provider: cliproxy-xai
+      name: OpenRouter
+      # Native: OpenRouter's own key and endpoint, not Bifrost. LibreChat needs
+      # OPENROUTER_KEY for this and no OPENROUTER_API_KEY, which would reroute its
+      # built-in OpenAI endpoint too. fetch stays off because the catalogue is
+      # already listed per provider through Bifrost.
+      apiKey: ${OPENROUTER_KEY}
+      baseURL: https://openrouter.ai/api/v1
+      models:
+        default:
+          - openrouter/auto
+        fetch: false
+      # OpenRouter models use varied stop tokens; dropping it avoids 422s.
+      dropParams:
+        - stop
     - <<: *provider
       name: DeepSeek
       headers:
