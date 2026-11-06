@@ -95,17 +95,21 @@ endpoints:
           - "*"
         fetch: true
     - <<: *provider
-      name: Anthropic
+      name: Claude
       headers:
-        x-bf-model-provider: cliproxy-anthropic
+        x-bf-model-provider: cliproxy-claude
     - <<: *provider
-      name: Google
+      name: Gemini
       headers:
-        x-bf-model-provider: cliproxy-google
+        x-bf-model-provider: cliproxy-gemini
     - <<: *provider
-      name: OpenAI
+      name: GPT
       headers:
-        x-bf-model-provider: cliproxy-openai
+        x-bf-model-provider: cliproxy-gpt
+    - <<: *provider
+      name: Grok
+      headers:
+        x-bf-model-provider: cliproxy-grok
     - <<: *provider
       name: OpenRouter
       # Native: OpenRouter's own key and endpoint, not Bifrost. LibreChat needs
