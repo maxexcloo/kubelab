@@ -561,18 +561,7 @@ spec:
           network_config:
             base_url: https://api.abliteration.ai
         # CLIProxyAPI merges every upstream's model names into one list, so each
-        # provider shares its endpoint and key but lists a single prefix. The
-        # unprefixed provider keeps the full set for explicit provider/model IDs.
-        cliproxyapi:
-          custom_provider_config:
-            base_provider_type: openai
-          keys:
-            - name: cliproxyapi
-              models: ["*"]
-              value: env.CLIPROXY_API_KEY
-          network_config:
-            allow_private_network: true
-            base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
+        # provider shares its endpoint and key but lists a single prefix.
         cliproxy-anthropic:
           custom_provider_config:
             base_provider_type: openai
