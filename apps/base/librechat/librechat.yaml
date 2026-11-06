@@ -97,15 +97,15 @@ endpoints:
     - <<: *provider
       name: Claude
       headers:
-        x-bf-model-provider: cliproxy-claude
+        x-bf-model-provider: cliproxy-anthropic
     - <<: *provider
       name: Gemini
       headers:
-        x-bf-model-provider: cliproxy-gemini
+        x-bf-model-provider: cliproxy-google
     - <<: *provider
       name: GPT
       headers:
-        x-bf-model-provider: cliproxy-gpt
+        x-bf-model-provider: cliproxy-openai
     - <<: *provider
       name: Grok
       headers:
