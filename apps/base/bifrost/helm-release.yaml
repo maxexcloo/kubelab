@@ -82,7 +82,7 @@ spec:
           - name: oauth2-proxy
             mountPath: /config
             readOnly: true
-      # Serves the text models as ai/ and local/auto; see router.py.
+      # Serves the text models as local/; see router.py.
       - name: router
         command:
           - python
@@ -306,12 +306,9 @@ spec:
             mcp_configs:
               - mcp_client_name: studio
                 tools_to_execute: ["*"]
-            # A model started since Bifrost last listed ai/ is missing from its catalogue,
-            # which "*" checks; a pattern reaches it at once.
             provider_configs:
-              - &running-models
-                provider: ai
-                allowed_models: ["regex:.*"]
+              - provider: local
+                allowed_models: ["*"]
                 key_ids: ["*"]
           - id: opencode
             name: OpenCode
@@ -322,11 +319,22 @@ spec:
               - provider: abliteration
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - *running-models
+              - provider: cloud
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: deepseek
+                allowed_models: ["*"]
+                key_ids: ["*"]
               - provider: deploy
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: local
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: opencode-go
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: opencode-zen
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: refuseless
@@ -360,7 +368,10 @@ spec:
               - provider: local
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: openrouter
+              - provider: opencode-go
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: opencode-zen
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: refuseless
@@ -473,17 +484,6 @@ spec:
               value: env.ABLITERATION_API_KEY
           network_config:
             base_url: https://api.abliteration.ai
-        # The router serves every local text model by name.
-        ai:
-          custom_provider_config:
-            base_provider_type: openai
-          keys:
-            - name: ai
-              models: ["*"]
-              value: env.AI_API_KEY
-          network_config:
-            allow_private_network: true
-            base_url: http://127.0.0.1:8090/ai
         cliproxyapi:
           custom_provider_config:
             base_provider_type: openai
@@ -519,8 +519,8 @@ spec:
               value: env.DEPLOY_API_KEY
           network_config:
             base_url: https://api.deploy.com/api
-        # The router sends local/auto and local/uncensored to the first running local text model
-        # that suits.
+        # The router sends local/auto and local/uncensored to the first running local text
+        # model that suits, and local/<name> to the model that reports that name.
         local:
           custom_provider_config:
             base_provider_type: openai
