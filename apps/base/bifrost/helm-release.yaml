@@ -562,41 +562,41 @@ spec:
             base_url: https://api.abliteration.ai
         # CLIProxyAPI merges every upstream's model names into one list, so each
         # provider shares its endpoint and key but lists a single prefix.
-        cliproxy-anthropic:
+        cliproxy-claude:
           custom_provider_config:
             base_provider_type: openai
           keys:
-            - name: cliproxy-anthropic
+            - name: cliproxy-claude
               models: ["regex:^claude-.*"]
               value: env.CLIPROXY_API_KEY
           network_config:
             allow_private_network: true
             base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-        cliproxy-google:
+        cliproxy-gemini:
           custom_provider_config:
             base_provider_type: openai
           keys:
-            - name: cliproxy-google
+            - name: cliproxy-gemini
               models: ["regex:^gemini-.*"]
               value: env.CLIPROXY_API_KEY
           network_config:
             allow_private_network: true
             base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-        cliproxy-openai:
+        cliproxy-gpt:
           custom_provider_config:
             base_provider_type: openai
           keys:
-            - name: cliproxy-openai
+            - name: cliproxy-gpt
               models: ["regex:^(gpt|codex|chatgpt)-.*"]
               value: env.CLIPROXY_API_KEY
           network_config:
             allow_private_network: true
             base_url: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-        cliproxy-xai:
+        cliproxy-grok:
           custom_provider_config:
             base_provider_type: openai
           keys:
-            - name: cliproxy-xai
+            - name: cliproxy-grok
               models: ["regex:^grok-.*"]
               value: env.CLIPROXY_API_KEY
           network_config:
