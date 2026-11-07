@@ -4,6 +4,7 @@ resources:
   - ../../base/actual-budget
   - ../../base/actual-budget-mcp
   - ../../base/actual-up
+  - ../../base/ai-models
   - ../../base/aiometadata
   - ../../base/aiostreams
   - ../../base/atvloadly

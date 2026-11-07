@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-models
+  labels:
+    app.kubernetes.io/name: ai-models
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-models
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ai-models
+    spec:
+      automountServiceAccountToken: false
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/hostname: bento
+        node.excloo.dev/dedicated: gpu
+      containers:
+        - name: main
+          image: docker.io/instrumentisto/rsync-ssh:alpine3.23-r3
+          command:
+            - rsync
+          args:
+            - --daemon
+            - --no-detach
+            - --config=/etc/rsyncd.conf
+            # Homelab restricts the kubelet node IP to Tailscale's IPv4 range.
+            # Bind to that address only; tailnet ACLs control who can read models.
+            - --address=$(NODE_IP)
+            - --port=10873
+          env:
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          livenessProbe: &health
+            exec:
+              command:
+                - /bin/sh
+                - -ec
+                - rsync --contimeout=3 --timeout=3 --list-only "rsync://$NODE_IP:10873/models/" >/dev/null
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe: *health
+          startupProbe:
+            <<: *health
+            failureThreshold: 30
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: config
+              mountPath: /etc/rsyncd.conf
+              readOnly: true
+              subPath: rsyncd.conf
+            - name: models
+              mountPath: /models
+              readOnly: true
+            - name: runtime
+              mountPath: /tmp
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      tolerations:
+        - key: node.excloo.dev/dedicated
+          operator: Equal
+          value: gpu
+          effect: NoSchedule
+      volumes:
+        - name: config
+          configMap:
+            name: ai-models
+        - name: models
+          hostPath:
+            path: ${dataset_root}/ai/models
+            type: Directory
+        - name: runtime
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
