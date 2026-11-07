@@ -33,7 +33,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/maxexcloo/studio-worker
-              tag: 2026.11.5.2
+              tag: 2026.11.7.2
             # Readiness only, as under Docker: loading never restarts the worker.
             probes:
               readiness:
