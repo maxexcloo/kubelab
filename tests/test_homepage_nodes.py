@@ -216,7 +216,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
                     widgets[0]["unifi_console"],
                     {
                         "key": "{{HOMEPAGE_VAR_UNIFI_API_KEY}}",
-                        "url": "https://gateway.mbk.example.net",
+                        "url": "https://sol.mbk.example.net",
                     },
                 )
                 kubernetes = next(
