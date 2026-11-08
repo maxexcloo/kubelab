@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    defaultPodOptions:
+      nodeSelector:
+        kubernetes.io/hostname: venus
+      tolerations:
+        - key: node.excloo.dev/dedicated
+          operator: Equal
+          value: gpu
+          effect: NoSchedule
+    persistence:
+      models:
+        hostPath: ${dataset_root}/ai/models
+        hostPathType: Directory
+        type: hostPath
+        globalMounts:
+          - path: /models
+    route:
+      private:
+        annotations:
+          gethomepage.dev/name: Syncthing (Venus)
+          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_SYNCTHING_VENUS_API_KEY}}" }}'
+          onepassword.excloo.dev/item: Syncthing (Venus)
+        hostnames:
+          - syncthing-venus.${cluster_name}.excloo.dev
