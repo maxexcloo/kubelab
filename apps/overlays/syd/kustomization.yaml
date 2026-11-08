@@ -4,7 +4,6 @@ resources:
   - ../../base/actual-budget
   - ../../base/actual-budget-mcp
   - ../../base/actual-up
-  - ../../base/ai-models
   - ../../base/aiometadata
   - ../../base/aiostreams
   - ../../base/atvloadly
@@ -38,7 +37,6 @@ resources:
   - ../../base/sidestore-vpn
   - ../../base/signtools
   - ../../base/studio
-  - ../../base/syncthing
   - ../../base/text
   - ../../base/trcc
   - ../../base/unifi-network-mcp
@@ -47,6 +45,8 @@ resources:
   - ../../../platform/observability/grafana/integrations
   - openspeedtest-kimbap
   - openspeedtest-neptune
+  - syncthing-kimbap
+  - syncthing-venus
 patches:
   # Retry installs that outwait new credentials; failed upgrades are not rolled
   # back over migrated data.
@@ -77,7 +77,6 @@ patches:
       kind: ConfigMap
   - path: beszel-agent.yaml
   - path: minilab.yaml
-  - path: syncthing.yaml
 replacements:
   - source:
       kind: HelmRelease
@@ -152,20 +151,3 @@ replacements:
           namespace: studio
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.BIFROST_HOST
-  # The cluster's Syncthing item is named for its host.
-  - source:
-      kind: HelmRelease
-      name: syncthing
-      namespace: syncthing
-      fieldPath: spec.values.route.private.annotations.[onepassword.excloo.dev/item]
-    targets:
-      - select:
-          kind: ExternalSecret
-          namespace: syncthing
-        fieldPaths:
-          - spec.data.*.remoteRef.key
-      - select:
-          kind: PocketIDClient
-          name: syncthing
-        fieldPaths:
-          - spec.item

@@ -1,0 +1,80 @@
+apiVersion: builtin
+kind: ReplacementTransformer
+metadata:
+  name: syncthing-instance
+replacements:
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - metadata.name
+          - spec.releaseName
+          - spec.values.global.nameOverride
+      - select:
+          kind: ExternalSecret
+          name: syncthing
+        fieldPaths:
+          - metadata.name
+          - spec.target.name
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - metadata.name
+          - spec.client.id
+  - source:
+      kind: Namespace
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: ExternalSecret
+          name: syncthing-oauth2-proxy
+        fieldPaths:
+          - metadata.name
+          - spec.target.name
+        options:
+          delimiter: "-"
+          index: 0
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.annotations.[onepassword.excloo.dev/item]
+    targets:
+      - select:
+          kind: ExternalSecret
+        fieldPaths:
+          - spec.data.*.remoteRef.key
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.item
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.annotations.[gethomepage.dev/name]
+    targets:
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.name
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.main.containers.oauth2-proxy.env.OAUTH2_PROXY_REDIRECT_URL
+          - spec.values.route.private.annotations.[gethomepage.dev/href]
+          - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
+        options:
+          delimiter: /
+          index: 2
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.callbackURLs.0
+          - spec.client.launchURL
+        options:
+          delimiter: /
+          index: 2
