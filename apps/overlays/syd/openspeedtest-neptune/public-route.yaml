@@ -1,31 +1,31 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: openspeedtest-hsp-public
+  name: openspeedtest-neptune-public
   namespace: openspeedtest
   annotations:
-    # Bypass Cloudflare so tests measure the internet path to HSP itself.
+    # Bypass Cloudflare so tests measure the internet path to Neptune itself.
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
     gethomepage.dev/description: Network Speed Test
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Operations
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-openspeedtest
-    gethomepage.dev/name: OpenSpeedTest (syd/hsp) (External)
-    gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-hsp
+    gethomepage.dev/name: OpenSpeedTest (syd/neptune) (External)
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-neptune
     monitoring.excloo.dev/enabled: "true"
   labels:
-    app.kubernetes.io/name: openspeedtest-hsp
+    app.kubernetes.io/name: openspeedtest-neptune
     gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:
-    - openspeedtest-hsp.excloo.com
+    - openspeedtest-neptune.excloo.com
   parentRefs:
     - name: public-direct
       namespace: networking
   rules:
     - backendRefs:
-        - name: openspeedtest-hsp
+        - name: openspeedtest-neptune
           port: 80
       filters:
         - type: ExtensionRef
