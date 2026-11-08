@@ -54,7 +54,7 @@ spec:
             image: *image
     defaultPodOptions:
       nodeSelector:
-        kubernetes.io/hostname: venus
+        node.excloo.dev/dedicated: gpu
       tolerations:
         - effect: NoSchedule
           key: node.excloo.dev/dedicated
