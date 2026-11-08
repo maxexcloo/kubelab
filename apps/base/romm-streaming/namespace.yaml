@@ -5,7 +5,3 @@ metadata:
   labels:
     gateway.excloo.dev/private-access: "true"
     gateway.excloo.dev/public-access: "true"
-    # Webstation's s6 init starts as root before dropping to its user.
-    pod-security.kubernetes.io/audit: baseline
-    pod-security.kubernetes.io/enforce: baseline
-    pod-security.kubernetes.io/warn: baseline

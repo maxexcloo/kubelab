@@ -1,0 +1,19 @@
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: romm-streaming
+  namespace: romm-streaming
+  labels:
+    endpointslice.kubernetes.io/managed-by: kubelab
+    kubernetes.io/service-name: romm-streaming
+addressType: IPv4
+endpoints:
+  # Native EndpointSlices require an IP; Homelab owns mandu.mbk.excloo.net.
+  - addresses:
+      - 100.87.73.3
+    conditions:
+      ready: true
+ports:
+  - name: http
+    port: 3000
+    protocol: TCP
