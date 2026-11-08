@@ -3,8 +3,8 @@ machines:
     bento:
       platform: ucore
       type: server
-    hass:
-      name: HASS
+    luna:
+      name: Luna
       platform: haos
       type: appliance
       services:
