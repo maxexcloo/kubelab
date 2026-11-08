@@ -82,7 +82,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                     "url": "homelab://mbk/kimbap/management",
                     "key": "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}",
                 },
-                "link": "homelab://mbk/hass/management/add-on",
+                "link": "homelab://mbk/luna/management/add-on",
                 "console": "homelab://mbk/nanokvm/management",
                 "local_console": "homelab://mbk/slzb-06m/management",
                 "other_service": "homelab://mbk/kimbap/netboot",
@@ -91,7 +91,7 @@ class HomepageEndpointsTests(unittest.TestCase):
         self.assertEqual(result["href"], "https://storage.mbk.example.net:8444")
         self.assertEqual(result["href"], result["widget"]["url"])
         self.assertEqual(result["widget"]["key"], "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}")
-        self.assertEqual(result["link"], "https://hass.mbk.example.net/add-on")
+        self.assertEqual(result["link"], "https://luna.mbk.example.net/add-on")
         self.assertEqual(
             result["other_service"], "http://storage.mbk.example.net:31010"
         )
