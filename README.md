@@ -48,11 +48,11 @@ placement, mounted folders and private routes in their cluster overlay. Each
 instance has its own configuration volume, device identity and credentials;
 manage peers and folder settings through that instance's GUI.
 
-The AI model library uses a send-only folder on Venus and a receive-only folder
-on Kimbap. Kimbap keeps the former mirror destination, `/mnt/truenas/ai/`.
-The sender runs as the model owner (UID/GID 1000) and mounts models read-only; its `.stfolder` marker and `.stignore` file
-are maintained by the dataset owner. Kimbap retains its model-tree ACLs with the
-folder's Ignore Permissions setting. Source deletions propagate; partial downloads (`*.download`, `*.part`,
+The AI model library uses send-and-receive folders on Venus and Kimbap, so
+changes and deletions propagate in both directions. Venus runs as the model
+owner (UID/GID 1000) with a writable model mount. Kimbap keeps the former mirror
+destination, `/mnt/truenas/ai/`, and retains its model-tree ACLs with the folder's
+Ignore Permissions setting. Partial downloads (`*.download`, `*.part`,
 `*.part.json` and `.rsync-partial`) are excluded. This replaces the native
 scheduled rsync mirror. Existing Kimbap folders and peers remain independent.
 
