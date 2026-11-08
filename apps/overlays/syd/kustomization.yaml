@@ -46,8 +46,8 @@ resources:
   - ../../../platform/identity/cloudflare-access
   - ../../../platform/identity/headlamp/integrations
   - ../../../platform/observability/grafana/integrations
-  - openspeedtest-hsp
   - openspeedtest-kimbap
+  - openspeedtest-neptune
 patches:
   # Retry installs that outwait new credentials; failed upgrades are not rolled
   # back over migrated data.
