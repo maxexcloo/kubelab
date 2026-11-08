@@ -13,7 +13,7 @@ scan:
     - screenshot
     - title_screen
 streaming:
-  enabled: true
+  enabled: false
   containers:
     - protocol: webstation
       host: https://games-streaming.excloo.com

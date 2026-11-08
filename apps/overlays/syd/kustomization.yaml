@@ -34,7 +34,6 @@ resources:
   - ../../base/reactive-resume
   - ../../base/redlib
   - ../../base/romm
-  - ../../base/romm-streaming
   - ../../base/shelfmark
   - ../../base/sidestore-vpn
   - ../../base/signtools
@@ -137,22 +136,6 @@ replacements:
           namespace: librechat
         fieldPaths:
           - spec.values.librechat.adminPanelUrl
-        options:
-          delimiter: /
-          index: 2
-  # Only RomM may frame the streaming room.
-  - source:
-      kind: HelmRelease
-      name: romm
-      namespace: romm
-      fieldPath: spec.values.route.public.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-          name: romm-streaming
-          namespace: romm-streaming
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.BROKER_FRAME_ANCESTORS
         options:
           delimiter: /
           index: 2
