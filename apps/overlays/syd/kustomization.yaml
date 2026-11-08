@@ -41,6 +41,7 @@ resources:
   - ../../base/studio
   - ../../base/syncthing
   - ../../base/text
+  - ../../base/trcc
   - ../../base/unifi-network-mcp
   - ../../../platform/identity/cloudflare-access
   - ../../../platform/identity/headlamp/integrations
