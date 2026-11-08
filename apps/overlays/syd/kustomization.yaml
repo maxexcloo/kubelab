@@ -34,7 +34,6 @@ resources:
   - ../../base/reactive-resume
   - ../../base/redlib
   - ../../base/romm
-  - ../../base/romm-streaming
   - ../../base/shelfmark
   - ../../base/sidestore-vpn
   - ../../base/signtools
@@ -47,7 +46,6 @@ resources:
   - ../../../platform/observability/grafana/integrations
   - openspeedtest-hsp
   - openspeedtest-kimbap
-  - romm-streaming-endpoints.yaml
 patches:
   # Retry installs that outwait new credentials; failed upgrades are not rolled
   # back over migrated data.
