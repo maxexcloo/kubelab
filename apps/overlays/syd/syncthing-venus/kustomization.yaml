@@ -7,6 +7,7 @@ patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
+  - path: storage.yaml
 transformers:
   - ../../../base/syncthing/instance
   - ../../../transformers/cluster-scoped
