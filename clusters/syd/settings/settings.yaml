@@ -16,4 +16,4 @@ spec:
       # The cluster is IPv4-only; Tailscale ingress needs dual-stack Services for IPv6.
       private_dns_ipv6: "false"
       storage_node: kimbap
-      unifi_host: gateway.mbk.excloo.net
+      unifi_host: sol.mbk.excloo.net
