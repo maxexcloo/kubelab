@@ -18,7 +18,7 @@ streaming:
     - protocol: webstation
       host: https://games-streaming.excloo.com
       broker_host: http://romm-streaming.romm-streaming.svc.cluster.local:3000
-      label: Mandu
+      label: Mars
       # Every library platform with a standalone emulator or a default RetroArch core.
       platforms:
         3ds: azahar
