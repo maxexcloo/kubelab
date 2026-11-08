@@ -41,6 +41,19 @@ Edit workload configuration in `apps/base/<application>` and select it through
 manifest checks cover what Flux builds, including its variable substitutions,
 but not Helm output, so render changed Helm charts separately.
 
+## Syncthing
+
+Syncthing runs per node. Cluster instances share `apps/base/syncthing`, with
+placement, mounted folders and private routes in their cluster overlay. Each
+instance has its own configuration volume, device identity and credentials;
+manage peers and folder settings through that instance's GUI.
+
+The AI model library uses a send-only folder on Venus and a receive-only folder
+on Kimbap. Kimbap keeps the former mirror destination, `/mnt/truenas/ai/`.
+Source deletions propagate; partial downloads (`*.download`, `*.part`,
+`*.part.json` and `.rsync-partial`) are excluded. This replaces the native
+scheduled rsync mirror. Existing Kimbap folders and peers remain independent.
+
 ## Deployment
 
 Merge reviewed pull requests into `main` and Flux reconciles them automatically.
