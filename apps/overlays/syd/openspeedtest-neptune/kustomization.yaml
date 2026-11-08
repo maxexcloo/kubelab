@@ -9,12 +9,12 @@ components:
 replacements:
   - source:
       kind: HTTPRoute
-      name: openspeedtest-hsp
+      name: openspeedtest-neptune
       fieldPath: spec.hostnames.0
     targets:
       - select:
           kind: HTTPRoute
-          name: openspeedtest-hsp
+          name: openspeedtest-neptune
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
         options:
@@ -22,12 +22,12 @@ replacements:
           index: 2
   - source:
       kind: HTTPRoute
-      name: openspeedtest-hsp-public
+      name: openspeedtest-neptune-public
       fieldPath: spec.hostnames.0
     targets:
       - select:
           kind: HTTPRoute
-          name: openspeedtest-hsp-public
+          name: openspeedtest-neptune-public
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
         options:
