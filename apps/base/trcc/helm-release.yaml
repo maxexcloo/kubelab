@@ -1,0 +1,96 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        strategy: Recreate
+        containers:
+          main:
+            image: &image
+              repository: ghcr.io/maxexcloo/trcc
+              tag: v9.12.0
+            probes:
+              readiness: &health
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - trcc
+                      - daemon-status
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              startup:
+                <<: *health
+                spec:
+                  exec:
+                    command:
+                      - trcc
+                      - daemon-status
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+            securityContext:
+              # USB character devices need host device access; sensors stay read-only.
+              privileged: true
+              readOnlyRootFilesystem: true
+        initContainers:
+          configuration:
+            command:
+              - cp
+              - -rL
+              - /config
+              - /data/.trcc
+            image: *image
+    defaultPodOptions:
+      nodeSelector:
+        kubernetes.io/hostname: venus
+      tolerations:
+        - effect: NoSchedule
+          key: node.excloo.dev/dedicated
+          operator: Equal
+          value: gpu
+    persistence:
+      configuration:
+        name: trcc
+        type: configMap
+        advancedMounts:
+          main:
+            configuration:
+              - path: /config
+                readOnly: true
+      data:
+        type: emptyDir
+        globalMounts:
+          - path: /data
+      sensors:
+        hostPath: /sys
+        hostPathType: Directory
+        type: hostPath
+        advancedMounts:
+          main:
+            main:
+              - path: /sys
+                readOnly: true
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+      usb:
+        hostPath: /dev/bus/usb
+        hostPathType: Directory
+        type: hostPath
+        advancedMounts:
+          main:
+            main:
+              - path: /dev/bus/usb
