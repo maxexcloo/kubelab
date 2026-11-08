@@ -48,7 +48,7 @@ placement, mounted folders and private routes in their cluster overlay. Each
 instance has its own configuration volume, device identity and credentials;
 manage peers and folder settings through that instance's GUI.
 
-The AI model library uses send-and-receive folders on Venus and Kimbap, so
+The `AI` folder (ID `ai`) uses send-and-receive mode on Venus and Kimbap, so
 changes and deletions propagate in both directions. Venus runs as the model
 owner (UID/GID 1000) with a writable model mount. Kimbap keeps the former mirror
 destination, `/mnt/truenas/ai/`, and retains its model-tree ACLs with the folder's
