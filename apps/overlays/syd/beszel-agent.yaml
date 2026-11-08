@@ -10,4 +10,5 @@ spec:
         - name: beszel-agent
           env:
             - name: NICS
-              value: ens2
+              # Match wired interfaces on OCI and bare-metal nodes, excluding overlays.
+              value: en*
