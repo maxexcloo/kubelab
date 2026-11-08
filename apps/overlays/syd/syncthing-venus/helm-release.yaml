@@ -23,7 +23,6 @@ spec:
         type: hostPath
         globalMounts:
           - path: /models
-            readOnly: true
     route:
       private:
         annotations:
