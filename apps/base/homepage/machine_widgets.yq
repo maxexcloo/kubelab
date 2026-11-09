@@ -5,7 +5,7 @@ load(strenv(PROVIDERS)).providers as $providers |
 ($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare"} |
   with(select(.widget != null); .widget.fields = ["status", "origin_ip"])) as $cloudflare |
 ($providers.tailscale // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "tailscale-light"} |
-  with(select(.widget != null); .widget.fields = ["address", "last_seen"])) as $tailscale |
+  with(select(.widget != null); .widget.fields = ["last_seen", "address"])) as $tailscale |
 # Keep inventory fields separate from the derived Homepage presentation.
 [$inventory | to_entries[] | .key as $network | .value | to_entries[] |
   .key as $key | .value as $machine | ($machine.hostname // $key) as $hostname |
@@ -60,7 +60,7 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
   (([.machine] | map(select(.beszel == true)) |
    map(with(select($beszel == null); error("Beszel monitoring needs exactly one Beszel route")) | $beszel + {
     "href": ($beszel.href + "/system/" + $host.group),
-    "widget": ($beszel.widget + {"systemId": $host.group, "fields": ["status", "cpu", "memory", "updated"]})
+    "widget": ($beszel.widget + {"systemId": $host.group, "fields": ["status", "updated", "cpu", "memory"]})
   })) +
   ([$infra.tailscale[$host.key]] | map(select(. != null and $tailscale.widget != null)) | map(. as $device | $tailscale + {
     "href": ("https://login.tailscale.com/admin/machines/" + $device),

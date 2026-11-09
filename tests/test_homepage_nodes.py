@@ -129,6 +129,9 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         )
         self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
         self.assertEqual(
+            node["Tailscale"]["widget"]["fields"], ["last_seen", "address"]
+        )
+        self.assertEqual(
             groups["mbk"]["Cloudflare"]["widget"]["tunnelid"], "cluster-tunnel"
         )
         self.assertEqual(
@@ -143,7 +146,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         )
         self.assertEqual(
             node["Beszel"]["widget"]["fields"],
-            ["status", "cpu", "memory", "updated"],
+            ["status", "updated", "cpu", "memory"],
         )
         self.assertEqual(node["Beszel"]["weight"], -1)
         self.assertEqual(node["Beszel"]["icon"], "sh-beszel")
