@@ -32,7 +32,7 @@ spec:
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
-            image:
+            image: &image
               repository: ghcr.io/maxexcloo/studio-worker
               tag: 2026.11.9.4
             # Readiness only, as under Docker: loading never restarts the worker.
@@ -55,6 +55,10 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-1
+      prepull:
+        containers:
+          main:
+            image: *image
     defaultPodOptions:
       nodeSelector:
         node.excloo.dev/dedicated: gpu
