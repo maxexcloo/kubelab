@@ -20,7 +20,7 @@ spec:
     controllers:
       main:
         annotations:
-          studio.excloo.dev/label: Video · 2 GPUs
+          studio.excloo.dev/label: Both GPUs
           studio.excloo.dev/worker: tp2
         labels:
           studio.excloo.dev/kind: video
