@@ -1,8 +1,9 @@
 """Shared app policy and derived settings must survive native composition."""
 
+import ast
 import unittest
 
-from support import CLUSTERS, repository_resources
+from support import CLUSTERS, ROOT, read_yaml, repository_resources
 
 
 class AppSettingsTests(unittest.TestCase):
@@ -125,6 +126,63 @@ class AppSettingsTests(unittest.TestCase):
                         )
                     checked += 1
             self.assertGreater(checked, 0)
+
+
+class BifrostRoutingTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        values = read_yaml(ROOT / "apps/base/bifrost/helm-release.yaml")["spec"][
+            "values"
+        ]
+        cls.governance = values["bifrost"]["governance"]
+
+    def test_advertised_cloud_models_each_have_one_route(self):
+        router = ast.parse((ROOT / "apps/base/bifrost/router.py").read_text())
+        aliases = next(
+            ast.literal_eval(statement.value)
+            for statement in router.body
+            if isinstance(statement, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "ALIASES"
+                for target in statement.targets
+            )
+        )
+        studio = read_yaml(ROOT / "apps/base/studio/helm-release.yaml")
+        cloud = studio["spec"]["values"]["controllers"]["main"]["containers"]["main"][
+            "env"
+        ]["STUDIO_ASSISTANT_CLOUD_MODEL"]
+        # Studio selects the uncensored counterpart of an auto model.
+        self.assertIn(
+            cloud.removeprefix("cloud/").replace("auto", "uncensored"), aliases["cloud"]
+        )
+        for model in aliases["cloud"]:
+            with self.subTest(model=model):
+                matched = [
+                    rule
+                    for rule in self.governance["routingRules"]
+                    if rule["enabled"]
+                    and eval(
+                        rule["cel_expression"].replace("&&", "and"),
+                        {"__builtins__": {}},
+                        {"provider": "cloud", "model": model},
+                    )
+                ]
+                self.assertEqual(len(matched), 1)
+
+    def test_cloud_keys_permit_every_target_and_fallback(self):
+        providers = {
+            target["provider"]
+            for rule in self.governance["routingRules"]
+            if rule["enabled"]
+            for target in rule["targets"] + rule.get("fallbacks", [])
+        }
+        for key in self.governance["virtualKeys"]:
+            if key.get("allow_all_providers"):
+                continue
+            allowed = {item["provider"] for item in key.get("provider_configs", [])}
+            if "cloud" in allowed:
+                with self.subTest(key=key["id"]):
+                    self.assertEqual(providers - allowed, set())
 
 
 if __name__ == "__main__":
