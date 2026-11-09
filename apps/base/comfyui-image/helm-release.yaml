@@ -15,19 +15,21 @@ spec:
             target:
               kind: Deployment
   values:
+    # A pool of one-GPU workers that each run images and video; Studio routes work to
+    # whichever is free and holds the model.
     controllers:
       main:
         strategy: Recreate
         annotations:
-          studio.excloo.dev/capabilities: image,upscale,models
-          studio.excloo.dev/label: Image
+          studio.excloo.dev/capabilities: image,video,upscale,models
+          studio.excloo.dev/label: Primary
           studio.excloo.dev/worker: primary
         labels:
           studio.excloo.dev/kind: image
         containers:
           main: &container
             env:
-              CLI_ARGS: --enable-assets --use-ck-attention --force-non-blocking --disable-pinned-memory --disable-mmap
+              CLI_ARGS: --cache-classic --disable-mmap --disable-pinned-memory --enable-assets --force-non-blocking --use-ck-attention
               HSA_OVERRIDE_GFX_VERSION: 12.0.1
             envFrom:
               - secretRef:
@@ -55,6 +57,20 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-1
+      secondary:
+        strategy: Recreate
+        annotations:
+          studio.excloo.dev/capabilities: image,video,upscale
+          studio.excloo.dev/label: Secondary
+          studio.excloo.dev/worker: secondary
+        labels:
+          studio.excloo.dev/kind: image
+        containers:
+          main: *container
+        pod:
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-1
       prepull:
         containers:
           main:
@@ -72,32 +88,71 @@ spec:
     # Studio is the shared worker client: it fetches outputs and the worker node
     # deletes ComfyUI's copies.
     persistence:
+      # Each worker keeps its own cache, config, output and user folders; both share the
+      # primary's input folder, so Studio stages inputs once.
       data:
         hostPath: ${dataset_root}/ai/comfyui-image/data
         hostPathType: Directory
         type: hostPath
-        globalMounts:
-          - path: /root/.cache
-            subPath: cache
-          - path: /root/.config
-            subPath: config
-          - path: /root/ComfyUI/input
-            subPath: input
-          - path: /root/ComfyUI/output
-            subPath: output
-          - path: /root/ComfyUI/user
-            subPath: user
+        advancedMounts:
+          main:
+            main:
+              - path: /root/.cache
+                subPath: cache
+              - path: /root/.config
+                subPath: config
+              - &input
+                path: /root/ComfyUI/input
+                subPath: input
+              - path: /root/ComfyUI/output
+                subPath: output
+              - path: /root/ComfyUI/user
+                subPath: user
+          secondary:
+            main:
+              - *input
       models:
         hostPath: ${dataset_root}/ai/models
         hostPathType: Directory
         type: hostPath
-        globalMounts:
-          # Writable only here: Studio's model downloads land in this worker.
-          - path: /root/ComfyUI/models
-            subPath: comfyui
-          - path: /models/radiance-image
-            readOnly: true
-            subPath: radiance
+        advancedMounts:
+          main:
+            main:
+              # Writable only here: Studio's model downloads land in the primary worker.
+              - path: /root/ComfyUI/models
+                subPath: comfyui
+              - &radiance-image
+                path: /models/radiance-image
+                readOnly: true
+                subPath: radiance
+              # Radiance H3 video profiles load their .rad packages from here.
+              - &radiance-video
+                path: /models/radiance-video
+                readOnly: true
+                subPath: radiance
+          secondary:
+            main:
+              - path: /root/ComfyUI/models
+                readOnly: true
+                subPath: comfyui
+              - *radiance-image
+              - *radiance-video
+      # The former video worker's folders; tp2 (comfyui-video) never runs beside it.
+      secondary-data:
+        hostPath: ${dataset_root}/ai/comfyui-video/data
+        hostPathType: Directory
+        type: hostPath
+        advancedMounts:
+          secondary:
+            main:
+              - path: /root/.cache
+                subPath: cache
+              - path: /root/.config
+                subPath: config
+              - path: /root/ComfyUI/output
+                subPath: output
+              - path: /root/ComfyUI/user
+                subPath: user
       shm:
         medium: Memory
         type: emptyDir
@@ -117,11 +172,20 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
+        # The editor opens on the primary worker.
+        rules:
+          - backendRefs:
+              - identifier: main
+                port: 8188
     service:
       main:
         controller: main
         forceRename: "{{ .Release.Name }}"
         ports:
-          http:
+          http: &http
             port: 8188
             protocol: HTTP
+      secondary:
+        controller: secondary
+        ports:
+          http: *http

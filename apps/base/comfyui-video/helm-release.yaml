@@ -15,16 +15,18 @@ spec:
             target:
               kind: Deployment
   values:
+    # Radiance H3 video profiles split across both GPUs; the comfyui-image pool runs
+    # everything else.
     controllers:
       main:
         annotations:
-          studio.excloo.dev/label: Video
-          studio.excloo.dev/worker: video
+          studio.excloo.dev/label: Video · 2 GPUs
+          studio.excloo.dev/worker: tp2
         labels:
           studio.excloo.dev/kind: video
         strategy: Recreate
         containers:
-          main: &container
+          main:
             env:
               CLI_ARGS: --cache-classic --disable-mmap --disable-pinned-memory --enable-assets --force-non-blocking --use-ck-attention
               HSA_OVERRIDE_GFX_VERSION: 12.0.1
@@ -50,19 +52,6 @@ spec:
               capabilities:
                 add:
                   - SYS_PTRACE
-        pod:
-          resourceClaims:
-            - name: gpu
-              resourceClaimTemplateName: gpu-1
-      # Radiance H3 profiles split across both GPUs.
-      tp2:
-        annotations:
-          studio.excloo.dev/label: Video · 2 GPUs
-        labels:
-          studio.excloo.dev/kind: video
-        strategy: Recreate
-        containers:
-          main: *container
         pod:
           resourceClaims:
             - name: gpu
@@ -133,7 +122,11 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
-        rules:
-          - backendRefs:
-              - name: comfyui-video
-                port: 8188
+    service:
+      main:
+        controller: main
+        forceRename: "{{ .Release.Name }}"
+        ports:
+          http:
+            port: 8188
+            protocol: HTTP
