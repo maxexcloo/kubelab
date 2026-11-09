@@ -9,7 +9,7 @@ metadata:
     gethomepage.dev/group: Operations
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-openspeedtest
-    gethomepage.dev/name: OpenSpeedTest (syd/saturn)
+    gethomepage.dev/name: OpenSpeedTest (Saturn)
     gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-saturn
     monitoring.excloo.dev/enabled: "true"
   labels:
