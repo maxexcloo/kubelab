@@ -38,8 +38,8 @@ spec:
     grafana:
       automountServiceAccountToken: false
       enabled: true
-      # renovate: datasource=github-releases depName=VictoriaMetrics/victorialogs-datasource extractVersion=^v(?<version>.+)$
-      plugins: [victoriametrics-logs-datasource@0.34.0]
+      plugins:
+        - victoriametrics-logs-datasource@0.34.0@https://github.com/VictoriaMetrics/victorialogs-datasource/releases/download/v0.34.0/victoriametrics-logs-datasource-v0.34.0.zip
       admin:
         existingSecret: grafana
         passwordKey: password
