@@ -111,15 +111,18 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             "Smart Home & Automations • mbk-luna",
         )
         storage = groups["mbk-storage"]
-        # Larger cards lead: TrueNAS adds pool rows to its widget.
+        # Connection widgets lead consistently, followed by telemetry and management.
         self.assertEqual(
-            list(storage), ["TrueNAS", "Beszel", "Cloudflare", "Tailscale"]
+            list(storage), ["Cloudflare", "Tailscale", "Beszel", "TrueNAS"]
+        )
+        self.assertEqual(
+            storage["Cloudflare"]["widget"]["fields"], ["status", "origin_ip"]
         )
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])
         node = groups["mbk-taco"]
-        self.assertEqual(list(node), ["Beszel", "Tailscale"])
+        self.assertEqual(list(node), ["Tailscale", "Beszel"])
         self.assertEqual(node["Beszel"]["widget"]["systemId"], "mbk-taco")
         self.assertEqual(
             node["Beszel"]["href"], "https://beszel.example.net/system/mbk-taco"
