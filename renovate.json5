@@ -1,6 +1,20 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: ["github>maxexcloo/dotfiles//renovate/default.json5"],
+  customManagers: [
+    {
+      autoReplaceStringTemplate: "victoriametrics-logs-datasource@{{{newValue}}}@https://github.com/{{{depName}}}/releases/download/v{{{newValue}}}/victoriametrics-logs-datasource-v{{{newValue}}}.zip",
+      customType: "regex",
+      datasourceTemplate: "github-releases",
+      depNameTemplate: "VictoriaMetrics/victorialogs-datasource",
+      description: "Update the Grafana plugin version and GitHub release asset together",
+      extractVersionTemplate: "^v(?<version>.+)$",
+      managerFilePatterns: ["/^platform/observability/victoria-metrics/helm-release\\.yaml$/"],
+      matchStrings: [
+        "victoriametrics-logs-datasource@(?<currentValue>[0-9.]+)@https://github\\.com/VictoriaMetrics/victorialogs-datasource/releases/download/v[^/]+/victoriametrics-logs-datasource-v[^\\s]+\\.zip",
+      ],
+    },
+  ],
   packageRules: [
     {
       automerge: false,
