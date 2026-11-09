@@ -60,7 +60,7 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
   (([.machine] | map(select(.beszel == true)) |
    map(with(select($beszel == null); error("Beszel monitoring needs exactly one Beszel route")) | $beszel + {
     "href": ($beszel.href + "/system/" + $host.group),
-    "widget": ($beszel.widget + {"systemId": $host.group, "fields": ["status", "cpu", "memory", "network"]})
+    "widget": ($beszel.widget + {"systemId": $host.group, "fields": ["status", "cpu", "memory", "updated"]})
   })) +
   ([$infra.tailscale[$host.key]] | map(select(. != null and $tailscale.widget != null)) | map(. as $device | $tailscale + {
     "href": ("https://login.tailscale.com/admin/machines/" + $device),
