@@ -7,10 +7,9 @@ spec:
   releaseName: cloudflared
   values:
     controllers:
+      # One connector per node, so public traffic can enter through any node.
       cloudflared:
-        replicas: 2
-        strategy: RollingUpdate
-        type: deployment
+        type: daemonset
         containers:
           cloudflared:
             image:
@@ -40,18 +39,7 @@ spec:
               capabilities:
                 drop:
                   - ALL
-        rollingUpdate:
-          maxSurge: 0
-          maxUnavailable: 1
     defaultPodOptions:
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app.kubernetes.io/instance: cloudflared
-                  app.kubernetes.io/name: cloudflared
-              topologyKey: kubernetes.io/hostname
       automountServiceAccountToken: false
       securityContext:
         runAsGroup: 65532
@@ -59,3 +47,7 @@ spec:
         runAsUser: 65532
         seccompProfile:
           type: RuntimeDefault
+      tolerations:
+        - effect: NoSchedule
+          key: node.excloo.dev/dedicated
+          operator: Exists

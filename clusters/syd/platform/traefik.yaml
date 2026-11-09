@@ -50,6 +50,8 @@ spec:
             tailscale.com/proxy-group: ingress
             tailscale.com/tags: tag:cluster-syd
           spec:
+            # Homelab's tailscale_ingress_target: every node's Tailscale forwards syd-ingress here.
+            clusterIP: 10.100.5.189
             allocateLoadBalancerNodePorts: false
             trafficDistribution: PreferSameNode
             loadBalancerClass: tailscale
