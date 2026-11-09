@@ -22,20 +22,6 @@ spec:
     - name: private
       namespace: networking
   rules:
-    - backendRefs:
-        - name: studio
-          namespace: studio
-          port: 8787
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /mcp/results
-      matches:
-        - path:
-            type: PathPrefix
-            value: /studio/mcp/results
     # Dashboard pages and their admin API sign in with Pocket ID through oauth2-proxy.
     # Everything else, including inference, MCP and its OAuth endpoints, carries its own
     # keys and reaches Bifrost directly; an /api call that bypassed the proxy would still

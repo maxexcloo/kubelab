@@ -35,10 +35,9 @@ spec:
             env:
               STUDIO_ALLOWED_HOSTS:
                 dependsOn:
-                  - BIFROST_HOST
                   - ROUTE_ALIAS_HOST
                   - ROUTE_HOST
-                value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),$(BIFROST_HOST),studio.studio.svc.cluster.local
+                value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),studio.studio.svc.cluster.local
               # The Chat tab uses the assistant's gateway with these models.
               STUDIO_CHAT_MODELS: local/auto,local/uncensored,cloud/auto,cloud/deepseek-flash,cloud/deepseek-flash-uncensored,cloud/glm,cloud/glm-flash,cloud/glm-flash-uncensored,cloud/glm-uncensored,cloud/mimo,cloud/mimo-flash
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
@@ -51,9 +50,10 @@ spec:
               # Deployments in these namespaces; text ones serve local/auto.
               STUDIO_KUBERNETES_NAMESPACES: comfyui-image,comfyui-video,text
               STUDIO_LOCAL_TEXT_MODEL: local/auto
+              # Result links and Grok's /mcp/<token> URL bypass Access (cloudflare-access.yaml).
               STUDIO_MCP_PUBLIC_URL:
-                dependsOn: BIFROST_HOST
-                value: https://$(BIFROST_HOST)/studio
+                dependsOn: ROUTE_HOST
+                value: https://$(ROUTE_HOST)
               STUDIO_MODEL_MANIFEST_PREFIX: models/comfyui/
               STUDIO_MULTI_USER: "1"
               STUDIO_OIDC_CLIENT_ID: client.invalid
@@ -63,7 +63,6 @@ spec:
               # Studio's assistant writes through Bifrost with its own key (external-secrets.yaml).
               STUDIO_ASSISTANT_CLOUD_MODEL: cloud/auto
               STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
-              BIFROST_HOST: bifrost.invalid
               HOST: 0.0.0.0
               PORT: "8787"
               ROUTE_ALIAS_HOST: studio.${cluster_name}.excloo.dev
