@@ -50,5 +50,3 @@ spec:
             clusterIP: 10.100.5.189
             trafficDistribution: PreferSameNode
             type: ClusterIP
-      spec:
-        type: ClusterIP

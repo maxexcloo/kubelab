@@ -8,13 +8,13 @@ spec:
   values:
     labelFilter: gateway.excloo.dev/public-access=true
     txtOwnerId: kubelab-${cluster_name}-public
-    nodeSelector:
-      node.excloo.dev/network: internal
+    extraArgs:
+      enable-legacy-annotation-prefix: null
     managedRecordTypes:
       - A
       - AAAA
       - CNAME
+    nodeSelector:
+      node.excloo.dev/network: internal
     sources:
       - gateway-httproute
-    extraArgs:
-      enable-legacy-annotation-prefix: null
