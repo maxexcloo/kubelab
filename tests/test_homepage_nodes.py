@@ -115,6 +115,9 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(
             list(storage), ["TrueNAS", "Beszel", "Cloudflare", "Tailscale"]
         )
+        self.assertEqual(
+            storage["Cloudflare"]["widget"]["fields"], ["status", "origin_ip"]
+        )
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])
