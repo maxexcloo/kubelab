@@ -1,7 +1,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: openspeedtest-kimbap
+  name: openspeedtest-saturn
   namespace: openspeedtest
   annotations:
     gethomepage.dev/description: Network Speed Test
@@ -9,20 +9,20 @@ metadata:
     gethomepage.dev/group: Operations
     gethomepage.dev/href: https://app.invalid
     gethomepage.dev/icon: sh-openspeedtest
-    gethomepage.dev/name: OpenSpeedTest (syd/kimbap)
-    gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-kimbap
+    gethomepage.dev/name: OpenSpeedTest (syd/saturn)
+    gethomepage.dev/pod-selector: app.kubernetes.io/instance=openspeedtest-saturn
     monitoring.excloo.dev/enabled: "true"
   labels:
-    app.kubernetes.io/name: openspeedtest-kimbap
+    app.kubernetes.io/name: openspeedtest-saturn
 spec:
   hostnames:
-    - openspeedtest-kimbap.${cluster_name}.excloo.dev
+    - openspeedtest-saturn.${cluster_name}.excloo.dev
   parentRefs:
     - name: private
       namespace: networking
   rules:
     - backendRefs:
-        - name: openspeedtest-kimbap
+        - name: openspeedtest-saturn
           port: 80
       filters:
         - type: ExtensionRef

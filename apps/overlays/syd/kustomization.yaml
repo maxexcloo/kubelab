@@ -43,9 +43,9 @@ resources:
   - ../../../platform/identity/cloudflare-access
   - ../../../platform/identity/headlamp/integrations
   - ../../../platform/observability/grafana/integrations
-  - openspeedtest-kimbap
+  - openspeedtest-saturn
   - openspeedtest-neptune
-  - syncthing-kimbap
+  - syncthing-saturn
   - syncthing-venus
 patches:
   # Retry installs that outwait new credentials; failed upgrades are not rolled
