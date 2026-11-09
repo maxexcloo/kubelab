@@ -48,13 +48,13 @@ placement, mounted folders and private routes in their cluster overlay. Each
 instance has its own configuration volume, device identity and credentials;
 manage peers and folder settings through that instance's GUI.
 
-The `AI` folder (ID `ai`) uses send-and-receive mode on Venus and Kimbap, so
+The `AI` folder (ID `ai`) uses send-and-receive mode on Venus and Saturn, so
 changes and deletions propagate in both directions. Venus runs as the model
-owner (UID/GID 1000) with a writable model mount. Kimbap keeps the former mirror
+owner (UID/GID 1000) with a writable model mount. Saturn keeps the former mirror
 destination, `/mnt/truenas/ai/`, and retains its model-tree ACLs with the folder's
 Ignore Permissions setting. Partial downloads (`*.download`, `*.part`,
 `*.part.json` and `.rsync-partial`) are excluded. This replaces the native
-scheduled rsync mirror. Existing Kimbap folders and peers remain independent.
+scheduled rsync mirror. Existing Saturn folders and peers remain independent.
 
 ## Deployment
 

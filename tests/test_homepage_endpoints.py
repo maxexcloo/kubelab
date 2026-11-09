@@ -77,15 +77,15 @@ class HomepageEndpointsTests(unittest.TestCase):
     def test_references_share_ports_and_preserve_paths_and_secrets(self):
         result = resolved(
             {
-                "href": "homelab://mbk/kimbap/management",
+                "href": "homelab://mbk/saturn/management",
                 "widget": {
-                    "url": "homelab://mbk/kimbap/management",
+                    "url": "homelab://mbk/saturn/management",
                     "key": "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}",
                 },
                 "link": "homelab://mbk/luna/management/add-on",
                 "console": "homelab://mbk/nanokvm/management",
                 "local_console": "homelab://mbk/slzb-06m/management",
-                "other_service": "homelab://mbk/kimbap/netboot",
+                "other_service": "homelab://mbk/saturn/netboot",
             }
         )
         self.assertEqual(result["href"], "https://storage.mbk.example.net:8444")
@@ -146,7 +146,7 @@ class HomepageEndpointsTests(unittest.TestCase):
 
     def test_grouped_services_and_providers_become_home_cards_with_widgets(self):
         def change(machines):
-            management = machines["mbk"]["kimbap"]["services"]["management"]
+            management = machines["mbk"]["saturn"]["services"]["management"]
             management.update(
                 group="Infrastructure",
                 name="TrueNAS",
@@ -197,11 +197,11 @@ class HomepageEndpointsTests(unittest.TestCase):
             None,
         ]:
             with self.subTest(host=host):
-                published.write_text(json.dumps({"hosts": {"kimbap": host}}))
+                published.write_text(json.dumps({"hosts": {"saturn": host}}))
                 result = resolved(
                     {
-                        "http": "homelab://mbk/kimbap/netboot",
-                        "https": "homelab://mbk/kimbap/management/path",
+                        "http": "homelab://mbk/saturn/netboot",
+                        "https": "homelab://mbk/saturn/management/path",
                     },
                     infrastructure=published,
                 )
@@ -214,19 +214,19 @@ class HomepageEndpointsTests(unittest.TestCase):
 
     def test_service_hostname_overrides_machine_and_published_addresses(self):
         published = self.directory / "infrastructure.json"
-        published.write_text(json.dumps({"hosts": {"kimbap": "100.64.0.9"}}))
+        published.write_text(json.dumps({"hosts": {"saturn": "100.64.0.9"}}))
         for scheme, port in [("http", 80), ("https", 443), ("https", 8443)]:
             with self.subTest(scheme=scheme, port=port):
                 edit_inventory(
                     self.homelab,
                     lambda machines, port=port, scheme=scheme: machines["mbk"][
-                        "kimbap"
+                        "saturn"
                     ]["services"]["management"].update(
                         hostname="studio.example.com", port=port, scheme=scheme
                     ),
                 )
                 result = resolved(
-                    {"href": "homelab://mbk/kimbap/management/path"},
+                    {"href": "homelab://mbk/saturn/management/path"},
                     homelab=self.homelab,
                     infrastructure=published,
                 )
@@ -234,39 +234,39 @@ class HomepageEndpointsTests(unittest.TestCase):
                 self.assertEqual(result["href"], f"{scheme}://{authority}/path")
         edit_inventory(
             self.homelab,
-            lambda machines: machines["mbk"]["kimbap"]["services"]["management"].update(
+            lambda machines: machines["mbk"]["saturn"]["services"]["management"].update(
                 dns_lan=True
             ),
         )
         self.assertEqual(
-            resolved({"href": "homelab://mbk/kimbap/management"}, homelab=self.homelab)[
+            resolved({"href": "homelab://mbk/saturn/management"}, homelab=self.homelab)[
                 "href"
             ],
             "https://storage.mbk.example.net:8443",
         )
         edit_inventory(
             self.homelab,
-            lambda machines: machines["mbk"]["kimbap"]["services"]["management"].update(
+            lambda machines: machines["mbk"]["saturn"]["services"]["management"].update(
                 hostname="https://invalid.example/path"
             ),
         )
         self.assertNotEqual(
             resolve(
-                {"href": "homelab://mbk/kimbap/management"}, homelab=self.homelab
+                {"href": "homelab://mbk/saturn/management"}, homelab=self.homelab
             ).returncode,
             0,
         )
 
     def test_service_paths_share_a_hostname_without_losing_the_prefix(self):
         document = {
-            "root": "homelab://mbk/kimbap/management",
-            "child": "homelab://mbk/kimbap/management/api/config",
+            "root": "homelab://mbk/saturn/management",
+            "child": "homelab://mbk/saturn/management/api/config",
         }
         for path in ["/files/", "/radiance/", "/files"]:
             with self.subTest(path=path):
                 edit_inventory(
                     self.homelab,
-                    lambda machines, path=path: machines["mbk"]["kimbap"]["services"][
+                    lambda machines, path=path: machines["mbk"]["saturn"]["services"][
                         "management"
                     ].update(
                         hostname="ai.example.com", path=path, port=443, scheme="https"
@@ -280,7 +280,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                 )
         edit_inventory(
             self.homelab,
-            lambda machines: machines["mbk"]["kimbap"]["services"]["management"].update(
+            lambda machines: machines["mbk"]["saturn"]["services"]["management"].update(
                 path="https://invalid.example/path"
             ),
         )
@@ -299,7 +299,7 @@ class HomepageEndpointsTests(unittest.TestCase):
                 edit_inventory(
                     self.homelab,
                     lambda machines, port=port, scheme=scheme: machines["mbk"][
-                        "kimbap"
+                        "saturn"
                     ]["services"]["management"].update(port=port, scheme=scheme),
                 )
                 self.assertNotEqual(render(self.output, self.homelab).returncode, 0)
@@ -314,7 +314,7 @@ class HomepageEndpointsTests(unittest.TestCase):
     def test_invalid_references_fail(self):
         for reference in [
             "homelab://mbk/missing/management",
-            "homelab://mbk/kimbap/missing",
+            "homelab://mbk/saturn/missing",
         ]:
             with self.subTest(reference=reference):
                 result = resolve({"href": reference})

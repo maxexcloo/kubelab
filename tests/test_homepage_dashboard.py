@@ -20,7 +20,7 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(services["Remote"]["siteMonitor"], services["Remote"]["href"])
         self.assertNotIn("Hidden", services)
         self.assertNotIn("mbk-bento", services)
-        self.assertNotIn("mbk-kimbap", services)
+        self.assertNotIn("mbk-saturn", services)
         self.assertNotIn("mbk-luna", services)
         self.assertNotIn("mbk-sol", services)
         self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")

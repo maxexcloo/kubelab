@@ -15,8 +15,8 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         shutil.copytree(HOMELAB, homelab)
         path = homelab / "data/machines.yaml"
         inventory = read_yaml(path)
-        del inventory["machines"]["mbk"]["kimbap"]["services"]["syncthing"]
-        inventory["machines"]["mbk"]["kimbap"]["beszel"] = True
+        del inventory["machines"]["mbk"]["saturn"]["services"]["syncthing"]
+        inventory["machines"]["mbk"]["saturn"]["beszel"] = True
         inventory["machines"]["mbk"]["personal"] = {
             "platform": "macos",
             "services": {"management": {"port": 443, "scheme": "https"}},
@@ -70,12 +70,12 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
                     "cloudflare": {
                         "account_id": "account",
                         "tunnels": {
-                            "kimbap": "storage-tunnel",
+                            "saturn": "storage-tunnel",
                             "mbk": "cluster-tunnel",
                         },
                     },
                     "tailscale": {
-                        "kimbap": "storage-device",
+                        "saturn": "storage-device",
                         "taco": "node-device",
                         "personal": "personal-device",
                     },
@@ -89,7 +89,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         services = self.services()
-        self.assertNotIn("mbk-kimbap", services)
+        self.assertNotIn("mbk-saturn", services)
         self.assertNotIn("mbk-sensor", services)
         groups = {
             name: {key: value for card in cards for key, value in card.items()}
@@ -262,16 +262,16 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             ],
         )
         self.placements.write_text(
-            json.dumps({"reader": ["hsp", "kimbap", "hsp"], "waiting": []})
+            json.dumps({"reader": ["hsp", "saturn", "hsp"], "waiting": []})
         )
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(
             set(self.groups("Clusters")),
-            {"mbk/hsp", "mbk/kimbap", "mbk/unscheduled", "syd"},
+            {"mbk/hsp", "mbk/saturn", "mbk/unscheduled", "syd"},
         )
         self.assertIn("Reader", self.groups("Clusters")["mbk/hsp"][0])
-        self.assertIn("Reader", self.groups("Clusters")["mbk/kimbap"][0])
+        self.assertIn("Reader", self.groups("Clusters")["mbk/saturn"][0])
         queries = [json.loads(line) for line in self.queries.read_text().splitlines()]
         self.assertTrue(any(query[-1] == "app in (reader,feeds)" for query in queries))
         self.assertTrue(all(query[1] != "remote" for query in queries))
