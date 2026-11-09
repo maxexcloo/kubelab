@@ -139,7 +139,8 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             node["Beszel"]["widget"]["password"], "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}"
         )
         self.assertEqual(
-            node["Beszel"]["widget"]["fields"], ["status", "cpu", "memory", "network"]
+            node["Beszel"]["widget"]["fields"],
+            ["status", "cpu", "memory", "updated"],
         )
         self.assertEqual(node["Beszel"]["weight"], -1)
         self.assertEqual(node["Beszel"]["icon"], "sh-beszel")
