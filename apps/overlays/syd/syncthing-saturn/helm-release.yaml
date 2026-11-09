@@ -6,7 +6,7 @@ spec:
   values:
     defaultPodOptions:
       nodeSelector:
-        kubernetes.io/hostname: kimbap
+        kubernetes.io/hostname: saturn
     persistence:
       ai:
         hostPath: ${dataset_root}/truenas/ai
@@ -47,8 +47,8 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/name: Syncthing (Kimbap)
-          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_SYNCTHING_KIMBAP_API_KEY}}" }}'
-          onepassword.excloo.dev/item: Syncthing (Kimbap)
+          gethomepage.dev/name: Syncthing (Saturn)
+          gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_SYNCTHING_SATURN_API_KEY}}" }}'
+          onepassword.excloo.dev/item: Syncthing (Saturn)
         hostnames:
-          - syncthing-kimbap.${cluster_name}.excloo.dev
+          - syncthing-saturn.${cluster_name}.excloo.dev
