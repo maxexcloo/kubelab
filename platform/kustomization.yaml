@@ -12,7 +12,6 @@ resources:
   - networking/coredns
   - networking/external-dns
   - networking/external-dns-private
-  - networking/tailscale
   - networking/traefik
   - observability/grafana
   - observability/metrics-server

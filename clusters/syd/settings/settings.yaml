@@ -13,7 +13,7 @@ spec:
       dataset_root: /var/mnt/datasets
       grafana_host: grafana.syd.excloo.dev
       home_assistant_host: luna.mbk.excloo.net
-      # The cluster is IPv4-only; Tailscale ingress needs dual-stack Services for IPv6.
+      # Homelab publishes only the ingress's IPv4 address (tailscale_ingress_ipv6).
       private_dns_ipv6: "false"
       storage_node: saturn
       unifi_host: sol.mbk.excloo.net
