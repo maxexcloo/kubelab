@@ -19,7 +19,7 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertNotIn("siteMonitor", services["Local"])
         self.assertEqual(services["Remote"]["siteMonitor"], services["Remote"]["href"])
         self.assertNotIn("Hidden", services)
-        self.assertNotIn("mbk-bento", services)
+        self.assertNotIn("mbk-venus", services)
         self.assertNotIn("mbk-saturn", services)
         self.assertNotIn("mbk-luna", services)
         self.assertNotIn("mbk-sol", services)

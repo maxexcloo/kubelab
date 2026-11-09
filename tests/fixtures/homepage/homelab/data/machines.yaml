@@ -1,8 +1,5 @@
 machines:
   mbk:
-    bento:
-      platform: ucore
-      type: server
     luna:
       name: Luna
       platform: haos
@@ -97,8 +94,11 @@ machines:
       cluster: syd
       platform: talos
       type: vm
+    venus:
+      platform: ucore
+      type: server
   syd:
-    hsp:
+    neptune:
       cluster: syd
       platform: talos
       type: vm
