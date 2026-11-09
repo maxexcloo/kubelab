@@ -21,7 +21,10 @@ spec:
           helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
         containers:
           main:
+            # The shell's builtin, as some images ship no true binary.
             command:
+              - /bin/sh
+              - -c
               - "true"
             resources:
               requests:
