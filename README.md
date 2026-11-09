@@ -1,8 +1,7 @@
 # Kubelab
 
 Kubernetes workloads and application integrations for my homelab, managed with
-Flux and Kustomize. This repository has the desired configuration, the validation
-tools and the deployment tasks.
+Flux and Kustomize.
 
 ## Ownership
 
@@ -14,8 +13,7 @@ Mini-app source and workload manifests live in the shared `minilab` repository.
 Kubelab picks its Flux entry point and supplies the shared integration settings.
 
 Current placement, endpoints, storage and credentials are in the configuration
-that owns them. This README covers the general workflows, and `AGENTS.md` has the
-project invariants and editing conventions.
+that owns them. `AGENTS.md` has the project invariants and editing conventions.
 
 ## Setup
 
@@ -37,24 +35,17 @@ Deploying needs a kubeconfig context that matches the selected configuration in
 ## Configuration Changes
 
 Edit workload configuration in `apps/base/<application>` and select it through
-`apps/overlays/<cluster>`. `AGENTS.md` describes the editing conventions. Local
-manifest checks cover what Flux builds, including its variable substitutions,
-but not Helm output, so render changed Helm charts separately.
+`apps/overlays/<cluster>`. Local manifest checks cover what Flux builds, including
+its variable substitutions, but not Helm output, so render changed Helm charts
+separately.
 
 ## Syncthing
 
-Syncthing runs per node. Cluster instances share `apps/base/syncthing`, with
-placement, mounted folders and private routes in their cluster overlay. Each
-instance has its own configuration volume, device identity and credentials;
-manage peers and folder settings through that instance's GUI.
-
-The `AI` folder (ID `ai`) uses send-and-receive mode on Venus and Saturn, so
-changes and deletions propagate in both directions. Venus runs as the model
-owner (UID/GID 1000) with a writable model mount. Saturn keeps the former mirror
-destination, `/mnt/truenas/ai/`, and retains its model-tree ACLs with the folder's
-Ignore Permissions setting. Partial downloads (`*.download`, `*.part`,
-`*.part.json` and `.rsync-partial`) are excluded. This replaces the native
-scheduled rsync mirror. Existing Saturn folders and peers remain independent.
+Manage Syncthing peers and folder settings through each instance's GUI; these
+settings are held outside Git. The `AI` folder (ID `ai`) is bidirectional, so
+changes and deletions propagate to both peers. Keep Ignore Permissions enabled
+on Saturn to preserve its model-tree ACLs, and exclude partial downloads
+(`*.download`, `*.part`, `*.part.json` and `.rsync-partial`).
 
 ## Deployment
 
@@ -72,22 +63,20 @@ releases in a different namespace, use `namespace/release` as the application.
 | `mise run setup`                                     | Install Git hooks                                                 |
 | `mise run status <cluster> [application]`            | Show reconciliation status or watch an application's Helm release |
 
-Bootstrap is a separate step after infrastructure provisioning, and routine
-application upgrades don't need it. CI validates changes and refreshes external
-monitoring; Flux handles routine cluster deployments.
+Bootstrap is a separate step after infrastructure provisioning; routine
+application upgrades don't need it.
 
 ## Updates & Recovery
 
-PostgreSQL uses the CloudNativePG Barman plugin for online S3 backups and WAL
-archiving. App-state jobs briefly stop their application, copy the selected
-volumes, start it again and upload the copy with Restic. Schedules, retention and
-volume selection sit beside the resources they belong to. Dedicated TrueNAS app
-datasets, bulk media and caches aren't backed up.
+PostgreSQL backups use the CloudNativePG Barman plugin; app-state backups use
+Restic and briefly stop the application. Schedules, retention and volume selection
+sit beside the resources they belong to. Dedicated TrueNAS app datasets, bulk
+media and caches aren't backed up.
 
 Credentials and Restic encryption passwords stay in 1Password. Restore PostgreSQL
 through the Barman plugin, and app state through Restic, into fresh volumes before
-switching the workload over. The first backup uploads are checked separately from
-restore tests.
+switching the workload over. A successful backup upload does not verify recovery;
+test restores separately.
 
 Check upstream migration requirements before upgrading. Keep persistent data and
 the credentials needed to restore it. Rolling back an image doesn't undo a
