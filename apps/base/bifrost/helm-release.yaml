@@ -391,6 +391,15 @@ spec:
               - provider: abliteration
                 allowed_models: ["*"]
                 key_ids: ["*"]
+              - provider: cliproxy-anthropic
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: cliproxy-google
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: cliproxy-grok
+                allowed_models: ["*"]
+                key_ids: ["*"]
               - provider: cloud
                 allowed_models: ["*"]
                 key_ids: ["*"]
