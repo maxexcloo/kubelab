@@ -250,7 +250,7 @@ spec:
                 weight: 1.0
           - id: cloud-deepseek-flash-uncensored
             name: Cloud DeepSeek Flash Uncensored
-            cel_expression: "provider == 'cloud' && model == 'deepseek-flash-uncensored'"
+            cel_expression: "provider == 'cloud' && model in ['uncensored', 'deepseek-flash-uncensored']"
             enabled: true
             fallbacks:
               - model: abliterated-model-large-flash
@@ -409,6 +409,9 @@ spec:
               - provider: opencode-zen
                 allowed_models: ["*"]
                 key_ids: ["*"]
+              - provider: openrouter
+                allowed_models: ["*"]
+                key_ids: ["*"]
               - provider: refuseless
                 allowed_models: ["*"]
                 key_ids: ["*"]
@@ -431,6 +434,9 @@ spec:
             value: env.VIRTUAL_KEY_STUDIO
             # The cloud rules' targets and fallbacks need their own provider too.
             provider_configs:
+              - provider: abliteration
+                allowed_models: ["*"]
+                key_ids: ["*"]
               - provider: cloud
                 allowed_models: ["*"]
                 key_ids: ["*"]
@@ -447,6 +453,9 @@ spec:
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: opencode-zen
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: openrouter
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: refuseless
