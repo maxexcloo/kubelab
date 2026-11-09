@@ -26,6 +26,7 @@ ALIASES = {
         "glm-uncensored",
         "mimo",
         "mimo-flash",
+        "uncensored",
     ),
     "local": ("auto", "uncensored"),
 }
