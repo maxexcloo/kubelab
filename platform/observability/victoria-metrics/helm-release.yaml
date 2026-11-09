@@ -24,6 +24,15 @@ spec:
       namespace: external-secrets
   install:
     crds: CreateReplace
+  postRenderers:
+    - kustomize:
+        patches:
+          # Without vmalert the chart renders an empty extraArgs map, which server-side apply sends as null.
+          - patch: |-
+              - op: remove
+                path: /spec/extraArgs
+            target:
+              kind: VMSingle
   upgrade:
     crds: CreateReplace
   values:
