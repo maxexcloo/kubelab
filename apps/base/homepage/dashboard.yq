@@ -61,14 +61,8 @@ map(.size = ([.widget] | map(select(. != null)) | length) + (.widgets // [] | le
 # gaps mid-grid; category groups list every service compactly without widgets.
 (map(select(.tab == "Home" and .size > 0)) | map(.group = "Overview" | .weight = .size)) as $overview |
 map(with(select(.tab == "Home"); del(.widget, .widgets) | .size = 0)) |
-# Servers keep connection widgets before telemetry and management panels.
 # Elsewhere larger cards lead so rows stay even.
-map(.weight = (if .tab == "Servers" then
-  if .widget.type == "cloudflared" then -3
-  elif .widget.type == "tailscale" then -2
-  elif .widget.type == "beszel" then -1
-  else 0 end
-else .size * -1 end)) + $overview | map(del(.size)) |
+map(.weight = .size * -1) + $overview | map(del(.size)) |
 sort_by(.tab, .group, .weight, (.name | downcase)) |
 group_by(.tab) |
 # Homepage shows nested groups in file order, so Overview goes first.
