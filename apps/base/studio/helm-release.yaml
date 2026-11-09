@@ -42,7 +42,6 @@ spec:
               STUDIO_CHAT_MODELS: local/auto,local/uncensored,cloud/auto,cloud/deepseek-flash,cloud/deepseek-flash-uncensored,cloud/glm,cloud/glm-flash,cloud/glm-flash-uncensored,cloud/glm-uncensored,cloud/mimo,cloud/mimo-flash
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
               STUDIO_CLIPROXYAPI_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
-              STUDIO_ENABLE_PRESETS: "1"
               # Studio scales these GPU deployments (apps/components/gpu/studio-runtime.yaml).
               # Pools: the GPU node's two GPUs.
               STUDIO_KUBERNETES_GPUS: '{"gpu": 2}'
