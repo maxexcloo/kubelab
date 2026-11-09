@@ -6,13 +6,13 @@ metadata:
 spec:
   releaseName: external-dns-private
   values:
-    nodeSelector:
-      node.excloo.dev/network: internal
-    domainFilters:
-      - ${public_domain}
     labelFilter: gateway.excloo.dev/private-dns=true
     txtOwnerId: kubelab-${cluster_name}-private
+    domainFilters:
+      - ${public_domain}
     managedRecordTypes:
       - CNAME
+    nodeSelector:
+      node.excloo.dev/network: internal
     sources:
       - crd

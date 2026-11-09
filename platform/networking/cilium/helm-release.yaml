@@ -26,13 +26,13 @@ spec:
       hostRoot: /sys/fs/cgroup
     hubble:
       relay:
+        enabled: true
         nodeSelector:
           node.excloo.dev/network: internal
-        enabled: true
       ui:
+        enabled: true
         nodeSelector:
           node.excloo.dev/network: internal
-        enabled: true
       metrics:
         enabled:
           - dns

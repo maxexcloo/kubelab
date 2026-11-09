@@ -57,10 +57,10 @@ spec:
         exposedPort: 80
         port: 8081
         protocol: TCP
-        # Keep cloudflared's X-Forwarded-Proto: https and client address (pod CIDR), so apps mark cookies Secure.
+        # Keep cloudflared's X-Forwarded-Proto: https and client address (pod subnet), so apps mark cookies Secure.
         forwardedHeaders:
           trustedIPs:
-            - 10.100.0.0/16
+            - 10.100.0.0/22
         expose:
           default: false
           tunnel: true
@@ -78,15 +78,14 @@ spec:
         cpu: 100m
         memory: 256Mi
     service:
+      # Only the named Services carry traffic.
+      enabled: false
       additionalServices:
         tunnel:
           spec:
             # Fall back to another node's ingress instead of failing locally.
             trafficDistribution: PreferSameNode
             type: ClusterIP
-      spec:
-        trafficDistribution: PreferSameNode
-        type: ClusterIP
     tolerations:
       - effect: NoSchedule
         key: node.excloo.dev/dedicated
