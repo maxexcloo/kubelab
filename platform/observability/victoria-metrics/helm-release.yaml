@@ -28,7 +28,17 @@ spec:
     crds: CreateReplace
   values:
     alertmanager:
-      enabled: false
+      enabled: true
+      spec:
+        useStrictSecurity: true
+        nodeSelector:
+          node.excloo.dev/network: internal
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
     coreDns:
       enabled: true
     defaultDashboards:
@@ -50,6 +60,13 @@ spec:
         datasources.yaml:
           apiVersion: 1
           datasources:
+            - name: Alertmanager
+              access: proxy
+              type: alertmanager
+              uid: Alertmanager
+              url: http://vmalertmanager-victoria-metrics-k8s-stack.observability.svc:9093
+              jsonData:
+                implementation: prometheus
             - name: VictoriaLogs
               access: proxy
               isDefault: false
@@ -126,6 +143,18 @@ spec:
           enabled: false
         datasources:
           enabled: false
+    internal:
+      vmauth:
+        spec:
+          useStrictSecurity: true
+          nodeSelector:
+            node.excloo.dev/network: internal
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi
     kube-state-metrics:
       collectors:
         [
@@ -270,7 +299,21 @@ spec:
             cpu: 50m
             memory: 384Mi
     vmalert:
-      enabled: false
+      enabled: true
+      spec:
+        externalLabels:
+          cluster: ${cluster_name}
+        extraArgs:
+          external.url: https://${grafana_host}
+        useStrictSecurity: true
+        nodeSelector:
+          node.excloo.dev/network: internal
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
     vmsingle:
       enabled: true
       spec:
