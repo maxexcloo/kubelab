@@ -262,15 +262,15 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             ],
         )
         self.placements.write_text(
-            json.dumps({"reader": ["hsp", "saturn", "hsp"], "waiting": []})
+            json.dumps({"reader": ["venus", "saturn", "venus"], "waiting": []})
         )
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(
             set(self.groups("Clusters")),
-            {"mbk/hsp", "mbk/saturn", "mbk/unscheduled", "syd"},
+            {"mbk/venus", "mbk/saturn", "mbk/unscheduled", "syd"},
         )
-        self.assertIn("Reader", self.groups("Clusters")["mbk/hsp"][0])
+        self.assertIn("Reader", self.groups("Clusters")["mbk/venus"][0])
         self.assertIn("Reader", self.groups("Clusters")["mbk/saturn"][0])
         queries = [json.loads(line) for line in self.queries.read_text().splitlines()]
         self.assertTrue(any(query[-1] == "app in (reader,feeds)" for query in queries))
@@ -278,7 +278,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.placements.write_text(json.dumps({"reader": ["renamed"], "waiting": []}))
         self.assertEqual(self.render().returncode, 0)
         self.assertIn("mbk/renamed", self.groups("Clusters"))
-        self.assertNotIn("mbk/hsp", self.groups("Clusters"))
+        self.assertNotIn("mbk/venus", self.groups("Clusters"))
         before = (self.output / "services.yaml").read_bytes()
         self.placements.write_text(json.dumps({"reader": "fail"}))
         self.assertNotEqual(self.render().returncode, 0)
