@@ -27,8 +27,8 @@ spec:
         names:
           # Paths can carry capability URLs, such as mini-app list links.
           RequestPath: drop
-    # A DaemonSet runs ingress on every untainted node; dedicated taints keep
-    # it off the GPU nodes, and surge updates keep it available while rolling.
+    # A DaemonSet runs ingress on every node, dedicated ones included, so each
+    # node can take its own traffic; surge updates keep it available while rolling.
     deployment:
       kind: DaemonSet
     gateway:
@@ -87,3 +87,7 @@ spec:
       spec:
         trafficDistribution: PreferSameNode
         type: ClusterIP
+    tolerations:
+      - effect: NoSchedule
+        key: node.excloo.dev/dedicated
+        operator: Exists
