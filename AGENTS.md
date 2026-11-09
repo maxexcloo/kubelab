@@ -1,16 +1,5 @@
 # AGENTS.md
 
-## Project Overview
-
-This repository owns the Kubernetes resources reconciled by Flux: app bases and
-cluster overlays in `apps/`, Flux entry points in `clusters/`, and cluster
-controllers and shared configuration in `platform/`. `README.md` describes
-purpose and usage. The separate `homelab` repository owns the substrate that
-rebuilds or reaches a cluster while Kubernetes is unavailable, and `minilab`
-owns mini-app source. Actual Up keeps its dependencies, serial operation queue,
-schedules and encrypted settings in its own repository; Kubelab deploys its
-published image.
-
 ## Conventions
 
 - Read the owning configuration before changing architecture, ownership,
@@ -82,9 +71,8 @@ published image.
   integration logic; document the contract in its schema and compose standard
   resources underneath.
 - The 1Password item reconciler in `platform/secrets/onepassword-items` is the
-  approved narrow exception: a scheduled job that creates missing referenced
-  items and fields, leaving external credentials as empty placeholders, prunes
-  unreferenced fields and archives unreferenced Kubelab-tagged items. Its
+  approved narrow exception: it leaves external credentials as empty placeholders,
+  prunes unreferenced fields and archives unreferenced Kubelab-tagged items. Its
   contract lives beside it.
 - Use Kustomize for composition and small patches. Use `configMapGenerator` only
   to mount checked-in app configuration, scripts or assets; do not use
@@ -118,8 +106,6 @@ Define each value once:
   `clusters/<cluster>/settings/settings.yaml`. Consumers write the variable
   where they need it. Substitution is strict, so a missing variable fails the
   render and the reconciliation.
-- A value with one consumer lives where it is used; cluster-specific files write
-  it directly.
 - App hostnames: the app's route. The shared route transformers derive its
   Homepage link, DNS record and Pocket ID client; Kustomize replacements in the
   app derive its own URL settings from `.invalid` placeholders, and the checks
@@ -142,9 +128,8 @@ alphabetise within each group. Preserve deliberate grouping and workflow order.
 ## Style
 
 - Use supported app configuration interfaces; leave unsupported settings manual.
-- Use 10-second probe intervals, 5-second timeouts and three consecutive failures;
-  allow 30 failures for startup. Preserve app-specific check mechanisms and
-  endpoints, and retain chart limitations or evidenced exceptions.
+- Preserve app-specific probe mechanisms and endpoints, chart limitations and
+  evidenced exceptions to the shared probe defaults.
 
 ## Verification & Delivery
 
