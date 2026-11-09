@@ -6,8 +6,8 @@ resources:
   - namespace.yaml
   - network-policy.yaml
 components:
-  - ../../components/gpu
   - ../../components/workload
+  - ../../components/gpu
   - ../../components/default-deny
 patches:
   - path: helm-release.yaml

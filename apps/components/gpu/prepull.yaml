@@ -1,0 +1,29 @@
+# Before each upgrade, a hook Job pulls the app's new image onto the GPU node, so
+# the running workers keep serving through the multi-GiB pull. The app sets the
+# Job's image to its own, through a YAML anchor.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: _
+spec:
+  timeout: 30m
+  # Keep retrying, so an upgrade blocked while the GPU node is off resumes once it
+  # returns. Workers hold no data, so rolling back between attempts is harmless.
+  upgrade:
+    remediation:
+      retries: -1
+  values:
+    controllers:
+      prepull:
+        type: job
+        annotations:
+          helm.sh/hook: pre-install,pre-upgrade
+          helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+        containers:
+          main:
+            command:
+              - "true"
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi

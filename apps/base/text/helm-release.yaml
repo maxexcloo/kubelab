@@ -31,7 +31,7 @@ spec:
           envFrom:
             - secretRef:
                 name: text
-          image:
+          image: &image
             repository: docker.io/stilldeadcode/radiance
             tag: 1.17.0
           resources:
@@ -198,6 +198,10 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-2
+      prepull:
+        containers:
+          main:
+            image: *image
     defaultPodOptions:
       automountServiceAccountToken: false
       nodeSelector:

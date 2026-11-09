@@ -3,3 +3,8 @@ kind: Component
 resources:
   - resource-claim-templates.yaml
   - studio-runtime.yaml
+patches:
+  - path: prepull.yaml
+    target:
+      group: helm.toolkit.fluxcd.io
+      kind: HelmRelease
