@@ -41,11 +41,9 @@ separately.
 
 ## Syncthing
 
-Manage Syncthing peers and folder settings through each instance's GUI; these
-settings are held outside Git. The `AI` folder (ID `ai`) is bidirectional, so
-changes and deletions propagate to both peers. Keep Ignore Permissions enabled
-on Saturn to preserve its model-tree ACLs, and exclude partial downloads
-(`*.download`, `*.part`, `*.part.json` and `.rsync-partial`).
+Manage Syncthing peers and folder settings in each instance's GUI. The `AI`
+folder syncs both ways between Venus and Saturn and ignores `*.download`, `*.part`
+and `*.part.json`; keep Ignore Permissions on at Saturn to preserve its ACLs.
 
 ## Deployment
 
