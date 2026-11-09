@@ -1,5 +1,5 @@
 # Talos owns CoreDNS and only prefers spreading it, which still let both
-# replicas land on kimbap; require one per schedulable node. The selector and
+# replicas land on saturn; require one per schedulable node. The selector and
 # container name only satisfy schema validation.
 apiVersion: apps/v1
 kind: Deployment

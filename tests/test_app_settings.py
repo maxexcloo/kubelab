@@ -18,7 +18,7 @@ class AppSettingsTests(unittest.TestCase):
                         identity = resource["metadata"]["namespace"]
                         # Per-node instances can retain a deployed namespace identity.
                         if identity == "syncthing":
-                            identity = "syncthing-kimbap"
+                            identity = "syncthing-saturn"
                         routes = [routes] if "hostnames" in routes else routes.values()
                     elif resource["kind"] == "HTTPRoute":
                         route = resource["spec"]

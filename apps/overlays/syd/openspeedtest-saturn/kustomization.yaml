@@ -8,12 +8,12 @@ components:
 replacements:
   - source:
       kind: HTTPRoute
-      name: openspeedtest-kimbap
+      name: openspeedtest-saturn
       fieldPath: spec.hostnames.0
     targets:
       - select:
           kind: HTTPRoute
-          name: openspeedtest-kimbap
+          name: openspeedtest-saturn
         fieldPaths:
           - metadata.annotations.[gethomepage.dev/href]
         options:
