@@ -27,7 +27,17 @@ machines:
           widget:
             key: "{{HOMEPAGE_VAR_HOME_ASSISTANT_ACCESS_TOKEN}}"
             type: homeassistant
-    kimbap:
+    nanokvm:
+      platform: nanokvm
+      type: appliance
+      services:
+        management:
+          description: Remote Console & Power Control
+          icon: sipeed
+          name: NanoKVM
+          port: 80
+          scheme: http
+    saturn:
       hostname: storage
       platform: truenas
       type: storage
@@ -53,16 +63,6 @@ machines:
           scheme: http
         syncthing:
           port: 20910
-          scheme: http
-    nanokvm:
-      platform: nanokvm
-      type: appliance
-      services:
-        management:
-          description: Remote Console & Power Control
-          icon: sipeed
-          name: NanoKVM
-          port: 80
           scheme: http
     slzb-06m:
       platform: slzb
