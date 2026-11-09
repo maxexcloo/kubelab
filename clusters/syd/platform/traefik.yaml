@@ -45,16 +45,10 @@ spec:
             internalTrafficPolicy: Local
             type: ClusterIP
         private:
-          annotations:
-            tailscale.com/hostname: syd-ingress
-            tailscale.com/proxy-group: ingress
-            tailscale.com/tags: tag:cluster-syd
           spec:
             # Homelab's tailscale_ingress_target: every node's Tailscale forwards syd-ingress here.
             clusterIP: 10.100.5.189
-            allocateLoadBalancerNodePorts: false
             trafficDistribution: PreferSameNode
-            loadBalancerClass: tailscale
-            type: LoadBalancer
+            type: ClusterIP
       spec:
         type: ClusterIP
