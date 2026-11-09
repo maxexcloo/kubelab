@@ -7,7 +7,6 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
-  - reference-grant.yaml
   - storage.yaml
 components:
   - ../../components/application

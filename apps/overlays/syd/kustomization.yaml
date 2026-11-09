@@ -138,16 +138,3 @@ replacements:
         options:
           delimiter: /
           index: 2
-  # Studio serves result links on Bifrost's host.
-  - source:
-      kind: HTTPRoute
-      name: bifrost
-      namespace: bifrost
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-          name: studio
-          namespace: studio
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.BIFROST_HOST
