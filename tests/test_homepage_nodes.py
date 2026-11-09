@@ -116,7 +116,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             list(storage), ["TrueNAS", "Beszel", "Cloudflare", "Tailscale"]
         )
         self.assertEqual(
-            storage["Cloudflare"]["widget"]["fields"], ["status", "origin_ip"]
+            storage["Cloudflare"]["widget"]["fields"], ["origin_ip", "status"]
         )
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
@@ -129,7 +129,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         )
         self.assertEqual(node["Tailscale"]["widget"]["deviceid"], "node-device")
         self.assertEqual(
-            node["Tailscale"]["widget"]["fields"], ["last_seen", "address"]
+            node["Tailscale"]["widget"]["fields"], ["address", "last_seen"]
         )
         self.assertEqual(
             groups["mbk"]["Cloudflare"]["widget"]["tunnelid"], "cluster-tunnel"
@@ -146,7 +146,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         )
         self.assertEqual(
             node["Beszel"]["widget"]["fields"],
-            ["status", "updated", "cpu", "memory"],
+            ["cpu", "memory", "status", "updated"],
         )
         self.assertEqual(node["Beszel"]["weight"], -1)
         self.assertEqual(node["Beszel"]["icon"], "sh-beszel")
