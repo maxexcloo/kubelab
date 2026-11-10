@@ -138,22 +138,13 @@ spec:
                       url: .payload.baseUrl + "/b2api/v4/b2_list_buckets"
                     - action: UPDATE
                       body: |-
-                        if (.response.body.buckets | length) == 0
-                        then .payload.body + {
-                          bucketType: "allPrivate",
-                          defaultServerSideEncryption: {
-                            algorithm: "AES256",
-                            mode: "SSE-B2"
-                          },
-                          lifecycleRules: [{
-                            daysFromHidingToDeleting: 1,
-                            daysFromUploadingToHiding: null,
-                            fileNamePrefix: ""
-                          }]
-                        }
+                        (if (.response.body.buckets | length) == 0
+                        then .payload.body
                         else {
                           accountId: .payload.body.accountId,
-                          bucketId: .response.body.buckets[0].bucketId,
+                          bucketId: .response.body.buckets[0].bucketId
+                        }
+                        end) + {
                           bucketType: "allPrivate",
                           defaultServerSideEncryption: {
                             algorithm: "AES256",
@@ -165,7 +156,6 @@ spec:
                             fileNamePrefix: ""
                           }]
                         }
-                        end
                       method: POST
                       url: |-
                         if (.response.body.buckets | length) == 0

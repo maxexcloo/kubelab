@@ -21,13 +21,8 @@ spec:
             spec:
               type: object
               properties:
-                cluster:
-                  maxLength: 63
-                  minLength: 1
-                  pattern: ^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$
-                  type: string
                 item:
                   description: Title of the existing 1Password item that receives the key.
                   minLength: 1
                   type: string
-              required: [cluster, item]
+              required: [item]
