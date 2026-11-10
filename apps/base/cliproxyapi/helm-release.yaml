@@ -12,7 +12,7 @@ spec:
               TZ: ${time_zone}
             image:
               repository: docker.io/eceasy/cli-proxy-api
-              tag: v8.0.62
+              tag: v8.0.63
             probes:
               liveness: &health
                 path: /
