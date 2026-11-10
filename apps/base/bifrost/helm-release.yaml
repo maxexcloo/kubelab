@@ -549,15 +549,7 @@ spec:
               Authorization: env.STUDIO_MCP_AUTHORIZATION
             # Studio waits up to 31 minutes for generation results.
             toolExecutionTimeout: 1860
-            toolsToExecute:
-              - Cancel
-              - Generate
-              - Handover
-              - Models
-              - Result
-              - Reuse
-              - Review
-              - Upload
+            toolsToExecute: ["*"]
           - name: unifi_network
             isCodeModeClient: true
             authType: none
