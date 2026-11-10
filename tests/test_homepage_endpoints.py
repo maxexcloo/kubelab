@@ -98,13 +98,6 @@ class HomepageEndpointsTests(unittest.TestCase):
         self.assertEqual(result["console"], "http://nanokvm.mbk.example.net")
         self.assertEqual(result["local_console"], "http://slzb-06m.mbk.example.net")
 
-    def test_unchanged_inventory_keeps_published_files(self):
-        self.assertEqual(render(self.output).returncode, 0)
-        self.assertEqual(read_yaml(self.directory / "bookmarks.yaml"), [])
-        timestamp = self.output.stat().st_mtime_ns
-        self.assertEqual(render(self.output).returncode, 0)
-        self.assertEqual(self.output.stat().st_mtime_ns, timestamp)
-
     def test_inventory_cards_follow_metadata_and_addresses(self):
         def change(machines):
             machine = machines["mbk"]["slzb-06m"]
@@ -286,8 +279,7 @@ class HomepageEndpointsTests(unittest.TestCase):
         )
         self.assertNotEqual(resolve(document, homelab=self.homelab).returncode, 0)
 
-    def test_invalid_endpoint_settings_preserve_previous_configuration(self):
-        self.output.write_text("previous configuration\n")
+    def test_invalid_endpoint_settings_fail(self):
         for scheme, port in [
             ("ftp", 443),
             ("https", 0),
@@ -303,13 +295,10 @@ class HomepageEndpointsTests(unittest.TestCase):
                     ]["services"]["management"].update(port=port, scheme=scheme),
                 )
                 self.assertNotEqual(render(self.output, self.homelab).returncode, 0)
-                self.assertEqual(self.output.read_text(), "previous configuration\n")
 
-    def test_invalid_yaml_preserves_previous_configuration(self):
+    def test_invalid_yaml_fails(self):
         (self.homelab / "data/machines.yaml").write_text("machines: [broken YAML\n")
-        self.output.write_text("previous configuration\n")
         self.assertNotEqual(render(self.output, self.homelab).returncode, 0)
-        self.assertEqual(self.output.read_text(), "previous configuration\n")
 
     def test_invalid_references_fail(self):
         for reference in [

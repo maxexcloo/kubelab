@@ -2,10 +2,11 @@
 
 import json
 import os
+import shutil
 import tarfile
 import unittest
 
-from homepage_support import HomepageDashboardFixture, route
+from homepage_support import HOMELAB, HomepageDashboardFixture, route
 from support import read_yaml
 
 
@@ -195,8 +196,27 @@ cp "$ARCHIVE_FIXTURE" "$2"
                 for p in self.output.iterdir()
             },
         )
-        (self.directory / "apps/overlays/syd/routes.yaml").write_text("[broken yaml\n")
+        routes = self.directory / "apps/overlays/syd/routes.yaml"
+        valid_routes = routes.read_text()
+        routes.write_text("[broken yaml\n")
         self.assertNotEqual(self.render().returncode, 0)
+        self.assertEqual(
+            before,
+            {
+                p.name: (p.read_bytes(), p.stat().st_mtime_ns)
+                for p in self.output.iterdir()
+            },
+        )
+        routes.write_text(valid_routes)
+        homelab = self.directory / "homelab"
+        shutil.copytree(HOMELAB, homelab)
+        machines = homelab / "data/machines.yaml"
+        inventory = read_yaml(machines)
+        inventory["machines"]["mbk"]["saturn"]["services"]["management"]["scheme"] = (
+            "ftp"
+        )
+        machines.write_text(json.dumps(inventory))
+        self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
         self.assertEqual(
             before,
             {

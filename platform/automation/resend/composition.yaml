@@ -73,15 +73,14 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.secretInjectionConfigs[0].secretRef.namespace
-              - type: CombineFromComposite
-                combine:
-                  strategy: string
-                  string:
-                    fmt: '{"name":"cluster-%s-%s","permission":"sending_access"}'
-                  variables:
-                    - fromFieldPath: spec.cluster
-                    - fromFieldPath: metadata.namespace
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.payload.body
+                transforms:
+                  - type: string
+                    string:
+                      fmt: '{"name":"cluster-${cluster_name}-%s","permission":"sending_access"}'
+                      type: Format
           - name: onepassword-item
             base:
               apiVersion: external-secrets.io/v1alpha1

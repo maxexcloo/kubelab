@@ -3,5 +3,4 @@ kind: ResendKey
 metadata:
   name: resend
 spec:
-  cluster: ${cluster_name}
   item: Beszel
