@@ -183,7 +183,7 @@ else
 fi
 yq ea '[.[]]' "$temporary_directory/dashboard-services.yaml" "$temporary_directory/providers.yaml" \
   > "$temporary_directory/config/services.yaml"
-cp "$temporary_directory/bookmarks.yaml" "$temporary_directory/config/bookmarks.yaml"
+printf '[]\n' > "$temporary_directory/config/bookmarks.yaml"
 
 for file in custom.css custom.js docker.yaml kubernetes.yaml; do
   cp "$source_directory/$file" "$temporary_directory/config/$file"
