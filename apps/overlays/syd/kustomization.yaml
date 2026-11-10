@@ -22,6 +22,7 @@ resources:
   - ../../base/immich-mcp
   - ../../base/karakeep
   - ../../base/karakeep-mcp
+  - ../../base/kubernetes-mcp
   - ../../base/larapaper
   - ../../base/librechat
   - ../../base/librechat-admin

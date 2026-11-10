@@ -359,6 +359,8 @@ spec:
                 tools_to_execute: ["*"]
               - mcp_client_name: karakeep
                 tools_to_execute: ["*"]
+              - mcp_client_name: kubernetes
+                tools_to_execute: ["*"]
               - mcp_client_name: larapaper
                 tools_to_execute: ["*"]
               - mcp_client_name: reactive_resume
@@ -513,6 +515,14 @@ spec:
               url: http://karakeep-mcp.karakeep-mcp.svc.cluster.local:8000/mcp
             connectionType: http
             endpointSlug: karakeep
+            toolsToExecute: ["*"]
+          - name: kubernetes
+            isCodeModeClient: true
+            authType: none
+            httpConfig:
+              url: http://kubernetes-mcp.kubernetes-mcp.svc.cluster.local:8080/mcp
+            connectionType: http
+            endpointSlug: kubernetes
             toolsToExecute: ["*"]
           - name: larapaper
             isCodeModeClient: true
