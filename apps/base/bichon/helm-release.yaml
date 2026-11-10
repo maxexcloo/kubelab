@@ -19,7 +19,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: docker.io/rustmailer/bichon
-              tag: 2.3.2
+              tag: 2.4.0
             probes:
               liveness: &health
                 path: /api/status
