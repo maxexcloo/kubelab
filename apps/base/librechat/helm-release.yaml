@@ -14,6 +14,17 @@ spec:
         name: librechat
         namespace: flux-system
       version: 3.0.0
+  # LibreChat drains providers for up to 60 s; the chart has no pod grace setting.
+  postRenderers:
+    - kustomize:
+        patches:
+          - patch: |-
+              - op: add
+                path: /spec/template/spec/terminationGracePeriodSeconds
+                value: 75
+            target:
+              kind: Deployment
+              name: librechat
   values:
     fullnameOverride: librechat
     global:
