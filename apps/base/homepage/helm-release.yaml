@@ -12,7 +12,7 @@ spec:
           homepage:
             image:
               repository: ghcr.io/gethomepage/homepage
-              tag: v2.7.0
+              tag: v2.8.0
             probes:
               liveness:
                 custom: true
