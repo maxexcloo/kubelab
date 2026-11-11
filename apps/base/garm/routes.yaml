@@ -1,0 +1,55 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: garm
+  annotations:
+    gethomepage.dev/description: Disposable GitHub Runners
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Operations
+    gethomepage.dev/href: https://app.invalid
+    gethomepage.dev/icon: sh-github
+    gethomepage.dev/name: &title GARM
+    monitoring.excloo.dev/enabled: "true"
+    onepassword.excloo.dev/item: *title
+  labels:
+    app.kubernetes.io/name: garm
+spec:
+  hostnames:
+    - garm.${cluster_name}.excloo.dev
+  parentRefs:
+    - name: private
+      namespace: networking
+  rules:
+    - backendRefs:
+        - name: garm
+          port: 9997
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: garm-public
+  annotations:
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    onepassword.excloo.dev/item: GARM
+  labels:
+    gateway.excloo.dev/public-access: "true"
+spec:
+  hostnames:
+    - garm.excloo.dev
+  parentRefs:
+    - name: public-tunnel
+      namespace: networking
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /webhooks
+        - path:
+            type: PathPrefix
+            value: /api/v1/callbacks
+        - path:
+            type: PathPrefix
+            value: /api/v1/metadata
+      backendRefs:
+        - name: garm
+          port: 9997

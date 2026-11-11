@@ -1,0 +1,14 @@
+url = "https://mercury.mbk.excloo.net:8443"
+project_name = "garm"
+include_default_profile = false
+instance_type = "virtual-machine"
+secure_boot = true
+client_certificate = "/etc/garm/incus-client.crt"
+client_key = "/etc/garm/incus-client.key"
+tls_server_certificate = "/etc/garm/incus-server.crt"
+
+[image_remotes.images]
+addr = "https://images.linuxcontainers.org"
+public = true
+protocol = "simplestreams"
+skip_verify = false

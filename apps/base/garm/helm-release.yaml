@@ -1,0 +1,54 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        replicas: 1
+        strategy: Recreate
+        containers:
+          main:
+            image:
+              repository: ghcr.io/cloudbase/garm
+              tag: v0.2.1
+            probes:
+              liveness: &health
+                type: TCP
+                port: 9997
+              readiness: *health
+              startup:
+                <<: *health
+                spec:
+                  failureThreshold: 30
+                  timeoutSeconds: 5
+            resources:
+              limits:
+                memory: 512Mi
+              requests:
+                cpu: 50m
+                memory: 128Mi
+    persistence:
+      configuration:
+        name: garm-runtime
+        type: secret
+        globalMounts:
+          - path: /etc/garm
+            readOnly: true
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        globalMounts:
+          - path: /data
+      provider:
+        name: garm-provider
+        type: configMap
+        globalMounts:
+          - path: /etc/garm/provider
+            readOnly: true
+    service:
+      main:
+        ports:
+          http:
+            port: 9997

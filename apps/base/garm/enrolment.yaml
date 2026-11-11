@@ -1,0 +1,68 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: garm-enrolment
+spec:
+  schedule: "*/10 * * * *"
+  timeZone: ${time_zone}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 540
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: garm-enrolment
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          nodeSelector:
+            node.excloo.dev/network: internal
+          containers:
+            - name: enrol
+              # The full Debian image includes OpenSSL for GitHub App JWT signing.
+              image: docker.io/library/python:3.14.0-bookworm
+              command:
+                - python3
+                - -B
+                - /scripts/enrol.py
+              env:
+                - name: GARM_API_URL
+                  value: http://garm.garm.svc.cluster.local:9997/api/v1
+                - name: GARM_PUBLIC_URL
+                  value: https://app.invalid
+              resources:
+                limits:
+                  memory: 128Mi
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+                - name: credentials
+                  mountPath: /secrets
+                  readOnly: true
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - name: script
+              configMap:
+                name: garm-enrolment
+            - name: credentials
+              secret:
+                secretName: garm-enrolment

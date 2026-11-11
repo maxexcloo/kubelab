@@ -1,0 +1,65 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: garm
+resources:
+  - enrolment.yaml
+  - external-secrets.yaml
+  - namespace.yaml
+  - network-policy.yaml
+  - routes.yaml
+  - storage.yaml
+components:
+  - ../../components/application
+  - ../../components/default-deny
+  - ../../../platform/backups/credentials
+  - ../../../platform/backups/files
+configurations:
+  - name-reference.yaml
+patches:
+  - path: helm-release.yaml
+    target:
+      kind: HelmRelease
+  - path: backup.yaml
+    target:
+      kind: CronJob
+      name: state-backup
+configMapGenerator:
+  - name: garm-provider
+    files:
+      - incus.toml
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
+  - name: garm-enrolment
+    files:
+      - enrol.py
+    options:
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
+replacements:
+  - source:
+      kind: HTTPRoute
+      name: garm
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: garm
+        fieldPaths:
+          - metadata.annotations.[gethomepage.dev/href]
+        options:
+          delimiter: /
+          index: 2
+  - source:
+      kind: HTTPRoute
+      name: garm-public
+      fieldPath: spec.hostnames.0
+    targets:
+      - select:
+          kind: CronJob
+          name: garm-enrolment
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.containers.[name=enrol].env.[name=GARM_PUBLIC_URL].value
+        options:
+          delimiter: /
+          index: 2

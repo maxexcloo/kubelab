@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+    groupPattern: "568"
+    permPattern: "0700"
+    userPattern: "568"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-path

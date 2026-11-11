@@ -15,6 +15,7 @@ resources:
   - ../../base/cliproxyapi
   - ../../base/comfyui-image
   - ../../base/comfyui-video
+  - ../../base/garm
   - ../../base/home-assistant
   - ../../base/home-assistant-mcp
   - ../../base/homepage

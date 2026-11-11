@@ -1,0 +1,45 @@
+{
+  "total_count": 5,
+  "repositories": [
+    {
+      "id": 1,
+      "name": "active",
+      "owner": { "login": "maxexcloo", "type": "User" },
+      "archived": false,
+      "disabled": false,
+      "fork": false
+    },
+    {
+      "id": 2,
+      "name": "archived",
+      "owner": { "login": "maxexcloo", "type": "User" },
+      "archived": true,
+      "disabled": false,
+      "fork": false
+    },
+    {
+      "id": 3,
+      "name": "disabled",
+      "owner": { "login": "maxexcloo", "type": "User" },
+      "archived": false,
+      "disabled": true,
+      "fork": false
+    },
+    {
+      "id": 4,
+      "name": "foreign",
+      "owner": { "login": "another-owner", "type": "User" },
+      "archived": false,
+      "disabled": false,
+      "fork": false
+    },
+    {
+      "id": 5,
+      "name": "owned-fork",
+      "owner": { "login": "MaxExcloo", "type": "User" },
+      "archived": false,
+      "disabled": false,
+      "fork": true
+    }
+  ]
+}

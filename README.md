@@ -45,6 +45,11 @@ Manage Syncthing peers and folder settings in each instance's GUI. The `AI`
 folder syncs both ways between Venus and Saturn and ignores `*.download`, `*.part`
 and `*.part.json`; keep Ignore Permissions on at Saturn to preserve its ACLs.
 
+## GitHub Runners
+
+[GARM](garm.md) manages repository-scoped disposable Incus VMs on Mercury.
+Its guide covers enrolment, the host capacity bound and activation prerequisites.
+
 ## Deployment
 
 Merge reviewed pull requests into `main` and Flux reconciles them automatically.
