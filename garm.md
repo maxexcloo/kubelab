@@ -69,6 +69,34 @@ No runner receives Incus credentials or a tailnet identity. This PR's NetworkPol
 allows the ingress gateway and enrolment job to reach GARM; VM egress isolation
 is enforced on Mercury, not by Kubernetes NetworkPolicy.
 
+Controller connectivity uses the cluster's existing node network, with no
+application Tailscale sidecar: the GARM pod leaves through Cilium's legacy host
+routing and IPv4 iptables masquerading, then the node's kernel `tailscale0`
+interface reaches Mercury. Cilium's checked-in configuration keeps legacy host
+routing enabled and leaves the chart's IPv4 masquerading defaults in place;
+there is no GARM egress-deny policy. The upstream
+[masquerading contract](https://docs.cilium.io/en/stable/network/concepts/masquerading/#iptables-based)
+covers traffic leaving non-Cilium interfaces such as `tailscale0`.
+
+Homelab owns that node path in
+[talos.tf](https://github.com/maxexcloo/homelab/blob/main/talos.tf) and
+[truenas.tf](https://github.com/maxexcloo/homelab/blob/main/truenas.tf): direct
+nodes use the kernel Tailscale extension, while Saturn's Talos container shares
+its network namespace with a kernel-mode Tailscale sidecar (`TS_USERSPACE=false`).
+The Talos routing rule at priority 5200 sends tailnet destinations through table
+52 before Cilium packet marks can bypass it. Homelab's
+[dns.tf](https://github.com/maxexcloo/homelab/blob/main/dns.tf) publishes Mercury's
+infrastructure hostname to its Tailscale addresses.
+
+With the current
+[cluster placement](https://github.com/maxexcloo/homelab/blob/main/data/clusters.yaml),
+Saturn is the untainted internal node eligible for this controller; Venus is
+reserved for GPU workloads and Neptune is external. Mercury's listener allow-list
+must therefore use the **Talos container's** configured Tailscale IPv4, rather
+than the TrueNAS host's separate identity or the pod address. Recheck the scheduled
+node after a restore or placement change. This establishes the configured path;
+pod-to-Incus TLS connectivity still needs a live activation check.
+
 GARM's public route exposes only `/webhooks`, `/api/v1/callbacks` and
 `/api/v1/metadata` through the Cloudflare tunnel. GARM authenticates webhooks
 with each repository's HMAC secret and runner requests with instance JWTs.
