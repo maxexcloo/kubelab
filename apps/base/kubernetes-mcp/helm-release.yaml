@@ -15,6 +15,7 @@ spec:
       toolsets: ["core"]
     fullnameOverride: kubernetes-mcp
     image:
+      # renovate: datasource=docker depName=quay.io/containers/kubernetes_mcp_server
       version: v0.1.2
     ingress:
       enabled: false
