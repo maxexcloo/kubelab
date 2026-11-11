@@ -38,12 +38,12 @@ spec:
         type: hostPath
         globalMounts:
           - path: /mnt/truenas/projects
-      public:
-        hostPath: ${dataset_root}/truenas/public
+      scratch:
+        hostPath: ${dataset_root}/truenas/scratch
         hostPathType: Directory
         type: hostPath
         globalMounts:
-          - path: /mnt/truenas/public
+          - path: /mnt/truenas/scratch
     route:
       private:
         annotations:
