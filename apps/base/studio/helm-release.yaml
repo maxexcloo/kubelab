@@ -63,8 +63,6 @@ spec:
               STUDIO_ASSISTANT_CLOUD_MODEL: cloud/auto
               STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
               HOST: 0.0.0.0
-              # Temporary: CPU profile over port-forward; remove after.
-              NODE_OPTIONS: --inspect=127.0.0.1:9229
               PORT: "8787"
               ROUTE_ALIAS_HOST: studio.${cluster_name}.excloo.dev
               ROUTE_HOST: app.invalid
@@ -74,7 +72,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/maxexcloo/studio
-              tag: 2026.11.11.4
+              tag: 2026.11.11.5
             probes:
               liveness:
                 path: /api/ping
