@@ -21,7 +21,7 @@ spec:
               TZ: ${time_zone}
             image:
               repository: ghcr.io/maxexcloo/atvloadly
-              tag: v0.8.2
+              tag: v0.8.3
             probes:
               liveness: &health
                 enabled: true
