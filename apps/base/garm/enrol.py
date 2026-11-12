@@ -91,21 +91,6 @@ def discover(github, installation):
     }
 
 
-def scale_set_settings(enabled):
-    return {
-        "name": SCALE_SET,
-        "enabled": enabled,
-        "flavor": "garm-vm",
-        "image": "images:ubuntu/24.04/cloud",
-        "max_runners": 1,
-        "min_idle_runners": 0,
-        "os_arch": "amd64",
-        "os_type": "linux",
-        "runner_bootstrap_timeout": 20,
-        "enable_shell": False,
-    }
-
-
 def reconcile(garm, active):
     repositories = garm("GET", "/repositories")
     owned = {
@@ -140,7 +125,18 @@ def reconcile(garm, active):
         if len(ours) > 1:
             raise ValueError(f"multiple managed scale sets for {name}")
         enabled = name in active
-        settings = scale_set_settings(enabled)
+        settings = {
+            "name": SCALE_SET,
+            "enabled": enabled,
+            "flavor": "garm-vm",
+            "image": "images:ubuntu/24.04/cloud",
+            "max_runners": 1,
+            "min_idle_runners": 0,
+            "os_arch": "amd64",
+            "os_type": "linux",
+            "runner_bootstrap_timeout": 20,
+            "enable_shell": False,
+        }
         if ours:
             scale_set = ours[0]
             if scale_set["provider_name"] != PROVIDER:
