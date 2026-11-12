@@ -17,24 +17,30 @@ included. Organisation and foreign repositories are excluded.
 Discovery completes every GitHub response page before GARM changes start. An API
 error, incomplete inventory, suspended installation or selected-repository
 installation fails the run. The next scheduled run retries. No repository or
-pool is deleted. Pools that this script owns are disabled when a complete
-inventory excludes their repository, then re-enabled if it becomes eligible
-again. Other credentials and pools remain separately managed; conflicting
-repository ownership fails rather than silently adopting it.
+scale set is deleted. Scale sets that this script owns are disabled when a
+complete inventory excludes their repository, then re-enabled if it becomes
+eligible again. Other credentials and differently named scale sets remain
+separately managed; conflicting repository credentials or a matching scale set
+using another provider fail rather than silently adopting it.
 
 The script logs in to GARM for a fresh token, sets the controller's public URLs,
-creates the GitHub App credential once, and creates repository entities with
-independent random webhook secrets. GARM's supported repository webhook API
-installs `workflow_job` hooks with TLS verification. Existing hooks are inspected
-before installation; an inactive or incorrectly configured managed hook is
-replaced through that API. An interrupted run resumes from the resources already
-created. Existing GitHub App credentials are not overwritten: rotate the GARM
-credential through its supported API when the external App key changes.
+creates the GitHub App credential once, and creates one repository scale set
+named `mercury-incus` per eligible repository. GARM's repository API still
+requires an independent random `webhook_secret` when creating the repository
+entity; no webhook is installed or exposed. An interrupted run resumes from the
+resources already created. Existing GitHub App credentials are not overwritten:
+rotate the GARM credential through its supported API when the external App key
+changes.
 
-Pools scale to zero and use the `mercury-incus` label. No workflow is switched by
-this change. Select `runs-on: mercury-incus` only in an explicitly approved
-rollout test. The pool intentionally omits generic labels such as `self-hosted`
-so it cannot claim existing jobs that have not opted in.
+Scale sets use GitHub's native long-poll message queue. Jobs queued while GARM
+is offline stay queued until it reconnects. GARM persists each scale set's
+requested runner count and reconciles towards that demand. The enrolment job
+does not schedule jobs or manage individual VMs.
+
+Scale sets scale to zero. No workflow is switched by this change. Select
+`runs-on: mercury-incus` only in an explicitly approved rollout test. That is
+the scale set's name; no generic labels such as `self-hosted` are added, so it
+cannot claim existing jobs that have not opted in.
 
 ## Capacity & Isolation
 
@@ -47,20 +53,24 @@ project, and uses its `garm-vm` profile without adding the default profile.
 The profile owns CPU, memory, root disk and network configuration.
 
 The **global bound is Incus project capacity**, independently of how many GARM
-repository pools exist: `limits.instances=1`, `limits.virtual-machines=1` and
+repository scale sets exist: `limits.instances=1`, `limits.virtual-machines=1` and
 `limits.containers=0`. The single VM has 4 CPU, 6 GiB RAM and a 64 GiB root disk
-on native local storage. A stopped VM also consumes that capacity. The pool's
+on native local storage. A stopped VM also consumes that capacity. Each scale set's
 `max_runners=1` only bounds that repository; it does not enforce the host bound.
 
-The Incus provider forwards creation failures to GARM. A quota rejection becomes
-an error instance; GARM retries creation up to five attempts after cleaning up
-the previous attempt, and the provider treats deletion of an absent instance
-as success. This is a hard capacity bound, not a fair global queue. Exhausted
-error instances depend on GARM's ordinary bootstrap-timeout/orphan cleanup before
-replacement; the configured timeout is in the pool settings. Contention can
-therefore delay a queued job even after capacity becomes free. Do not promise
-immediate cross-repository scheduling or change this into a custom supervisor.
-Verify eventual job recovery under contention before migrating workflows.
+The Incus provider forwards quota rejection as a creation failure. GARM's
+scale-set provider worker marks the failed instance for deletion. Once that
+instance is removed, the autoscaling worker requests a replacement while the
+persisted runner demand remains. Unlike webhook pools, this path has no
+five-attempt ceiling, so waiting repositories keep retrying without a manual
+job restart.
+The provider treats deletion of an absent instance as success.
+
+This gives each repository durable job delivery and automatic recovery from
+capacity rejection. The Incus quota is a hard host bound, not a global FIFO
+queue or a fairness guarantee. Competing repositories can still delay one
+another; no bounded wait or strict execution order is promised. Verify
+two-repository contention and controller-restart recovery during activation.
 
 Homelab owns the isolated NAT bridge and firewall. Runner traffic cannot reach
 the host, private networks, LAN, tailnet, link-local or cloud metadata addresses;
@@ -97,9 +107,9 @@ than the TrueNAS host's separate identity or the pod address. Recheck the schedu
 node after a restore or placement change. This establishes the configured path;
 pod-to-Incus TLS connectivity still needs a live activation check.
 
-GARM's public route exposes only `/webhooks`, `/api/v1/callbacks` and
-`/api/v1/metadata` through the Cloudflare tunnel. GARM authenticates webhooks
-with each repository's HMAC secret and runner requests with instance JWTs.
+GARM's public route exposes only `/api/v1/callbacks` and `/api/v1/metadata`
+through the Cloudflare tunnel. GARM authenticates runner requests with instance
+JWTs. Webhook management remains disabled and no webhook route is published.
 The UI, first-run, login and administration API remain on the private route.
 The enrolment job derives the public callback/metadata URLs from the public
 route, so bootstrap needs no private IP/port firewall exception. Cloudflare must
@@ -116,9 +126,9 @@ Activation requires separate approval and the following work:
    GARM. Record the actual controller egress Tailscale IPv4 in Homelab's listener
    allow-list; verify cluster DNS and routing reach the private Incus endpoint.
 2. Create a GitHub App installed on all `maxexcloo` repositories. Grant repository
-   **Administration: Read & write**, **Metadata: Read-only** and
-   **Webhooks: Read & write**. Organisation permissions are unnecessary. GARM
-   installs repository webhooks; an App-level webhook subscription is unnecessary.
+   **Administration: Read & write** and **Metadata: Read-only**. Organisation
+   permissions, Webhooks permissions and webhook subscriptions are unnecessary:
+   repository scale sets obtain their demand through GitHub's message queue.
 3. Populate the external fields declared in `external-secrets.yaml` in the
    **GARM** 1Password item. The App key must be RSA PKCS#1 PEM, as required by the
    released GARM API. The database passphrase must be a strong random string of
@@ -133,21 +143,24 @@ Activation requires separate approval and the following work:
    using the stored administrator credentials. The CronJob fails safely until
    initialisation and all credentials are ready. Check the bundled provider
    version against the reviewed provider release when activating or upgrading.
-5. Verify enrolment and signed webhook delivery on one test repository. With
+5. Verify enrolment and the native scale-set listener on one test repository. With
    explicit live-test approval, run one disposable VM job, verify CPU/RAM and
    denied host/LAN/tailnet/metadata access, verify allowed GitHub/package egress,
    and confirm runner deregistration and VM deletion. Queue jobs in two different
-   repositories simultaneously and keep the first running beyond the initial
-   retry window: prove at most one VM exists and that the other job eventually
-   recovers after release of capacity. Pause rollout if recovery needs manual
-   intervention. No existing workflow fleet changes are part of activation here.
+   repositories simultaneously and keep the first running through repeated
+   capacity rejections: prove at most one VM exists and that the other job eventually
+   recovers after release of capacity. Restart GARM while jobs remain queued
+   and verify they run automatically after reconnection. Pause rollout if
+   recovery needs manual intervention. No existing workflow fleet changes are
+   part of activation here.
 
 SQLite state uses one replica, `Recreate` and a retained local-path claim. The
 shared file-backup job stops the controller while copying state to Restic.
 During recovery, restore the database and original passphrase/JWT secret before
-starting GARM; retaining the controller ID and webhook secrets keeps installed
-hooks associated with the correct controller. Reconcile existing Incus instances
-before accepting more jobs. Test restores separately.
+starting GARM; retain the controller ID, repository entities and scale-set IDs
+so GitHub's existing queues remain associated with the restored controller.
+Reconcile existing Incus instances before accepting more jobs. Test restores
+separately.
 
 ## Upstream Contracts
 
@@ -157,12 +170,16 @@ The implementation was checked against released source, rather than unreleased
 - [GARM v0.2.1 credentials](https://github.com/cloudbase/garm/blob/v0.2.1/doc/credentials.md)
   and [request types](https://github.com/cloudbase/garm/blob/v0.2.1/params/requests.go)
   define App authentication, base64-encoded key bytes, login, controller updates
-  and repository/pool requests.
+  and repository/scale-set requests.
 - [Repository API](https://github.com/cloudbase/garm/blob/v0.2.1/apiserver/controllers/repositories.go)
   and [routers](https://github.com/cloudbase/garm/blob/v0.2.1/apiserver/routers/routers.go)
-  define supported webhook installation and instance-authenticated public paths.
-- [Pool implementation](https://github.com/cloudbase/garm/blob/v0.2.1/runner/pool/pool.go)
-  defines creation errors, five-attempt retries and orphan cleanup.
+  define repository scale-set creation and instance-authenticated public paths.
+- [Scale-set documentation](https://github.com/cloudbase/garm/blob/v0.2.1/doc/scale-sets.md),
+  [listener](https://github.com/cloudbase/garm/blob/v0.2.1/workers/scaleset/scaleset_listener.go),
+  [autoscaler](https://github.com/cloudbase/garm/blob/v0.2.1/workers/scaleset/scaleset.go)
+  and [provider worker](https://github.com/cloudbase/garm/blob/v0.2.1/workers/provider/instance_manager.go)
+  define durable demand, failed-instance deletion and replacement. Provider-wide
+  capacity scheduling is an [upstream request](https://github.com/cloudbase/garm/issues/204).
 - [Incus provider v0.1.5 configuration](https://github.com/cloudbase/garm-provider-incus/blob/v0.1.5/config/config.go)
   and [implementation](https://github.com/cloudbase/garm-provider-incus/blob/v0.1.5/provider/incus.go)
   define remote TLS, projects, profile flavours, VM mode and error propagation.

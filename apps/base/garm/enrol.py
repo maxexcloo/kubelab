@@ -14,7 +14,7 @@ from pathlib import Path
 OWNER = "maxexcloo"
 CREDENTIAL = "maxexcloo-app"
 PROVIDER = "mercury"
-LABEL = "mercury-incus"
+SCALE_SET = "mercury-incus"
 
 
 class API:
@@ -91,14 +91,9 @@ def discover(github, installation):
     }
 
 
-def managed(pool):
-    return pool["provider_name"] == PROVIDER and any(
-        tag["name"] == LABEL for tag in pool.get("tags", [])
-    )
-
-
-def pool_settings(enabled):
+def scale_set_settings(enabled):
     return {
+        "name": SCALE_SET,
         "enabled": enabled,
         "flavor": "garm-vm",
         "image": "images:ubuntu/24.04/cloud",
@@ -107,8 +102,6 @@ def pool_settings(enabled):
         "os_arch": "amd64",
         "os_type": "linux",
         "runner_bootstrap_timeout": 20,
-        # Match only explicit opt-in jobs, leaving existing generic labels alone.
-        "tags": [LABEL],
         "enable_shell": False,
     }
 
@@ -135,46 +128,32 @@ def reconcile(garm, active):
                     "owner": OWNER,
                     "name": github_repo["name"],
                     "credentials_name": CREDENTIAL,
+                    # Required by the repository API even without webhook use.
                     "webhook_secret": secrets.token_urlsafe(48),
                     "forge_type": "github",
                 },
             )
     for name, repo in sorted(owned.items()):
         path = f"/repositories/{repo['id']}"
-        pools = garm("GET", path + "/pools")
-        ours = [pool for pool in pools if managed(pool)]
+        scale_sets = garm("GET", path + "/scalesets")
+        ours = [scale_set for scale_set in scale_sets if scale_set["name"] == SCALE_SET]
         if len(ours) > 1:
-            raise ValueError(f"multiple managed pools for {name}")
+            raise ValueError(f"multiple managed scale sets for {name}")
         enabled = name in active
-        if enabled:
-            try:
-                hook = garm("GET", path + "/webhook")
-            except urllib.error.HTTPError as error:
-                if error.code != 404:
-                    raise
-                error.close()
-                hook = None
-            if hook and (
-                not hook.get("active", False)
-                or hook.get("insecure_ssl", False)
-                or hook["events"] != ["workflow_job"]
-            ):
-                garm("DELETE", path + "/webhook")
-                hook = None
-            if not hook:
-                garm("POST", path + "/webhook", {"insecure_ssl": False})
-        settings = pool_settings(enabled)
+        settings = scale_set_settings(enabled)
         if ours:
-            pool = ours[0]
+            scale_set = ours[0]
+            if scale_set["provider_name"] != PROVIDER:
+                raise ValueError(f"scale set already uses another provider: {name}")
             # GARM omits zero and false fields in its JSON responses.
             current = {
-                key: pool.get(key, type(value)()) for key, value in settings.items()
+                key: scale_set.get(key, type(value)())
+                for key, value in settings.items()
             }
-            current["tags"] = [tag["name"] for tag in pool.get("tags", [])]
             if current != settings:
-                garm("PUT", path + f"/pools/{pool['id']}", settings)
+                garm("PUT", f"/scalesets/{scale_set['id']}", settings)
         elif enabled:
-            garm("POST", path + "/pools", {"provider_name": PROVIDER, **settings})
+            garm("POST", path + "/scalesets", {"provider_name": PROVIDER, **settings})
     print(f"Reconciled {len(active)} active owned repositories")
 
 
@@ -200,7 +179,6 @@ def main():
     desired = {
         "callback_url": public + "/api/v1/callbacks",
         "metadata_url": public + "/api/v1/metadata",
-        "webhook_url": public + "/webhooks",
     }
     controller = garm("GET", "/controller")
     if any(controller.get(key) != value for key, value in desired.items()):

@@ -3,27 +3,29 @@
     "id": "71524b70-8295-4abd-8cc5-18ea31fddf36",
     "owner": "maxexcloo",
     "name": "active",
-    "credentials": { "id": 1, "name": "maxexcloo-app", "auth-type": "app", "forge_type": "github" },
+    "credentials": {
+      "id": 1,
+      "name": "maxexcloo-app",
+      "auth-type": "app",
+      "forge_type": "github"
+    },
     "agent_mode": false
   },
-  "pool": {
-    "id": "a45b4e27-395c-446f-8f2b-135e6603cbce",
+  "scale_set": {
+    "id": 1,
     "provider_name": "mercury",
     "max_runners": 1,
     "image": "images:ubuntu/24.04/cloud",
     "flavor": "garm-vm",
     "os_type": "linux",
     "os_arch": "amd64",
-    "tags": [{ "id": 1, "name": "mercury-incus" }],
     "enabled": true,
     "enable_shell": false,
     "generation": 1,
-    "runner_bootstrap_timeout": 20
-  },
-  "hook": {
-    "id": 1,
-    "url": "https://example.invalid/webhooks/controller",
-    "active": true,
-    "events": ["workflow_job"]
+    "runner_bootstrap_timeout": 20,
+    "name": "mercury-incus",
+    "scale_set_id": 7,
+    "state": "running",
+    "disable_update": false
   }
 }

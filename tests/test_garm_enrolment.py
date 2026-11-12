@@ -25,8 +25,7 @@ def fixture(name):
 class GarmFixture:
     def __init__(self):
         self.repos = []
-        self.pools = {}
-        self.hooks = {}
+        self.scale_sets = {}
         self.writes = []
 
     def __call__(self, method, path, data=None):
@@ -42,32 +41,24 @@ class GarmFixture:
                 "credentials": {"name": data["credentials_name"]},
             }
             self.repos.append(repo)
-            self.pools[repo["id"]] = []
+            self.scale_sets[repo["id"]] = []
             return copy.deepcopy(repo)
         parts = path.split("/")
-        repo_id = parts[2]
-        if parts[3] == "webhook":
+        if parts[1] == "repositories" and parts[3] == "scalesets":
+            repo_id = parts[2]
             if method == "GET":
-                if repo_id not in self.hooks:
-                    raise urllib.error.HTTPError(path, 404, "not found", {}, None)
-                return self.hooks[repo_id]
-            self.hooks[repo_id] = {"active": True, "events": ["workflow_job"]}
-            return self.hooks[repo_id]
-        if method == "GET":
-            return copy.deepcopy(self.pools[repo_id])
-        pool = dict(data)
-        pool["tags"] = [{"name": name} for name in data["tags"]]
-        # Exercise GARM's omitempty on zero/false values.
-        pool = {key: value for key, value in pool.items() if value}
-        if method == "POST":
-            pool["id"] = f"pool-{repo_id}"
-            self.pools[repo_id].append(pool)
-        else:
-            previous = self.pools[repo_id][0]
-            previous.update(pool)
-            if not data["enabled"]:
-                previous.pop("enabled", None)
-        return copy.deepcopy(pool)
+                return copy.deepcopy(self.scale_sets[repo_id])
+            if method == "POST":
+                scale_set = {**data, "id": len(self.repos)}
+                self.scale_sets[repo_id].append(scale_set)
+                return copy.deepcopy(scale_set)
+        if parts[1] == "scalesets" and method == "PUT":
+            for scale_sets in self.scale_sets.values():
+                for scale_set in scale_sets:
+                    if str(scale_set["id"]) == parts[2]:
+                        scale_set.update(data)
+                        return copy.deepcopy(scale_set)
+        raise AssertionError(f"unexpected GARM request: {method} {path}")
 
 
 class GarmEnrolmentTests(unittest.TestCase):
@@ -119,9 +110,7 @@ class GarmEnrolmentTests(unittest.TestCase):
         garm = GarmFixture()
         active = {"active": {"name": "active"}}
         enrol.reconcile(garm, active)
-        self.assertEqual(
-            [method for method, _, _ in garm.writes], ["POST", "POST", "POST"]
-        )
+        self.assertEqual([method for method, _, _ in garm.writes], ["POST", "POST"])
         garm.writes.clear()
         enrol.reconcile(garm, active)
         self.assertEqual(garm.writes, [])
@@ -145,8 +134,7 @@ class GarmEnrolmentTests(unittest.TestCase):
         garm = GarmFixture()
         repo_id = response["repository"]["id"]
         garm.repos = [response["repository"]]
-        garm.pools[repo_id] = [response["pool"]]
-        garm.hooks[repo_id] = response["hook"]
+        garm.scale_sets[repo_id] = [response["scale_set"]]
         enrol.reconcile(garm, {"active": {"name": "active"}})
         self.assertEqual(garm.writes, [])
 
@@ -195,13 +183,13 @@ class GarmEnrolmentTests(unittest.TestCase):
         self.assertEqual(credential[2]["auth_type"], "app")
         self.assertEqual(set(reconcile.call_args.args[1]), {"active", "owned-fork"})
 
-    def test_transient_webhook_error_never_creates_a_pool(self):
+    def test_transient_scale_set_error_preserves_enrolment(self):
         garm = GarmFixture()
         enrol.reconcile(garm, {"active": {"name": "active"}})
         garm.writes.clear()
 
         def failing(method, path, data=None):
-            if path.endswith("/webhook"):
+            if path.endswith("/scalesets"):
                 raise urllib.error.HTTPError(path, 503, "unavailable", {}, None)
             return garm(method, path, data)
 
@@ -209,13 +197,20 @@ class GarmEnrolmentTests(unittest.TestCase):
             enrol.reconcile(failing, {"active": {"name": "active"}})
         caught.exception.close()
         self.assertEqual(garm.writes, [])
+        enrol.reconcile(garm, {"active": {"name": "active"}})
+        self.assertEqual(garm.writes, [])
 
-    def test_foreign_credentials_and_unmanaged_pools_are_preserved(self):
+    def test_foreign_credentials_and_scale_sets_are_preserved(self):
         garm = GarmFixture()
         enrol.reconcile(garm, {"active": {"name": "active"}})
-        garm.pools["1"][0]["provider_name"] = "other"
+        garm.scale_sets["1"][0]["name"] = "separate-runner"
         garm.writes.clear()
         enrol.reconcile(garm, {})
+        self.assertEqual(garm.writes, [])
+        garm.scale_sets["1"][0]["name"] = enrol.SCALE_SET
+        garm.scale_sets["1"][0]["provider_name"] = "other"
+        with self.assertRaises(ValueError):
+            enrol.reconcile(garm, {"active": {"name": "active"}})
         self.assertEqual(garm.writes, [])
         garm.repos[0]["credentials"]["name"] = "other"
         with self.assertRaises(ValueError):
