@@ -27,7 +27,7 @@ jobs:
         uses: maxexcloo/dotfiles/.github/actions/mise@main
         with:
           project-tools: true
-          tools: actionlint gh helm hk jq node@24 npm:renovate oxfmt python ruff shellcheck yq
+          tools: actionlint gh hk jq node@24 npm:renovate oxfmt python ruff shellcheck yq
       - name: Run Checks
         run: mise run check
       - name: Render Homepage Services From Homelab

@@ -27,9 +27,7 @@ Deploying needs a kubeconfig context that matches the selected configuration in
 ## Configuration Changes
 
 Edit workload configuration in `apps/base/<application>` and select it through
-`apps/overlays/<cluster>`. Local manifest checks cover what Flux builds, including
-its variable substitutions, but not Helm output, so render changed Helm charts
-separately.
+`apps/overlays/<cluster>`.
 
 ## Syncthing
 
