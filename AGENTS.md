@@ -6,8 +6,7 @@
   ownership and `homelab` configuration as authoritative for substrate details.
 - Prefer upstream Helm charts, then `bjw-s/app-template`, then direct manifests.
 - Keep cluster differences in overlays; do not copy an entire application.
-- Upgrade Flux manually with `flux install --export`; Renovate ignores
-  `gotk-components.yaml`.
+- Upgrade Flux manually with `flux install --export`.
 - Routes alias `onepassword.excloo.dev/item` to their `gethomepage.dev/name`,
   optionally with a bracketed qualifier that the card's location tag already
   shows. Routes without a card name the item of the app they sign in with.
