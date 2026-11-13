@@ -98,6 +98,27 @@ class HomepageEndpointsTests(unittest.TestCase):
         self.assertEqual(result["console"], "http://nanokvm.mbk.example.net")
         self.assertEqual(result["local_console"], "http://slzb-06m.mbk.example.net")
 
+    def test_private_proxy_links_use_https_and_keep_the_service_path(self):
+        def change(machines):
+            machines["mbk"]["saturn"]["services"]["management"].update(
+                private_proxy="syd", path="/console"
+            )
+
+        edit_inventory(self.homelab, change)
+        result = resolved(
+            {
+                "href": "homelab://mbk/saturn/management",
+                "widget": "homelab://mbk/saturn/management/api",
+            },
+            homelab=self.homelab,
+        )
+        self.assertEqual(
+            result["href"], "https://management.storage.example.net/console"
+        )
+        self.assertEqual(
+            result["widget"], "https://management.storage.example.net/console/api"
+        )
+
     def test_inventory_cards_follow_metadata_and_addresses(self):
         def change(machines):
             machine = machines["mbk"]["slzb-06m"]

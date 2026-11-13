@@ -27,6 +27,9 @@ with(select($domain == null or $domain == false); error("Missing infrastructure 
     .authority = $infra.hosts[$parts.machine]) |
   with(select(($service.scheme != "http" or $port != "80") and ($service.scheme != "https" or $port != "443"));
     .authority += ":" + $port) |
-  $service.scheme + "://" + .authority +
+  with(select($service.private_proxy != null);
+    .authority = ($parts.service + "." + ($machine.hostname // $parts.machine) + "." + $domain) |
+    .scheme = "https") |
+  (.scheme // $service.scheme) + "://" + .authority +
     (if ($parts.suffix // "") == "" then $path else ($path | sub("/$"; "")) + $parts.suffix end)
 )

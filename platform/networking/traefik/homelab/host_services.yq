@@ -1,0 +1,32 @@
+load(strenv(HOMELAB_DOMAINS)).domains.infrastructure as $domain |
+# A service opts into one cluster with private_proxy: <cluster>. Its existing
+# scheme, port and optional hostname describe the upstream, never the proxy.
+[.machines | to_entries[] | .key as $network | .value | to_entries[] |
+  .key as $machineKey | .value as $machine |
+  ($machine.hostname // $machineKey) as $host |
+  ($machine.services // {} | to_entries[]) |
+  select(.value.private_proxy == strenv(HOMELAB_CLUSTER)) |
+  .key as $service | .value as $endpoint |
+  ($service + "-" + $host) as $name |
+  {
+    "name": $name,
+    "router": {
+      "entryPoints": ["websecure"],
+      "rule": ("Host(`" + $service + "." + $host + "." + $domain + "`) || Host(`" +
+        $name + "." + strenv(HOMELAB_CLUSTER) + ".excloo.dev`)"),
+      "service": $name,
+      "tls": {}
+    },
+    "service": {
+      "loadBalancer": {
+        "servers": [{"url": ($endpoint.scheme + "://" +
+          ($endpoint.hostname // ($host + "." + $network + "." + $domain)) +
+          ":" + ($endpoint.port | to_string))}]
+      }
+    }
+  }
+] as $services |
+{"http": {
+  "routers": ($services[] as $service ireduce ({}; .[$service.name] = $service.router)),
+  "services": ($services[] as $service ireduce ({}; .[$service.name] = $service.service))
+}}

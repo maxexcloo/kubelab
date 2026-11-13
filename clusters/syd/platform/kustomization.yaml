@@ -8,3 +8,5 @@ resources:
 patches:
   - path: secret-store.yaml
   - path: traefik.yaml
+components:
+  - ../../../platform/networking/traefik/homelab

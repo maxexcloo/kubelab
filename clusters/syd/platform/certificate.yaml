@@ -9,6 +9,8 @@ spec:
     - "*.${public_domain}"
     - "*.mini.${public_domain}"
     - "*.syd.excloo.dev"
+    - "*.mars.excloo.net"
+    - "*.mercury.excloo.net"
     # One level deeper than the wildcard: the Redlib www redirect serves this
     # name directly, unproxied, on both the public and private gateways.
     - "www.reddit.${public_domain}"

@@ -1,0 +1,60 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: networking
+spec:
+  values:
+    additionalArguments:
+      - --providers.file.directory=/etc/traefik/homelab
+      - --providers.file.watch=true
+    additionalVolumeMounts:
+      - name: homelab-routes
+        mountPath: /etc/traefik/homelab
+        readOnly: true
+    deployment:
+      additionalContainers:
+        - name: homelab
+          image: docker.io/mikefarah/yq:4.54.3
+          command:
+            - /bin/sh
+            - /scripts/render_host_services.sh
+            - --watch
+            - /output
+          env:
+            - name: HOMELAB_BRANCH
+              value: main
+            - name: HOMELAB_CLUSTER
+              value: ${cluster_name}
+            - name: HOMELAB_REPOSITORY
+              value: https://github.com/maxexcloo/homelab
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              cpu: 5m
+              memory: 16Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: homelab-routes
+              mountPath: /output
+            - name: homelab-scripts
+              mountPath: /scripts
+              readOnly: true
+            - name: homelab-temporary
+              mountPath: /tmp
+      additionalVolumes:
+        - name: homelab-routes
+          emptyDir: {}
+        - name: homelab-scripts
+          configMap:
+            name: traefik-homelab
+        - name: homelab-temporary
+          emptyDir: {}
+    podSecurityContext:
+      fsGroup: 65532
