@@ -35,7 +35,7 @@ spec:
               secretKeyRef:
                 key: BIFROST_API_KEY
                 name: bifrost
-          # The owner's user override in the admin panel sends this key to the restricted MCP servers.
+          # The ADMIN role override in the admin panel sends this key to the restricted MCP servers.
           - name: BIFROST_OWNER_API_KEY
             valueFrom:
               secretKeyRef:
@@ -56,15 +56,15 @@ spec:
         DOMAIN_CLIENT: https://app.invalid
         DOMAIN_SERVER: https://app.invalid
         ENDPOINTS: custom,agents
-        OPENID_ADMIN_ROLE: ${owner_email}
-        OPENID_ADMIN_ROLE_PARAMETER_PATH: email
+        OPENID_ADMIN_ROLE: all_services
+        OPENID_ADMIN_ROLE_PARAMETER_PATH: groups
         OPENID_ADMIN_ROLE_TOKEN_KIND: id
         OPENID_AUTO_REDIRECT: "true"
         OPENID_BUTTON_LABEL: Excloo ID
         OPENID_CALLBACK_URL: /oauth/openid/callback
         OPENID_CLIENT_ID: librechat
         OPENID_ISSUER: https://${identity_host}/.well-known/openid-configuration
-        OPENID_SCOPE: openid profile email
+        OPENID_SCOPE: openid profile email groups
         OPENID_USE_PKCE: "true"
         SCHEDULES_SINGLE_PROCESS: "true"
         SEARCH: "true"
