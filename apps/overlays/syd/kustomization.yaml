@@ -48,6 +48,7 @@ resources:
   - openspeedtest-neptune
   - syncthing-saturn
   - syncthing-venus
+  - workstation-services
 patches:
   # Retry installs that outwait new credentials; failed upgrades are not rolled
   # back over migrated data.
