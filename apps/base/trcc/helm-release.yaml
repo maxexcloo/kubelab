@@ -11,7 +11,7 @@ spec:
           main:
             image: &image
               repository: ghcr.io/maxexcloo/trcc
-              tag: v9.12.1
+              tag: v9.12.2
             probes:
               readiness: &health
                 enabled: true
