@@ -121,9 +121,8 @@ spec:
               # Writable only here: Studio's model downloads land in the primary worker.
               - path: /root/ComfyUI/models
                 subPath: comfyui
-              - &radiance-image
-                path: /models/radiance-image
-                readOnly: true
+              # Writable here too: Library › Convert to Radiance installs .rad packages here.
+              - path: /models/radiance-image
                 subPath: radiance
               # Radiance H3 video profiles load their .rad packages from here.
               - &radiance-video
@@ -135,7 +134,9 @@ spec:
               - path: /root/ComfyUI/models
                 readOnly: true
                 subPath: comfyui
-              - *radiance-image
+              - path: /models/radiance-image
+                readOnly: true
+                subPath: radiance
               - *radiance-video
       # The former video worker's folders; tp2 (comfyui-video) never runs beside it.
       secondary-data:
