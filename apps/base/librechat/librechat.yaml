@@ -161,6 +161,18 @@ endpoints:
         reasoningKey: reasoning_content
         includeReasoningContent: true
         includeReasoningHistory: true
+# Model specs are LibreChat's only way to preselect an MCP server. This one starts new chats on
+# Cloud with Studio selected unless the user last chose another model; every endpoint stays listed.
+modelSpecs:
+  list:
+    - name: cloud-auto
+      label: Cloud Auto
+      softDefault: true
+      mcpServers:
+        - studio
+      preset:
+        endpoint: Cloud
+        model: cloud/auto
 fileConfig:
   endpoints:
     agents:
