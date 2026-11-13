@@ -82,6 +82,7 @@ for cluster_file in "${manifest_directory}"/clusters/*.yaml; do
     # Certificates without a route still need expiry monitoring.
     yq eval -N -r '
       select(.apiVersion == "cert-manager.io/v1" and .kind == "Certificate") |
+      select(.metadata.annotations."monitoring.excloo.dev/enabled" != "false") |
       .spec.dnsNames[] |
       select(contains("*") | not)
     ' "${manifest_directory}/${target}.yaml" |

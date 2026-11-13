@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+spec:
+  # Gateway certificates still match existing SNI names; host service names use
+  # this certificate, which the CRD provider reloads when cert-manager renews it.
+  defaultCertificate:
+    secretName: homelab-services

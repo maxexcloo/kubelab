@@ -1,4 +1,5 @@
-load(strenv(HOMELAB_DOMAINS)).domains.infrastructure as $domain |
+load(strenv(HOMELAB_DOMAINS)).domains as $domains |
+$domains.infrastructure as $domain |
 # A service opts into one cluster with private_proxy: <cluster>. Its existing
 # scheme, port and optional hostname describe the upstream, never the proxy.
 [.machines | to_entries[] | .key as $network | .value | to_entries[] |
@@ -13,7 +14,7 @@ load(strenv(HOMELAB_DOMAINS)).domains.infrastructure as $domain |
     "router": {
       "entryPoints": ["websecure"],
       "rule": ("Host(`" + $service + "." + $host + "." + $domain + "`) || Host(`" +
-        $name + "." + strenv(HOMELAB_CLUSTER) + ".excloo.dev`)"),
+        $name + "." + strenv(HOMELAB_CLUSTER) + "." + $domains.services + "`)"),
       "service": $name,
       "tls": {}
     },

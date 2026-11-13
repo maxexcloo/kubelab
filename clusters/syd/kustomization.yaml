@@ -7,6 +7,7 @@ resources:
   - crossplane-runtime.yaml
   - flux-system
   - foundation.yaml
+  - homelab-services.yaml
   - platform.yaml
 patches:
   - patch: |-
@@ -26,7 +27,7 @@ patches:
     target:
       group: kustomize.toolkit.fluxcd.io
       kind: Kustomization
-      name: (apps|automation|crossplane-runtime|foundation|platform)
+      name: (apps|automation|crossplane-runtime|foundation|homelab-services|platform)
   - patch: |-
       apiVersion: kustomize.toolkit.fluxcd.io/v1
       kind: Kustomization
@@ -37,7 +38,7 @@ patches:
     target:
       group: kustomize.toolkit.fluxcd.io
       kind: Kustomization
-      name: (apps|automation|crossplane-runtime|platform)
+      name: (apps|automation|crossplane-runtime|homelab-services|platform)
   # Bootstrap dependencies must be healthy at their current generation; unrelated
   # application revisions do not need to reconcile the whole platform in lockstep.
   - patch: |-
@@ -49,6 +50,6 @@ patches:
     target:
       group: kustomize.toolkit.fluxcd.io
       kind: Kustomization
-      name: (apps|automation|crossplane-runtime|platform)
+      name: (apps|automation|crossplane-runtime|homelab-services|platform)
 components:
   - settings

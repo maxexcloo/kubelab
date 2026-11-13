@@ -4,6 +4,7 @@ set -euo pipefail
 # Flylab's Gatus renderer reads the per-cluster app and platform outputs.
 mkdir -p "${1:?Usage: render_manifests.sh <directory>}/clusters"
 manifest_directory="$(cd "$1" && pwd)"
+fixture_directory="$(pwd)/tests/fixtures/flux"
 build_directory="$(mktemp -d "${TMPDIR:-/tmp}/kubelab-render.XXXXXX")"
 trap 'rm -fr -- "${build_directory:?}"' EXIT
 
@@ -26,6 +27,12 @@ for cluster_directory in clusters/*/; do
         select(.apiVersion == "kustomize.toolkit.fluxcd.io/v1" and .kind == "Kustomization" and
           .metadata.name == strenv(KUSTOMIZATION))
       ' "${cluster_file}" >"${kustomization_file}"
+      # Flux dry-run skips substituteFrom; use public owner-input fixtures offline.
+      while IFS= read -r reference; do
+        SUBSTITUTIONS="${fixture_directory}/${reference}.yaml" yq eval -i '
+          .spec.postBuild.substitute = ((.spec.postBuild.substitute // {}) * load(strenv(SUBSTITUTIONS)))
+        ' "${kustomization_file}"
+      done < <(yq eval -r '.spec.postBuild.substituteFrom[]?.name' "${kustomization_file}")
       target="$(yq eval -r '.spec.path | sub("^\./"; "")' "${kustomization_file}")"
       manifest_file="${manifest_directory}/${target}.yaml"
       if [[ ! -f "${manifest_file}" ]]; then
