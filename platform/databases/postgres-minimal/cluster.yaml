@@ -3,4 +3,4 @@ kind: Cluster
 metadata:
   name: database
 spec:
-  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-minimal-trixie
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.7-minimal-trixie
