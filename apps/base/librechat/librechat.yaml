@@ -264,6 +264,21 @@ mcpServers:
         title: Personal API Key
     headers:
       x-bf-vk: "{{KARAKEEP_API_KEY}}"
+  kubernetes:
+    type: streamable-http
+    description: Inspect cluster workloads, events and logs read-only in Kubernetes.
+    requiresOAuth: false
+    startup: false
+    title: Kubernetes
+    url: http://bifrost.bifrost.svc.cluster.local:8080/mcp/kubernetes
+    # Cluster access needs an individually authorised key rather than the shared chat key.
+    customUserVars:
+      KUBERNETES_API_KEY:
+        description: Your personal Bifrost virtual key authorised for Kubernetes. Ordinary chat keys cannot access these tools.
+        sensitive: true
+        title: Personal API Key
+    headers:
+      x-bf-vk: "{{KUBERNETES_API_KEY}}"
   larapaper:
     type: streamable-http
     description: Create, edit and render TRMNL recipe plugins in LaraPaper.
