@@ -9,6 +9,7 @@ resources:
   - pocket-id.yaml
   - resend.yaml
   - storage.yaml
+  - webstation.yaml
 components:
   - ../../../platform/databases/postgres
   - ../../components/application

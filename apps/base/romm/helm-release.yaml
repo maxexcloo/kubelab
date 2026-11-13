@@ -152,7 +152,14 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
-        rules:
+        rules: &routes
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /streaming
+            backendRefs:
+              - name: webstation
+                port: 3000
           - backendRefs:
               - name: "{{ .Release.Name }}"
                 port: 8080
@@ -178,6 +185,7 @@ spec:
         parentRefs:
           - name: public-tunnel
             namespace: networking
+        rules: *routes
     service:
       main:
         ports:
