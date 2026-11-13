@@ -29,7 +29,7 @@ spec:
         containers:
           main: &container
             env:
-              CLI_ARGS: --cache-classic --disable-mmap --disable-pinned-memory --enable-assets --force-non-blocking --use-ck-attention
+              CLI_ARGS: --cache-classic --disable-mmap --disable-pinned-memory --force-non-blocking --use-ck-attention
               HSA_OVERRIDE_GFX_VERSION: 12.0.1
             envFrom:
               - secretRef:
