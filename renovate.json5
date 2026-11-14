@@ -32,6 +32,11 @@
       matchPackageNames: ["ghcr.io/fluxcd/flux-cli"],
     },
     {
+      description: "Images publishes immutable <release>-<build> tags",
+      matchPackageNames: ["ghcr.io/maxexcloo/atvloadly", "ghcr.io/maxexcloo/trcc"],
+      versioning: "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<build>\\d+))?$",
+    },
+    {
       description: "Kubernetes clients follow the cluster version in Homelab",
       groupName: "Kubernetes Clients",
       matchDepNames: ["docker.io/alpine/k8s", "kubectl"],
