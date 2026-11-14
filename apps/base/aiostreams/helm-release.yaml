@@ -30,7 +30,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/viren070/aiostreams
-              tag: v2.37.0
+              tag: v2.38.0
             probes:
               liveness: &health
                 path: /api/v1/health
