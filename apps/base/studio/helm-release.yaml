@@ -59,6 +59,8 @@ spec:
               STUDIO_OIDC_ISSUER: https://${identity_host}
               STUDIO_OIDC_LABEL: Excloo ID
               STUDIO_OIDC_REDIRECT_URI: https://app.invalid/api/accounts/oidc/callback
+              # Reddit imports read through Redlib (apps/base/redlib/helm-release.yaml).
+              STUDIO_REDLIB_URL: https://reddit.excloo.com
               # Studio's assistant writes through Bifrost with its own key (external-secrets.yaml).
               STUDIO_ASSISTANT_CLOUD_MODEL: cloud/auto
               STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
