@@ -6,6 +6,7 @@ resources:
   - helm-release.yaml
   - namespace.yaml
   - network-policy.yaml
+  - private-dns.yaml
   - rbac.yaml
 configMapGenerator:
   - name: homepage
@@ -38,21 +39,8 @@ configMapGenerator:
       - service_routes.yq
 configurations:
   - name-reference.yaml
-replacements:
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.private.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.homepage.containers.homepage.env.HOMEPAGE_ALLOWED_HOSTS
-        options:
-          delimiter: ","
-          index: 0
 transformers:
-  - ../../transformers/route-private
+  - ../../transformers/cluster-scoped
 components:
   - ../../../platform/components/app-template
-  - ../../components/private-dns
   - ../../components/default-deny

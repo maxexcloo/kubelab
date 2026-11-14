@@ -3,7 +3,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: larapaper
 spec:
-  hostname: app.invalid
+  hostname: larapaper.excloo.com
   name: LaraPaper
 ---
 apiVersion: automation.excloo.dev/v1alpha1
@@ -11,7 +11,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: larapaper-devices
 spec:
-  hostname: app.invalid
+  hostname: larapaper.excloo.com
   name: "LaraPaper: Devices"
   # TRMNL devices authenticate with their MAC address and access token.
   paths:

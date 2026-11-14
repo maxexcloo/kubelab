@@ -3,5 +3,5 @@ kind: CloudflareAccessApplication
 metadata:
   name: shelfmark
 spec:
-  hostname: app.invalid
+  hostname: shelf.excloo.com
   name: Shelfmark

@@ -5,10 +5,10 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/oauth2-proxy/callback
+      - https://bifrost.excloo.com/oauth2-proxy/callback
     description: AI Gateway
     id: bifrost
-    launchURL: https://app.invalid
+    launchURL: https://bifrost.excloo.com
     name: Bifrost
     pkceEnabled: true
   item: Bifrost

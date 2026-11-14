@@ -1,0 +1,9 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: aiometadata
+spec:
+  crossplane:
+    compositionRef:
+      name: private-dns-record
+  hostname: aiometadata.excloo.com

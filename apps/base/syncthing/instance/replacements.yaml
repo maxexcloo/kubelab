@@ -57,24 +57,3 @@ replacements:
           kind: PocketIDClient
         fieldPaths:
           - spec.client.name
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.private.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.containers.oauth2-proxy.env.OAUTH2_PROXY_REDIRECT_URL
-          - spec.values.route.private.annotations.[gethomepage.dev/href]
-          - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: PocketIDClient
-        fieldPaths:
-          - spec.client.callbackURLs.0
-          - spec.client.launchURL
-        options:
-          delimiter: /
-          index: 2

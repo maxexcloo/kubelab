@@ -28,13 +28,13 @@ spec:
               OIDC_AUTOLOGIN: "true"
               OIDC_ENABLED: "true"
               OIDC_PROVIDER: Excloo ID
-              OIDC_REDIRECT_URI: https://app.invalid/api/oauth/openid
+              OIDC_REDIRECT_URI: https://games.excloo.com/api/oauth/openid
               OIDC_SERVER_APPLICATION_URL: https://${identity_host}
               OIDC_SERVER_METADATA_URL: https://${identity_host}/.well-known/openid-configuration
               PLAYMATCH_API_ENABLED: "true"
               POUET_API_ENABLED: "true"
               REDIS_HOST: localhost
-              ROMM_BASE_URL: https://app.invalid
+              ROMM_BASE_URL: https://games.excloo.com
               ROMM_DB_DRIVER: postgresql
               # Large library metadata scans exceed 24 hours even with four workers.
               SCAN_TIMEOUT: "259200"
@@ -146,7 +146,8 @@ spec:
     route:
       private:
         hostnames:
-          - app.invalid
+          - games.excloo.com
+          - romm.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
@@ -170,7 +171,7 @@ spec:
           gethomepage.dev/description: Game & ROM Library
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://games.excloo.com
           gethomepage.dev/icon: sh-romm
           gethomepage.dev/name: &title RoMM
           gethomepage.dev/widget.type: romm

@@ -6,31 +6,17 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - private-dns.yaml
 components:
   - ../../../platform/databases/postgres-minimal
   - ../../components/application
   - ../../components/default-deny
   - ../../components/database-colocation
   - ../../../platform/backups/credentials
-  - ../../components/private-dns
 patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
-replacements:
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.private.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.BASE_URL
-          - spec.values.controllers.main.containers.main.env.OAUTH2_REDIRECT_URL
-          - spec.values.route.private.annotations.[gethomepage.dev/widget.url]
-        options:
-          delimiter: /
-          index: 2
 transformers:
+  - ../../transformers/cluster-scoped
   - ../../transformers/pocket-id-icon-private
-  - ../../transformers/route-private

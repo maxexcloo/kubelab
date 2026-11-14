@@ -35,10 +35,8 @@
 
 ### Routing & Placement
 
-- Private browser and API routes include `<app>.<cluster>.excloo.dev` alongside
-  existing primary addresses. Keep aliases on private gateways.
-- The shared route transformers add the alias to app-template routes;
-  hand-written routes list `<app>.${cluster_name}.excloo.dev` themselves.
+- Private browser and API routes list `<app>.${cluster_name}.excloo.dev` after
+  their primary address. Keep aliases on private gateways.
 - Public routes attach to the `public-tunnel` gateway, so Cloudflare fronts
   them. Only routes that must bypass Cloudflare (unproxied DNS) attach to
   `public-direct`, which anyone can reach on the external node's address; keep
@@ -101,10 +99,8 @@ Define each value once:
   `clusters/<cluster>/settings/settings.yaml`. Consumers write the variable
   where they need it. Substitution is strict, so a missing variable fails the
   render and the reconciliation.
-- App hostnames: the app's route. The shared route transformers derive its
-  Homepage link, DNS record and Pocket ID client; Kustomize replacements in the
-  app derive its own URL settings from `.invalid` placeholders, and the checks
-  fail when one survives rendering.
+- App hostnames are the exception: write them literally wherever they are used,
+  including in other apps, and change every occurrence together.
 - App icons: the route's Homepage icon. The `pocket-id-icon` transformers, or a
   replacement beside a hand-written route, give it to the app's Pocket ID client.
 - 1Password item titles: once per manifest, using YAML anchors for repeats.

@@ -5,10 +5,10 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/api/v1/auth/oidc/callback
+      - https://aiostreams.excloo.com/api/v1/auth/oidc/callback
     description: Stremio Aggregator
     id: aiostreams
-    launchURL: https://app.invalid
+    launchURL: https://aiostreams.excloo.com
     name: AIOStreams
     pkceEnabled: true
   item: AIOStreams

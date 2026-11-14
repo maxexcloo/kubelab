@@ -10,7 +10,7 @@ spec:
           main:
             env:
               APP_TIMEZONE: ${time_zone}
-              APP_URL: https://app.invalid
+              APP_URL: https://larapaper.excloo.com
               DB_DATABASE: database/storage/database.sqlite
               FORCE_HTTPS: "1"
               OIDC_ENABLED: "true"
@@ -56,7 +56,8 @@ spec:
     route:
       private:
         hostnames:
-          - app.invalid
+          - larapaper.excloo.com
+          - larapaper.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
@@ -73,7 +74,7 @@ spec:
           gethomepage.dev/description: TRMNL Server
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://larapaper.excloo.com
           gethomepage.dev/icon: sh-trmnl
           gethomepage.dev/name: &title LaraPaper
           monitoring.excloo.dev/enabled: "true"

@@ -35,7 +35,7 @@ spec:
           - name: OAUTH2_PROXY_PROXY_PREFIX
             value: /oauth2-proxy
           - name: OAUTH2_PROXY_REDIRECT_URL
-            value: https://app.invalid/oauth2-proxy/callback
+            value: https://bifrost.excloo.com/oauth2-proxy/callback
           - name: OIDC_ISSUER_URL
             value: https://${identity_host}
           - name: UPSTREAM_REQUEST_HEADERS
@@ -214,7 +214,7 @@ spec:
       sourceOfTruth: config.json
       client:
         allowedOrigins:
-          - https://app.invalid
+          - https://bifrost.excloo.com
         disableDbPingsInHealth: true
         # Freed rows are reused, so logs.db stops growing but never shrinks on its own.
         logRetentionDays: 7

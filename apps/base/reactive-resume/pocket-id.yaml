@@ -5,9 +5,9 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/api/auth/callback/custom
+      - https://resume.excloo.com/api/auth/callback/custom
     description: Resume Builder
     id: reactive-resume
-    launchURL: https://app.invalid
+    launchURL: https://resume.excloo.com
     name: Reactive Resume
   item: Reactive Resume

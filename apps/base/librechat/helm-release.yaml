@@ -48,13 +48,13 @@ spec:
     ingress:
       enabled: false
     librechat:
-      adminPanelUrl: https://librechat-admin.invalid
+      adminPanelUrl: https://librechat-admin.${cluster_name}.excloo.dev
       configEnv:
         ALLOW_REGISTRATION: "false"
         ALLOW_SOCIAL_LOGIN: "true"
         ALLOW_SOCIAL_REGISTRATION: "true"
-        DOMAIN_CLIENT: https://app.invalid
-        DOMAIN_SERVER: https://app.invalid
+        DOMAIN_CLIENT: https://chat.excloo.com
+        DOMAIN_SERVER: https://chat.excloo.com
         ENDPOINTS: custom,agents
         OPENID_ADMIN_ROLE: all_services
         OPENID_ADMIN_ROLE_PARAMETER_PATH: groups

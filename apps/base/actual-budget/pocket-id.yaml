@@ -5,9 +5,9 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/openid/callback
+      - https://budget.excloo.com/openid/callback
     description: Personal Finance
     id: actual-budget
-    launchURL: https://app.invalid
+    launchURL: https://budget.excloo.com
     name: Actual Budget
   item: Actual Budget

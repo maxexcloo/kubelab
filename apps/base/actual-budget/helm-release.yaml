@@ -11,7 +11,7 @@ spec:
             env:
               ACTUAL_HOSTNAME: 0.0.0.0
               ACTUAL_OPENID_DISCOVERY_URL: https://${identity_host}/.well-known/openid-configuration
-              ACTUAL_OPENID_SERVER_HOSTNAME: https://app.invalid
+              ACTUAL_OPENID_SERVER_HOSTNAME: https://budget.excloo.com
               ACTUAL_PORT: "5006"
               ACTUAL_SERVER_FILES: /data/server-files
               ACTUAL_USER_CREATION_MODE: login
@@ -38,7 +38,8 @@ spec:
     route:
       private:
         hostnames:
-          - app.invalid
+          - budget.excloo.com
+          - actual-budget.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
@@ -50,7 +51,7 @@ spec:
           gethomepage.dev/description: Personal Finance
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://budget.excloo.com
           gethomepage.dev/icon: sh-actual-budget
           gethomepage.dev/name: &title Actual Budget
           monitoring.excloo.dev/enabled: "true"

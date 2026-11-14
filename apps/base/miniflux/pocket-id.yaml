@@ -5,9 +5,9 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/oauth2/oidc/callback
+      - https://reader.excloo.com/oauth2/oidc/callback
     description: RSS Reader
     id: miniflux
-    launchURL: https://app.invalid
+    launchURL: https://reader.excloo.com
     name: Miniflux
   item: Miniflux

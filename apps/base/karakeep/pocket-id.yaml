@@ -5,10 +5,10 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/api/auth/callback/custom
+      - https://links.excloo.com/api/auth/callback/custom
     description: Bookmark Manager
     id: karakeep
-    launchURL: https://app.invalid
+    launchURL: https://links.excloo.com
     name: Karakeep
     pkceEnabled: true
   item: Karakeep

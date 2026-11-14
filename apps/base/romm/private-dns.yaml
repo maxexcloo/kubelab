@@ -1,0 +1,9 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: romm
+spec:
+  crossplane:
+    compositionRef:
+      name: private-dns-record-control-d-only
+  hostname: games.excloo.com

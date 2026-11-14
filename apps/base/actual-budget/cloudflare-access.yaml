@@ -3,5 +3,5 @@ kind: CloudflareAccessApplication
 metadata:
   name: actual-budget
 spec:
-  hostname: app.invalid
+  hostname: budget.excloo.com
   name: Actual Budget

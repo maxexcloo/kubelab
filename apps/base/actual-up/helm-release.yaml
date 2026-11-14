@@ -9,7 +9,7 @@ spec:
         containers:
           main:
             env:
-              ACTUAL_UP_PUBLIC_URL: https://app.invalid
+              ACTUAL_UP_PUBLIC_URL: https://actual-up.${cluster_name}.excloo.dev
               TZ: ${time_zone}
             envFrom:
               - secretRef:
@@ -53,10 +53,10 @@ spec:
           gethomepage.dev/description: Up to Actual Sync
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://actual-up.${cluster_name}.excloo.dev
           gethomepage.dev/icon: sh-actual-budget
           gethomepage.dev/name: &title Actual Up
-          gethomepage.dev/siteMonitor: https://app.invalid/livez
+          gethomepage.dev/siteMonitor: https://actual-up.${cluster_name}.excloo.dev/livez
           onepassword.excloo.dev/item: *title
         hostnames:
           - actual-up.${cluster_name}.excloo.dev

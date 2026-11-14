@@ -1,9 +1,9 @@
 apiVersion: automation.excloo.dev/v1alpha1
 kind: PrivateDNSRecord
 metadata:
-  name: application
+  name: miniflux
 spec:
   crossplane:
     compositionRef:
       name: private-dns-record
-  hostname: app.invalid
+  hostname: reader.excloo.com

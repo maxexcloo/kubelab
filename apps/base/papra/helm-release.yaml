@@ -11,7 +11,7 @@ spec:
             env:
               AI_DEFAULT_MODEL: openrouter://openrouter/auto
               AI_IS_ENABLED: "true"
-              APP_BASE_URL: https://app.invalid
+              APP_BASE_URL: https://docs.excloo.com
               AUTO_TAGGING_ENABLED: "true"
               DATABASE_URL: file:/app/app-data/db/db.sqlite
               DOCUMENT_STORAGE_DRIVER: filesystem
@@ -60,13 +60,14 @@ spec:
           gethomepage.dev/description: Document Management
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://docs.excloo.com
           gethomepage.dev/icon: sh-papra
           gethomepage.dev/name: &title Papra
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: *title
         hostnames:
           - docs.excloo.com
+          - papra.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

@@ -7,7 +7,7 @@ metadata:
     gethomepage.dev/description: AI Chat
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Artificial Intelligence
-    gethomepage.dev/href: https://app.invalid
+    gethomepage.dev/href: https://chat.excloo.com
     gethomepage.dev/icon: sh-librechat
     gethomepage.dev/name: &title LibreChat
     monitoring.excloo.dev/enabled: "true"
@@ -34,7 +34,7 @@ metadata:
     app.kubernetes.io/name: librechat
 spec:
   hostnames:
-    - app.invalid
+    - chat.excloo.com
     - librechat.${cluster_name}.excloo.dev
   parentRefs:
     - name: private

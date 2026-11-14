@@ -36,7 +36,7 @@ spec:
               HOST: 0.0.0.0
               PORT: "8787"
               ROUTE_ALIAS_HOST: studio.${cluster_name}.excloo.dev
-              ROUTE_HOST: app.invalid
+              ROUTE_HOST: studio.excloo.com
               STUDIO_ALLOWED_HOSTS:
                 dependsOn:
                   - ROUTE_ALIAS_HOST
@@ -65,7 +65,7 @@ spec:
               STUDIO_OIDC_CLIENT_ID: client.invalid
               STUDIO_OIDC_ISSUER: https://${identity_host}
               STUDIO_OIDC_LABEL: Excloo ID
-              STUDIO_OIDC_REDIRECT_URI: https://app.invalid/api/accounts/oidc/callback
+              STUDIO_OIDC_REDIRECT_URI: https://studio.excloo.com/api/accounts/oidc/callback
               # Reddit imports read through Redlib (apps/base/redlib/helm-release.yaml).
               STUDIO_REDLIB_URL: https://reddit.excloo.com
               TZ: ${time_zone}
@@ -135,7 +135,8 @@ spec:
     route:
       private:
         hostnames:
-          - app.invalid
+          - studio.excloo.com
+          - studio.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:
@@ -147,7 +148,7 @@ spec:
           gethomepage.dev/description: Image & Video Studio
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://studio.excloo.com
           gethomepage.dev/icon: mdi-image-#ffffff
           gethomepage.dev/name: &title Studio
           monitoring.excloo.dev/enabled: "true"

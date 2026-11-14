@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - private-dns.yaml
   - resend.yaml
   - storage.yaml
 components:
@@ -16,7 +17,6 @@ components:
   - ../../components/database-colocation
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
-  - ../../components/private-dns-control-d-only
 patches:
   - path: helm-release.yaml
     target:
@@ -25,19 +25,6 @@ patches:
     target:
       kind: CronJob
       name: state-backup
-replacements:
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.public.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.APP_URL
-          - spec.values.controllers.main.containers.main.env.CLIENT_URL
-        options:
-          delimiter: /
-          index: 2
 transformers:
+  - ../../transformers/cluster-scoped
   - ../../transformers/pocket-id-icon-public
-  - ../../transformers/route-public

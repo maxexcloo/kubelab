@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - private-dns.yaml
   - resend.yaml
   - storage.yaml
   - webstation.yaml
@@ -16,7 +17,6 @@ components:
   - ../../components/default-deny
   - ../../components/database-colocation
   - ../../../platform/backups/credentials
-  - ../../components/private-dns-control-d-only
 configurations:
   - name-reference.yaml
 configMapGenerator:
@@ -30,19 +30,6 @@ patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
-replacements:
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.public.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.OIDC_REDIRECT_URI
-          - spec.values.controllers.main.containers.main.env.ROMM_BASE_URL
-        options:
-          delimiter: /
-          index: 2
 transformers:
+  - ../../transformers/cluster-scoped
   - ../../transformers/pocket-id-icon-public
-  - ../../transformers/route-public

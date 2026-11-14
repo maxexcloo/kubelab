@@ -7,13 +7,13 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - private-dns.yaml
   - storage.yaml
 components:
   - ../../components/application
   - ../../components/default-deny
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
-  - ../../components/private-dns-control-d-only
 patches:
   - path: helm-release.yaml
     target:
@@ -23,5 +23,5 @@ patches:
       kind: CronJob
       name: state-backup
 transformers:
+  - ../../transformers/cluster-scoped
   - ../../transformers/pocket-id-icon-public
-  - ../../transformers/route-public

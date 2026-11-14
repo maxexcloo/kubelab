@@ -3,5 +3,5 @@ kind: CloudflareAccessApplication
 metadata:
   name: librechat
 spec:
-  hostname: app.invalid
+  hostname: chat.excloo.com
   name: LibreChat

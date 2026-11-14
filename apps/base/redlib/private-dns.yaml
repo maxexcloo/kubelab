@@ -1,0 +1,9 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: redlib
+spec:
+  crossplane:
+    compositionRef:
+      name: private-dns-record-control-d-only
+  hostname: reddit.excloo.com

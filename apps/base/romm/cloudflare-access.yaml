@@ -3,7 +3,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: romm
 spec:
-  hostname: app.invalid
+  hostname: games.excloo.com
   name: RoMM
 ---
 apiVersion: automation.excloo.dev/v1alpha1
@@ -11,7 +11,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: romm-clients
 spec:
-  hostname: app.invalid
+  hostname: games.excloo.com
   name: "RoMM: Clients"
   # Mobile and handheld clients authenticate to RoMM's API themselves.
   paths:

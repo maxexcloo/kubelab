@@ -3,7 +3,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: reactive-resume
 spec:
-  hostname: app.invalid
+  hostname: resume.excloo.com
   name: Reactive Resume
 ---
 apiVersion: automation.excloo.dev/v1alpha1
@@ -11,7 +11,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: reactive-resume-public
 spec:
-  hostname: app.invalid
+  hostname: resume.excloo.com
   name: "Reactive Resume: Public"
   # Shared resumes for maxexcloo, their downloads, preview cards and public
   # pictures, which Reactive Resume stores under the account's user ID.
@@ -29,7 +29,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: reactive-resume-clients
 spec:
-  hostname: app.invalid
+  hostname: resume.excloo.com
   name: "Reactive Resume: Clients"
   # MCP clients such as LibreChat discover, register, exchange OAuth tokens and
   # call the OAuth-protected MCP endpoint from their servers; users still sign

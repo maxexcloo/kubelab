@@ -4,6 +4,12 @@ metadata:
   name: application
 spec:
   values:
+    controllers:
+      main:
+        containers:
+          oauth2-proxy:
+            env:
+              OAUTH2_PROXY_REDIRECT_URL: https://syncthing-saturn.${cluster_name}.excloo.dev/oauth2/callback
     defaultPodOptions:
       nodeSelector:
         kubernetes.io/hostname: saturn
@@ -47,8 +53,10 @@ spec:
     route:
       private:
         annotations:
+          gethomepage.dev/href: https://syncthing-saturn.${cluster_name}.excloo.dev
           gethomepage.dev/name: Syncthing (Saturn)
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_SYNCTHING_SATURN_API_KEY}}" }}'
+          gethomepage.dev/widget.url: https://syncthing-saturn.${cluster_name}.excloo.dev
           onepassword.excloo.dev/item: Syncthing (Saturn)
         hostnames:
           - syncthing-saturn.${cluster_name}.excloo.dev

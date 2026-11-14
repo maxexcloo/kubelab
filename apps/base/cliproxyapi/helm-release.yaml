@@ -27,7 +27,7 @@ spec:
                 memory: 32Mi
           oauth2-proxy:
             env:
-              OAUTH2_PROXY_REDIRECT_URL: https://app.invalid/oauth2/callback
+              OAUTH2_PROXY_REDIRECT_URL: https://cliproxy.excloo.com/oauth2/callback
               UPSTREAM_AUTHORIZATION:
                 valueFrom:
                   secretKeyRef:
@@ -60,7 +60,7 @@ spec:
           gethomepage.dev/description: Subscription Proxy
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
-          gethomepage.dev/href: https://app.invalid/management.html
+          gethomepage.dev/href: https://cliproxy.excloo.com/management.html
           gethomepage.dev/icon: mdi-api-#ffffff
           gethomepage.dev/name: &title CLI Proxy API
           monitoring.excloo.dev/enabled: "true"
@@ -68,6 +68,7 @@ spec:
           onepassword.excloo.dev/item: *title
         hostnames:
           - cliproxy.excloo.com
+          - cliproxyapi.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

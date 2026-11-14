@@ -21,7 +21,7 @@ spec:
               INFERENCE_OUTPUT_SCHEMA: json
               INFERENCE_TEXT_MODEL: openrouter/auto
               MEILI_ADDR: "http://{{ .Release.Name }}-meilisearch:7700"
-              NEXTAUTH_URL: https://app.invalid
+              NEXTAUTH_URL: https://links.excloo.com
               OAUTH_PROVIDER_NAME: Excloo ID
               OAUTH_WELLKNOWN_URL: https://${identity_host}/.well-known/openid-configuration
               OPENAI_BASE_URL: https://openrouter.ai/api/v1
@@ -153,7 +153,7 @@ spec:
           gethomepage.dev/description: Bookmark Manager
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://links.excloo.com
           gethomepage.dev/icon: sh-karakeep-light
           gethomepage.dev/name: &title Karakeep
           gethomepage.dev/pod-selector: app.kubernetes.io/name=karakeep,app.kubernetes.io/controller=karakeep
@@ -165,6 +165,7 @@ spec:
           onepassword.excloo.dev/item: *title
         hostnames:
           - links.excloo.com
+          - karakeep.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

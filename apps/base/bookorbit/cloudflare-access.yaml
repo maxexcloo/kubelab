@@ -3,7 +3,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: bookorbit
 spec:
-  hostname: app.invalid
+  hostname: books.excloo.com
   name: BookOrbit
 ---
 apiVersion: automation.excloo.dev/v1alpha1
@@ -11,7 +11,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: bookorbit-clients
 spec:
-  hostname: app.invalid
+  hostname: books.excloo.com
   name: "BookOrbit: Clients"
   # OPDS readers, KOReader sync and Kobo sync authenticate to BookOrbit themselves.
   paths:

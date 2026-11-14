@@ -5,9 +5,9 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/api/auth/oidc/callback
+      - https://shelf.excloo.com/api/auth/oidc/callback
     description: Book Search & Downloads
     id: shelfmark
-    launchURL: https://app.invalid
+    launchURL: https://shelf.excloo.com
     name: Shelfmark
   item: Shelfmark

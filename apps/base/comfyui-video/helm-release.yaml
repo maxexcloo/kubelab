@@ -114,7 +114,7 @@ spec:
           gethomepage.dev/description: Video Workflows
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://comfyui-video.${cluster_name}.excloo.dev
           gethomepage.dev/icon: sh-comfyui
           gethomepage.dev/name: ComfyUI Video
         hostnames:

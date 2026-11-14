@@ -5,10 +5,10 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/api/auth/oauth2/callback/pocket-id
+      - https://docs.excloo.com/api/auth/oauth2/callback/pocket-id
     description: Document Management
     id: papra
-    launchURL: https://app.invalid
+    launchURL: https://docs.excloo.com
     name: Papra
     pkceEnabled: true
   item: Papra

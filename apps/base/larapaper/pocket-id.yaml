@@ -5,9 +5,9 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/auth/oidc/callback
+      - https://larapaper.excloo.com/auth/oidc/callback
     description: TRMNL Server
     id: larapaper
-    launchURL: https://app.invalid
+    launchURL: https://larapaper.excloo.com
     name: LaraPaper
   item: LaraPaper

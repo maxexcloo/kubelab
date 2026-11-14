@@ -5,17 +5,3 @@ resources:
   - route.yaml
 components:
   - ../../../base/openspeedtest/instance
-replacements:
-  - source:
-      kind: HTTPRoute
-      name: openspeedtest-saturn
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: openspeedtest-saturn
-        fieldPaths:
-          - metadata.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2

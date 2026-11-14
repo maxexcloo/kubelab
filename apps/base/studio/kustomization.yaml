@@ -7,11 +7,11 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - private-dns.yaml
   - storage.yaml
 components:
   - ../../components/application
   - ../../components/default-deny
-  - ../../components/private-dns-control-d-only
 patches:
   - path: helm-release.yaml
     target:
@@ -25,21 +25,6 @@ replacements:
           kind: HelmRelease
         fieldPaths:
           - spec.values.controllers.main.containers.main.env.STUDIO_OIDC_CLIENT_ID
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.public.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.ROUTE_HOST
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.STUDIO_OIDC_REDIRECT_URI
-        options:
-          delimiter: /
-          index: 2
 transformers:
+  - ../../transformers/cluster-scoped
   - ../../transformers/pocket-id-icon-public
-  - ../../transformers/route-public

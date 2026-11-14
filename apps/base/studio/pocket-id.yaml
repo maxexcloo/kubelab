@@ -5,11 +5,11 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/api/accounts/oidc/callback
+      - https://studio.excloo.com/api/accounts/oidc/callback
     description: Image & Video Studio
     id: studio
     isPublic: true
-    launchURL: https://app.invalid
+    launchURL: https://studio.excloo.com
     name: Studio
     pkceEnabled: true
   crossplane:

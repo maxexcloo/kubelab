@@ -5,9 +5,9 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/api/oauth/openid
+      - https://games.excloo.com/api/oauth/openid
     description: Game & ROM Library
     id: romm
-    launchURL: https://app.invalid
+    launchURL: https://games.excloo.com
     name: RoMM
   item: RoMM

@@ -4,6 +4,12 @@ metadata:
   name: application
 spec:
   values:
+    controllers:
+      main:
+        containers:
+          oauth2-proxy:
+            env:
+              OAUTH2_PROXY_REDIRECT_URL: https://syncthing-venus.${cluster_name}.excloo.dev/oauth2/callback
     defaultPodOptions:
       securityContext:
         fsGroup: 1000
@@ -26,8 +32,10 @@ spec:
     route:
       private:
         annotations:
+          gethomepage.dev/href: https://syncthing-venus.${cluster_name}.excloo.dev
           gethomepage.dev/name: Syncthing (Venus)
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_SYNCTHING_VENUS_API_KEY}}" }}'
+          gethomepage.dev/widget.url: https://syncthing-venus.${cluster_name}.excloo.dev
           onepassword.excloo.dev/item: Syncthing (Venus)
         hostnames:
           - syncthing-venus.${cluster_name}.excloo.dev

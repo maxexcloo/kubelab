@@ -1,0 +1,9 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: syncthing
+spec:
+  client:
+    callbackURLs:
+      - https://syncthing-venus.${cluster_name}.excloo.dev/oauth2/callback
+    launchURL: https://syncthing-venus.${cluster_name}.excloo.dev

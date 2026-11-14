@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: redlib
 spec:
   hostnames:
-    - www.app.invalid
+    - www.reddit.excloo.com
   parentRefs:
     - name: private
       namespace: networking
@@ -14,6 +14,6 @@ spec:
     - filters:
         - type: RequestRedirect
           requestRedirect:
-            hostname: app.invalid
+            hostname: reddit.excloo.com
             scheme: https
             statusCode: 301

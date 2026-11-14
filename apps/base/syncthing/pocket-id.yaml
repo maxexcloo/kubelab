@@ -5,10 +5,10 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/oauth2/callback
+      - https://syncthing.${cluster_name}.excloo.dev/oauth2/callback
     description: File Synchronisation
     id: syncthing
-    launchURL: https://app.invalid
+    launchURL: https://syncthing.${cluster_name}.excloo.dev
     name: Syncthing
     pkceEnabled: true
   item: Syncthing

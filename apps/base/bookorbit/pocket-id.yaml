@@ -5,9 +5,9 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/oauth2-callback
+      - https://books.excloo.com/oauth2-callback
     description: Digital Library
     id: bookorbit
-    launchURL: https://app.invalid
+    launchURL: https://books.excloo.com
     name: BookOrbit
   item: BookOrbit

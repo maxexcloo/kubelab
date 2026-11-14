@@ -12,7 +12,7 @@ spec:
               AUTH_REQUIRE_SIGNIN: "true"
               DATABASE_URI: sqlite://addon/data/db.sqlite
               ENABLE_CACHE_WARMING: "false"
-              HOST_NAME: https://app.invalid
+              HOST_NAME: https://aiometadata.excloo.com
               MAL_WARMUP_ENABLED: "false"
               OIDC_ENABLED: "true"
               OIDC_GROUP_PERMISSIONS: all_services=admin
@@ -106,13 +106,14 @@ spec:
           gethomepage.dev/description: Stremio Metadata
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://aiometadata.excloo.com
           gethomepage.dev/icon: sh-aiometadata
           gethomepage.dev/name: &title AIOMetadata
           monitoring.excloo.dev/enabled: "true"
           onepassword.excloo.dev/item: *title
         hostnames:
           - aiometadata.excloo.com
+          - aiometadata.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

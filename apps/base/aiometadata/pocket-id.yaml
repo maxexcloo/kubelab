@@ -5,10 +5,10 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/api/auth/oidc/callback
+      - https://aiometadata.excloo.com/api/auth/oidc/callback
     description: Stremio Metadata
     id: aiometadata
-    launchURL: https://app.invalid
+    launchURL: https://aiometadata.excloo.com
     name: AIOMetadata
     pkceEnabled: true
   item: AIOMetadata

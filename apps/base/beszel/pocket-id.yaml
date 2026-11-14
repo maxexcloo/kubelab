@@ -5,10 +5,10 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/api/oauth2-redirect
+      - https://systems.excloo.com/api/oauth2-redirect
     description: System Monitoring
     id: beszel
-    launchURL: https://app.invalid
+    launchURL: https://systems.excloo.com
     name: Beszel
     pkceEnabled: true
   item: Beszel

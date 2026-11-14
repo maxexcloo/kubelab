@@ -9,6 +9,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - private-dns.yaml
   - resend.yaml
   - route.yaml
   - source.yaml
@@ -23,48 +24,6 @@ replacements:
           kind: OCIRepository
         fieldPaths:
           - metadata.namespace
-  - source:
-      kind: HTTPRoute
-      name: immich
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: immich
-        fieldPaths:
-          - metadata.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.immich.configuration.server.externalDomain
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: HTTPRoute
-          name: immich-private
-        fieldPaths:
-          - spec.hostnames.0
-      - select:
-          kind: CloudflareAccessApplication
-        fieldPaths:
-          - spec.hostname
-      - select:
-          kind: PrivateDNSRecord
-        fieldPaths:
-          - spec.hostname
-      - select:
-          kind: PocketIDClient
-        fieldPaths:
-          - spec.client.callbackURLs.1
-          - spec.client.callbackURLs.2
-          - spec.client.launchURL
-        options:
-          delimiter: /
-          index: 2
   # The Pocket ID client's logo follows the app's Homepage icon.
   - source:
       kind: HTTPRoute
@@ -81,7 +40,6 @@ components:
   - ../../../platform/databases/postgres
   - ../../../platform/backups/credentials
   - ../../components/database-colocation
-  - ../../components/private-dns-control-d-only
   - ../../components/default-deny
 patches:
   - path: database.yaml

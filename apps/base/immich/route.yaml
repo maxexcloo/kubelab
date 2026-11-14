@@ -7,7 +7,7 @@ metadata:
     gethomepage.dev/description: Photo Manager
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Media
-    gethomepage.dev/href: https://app.invalid
+    gethomepage.dev/href: https://photos.excloo.com
     gethomepage.dev/icon: sh-immich
     gethomepage.dev/name: &title Immich
     gethomepage.dev/pod-selector: app.kubernetes.io/instance=immich,app.kubernetes.io/name=server
@@ -40,7 +40,7 @@ metadata:
     app.kubernetes.io/name: immich
 spec:
   hostnames:
-    - app.invalid
+    - photos.excloo.com
     - immich.${cluster_name}.excloo.dev
   parentRefs:
     - name: private

@@ -6,12 +6,12 @@ spec:
   client:
     # The admin panel reuses the LibreChat admin OAuth callback for its SSO login.
     callbackURLs:
-      - https://app.invalid/oauth/openid/callback
-      - https://app.invalid/api/admin/oauth/openid/callback
+      - https://chat.excloo.com/oauth/openid/callback
+      - https://chat.excloo.com/api/admin/oauth/openid/callback
     description: AI Chat
     id: librechat
     isPublic: true
-    launchURL: https://app.invalid
+    launchURL: https://chat.excloo.com
     name: LibreChat
     pkceEnabled: true
   crossplane:

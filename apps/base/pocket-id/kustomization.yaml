@@ -6,6 +6,7 @@ resources:
   - groups.yaml
   - namespace.yaml
   - network-policy.yaml
+  - private-dns.yaml
   - resend.yaml
 components:
   - ../../../platform/databases/postgres
@@ -13,7 +14,6 @@ components:
   - ../../components/default-deny
   - ../../components/database-colocation
   - ../../../platform/backups/credentials
-  - ../../components/private-dns-control-d-only
 patches:
   - path: database.yaml
     target:
@@ -21,17 +21,5 @@ patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
-replacements:
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.public.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.APP_URL
-        options:
-          delimiter: /
-          index: 2
 transformers:
-  - ../../transformers/route-public
+  - ../../transformers/cluster-scoped

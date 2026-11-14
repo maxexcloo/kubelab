@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - private-dns.yaml
   - storage.yaml
 components:
   - ../../components/application
@@ -13,7 +14,6 @@ components:
   - ../../components/oauth2-proxy
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
-  - ../../components/private-dns
 patches:
   - path: helm-release.yaml
     target:
@@ -22,18 +22,6 @@ patches:
     target:
       kind: CronJob
       name: state-backup
-replacements:
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.private.hostnames.0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.containers.oauth2-proxy.env.OAUTH2_PROXY_REDIRECT_URL
-        options:
-          delimiter: /
-          index: 2
 transformers:
+  - ../../transformers/cluster-scoped
   - ../../transformers/pocket-id-icon-private
-  - ../../transformers/route-private

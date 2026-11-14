@@ -9,7 +9,7 @@ metadata:
     gateway.excloo.dev/public-access: "true"
 spec:
   hostnames:
-    - www.app.invalid
+    - www.reddit.excloo.com
   parentRefs:
     - name: public-direct
       namespace: networking
@@ -17,6 +17,6 @@ spec:
     - filters:
         - type: RequestRedirect
           requestRedirect:
-            hostname: app.invalid
+            hostname: reddit.excloo.com
             scheme: https
             statusCode: 301

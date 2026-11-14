@@ -6,10 +6,10 @@ spec:
   client:
     callbackURLs:
       - app.immich:///oauth-callback
-      - https://app.invalid/auth/login
-      - https://app.invalid/user-settings
+      - https://photos.excloo.com/auth/login
+      - https://photos.excloo.com/user-settings
     description: Photo Manager
     id: immich
-    launchURL: https://app.invalid
+    launchURL: https://photos.excloo.com
     name: Immich
   item: Immich

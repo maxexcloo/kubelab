@@ -56,7 +56,7 @@ class ServiceInventoryTests(unittest.TestCase):
             result = check()
             self.assertNotEqual(result.returncode, 0)
             self.assertIn(
-                "use private-dns to publish a private hostname in Cloudflare",
+                "use private-dns-record to publish a private hostname in Cloudflare",
                 result.stderr,
             )
             composition["name"] = "private-dns-record"
@@ -67,7 +67,8 @@ class ServiceInventoryTests(unittest.TestCase):
             result = check()
             self.assertNotEqual(result.returncode, 0)
             self.assertIn(
-                "use private-dns-control-d-only for a public hostname", result.stderr
+                "use private-dns-record-control-d-only for a public hostname",
+                result.stderr,
             )
             composition["name"] = "private-dns-record-control-d-only"
             result = check()

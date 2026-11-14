@@ -60,7 +60,7 @@ spec:
           gethomepage.dev/description: Apple TV App Installation & Refresh
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://atvloadly.${cluster_name}.excloo.dev
           gethomepage.dev/icon: mdi-apple-#ffffff
           gethomepage.dev/name: ATVLoadly
           monitoring.excloo.dev/enabled: "true"

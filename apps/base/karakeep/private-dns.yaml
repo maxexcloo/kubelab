@@ -1,0 +1,9 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: karakeep
+spec:
+  crossplane:
+    compositionRef:
+      name: private-dns-record
+  hostname: links.excloo.com

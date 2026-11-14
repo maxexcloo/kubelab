@@ -1,0 +1,9 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PrivateDNSRecord
+metadata:
+  name: papra
+spec:
+  crossplane:
+    compositionRef:
+      name: private-dns-record
+  hostname: docs.excloo.com

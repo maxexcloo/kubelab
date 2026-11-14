@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - private-dns.yaml
   - route.yaml
   - service.yaml
   - source.yaml
@@ -25,42 +26,8 @@ replacements:
           kind: HelmRepository
         fieldPaths:
           - metadata.namespace
-  - source:
-      kind: HTTPRoute
-      name: bifrost
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: bifrost
-        fieldPaths:
-          - metadata.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: PocketIDClient
-        fieldPaths:
-          - spec.client.callbackURLs.0
-          - spec.client.launchURL
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: PrivateDNSRecord
-        fieldPaths:
-          - spec.hostname
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.bifrost.client.allowedOrigins.0
-          - spec.values.extraContainers.[name=oauth2-proxy].env.[name=OAUTH2_PROXY_REDIRECT_URL].value
-        options:
-          delimiter: /
-          index: 2
 components:
   - ../../components/oauth2-proxy-config
-  - ../../components/private-dns
   - ../../components/default-deny
 transformers:
   - ../../transformers/cluster-scoped

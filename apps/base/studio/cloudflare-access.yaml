@@ -3,7 +3,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: studio
 spec:
-  hostname: app.invalid
+  hostname: studio.excloo.com
   name: Studio
 ---
 apiVersion: automation.excloo.dev/v1alpha1
@@ -11,7 +11,7 @@ kind: CloudflareAccessApplication
 metadata:
   name: studio-mcp
 spec:
-  hostname: app.invalid
+  hostname: studio.excloo.com
   name: "Studio: MCP"
   # MCP takes a personal token, which a Grok connector puts in the path, and result links
   # are signed. OAuth discovery reaches Studio's plain 404 rather than the login page.

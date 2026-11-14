@@ -8,6 +8,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - private-dns.yaml
   - route.yaml
   - source.yaml
   - storage.yaml
@@ -31,49 +32,6 @@ replacements:
         fieldPaths:
           - metadata.namespace
   - source:
-      kind: HTTPRoute
-      name: librechat
-      fieldPath: spec.hostnames.0
-    targets:
-      - select:
-          kind: CloudflareAccessApplication
-        fieldPaths:
-          - spec.hostname
-      - select:
-          kind: HTTPRoute
-          name: librechat-private
-        fieldPaths:
-          - spec.hostnames.0
-      - select:
-          kind: PrivateDNSRecord
-        fieldPaths:
-          - spec.hostname
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.librechat.configEnv.DOMAIN_CLIENT
-          - spec.values.librechat.configEnv.DOMAIN_SERVER
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: HTTPRoute
-          name: librechat
-        fieldPaths:
-          - metadata.annotations.[gethomepage.dev/href]
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: PocketIDClient
-        fieldPaths:
-          - spec.client.callbackURLs.0
-          - spec.client.callbackURLs.1
-          - spec.client.launchURL
-        options:
-          delimiter: /
-          index: 2
-  - source:
       kind: PocketIDClient
       fieldPath: spec.client.id
     targets:
@@ -96,7 +54,6 @@ replacements:
 components:
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
-  - ../../components/private-dns-control-d-only
   - ../../components/default-deny
 patches:
   - path: backup.yaml

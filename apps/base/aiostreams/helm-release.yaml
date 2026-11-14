@@ -16,7 +16,7 @@ spec:
               AIOSTREAMS_OIDC_GROUP_PERMISSIONS: all_services=admin
               AIOSTREAMS_OIDC_ISSUER: https://${identity_host}
               AIOSTREAMS_OIDC_SCOPES: openid profile email groups
-              BASE_URL: https://app.invalid
+              BASE_URL: https://aiostreams.excloo.com
               DATABASE_URI: sqlite://./data/db.sqlite
               FEATURED_TEMPLATE_IDS: tamtaro.complete,Vidhin05.english-template
               FETCH_TRAKT_ALIASES: "true"
@@ -54,7 +54,7 @@ spec:
           gethomepage.dev/description: Stremio Aggregator
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
-          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/href: https://aiostreams.excloo.com
           gethomepage.dev/icon: sh-aiostreams
           gethomepage.dev/name: &title AIOStreams
           monitoring.excloo.dev/enabled: "true"
@@ -62,6 +62,7 @@ spec:
           onepassword.excloo.dev/item: *title
         hostnames:
           - aiostreams.excloo.com
+          - aiostreams.${cluster_name}.excloo.dev
         labels:
           app.kubernetes.io/name: "{{ .Release.Name }}"
         parentRefs:

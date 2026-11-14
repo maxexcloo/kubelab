@@ -26,7 +26,7 @@ spec:
       # OIDC signs in automatically; ?logout=true still offers Kubernetes token authentication.
       oidc:
         autoLogin: true
-        callbackURL: https://app.invalid/oidc-callback
+        callbackURL: https://headlamp.${cluster_name}.excloo.dev/oidc-callback
         clientID: headlamp
         issuerURL: https://${identity_host}
         scopes: profile,email,groups

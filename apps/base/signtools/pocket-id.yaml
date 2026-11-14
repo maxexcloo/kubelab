@@ -5,10 +5,10 @@ metadata:
 spec:
   client:
     callbackURLs:
-      - https://app.invalid/oauth2/callback
+      - https://apps.excloo.com/oauth2/callback
     description: iOS App Signing & Installation
     id: signtools
-    launchURL: https://app.invalid
+    launchURL: https://apps.excloo.com
     name: SignTools
     pkceEnabled: true
   item: SignTools

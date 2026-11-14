@@ -6,60 +6,15 @@ resources:
   - external-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
+  - private-dns.yaml
   - private-redirect.yaml
   - redirect.yaml
 components:
   - ../../components/application
   - ../../components/default-deny
-  - ../../components/private-dns-control-d-only
 patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
-replacements:
-  - source:
-      kind: HelmRelease
-      fieldPath: spec.values.route.public.hostnames.0
-    targets:
-      - select:
-          kind: HTTPRoute
-          name: redlib-www-private
-        fieldPaths:
-          - spec.hostnames.0
-        options:
-          delimiter: www.
-          index: 1
-      - select:
-          kind: HTTPRoute
-          name: redlib-www-private
-        fieldPaths:
-          - spec.rules.0.filters.0.requestRedirect.hostname
-      - select:
-          kind: CloudflareWAFPolicy
-        fieldPaths:
-          - spec.rule.expression
-        options:
-          delimiter: /
-          index: 2
-      - select:
-          kind: HTTPRoute
-          name: redlib-www
-        fieldPaths:
-          - spec.hostnames.0
-        options:
-          delimiter: www.
-          index: 1
-      - select:
-          kind: HTTPRoute
-          name: redlib-www
-        fieldPaths:
-          - spec.rules.0.filters.0.requestRedirect.hostname
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.containers.main.env.REDLIB_FULL_URL
-        options:
-          delimiter: /
-          index: 2
 transformers:
-  - ../../transformers/route-public
+  - ../../transformers/cluster-scoped

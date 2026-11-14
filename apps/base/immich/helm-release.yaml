@@ -70,7 +70,7 @@ spec:
           enabled: true
           issuerUrl: https://${identity_host}
         server:
-          externalDomain: https://app.invalid
+          externalDomain: https://photos.excloo.com
       configurationKind: Secret
       persistence:
         library:

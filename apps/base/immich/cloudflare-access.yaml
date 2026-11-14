@@ -3,5 +3,5 @@ kind: CloudflareAccessApplication
 metadata:
   name: immich
 spec:
-  hostname: app.invalid
+  hostname: photos.excloo.com
   name: Immich
