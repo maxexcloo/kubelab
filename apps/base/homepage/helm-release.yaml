@@ -78,6 +78,7 @@ spec:
               - --watch
               - /source
               - /output
+              - /publish
             env:
               HOMELAB_ARCHIVE: https://codeload.github.com/maxexcloo/homelab/tar.gz/refs/heads/main
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
@@ -175,6 +176,15 @@ spec:
           homepage:
             endpoints:
               - path: /infrastructure
+                readOnly: true
+      published-routes:
+        type: emptyDir
+        advancedMounts:
+          homepage:
+            endpoints:
+              - path: /publish
+            homepage:
+              - path: /app/public/dashboard
                 readOnly: true
       temporary:
         type: emptyDir

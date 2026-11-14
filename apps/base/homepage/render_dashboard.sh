@@ -27,8 +27,10 @@ if [ "${1:-}" = --watch ]; then
   done
 fi
 
-source_directory=${1:?Usage: render_dashboard.sh source-directory output-directory}
-output_directory=${2:?Usage: render_dashboard.sh source-directory output-directory}
+usage='Usage: render_dashboard.sh source-directory output-directory publish-directory'
+source_directory=${1:?$usage}
+output_directory=${2:?$usage}
+publish_directory=${3:?$usage}
 script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
@@ -44,15 +46,36 @@ export HOMELAB_MACHINES="$homelab_directory/data/machines.yaml"
 
 "$KUBECTL" get httproutes --all-namespaces --output json > "$temporary_directory/httproutes.json"
 # Minilab prefixes its route names, which the Home group already states.
-yq -p=json -o=yaml '[.items[] | .metadata |
-  select(.annotations."gethomepage.dev/enabled" == "true") |
-  {"annotations": .annotations, "labels": (.labels // {}), "name": .name, "namespace": .namespace} |
+yq -p=json -o=yaml '[.items[] |
+  select(.metadata.annotations."gethomepage.dev/enabled" == "true") |
+  {"annotations": (.metadata.annotations |
+    with_entries(select(.key | test("^(gethomepage\\.dev|monitoring\\.excloo\\.dev)/")))),
+   "hostnames": .spec.hostnames, "labels": (.metadata.labels // {}),
+   "name": .metadata.name, "namespace": .metadata.namespace} |
   with(select(.annotations."gethomepage.dev/group" == "Minilab");
     .annotations."gethomepage.dev/group" = "Mini" |
     .homeName = (.annotations."gethomepage.dev/name" | sub("^[^:]*: "; "")))]
 ' "$temporary_directory/httproutes.json" > "$temporary_directory/routes.yaml"
 yq -e 'length > 0' "$temporary_directory/routes.yaml" >/dev/null
-sh "$script_directory/route_nodes.sh" "$temporary_directory/routes.yaml" "$temporary_directory/inventory.yaml"
+sh "$script_directory/route_nodes.sh" "$temporary_directory/routes.yaml" "$temporary_directory/local-routes.yaml"
+
+# Each cluster's Homepage publishes its own routes, with placement, for the
+# others; an unreachable cluster drops out until it answers again.
+mkdir "$temporary_directory/clusters"
+CLUSTER="$HOMEPAGE_CLUSTER" yq -o=json -I=0 '.[].cluster = strenv(CLUSTER)' \
+  "$temporary_directory/local-routes.yaml" > "$temporary_directory/clusters/$HOMEPAGE_CLUSTER.json"
+for cluster in $(yq '.clusters | keys | .[]' "$homelab_directory/data/clusters.yaml"); do
+  [ "$cluster" != "$HOMEPAGE_CLUSTER" ] || continue
+  if wget -O "$temporary_directory/remote.json" -q -T 10 \
+    "https://homepage.$cluster.excloo.dev/dashboard/routes.json" &&
+    yq -e -p=json 'tag == "!!seq" and length > 0' "$temporary_directory/remote.json" >/dev/null; then
+    CLUSTER="$cluster" yq -p=json -o=json -I=0 '.[].cluster = strenv(CLUSTER)' \
+      "$temporary_directory/remote.json" > "$temporary_directory/clusters/$cluster.json"
+  else
+    echo "Skipping cluster $cluster: its Homepage routes are unavailable" >&2
+  fi
+done
+yq ea -o=yaml '[.[]]' "$temporary_directory/clusters/"*.json > "$temporary_directory/inventory.yaml"
 
 mkdir "$temporary_directory/config"
 yq -o=json 'map(select(.namespace == "beszel"))' \
@@ -88,12 +111,19 @@ SERVICES="$temporary_directory/config/services.yaml" \
 for file in "$temporary_directory/config/"*.yaml; do
   yq '.' "$file" >/dev/null
 done
-mkdir -p "$output_directory"
-for file in custom.css custom.js docker.yaml kubernetes.yaml widgets.yaml bookmarks.yaml services.yaml settings.yaml; do
-  if ! cmp -s "$temporary_directory/config/$file" "$output_directory/$file"; then
-    staged_output=$(mktemp "$output_directory/$file.XXXXXX")
-    cp "$temporary_directory/config/$file" "$staged_output"
+publish() {
+  if ! cmp -s "$1" "$2/${1##*/}"; then
+    staged_output=$(mktemp "$2/${1##*/}.XXXXXX")
+    cp "$1" "$staged_output"
     chmod 644 "$staged_output"
-    mv "$staged_output" "$output_directory/$file"
+    mv "$staged_output" "$2/${1##*/}"
   fi
+}
+mkdir -p "$output_directory" "$publish_directory"
+# Homepage serves only public files present when it starts, so publish routes
+# before settings.
+yq -o=json '.' "$temporary_directory/local-routes.yaml" > "$temporary_directory/routes.json"
+publish "$temporary_directory/routes.json" "$publish_directory"
+for file in custom.css custom.js docker.yaml kubernetes.yaml widgets.yaml bookmarks.yaml services.yaml settings.yaml; do
+  publish "$temporary_directory/config/$file" "$output_directory"
 done

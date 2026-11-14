@@ -56,6 +56,25 @@ class HomepageDashboardFixture:
         self.addCleanup(self.temporary.cleanup)
         self.directory = Path(self.temporary.name)
         self.output = self.directory / "output"
+        self.published = self.directory / "published"
+        self.remote = self.directory / "remote"
+        self.remote.mkdir()
+        bin_directory = self.directory / "bin"
+        bin_directory.mkdir()
+        self.path = f"{bin_directory}{os.pathsep}{os.environ['PATH']}"
+        wget = bin_directory / "wget"
+        wget.write_text("""#!/usr/bin/env python3
+import os
+import shutil
+import sys
+from urllib.parse import urlparse
+url = urlparse(sys.argv[-1])
+source = os.path.join(os.environ["REMOTE_ROUTES"], url.hostname + url.path.replace("/", "_"))
+if not os.path.exists(source):
+    sys.exit(4)
+shutil.copy(source, sys.argv[sys.argv.index("-O") + 1])
+""")
+        wget.chmod(0o755)
         self.placements = self.directory / "placements.json"
         self.placements.write_text("{}")
         self.queries = self.directory / "queries.jsonl"
@@ -88,9 +107,19 @@ else:
     def write_routes(self, routes):
         self.routes.write_text(json.dumps({"items": routes}))
 
+    def serve_remote_routes(self, cluster, routes):
+        name = f"homepage.{cluster}.excloo.dev_dashboard_routes.json"
+        (self.remote / name).write_text(routes)
+
     def render(self, **environment):
         return subprocess.run(
-            ["sh", str(APP / "render_dashboard.sh"), str(APP), str(self.output)],
+            [
+                "sh",
+                str(APP / "render_dashboard.sh"),
+                str(APP),
+                str(self.output),
+                str(self.published),
+            ],
             env=os.environ
             | {
                 "HOMELAB_DIRECTORY": str(HOMELAB),
@@ -100,8 +129,10 @@ else:
                 "HOMEPAGE_CLUSTER": "mbk",
                 "HTTP_ROUTES": str(self.routes),
                 "KUBECTL": str(self.kubectl),
+                "PATH": self.path,
                 "POD_PLACEMENTS": str(self.placements),
                 "POD_QUERIES": str(self.queries),
+                "REMOTE_ROUTES": str(self.remote),
             }
             | environment,
             capture_output=True,

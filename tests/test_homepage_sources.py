@@ -33,6 +33,34 @@ class HomepageSourcesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertIn("New Tool", self.services())
         self.assertNotIn("Feeds", self.services())
 
+    def test_clusters_share_published_routes(self):
+        self.write_routes([route("Local", siteMonitor="https://local.example.net")])
+        result = self.render()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skipping cluster syd", result.stderr)
+        self.assertNotIn("siteMonitor", self.services()["Local"])
+        self.serve_remote_routes("mbk", (self.published / "routes.json").read_text())
+        self.write_routes([route("Remote")])
+        result = self.render(HOMEPAGE_CLUSTER="syd")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        services = self.services()
+        self.assertEqual(services["Remote"]["namespace"], "remote")
+        # Other clusters' apps have no Kubernetes connection, so keep siteMonitor.
+        self.assertEqual(services["Local"]["siteMonitor"], "https://local.example.net")
+        for option in ("app", "namespace"):
+            self.assertNotIn(option, services["Local"])
+        clusters = self.groups("Clusters")
+        self.assertIn("Local", clusters["mbk/node"][0])
+        self.assertIn("Remote", clusters["syd/node"][0])
+        # The published file holds only the local cluster's routes.
+        published = json.loads((self.published / "routes.json").read_text())
+        self.assertEqual([r["name"] for r in published], ["remote"])
+        self.serve_remote_routes("mbk", "[broken json")
+        result = self.render(HOMEPAGE_CLUSTER="syd")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skipping cluster mbk", result.stderr)
+        self.assertNotIn("Local", self.services())
+
     def test_required_inputs_fail_without_publishing(self):
         for name in ("HOMELAB_INFRASTRUCTURE_FILE", "KUBECTL"):
             with self.subTest(name=name):
