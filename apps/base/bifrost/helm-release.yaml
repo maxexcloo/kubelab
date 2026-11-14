@@ -216,7 +216,8 @@ spec:
         allowedOrigins:
           - https://app.invalid
         disableDbPingsInHealth: true
-        logRetentionDays: 30
+        # Freed rows are reused, so logs.db stops growing but never shrinks on its own.
+        logRetentionDays: 7
         # Chat requests carry only the tools their client sends; MCP stays on /mcp.
         mcpDisableAutoToolInject: true
       governance:
