@@ -8,85 +8,64 @@ from support import read_yaml
 
 
 class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
-    def test_remote_annotations_and_external_machines(self):
+    def test_route_annotations_and_external_machines(self):
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         services = self.services()
-        self.assertIn("Remote", services)
-        self.assertEqual(services["Remote"]["description"], "syd")
         self.assertIn("Shared", services)
-        self.assertIn("Local", services)
+        self.assertEqual(services["Local"]["description"], "mbk/node")
         self.assertNotIn("siteMonitor", services["Local"])
-        self.assertEqual(services["Remote"]["siteMonitor"], services["Remote"]["href"])
         self.assertNotIn("Hidden", services)
-        self.assertNotIn("mbk-venus", services)
-        self.assertNotIn("mbk-saturn", services)
-        self.assertNotIn("mbk-luna", services)
-        self.assertNotIn("mbk-sol", services)
+        for host in ("mbk-venus", "mbk-saturn", "mbk-luna", "mbk-sol"):
+            self.assertNotIn(host, services)
         self.assertEqual(services["TrueNAS"]["widget"]["type"], "truenas")
         self.assertEqual(
             list(read_yaml(self.output / "settings.yaml")["layout"])[-1], "Servers"
         )
 
     def test_same_named_services_keep_their_locations(self):
-        self.write_routes("syd", [route("TrueNAS", group="Infrastructure")])
+        self.write_routes([route("TrueNAS", group="Infrastructure")])
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
         names = [name for entry in self.groups()["Infrastructure"] for name in entry]
-        self.assertIn("TrueNAS (syd)", names)
+        self.assertIn("TrueNAS (mbk)", names)
         self.assertEqual(len([name for name in names if name.startswith("TrueNAS")]), 2)
 
-    def test_helm_widget_and_moving_an_app_between_clusters(self):
-        annotations = route(
+    def test_route_widget_and_status_selector(self):
+        library = route(
             "Library",
             group="Media",
             **{
                 "description": "Photo Manager",
                 "widget.type": "immich",
                 "widget.fields": '["photos", "videos"]',
-                "widget.key": '{{ "{{HOMEPAGE_VAR_IMMICH_API_KEY}}" }}',
+                "widget.key": "{{HOMEPAGE_VAR_IMMICH_API_KEY}}",
                 "widget.version": "2",
                 "widget.headers.X-Example": "value",
             },
-        )["metadata"]["annotations"]
-        resource = {
-            "apiVersion": "helm.toolkit.fluxcd.io/v2",
-            "kind": "HelmRelease",
-            "metadata": {"name": "library", "namespace": "library"},
-            "spec": {
-                "values": {
-                    "route": {
-                        "private": {
-                            "annotations": annotations,
-                            "labels": {"app.kubernetes.io/name": "{{ .Release.Name }}"},
-                        }
-                    }
-                }
-            },
-        }
-        self.write_routes("syd", [resource])
+        )
+        library["metadata"]["labels"] = {"app.kubernetes.io/name": "photos"}
+        self.write_routes([library])
         result = self.render()
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.services()["Library"]["app"], "photos")
         groups = self.groups()
         self.assertEqual(
-            groups["Media"][0]["Library"]["description"], "Photo Manager • syd"
+            groups["Media"][0]["Library"]["description"], "Photo Manager • mbk/node"
         )
-        self.assertEqual(groups["syd"][0]["Library"]["description"], "Photo Manager")
-        # Clusters cards show placement only, four to a row; widgets stay on Home.
-        self.assertNotIn("widget", groups["syd"][0]["Library"])
         self.assertEqual(
-            read_yaml(self.output / "settings.yaml")["layout"]["Clusters"]["syd"][
-                "columns"
-            ],
-            4,
+            groups["mbk/node"][0]["Library"]["description"], "Photo Manager"
         )
+        # Clusters cards show placement only, four to a row; widgets stay on Home.
+        self.assertNotIn("widget", groups["mbk/node"][0]["Library"])
+        settings = read_yaml(self.output / "settings.yaml")
+        self.assertEqual(settings["layout"]["Clusters"]["mbk/node"]["columns"], 4)
         # Home widgets move to Overview, which leads Home; categories stay compact.
         self.assertNotIn("widget", groups["Media"][0]["Library"])
         overview = {
             name: card for entry in groups["Overview"] for name, card in entry.items()
         }
-        self.assertEqual(overview["Library"]["description"], "Photo Manager • syd")
-        layout = read_yaml(self.output / "settings.yaml")["layout"]["Home"]
+        layout = settings["layout"]["Home"]
         self.assertEqual(
             next(key for key in layout if isinstance(layout[key], dict)), "Overview"
         )
@@ -96,50 +75,8 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(widget["key"], "{{HOMEPAGE_VAR_IMMICH_API_KEY}}")
         self.assertEqual(widget["headers"], {"X-Example": "value"})
         self.assertEqual(widget["version"], 2)
-        self.assertIn(
-            "Media", read_yaml(self.output / "settings.yaml")["layout"]["Home"]
-        )
-        self.write_routes("mbk", [resource])
-        self.write_routes("syd", [route("Remote")])
-        result = self.render()
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("Library", self.services())
-        self.assertEqual(self.services()["Library"]["app"], "library")
-        groups = self.groups()
-        self.assertEqual(
-            groups["Media"][0]["Library"]["description"], "Photo Manager • mbk/node"
-        )
-        self.assertIn("Library", groups["mbk/node"][0])
-        self.assertIn(
-            "Media", read_yaml(self.output / "settings.yaml")["layout"]["Home"]
-        )
-
-    def test_helm_status_selector_uses_explicit_release_name(self):
-        annotations = route("Reader")["metadata"]["annotations"]
-        route_values = {
-            "annotations": annotations,
-            "labels": {"app.kubernetes.io/name": "{{ .Release.Name }}"},
-        }
-        self.write_routes(
-            "mbk",
-            [
-                {
-                    "apiVersion": "helm.toolkit.fluxcd.io/v2",
-                    "kind": "HelmRelease",
-                    "metadata": {"name": "application", "namespace": "reader"},
-                    "spec": {
-                        "releaseName": "miniflux",
-                        "values": {"route": {"private": route_values}},
-                    },
-                }
-            ],
-        )
-        result = self.render()
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(self.services()["Reader"]["app"], "miniflux")
 
     def test_management_services_share_schema_and_do_not_change_other_cards(self):
-
         homelab = self.directory / "homelab"
         shutil.copytree(HOMELAB, homelab)
         path = homelab / "data/machines.yaml"
@@ -169,7 +106,7 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
           scheme: https
 """)
         beszel = beszel_route()
-        self.write_routes("mbk", [beszel])
+        self.write_routes([beszel])
         result = self.render(HOMELAB_DIRECTORY=str(homelab))
         self.assertEqual(result.returncode, 0, result.stderr)
         groups = {

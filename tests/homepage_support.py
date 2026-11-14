@@ -2,7 +2,6 @@
 
 import json
 import os
-import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -40,10 +39,10 @@ def beszel_route():
         description="System Monitoring",
         icon="sh-beszel",
         **{
-            "widget.password": '{{ "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}" }}',
+            "widget.password": "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}",
             "widget.type": "beszel",
             "widget.url": "https://beszel.example.net",
-            "widget.username": '{{ "{{HOMEPAGE_VAR_BESZEL_USERNAME}}" }}',
+            "widget.username": "{{HOMEPAGE_VAR_BESZEL_USERNAME}}",
             "widget.version": "2",
         },
     )
@@ -57,28 +56,38 @@ class HomepageDashboardFixture:
         self.addCleanup(self.temporary.cleanup)
         self.directory = Path(self.temporary.name)
         self.output = self.directory / "output"
+        self.published = self.directory / "published"
+        self.remote = self.directory / "remote"
+        self.remote.mkdir()
+        bin_directory = self.directory / "bin"
+        bin_directory.mkdir()
+        self.path = f"{bin_directory}{os.pathsep}{os.environ['PATH']}"
+        wget = bin_directory / "wget"
+        wget.write_text("""#!/usr/bin/env python3
+import os
+import shutil
+import sys
+from urllib.parse import urlparse
+url = urlparse(sys.argv[-1])
+source = os.path.join(os.environ["REMOTE_ROUTES"], url.hostname + url.path.replace("/", "_"))
+if not os.path.exists(source):
+    sys.exit(4)
+shutil.copy(source, sys.argv[sys.argv.index("-O") + 1])
+""")
+        wget.chmod(0o755)
         self.placements = self.directory / "placements.json"
         self.placements.write_text("{}")
         self.queries = self.directory / "queries.jsonl"
-        self.gatus = self.directory / "gatus.json"
-        self.gatus.write_text(
-            json.dumps(
-                [
-                    {
-                        "group": "Providers",
-                        "key": "providers_example",
-                        "name": "Example",
-                        "results": [{"duration": 12000000, "success": True}],
-                    },
-                ]
-            )
-        )
+        self.routes = self.directory / "routes.json"
         self.kubectl = self.directory / "kubectl"
         self.kubectl.write_text("""#!/usr/bin/env python3
 import json
 import os
 import sys
-if sys.argv[1:2] == ["--namespace"] and sys.argv[3:5] == ["get", "pods"]:
+if sys.argv[1:3] == ["get", "httproutes"]:
+    with open(os.environ["HTTP_ROUTES"]) as source:
+        print(source.read())
+elif sys.argv[1:2] == ["--namespace"] and sys.argv[3:5] == ["get", "pods"]:
     with open(os.environ["POD_QUERIES"], "a") as output:
         output.write(json.dumps(sys.argv[1:]) + "\\n")
     with open(os.environ["POD_PLACEMENTS"]) as source:
@@ -88,68 +97,42 @@ if sys.argv[1:2] == ["--namespace"] and sys.argv[3:5] == ["get", "pods"]:
         sys.exit(1)
     print("\\n".join(nodes))
 else:
-    os.execv(os.environ["SYSTEM_KUBECTL"], [os.environ["SYSTEM_KUBECTL"], *sys.argv[1:]])
+    sys.exit(f"Unexpected kubectl call: {sys.argv[1:]}")
 """)
         self.kubectl.chmod(0o755)
-        for cluster in ("mbk", "syd"):
-            for target in (f"apps/overlays/{cluster}", f"clusters/{cluster}/platform"):
-                directory = self.directory / target
-                directory.mkdir(parents=True)
-                (directory / "kustomization.yaml").write_text("resources: []\n")
-            directory = self.directory / f"clusters/{cluster}"
-            resources = [
-                {
-                    "apiVersion": "kustomize.toolkit.fluxcd.io/v1",
-                    "kind": "Kustomization",
-                    "metadata": {"name": name, "namespace": "flux-system"},
-                    "spec": {
-                        "path": "./" + target,
-                        "postBuild": {
-                            "substitute": {
-                                "cluster_name": cluster,
-                                "public_domain": "example.net",
-                            }
-                        },
-                    },
-                }
-                for name, target in (
-                    ("apps", f"apps/overlays/{cluster}"),
-                    ("platform", f"clusters/{cluster}/platform"),
-                )
-            ]
-            (directory / "kustomization.yaml").write_text("resources: [flux.yaml]\n")
-            (directory / "flux.yaml").write_text(
-                "\n---\n".join(json.dumps(r) for r in resources)
-            )
-        self.write_routes("mbk", [route("Local"), route("Shared")])
         self.write_routes(
-            "syd", [route("Remote"), route("Shared"), route("Hidden", enabled="false")]
+            [route("Local"), route("Shared"), route("Hidden", enabled="false")]
         )
 
-    def write_routes(self, cluster, resources):
-        directory = self.directory / f"apps/overlays/{cluster}"
-        (directory / "kustomization.yaml").write_text("resources: [routes.yaml]\n")
-        (directory / "routes.yaml").write_text(
-            "\n---\n".join(json.dumps(r) for r in resources)
-        )
+    def write_routes(self, routes):
+        self.routes.write_text(json.dumps({"items": routes}))
+
+    def serve_remote_routes(self, cluster, routes):
+        name = f"homepage.{cluster}.excloo.dev_dashboard_routes.json"
+        (self.remote / name).write_text(routes)
 
     def render(self, **environment):
         return subprocess.run(
-            ["sh", str(APP / "render_dashboard.sh"), str(APP), str(self.output)],
+            [
+                "sh",
+                str(APP / "render_dashboard.sh"),
+                str(APP),
+                str(self.output),
+                str(self.published),
+            ],
             env=os.environ
             | {
-                "FLUX": shutil.which("flux"),
                 "HOMELAB_DIRECTORY": str(HOMELAB),
                 "HOMELAB_INFRASTRUCTURE_FILE": str(
                     ROOT / "tests/fixtures/homepage/infrastructure.json"
                 ),
                 "HOMEPAGE_CLUSTER": "mbk",
-                "HOMEPAGE_GATUS_STATUSES_FILE": str(self.gatus),
-                "KUBELAB_DIRECTORY": str(self.directory),
+                "HTTP_ROUTES": str(self.routes),
                 "KUBECTL": str(self.kubectl),
+                "PATH": self.path,
                 "POD_PLACEMENTS": str(self.placements),
                 "POD_QUERIES": str(self.queries),
-                "SYSTEM_KUBECTL": shutil.which("kubectl"),
+                "REMOTE_ROUTES": str(self.remote),
             }
             | environment,
             capture_output=True,

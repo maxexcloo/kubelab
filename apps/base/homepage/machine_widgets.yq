@@ -52,7 +52,7 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
 (load(strenv(BESZEL_ROUTES)) as $routes | if ($routes | length) == 1 then
   ($routes[0].annotations | with_entries(select(.key | test("^gethomepage.dev/"))) |
     to_entries | .[] as $field ireduce ({};
-      setpath(($field.key | sub("^gethomepage.dev/"; "") | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
+      setpath(($field.key | sub("^gethomepage.dev/"; "") | split(".")); $field.value)) |
     with(select(.widget.version != null); .widget.version |= from_yaml) |
     pick(["description", "href", "icon", "name", "widget"]))
   else null end) as $beszel |
