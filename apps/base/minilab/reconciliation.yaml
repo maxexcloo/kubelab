@@ -13,5 +13,5 @@ spec:
   dependsOn:
     - name: automation
   sourceRef:
-    kind: GitRepository
+    kind: OCIRepository
     name: minilab
