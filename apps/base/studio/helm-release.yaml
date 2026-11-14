@@ -33,11 +33,18 @@ spec:
                   - NET_BIND_SERVICE
           main:
             env:
+              HOST: 0.0.0.0
+              PORT: "8787"
+              ROUTE_ALIAS_HOST: studio.${cluster_name}.excloo.dev
+              ROUTE_HOST: app.invalid
               STUDIO_ALLOWED_HOSTS:
                 dependsOn:
                   - ROUTE_ALIAS_HOST
                   - ROUTE_HOST
                 value: $(ROUTE_HOST),$(ROUTE_ALIAS_HOST),studio.studio.svc.cluster.local
+              # Studio's assistant writes through Bifrost with its own key (external-secrets.yaml).
+              STUDIO_ASSISTANT_CLOUD_MODEL: cloud/auto
+              STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
               # The navigation's Chat item opens LibreChat (apps/base/librechat/route.yaml).
               STUDIO_CHAT_URL: https://chat.excloo.com
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
@@ -61,13 +68,6 @@ spec:
               STUDIO_OIDC_REDIRECT_URI: https://app.invalid/api/accounts/oidc/callback
               # Reddit imports read through Redlib (apps/base/redlib/helm-release.yaml).
               STUDIO_REDLIB_URL: https://reddit.excloo.com
-              # Studio's assistant writes through Bifrost with its own key (external-secrets.yaml).
-              STUDIO_ASSISTANT_CLOUD_MODEL: cloud/auto
-              STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
-              HOST: 0.0.0.0
-              PORT: "8787"
-              ROUTE_ALIAS_HOST: studio.${cluster_name}.excloo.dev
-              ROUTE_HOST: app.invalid
               TZ: ${time_zone}
             envFrom:
               - secretRef:
