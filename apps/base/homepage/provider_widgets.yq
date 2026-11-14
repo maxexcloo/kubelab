@@ -1,32 +1,26 @@
-load(strenv(PROVIDERS)).providers as $providers |
-with(select(tag != "!!seq" or length == 0); error("Missing Gatus endpoint statuses")) |
-([$providers | to_entries[] | select(.value.conditions != null) | .value.name] +
- [$providers | to_entries[] | select(.value.dns != null) |
-   (.value.dns.name // (.value.name + " DNS"))]) as $expected |
-[.[] | select(.group == "Providers") | .name] as $available |
-with(select(($expected - $available) | length > 0); error("Missing Gatus provider checks")) |
-[$providers | to_entries[] | .value as $provider |
-  ({"probe": .value.name, "provider": $provider},
-   (select(.value.dns != null) |
-     {"probe": (.value.dns.name // (.value.name + " DNS")), "provider": $provider}))
-] as $catalogue |
-map(select(.group == "Providers")) | sort_by(.name | downcase) |
-map(. as $endpoint |
-  ($catalogue | map(select(.probe == $endpoint.name)) | .[0]) as $entry |
-  {(.name): {
-    "description": (if $entry.probe == $entry.provider.name
-      then ($entry.provider.description // "External Monitoring") else "DNS Resolver" end),
-    "href": ($entry.provider.url // (strenv(GATUS_URL) + "/endpoints/" + .key)),
-    "icon": ($entry.provider.icon // "mdi-cloud"),
-    "id": ("provider-" + .key),
-    "widget": {
-      "type": "customapi",
-      "url": (strenv(GATUS_URL) + "/api/v1/endpoints/" + .key + "/statuses?page=1&pageSize=1"),
-      "refreshInterval": 30000,
-      "mappings": [
-        {"field": "results.0.success", "label": "Status",
-         "remap": [{"value": true, "to": "Online"}, {"value": false, "to": "Offline"}, {"any": true, "to": "Unknown"}]},
-        {"field": "results.0.duration", "label": "Response", "format": "number", "scale": 0.000001, "suffix": "ms"}
-      ]
-    }
-  }}) | [{"Providers": .}]
+.providers.gatus.url as $gatus |
+# Flylab's Gatus checks every monitored provider and its DNS resolver; Gatus
+# keys endpoints by their lower-case group and name.
+[.providers[] | . as $provider |
+  (if .monitoring == false then [] else
+    [{"probe": .name, "description": (.description // "External Monitoring")}] end) +
+  (if .dns == null then [] else
+    [{"probe": (.dns.name // (.name + " DNS")), "description": "DNS Resolver"}] end) |
+  .[] | . + {"provider": $provider}] |
+sort_by(.probe | downcase) |
+map(("providers_" + (.probe | downcase | sub("[ /_,.#+&]"; "-"))) as $key | {(.probe): {
+  "description": .description,
+  "href": (.provider.url // ($gatus + "/endpoints/" + $key)),
+  "icon": (.provider.icon // "mdi-cloud"),
+  "id": ("provider-" + $key),
+  "widget": {
+    "type": "customapi",
+    "url": ($gatus + "/api/v1/endpoints/" + $key + "/statuses?page=1&pageSize=1"),
+    "refreshInterval": 30000,
+    "mappings": [
+      {"field": "results.0.success", "label": "Status",
+       "remap": [{"value": true, "to": "Online"}, {"value": false, "to": "Offline"}, {"any": true, "to": "Unknown"}]},
+      {"field": "results.0.duration", "label": "Response", "format": "number", "scale": 0.000001, "suffix": "ms"}
+    ]
+  }
+}}) | [{"Providers": .}]
