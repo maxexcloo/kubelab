@@ -33,7 +33,11 @@
     },
     {
       description: "Images publishes immutable <release>-<build> tags",
-      matchPackageNames: ["ghcr.io/maxexcloo/atvloadly", "ghcr.io/maxexcloo/trcc"],
+      matchPackageNames: [
+        "ghcr.io/maxexcloo/atvloadly",
+        "ghcr.io/maxexcloo/betterbench",
+        "ghcr.io/maxexcloo/trcc",
+      ],
       versioning: "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<build>\\d+))?$",
     },
     {
