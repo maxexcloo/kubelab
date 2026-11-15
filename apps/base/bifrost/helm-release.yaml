@@ -260,7 +260,7 @@ spec:
             scope: global
             targets:
               - provider: refuseless
-                model: deepseek-v4.1-flash-abliterated
+                model: deepseek-v4.1-flash-abliterated-fast
                 weight: 1.0
           - id: cloud-glm
             name: Cloud GLM
