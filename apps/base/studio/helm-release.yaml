@@ -107,7 +107,7 @@ spec:
       dnsConfig:
         nameservers:
           - 127.0.0.1
-          - 10.100.4.10
+          - ${dns_service_ip}
       # Studio drains in-flight requests for up to 30 s on SIGTERM (backend/shutdown.js); leave it room.
       terminationGracePeriodSeconds: 45
       # Files on the TrueNAS datasets belong to the image's node user.

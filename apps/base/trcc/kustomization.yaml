@@ -4,8 +4,8 @@ namespace: trcc
 resources:
   - namespace.yaml
 components:
-  - ../../components/default-deny
   - ../../components/workload
+  - ../../components/default-deny
 configMapGenerator:
   - name: trcc
     files:
