@@ -12,9 +12,10 @@ class HomepageProvidersTests(HomepageDashboardFixture, unittest.TestCase):
     def test_provider_widgets_follow_gatus_endpoint_keys(self):
         homelab = self.directory / "homelab"
         shutil.copytree(HOMELAB, homelab)
-        path = homelab / "data/providers.yaml"
+        path = homelab / "inventory.json"
         providers = read_yaml(path)
         providers["providers"]["example"]["dns"] = {
+            "name": "Example DNS",
             "query-type": "A",
             "url": "192.0.2.53",
         }
