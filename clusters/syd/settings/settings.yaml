@@ -14,6 +14,5 @@ spec:
       dns_service_ip: 10.100.4.10
       grafana_host: grafana.syd.excloo.dev
       home_assistant_host: luna.mbk.excloo.net
-      pod_subnet: 10.100.0.0/22
       storage_node: saturn
       unifi_host: sol.mbk.excloo.net
