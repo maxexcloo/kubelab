@@ -20,6 +20,9 @@ configMapGenerator:
   - name: librechat-config
     files:
       - librechat.yaml
+  - name: librechat-patches
+    files:
+      - tool-history.cjs
 replacements:
   # The chart source lives in the namespace the release references.
   - source:
