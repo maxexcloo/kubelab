@@ -6,15 +6,11 @@ temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
 
 yq '
-  with(.[];
-    .clusterGroups = [.cluster] |
-    with(select(.cluster == strenv(HOMEPAGE_CLUSTER));
-      .placementSelector = (.annotations."gethomepage.dev/pod-selector" //
-        ("app.kubernetes.io/name=" + (.annotations."gethomepage.dev/app" //
-          .labels."app.kubernetes.io/name" // (.source | split("/") | .[2]))))))
+  .[] |= (.placementSelector = (.annotations."gethomepage.dev/pod-selector" //
+    ("app.kubernetes.io/name=" + (.annotations."gethomepage.dev/app" //
+      .labels."app.kubernetes.io/name" // .name))))
 ' "$inventory" > "$temporary_directory/routes.yaml"
 yq -r '
-  map(select(.cluster == strenv(HOMEPAGE_CLUSTER))) |
   unique_by(.namespace + "/" + .placementSelector) | .[] |
   [.namespace, .placementSelector] | @tsv
 ' "$temporary_directory/routes.yaml" > "$temporary_directory/selectors.tsv"
@@ -38,9 +34,7 @@ yq ea -o=yaml -p=json '. as $placement ireduce ({}; . * $placement)' \
 # shellcheck disable=SC2016
 NODES="$temporary_directory/nodes.yaml" yq '
   load(strenv(NODES)) as $placements |
-  with(.[] | select(.cluster == strenv(HOMEPAGE_CLUSTER));
-    .cluster as $cluster |
-    .clusterGroups = ($placements[.namespace][.placementSelector] |
-      with(select(length == 0); . = ["unscheduled"]) | map($cluster + "/" + .)) |
+  .[] |= (.clusterGroups = ($placements[.namespace][.placementSelector] |
+    with(select(length == 0); . = ["unscheduled"]) | map(strenv(HOMEPAGE_CLUSTER) + "/" + .)) |
     del(.placementSelector))
 ' "$temporary_directory/routes.yaml" > "$output"

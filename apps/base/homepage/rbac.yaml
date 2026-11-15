@@ -36,23 +36,6 @@ rules:
       - customresourcedefinitions/status
     verbs:
       - get
-  - apiGroups:
-      - kustomize.toolkit.fluxcd.io
-    resourceNames:
-      - apps
-      - minilab
-    resources:
-      - kustomizations
-    verbs:
-      - get
-  - apiGroups:
-      - source.toolkit.fluxcd.io
-    resourceNames:
-      - flux-system
-    resources:
-      - gitrepositories
-    verbs:
-      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
