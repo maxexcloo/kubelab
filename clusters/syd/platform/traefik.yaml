@@ -46,7 +46,6 @@ spec:
             type: ClusterIP
         private:
           spec:
-            # Homelab's tailscale_ingress_target: every node's Tailscale forwards syd-ingress here.
-            clusterIP: 10.100.5.189
+            clusterIP: ${tailscale_ingress_target}
             trafficDistribution: PreferSameNode
             type: ClusterIP

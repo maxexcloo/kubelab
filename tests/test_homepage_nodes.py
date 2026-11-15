@@ -13,24 +13,24 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
 
         homelab = self.directory / "homelab"
         shutil.copytree(HOMELAB, homelab)
-        path = homelab / "data/machines.yaml"
+        path = homelab / "inventory.json"
         inventory = read_yaml(path)
-        del inventory["machines"]["mbk"]["saturn"]["services"]["syncthing"]
-        inventory["machines"]["mbk"]["saturn"]["beszel"] = True
-        inventory["machines"]["mbk"]["personal"] = {
-            "platform": "macos",
-            "services": {"management": {"port": 443, "scheme": "https"}},
+        del inventory["services"]["saturn/syncthing"]
+        inventory["machines"]["saturn"]["beszel"] = True
+        inventory["machines"]["personal"] = {
+            "network": "mbk",
+            "location": "mbk-personal",
         }
-        inventory["machines"]["mbk"]["sensor"] = {"platform": "slzb"}
-        inventory["machines"]["mbk"]["taco"] = {
+        inventory["machines"]["sensor"] = {"network": "mbk", "location": "mbk-sensor"}
+        inventory["machines"]["taco"] = {
             "beszel": True,
             "cluster": "mbk",
-            "platform": "talos",
+            "network": "mbk",
+            "location": "mbk-taco",
+            "fqdn": "taco.mbk.example.net",
             "type": "vm",
         }
-        path.write_text(json.dumps(inventory))
-        providers_path = homelab / "data/providers.yaml"
-        providers = read_yaml(providers_path)
+        providers = inventory
         providers["providers"].update(
             {
                 "cloudflare": {
@@ -62,7 +62,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
                     "url": f"https://{name.lower()}.example.net",
                 }
             )
-        providers_path.write_text(json.dumps(providers))
+        path.write_text(json.dumps(inventory))
         identities = self.directory / "infrastructure.json"
         identities.write_text(
             json.dumps(
@@ -172,12 +172,14 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
 
         homelab = self.directory / "homelab"
         shutil.copytree(HOMELAB, homelab)
-        path = homelab / "data/machines.yaml"
+        path = homelab / "inventory.json"
         inventory = read_yaml(path)
-        del inventory["machines"]["mbk"]["taco"]
-        inventory["machines"]["mbk"]["node"] = {
+        del inventory["machines"]["taco"]
+        inventory["machines"]["node"] = {
             "cluster": "mbk",
-            "hostname": "renamed",
+            "location": "mbk-renamed",
+            "network": "mbk",
+            "fqdn": "renamed.mbk.example.net",
             "type": "vm",
         }
         path.write_text(json.dumps(inventory))
@@ -195,7 +197,12 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(layout["Home"]["tab"], "Home")
         self.assertIn("Servers", layout)
         before = (self.output / "services.yaml").read_bytes()
-        inventory["machines"]["mbk"]["extra"] = {"cluster": "mbk", "type": "vm"}
+        inventory["machines"]["extra"] = {
+            "cluster": "mbk",
+            "type": "vm",
+            "network": "mbk",
+            "location": "mbk-extra",
+        }
         path.write_text(json.dumps(inventory))
         self.assertEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
         self.assertEqual((self.output / "services.yaml").read_bytes(), before)
