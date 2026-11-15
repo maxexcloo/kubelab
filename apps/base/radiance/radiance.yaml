@@ -1,0 +1,58 @@
+# One process serves every model and moves them between the cards, host memory and disk as
+# requests name them (Radiance's docs/MULTIMODEL.md). An entry's name is the model id. The
+# container appends Studio's converted fine-tunes (helm-release.yaml), so models stays last.
+server:
+  host: "::"
+  port: 8000
+memory:
+  gpu-headroom-mib: 192
+scheduler:
+  # H3 reads about 64 GiB from disk on a cold load.
+  load-timeout: 600s
+defaults:
+  # Requests name any LoRA under this folder in their loras field.
+  lora-dir: /models/comfyui/loras
+models:
+  # The H3 models take both cards. One rank-64 LoRA slot keeps its VRAM pool budgets from running out.
+  fasth3-8-step-v2-i8:
+    model: /models/radiance/fasth3-8-step-v2-i8.rad
+    tp: 2
+    max-lora-rank: 64
+    max-loras: 1
+    vision-tower-placement: ram
+  flux-3-klein-base-iq8r:
+    model: /models/radiance/flux-3-klein-base-iq8r.rad
+    tp: 1
+  flux-3-klein-iq8r:
+    model: /models/radiance/flux-3-klein-iq8r.rad
+    tp: 1
+  krea-2-raw-iq8r:
+    model: /models/radiance/krea-2-raw-iq8r.rad
+    tp: 1
+  krea-2-turbo-iq8r:
+    model: /models/radiance/krea-2-turbo-iq8r.rad
+    tp: 1
+  minimax-h3-i8:
+    model: /models/radiance/minimax-h3-i8.rad
+    tp: 2
+    max-lora-rank: 64
+    max-loras: 1
+    vision-tower-placement: ram
+  # A Qwen-Image request holds two sequences of max-model-len tokens, and the model's own 33600
+  # is more than one card. 8192 tokens is about 1.9 megapixels.
+  noctq-v4-uncensored-iq8r:
+    model: /models/radiance/noctq-v4-uncensored-iq8r.rad
+    tp: 1
+    max-model-len: 8192
+  qwen-image-2.1-iq8r:
+    model: /models/radiance/qwen-image-2.1-iq8r.rad
+    tp: 1
+    max-model-len: 8192
+  qwen-image-2.1-turbo-iq8r:
+    model: /models/radiance/qwen-image-2.1-turbo-iq8r.rad
+    tp: 1
+    max-model-len: 8192
+  qwen-image-2.1-turbo-uncensored-iq8r:
+    model: /models/radiance/qwen-image-2.1-turbo-uncensored-iq8r.rad
+    tp: 1
+    max-model-len: 8192

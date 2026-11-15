@@ -54,7 +54,7 @@ spec:
               STUDIO_KUBERNETES_GPUS: '{"gpu": 2}'
               # Studio finds its workloads from the studio.excloo.dev labels on the GPU
               # Deployments in these namespaces; text ones serve local/auto.
-              STUDIO_KUBERNETES_NAMESPACES: comfyui-image,comfyui-video,text
+              STUDIO_KUBERNETES_NAMESPACES: comfyui-image,comfyui-video,radiance,text
               STUDIO_LOCAL_TEXT_MODEL: local/auto
               # Result links and Grok's /mcp/<token> URL bypass Access (cloudflare-access.yaml).
               STUDIO_MCP_PUBLIC_URL:
