@@ -7,30 +7,6 @@ spec:
     controllers:
       main:
         containers:
-          # Civitai refuses the cluster's egress (HTTP 451); ctrld resolves only Civitai's names
-          # through Control D, which proxies them (external-secrets.yaml).
-          ctrld:
-            workingDir: /etc/controld
-            args:
-              - --config=/etc/ctrld/ctrld.toml
-            command:
-              - /ctrld
-              - run
-            image:
-              repository: controldns/ctrld
-              tag: 1.5.10
-            resources:
-              limits:
-                memory: 128Mi
-              requests:
-                cpu: 10m
-                memory: 32Mi
-            securityContext:
-              runAsGroup: 65534
-              runAsUser: 65534
-              capabilities:
-                add:
-                  - NET_BIND_SERVICE
           main:
             env:
               HOST: 0.0.0.0
@@ -91,18 +67,8 @@ spec:
           securityContext:
             runAsNonRoot: true
     defaultPodOptions:
-      # kubectl exec and logs reach Studio, not the ctrld sidecar listed before it.
-      annotations:
-        kubectl.kubernetes.io/default-container: studio
       # Studio's service account scales the GPU workloads.
       automountServiceAccountToken: true
-      # ctrld answers first and sends all but Civitai's names to kube-dns (Homelab's service
-      # subnet), listed after it as the fallback.
-      dnsPolicy: None
-      dnsConfig:
-        nameservers:
-          - 127.0.0.1
-          - 10.100.4.10
       # Studio drains in-flight requests for up to 30 s on SIGTERM (backend/shutdown.js); leave it room.
       terminationGracePeriodSeconds: 45
       # Files on the TrueNAS datasets belong to the image's node user.
@@ -111,20 +77,6 @@ spec:
         runAsGroup: 1000
         runAsUser: 1000
     persistence:
-      controld:
-        type: emptyDir
-        advancedMounts:
-          main:
-            ctrld:
-              - path: /etc/controld
-      ctrld:
-        name: "{{ .Release.Name }}-ctrld"
-        type: secret
-        advancedMounts:
-          main:
-            ctrld:
-              - path: /etc/ctrld
-                readOnly: true
       data:
         existingClaim: data
         type: persistentVolumeClaim
