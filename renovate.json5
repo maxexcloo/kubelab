@@ -59,6 +59,13 @@
       versioning: "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)$",
     },
     {
+      description: "LibreChat's Studio sidecar restarts LibreChat, so update it apart from Studio early on Monday mornings in Sydney",
+      groupName: "Studio Chat Uploads",
+      matchFileNames: ["apps/base/librechat/helm-release.yaml"],
+      matchPackageNames: ["ghcr.io/maxexcloo/studio"],
+      schedule: ["* 14-17 * * 0"],
+    },
+    {
       description: "VectorChord images are built per PostgreSQL major, which follows the CloudNativePG cluster",
       matchPackageNames: ["ghcr.io/tensorchord/vchord-scratch"],
       versioning: "regex:^pg18-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
