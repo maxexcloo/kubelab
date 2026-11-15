@@ -33,7 +33,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/pocket-id/pocket-id
-              tag: v2.19.2
+              tag: v2.19.3
             probes:
               liveness: &health
                 type: COMMAND
