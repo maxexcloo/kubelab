@@ -5,7 +5,6 @@ resources:
   - external-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
-  - route.yaml
 components:
   - ../../components/application
   - ../../components/default-deny

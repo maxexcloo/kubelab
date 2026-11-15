@@ -73,8 +73,8 @@
   to mount checked-in app configuration, scripts or assets; do not use
   `secretGenerator`. Keep executable code in its own source file.
 - Flux `postBuild` substitution rewrites `${...}` in everything it applies,
-  ConfigMaps included. Mark mounted scripts and assets
-  `kustomize.toolkit.fluxcd.io/substitute: disabled`.
+  ConfigMaps included. The apps and platform cluster overlays disable
+  substitution on all ConfigMaps so mounted scripts and assets keep their content.
 - Keep shared chart policy in native Kustomize components and app-specific values
   in the app's Flux `HelmRelease` patch; use overlay patches for cluster
   differences.
@@ -115,7 +115,7 @@ Define each value once:
 ## Sorting Exceptions
 
 Use conventional Kubernetes field and resource ordering. Keep project-owned
-YAML free of blank separator lines.
+Kubernetes manifests free of blank separator lines.
 
 For Homepage service dashboards, put widgets before other peer cards and
 alphabetise within each group. Preserve deliberate grouping and workflow order.
