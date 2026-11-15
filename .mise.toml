@@ -1,6 +1,7 @@
 [tools]
 flux2 = "latest"
 kubeconform = "latest"
+# Follows the cluster Kubernetes version in Homelab.
 kubectl = "1.37.2"
 
 # Bootstrap

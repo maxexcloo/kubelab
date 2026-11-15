@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
   - provider-http-runtime-config.yaml
   - provider-http.yaml
+  - rbac.yaml
   - runtime-config.yaml
-  - secret-publication.yaml

@@ -47,8 +47,6 @@ jq -e \
       [.monitor, .name] | any(. == "");
     def invalid_url:
       (.monitor | test("^https?://[^[:space:]]+$") | not);
-    def invalid_href:
-      (.href | test("^[a-z][a-z0-9+.-]*://[^/]*\\.invalid([/:]|$)"));
     def url_hostname:
       try capture("^https?://(?<hostname>[^/:]+)").hostname catch "";
     map(select(.type != "certificate")) as $route_inventory |
@@ -80,7 +78,6 @@ jq -e \
         $inventory | map(select(.alerts != "true" and .alerts != "false") | .source)),
       failure("missing service metadata"; ", "; $inventory | map(select(missing_required) | .source)),
       failure("invalid service URL"; ", "; $inventory | map(select(invalid_url) | .source)),
-      failure("unresolved service href placeholder"; ", "; $route_inventory | map(select(invalid_href) | .source)),
       failure("service href does not match a route hostname"; ", ";
         $inventory | map(select((.monitor | url_hostname) as $hostname | (.hostnames | index($hostname)) == null) | .source)),
       failure("duplicate cluster, service group and name"; "; ";

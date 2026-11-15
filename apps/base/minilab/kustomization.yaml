@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - admission-policy.yaml
-  - backups.yaml
+  - object-storage.yaml
   - rbac.yaml
   - reconciliation.yaml
   - source.yaml
