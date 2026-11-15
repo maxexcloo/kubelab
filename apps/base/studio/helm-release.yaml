@@ -45,6 +45,10 @@ spec:
               # Studio's assistant writes through Bifrost with its own key (external-secrets.yaml).
               STUDIO_ASSISTANT_CLOUD_MODEL: cloud/auto
               STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
+              # Settings › Workers benchmarks a running text model with this image, taking the
+              # model's key from the text Secret in its namespace (apps/base/text).
+              STUDIO_BENCHMARK_IMAGE: ghcr.io/maxexcloo/betterbench:source-f72bb9011a830fd98e82ab89d01e549efa76e9c5
+              STUDIO_BENCHMARK_SECRET: text
               # The navigation's Chat item opens LibreChat (apps/base/librechat/route.yaml).
               STUDIO_CHAT_URL: https://chat.excloo.com
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).

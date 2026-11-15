@@ -5,7 +5,8 @@ metadata:
 spec:
   ingress:
     - from:
-        # Bifrost serves the models; Studio checks each model's /health.
+        # Bifrost serves the models; Studio checks each model's /health and its BetterBench Jobs
+        # benchmark them.
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: bifrost
@@ -18,6 +19,9 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: studio
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: betterbench
       ports:
         - port: 8000
   podSelector:
