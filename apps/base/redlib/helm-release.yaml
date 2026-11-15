@@ -52,7 +52,7 @@ spec:
             image:
               pullPolicy: IfNotPresent
               repository: ghcr.io/nachtalb/redlib
-              tag: latest@sha256:6d2148ade189a0b21358152456b86640c89948a730e7e8d9ff96752bbcffae50
+              tag: latest@sha256:d5947e142a4c09419c2046da20d7910ea2cff6556868c61a3d973f3cad05936e
             probes:
               liveness: &health
                 path: /settings
