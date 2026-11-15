@@ -1,10 +1,10 @@
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
+kind: OCIRepository
 metadata:
   name: minilab
   namespace: flux-system
 spec:
   interval: 1m
-  url: https://github.com/maxexcloo/minilab.git
+  url: oci://ghcr.io/maxexcloo/minilab
   ref:
-    branch: main
+    tag: main
