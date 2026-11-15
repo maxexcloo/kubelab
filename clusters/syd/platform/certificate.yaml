@@ -8,7 +8,7 @@ spec:
   dnsNames:
     - "*.${public_domain}"
     - "*.mini.${public_domain}"
-    - "*.${cluster_name}.excloo.dev"
+    - "*.syd.excloo.dev"
     # One level deeper than the wildcard: the Redlib www redirect serves this
     # name directly, unproxied, on both the public and private gateways.
     - "www.reddit.${public_domain}"
