@@ -12,7 +12,7 @@ in the `minilab` repository.
 
 ## Setup
 
-Install wget and the [shared Mise configuration](https://github.com/maxexcloo/dotfiles#shared-tools--tasks),
+Install the [shared Mise configuration](https://github.com/maxexcloo/dotfiles#shared-tools--tasks),
 then install the configured tools and Git hooks:
 
 ```shell
