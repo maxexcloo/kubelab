@@ -52,7 +52,7 @@ spec:
     # Studio saves each image a person attaches in chat as their Upload.
     initContainers:
       studio-chat-uploads:
-        image: ghcr.io/maxexcloo/studio:2026.11.15.17
+        image: ghcr.io/maxexcloo/studio:2026.11.15.18
         restartPolicy: Always
         command:
           - node
