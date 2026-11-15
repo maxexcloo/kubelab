@@ -5,13 +5,20 @@ metadata:
 spec:
   ingress:
     - from:
-        # Bifrost calls the MCP endpoint; Traefik serves the studio and result links.
+        # Bifrost calls the MCP endpoint, LibreChat's sidecar sends chat uploads, and Traefik
+        # serves the studio and result links.
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: bifrost
           podSelector:
             matchLabels:
               app.kubernetes.io/name: bifrost
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: librechat
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: librechat
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking
