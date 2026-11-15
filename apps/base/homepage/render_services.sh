@@ -11,11 +11,9 @@ trap 'rm -fr "$temporary_directory"' EXIT
 
 script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 BESZEL_ROUTES="$HOMEPAGE_BESZEL_ROUTES" INFRASTRUCTURE="$HOMELAB_INFRASTRUCTURE_FILE" \
-  PROVIDERS="$homelab_directory/data/providers.yaml" \
   yq --from-file "$script_directory/machine_widgets.yq" \
-  "$homelab_directory/data/machines.yaml" > "$temporary_directory/machines.yaml"
+  "$homelab_directory/inventory.json" > "$temporary_directory/machines.yaml"
 # Resolve inventory references in one pass, including nested widget URLs.
-MACHINES="$homelab_directory/data/machines.yaml" DOMAINS="$homelab_directory/data/domains.yaml" \
-  INFRASTRUCTURE="$HOMELAB_INFRASTRUCTURE_FILE" \
+INVENTORY="$homelab_directory/inventory.json" INFRASTRUCTURE="$HOMELAB_INFRASTRUCTURE_FILE" \
   yq --from-file "$script_directory/resolve_endpoints.yq" \
   "$temporary_directory/machines.yaml" > "$output"
