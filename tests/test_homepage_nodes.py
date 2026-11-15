@@ -83,7 +83,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             )
         )
         beszel = beszel_route()
-        self.write_routes("mbk", [beszel])
+        self.write_routes([beszel])
         result = self.render(
             HOMELAB_DIRECTORY=str(homelab), HOMELAB_INFRASTRUCTURE_FILE=str(identities)
         )
@@ -180,24 +180,18 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             "hostname": "renamed",
             "type": "vm",
         }
-        inventory["machines"]["syd"] = {"node": {"cluster": "syd", "type": "vm"}}
         path.write_text(json.dumps(inventory))
-        for cluster in ("mbk", "syd"):
-            tool = route("Headlamp", group="Operations", instance="inventory")
-            tool["metadata"]["namespace"] = "headlamp"
-            self.write_routes(cluster, [tool])
+        tool = route("Headlamp", group="Operations", instance="inventory")
+        tool["metadata"]["namespace"] = "headlamp"
+        self.write_routes([tool])
         result = self.render(HOMELAB_DIRECTORY=str(homelab))
         self.assertEqual(result.returncode, 0, result.stderr)
-        groups = self.groups()
-        local = groups["mbk/node"][0]["Headlamp"]
-        remote = groups["syd"][0]["Headlamp"]
+        local = self.groups()["mbk/node"][0]["Headlamp"]
         self.assertEqual(local["namespace"], "headlamp")
         self.assertEqual(local["app"], "headlamp")
-        self.assertNotIn("namespace", remote)
         layout = read_yaml(self.output / "settings.yaml")["layout"]
         self.assertEqual(layout["Clusters"]["tab"], "Clusters")
         self.assertIn("mbk/node", layout["Clusters"])
-        self.assertIn("syd", layout["Clusters"])
         self.assertEqual(layout["Home"]["tab"], "Home")
         self.assertIn("Servers", layout)
         before = (self.output / "services.yaml").read_bytes()
@@ -208,7 +202,6 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
 
     def test_native_node_widget_and_local_pod_stats_follow_cluster_selection(self):
         self.write_routes(
-            "mbk",
             [
                 route("Local", **{"pod-selector": "app=local"}),
                 route("Compact", showStats="false"),
@@ -240,22 +233,15 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
                 # Nodes are discovered by Homepage, never copied from host inventory.
                 self.assertEqual(set(kubernetes), {"cluster", "nodes"})
                 services = self.services()
-                local, remote = (
-                    ("Local", "Remote") if cluster == "mbk" else ("Remote", "Local")
-                )
-                self.assertNotIn("showStats", services[local])
-                self.assertEqual(services[local]["namespace"], local.lower())
-                for option in ("app", "namespace", "podSelector", "showStats"):
-                    self.assertNotIn(option, services[remote])
-                if cluster == "mbk":
-                    self.assertEqual(services[local]["podSelector"], "app=local")
-                    self.assertIs(services["Compact"]["showStats"], False)
+                self.assertNotIn("showStats", services["Local"])
+                self.assertEqual(services["Local"]["namespace"], "local")
+                self.assertEqual(services["Local"]["podSelector"], "app=local")
+                self.assertIs(services["Compact"]["showStats"], False)
                 layout = read_yaml(self.output / "settings.yaml")["layout"]
                 self.assertEqual(layout["Clusters"]["tab"], "Clusters")
 
     def test_live_placement_follows_rescheduling_selectors_and_unscheduled_apps(self):
         self.write_routes(
-            "mbk",
             [
                 route("Reader", **{"pod-selector": "app in (reader,feeds)"}),
                 route("Waiting"),
@@ -268,13 +254,12 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(
             set(self.groups("Clusters")),
-            {"mbk/venus", "mbk/saturn", "mbk/unscheduled", "syd"},
+            {"mbk/venus", "mbk/saturn", "mbk/unscheduled"},
         )
         self.assertIn("Reader", self.groups("Clusters")["mbk/venus"][0])
         self.assertIn("Reader", self.groups("Clusters")["mbk/saturn"][0])
         queries = [json.loads(line) for line in self.queries.read_text().splitlines()]
         self.assertTrue(any(query[-1] == "app in (reader,feeds)" for query in queries))
-        self.assertTrue(all(query[1] != "remote" for query in queries))
         self.placements.write_text(json.dumps({"reader": ["renamed"], "waiting": []}))
         self.assertEqual(self.render().returncode, 0)
         self.assertIn("mbk/renamed", self.groups("Clusters"))

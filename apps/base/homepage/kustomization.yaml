@@ -35,7 +35,6 @@ configMapGenerator:
       - render_services.sh
       - resolve_endpoints.yq
       - route_nodes.sh
-      - service_routes.yq
 configurations:
   - name-reference.yaml
 replacements:

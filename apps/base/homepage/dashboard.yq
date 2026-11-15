@@ -14,29 +14,28 @@ map(
   del(.enabled, .instance) |
   .tab = "Home" |
   with(select($route.clusterView == true); .tab = "Clusters") |
+  # Local apps report status through the Kubernetes connection; other clusters'
+  # apps have no connection, so they keep siteMonitor.
   with(select($cluster == strenv(HOMEPAGE_CLUSTER));
-    .app = (.app // $route.labels."app.kubernetes.io/name" // ($route.source | split("/") | .[2])) |
+    .app = (.app // $route.labels."app.kubernetes.io/name" // $route.name) |
     .namespace = $route.namespace |
-    with(select(."pod-selector" != null); .podSelector = ."pod-selector")) |
+    with(select(."pod-selector" != null); .podSelector = ."pod-selector") |
+    del(.siteMonitor)) |
+  with(select($cluster != strenv(HOMEPAGE_CLUSTER));
+    del(.app, .showStats) |
+    .siteMonitor = (.siteMonitor // $route.annotations."monitoring.excloo.dev/url" // .href) |
+    with(select($route.annotations."monitoring.excloo.dev/path" != null);
+      .siteMonitor = ("https://" + $route.hostnames[0] + $route.annotations."monitoring.excloo.dev/path"))) |
   del(."pod-selector") |
-  with(select($cluster != strenv(HOMEPAGE_CLUSTER)); del(.app, .namespace, .showStats)) |
   .description = (.description // "") |
   with(select($route.clusterView == false);
     .description = ([.description, ($route.clusterGroups | join(", "))] | map(select(. != "")) | join(" • "))) |
-  to_entries | .[] as $field ireduce ({};
-    setpath(($field.key | split(".")); ($field.value | sub("^\\{\\{ \"(.*)\" \\}\\}$"; "${1}")))) |
+  to_entries | .[] as $field ireduce ({}; setpath(($field.key | split(".")); $field.value)) |
   with(select(.widget.version != null); .widget.version |= from_yaml) |
   with(select(.widget.fields != null); .widget.fields |= from_yaml) |
   with(select(.showStats != null); .showStats |= from_yaml) |
   with(select($route.clusterView == false and $route.homeName != null);
     .name = $route.homeName) |
-  # In-cluster services report status through the Kubernetes connection. Keep
-  # the siteMonitor annotation for other clusters, where no connection exists.
-  with(select(.app != null); del(.siteMonitor)) |
-  with(select(.app == null);
-    .siteMonitor = (.siteMonitor // $route.annotations."monitoring.excloo.dev/url" // .href) |
-    with(select($route.annotations."monitoring.excloo.dev/path" != null);
-      .siteMonitor = ("https://" + $route.hostnames[0] + $route.annotations."monitoring.excloo.dev/path"))) |
   # Clusters cards show placement; widgets stay on Home.
   with(select($route.clusterView == true); del(.widget, .widgets)) |
   .location = $cluster
@@ -45,9 +44,8 @@ map(
   .key as $group | .value[] | to_entries | .[] |
   .value + {"group": $group, "name": .key,
     "location": ((.value.description // "") | split(" • ") | .[1:] | join(" • ")),
-    "tab": (["Home"] +
-      ($host_groups | map(select(. == $group)) | map("Servers")) +
-      ($cluster_names | map(select(. == $group)) | map("Clusters")) | .[-1])}] as $external |
+    "tab": (if ($cluster_names | any_c(. == $group)) then "Clusters"
+      elif ($host_groups | any_c(. == $group)) then "Servers" else "Home" end)}] as $external |
 # An app's routes collapse into one card. Homepage finds cards by group and
 # name, so same-named services elsewhere keep their location in the name.
 ($external + $applications) | unique_by(.tab + "/" + .group + "/" + .name + "/" + .location) |

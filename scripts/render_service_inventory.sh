@@ -44,7 +44,7 @@ for cluster_file in "${manifest_directory}"/clusters/*.yaml; do
   while IFS= read -r target; do
     target="${target#./}"
     # shellcheck disable=SC2016
-    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval --from-file apps/base/homepage/service_routes.yq -I=0 -N -o=json \
+    ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval --from-file scripts/service_routes.yq -I=0 -N -o=json \
       "${manifest_directory}/${target}.yaml" |
       ALL_ROUTES="${all_routes}" CLUSTER="${cluster}" yq eval -N -o=yaml -p=json -r '
         select(
