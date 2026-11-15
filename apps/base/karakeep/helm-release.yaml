@@ -31,7 +31,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/karakeep-app/karakeep
-              tag: 0.34.1
+              tag: 0.35.0
             probes:
               liveness: &health
                 path: /api/health
