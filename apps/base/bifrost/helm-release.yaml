@@ -560,6 +560,8 @@ spec:
               Authorization: env.STUDIO_MCP_AUTHORIZATION
             # Studio waits up to 31 minutes for generation results.
             toolExecutionTimeout: 1860
+            # Re-list Studio's tools so a deploy that adds or changes one reaches chats.
+            toolSyncInterval: 10m
             toolsToExecute: ["*"]
           - name: unifi_network
             isCodeModeClient: true
