@@ -130,6 +130,9 @@ alphabetise within each group. Preserve deliberate grouping and workflow order.
 
 - Render changed Helm charts and use small response fixtures for changed API
   comparisons; avoid adding a general validation framework.
+- For a values change to a live HelmRelease, also run
+  `helm upgrade --dry-run=server` against the release, since `helm template`
+  misses upgrade-time checks. Add any secrets it needs in an earlier change.
 - Deliver changes through a pull request; Flux deploys `main` once it merges.
   Verify the changed workload at the merged revision rather than waiting for
   unrelated workloads or a whole-cluster reconciliation.
