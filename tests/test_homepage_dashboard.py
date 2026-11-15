@@ -1,5 +1,6 @@
 """Check Homepage dashboard composition without network access."""
 
+import json
 import shutil
 import unittest
 
@@ -79,32 +80,29 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
     def test_management_services_share_schema_and_do_not_change_other_cards(self):
         homelab = self.directory / "homelab"
         shutil.copytree(HOMELAB, homelab)
-        path = homelab / "data/machines.yaml"
-        with path.open("a") as inventory:
-            inventory.write("""  lab:
-    first:
-      beszel: true
-      platform: ucore
-      type: server
-      services:
-        management:
-          description: Host Administration
-          icon: example-console
-          name: Example Console
-          port: 9090
-          scheme: https
-    second:
-      hostname: renamed
-      platform: bazzite
-      type: server
-      services:
-        management:
-          description: Host Administration
-          icon: example-console
-          name: Example Console
-          port: 9443
-          scheme: https
-""")
+        path = homelab / "inventory.json"
+        inventory = read_yaml(path)
+        for name, hostname, port in [
+            ("first", "first", 9090),
+            ("second", "renamed", 9443),
+        ]:
+            inventory["machines"][name] = {
+                "beszel": name == "first",
+                "type": "server",
+                "network": "lab",
+                "location": "lab-" + hostname,
+                "fqdn": hostname + ".lab.example.net",
+            }
+            inventory["services"][name + "/management"] = {
+                "machine": name,
+                "description": "Host Administration",
+                "icon": "example-console",
+                "name": "Example Console",
+                "scheme": "https",
+                "port": port,
+                "url": f"https://{hostname}.lab.example.net:{port}",
+            }
+        path.write_text(json.dumps(inventory))
         beszel = beszel_route()
         self.write_routes([beszel])
         result = self.render(HOMELAB_DIRECTORY=str(homelab))

@@ -60,7 +60,7 @@ spec:
         # Keep cloudflared's X-Forwarded-Proto: https and client address (pod subnet), so apps mark cookies Secure.
         forwardedHeaders:
           trustedIPs:
-            - 10.100.0.0/22
+            - ${pod_subnet}
         expose:
           default: false
           tunnel: true
