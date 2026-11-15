@@ -41,6 +41,8 @@ spec:
               secretKeyRef:
                 key: BIFROST_OWNER_API_KEY
                 name: bifrost
+          - name: NODE_OPTIONS
+            value: --require /patches/tool-history.cjs
         existingSecretName: librechat
     image:
       pullPolicy: IfNotPresent
@@ -255,12 +257,18 @@ spec:
     volumeMounts:
       - name: data
         mountPath: /app/client/public/images
+      - name: patches
+        mountPath: /patches
+        readOnly: true
       - name: uploads
         mountPath: /app/uploads
     volumes:
       - name: data
         persistentVolumeClaim:
           claimName: data
+      - name: patches
+        configMap:
+          name: librechat-patches
       - name: uploads
         persistentVolumeClaim:
           claimName: uploads
