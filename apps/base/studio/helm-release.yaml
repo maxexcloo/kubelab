@@ -47,7 +47,8 @@ spec:
               STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
               # Settings › Workers benchmarks a running text model with this image, taking the
               # model's key from the text Secret in its namespace (apps/base/text).
-              STUDIO_BENCHMARK_IMAGE: ghcr.io/maxexcloo/betterbench:source-f72bb9011a830fd98e82ab89d01e549efa76e9c5
+              # renovate: datasource=docker depName=ghcr.io/maxexcloo/betterbench
+              STUDIO_BENCHMARK_IMAGE: ghcr.io/maxexcloo/betterbench:v0.6.1-285
               STUDIO_BENCHMARK_SECRET: text
               # The navigation's Chat item opens LibreChat (apps/base/librechat/route.yaml).
               STUDIO_CHAT_URL: https://chat.excloo.com
