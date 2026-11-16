@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: radiance
+spec:
+  ingress:
+    # Studio queues image and video jobs, and parks and lists the models.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: studio
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: studio
+      ports:
+        - port: 8000
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radiance
+  policyTypes:
+    - Ingress
