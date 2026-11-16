@@ -24,8 +24,6 @@ spec:
       autoMount:
         enabled: false
       hostRoot: /sys/fs/cgroup
-    hostFirewall:
-      enabled: true
     hubble:
       relay:
         enabled: true
