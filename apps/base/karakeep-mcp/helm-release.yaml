@@ -15,7 +15,7 @@ spec:
               - --outputTransport=streamableHttp
               - --stateful
               # renovate: datasource=npm depName=@karakeep/mcp
-              - --stdio=npx --yes @karakeep/mcp@0.34.0
+              - --stdio=npx --yes @karakeep/mcp@0.35.0
             env:
               HOME: /tmp
               KARAKEEP_API_ADDR: http://karakeep.karakeep.svc.cluster.local:3000
