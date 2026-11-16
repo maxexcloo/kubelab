@@ -138,7 +138,6 @@ spec:
                 readOnly: true
                 subPath: radiance
               - *radiance-video
-      # The former video worker's folders; tp2 (comfyui-video) never runs beside it.
       secondary-data:
         hostPath: ${dataset_root}/ai/comfyui-video/data
         hostPathType: Directory
@@ -169,7 +168,7 @@ spec:
           gethomepage.dev/icon: sh-comfyui
           gethomepage.dev/name: ComfyUI
         hostnames:
-          - comfyui-image.${cluster_name}.excloo.dev
+          - comfyui.${cluster_name}.excloo.dev
         parentRefs:
           - name: private
             namespace: networking
