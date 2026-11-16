@@ -372,6 +372,14 @@ spec:
             name: Codex
             value: env.VIRTUAL_KEY_CODEX
             mcp_configs: *agent-mcp
+          - id: dsh
+            name: DeepSeek Harness
+            value: env.VIRTUAL_KEY_DSH
+            mcp_configs: *agent-mcp
+            provider_configs:
+              - provider: deepseek
+                allowed_models: [deepseek-flash]
+                key_ids: ["*"]
           # LibreChat offers a section per provider.
           - id: librechat
             name: LibreChat
