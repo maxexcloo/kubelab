@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: radiance
+resources:
+  - namespace.yaml
+  - network-policy.yaml
+components:
+  - ../../components/workload
+  - ../../components/gpu
+  - ../../components/default-deny
+configurations:
+  - name-reference.yaml
+configMapGenerator:
+  - name: radiance
+    files:
+      - radiance.yaml
+      - start.sh
+patches:
+  - path: helm-release.yaml
+    target:
+      kind: HelmRelease
