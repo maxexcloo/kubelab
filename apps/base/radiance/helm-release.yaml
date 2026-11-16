@@ -97,6 +97,20 @@ spec:
             main:
               - path: /models
                 readOnly: true
+    route:
+      private:
+        annotations:
+          gethomepage.dev/description: Image & Video Generation
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Artificial Intelligence
+          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: mdi-creation
+          gethomepage.dev/name: Radiance
+        hostnames:
+          - radiance.${cluster_name}.excloo.dev
+        parentRefs:
+          - name: private
+            namespace: networking
     service:
       main:
         controller: main
