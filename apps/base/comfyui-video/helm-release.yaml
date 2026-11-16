@@ -112,7 +112,7 @@ spec:
       private:
         annotations:
           gethomepage.dev/description: Video Workflows
-          gethomepage.dev/enabled: "true"
+          gethomepage.dev/enabled: "false"
           gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: sh-comfyui
