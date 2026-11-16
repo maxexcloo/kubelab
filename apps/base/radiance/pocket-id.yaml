@@ -1,0 +1,14 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: radiance
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/oauth2/callback
+    description: AI Inference
+    id: radiance
+    launchURL: https://app.invalid
+    name: Radiance
+    pkceEnabled: true
+  item: Radiance

@@ -94,7 +94,10 @@ spec:
           gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: mdi-creation
-          gethomepage.dev/name: Radiance
+          gethomepage.dev/name: &title Radiance
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/path: /ping
+          onepassword.excloo.dev/item: *title
         hostnames:
           - radiance.${cluster_name}.excloo.dev
         parentRefs:
