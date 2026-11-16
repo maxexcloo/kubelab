@@ -43,9 +43,11 @@ spec:
                 type: HTTP
                 spec:
                   timeoutSeconds: 5
+            # H3 and FastH3 pin about 42.5 GiB of host memory to load, and Radiance keeps 8 GiB
+            # of the limit free beside it (radiance.yaml). Venus has 64 GiB.
             resources:
               limits:
-                memory: 48Gi
+                memory: 58Gi
               requests:
                 cpu: 100m
                 memory: 1Gi
