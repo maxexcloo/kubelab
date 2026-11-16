@@ -56,6 +56,9 @@ spec:
             - name: gpu
               resourceClaimTemplateName: gpu-2
       prepull:
+        # The release ServiceAccount is created after pre-install hooks.
+        serviceAccount:
+          name: default
         containers:
           main:
             image: *image
