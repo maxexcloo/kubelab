@@ -33,7 +33,7 @@ spec:
                 name: text
           image: &image
             repository: docker.io/stilldeadcode/radiance
-            tag: 1.17.0
+            tag: 2.1.0
           resources:
             claims:
               - name: gpu
