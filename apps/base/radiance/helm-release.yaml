@@ -3,17 +3,6 @@ kind: HelmRelease
 metadata:
   name: application
 spec:
-  # GPU workloads stay stopped until started with kubectl scale; any upgrade of
-  # the release stops them again.
-  postRenderers:
-    - kustomize:
-        patches:
-          - patch: |-
-              - op: add
-                path: /spec/replicas
-                value: 0
-            target:
-              kind: Deployment
   values:
     controllers:
       main:
