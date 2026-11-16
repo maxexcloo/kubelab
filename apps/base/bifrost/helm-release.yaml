@@ -376,27 +376,6 @@ spec:
             name: DeepSeek Harness
             value: env.VIRTUAL_KEY_DSH
             mcp_configs: *agent-mcp
-            provider_configs:
-              - provider: deepseek
-                allowed_models: [deepseek-flash]
-                key_ids: ["*"]
-          # LibreChat offers a section per provider.
-          - id: librechat
-            name: LibreChat
-            allow_all_providers: true
-            value: env.VIRTUAL_KEY_LIBRECHAT
-            # Studio trusts the forwarded user headers, so only LibreChat may call it.
-            mcp_configs:
-              - mcp_client_name: studio
-                tools_to_execute: ["*"]
-            provider_configs:
-              - provider: local
-                allowed_models: ["*"]
-                key_ids: ["*"]
-          - id: opencode
-            name: OpenCode
-            value: env.VIRTUAL_KEY_OPENCODE
-            mcp_configs: *agent-mcp
             # Agents reach the models themselves; cloud/auto is for chat.
             provider_configs: &agent-models
               - provider: abliteration
@@ -438,6 +417,24 @@ spec:
               - provider: xiaomi
                 allowed_models: ["*"]
                 key_ids: ["*"]
+          # LibreChat offers a section per provider.
+          - id: librechat
+            name: LibreChat
+            allow_all_providers: true
+            value: env.VIRTUAL_KEY_LIBRECHAT
+            # Studio trusts the forwarded user headers, so only LibreChat may call it.
+            mcp_configs:
+              - mcp_client_name: studio
+                tools_to_execute: ["*"]
+            provider_configs:
+              - provider: local
+                allowed_models: ["*"]
+                key_ids: ["*"]
+          - id: opencode
+            name: OpenCode
+            value: env.VIRTUAL_KEY_OPENCODE
+            mcp_configs: *agent-mcp
+            provider_configs: *agent-models
           # The owner's personal key for LibreChat's restricted MCP servers.
           - id: owner
             name: Owner
