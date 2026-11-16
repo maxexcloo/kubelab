@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: comfyui-video
+  name: comfyui
 spec:
   ingress:
     - from:
@@ -22,6 +22,6 @@ spec:
         - port: 8188
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: comfyui-video
+      app.kubernetes.io/name: comfyui
   policyTypes:
     - Ingress

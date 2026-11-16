@@ -100,7 +100,7 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/description: Image & Video Generation
+          gethomepage.dev/description: AI Inference
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/href: https://app.invalid
