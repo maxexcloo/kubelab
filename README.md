@@ -12,7 +12,7 @@ in the `minilab` repository.
 
 ## Setup
 
-Install wget and the [shared Mise configuration](https://github.com/maxexcloo/dotfiles#shared-tools--tasks),
+Install the [shared Mise configuration](https://github.com/maxexcloo/dotfiles#shared-tools--tasks),
 then install the configured tools and Git hooks:
 
 ```shell
@@ -31,9 +31,8 @@ Edit workload configuration in `apps/base/<application>` and select it through
 
 ## Syncthing
 
-Manage Syncthing peers and folder settings in each instance's GUI. The `AI`
-folder syncs both ways between Venus and Saturn and ignores `*.download`, `*.part`
-and `*.part.json`; keep Ignore Permissions on at Saturn to preserve its ACLs.
+Manage Syncthing peers and folders in each instance's GUI. Keep Ignore Permissions
+on at Saturn to preserve its ACLs.
 
 ## Deployment
 

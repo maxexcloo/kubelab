@@ -48,7 +48,7 @@ spec:
               # Settings › Workers benchmarks a running text model with this image, taking the
               # model's key from the text Secret in its namespace (apps/base/text).
               # renovate: datasource=docker depName=ghcr.io/maxexcloo/betterbench
-              STUDIO_BENCHMARK_IMAGE: ghcr.io/maxexcloo/betterbench:v0.6.1-285
+              STUDIO_BENCHMARK_IMAGE: ghcr.io/maxexcloo/betterbench:v0.6.1-291
               STUDIO_BENCHMARK_SECRET: text
               # The navigation's Chat item opens LibreChat (apps/base/librechat/route.yaml).
               STUDIO_CHAT_URL: https://chat.excloo.com
@@ -59,7 +59,7 @@ spec:
               STUDIO_KUBERNETES_GPUS: '{"gpu": 2}'
               # Studio finds its workloads from the studio.excloo.dev labels on the GPU
               # Deployments in these namespaces; text ones serve local/auto.
-              STUDIO_KUBERNETES_NAMESPACES: comfyui-image,comfyui-video,text
+              STUDIO_KUBERNETES_NAMESPACES: comfyui-image,comfyui-video,radiance,text
               STUDIO_LOCAL_TEXT_MODEL: local/auto
               # Result links and Grok's /mcp/<token> URL bypass Access (cloudflare-access.yaml).
               STUDIO_MCP_PUBLIC_URL:
@@ -79,7 +79,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/maxexcloo/studio
-              tag: 2026.11.15.8
+              tag: 2026.11.16.22
             probes:
               liveness:
                 path: /api/ping
@@ -107,7 +107,7 @@ spec:
       dnsConfig:
         nameservers:
           - 127.0.0.1
-          - 10.100.4.10
+          - ${dns_service_ip}
       # Studio drains in-flight requests for up to 30 s on SIGTERM (backend/shutdown.js); leave it room.
       terminationGracePeriodSeconds: 45
       # Files on the TrueNAS datasets belong to the image's node user.

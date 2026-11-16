@@ -1,0 +1,166 @@
+{
+  "clusters": {
+    "mbk": {},
+    "syd": {}
+  },
+  "machines": {
+    "luna": {
+      "type": "appliance",
+      "fqdn": "luna.mbk.example.net",
+      "network": "mbk",
+      "location": "mbk-luna"
+    },
+    "nanokvm": {
+      "type": "appliance",
+      "fqdn": "nanokvm.mbk.example.net",
+      "network": "mbk",
+      "location": "mbk-nanokvm"
+    },
+    "saturn": {
+      "type": "storage",
+      "fqdn": "storage.mbk.example.net",
+      "network": "mbk",
+      "location": "mbk-storage"
+    },
+    "slzb-06m": {
+      "type": "appliance",
+      "fqdn": "slzb-06m.mbk.example.net",
+      "network": "mbk",
+      "location": "mbk-slzb-06m"
+    },
+    "sol": {
+      "type": "router",
+      "fqdn": "sol.mbk.example.net",
+      "network": "mbk",
+      "location": "mbk-sol"
+    },
+    "taco": {
+      "type": "vm",
+      "fqdn": "taco.mbk.example.net",
+      "network": "mbk",
+      "location": "mbk-taco"
+    },
+    "venus": {
+      "type": "server",
+      "fqdn": "venus.mbk.example.net",
+      "network": "mbk",
+      "location": "mbk-venus"
+    },
+    "neptune": {
+      "type": "vm",
+      "fqdn": "neptune.syd.example.net",
+      "network": "syd",
+      "location": "syd-neptune"
+    }
+  },
+  "providers": {
+    "example": {
+      "description": "Example provider",
+      "icon": "example",
+      "name": "Example",
+      "url": "https://provider.example.com"
+    },
+    "gatus": {
+      "description": "Health Monitoring & Status Page",
+      "group": "Operations",
+      "icon": "gatus",
+      "name": "Gatus",
+      "url": "https://status.example.net",
+      "widget": {
+        "type": "gatus"
+      }
+    }
+  },
+  "services": {
+    "luna/esphome": {
+      "description": "ESP Device Builder",
+      "group": "Smart Home",
+      "icon": "sh-esphome",
+      "name": "ESPHome",
+      "path": "/5c53de3b_esphome",
+      "port": 443,
+      "scheme": "https",
+      "siteMonitor": "",
+      "machine": "luna",
+      "url": "https://luna.mbk.example.net/5c53de3b_esphome"
+    },
+    "luna/management": {
+      "description": "Smart Home & Automations",
+      "group": "Smart Home",
+      "icon": "sh-home-assistant",
+      "name": "Home Assistant",
+      "port": 443,
+      "scheme": "https",
+      "widget": {
+        "key": "{{HOMEPAGE_VAR_HOME_ASSISTANT_ACCESS_TOKEN}}",
+        "type": "homeassistant"
+      },
+      "machine": "luna",
+      "url": "https://luna.mbk.example.net"
+    },
+    "nanokvm/management": {
+      "description": "Remote Console & Power Control",
+      "icon": "sipeed",
+      "name": "NanoKVM",
+      "port": 80,
+      "scheme": "http",
+      "machine": "nanokvm",
+      "url": "http://nanokvm.mbk.example.net"
+    },
+    "saturn/management": {
+      "description": "Storage Appliance",
+      "group": "Infrastructure",
+      "icon": "sh-truenas-scale",
+      "name": "TrueNAS",
+      "port": 8444,
+      "scheme": "https",
+      "widget": {
+        "enablePools": true,
+        "key": "{{HOMEPAGE_VAR_TRUENAS_API_KEY}}",
+        "type": "truenas",
+        "version": 2
+      },
+      "machine": "saturn",
+      "url": "https://storage.mbk.example.net:8444"
+    },
+    "saturn/netboot": {
+      "description": "Network Boot Server",
+      "group": "Infrastructure",
+      "icon": "mdi-server-network-#ffffff",
+      "name": "Netboot",
+      "port": 31010,
+      "scheme": "http",
+      "machine": "saturn",
+      "url": "http://storage.mbk.example.net:31010"
+    },
+    "saturn/syncthing": {
+      "port": 20910,
+      "scheme": "http",
+      "machine": "saturn",
+      "url": "http://storage.mbk.example.net:20910"
+    },
+    "slzb-06m/management": {
+      "description": "Zigbee Ethernet Adapter",
+      "icon": "zigbee",
+      "name": "SLZB-06M",
+      "port": 80,
+      "scheme": "http",
+      "machine": "slzb-06m",
+      "url": "http://slzb-06m.mbk.example.net"
+    },
+    "sol/management": {
+      "description": "Network Controller",
+      "group": "Infrastructure",
+      "icon": "sh-ubiquiti-unifi",
+      "name": "UniFi",
+      "port": 443,
+      "scheme": "https",
+      "widget": {
+        "key": "{{HOMEPAGE_VAR_UNIFI_API_KEY}}",
+        "type": "unifi"
+      },
+      "machine": "sol",
+      "url": "https://sol.mbk.example.net"
+    }
+  }
+}

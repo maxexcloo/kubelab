@@ -19,7 +19,6 @@ patches:
         prune: true
         retryInterval: 30s
         timeout: 10m
-        wait: true
         sourceRef:
           kind: GitRepository
           name: flux-system
@@ -27,17 +26,6 @@ patches:
       group: kustomize.toolkit.fluxcd.io
       kind: Kustomization
       name: (apps|automation|crossplane-runtime|foundation|platform)
-  - patch: |-
-      apiVersion: kustomize.toolkit.fluxcd.io/v1
-      kind: Kustomization
-      metadata:
-        name: _
-      spec:
-        wait: false
-    target:
-      group: kustomize.toolkit.fluxcd.io
-      kind: Kustomization
-      name: (apps|automation|crossplane-runtime|platform)
   # Bootstrap dependencies must be healthy at their current generation; unrelated
   # application revisions do not need to reconcile the whole platform in lockstep.
   - patch: |-

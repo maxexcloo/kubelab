@@ -1,0 +1,103 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  # GPU workloads stay stopped until started with kubectl scale; any upgrade of
+  # the release stops them again.
+  postRenderers:
+    - kustomize:
+        patches:
+          - patch: |-
+              - op: add
+                path: /spec/replicas
+                value: 0
+            target:
+              kind: Deployment
+  values:
+    controllers:
+      main:
+        annotations:
+          studio.excloo.dev/backend: radiance
+          studio.excloo.dev/capabilities: image,video
+          studio.excloo.dev/label: Radiance
+          studio.excloo.dev/worker: radiance
+        labels:
+          studio.excloo.dev/kind: image
+        strategy: Recreate
+        containers:
+          main:
+            command:
+              - /bin/sh
+              - /etc/radiance/start.sh
+            image: &image
+              repository: docker.io/stilldeadcode/radiance
+              tag: 2.1.0
+            # Readiness only: /health answers once the listener is open, and models load on
+            # request.
+            probes:
+              readiness:
+                enabled: true
+                path: /health
+                port: 8000
+                type: HTTP
+                spec:
+                  timeoutSeconds: 5
+            resources:
+              limits:
+                memory: 48Gi
+              requests:
+                cpu: 100m
+                memory: 1Gi
+              claims:
+                - name: gpu
+        pod:
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: gpu-2
+      prepull:
+        # The release ServiceAccount is created after pre-install hooks.
+        serviceAccount:
+          name: default
+        containers:
+          main:
+            image: *image
+    defaultPodOptions:
+      nodeSelector:
+        node.excloo.dev/dedicated: gpu
+      securityContext:
+        seccompProfile:
+          type: Unconfined
+      terminationGracePeriodSeconds: 60
+      tolerations:
+        - key: node.excloo.dev/dedicated
+          operator: Equal
+          value: gpu
+    persistence:
+      config:
+        name: radiance
+        type: configMap
+        globalMounts:
+          - path: /etc/radiance
+            readOnly: true
+      data:
+        type: emptyDir
+        advancedMounts:
+          main:
+            main:
+              - path: /data
+      models:
+        hostPath: ${dataset_root}/ai/models
+        hostPathType: Directory
+        type: hostPath
+        advancedMounts:
+          main:
+            main:
+              - path: /models
+                readOnly: true
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: 8000

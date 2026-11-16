@@ -26,8 +26,8 @@ spec:
     route:
       private:
         annotations:
-          gethomepage.dev/name: Syncthing (Venus)
+          gethomepage.dev/name: &title Syncthing (Venus)
           gethomepage.dev/widget.key: '{{ "{{HOMEPAGE_VAR_SYNCTHING_VENUS_API_KEY}}" }}'
-          onepassword.excloo.dev/item: Syncthing (Venus)
+          onepassword.excloo.dev/item: *title
         hostnames:
           - syncthing-venus.${cluster_name}.excloo.dev

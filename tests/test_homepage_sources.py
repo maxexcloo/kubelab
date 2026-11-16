@@ -5,7 +5,6 @@ import shutil
 import unittest
 
 from homepage_support import HOMELAB, HomepageDashboardFixture, route
-from support import read_yaml
 
 
 class HomepageSourcesTests(HomepageDashboardFixture, unittest.TestCase):
@@ -90,12 +89,7 @@ class HomepageSourcesTests(HomepageDashboardFixture, unittest.TestCase):
         self.routes.write_text(valid_routes)
         homelab = self.directory / "homelab"
         shutil.copytree(HOMELAB, homelab)
-        machines = homelab / "data/machines.yaml"
-        inventory = read_yaml(machines)
-        inventory["machines"]["mbk"]["saturn"]["services"]["management"]["scheme"] = (
-            "ftp"
-        )
-        machines.write_text(json.dumps(inventory))
+        (homelab / "inventory.json").write_text("{broken json")
         self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
         self.assertEqual(before, files())
 

@@ -31,6 +31,7 @@ resources:
   - ../../base/openspeedtest
   - ../../base/papra
   - ../../base/pocket-id
+  - ../../base/radiance
   - ../../base/reactive-resume
   - ../../base/redlib
   - ../../base/romm
@@ -125,10 +126,10 @@ replacements:
           delimiter: /
           index: 2
   - source:
-      kind: HTTPRoute
+      kind: HelmRelease
       name: librechat-admin
       namespace: librechat-admin
-      fieldPath: spec.hostnames.0
+      fieldPath: spec.values.route.private.hostnames.0
     targets:
       - select:
           kind: HelmRelease

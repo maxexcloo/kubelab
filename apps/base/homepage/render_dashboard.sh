@@ -42,7 +42,7 @@ if [ -z "$homelab_directory" ]; then
   wget -O - -q -T 30 "${HOMELAB_ARCHIVE:?HOMELAB_ARCHIVE is required}" |
     tar -xz -C "$homelab_directory" --strip-components=1
 fi
-export HOMELAB_MACHINES="$homelab_directory/data/machines.yaml"
+export HOMELAB_INVENTORY="$homelab_directory/inventory.json"
 
 "$KUBECTL" get httproutes --all-namespaces --output json > "$temporary_directory/httproutes.json"
 # Minilab prefixes its route names, which the Home group already states.
@@ -64,7 +64,7 @@ sh "$script_directory/route_nodes.sh" "$temporary_directory/routes.yaml" "$tempo
 mkdir "$temporary_directory/clusters"
 CLUSTER="$HOMEPAGE_CLUSTER" yq -o=json -I=0 '.[].cluster = strenv(CLUSTER)' \
   "$temporary_directory/local-routes.yaml" > "$temporary_directory/clusters/$HOMEPAGE_CLUSTER.json"
-for cluster in $(yq '.clusters | keys | .[]' "$homelab_directory/data/clusters.yaml"); do
+for cluster in $(yq -r '.clusters | keys | .[]' "$HOMELAB_INVENTORY"); do
   [ "$cluster" != "$HOMEPAGE_CLUSTER" ] || continue
   if wget -O "$temporary_directory/remote.json" -q -T 10 \
     "https://homepage.$cluster.excloo.dev/dashboard/routes.json" &&
@@ -85,7 +85,7 @@ HOMEPAGE_BESZEL_ROUTES="$temporary_directory/beszel-routes.json" \
 SERVICES="$temporary_directory/external-services.yaml" \
   yq --from-file "$script_directory/dashboard.yq" "$temporary_directory/inventory.yaml" \
   > "$temporary_directory/dashboard-services.yaml"
-yq --from-file "$script_directory/provider_widgets.yq" "$homelab_directory/data/providers.yaml" \
+yq --from-file "$script_directory/provider_widgets.yq" "$HOMELAB_INVENTORY" \
   > "$temporary_directory/providers.yaml"
 yq ea '[.[]]' "$temporary_directory/dashboard-services.yaml" "$temporary_directory/providers.yaml" \
   > "$temporary_directory/config/services.yaml"
@@ -97,8 +97,7 @@ done
 printf '\n:root { --homepage-cluster: "%s"; }\n' "$HOMEPAGE_CLUSTER" >> "$temporary_directory/config/custom.css"
 yq '(.[] | select(has("kubernetes"))).kubernetes.cluster.label = strenv(HOMEPAGE_CLUSTER)' \
   "$source_directory/widgets.yaml" > "$temporary_directory/widgets.yaml"
-MACHINES="$homelab_directory/data/machines.yaml" DOMAINS="$homelab_directory/data/domains.yaml" \
-  INFRASTRUCTURE="$HOMELAB_INFRASTRUCTURE_FILE" \
+INVENTORY="$HOMELAB_INVENTORY" INFRASTRUCTURE="$HOMELAB_INFRASTRUCTURE_FILE" \
   yq --from-file "$script_directory/resolve_endpoints.yq" \
   "$temporary_directory/widgets.yaml" > "$temporary_directory/config/widgets.yaml"
 

@@ -31,6 +31,23 @@ spec:
         fsGroup: 1000
         runAsGroup: 1000
         runAsUser: 1000
+    route:
+      private:
+        forceRename: "{{ .Release.Name }}"
+        annotations:
+          # The admin panel signs in with LibreChat accounts.
+          onepassword.excloo.dev/item: LibreChat
+        hostnames:
+          - librechat-admin.${cluster_name}.excloo.dev
+        labels:
+          app.kubernetes.io/name: "{{ .Release.Name }}"
+        parentRefs:
+          - name: private
+            namespace: networking
+        rules:
+          - backendRefs:
+              - identifier: main
+                port: http
     service:
       main:
         ports:
