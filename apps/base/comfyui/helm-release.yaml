@@ -72,6 +72,8 @@ spec:
             - name: gpu
               resourceClaimTemplateName: gpu-1
       prepull:
+        serviceAccount:
+          name: default
         containers:
           main:
             image: *image
