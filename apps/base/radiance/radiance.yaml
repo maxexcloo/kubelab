@@ -26,15 +26,22 @@ models:
     max-lora-rank: 64
     max-loras: 1
     vision-tower-placement: ram
-  flux-3-klein-base-iq8r:
-    model: /models/radiance/.v2/flux-3-klein-base-iq8r.rad
+  flux-3-image-klein-base-iq8r:
+    model: /models/radiance/.v2/flux-3-image-klein-base-iq8r.rad
     tp: 1
-  flux-3-klein-iq8r:
-    model: /models/radiance/.v2/flux-3-klein-iq8r.rad
+  flux-3-image-klein-iq8r:
+    model: /models/radiance/.v2/flux-3-image-klein-iq8r.rad
     tp: 1
-  krea-2-raw-iq8r:
-    model: /models/radiance/.v2/krea-2-raw-iq8r.rad
+  # Text models, by the names Bifrost serves them as local/<name>.
+  gemma-4-31b-heretic:
+    model: /models/radiance/.v2/gemma4-31b-heretic-ara-a4.rad
     tp: 1
+    kv-cache-dtype: i8
+    max-model-len: 169328
+    max-num-batched-tokens: 2048
+    max-num-seqs: 2
+    num-speculative-tokens: 3
+    vision-tower-placement: ram
   krea-2-turbo-iq8r:
     model: /models/radiance/.v2/krea-2-turbo-iq8r.rad
     tp: 1
@@ -46,8 +53,8 @@ models:
     vision-tower-placement: ram
   # A Qwen-Image request holds two sequences of max-model-len tokens, and the model's own 33600
   # is more than one card. 8192 tokens is about 1.9 megapixels.
-  noctq-v4-uncensored-iq8r:
-    model: /models/radiance/.v2/noctq-v4-uncensored-iq8r.rad
+  noctq-v4-iq8r:
+    model: /models/radiance/.v2/noctq-v4-iq8r.rad
     tp: 1
     max-model-len: 8192
   qwen-image-2.1-iq8r:
@@ -58,7 +65,40 @@ models:
     model: /models/radiance/.v2/qwen-image-2.1-turbo-iq8r.rad
     tp: 1
     max-model-len: 8192
-  qwen-image-2.1-turbo-uncensored-iq8r:
-    model: /models/radiance/.v2/qwen-image-2.1-turbo-uncensored-iq8r.rad
+  qwen3.8-27b-iq4r:
+    model: /models/radiance/.v2/qwen3.8-27b-iq4r-l-v4.rad
     tp: 1
-    max-model-len: 8192
+    embedding-placement: ram
+    host-pool-mib: 3072
+    kv-cache-dtype: i8
+    max-model-len: 262144
+    max-num-batched-tokens: 2048
+    max-num-seqs: 8
+    prefix-cache-mib: 4096
+    reasoning-effort-map: high=xhigh
+  # The auto and uncensored aliases are local/auto and local/uncensored.
+  qwen3.8-27b-uncensored:
+    model: /models/radiance/.v2/qwen3.8-27b-uncensored-iq8r.rad
+    aliases: [auto, uncensored]
+    tp: 2
+    kv-cache-dtype: i8
+    max-model-len: 200000
+    max-num-batched-tokens: 2048
+    max-num-seqs: 8
+    prefix-cache-mib: 8192
+    reasoning-effort-map: high=xhigh
+  # Its experts do not fit the cards: the hottest stay there and the rest stream from host memory.
+  qwen3.8-flash-next:
+    model: /models/radiance/.v2/qwen3.8-next-flash-iqr-v4.rad
+    tp: 2
+    host-pool-mib: 12288
+    kv-cache-dtype: i8
+    max-model-len: 200000
+    max-num-batched-tokens: 2048
+    max-num-seqs: 8
+    num-speculative-tokens: 3
+    placement: expert_tiered
+    prefix-cache-mib: 4096
+    reasoning-effort-map: high=xhigh
+    tp-wire: wht6
+    ttl: 30m
