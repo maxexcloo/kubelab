@@ -1,0 +1,15 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: PocketIDClient
+metadata:
+  name: songmirror
+spec:
+  client:
+    callbackURLs:
+      - https://app.invalid/oauth2/callback
+      - https://app.invalid/oauth2/callback
+    description: Playlist Sync & Local Audio Mirror
+    id: songmirror
+    launchURL: https://app.invalid
+    name: SongMirror
+    pkceEnabled: true
+  item: SongMirror
