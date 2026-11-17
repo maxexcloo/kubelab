@@ -17,8 +17,10 @@ spec:
       version: 1.20.4
   values:
     MTU: 1280
-    # The TrueNAS Tailscale sidecar is outside Talos's cgroup and needs kube-proxy for ClusterIPs.
-    kubeProxyReplacement: false
+    # KubePrism is reachable before Kubernetes Service forwarding starts.
+    k8sServiceHost: localhost
+    k8sServicePort: 7445
+    kubeProxyReplacement: true
     bpf:
       hostLegacyRouting: true
     cgroup:
