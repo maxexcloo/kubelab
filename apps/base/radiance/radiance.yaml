@@ -58,18 +58,31 @@ models:
     max-loras: 1
     vision-tower-placement: ram
   # A Qwen-Image request holds two sequences of max-model-len tokens, and the model's own 33600
-  # is more than the cards. 20480 on two cards holds four references with their prompt.
+  # is more than the cards. 8192 on one card holds three references with their prompt; Studio sends
+  # four to the -refs entry, whose 20480 on two cards holds four.
   noctq-v4-iq8r:
+    model: /models/radiance/.v2/noctq-v4-iq8r.rad
+    tp: 1
+    max-model-len: 8192
+  noctq-v4-iq8r-refs:
     model: /models/radiance/.v2/noctq-v4-iq8r.rad
     tp: 2
     max-model-len: 20480
     tp-wire: wht6
   qwen-image-2.1-iq8r:
     model: /models/radiance/.v2/qwen-image-2.1-iq8r.rad
+    tp: 1
+    max-model-len: 8192
+  qwen-image-2.1-iq8r-refs:
+    model: /models/radiance/.v2/qwen-image-2.1-iq8r.rad
     tp: 2
     max-model-len: 20480
     tp-wire: wht6
   qwen-image-2.1-turbo-iq8r:
+    model: /models/radiance/.v2/qwen-image-2.1-turbo-iq8r.rad
+    tp: 1
+    max-model-len: 8192
+  qwen-image-2.1-turbo-iq8r-refs:
     model: /models/radiance/.v2/qwen-image-2.1-turbo-iq8r.rad
     tp: 2
     max-model-len: 20480
