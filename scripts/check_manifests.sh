@@ -6,7 +6,7 @@ cache_directory="${XDG_CACHE_HOME:-${HOME}/.cache}/kubelab/kubeconform"
 # Keep validation aligned with the deployed cluster API.
 kubernetes_version="$(kubectl version --client -o json | yq -r '.clientVersion.gitVersion')"
 # renovate: datasource=git-refs depName=https://github.com/datreeio/CRDs-catalog
-crd_catalog_revision="fe5a915f84547feb194491b7b8b7d40ad321737a"
+crd_catalog_revision="784ec895547a36e548e6810b41f27baade3a0890"
 mkdir -p "${cache_directory}"
 
 # Kinds without a published schema, including Kubelab's own composite resources, are not validated.
