@@ -61,7 +61,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/href: https://app.invalid/management.html
-          gethomepage.dev/icon: mdi-api-#ffffff
+          gethomepage.dev/icon: https://raw.githubusercontent.com/router-for-me/Cli-Proxy-API-Management-Center/main/logo.jpg
           gethomepage.dev/name: &title CLI Proxy API
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /healthz

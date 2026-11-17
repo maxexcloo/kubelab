@@ -48,14 +48,14 @@ spec:
                     User-Agent: [kubelab-crossplane/1.0]
                     X-API-Key: ["{{ pocket-id:pocket-id:STATIC_API_KEY }}"]
                   mappings:
-                    # Homepage icon names become logo URLs: sh- icons come from
-                    # selfh.st, mdi- and si- glyphs have none, and other names come
-                    # from dashboard-icons. A -light icon is the dark-theme logo.
+                    # A -light catalogue icon supplies the dark-theme logo.
                     - action: CREATE
                       body: |-
                         .payload.body |
                         (.icon // "") as $icon | del(.icon) |
-                        if $icon == "" or ($icon | test("^(mdi|si)-")) then . else
+                        if $icon == "" or ($icon | test("^(mdi|si)-")) then .
+                        elif ($icon | test("^https?://")) then . + {logoUrl: $icon}
+                        else
                           (if ($icon | startswith("sh-"))
                             then "https://cdn.jsdelivr.net/gh/selfhst/icons/png/" + ($icon | ltrimstr("sh-"))
                             else "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/" + $icon end) as $logo |
@@ -71,7 +71,9 @@ spec:
                       body: |-
                         .payload.body | del(.id) |
                         (.icon // "") as $icon | del(.icon) |
-                        if $icon == "" or ($icon | test("^(mdi|si)-")) then . else
+                        if $icon == "" or ($icon | test("^(mdi|si)-")) then .
+                        elif ($icon | test("^https?://")) then . + {logoUrl: $icon}
+                        else
                           (if ($icon | startswith("sh-"))
                             then "https://cdn.jsdelivr.net/gh/selfhst/icons/png/" + ($icon | ltrimstr("sh-"))
                             else "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/" + $icon end) as $logo |
