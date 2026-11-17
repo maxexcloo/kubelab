@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: cloudnative-pg
         namespace: flux-system
-      version: 0.29.1
+      version: 0.29.2
   values:
     nodeSelector:
       node.excloo.dev/network: internal
