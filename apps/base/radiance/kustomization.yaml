@@ -10,7 +10,7 @@ components:
   - ../../components/workload
   - ../../components/gpu
   - ../../components/default-deny
-  - ../../components/oauth2-proxy-config
+  - ../../components/oauth2-proxy
 configurations:
   - name-reference.yaml
 configMapGenerator:
@@ -22,6 +22,18 @@ patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.hostnames.0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.main.containers.oauth2-proxy.env.OAUTH2_PROXY_REDIRECT_URL
+        options:
+          delimiter: /
+          index: 2
 transformers:
   - ../../transformers/cluster-scoped
   - ../../transformers/pocket-id-icon-private
