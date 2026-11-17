@@ -74,13 +74,25 @@ endpoints:
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
       # LibreChat assumes 32k for unknown models and summarises too early. Bifrost reports no
-      # context lengths, and every model here has at least 131k. Keys match as substrings, so
-      # this covers every name.
+      # context lengths. The longest key a name contains wins: every model has at least 131k,
+      # and local/ ones take their max-model-len in apps/base/radiance/radiance.yaml.
       tokenConfig:
         /:
           prompt: 0
           completion: 0
           context: 131072
+        local/:
+          prompt: 0
+          completion: 0
+          context: 200000
+        local/gemma-4-31b-heretic:
+          prompt: 0
+          completion: 0
+          context: 169328
+        local/qwen3.8-27b-iq4r:
+          prompt: 0
+          completion: 0
+          context: 262144
       titleConvo: true
       # Titles use the conversation's own model, so a cloud chat titles through cloud/ and a local one through local/.
       titleModel: current_model
@@ -161,6 +173,51 @@ endpoints:
         reasoningKey: reasoning_content
         includeReasoningContent: true
         includeReasoningHistory: true
+# Readable entries for the local models, listed under the Local section beside its raw ids.
+modelSpecs:
+  list:
+    - name: local-auto
+      label: Local Auto
+      description: The default local model, currently Qwen3.8 27B Uncensored.
+      group: Local
+      preset:
+        endpoint: Local
+        model: local/auto
+    - name: local-uncensored
+      label: Local Uncensored
+      description: The local model for uncensored chats, currently Qwen3.8 27B Uncensored.
+      group: Local
+      preset:
+        endpoint: Local
+        model: local/uncensored
+    - name: local-gemma-4-31b-heretic
+      label: Gemma 4 31B Heretic
+      description: Gemma 4 31B with refusals removed, on one card. 169k context.
+      group: Local
+      preset:
+        endpoint: Local
+        model: local/gemma-4-31b-heretic
+    - name: local-qwen3.8-27b-iq4r
+      label: Qwen3.8 27B IQ4R
+      description: Qwen3.8 27B at 4 bits on one card. The longest local context, 262k.
+      group: Local
+      preset:
+        endpoint: Local
+        model: local/qwen3.8-27b-iq4r
+    - name: local-qwen3.8-27b-uncensored
+      label: Qwen3.8 27B Uncensored
+      description: Qwen3.8 27B with refusals removed, on both cards. 200k context.
+      group: Local
+      preset:
+        endpoint: Local
+        model: local/qwen3.8-27b-uncensored
+    - name: local-qwen3.8-flash-next
+      label: Qwen3.8 Flash Next
+      description: A mixture of experts across both cards, part streamed from host memory. 200k context; the slowest to load.
+      group: Local
+      preset:
+        endpoint: Local
+        model: local/qwen3.8-flash-next
 fileConfig:
   endpoints:
     agents:
