@@ -34,7 +34,7 @@ models:
   flux-3-image-klein-iq8r:
     model: /models/radiance/.v2/flux-3-image-klein-iq8r.rad
     tp: 1
-  # Text models, by the names Bifrost serves them as local/<name>.
+  # Text models, which Bifrost serves as local/<name> (apps/base/bifrost/router.py).
   # The LoRA folder is ComfyUI's, for image and video; a text model given it does not load.
   gemma-4-31b-heretic:
     lora-dir: ""

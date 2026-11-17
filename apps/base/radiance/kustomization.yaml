@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - rbac.yaml
 components:
   - ../../components/workload
   - ../../components/gpu

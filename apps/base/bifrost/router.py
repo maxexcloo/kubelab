@@ -1,20 +1,17 @@
-"""Serves Bifrost's local/ provider from the text Services, and lists cloud/'s aliases.
+"""Serves Bifrost's local/ provider from Radiance, and lists cloud/'s aliases.
 
-Each Service in NAMESPACE annotated text.excloo.dev/priority serves one local text model.
-local/auto reaches them in priority order, moving on when one is busy, and local/uncensored
-does the same for those annotated text.excloo.dev/uncensored. local/<name> reaches the
-Service that reports that model name. Requests otherwise pass through unchanged, so clients
-set reasoning themselves. Requests nothing can serve fail fast with 503.
+Radiance loads the model a request names, so local/<name> reaches Radiance as <name>; auto and
+uncensored are Radiance aliases. Radiance also serves image and video models, so only the text
+models in LOCAL are listed and served. Requests otherwise pass through unchanged, so clients set
+reasoning themselves. While Radiance is stopped, local/ requests fail fast with 503.
 """
 
 import http.client
 import json
 import os
-import ssl
-import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlsplit
 
-ACCOUNT = "/var/run/secrets/kubernetes.io/serviceaccount"
 ALIASES = {
     "cloud": (
         "auto",
@@ -30,9 +27,6 @@ ALIASES = {
     ),
     "local": ("auto", "uncensored"),
 }
-API = "https://kubernetes.default.svc"
-# Radiance answers 429 when its queue is full, and 503 while busy or reloading.
-BUSY = {429, 503}
 HOP_HEADERS = {
     "connection",
     "content-length",
@@ -40,52 +34,19 @@ HOP_HEADERS = {
     "keep-alive",
     "transfer-encoding",
 }
-NAMESPACE = os.environ["NAMESPACE"]
+# The text entries of apps/base/radiance/radiance.yaml.
+LOCAL = (
+    "gemma-4-31b-heretic",
+    "qwen3.8-27b-iq4r",
+    "qwen3.8-27b-uncensored",
+    "qwen3.8-flash-next",
+)
 PORT = int(os.environ["PORT"])
+RADIANCE = urlsplit(os.environ["RADIANCE_URL"])
 
 
-def kubernetes(path):
-    with open(f"{ACCOUNT}/token", encoding="utf-8") as token:
-        headers = {"Authorization": f"Bearer {token.read()}"}
-    request = urllib.request.Request(f"{API}{path}", headers=headers)
-    context = ssl.create_default_context(cafile=f"{ACCOUNT}/ca.crt")
-    with urllib.request.urlopen(request, context=context, timeout=5) as response:
-        return json.load(response)["items"]
-
-
-def running(headers, uncensored=False):
-    """Each running Service, in priority order, with the models it reports."""
-    slices = kubernetes(
-        f"/apis/discovery.k8s.io/v1/namespaces/{NAMESPACE}/endpointslices"
-    )
-    ready = {
-        item["metadata"]["labels"]["kubernetes.io/service-name"]
-        for item in slices
-        if any(e["conditions"].get("ready") for e in item.get("endpoints") or [])
-    }
-    services = sorted(
-        (int(annotations["text.excloo.dev/priority"]), item["metadata"]["name"])
-        for item in kubernetes(f"/api/v1/namespaces/{NAMESPACE}/services")
-        if "text.excloo.dev/priority"
-        in (annotations := item["metadata"].get("annotations", {}))
-        and item["metadata"]["name"] in ready
-        and (not uncensored or annotations.get("text.excloo.dev/uncensored") == "true")
-    )
-    found = []
-    for _, service in services:
-        upstream = http.client.HTTPConnection(
-            f"{service}.{NAMESPACE}.svc", 8000, timeout=5
-        )
-        try:
-            upstream.request("GET", "/v1/models", headers=headers)
-            response = upstream.getresponse()
-            if response.status == 200:
-                found.append((service, json.load(response)["data"]))
-        except OSError:
-            pass
-        finally:
-            upstream.close()
-    return found
+def radiance(timeout=None):
+    return http.client.HTTPConnection(RADIANCE.hostname, RADIANCE.port, timeout=timeout)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -95,11 +56,18 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/healthz":
             return self.reply(200, {"status": "ok"})
         if self.path == "/local/v1/models":
-            aliases = [{"id": alias, "object": "model"} for alias in ALIASES["local"]]
-            models = [
-                model for _, found in running(self.forwarded()) for model in found
-            ]
-            return self.reply(200, {"data": aliases + models, "object": "list"})
+            data = [{"id": alias, "object": "model"} for alias in ALIASES["local"]]
+            upstream = radiance(timeout=5)
+            try:
+                upstream.request("GET", "/v1/models", headers=self.forwarded())
+                response = upstream.getresponse()
+                if response.status == 200:
+                    data += [m for m in json.load(response)["data"] if m["id"] in LOCAL]
+            except OSError:
+                pass
+            finally:
+                upstream.close()
+            return self.reply(200, {"data": data, "object": "list"})
         # Bifrost's cloud routing rules send cloud/ on before it reaches the router.
         provider = self.path.removeprefix("/").removesuffix("/v1/models")
         if provider == "cloud":
@@ -109,32 +77,20 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         provider, _, path = self.path.removeprefix("/").partition("/")
-        body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
-        model = body.get("model")
-        alias = provider == "local" and model in ALIASES["local"]
-        named = provider == "local" and not alias
-        served = [
-            (service, models[0]["id"] if alias else model)
-            for service, models in running(
-                self.forwarded(), alias and model == "uncensored"
-            )
-            if (alias and models) or (named and any(m["id"] == model for m in models))
-        ]
-        for index, (service, name) in enumerate(served):
-            upstream = http.client.HTTPConnection(f"{service}.{NAMESPACE}.svc", 8000)
+        body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+        model = json.loads(body).get("model")
+        if provider == "local" and model in ALIASES["local"] + LOCAL:
+            upstream = radiance()
             try:
                 upstream.connect()
             except OSError:
-                continue
-            # Generation can take minutes once connected.
-            upstream.sock.settimeout(None)
-            data = json.dumps(body | {"model": name}).encode()
-            upstream.request("POST", f"/{path}", data, self.forwarded())
-            response = upstream.getresponse()
-            if response.status in BUSY and index < len(served) - 1:
-                upstream.close()
-                continue
-            return self.relay(response, upstream)
+                upstream = None
+            if upstream:
+                # Radiance holds a request while it loads the model, up to its load-timeout,
+                # and generation can take minutes.
+                upstream.sock.settimeout(None)
+                upstream.request("POST", f"/{path}", body, self.forwarded())
+                return self.relay(upstream.getresponse(), upstream)
         message = f"no running model serves {provider}/{model}"
         self.reply(503, {"error": {"message": message, "type": "service_unavailable"}})
 
