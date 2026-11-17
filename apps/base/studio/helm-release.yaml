@@ -153,7 +153,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Artificial Intelligence
           gethomepage.dev/href: https://app.invalid
-          gethomepage.dev/icon: https://raw.githubusercontent.com/maxexcloo/studio/main/frontend/public/icon-512.png
+          gethomepage.dev/icon: https://raw.githubusercontent.com/maxexcloo/studio/main/frontend/public/favicon.svg
           gethomepage.dev/name: &title Studio
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /api/ping
