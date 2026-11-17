@@ -20,13 +20,13 @@ defaults:
   # Requests name any LoRA under this folder in their loras field.
   lora-dir: /models/comfyui/loras
 models:
-  # The H3 models take both cards and leave room beside their largest step for one LoRA slot at
-  # rank 16, which holds stacked adapters as their best rank-16 fit (Radiance GUIDE §4.9.1-2).
+  # The H3 models take both cards. FastH3's extra attention projection leaves no room for a LoRA
+  # slot; H3 has room for one at rank 16, which holds stacked adapters as their best rank-16 fit
+  # (Radiance GUIDE §4.9.1-2).
   fasth3-8-step-v2-i8:
+    lora-dir: ""
     model: /models/radiance/.v2/fasth3-8-step-v2-i8.rad
     tp: 2
-    max-lora-rank: 16
-    max-loras: 1
     vision-tower-placement: ram
   flux-3-image-klein-base-iq8r:
     model: /models/radiance/.v2/flux-3-image-klein-base-iq8r.rad
