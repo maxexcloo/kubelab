@@ -173,51 +173,145 @@ endpoints:
         reasoningKey: reasoning_content
         includeReasoningContent: true
         includeReasoningHistory: true
-# Readable entries for the local models, listed under the Local section beside its raw ids.
+# Readable entries for the cloud and local aliases, listed under their section beside its raw ids.
+# Each pins Studio, so its tools stay attached whatever the chat's MCP selection.
 modelSpecs:
   list:
     - name: local-auto
       label: Local Auto
       description: The default local model, currently Qwen3.8 27B Uncensored.
       group: Local
+      mcpServers: &studio
+        - studio
       preset:
         endpoint: Local
         model: local/auto
+        promptPrefix: &honest If a tool isn't available or a call fails, say so; never claim actions you didn't take with a tool.
     - name: local-uncensored
       label: Local Uncensored
       description: The local model for uncensored chats, currently Qwen3.8 27B Uncensored.
       group: Local
+      mcpServers: *studio
       preset:
         endpoint: Local
         model: local/uncensored
+        promptPrefix: *honest
     - name: local-gemma-4-31b-heretic
       label: Gemma 4 31B Heretic
       description: Gemma 4 31B with refusals removed, on one card. 169k context.
       group: Local
+      mcpServers: *studio
       preset:
         endpoint: Local
         model: local/gemma-4-31b-heretic
+        promptPrefix: *honest
     - name: local-qwen3.8-27b-iq4r
       label: Qwen3.8 27B IQ4R
       description: Qwen3.8 27B at 4 bits on one card. The longest local context, 262k.
       group: Local
+      mcpServers: *studio
       preset:
         endpoint: Local
         model: local/qwen3.8-27b-iq4r
+        promptPrefix: *honest
     - name: local-qwen3.8-27b-uncensored
       label: Qwen3.8 27B Uncensored
       description: Qwen3.8 27B with refusals removed, on both cards. 200k context.
       group: Local
+      mcpServers: *studio
       preset:
         endpoint: Local
         model: local/qwen3.8-27b-uncensored
+        promptPrefix: *honest
     - name: local-qwen3.8-flash-next
       label: Qwen3.8 Flash Next
       description: A mixture of experts across both cards, part streamed from host memory. 200k context; the slowest to load.
       group: Local
+      mcpServers: *studio
       preset:
         endpoint: Local
         model: local/qwen3.8-flash-next
+        promptPrefix: *honest
+    - name: cloud-auto
+      label: Cloud Auto
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/auto
+        promptPrefix: *honest
+    - name: cloud-deepseek-flash
+      label: DeepSeek Flash
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/deepseek-flash
+        promptPrefix: *honest
+    - name: cloud-deepseek-flash-uncensored
+      label: DeepSeek Flash Uncensored
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/deepseek-flash-uncensored
+        promptPrefix: *honest
+    - name: cloud-glm
+      label: GLM
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/glm
+        promptPrefix: *honest
+    - name: cloud-glm-flash
+      label: GLM Flash
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/glm-flash
+        promptPrefix: *honest
+    - name: cloud-glm-flash-uncensored
+      label: GLM Flash Uncensored
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/glm-flash-uncensored
+        promptPrefix: *honest
+    - name: cloud-glm-uncensored
+      label: GLM Uncensored
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/glm-uncensored
+        promptPrefix: *honest
+    - name: cloud-mimo
+      label: MiMo
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/mimo
+        promptPrefix: *honest
+    - name: cloud-mimo-flash
+      label: MiMo Flash
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/mimo-flash
+        promptPrefix: *honest
+    - name: cloud-uncensored
+      label: Cloud Uncensored
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/uncensored
+        promptPrefix: *honest
 fileConfig:
   endpoints:
     agents:
