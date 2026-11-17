@@ -13,6 +13,8 @@ memory:
   host-headroom-mib: 8192
   host-mib: 49152
 scheduler:
+  # Long runs (FLUX.3 Base, bf16 with LoRAs) finish before another model takes the cards.
+  drain-timeout: 120s
   # H3 reads about 64 GiB from disk on a cold load.
   load-timeout: 600s
   warm-up: false
