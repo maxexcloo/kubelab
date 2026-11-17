@@ -90,7 +90,8 @@
 - Keep databases, external secrets, integrations, namespaces, network policies
   and storage in files named for their purpose rather than mixed `resources.yaml`
   files.
-- Homepage retains its existing configuration layout and probe timings.
+- Homepage retains its existing configuration layout and probe timings. Prefer stock,
+  coloured icons, using light variants for black or dark artwork.
 
 ### Shared Values
 
