@@ -4,7 +4,6 @@ metadata:
   name: radiance
 spec:
   ingress:
-    # Studio uses the API; Traefik serves the UI.
     - from:
         - namespaceSelector:
             matchLabels:
@@ -12,6 +11,9 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: studio
+      ports:
+        - port: 8000
+    - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: networking
@@ -19,7 +21,7 @@ spec:
             matchLabels:
               app.kubernetes.io/name: traefik
       ports:
-        - port: 8000
+        - port: 4180
   podSelector:
     matchLabels:
       app.kubernetes.io/name: radiance

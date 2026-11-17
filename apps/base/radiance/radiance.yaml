@@ -2,6 +2,7 @@
 # requests name them (Radiance's docs/MULTIMODEL.md). An entry's name is the model id. The
 # container appends Studio's converted fine-tunes (start.sh), so models stays last.
 server:
+  api-key-env: API_KEY
   host: "::"
   port: 8000
 # host-headroom-mib matches the 8 GiB a load or park always leaves free. host-mib caps what parked
