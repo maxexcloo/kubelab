@@ -6,7 +6,7 @@ spec:
   client:
     description: Kubernetes Dashboard
     # Matches the route's Homepage icon.
-    icon: sh-headlamp
+    icon: sh-headlamp-light
     id: headlamp
     isPublic: true
     launchURL: https://headlamp.${cluster_name}.excloo.dev

@@ -2,7 +2,7 @@
 load(strenv(INFRASTRUCTURE)) as $infra |
 .providers as $providers |
 # Show tunnel health and origin alongside tailnet address and connection recency.
-($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "sh-cloudflare"} |
+($providers.cloudflare // {} | pick(["description", "icon", "name", "widget"]) |
   with(select(.widget != null); .widget.fields = ["origin_ip", "status"])) as $cloudflare |
 ($providers.tailscale // {} | pick(["description", "icon", "name", "widget"]) + {"icon": "tailscale-light"} |
   with(select(.widget != null); .widget.fields = ["address", "last_seen"])) as $tailscale |

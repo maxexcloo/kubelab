@@ -55,7 +55,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
           gethomepage.dev/href: https://app.invalid
-          gethomepage.dev/icon: sh-aiostreams
+          gethomepage.dev/icon: sh-aiostreams-light
           gethomepage.dev/name: &title AIOStreams
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /api/v1/health
