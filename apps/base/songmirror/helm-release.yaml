@@ -13,7 +13,7 @@ spec:
               - -ec
               - |
                 cp -R /spotdl-image/. /opt/spotdl/
-                cp /deno-image /opt/spotdl/bin/deno
+                cp /deno-image/deno /opt/spotdl/bin/deno
             image: &songmirror-image
               repository: ghcr.io/ahnafnafee/songmirror
               tag: sha-ec353cd
@@ -77,7 +77,6 @@ spec:
             spotdl:
               # yt-dlp uses Deno to resolve YouTube audio formats.
               - path: /deno-image
-                subPath: deno
                 readOnly: true
       music:
         existingClaim: music
