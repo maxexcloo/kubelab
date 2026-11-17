@@ -7,7 +7,7 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Artificial Intelligence
     gethomepage.dev/href: https://app.invalid
-    gethomepage.dev/icon: mdi-bridge-#ffffff
+    gethomepage.dev/icon: https://raw.githubusercontent.com/maximhq/bifrost/dev/ui/public/bifrost-icon-dark.webp
     gethomepage.dev/name: &title Bifrost
     monitoring.excloo.dev/enabled: "true"
     monitoring.excloo.dev/path: /health

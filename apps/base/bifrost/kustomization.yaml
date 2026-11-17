@@ -16,6 +16,17 @@ configMapGenerator:
     files:
       - router.py
 replacements:
+  - source:
+      kind: HTTPRoute
+      name: bifrost
+      fieldPath: metadata.annotations.[gethomepage.dev/icon]
+    targets:
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.icon
+        options:
+          create: true
   # The chart source lives in the namespace the release references.
   - source:
       kind: HelmRelease
