@@ -45,11 +45,11 @@ spec:
               # Studio's assistant writes through Bifrost with its own key (external-secrets.yaml).
               STUDIO_ASSISTANT_CLOUD_MODEL: cloud/auto
               STUDIO_ASSISTANT_URL: http://bifrost.bifrost.svc.cluster.local:8080
-              # Settings › Workers benchmarks a running text model with this image, taking the
-              # model's key from the text Secret in its namespace (apps/base/text).
+              # Settings › Workers benchmarks Radiance's text model with this image, taking its
+              # key from the radiance Secret in its namespace (apps/base/radiance).
               # renovate: datasource=docker depName=ghcr.io/maxexcloo/betterbench
               STUDIO_BENCHMARK_IMAGE: ghcr.io/maxexcloo/betterbench:v0.6.1-291
-              STUDIO_BENCHMARK_SECRET: text
+              STUDIO_BENCHMARK_SECRET: radiance
               # The navigation's Chat item opens LibreChat (apps/base/librechat/route.yaml).
               STUDIO_CHAT_URL: https://chat.excloo.com
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
@@ -58,8 +58,8 @@ spec:
               # Pools: the GPU node's two GPUs.
               STUDIO_KUBERNETES_GPUS: '{"gpu": 2}'
               # Studio finds its workloads from the studio.excloo.dev labels on the GPU
-              # Deployments in these namespaces; text ones serve local/auto.
-              STUDIO_KUBERNETES_NAMESPACES: comfyui,radiance,text
+              # Deployments in these namespaces; Radiance also serves local/auto.
+              STUDIO_KUBERNETES_NAMESPACES: comfyui,radiance
               STUDIO_LOCAL_TEXT_MODEL: local/auto
               # Result links and Grok's /mcp/<token> URL bypass Access (cloudflare-access.yaml).
               STUDIO_MCP_PUBLIC_URL:
@@ -79,7 +79,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/maxexcloo/studio
-              tag: 2026.11.17.2
+              tag: 2026.11.17.4
             probes:
               liveness:
                 path: /api/ping

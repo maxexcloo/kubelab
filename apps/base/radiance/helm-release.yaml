@@ -8,8 +8,9 @@ spec:
       main:
         annotations:
           studio.excloo.dev/backend: radiance
-          studio.excloo.dev/capabilities: image,video
+          studio.excloo.dev/capabilities: image,text,video
           studio.excloo.dev/label: Radiance
+          studio.excloo.dev/vision: "true"
           studio.excloo.dev/worker: radiance
         labels:
           studio.excloo.dev/kind: image
