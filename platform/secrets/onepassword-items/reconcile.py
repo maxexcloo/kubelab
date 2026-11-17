@@ -127,14 +127,18 @@ def flux_resource_ready(resource):
 
 def kustomization_ready(resource):
     source_reference = resource.get("spec", {}).get("sourceRef", {})
-    if source_reference.get("kind") != "GitRepository":
+    source_plural = {
+        "GitRepository": "gitrepositories",
+        "OCIRepository": "ocirepositories",
+    }.get(source_reference.get("kind"))
+    if source_plural is None:
         return False
     source_namespace = source_reference.get(
         "namespace", resource.get("metadata", {}).get("namespace")
     )
     source = kubernetes_request(
         f"/apis/source.toolkit.fluxcd.io/v1/namespaces/{source_namespace}/"
-        f"gitrepositories/{source_reference.get('name')}"
+        f"{source_plural}/{source_reference.get('name')}"
     )
     source_revision = source.get("status", {}).get("artifact", {}).get("revision")
     return (
