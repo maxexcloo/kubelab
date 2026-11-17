@@ -36,6 +36,36 @@ def item_configuration(**overrides):
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_kustomization_readiness_tracks_git_and_oci_source_revisions(self):
+        for kind, plural, revision in (
+            ("GitRepository", "gitrepositories", "main@sha1:abc"),
+            ("OCIRepository", "ocirepositories", "main@sha256:abc"),
+        ):
+            with self.subTest(kind=kind):
+                resource = {
+                    "metadata": {"namespace": "flux-system", "generation": 1},
+                    "spec": {"sourceRef": {"kind": kind, "name": "apps"}},
+                    "status": {
+                        "conditions": [{"type": "Ready", "status": "True"}],
+                        "observedGeneration": 1,
+                        "lastAppliedRevision": revision,
+                    },
+                }
+                source = {"status": {"artifact": {"revision": revision}}}
+                with patch.object(
+                    RECONCILER, "kubernetes_request", return_value=source
+                ) as request:
+                    self.assertTrue(RECONCILER.kustomization_ready(resource))
+                    request.assert_called_once_with(
+                        "/apis/source.toolkit.fluxcd.io/v1/namespaces/flux-system/"
+                        f"{plural}/apps"
+                    )
+                    resource["status"]["lastAppliedRevision"] = "older"
+                    self.assertFalse(RECONCILER.kustomization_ready(resource))
+                    resource["status"]["lastAppliedRevision"] = revision
+                    source["spec"] = {"suspend": True}
+                    self.assertFalse(RECONCILER.kustomization_ready(resource))
+
     def test_all_managed_routes_reference_items_by_display_name(self):
         from support import CLUSTERS, repository_resources
 
