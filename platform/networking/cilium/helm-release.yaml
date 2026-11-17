@@ -17,7 +17,10 @@ spec:
       version: 1.20.4
   values:
     MTU: 1280
-    kubeProxyReplacement: false
+    # Talos's KubePrism, since the kubernetes Service needs Cilium to be reachable.
+    k8sServiceHost: localhost
+    k8sServicePort: 7445
+    kubeProxyReplacement: true
     bpf:
       hostLegacyRouting: true
     cgroup:
