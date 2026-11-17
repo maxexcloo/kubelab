@@ -61,7 +61,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Applications
           gethomepage.dev/href: https://app.invalid
-          gethomepage.dev/icon: mdi-apple-#ffffff
+          gethomepage.dev/icon: https://raw.githubusercontent.com/bitxeno/atvloadly/master/web/static/public/apple-touch-icon.png
           gethomepage.dev/name: ATVLoadly
           monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /

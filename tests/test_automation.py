@@ -65,9 +65,11 @@ class PocketIDClientTests(unittest.TestCase):
         )
 
     def test_homepage_icons_become_logo_urls(self):
-        mapping = next(
-            m for m in self.parameters["mappings"] if m["action"] == "UPDATE"
-        )
+        mappings = [
+            m
+            for m in self.parameters["mappings"]
+            if m["action"] in {"CREATE", "UPDATE"}
+        ]
         selfhst = "https://cdn.jsdelivr.net/gh/selfhst/icons/png/"
         dashboard = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/"
         for icon, logos in [
@@ -80,14 +82,21 @@ class PocketIDClientTests(unittest.TestCase):
                 },
             ),
             ("bookorbit", {"logoUrl": dashboard + "bookorbit.png"}),
+            (
+                "https://example.com/logo.png",
+                {"logoUrl": "https://example.com/logo.png"},
+            ),
             ("mdi-image-#ffffff", {}),
         ]:
-            with self.subTest(icon=icon):
-                body = {"id": "app", "icon": icon, "name": "App"}
-                self.assertEqual(
-                    evaluate(mapping["body"], {"payload": {"body": body}}),
-                    {"name": "App", **logos},
-                )
+            for mapping in mappings:
+                with self.subTest(icon=icon, action=mapping["action"]):
+                    body = {"icon": icon, "name": "App"}
+                    if mapping["action"] == "UPDATE":
+                        body["id"] = "app"
+                    self.assertEqual(
+                        evaluate(mapping["body"], {"payload": {"body": body}}),
+                        {"name": "App", **logos},
+                    )
 
     def test_secret_is_created_until_a_create_succeeds(self):
         secret = composition_resource(
