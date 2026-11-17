@@ -82,16 +82,16 @@ spec:
           - name: oauth2-proxy
             mountPath: /config
             readOnly: true
-      # Serves the text models as local/; see router.py.
+      # Serves Radiance's text models as local/; see router.py.
       - name: router
         command:
           - python
           - /app/router.py
         env:
-          - name: NAMESPACE
-            value: text
           - name: PORT
             value: "8090"
+          - name: RADIANCE_URL
+            value: http://radiance.radiance.svc.cluster.local:8000
         image: docker.io/library/python:3.15.2-alpine3.24
         imagePullPolicy: IfNotPresent
         livenessProbe: &router-probe
@@ -123,9 +123,6 @@ spec:
         volumeMounts:
           - name: router
             mountPath: /app
-            readOnly: true
-          - name: router-token
-            mountPath: /var/run/secrets/kubernetes.io/serviceaccount
             readOnly: true
     image:
       pullPolicy: IfNotPresent
@@ -174,17 +171,6 @@ spec:
       - name: router
         configMap:
           name: router
-      # Only the router reads the Kubernetes API (apps/base/text/rbac.yaml).
-      - name: router-token
-        projected:
-          sources:
-            - serviceAccountToken:
-                path: token
-            - configMap:
-                name: kube-root-ca.crt
-                items:
-                  - key: ca.crt
-                    path: ca.crt
       - name: temporary
         emptyDir:
           sizeLimit: 1Gi
@@ -657,8 +643,7 @@ spec:
               value: env.DEPLOY_API_KEY
           network_config:
             base_url: https://api.deploy.com/api
-        # The router sends local/auto and local/uncensored to the first running local text
-        # model that suits, and local/<name> to the model that reports that name.
+        # The router sends local/ to Radiance, which takes this key (apps/base/radiance).
         local:
           custom_provider_config:
             base_provider_type: openai

@@ -4,13 +4,24 @@ metadata:
   name: radiance
 spec:
   ingress:
+    # Bifrost serves the text models; Studio queues image and video jobs, parks and lists the
+    # models, and its BetterBench Jobs benchmark text.
     - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: bifrost
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: bifrost
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: studio
           podSelector:
             matchLabels:
               app.kubernetes.io/name: studio
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: betterbench
       ports:
         - port: 8000
     - from:
