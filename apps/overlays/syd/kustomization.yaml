@@ -37,6 +37,7 @@ resources:
   - ../../base/shelfmark
   - ../../base/sidestore-vpn
   - ../../base/signtools
+  - ../../base/songmirror
   - ../../base/studio
   - ../../base/trcc
   - ../../base/unifi-network-mcp

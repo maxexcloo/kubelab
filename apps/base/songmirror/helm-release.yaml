@@ -1,0 +1,126 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        initContainers:
+          spotdl:
+            command:
+              - sh
+              - -ec
+              - |
+                cp -R /spotdl-image/. /opt/spotdl/
+                cp /deno-image /opt/spotdl/bin/deno
+            image: &songmirror-image
+              repository: ghcr.io/ahnafnafee/songmirror
+              tag: sha-ec353cd
+            resources:
+              limits:
+                memory: 128Mi
+              requests:
+                cpu: 25m
+                memory: 32Mi
+        containers:
+          main:
+            command:
+              - /app/.venv/bin/python
+              - -m
+              - uvicorn
+              - songmirror.web:app
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
+            env:
+              HOME: /data
+              PATH: /opt/spotdl/bin:/usr/local/bin:/usr/bin:/bin
+              PYTHONPATH: /app
+              SONGMIRROR_DOWNLOAD_DIR: /music
+              SONGMIRROR_PUBLIC_URL: https://app.invalid
+              SPOTDL_CMD: /opt/spotdl/bin/python -m spotdl
+              SPOTIFY_OAUTH_OPEN_BROWSER: "0"
+              TZ: ${time_zone}
+            image: *songmirror-image
+            probes:
+              liveness: &health
+                port: 8080
+              readiness: *health
+              startup: *health
+            resources:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 50m
+                memory: 128Mi
+            workingDir: /data
+          oauth2-proxy:
+            env:
+              UPSTREAM_URI: http://127.0.0.1:8080
+    persistence:
+      data:
+        existingClaim: data
+        type: persistentVolumeClaim
+        advancedMounts:
+          main:
+            main:
+              - path: /data
+      deno-image:
+        type: image
+        image:
+          repository: docker.io/denoland/deno
+          tag: bin-2.9.8
+        advancedMounts:
+          main:
+            spotdl:
+              # yt-dlp uses Deno to resolve YouTube audio formats.
+              - path: /deno-image
+                subPath: deno
+                readOnly: true
+      music:
+        existingClaim: music
+        type: persistentVolumeClaim
+        advancedMounts:
+          main:
+            main:
+              - path: /music
+      spotdl:
+        type: emptyDir
+        advancedMounts:
+          main:
+            main:
+              - path: /opt/spotdl
+                readOnly: true
+            spotdl:
+              - path: /opt/spotdl
+      spotdl-image:
+        type: image
+        image: *songmirror-image
+        advancedMounts:
+          main:
+            spotdl:
+              # The upstream image installs spotDL under its root-only home.
+              - path: /spotdl-image
+                subPath: root/.local/share/uv/tools/spotdl
+                readOnly: true
+    route:
+      private:
+        annotations:
+          gethomepage.dev/description: Playlist Sync & Local Audio Mirror
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/href: https://app.invalid
+          gethomepage.dev/icon: https://raw.githubusercontent.com/ahnafnafee/songmirror/main/frontend/public/songmirror-favicon-64.png
+          gethomepage.dev/name: &title SongMirror
+          monitoring.excloo.dev/enabled: "true"
+          monitoring.excloo.dev/path: /ping
+          onepassword.excloo.dev/item: *title
+        hostnames:
+          - songmirror.excloo.com
+        labels:
+          app.kubernetes.io/name: "{{ .Release.Name }}"
+        parentRefs:
+          - name: private
+            namespace: networking
