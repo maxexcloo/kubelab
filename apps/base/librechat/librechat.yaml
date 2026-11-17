@@ -479,6 +479,7 @@ mcpServers:
       X-AI-User-Email: "{{LIBRECHAT_USER_EMAIL}}"
       X-AI-User-Id: "{{LIBRECHAT_USER_ID}}"
       X-Studio-Conversation-Id: "{{LIBRECHAT_BODY_CONVERSATIONID}}"
+      X-Studio-Turn-Id: "{{LIBRECHAT_BODY_PARENTMESSAGEID}}"
       x-bf-vk: "${BIFROST_API_KEY}"
   unifi-network:
     type: streamable-http
