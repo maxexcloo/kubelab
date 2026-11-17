@@ -118,8 +118,8 @@ models:
     mixed-step-target-ms: 150
     prefix-cache-mib: 8192
     reasoning-effort-map: high=xhigh
-  # The uncensored replacement for qwen3.8-27b-iq4r, loaded only to check it before that entry
-  # switches over.
+  # Uncensored replacements for qwen3.8-27b-iq4r and qwen3.8-flash-next, loaded only to check them
+  # before those entries switch over.
   qwen3.8-27b-uncensored-iq4r-check:
     lora-dir: ""
     model: /models/radiance/qwen3.8-27b-uncensored-iq4r-v4.rad
@@ -127,6 +127,17 @@ models:
     kv-cache-dtype: i8
     max-model-len: 262144
     max-num-seqs: 8
+  qwen3.8-flash-next-uncensored-check:
+    lora-dir: ""
+    model: /models/radiance/qwen3.8-next-flash-uncensored-iqr-v4.rad
+    tp: 2
+    host-pool-mib: 12288
+    kv-cache-dtype: i8
+    max-model-len: 200000
+    max-num-seqs: 8
+    num-speculative-tokens: 3
+    placement: expert_tiered
+    tp-wire: wht6
   # Its experts do not fit the cards: the hottest stay there and the rest stream from host memory.
   qwen3.8-flash-next:
     lora-dir: ""
