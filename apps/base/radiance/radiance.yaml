@@ -48,6 +48,15 @@ models:
     max-num-seqs: 2
     num-speculative-tokens: 3
     vision-tower-placement: ram
+  gemma-4-31b-heretic-i8g:
+    lora-dir: ""
+    model: /models/radiance/gemma4-31b-heretic-ara-i8g.rad
+    tp: 2
+    kv-cache-dtype: i8
+    max-model-len: 262144
+    max-num-seqs: 2
+    num-speculative-tokens: 3
+    vision-tower-placement: ram
   krea-2-turbo-iq8r:
     model: /models/radiance/.v2/krea-2-turbo-iq8r.rad
     tp: 1
@@ -109,6 +118,15 @@ models:
     mixed-step-target-ms: 150
     prefix-cache-mib: 8192
     reasoning-effort-map: high=xhigh
+  # The uncensored replacement for qwen3.8-27b-iq4r, loaded only to check it before that entry
+  # switches over.
+  qwen3.8-27b-uncensored-iq4r-check:
+    lora-dir: ""
+    model: /models/radiance/qwen3.8-27b-uncensored-iq4r-v4.rad
+    tp: 1
+    kv-cache-dtype: i8
+    max-model-len: 262144
+    max-num-seqs: 8
   # Its experts do not fit the cards: the hottest stay there and the rest stream from host memory.
   qwen3.8-flash-next:
     lora-dir: ""
