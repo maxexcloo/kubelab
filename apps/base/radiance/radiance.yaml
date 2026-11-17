@@ -34,7 +34,9 @@ models:
     model: /models/radiance/.v2/flux-3-image-klein-iq8r.rad
     tp: 1
   # Text models, by the names Bifrost serves them as local/<name>.
+  # The LoRA folder is ComfyUI's, for image and video; a text model given it does not load.
   gemma-4-31b-heretic:
+    lora-dir: ""
     model: /models/radiance/.v2/gemma4-31b-heretic-ara-a4.rad
     tp: 1
     kv-cache-dtype: i8
@@ -67,6 +69,7 @@ models:
     tp: 1
     max-model-len: 8192
   qwen3.8-27b-iq4r:
+    lora-dir: ""
     model: /models/radiance/.v2/qwen3.8-27b-iq4r-l-v4.rad
     tp: 1
     embedding-placement: ram
@@ -79,6 +82,7 @@ models:
     reasoning-effort-map: high=xhigh
   # The auto and uncensored aliases are local/auto and local/uncensored.
   qwen3.8-27b-uncensored:
+    lora-dir: ""
     model: /models/radiance/.v2/qwen3.8-27b-uncensored-iq8r.rad
     aliases: [auto, uncensored]
     tp: 2
@@ -90,6 +94,7 @@ models:
     reasoning-effort-map: high=xhigh
   # Its experts do not fit the cards: the hottest stay there and the rest stream from host memory.
   qwen3.8-flash-next:
+    lora-dir: ""
     model: /models/radiance/.v2/qwen3.8-next-flash-iqr-v4.rad
     tp: 2
     host-pool-mib: 12288
