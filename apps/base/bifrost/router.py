@@ -3,12 +3,14 @@
 Radiance loads the model a request names, so local/<name> reaches Radiance as <name>; auto and
 uncensored are Radiance aliases. Radiance also serves image and video models, so only the text
 models in LOCAL are listed and served. Requests otherwise pass through unchanged, so clients set
-reasoning themselves. While Radiance is stopped, local/ requests fail fast with 503.
+reasoning themselves. A request whose model is not on the cards within LOAD_WAIT seconds, such as
+while a video holds them, or any while Radiance is stopped, fails with 503 and nothing falls back.
 """
 
 import http.client
 import json
 import os
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 
@@ -34,6 +36,8 @@ HOP_HEADERS = {
     "keep-alive",
     "transfer-encoding",
 }
+# Normal cold loads take up to about 30 s.
+LOAD_WAIT = 60
 # The text entries of apps/base/radiance/radiance.yaml.
 LOCAL = (
     "gemma-4-31b-heretic",
@@ -79,6 +83,7 @@ class Handler(BaseHTTPRequestHandler):
         provider, _, path = self.path.removeprefix("/").partition("/")
         body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
         model = json.loads(body).get("model")
+        message = f"no running model serves {provider}/{model}"
         if provider == "local" and model in ALIASES["local"] + LOCAL:
             upstream = radiance()
             try:
@@ -90,9 +95,32 @@ class Handler(BaseHTTPRequestHandler):
                 # and generation can take minutes.
                 upstream.sock.settimeout(None)
                 upstream.request("POST", f"/{path}", body, self.forwarded())
-                return self.relay(upstream.getresponse(), upstream)
-        message = f"no running model serves {provider}/{model}"
+                if self.loaded(model):
+                    return self.relay(upstream.getresponse(), upstream)
+                # Radiance still loads the model for the abandoned request.
+                upstream.close()
+                message = f"{provider}/{model} did not load within {LOAD_WAIT} s; Radiance's cards are probably busy"
         self.reply(503, {"error": {"message": message, "type": "service_unavailable"}})
+
+    def loaded(self, model):
+        """Whether the model comes onto the cards within LOAD_WAIT; a failed lookup does not wait."""
+        deadline = time.monotonic() + LOAD_WAIT
+        while time.monotonic() < deadline:
+            upstream = radiance(timeout=5)
+            try:
+                upstream.request("GET", "/v1/models", headers=self.forwarded())
+                response = upstream.getresponse()
+                entries = json.load(response)["data"] if response.status == 200 else []
+                state = next((m["state"] for m in entries if m["id"] == model), None)
+            except OSError:
+                state = None
+            finally:
+                upstream.close()
+            # Radiance answers a failed load itself.
+            if state in (None, "failed", "resident"):
+                return True
+            time.sleep(1)
+        return False
 
     def forwarded(self):
         return {k: v for k, v in self.headers.items() if k.lower() not in HOP_HEADERS}
