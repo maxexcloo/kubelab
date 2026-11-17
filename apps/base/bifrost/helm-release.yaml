@@ -542,6 +542,7 @@ spec:
               - X-AI-User-Email
               - X-AI-User-Id
               - X-Studio-Conversation-Id
+              - X-Studio-Turn-Id
             authType: headers
             httpConfig:
               url: http://studio.studio.svc.cluster.local:8787/mcp
