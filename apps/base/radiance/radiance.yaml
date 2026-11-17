@@ -37,6 +37,7 @@ models:
     model: /models/radiance/.v2/flux-3-image-klein-iq8r.rad
     tp: 1
   # Text models, which Bifrost serves as local/<name> (apps/base/bifrost/router.py).
+  # mixed-step-target-ms keeps streaming answers moving while another request's prompt is read.
   # The LoRA folder is ComfyUI's, for image and video; a text model given it does not load.
   gemma-4-31b-heretic:
     lora-dir: ""
@@ -44,7 +45,6 @@ models:
     tp: 1
     kv-cache-dtype: i8
     max-model-len: 169328
-    max-num-batched-tokens: 2048
     max-num-seqs: 2
     num-speculative-tokens: 3
     vision-tower-placement: ram
@@ -75,12 +75,11 @@ models:
     lora-dir: ""
     model: /models/radiance/.v2/qwen3.8-27b-iq4r-l-v4.rad
     tp: 1
-    embedding-placement: ram
     host-pool-mib: 3072
     kv-cache-dtype: i8
     max-model-len: 262144
-    max-num-batched-tokens: 2048
     max-num-seqs: 8
+    mixed-step-target-ms: 150
     prefix-cache-mib: 4096
     reasoning-effort-map: high=xhigh
   # The auto and uncensored aliases are local/auto and local/uncensored.
@@ -91,8 +90,8 @@ models:
     tp: 2
     kv-cache-dtype: i8
     max-model-len: 200000
-    max-num-batched-tokens: 2048
     max-num-seqs: 8
+    mixed-step-target-ms: 150
     prefix-cache-mib: 8192
     reasoning-effort-map: high=xhigh
   # Its experts do not fit the cards: the hottest stay there and the rest stream from host memory.
@@ -103,8 +102,8 @@ models:
     host-pool-mib: 12288
     kv-cache-dtype: i8
     max-model-len: 200000
-    max-num-batched-tokens: 2048
     max-num-seqs: 8
+    mixed-step-target-ms: 150
     num-speculative-tokens: 3
     placement: expert_tiered
     prefix-cache-mib: 4096
