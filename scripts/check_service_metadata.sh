@@ -86,7 +86,7 @@ jq -e \
       failure("Pocket ID launch URL has no enabled route"; ", ";
         $pocket_id |
           map(select((.launchURL | url_hostname | split(".") | .[-2:] | join(".")) as $domain | $route_domains | index($domain))) |
-          map(select(.launchURL as $url | $inventory | any(.href == $url) | not) | .source)),
+          map(select(.launchURL as $url | $route_inventory | any(.href == $url) | not) | .source)),
       failure("private DNS hostname has no matching private route"; ", ";
         $private_dns | map(select(. as $dns | $route_inventory | any(
           .cluster == $dns.cluster and .namespace == $dns.namespace and

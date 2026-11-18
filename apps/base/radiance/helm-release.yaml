@@ -112,7 +112,6 @@ spec:
           gethomepage.dev/href: https://app.invalid
           gethomepage.dev/icon: https://codeberg.org/StillDeadcode/radiance/raw/branch/main/dashboard/logo/radiance-mark.svg
           gethomepage.dev/name: &title Radiance
-          monitoring.excloo.dev/enabled: "true"
           monitoring.excloo.dev/path: /ping
           onepassword.excloo.dev/item: *title
         hostnames:
