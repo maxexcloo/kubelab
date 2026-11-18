@@ -70,7 +70,6 @@ endpoints:
           - cloud/mimo-flash
           - cloud/uncensored
           - local/auto
-          - local/uncensored
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
       # LibreChat assumes 32k for unknown models and summarises too early. Bifrost reports no
@@ -89,7 +88,11 @@ endpoints:
           prompt: 0
           completion: 0
           context: 169328
-        local/qwen3.8-27b-iq4r:
+        local/gemma-4-31b-heretic-i8g:
+          prompt: 0
+          completion: 0
+          context: 262144
+        local/qwen3.8-27b:
           prompt: 0
           completion: 0
           context: 262144
@@ -179,7 +182,7 @@ modelSpecs:
   list:
     - name: local-auto
       label: Local Auto
-      description: The default local model, currently Qwen3.8 27B Uncensored.
+      description: Uncensored Qwen3.8, the one already loaded; else Flash Next while the cards are idle, else 27B on one card.
       group: Local
       mcpServers: &studio
         - studio
@@ -187,27 +190,27 @@ modelSpecs:
         endpoint: Local
         model: local/auto
         promptPrefix: &honest If a tool isn't available or a call fails, say so; never claim actions you didn't take with a tool.
-    - name: local-uncensored
-      label: Local Uncensored
-      description: The local model for uncensored chats, currently Qwen3.8 27B Uncensored.
-      group: Local
-      mcpServers: *studio
-      preset:
-        endpoint: Local
-        model: local/uncensored
-        promptPrefix: *honest
     - name: local-gemma-4-31b-heretic
       label: Gemma 4 31B Heretic
-      description: Gemma 4 31B with refusals removed, on one card. 169k context.
+      description: Gemma 4 31B with refusals removed, at 4 bits on one card. 169k context.
       group: Local
       mcpServers: *studio
       preset:
         endpoint: Local
         model: local/gemma-4-31b-heretic
         promptPrefix: *honest
+    - name: local-gemma-4-31b-heretic-i8g
+      label: Gemma 4 31B Heretic I8G
+      description: Gemma 4 31B with refusals removed, at 8 bits on both cards. 262k context.
+      group: Local
+      mcpServers: *studio
+      preset:
+        endpoint: Local
+        model: local/gemma-4-31b-heretic-i8g
+        promptPrefix: *honest
     - name: local-qwen3.8-27b-iq4r
-      label: Qwen3.8 27B IQ4R
-      description: Qwen3.8 27B at 4 bits on one card. The longest local context, 262k.
+      label: Qwen3.8 27B Uncensored IQ4R
+      description: Qwen3.8 27B with refusals removed, at 4 bits on one card. 262k context.
       group: Local
       mcpServers: *studio
       preset:
@@ -216,7 +219,7 @@ modelSpecs:
         promptPrefix: *honest
     - name: local-qwen3.8-27b-uncensored
       label: Qwen3.8 27B Uncensored
-      description: Qwen3.8 27B with refusals removed, on both cards. 200k context.
+      description: Qwen3.8 27B with refusals removed, at 8 bits on both cards. 262k context.
       group: Local
       mcpServers: *studio
       preset:
@@ -224,8 +227,8 @@ modelSpecs:
         model: local/qwen3.8-27b-uncensored
         promptPrefix: *honest
     - name: local-qwen3.8-flash-next
-      label: Qwen3.8 Flash Next
-      description: A mixture of experts across both cards, part streamed from host memory. 200k context; the slowest to load.
+      label: Qwen3.8 Flash Next Uncensored
+      description: A mixture of experts with refusals removed, across both cards and part streamed from host memory. 200k context; the slowest to load.
       group: Local
       mcpServers: *studio
       preset:
