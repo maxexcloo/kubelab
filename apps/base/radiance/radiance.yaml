@@ -7,10 +7,8 @@ server:
   port: 8000
 # host-headroom-mib matches the 8 GiB a load or park always leaves free. host-mib caps what parks may
 # pin. Parked copies are driver (GTT) memory, which amdgpu caps at ttm.pages_limit (half of venus's
-# RAM, 30.92 GiB) and the pod's cgroup does not count, so host-mib stays under that cap. A copy with
-# no room goes to the disk tier, the pod's emptyDir, rather than unloading its model.
+# RAM, 30.92 GiB) and the pod's cgroup does not count, so host-mib stays under that cap.
 memory:
-  disk-tier: /data
   gpu-headroom-mib: 192
   host-headroom-mib: 8192
   host-mib: 30720
