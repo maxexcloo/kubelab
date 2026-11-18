@@ -5,13 +5,15 @@ server:
   api-key-env: API_KEY
   host: "::"
   port: 8000
-# host-headroom-mib matches the 8 GiB a load or park always leaves free. host-mib caps what parked
-# models' copies may hold beside the pins of loaded ones: the pod limit (helm-release.yaml) less that
-# 8 GiB and about 2 GiB for the process.
+# host-headroom-mib matches the 8 GiB a load or park always leaves free. host-mib caps what parks may
+# pin. Parked copies are driver (GTT) memory, which amdgpu caps at ttm.pages_limit (half of venus's
+# RAM, 30.92 GiB) and the pod's cgroup does not count, so host-mib stays under that cap. A copy with
+# no room goes to the disk tier, the pod's emptyDir, rather than unloading its model.
 memory:
+  disk-tier: /data
   gpu-headroom-mib: 192
   host-headroom-mib: 8192
-  host-mib: 49152
+  host-mib: 30720
 scheduler:
   # Long runs (FLUX.3 Base, bf16 with LoRAs) finish before another model takes the cards.
   drain-timeout: 120s
