@@ -42,7 +42,7 @@ models:
     model: /models/radiance/flux-3-image-klein-pup
     aliases: [flux-pup]
     tp: 1
-    chat-template-kwargs: {"enable_thinking": false}
+    chat-template-kwargs: { "enable_thinking": false }
     kv-cache-dtype: i8
     max-model-len: 16384
     max-num-seqs: 2
