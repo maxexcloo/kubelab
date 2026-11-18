@@ -18,7 +18,7 @@ spec:
               - run
             image:
               repository: controldns/ctrld
-              tag: 1.5.10
+              tag: 1.5.11
             resources:
               limits:
                 memory: 128Mi
