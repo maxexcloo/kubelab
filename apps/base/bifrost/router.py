@@ -1,7 +1,7 @@
 """Serves Bifrost's local/ provider from Radiance, and lists cloud/'s aliases.
 
-Radiance loads the model a request names, so local/<name> reaches Radiance as <name>; auto and
-uncensored are Radiance aliases. Radiance also serves image and video models, so only the text
+Radiance loads the model a request names, so local/<name> reaches Radiance as <name>, and local/auto
+as the Qwen text model AUTO picks. Radiance also serves image and video models, so only the text
 models in LOCAL are listed and served. Requests otherwise pass through unchanged, so clients set
 reasoning themselves. A request whose model is not on the cards within LOAD_WAIT seconds, such as
 while a video holds them, or any while Radiance is stopped, fails with 503 and nothing falls back.
@@ -27,8 +27,10 @@ ALIASES = {
         "mimo-flash",
         "uncensored",
     ),
-    "local": ("auto", "uncensored"),
+    "local": ("auto",),
 }
+# local/auto's Qwen text models, best first: two cards, two cards, one card.
+AUTO = ("qwen3.8-flash-next", "qwen3.8-27b-uncensored", "qwen3.8-27b-iq4r")
 HOP_HEADERS = {
     "connection",
     "content-length",
@@ -38,9 +40,11 @@ HOP_HEADERS = {
 }
 # Normal cold loads take up to about 30 s.
 LOAD_WAIT = 60
-# The text entries of apps/base/radiance/radiance.yaml.
+# The text entries of apps/base/radiance/radiance.yaml, flux-pup by its alias.
 LOCAL = (
+    "flux-pup",
     "gemma-4-31b-heretic",
+    "gemma-4-31b-heretic-i8g",
     "qwen3.8-27b-iq4r",
     "qwen3.8-27b-uncensored",
     "qwen3.8-flash-next",
@@ -85,6 +89,9 @@ class Handler(BaseHTTPRequestHandler):
         model = json.loads(body).get("model")
         message = f"no running model serves {provider}/{model}"
         if provider == "local" and model in ALIASES["local"] + LOCAL:
+            if model == "auto":
+                model = self.auto()
+                body = json.dumps({**json.loads(body), "model": model}).encode()
             upstream = radiance()
             try:
                 upstream.connect()
@@ -101,6 +108,45 @@ class Handler(BaseHTTPRequestHandler):
                 upstream.close()
                 message = f"{provider}/{model} did not load within {LOAD_WAIT} s; Radiance's cards are probably busy"
         self.reply(503, {"error": {"message": message, "type": "service_unavailable"}})
+
+    def auto(self):
+        """The loaded AUTO model, best first; else a two-card one while nothing runs or waits on the
+        cards, so no image or video is held up, else the one-card one."""
+        live = self.fleet()
+        models = {m["id"]: m for m in live.get("models", [])}
+        for model in AUTO:
+            if models.get(model, {}).get("state") in ("loading", "resident"):
+                return model
+        # Videos run outside in_flight, so a busy card counts too.
+        idle = (
+            models
+            and not any(
+                m["in_flight"] or m["waiting"] or m["state"] == "loading"
+                for m in models.values()
+            )
+            and all(card["busy"] < 0.2 for card in live["cards"])
+        )
+        if idle:
+            return next(
+                (m for m in AUTO[:2] if models.get(m, {}).get("state") != "failed"),
+                AUTO[2],
+            )
+        return AUTO[2]
+
+    def fleet(self):
+        """Radiance's cards and models, as its dashboard reads them; empty when unreachable."""
+        upstream = radiance(timeout=5)
+        try:
+            # since=now leaves out the dashboard's hour of history.
+            upstream.request(
+                "GET", f"/history?since={time.time()}", headers=self.forwarded()
+            )
+            response = upstream.getresponse()
+            return json.load(response)["live"] if response.status == 200 else {}
+        except OSError:
+            return {}
+        finally:
+            upstream.close()
 
     def loaded(self, model):
         """Whether the model comes onto the cards within LOAD_WAIT; a failed lookup does not wait."""
