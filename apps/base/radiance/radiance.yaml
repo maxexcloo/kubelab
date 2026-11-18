@@ -33,9 +33,17 @@ models:
   flux-3-image-klein-base-iq8r:
     model: /models/radiance/.v2/flux-3-image-klein-base-iq8r.rad
     tp: 1
+  flux-3-image-klein-base-iq8r-fast:
+    model: /models/radiance/.v2/flux-3-image-klein-base-iq8r.rad
+    tp: 2
+    tp-wire: wht6
   flux-3-image-klein-iq8r:
     model: /models/radiance/.v2/flux-3-image-klein-iq8r.rad
     tp: 1
+  flux-3-image-klein-iq8r-fast:
+    model: /models/radiance/.v2/flux-3-image-klein-iq8r.rad
+    tp: 2
+    tp-wire: wht6
   # BFL's FLUX.3 prompt upsampler, which Bifrost serves as local/flux-pup outside local/auto.
   flux-3-image-klein-pup:
     lora-dir: ""
@@ -71,6 +79,10 @@ models:
   krea-2-turbo-iq8r:
     model: /models/radiance/.v2/krea-2-turbo-iq8r.rad
     tp: 1
+  krea-2-turbo-iq8r-fast:
+    model: /models/radiance/.v2/krea-2-turbo-iq8r.rad
+    tp: 2
+    tp-wire: wht6
   minimax-h3-i8:
     model: /models/radiance/.v2/minimax-h3-i8.rad
     tp: 2
