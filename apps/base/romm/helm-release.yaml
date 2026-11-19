@@ -84,7 +84,7 @@ spec:
               - ""
             image:
               repository: docker.io/valkey/valkey
-              tag: 9.1.4
+              tag: 9.2.0
             probes:
               liveness: &valkey-health
                 enabled: true
