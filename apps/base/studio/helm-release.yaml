@@ -65,6 +65,7 @@ spec:
               STUDIO_MCP_PUBLIC_URL:
                 dependsOn: ROUTE_HOST
                 value: https://$(ROUTE_HOST)
+              STUDIO_MODEL_LIBRARY_URL: http://comfyui-model-library.comfyui.svc.cluster.local:8188
               STUDIO_MODEL_MANIFEST_PREFIX: models/comfyui/
               STUDIO_MULTI_USER: "1"
               STUDIO_OIDC_CLIENT_ID: client.invalid
@@ -79,7 +80,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/maxexcloo/studio
-              tag: 2026.11.19.21
+              tag: 2026.11.19.22
             probes:
               liveness:
                 path: /api/ping
