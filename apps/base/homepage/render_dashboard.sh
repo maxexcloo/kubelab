@@ -3,8 +3,6 @@ set -eu
 : "${HOMEPAGE_CLUSTER:?HOMEPAGE_CLUSTER is required}"
 : "${KUBECTL:?KUBECTL is required}"
 export HOMEPAGE_CLUSTER
-# HOMELAB_DIRECTORY selects a local Homelab checkout for tests; unset or empty,
-# HOMELAB_ARCHIVE is downloaded.
 
 if [ "${1:-}" = --watch ]; then
   shift
@@ -35,14 +33,12 @@ script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
 
-homelab_directory=${HOMELAB_DIRECTORY:-}
-if [ -z "$homelab_directory" ]; then
-  homelab_directory="$temporary_directory/homelab"
-  mkdir "$homelab_directory"
-  wget -O - -q -T 30 "${HOMELAB_ARCHIVE:?HOMELAB_ARCHIVE is required}" |
-    tar -xz -C "$homelab_directory" --strip-components=1
+HOMELAB_INVENTORY=${HOMELAB_DIRECTORY:+$HOMELAB_DIRECTORY/inventory.json}
+if [ -z "$HOMELAB_INVENTORY" ]; then
+  HOMELAB_INVENTORY="$temporary_directory/inventory.json"
+  wget -O "$HOMELAB_INVENTORY" -q -T 30 "${HOMELAB_INVENTORY_URL:?HOMELAB_INVENTORY_URL is required}"
 fi
-export HOMELAB_INVENTORY="$homelab_directory/inventory.json"
+export HOMELAB_INVENTORY
 
 "$KUBECTL" get httproutes --all-namespaces --output json > "$temporary_directory/httproutes.json"
 # Minilab prefixes its route names, which the Home group already states.
@@ -81,7 +77,7 @@ mkdir "$temporary_directory/config"
 yq -o=json 'map(select(.namespace == "beszel"))' \
   "$temporary_directory/inventory.yaml" > "$temporary_directory/beszel-routes.json"
 HOMEPAGE_BESZEL_ROUTES="$temporary_directory/beszel-routes.json" \
-  sh "$script_directory/render_services.sh" "$temporary_directory/external-services.yaml" "$homelab_directory"
+  sh "$script_directory/render_services.sh" "$temporary_directory/external-services.yaml" "$HOMELAB_INVENTORY"
 SERVICES="$temporary_directory/external-services.yaml" \
   yq --from-file "$script_directory/dashboard.yq" "$temporary_directory/inventory.yaml" \
   > "$temporary_directory/dashboard-services.yaml"

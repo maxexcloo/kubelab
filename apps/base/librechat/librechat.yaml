@@ -73,8 +73,8 @@ endpoints:
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
       # LibreChat assumes 32k for unknown models and summarises too early. Bifrost reports no
-      # context lengths. The longest key a name contains wins: every model has at least 131k,
-      # and local/ ones take their max-model-len in apps/base/radiance/radiance.yaml.
+      # context lengths. The longest key a name contains wins. Local models use
+      # max-model-len from apps/base/radiance/radiance.yaml.
       tokenConfig:
         /:
           prompt: 0
@@ -84,6 +84,10 @@ endpoints:
           prompt: 0
           completion: 0
           context: 200000
+        local/flux-pup:
+          prompt: 0
+          completion: 0
+          context: 16384
         local/gemma-4-31b-heretic:
           prompt: 0
           completion: 0
