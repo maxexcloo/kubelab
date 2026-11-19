@@ -158,12 +158,17 @@ models:
     lora-dir: ""
     model: /models/radiance/qwen3.8-next-flash-uncensored-iqr-v4.rad
     tp: 2
+    draft-coupling: "on"
+    draft-depth: adaptive
+    draft-depth-load: "on"
+    draft-suffix: "on"
+    draft-verify: traversal
     host-pool-mib: 12288
     kv-cache-dtype: i8
     max-model-len: 200000
     max-num-seqs: 8
     mixed-step-target-ms: 150
-    num-speculative-tokens: 3
+    num-speculative-tokens: 5
     placement: expert_tiered
     prefix-cache-mib: 4096
     reasoning-effort-map: high=xhigh
