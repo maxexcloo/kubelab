@@ -13,7 +13,7 @@ spec:
         kind: HelmRepository
         name: librechat
         namespace: flux-system
-      version: 3.0.0
+      version: 3.2.1
   # LibreChat drains providers for up to 60 s; the chart has no pod grace setting.
   postRenderers:
     - kustomize:
