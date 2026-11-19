@@ -14,6 +14,7 @@ spec:
                 value: 0
             target:
               kind: Deployment
+              labelSelector: studio.excloo.dev/kind
   values:
     # A pool of one-GPU workers that each run images and video; Studio routes work to
     # whichever is free and holds the model.
@@ -36,7 +37,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image: &image
               repository: ghcr.io/maxexcloo/studio-worker
-              tag: 2026.11.19.14
+              tag: 2026.11.19.22
             # Readiness only, as under Docker: loading never restarts the worker.
             probes:
               readiness:
@@ -44,7 +45,7 @@ spec:
                 path: /system_stats
                 port: 8188
                 type: HTTP
-                spec:
+                spec: &readiness
                   timeoutSeconds: 5
             resources:
               claims:
@@ -71,6 +72,48 @@ spec:
           resourceClaims:
             - name: gpu
               resourceClaimTemplateName: gpu-1
+      model-library:
+        replicas: 1
+        strategy: Recreate
+        containers:
+          main:
+            args:
+              - --model-library
+            env:
+              HF_HOME: /tmp/huggingface
+              STUDIO_MODEL_LIBRARY_DIR: /models
+              STUDIO_WORKER_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    key: STUDIO_WORKER_TOKEN
+                    name: "{{ .Release.Name }}"
+            image: *image
+            probes:
+              readiness:
+                enabled: true
+                path: /studio/worker
+                port: 8188
+                type: HTTP
+                spec: *readiness
+            resources:
+              limits:
+                memory: 2Gi
+              requests:
+                cpu: 50m
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                add:
+                  - DAC_OVERRIDE
+                drop:
+                  - ALL
+              readOnlyRootFilesystem: true
+              runAsUser: 0
+        pod:
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
       prepull:
         serviceAccount:
           name: default
@@ -120,7 +163,7 @@ spec:
         advancedMounts:
           main:
             main:
-              # Writable only here: Studio's model downloads land in the primary worker.
+              # The worker's built-in storage endpoint remains available for local operations.
               - path: /root/ComfyUI/models
                 subPath: comfyui
               # Writable here too: Library › Convert to Radiance installs .rad packages here.
@@ -140,6 +183,10 @@ spec:
                 readOnly: true
                 subPath: radiance
               - *radiance-video
+          model-library:
+            main:
+              - path: /models
+                subPath: comfyui
       secondary-data:
         hostPath: ${dataset_root}/ai/comfyui-video/data
         hostPathType: Directory
@@ -158,8 +205,23 @@ spec:
       shm:
         medium: Memory
         type: emptyDir
-        globalMounts:
-          - path: /dev/shm
+        advancedMounts:
+          main:
+            main:
+              - &shm
+                path: /dev/shm
+          secondary:
+            main:
+              - *shm
+          prepull:
+            main:
+              - *shm
+      model-library-temporary:
+        type: emptyDir
+        advancedMounts:
+          model-library:
+            main:
+              - path: /tmp
     route:
       private:
         annotations:
@@ -189,5 +251,9 @@ spec:
             protocol: HTTP
       secondary:
         controller: secondary
+        ports:
+          http: *http
+      model-library:
+        controller: model-library
         ports:
           http: *http

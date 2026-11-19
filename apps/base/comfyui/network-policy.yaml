@@ -23,5 +23,32 @@ spec:
   podSelector:
     matchLabels:
       app.kubernetes.io/name: comfyui
+    matchExpressions:
+      - key: app.kubernetes.io/controller
+        operator: NotIn
+        values:
+          - model-library
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: comfyui-model-library
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: studio
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: studio
+      ports:
+        - port: 8188
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/controller: model-library
+      app.kubernetes.io/name: comfyui
   policyTypes:
     - Ingress
