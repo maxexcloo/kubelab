@@ -77,6 +77,19 @@ patches:
     target:
       kind: ConfigMap
   - path: beszel-agent.yaml
+  - patch: |-
+      apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      metadata:
+        name: comfyui
+        namespace: comfyui
+      spec:
+        values:
+          controllers:
+            model-library:
+              pod:
+                nodeSelector:
+                  kubernetes.io/hostname: venus
   - path: minilab.yaml
 replacements:
   - source:
