@@ -79,7 +79,16 @@ class HomepageSourcesTests(HomepageDashboardFixture, unittest.TestCase):
             }
 
         before = files()
-        self.assertEqual(self.render().returncode, 0)
+        download = self.remote / "inventory.example.net_inventory.json"
+        shutil.copyfile(HOMELAB / "inventory.json", download)
+        remote = {
+            "HOMELAB_DIRECTORY": "",
+            "HOMELAB_INVENTORY_URL": "https://inventory.example.net/inventory.json",
+        }
+        self.assertEqual(self.render(**remote).returncode, 0)
+        self.assertEqual(before, files())
+        download.unlink()
+        self.assertNotEqual(self.render(**remote).returncode, 0)
         self.assertEqual(before, files())
         valid_routes = self.routes.read_text()
         for routes in ("[broken json", '{"items": []}'):
