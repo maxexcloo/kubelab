@@ -45,7 +45,7 @@ releases in a different namespace, use `namespace/release` as the application.
 | ---------------------------------------------------- | ----------------------------------------------------------------- |
 | `mise run bootstrap <cluster>`                       | Install networking, bootstrap credentials and start Flux          |
 | `mise run check`                                     | Validate manifests, metadata, formatting, scripts and tests       |
-| `mise run deploy <cluster> <application> [revision]` | Fetch Git, reconcile apps and verify the selected workload        |
+| `mise run deploy <cluster> <application> [revision]` | Reconcile and verify the workload and its owning Kustomization    |
 | `mise run fmt`                                       | Format project files                                              |
 | `mise run setup`                                     | Install Git hooks                                                 |
 | `mise run status <cluster> [application]`            | Show reconciliation status or watch an application's Helm release |

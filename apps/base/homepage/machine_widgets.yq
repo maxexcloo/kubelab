@@ -67,18 +67,15 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
   ([$infra.tailscale[$host.key]] | map(select(. != null and $tailscale.widget != null)) | map(. as $device | $tailscale + {
     "href": ("https://login.tailscale.com/admin/machines/" + $device),
     "widget": ($tailscale.widget + {"deviceid": $device})
-  })) +
-  ([$infra.cloudflare.tunnels[$host.key]] | map(select(. != null and $cloudflare.widget != null)) | map(. as $tunnel | $cloudflare + {
-    "href": ("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + $tunnel),
-    "widget": ($cloudflare.widget + {"accountid": $infra.cloudflare.account_id, "tunnelid": $tunnel})
   }))) | .[] | . + {"group": $host.group}
 ] as $monitoring |
-[($infra.cloudflare.tunnels // {}) | to_entries[] | select($cloudflare.widget != null) |
-  .key as $name | select($hosts | any_c(.key == $name) | not) |
-  $cloudflare + {"group": $name,
+[($infra.cloudflare.tunnels // {}) | to_entries[] | select(.value != null and $cloudflare.widget != null) |
+  .key as $name | ($hosts | map(select(.key == $name)) | .[0]) as $host |
+  select($host == null or $host.machine.type != null) |
+  $cloudflare + {"group": ($host.group // $name),
    "href": ("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .value),
    "widget": ($cloudflare.widget + {"accountid": $infra.cloudflare.account_id, "tunnelid": .value})}
-] as $cluster_tunnels |
-($existing + $management + $monitoring + $cluster_tunnels) |
+] as $tunnels |
+($existing + $management + $monitoring + $tunnels) |
 sort_by(.group, (.name | downcase)) | group_by(.group) |
 map({(.[0].group): map(.name as $name | del(.name, .group) | {($name): .})})

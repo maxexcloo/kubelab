@@ -25,9 +25,13 @@ namespace="${usage_application%%/*}"
 release="${usage_application##*/}"
 revision="${usage_revision:-$(git ls-remote --exit-code origin refs/heads/main)}"
 expected="main@sha1:${revision%%[[:space:]]*}"
-flux --context "$usage_cluster" reconcile kustomization apps --with-source
+owner_label='{.metadata.labels.kustomize\.toolkit\.fluxcd\.io/name}'
+owner="$(kubectl --context "$usage_cluster" -n "$namespace" get helmrelease "$release" --ignore-not-found -o "jsonpath=$owner_label")"
+owner="${owner:-apps}"
+flux --context "$usage_cluster" -n flux-system reconcile kustomization "$owner" --with-source
 flux --context "$usage_cluster" -n "$namespace" reconcile helmrelease "$release"
-test "$(kubectl --context "$usage_cluster" -n flux-system get kustomization apps -o jsonpath='{.status.lastAppliedRevision}')" = "$expected"
+test "$(kubectl --context "$usage_cluster" -n "$namespace" get helmrelease "$release" -o "jsonpath=$owner_label")" = "$owner"
+test "$(kubectl --context "$usage_cluster" -n flux-system get kustomization "$owner" -o jsonpath='{.status.lastAppliedRevision}')" = "$expected"
 echo "$usage_application Ready at $expected"
 '''
 usage = '''
@@ -71,15 +75,15 @@ run = '''
 set -eu
 temporary_directory=$(mktemp -d)
 trap 'rm -fr -- "$temporary_directory"' EXIT
-homelab_directory=${HOMELAB_DIRECTORY:-}
-if [ -z "$homelab_directory" ]; then
-  homelab_directory="$temporary_directory/homelab"
-  mkdir "$homelab_directory"
-  curl -fsSL https://codeload.github.com/maxexcloo/homelab/tar.gz/refs/heads/main | tar -xz -C "$homelab_directory" --strip-components=1
+inventory=${HOMELAB_DIRECTORY:+$HOMELAB_DIRECTORY/inventory.json}
+if [ -z "$inventory" ]; then
+  inventory="$temporary_directory/inventory.json"
+  inventory_url=$(yq -er '.spec.values.controllers.homepage.initContainers.endpoints.env.HOMELAB_INVENTORY_URL' apps/base/homepage/helm-release.yaml)
+  curl -fsSL "$inventory_url" -o "$inventory"
 fi
 HOMELAB_INFRASTRUCTURE_FILE=tests/fixtures/homepage/infrastructure.json \
   HOMEPAGE_BESZEL_ROUTES=tests/fixtures/homepage/beszel-routes.json \
-  sh apps/base/homepage/render_services.sh "$temporary_directory/services.yaml" "$homelab_directory"
+  sh apps/base/homepage/render_services.sh "$temporary_directory/services.yaml" "$inventory"
 '''
 
 # Setup

@@ -80,7 +80,7 @@ spec:
               - /output
               - /publish
             env:
-              HOMELAB_ARCHIVE: https://codeload.github.com/maxexcloo/homelab/tar.gz/refs/heads/main
+              HOMELAB_INVENTORY_URL: https://raw.githubusercontent.com/maxexcloo/homelab/refs/heads/main/inventory.json
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
               HOMEPAGE_CLUSTER: ${cluster_name}
               HOMEPAGE_REVALIDATE_URL: http://127.0.0.1:3000/api/revalidate
