@@ -28,7 +28,7 @@ spec:
                     name: radiance
             image: &image
               repository: docker.io/stilldeadcode/radiance
-              tag: 2.1.0
+              tag: 2.2.0
             # Readiness only: /health answers once the listener is open, and models load on
             # request.
             probes:
