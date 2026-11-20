@@ -72,8 +72,12 @@ endpoints:
           - local/auto
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
-      # Local entries without a known context length use LibreChat's 32k baseline.
-      # The longest matching key wins. Explicit contexts follow Radiance's max-model-len.
+      # Local ids take their context from the model's max-model-len in
+      # apps/base/radiance/radiance.yaml, which tests/test_app_settings.py checks. LibreChat builds
+      # no token config from Bifrost, which lists no context lengths, and Radiance reports one only
+      # while a model is loaded. local/auto is the smallest of router.py's AUTO pool so a chat it
+      # picks can never exceed what that model serves. The local/ key covers a model published
+      # without an entry here and takes LibreChat's 32k baseline; every other name is at least 131k.
       tokenConfig:
         /:
           prompt: 0
@@ -99,7 +103,11 @@ endpoints:
           prompt: 0
           completion: 0
           context: 262144
-        local/qwen3.8-27b:
+        local/qwen3.8-27b-iq4r:
+          prompt: 0
+          completion: 0
+          context: 262144
+        local/qwen3.8-27b-uncensored:
           prompt: 0
           completion: 0
           context: 262144

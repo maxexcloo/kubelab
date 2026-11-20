@@ -169,6 +169,43 @@ class BifrostRoutingTests(unittest.TestCase):
                 ]
                 self.assertEqual(len(matched), 1)
 
+    def test_local_contexts_follow_radiance_max_model_len(self):
+        """LibreChat cannot learn a local context from Bifrost or a cold Radiance model."""
+        radiance = read_yaml(ROOT / "apps/base/radiance/radiance.yaml")["models"]
+        values = read_yaml(ROOT / "apps/base/librechat/librechat.yaml")
+        token_config = next(
+            endpoint["tokenConfig"]
+            for endpoint in values["endpoints"]["custom"]
+            if endpoint["name"] == "Cloud"
+        )
+        # local/auto names no model; it takes the smallest of router.py's AUTO pool.
+        router = ast.parse((ROOT / "apps/base/bifrost/router.py").read_text())
+        auto = next(
+            ast.literal_eval(statement.value)
+            for statement in router.body
+            if isinstance(statement, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "AUTO"
+                for target in statement.targets
+            )
+        )
+        chat_models = {
+            alias.removeprefix("chat/"): entry
+            for entry in radiance.values()
+            for alias in entry.get("aliases", [])
+            if alias.startswith("chat/")
+        }
+        self.assertGreater(len(chat_models), 0)
+        for name, entry in chat_models.items():
+            with self.subTest(model=name):
+                self.assertEqual(
+                    token_config[f"local/{name}"]["context"], entry["max-model-len"]
+                )
+        self.assertEqual(
+            token_config["local/auto"]["context"],
+            min(radiance[name]["max-model-len"] for name in auto),
+        )
+
     def test_cloud_keys_permit_every_target_and_fallback(self):
         providers = {
             target["provider"]
