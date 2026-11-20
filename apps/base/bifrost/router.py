@@ -1,10 +1,8 @@
 """Serves Bifrost's local/ provider from Radiance, and lists cloud/'s aliases.
 
-Radiance loads the model a request names, so local/<name> reaches Radiance as <name>, and local/auto
-as the Qwen text model AUTO picks. Radiance also serves image and video models, so only the text
-models in LOCAL are listed and served. Requests otherwise pass through unchanged, so clients set
-reasoning themselves. A request whose model is not on the cards within LOAD_WAIT seconds, such as
-while a video holds them, or any while Radiance is stopped, fails with 503 and nothing falls back.
+Radiance advertises chat models through its chat/ aliases. The router publishes those names as
+local/ models and retains local/auto's Qwen selection. Requests otherwise pass through unchanged.
+A model that cannot load within LOAD_WAIT seconds, or while Radiance is stopped, returns 503.
 """
 
 import http.client
@@ -40,15 +38,7 @@ HOP_HEADERS = {
 }
 # Normal cold loads take up to about 30 s.
 LOAD_WAIT = 60
-# The text entries of apps/base/radiance/radiance.yaml, flux-pup by its alias.
-LOCAL = (
-    "flux-pup",
-    "gemma-4-31b-heretic",
-    "gemma-4-31b-heretic-i8g",
-    "qwen3.8-27b-iq4r",
-    "qwen3.8-27b-uncensored",
-    "qwen3.8-flash-next",
-)
+CHAT_ALIAS_PREFIX = "chat/"
 PORT = int(os.environ["PORT"])
 RADIANCE = urlsplit(os.environ["RADIANCE_URL"])
 
@@ -65,16 +55,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(200, {"status": "ok"})
         if self.path == "/local/v1/models":
             data = [{"id": alias, "object": "model"} for alias in ALIASES["local"]]
-            upstream = radiance(timeout=5)
-            try:
-                upstream.request("GET", "/v1/models", headers=self.forwarded())
-                response = upstream.getresponse()
-                if response.status == 200:
-                    data += [m for m in json.load(response)["data"] if m["id"] in LOCAL]
-            except OSError:
-                pass
-            finally:
-                upstream.close()
+            data += [
+                {**entry, "id": name} for name, entry in self.chat_models().items()
+            ]
             return self.reply(200, {"data": data, "object": "list"})
         # Bifrost's cloud routing rules send cloud/ on before it reaches the router.
         provider = self.path.removeprefix("/").removesuffix("/v1/models")
@@ -86,12 +69,18 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         provider, _, path = self.path.removeprefix("/").partition("/")
         body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
-        model = json.loads(body).get("model")
+        request = json.loads(body)
+        model = request.get("model")
         message = f"no running model serves {provider}/{model}"
-        if provider == "local" and model in ALIASES["local"] + LOCAL:
+        target = None
+        if provider == "local":
             if model == "auto":
-                model = self.auto()
-                body = json.dumps({**json.loads(body), "model": model}).encode()
+                target = self.auto()
+            else:
+                target = self.chat_models().get(model, {}).get("parent")
+        if target:
+            if model != target:
+                body = json.dumps({**request, "model": target}).encode()
             upstream = radiance()
             try:
                 upstream.connect()
@@ -102,12 +91,31 @@ class Handler(BaseHTTPRequestHandler):
                 # and generation can take minutes.
                 upstream.sock.settimeout(None)
                 upstream.request("POST", f"/{path}", body, self.forwarded())
-                if self.loaded(model):
+                if self.loaded(target):
                     return self.relay(upstream.getresponse(), upstream)
                 # Radiance still loads the model for the abandoned request.
                 upstream.close()
                 message = f"{provider}/{model} did not load within {LOAD_WAIT} s; Radiance's cards are probably busy"
         self.reply(503, {"error": {"message": message, "type": "service_unavailable"}})
+
+    def chat_models(self):
+        # Radiance lists aliases even when the model is cold and its capabilities are unknown.
+        return {
+            entry["id"].removeprefix(CHAT_ALIAS_PREFIX): entry
+            for entry in self.models()
+            if entry.get("parent") and entry["id"].startswith(CHAT_ALIAS_PREFIX)
+        }
+
+    def models(self):
+        upstream = radiance(timeout=5)
+        try:
+            upstream.request("GET", "/v1/models", headers=self.forwarded())
+            response = upstream.getresponse()
+            return json.load(response)["data"] if response.status == 200 else []
+        except OSError:
+            return []
+        finally:
+            upstream.close()
 
     def auto(self):
         """The loaded AUTO model, best first; else a two-card one while nothing runs or waits on the
@@ -152,16 +160,10 @@ class Handler(BaseHTTPRequestHandler):
         """Whether the model comes onto the cards within LOAD_WAIT; a failed lookup does not wait."""
         deadline = time.monotonic() + LOAD_WAIT
         while time.monotonic() < deadline:
-            upstream = radiance(timeout=5)
-            try:
-                upstream.request("GET", "/v1/models", headers=self.forwarded())
-                response = upstream.getresponse()
-                entries = json.load(response)["data"] if response.status == 200 else []
-                state = next((m["state"] for m in entries if m["id"] == model), None)
-            except OSError:
-                state = None
-            finally:
-                upstream.close()
+            state = next(
+                (entry["state"] for entry in self.models() if entry["id"] == model),
+                None,
+            )
             # Radiance answers a failed load itself.
             if state in (None, "failed", "resident"):
                 return True

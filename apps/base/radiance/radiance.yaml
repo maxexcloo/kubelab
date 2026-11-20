@@ -44,11 +44,12 @@ models:
     model: /models/radiance/.v2/flux-3-image-klein-iq8r.rad
     tp: 2
     tp-wire: wht6
-  # BFL's FLUX.3 prompt upsampler, which Bifrost serves as local/flux-pup outside local/auto.
+  # Bifrost discovers chat/ aliases while models are cold.
+  # BFL's FLUX.3 prompt upsampler stays outside local/auto.
   flux-3-image-klein-pup:
     lora-dir: ""
     model: /models/radiance/flux-3-image-klein-pup
-    aliases: [flux-pup]
+    aliases: [chat/flux-pup, flux-pup]
     tp: 1
     chat-template-kwargs: { "enable_thinking": false }
     kv-cache-dtype: i8
@@ -61,6 +62,7 @@ models:
   gemma-4-31b-heretic:
     lora-dir: ""
     model: /models/radiance/.v2/gemma4-31b-heretic-ara-a4.rad
+    aliases: [chat/gemma-4-31b-heretic]
     tp: 1
     kv-cache-dtype: i8
     max-model-len: 169328
@@ -70,6 +72,7 @@ models:
   gemma-4-31b-heretic-i8g:
     lora-dir: ""
     model: /models/radiance/gemma4-31b-heretic-ara-i8g.rad
+    aliases: [chat/gemma-4-31b-heretic-i8g]
     tp: 2
     kv-cache-dtype: i8
     max-model-len: 262144
@@ -136,6 +139,7 @@ models:
   qwen3.8-27b-iq4r:
     lora-dir: ""
     model: /models/radiance/qwen3.8-27b-uncensored-iq4r-v4.rad
+    aliases: [chat/qwen3.8-27b-iq4r]
     tp: 1
     kv-cache-dtype: i8
     max-model-len: 262144
@@ -146,6 +150,7 @@ models:
   qwen3.8-27b-uncensored:
     lora-dir: ""
     model: /models/radiance/.v2/qwen3.8-27b-uncensored-iq8r.rad
+    aliases: [chat/qwen3.8-27b-uncensored]
     tp: 2
     kv-cache-dtype: i8
     max-model-len: 262144
@@ -157,6 +162,7 @@ models:
   qwen3.8-flash-next:
     lora-dir: ""
     model: /models/radiance/qwen3.8-next-flash-uncensored-iqr-v4.rad
+    aliases: [chat/qwen3.8-flash-next]
     tp: 2
     draft-coupling: "on"
     draft-depth: adaptive

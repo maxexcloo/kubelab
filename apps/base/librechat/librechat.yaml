@@ -72,15 +72,18 @@ endpoints:
           - local/auto
       # A live heading summarises long reasoning while it streams.
       reasoningLabel: true
-      # LibreChat assumes 32k for unknown models and summarises too early. Bifrost reports no
-      # context lengths. The longest key a name contains wins. Local models use
-      # max-model-len from apps/base/radiance/radiance.yaml.
+      # Local entries without a known context length use LibreChat's 32k baseline.
+      # The longest matching key wins. Explicit contexts follow Radiance's max-model-len.
       tokenConfig:
         /:
           prompt: 0
           completion: 0
           context: 131072
         local/:
+          prompt: 0
+          completion: 0
+          context: 32768
+        local/auto:
           prompt: 0
           completion: 0
           context: 200000
@@ -100,6 +103,10 @@ endpoints:
           prompt: 0
           completion: 0
           context: 262144
+        local/qwen3.8-flash-next:
+          prompt: 0
+          completion: 0
+          context: 200000
       titleConvo: true
       # Titles use the conversation's own model, so a cloud chat titles through cloud/ and a local one through local/.
       titleModel: current_model
