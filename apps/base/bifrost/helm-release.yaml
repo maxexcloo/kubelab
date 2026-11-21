@@ -3,8 +3,8 @@ kind: HelmRelease
 metadata:
   name: bifrost
 spec:
-  releaseName: bifrost
   interval: 30m
+  releaseName: bifrost
   chart:
     spec:
       chart: bifrost
@@ -14,6 +14,11 @@ spec:
         name: bifrost
         namespace: flux-system
       version: 2.1.49
+  dependsOn:
+    - name: pocket-id
+      namespace: pocket-id
+    - name: traefik
+      namespace: networking
   values:
     fullnameOverride: bifrost
     envFrom:
