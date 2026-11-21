@@ -17,7 +17,7 @@ spec:
     image:
       pullPolicy: IfNotPresent
       repository: openspeedtest/latest
-      tag: v2.0.8
+      tag: v2.0.9
     podSecurityContext:
       runAsGroup: 101
       runAsUser: 101
