@@ -17,6 +17,8 @@ spec:
   dependsOn:
     - name: pocket-id
       namespace: pocket-id
+    - name: traefik
+      namespace: networking
   values:
     fullnameOverride: bifrost
     envFrom:
