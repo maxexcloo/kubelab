@@ -49,7 +49,7 @@ jq -e \
       (.monitor | test("^https?://[^[:space:]]+$") | not);
     def url_hostname:
       try capture("^https?://(?<hostname>[^/:]+)").hostname catch "";
-    map(select(.type != "certificate")) as $route_inventory |
+    . as $route_inventory |
     map(select(.monitoringEnabled)) as $inventory |
     # Route domains limit the Pocket ID check; external services such as
     # Cloudflare Access have no route to match.
