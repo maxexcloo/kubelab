@@ -3,6 +3,9 @@ kind: HelmRelease
 metadata:
   name: application
 spec:
+  dependsOn:
+    - name: pocket-id
+      namespace: pocket-id
   values:
     controllers:
       main:
