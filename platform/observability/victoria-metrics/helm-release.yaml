@@ -24,26 +24,112 @@ spec:
       namespace: external-secrets
   install:
     crds: CreateReplace
-  postRenderers:
-    - kustomize:
-        patches:
-          # Without vmalert the chart renders an empty extraArgs map, which server-side apply sends as null.
-          - patch: |-
-              - op: remove
-                path: /spec/extraArgs
-            target:
-              kind: VMSingle
   upgrade:
     crds: CreateReplace
   values:
     alertmanager:
-      enabled: false
+      config:
+        route:
+          group_by: [alertname]
+          receiver: owner
+        receivers:
+          - name: owner
+            email_configs:
+              - auth_password_file: /etc/vm/secrets/alertmanager-resend/password
+                auth_username: resend
+                from: kubelab@${mail_domain}
+                send_resolved: true
+                smarthost: smtp.resend.com:587
+                to: ${owner_email}
+            pushover_configs:
+              - priority: "0"
+                send_resolved: true
+                token_file: /etc/vm/secrets/alertmanager-pushover/app-token
+                user_key_file: /etc/vm/secrets/alertmanager-pushover/user-key
+      enabled: true
+      spec:
+        nodeSelector:
+          node.excloo.dev/network: internal
+        secrets:
+          - alertmanager-resend
+        selectAllByDefault: false
+        volumeMounts:
+          - name: pushover
+            mountPath: /etc/vm/secrets/alertmanager-pushover
+            readOnly: true
+        volumes:
+          - name: pushover
+            secret:
+              optional: true
+              secretName: alertmanager-pushover
     coreDns:
       enabled: true
     defaultDashboards:
       enabled: false
     defaultRules:
       enabled: false
+    extraObjects:
+      - apiVersion: operator.victoriametrics.com/v1beta1
+        kind: VMPodScrape
+        metadata:
+          name: cnpg-backups
+        spec:
+          namespaceSelector:
+            any: true
+          podMetricsEndpoints:
+            - metricRelabelConfigs:
+                - action: keep
+                  sourceLabels: [__name__]
+                  regex: barman_cloud_cloudnative_pg_io_last_available_backup_timestamp|cnpg_collector_pg_wal_archive_status
+              port: metrics
+              relabelConfigs:
+                - sourceLabels: [__meta_kubernetes_pod_label_cnpg_io_cluster]
+                  targetLabel: cnpg_cluster
+                - replacement: cnpg-backups
+                  targetLabel: job
+          selector:
+            matchLabels:
+              cnpg.io/instanceRole: primary
+              cnpg.io/podRole: instance
+    extraRules:
+      backups:
+        groups:
+          - name: backups
+            rules:
+              - alert: FileBackupOverdue
+                expr: |
+                  time() - (
+                    kube_cronjob_status_last_successful_time{cronjob=~"state-backup|redlib-multi-backup"}
+                    or on (cluster, namespace, cronjob)
+                    kube_cronjob_created{cronjob=~"state-backup|redlib-multi-backup"}
+                  ) > 30 * 3600
+                for: 5m
+                annotations:
+                  summary: File backup for {{ $labels.namespace }} is more than 30 hours old
+              - alert: BackupWorkloadStranded
+                expr: |
+                  kube_deployment_annotations{annotation_backup_excloo_dev_resume_state!=""}
+                  unless on (cluster, namespace)
+                  kube_cronjob_status_active{cronjob="state-backup"} > 0
+                for: 5m
+                annotations:
+                  summary: Backup has not resumed {{ $labels.namespace }}/{{ $labels.deployment }}
+              - alert: PostgreSQLBackupOverdue
+                expr: |
+                  time() - barman_cloud_cloudnative_pg_io_last_available_backup_timestamp > 30 * 3600
+                  or (
+                    up{job="cnpg-backups"}
+                    unless on (cluster, namespace, pod)
+                    barman_cloud_cloudnative_pg_io_last_available_backup_timestamp
+                  )
+                for: 15m
+                annotations:
+                  summary: PostgreSQL backup for {{ $labels.cnpg_cluster }} is overdue or its metrics are unreachable
+              - alert: PostgreSQLWALArchivingStalled
+                expr: cnpg_collector_pg_wal_archive_status{value="ready"} > 0
+                for: 15m
+                annotations:
+                  summary: WAL is waiting to be archived for {{ $labels.cnpg_cluster }}
     grafana:
       automountServiceAccountToken: false
       enabled: true
@@ -165,6 +251,8 @@ spec:
           volumeattachments,
         ]
       enabled: true
+      metricAnnotationsAllowList:
+        - deployments=[backup.excloo.dev/resume-state]
       resources:
         limits:
           memory: 256Mi
@@ -279,7 +367,10 @@ spec:
             cpu: 50m
             memory: 384Mi
     vmalert:
-      enabled: false
+      enabled: true
+      spec:
+        nodeSelector:
+          node.excloo.dev/network: internal
     vmsingle:
       enabled: true
       spec:
