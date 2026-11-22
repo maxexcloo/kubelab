@@ -2,6 +2,7 @@
 
 import json
 import os
+import shlex
 import signal
 import subprocess
 import sys
@@ -89,7 +90,8 @@ class BackupRecoveryTests(unittest.TestCase):
 
     def prepare(self, directory):
         kubectl = directory / "kubectl"
-        kubectl.write_text(f"#!{sys.executable}\n" + KUBECTL)
+        command = shlex.join([sys.executable, "-c", KUBECTL])
+        kubectl.write_text(f'#!/bin/sh\nexec {command} "$@"\n')
         kubectl.chmod(0o755)
         timeout = directory / "timeout"
         timeout.write_text(
