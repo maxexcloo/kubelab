@@ -14,11 +14,6 @@ spec:
         name: bifrost
         namespace: flux-system
       version: 2.1.49
-  dependsOn:
-    - name: pocket-id
-      namespace: pocket-id
-    - name: traefik
-      namespace: networking
   values:
     fullnameOverride: bifrost
     envFrom:

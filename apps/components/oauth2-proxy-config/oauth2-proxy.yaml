@@ -4,15 +4,21 @@ providers:
     clientSecret: ${OIDC_CLIENT_SECRET}
     code_challenge_method: S256
     id: pocket-id
+    # Pocket ID can be offline while oauth2-proxy starts.
+    loginURL: ${OIDC_ISSUER_URL}/authorize
     name: Excloo ID
+    profileURL: ${OIDC_ISSUER_URL}/api/oidc/userinfo
+    provider: oidc
+    redeemURL: ${OIDC_ISSUER_URL}/api/oidc/token
     oidcConfig:
       emailClaim: email
       groupsClaim: groups
       issuerURL: ${OIDC_ISSUER_URL}
+      jwksURL: ${OIDC_ISSUER_URL}/.well-known/jwks.json
+      skipDiscovery: true
       userIDClaim: email
       audienceClaims:
         - aud
-    provider: oidc
 server:
   bindAddress: 0.0.0.0:4180
 upstreamConfig:

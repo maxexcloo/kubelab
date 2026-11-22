@@ -3,11 +3,6 @@ kind: HelmRelease
 metadata:
   name: application
 spec:
-  dependsOn:
-    - name: pocket-id
-      namespace: pocket-id
-    - name: traefik
-      namespace: networking
   values:
     controllers:
       main:

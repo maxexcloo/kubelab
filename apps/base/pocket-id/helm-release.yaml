@@ -10,15 +10,10 @@ spec:
           wait-for-database:
             command:
               - sh
-              - -ec
-              - |
-                until pg_isready -h pocket-id-database-rw -p 5432 -q; do
-                  echo waiting for pocket-id-database-rw
-                  sleep 2
-                done
+              - /checks/wait-for-database.sh
             image:
-              repository: ghcr.io/cloudnative-pg/postgresql
-              tag: 18.7-standard-trixie
+              repository: image.invalid
+              tag: tag
             resources:
               limits:
                 memory: 64Mi
@@ -71,6 +66,15 @@ spec:
       securityContext:
         fsGroup: null
         fsGroupChangePolicy: null
+    persistence:
+      database-check:
+        name: pocket-id-database-check
+        type: configMap
+        advancedMounts:
+          main:
+            wait-for-database:
+              - path: /checks
+                readOnly: true
     route:
       private:
         hostnames:
