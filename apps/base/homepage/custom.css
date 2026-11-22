@@ -24,10 +24,6 @@ body {
 .service-description {
   font-weight: 400;
 }
-/* Icons */
-.service-icon img[src$="/frontend/public/favicon.svg"] {
-  filter: brightness(0) invert(1);
-}
 /* Cards */
 .rounded,
 .rounded-md {
