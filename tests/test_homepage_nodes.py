@@ -17,6 +17,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         inventory = read_yaml(path)
         del inventory["services"]["saturn/syncthing"]
         inventory["machines"]["saturn"]["beszel"] = True
+        inventory["machines"]["neptune"]["beszel"] = True
         inventory["machines"]["personal"] = {
             "network": "mbk",
             "location": "mbk-personal",
@@ -152,9 +153,14 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(node["Beszel"]["weight"], -1)
         self.assertEqual(node["Beszel"]["icon"], "sh-beszel")
         layout = read_yaml(self.output / "settings.yaml")["layout"]
-        for group in ["Saturn", "Taco"]:
-            self.assertEqual(layout["Servers"]["tab"], "Servers")
-            self.assertIn(group, layout["Servers"])
+        self.assertEqual(layout["Servers"]["tab"], "Servers")
+        server_groups = [
+            key for key, value in layout["Servers"].items() if isinstance(value, dict)
+        ]
+        self.assertEqual(
+            server_groups,
+            ["Luna", "NanoKVM", "Saturn", "SLZB-06M", "Sol", "Taco", "Neptune"],
+        )
         for group in ["Infrastructure", "Operations", "Smart Home"]:
             self.assertEqual(layout["Home"]["tab"], "Home")
             self.assertIn(group, layout["Home"])
@@ -179,6 +185,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         inventory["machines"]["node"] = {
             "cluster": "mbk",
             "location": "mbk-renamed",
+            "name": "Node",
             "network": "mbk",
             "fqdn": "renamed.mbk.example.net",
             "type": "vm",
@@ -203,6 +210,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             "type": "vm",
             "network": "mbk",
             "location": "mbk-extra",
+            "name": "Extra",
         }
         path.write_text(json.dumps(inventory))
         self.assertEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)

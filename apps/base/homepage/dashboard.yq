@@ -1,4 +1,6 @@
-[load(strenv(HOMELAB_INVENTORY)).machines[] | select(.type != null) | .name] as $host_groups |
+(load(strenv(HOMELAB_INVENTORY)).machines | to_entries |
+  map(select(.value.type != null) | {"key": .value.name, "value": .value.network}) |
+  from_entries) as $host_sites |
 (map(.cluster) | unique) as $cluster_names |
 map(
   ([. + {"clusterView": false}] +
@@ -43,7 +45,7 @@ map(
   .value + {"group": $group, "name": .key,
     "location": ((.value.description // "") | split(" • ") | .[1:] | join(" • ")),
     "tab": (if ($cluster_names | any_c(. == $group)) then "Clusters"
-      elif ($host_groups | any_c(. == $group)) then "Servers" else "Home" end)}] as $external |
+      elif $host_sites[$group] != null then "Servers" else "Home" end)}] as $external |
 # An app's routes collapse into one card. Homepage finds cards by group and
 # name, so same-named services elsewhere keep their location in the name.
 ($external + $applications) | unique_by(.tab + "/" + .group + "/" + .name + "/" + .location) |
@@ -62,6 +64,7 @@ map(.weight = .size * -1) + $overview | map(del(.size)) |
 sort_by(.tab, .group, .weight, (.name | downcase)) |
 group_by(.tab) |
 # Homepage shows nested groups in file order, so Overview goes first.
-map({(.[0].tab): (group_by(.group) |
-  (map(select(.[0].group == "Overview")) + map(select(.[0].group != "Overview"))) |
+map(.[0].tab as $tab | {($tab): (group_by(.group) |
+  (if $tab == "Servers" then sort_by($host_sites[.[0].group], (.[0].group | downcase))
+  else map(select(.[0].group == "Overview")) + map(select(.[0].group != "Overview")) end) |
   map({(.[0].group): map(.name as $name | del(.name, .group, .tab) | {($name): .})}))})
