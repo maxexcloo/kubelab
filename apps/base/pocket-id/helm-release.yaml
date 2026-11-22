@@ -6,20 +6,6 @@ spec:
   values:
     controllers:
       main:
-        initContainers:
-          wait-for-database:
-            command:
-              - sh
-              - /checks/wait-for-database.sh
-            image:
-              repository: image.invalid
-              tag: tag
-            resources:
-              limits:
-                memory: 64Mi
-              requests:
-                cpu: 10m
-                memory: 32Mi
         containers:
           main:
             env:
@@ -31,6 +17,7 @@ spec:
               AUTO_CREATE_OIDC_CLIENT_SECRET: "false"
               EMAILS_VERIFIED: "true"
               FILE_BACKEND: database
+              GEOLITE_DB_PATH: /tmp/GeoLite2-City.mmdb
               REQUIRE_USER_EMAIL: "true"
               SMTP_FROM: pocket-id@${mail_domain}
               SMTP_HOST: smtp.resend.com
@@ -66,15 +53,6 @@ spec:
       securityContext:
         fsGroup: null
         fsGroupChangePolicy: null
-    persistence:
-      database-check:
-        name: pocket-id-database-check
-        type: configMap
-        advancedMounts:
-          main:
-            wait-for-database:
-              - path: /checks
-                readOnly: true
     route:
       private:
         hostnames:
