@@ -29,6 +29,9 @@ if args[0] == "get":
     if "resume-state" in output:
         print(state.get("resume_state", ""), end="")
     elif "replicas" in output:
+        if "expected_before_capture" in state:
+            assert "resume_state" not in state
+            assert [state["replicas"], state["suspended"]] == state["expected_before_capture"]
         print(state["replicas"], end="")
     elif "suspend" in output:
         print(str(state["suspended"]).lower(), end="")
@@ -148,6 +151,8 @@ class BackupRecoveryTests(unittest.TestCase):
                     if crash_after == 3:
                         self.assertEqual(interrupted_state["replicas"], 0)
                         self.assertTrue(interrupted_state["suspended"])
+                    interrupted_state["expected_before_capture"] = [replicas, suspended]
+                    state.write_text(json.dumps(interrupted_state))
                     retried = self.run_backup(directory, state)
                     self.assertEqual(retried.returncode, 0, retried.stderr)
                     restored = json.loads(state.read_text())
