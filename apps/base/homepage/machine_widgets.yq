@@ -36,7 +36,10 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
     $host_index[$reference[0]][$reference[1]] as $host |
     with(select(.group != "Servers");
-      .description = (.description + " • " + $host.machine.name)) |
+      .description = (.description + " • " + $host.machine.name) |
+      (.name | split(" (")) as $name_parts |
+      with(select($name_parts[-1] == ($host.machine.name + ")"));
+        .name = ($name_parts[0:-1] | join(" (")))) |
     with(select(.group == "Servers"); .group = $host.machine.name))]) as $existing |
 # Grouped services own their management cards; other hosts get their own.
 [$hosts[] | select(.machine.type != null and .machine.services.management != null) |

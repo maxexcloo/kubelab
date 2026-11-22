@@ -32,6 +32,41 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertIn("TrueNAS (mbk)", names)
         self.assertEqual(len([name for name in names if name.startswith("TrueNAS")]), 2)
 
+    def test_host_qualifiers_are_used_only_for_duplicate_home_cards(self):
+        homelab = self.directory / "homelab"
+        shutil.copytree(HOMELAB, homelab)
+        path = homelab / "inventory.json"
+        inventory = read_yaml(path)
+        service = inventory["services"]["saturn/syncthing"]
+        service.update(description="File Synchronisation", name="Syncthing (Saturn)")
+        inventory["services"]["saturn/agent-browser"] = {
+            **service,
+            "name": "Agent Browser (Saturn)",
+            "url": "https://browser.example.net",
+        }
+        path.write_text(json.dumps(inventory))
+        result = self.render(HOMELAB_DIRECTORY=str(homelab))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Agent Browser", self.services())
+        self.assertIn("Syncthing", self.services())
+        self.assertNotIn("Syncthing (Saturn)", self.services())
+
+        syncthing = route("Syncthing (mbk-taco)", group="Infrastructure")
+        syncthing["metadata"]["namespace"] = "syncthing"
+        self.placements.write_text(json.dumps({"syncthing": ["taco"]}))
+        self.write_routes([syncthing])
+        result = self.render(HOMELAB_DIRECTORY=str(homelab))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        home_names = {
+            name for card in self.groups("Home")["Infrastructure"] for name in card
+        }
+        self.assertEqual(
+            {name for name in home_names if name.startswith("Syncthing")},
+            {"Syncthing (Saturn)", "Syncthing (Taco)"},
+        )
+        cluster_cards = self.groups("Clusters")["mbk/taco"]
+        self.assertIn("Syncthing (mbk-taco)", cluster_cards[0])
+
     def test_route_widget_and_status_selector(self):
         library = route(
             "Library",
