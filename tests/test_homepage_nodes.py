@@ -104,7 +104,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertNotIn("widget", groups["Smart Home"]["Home Assistant"])
         self.assertEqual(
             groups["Overview"]["Home Assistant"]["widget"],
-            groups["Luna"]["Home Assistant"]["widget"],
+            groups["Luna (MBK)"]["Home Assistant"]["widget"],
         )
         # Taller cards end the Overview grid: TrueNAS adds pool rows to its widget.
         self.assertEqual(list(groups["Overview"])[-1], "TrueNAS")
@@ -112,7 +112,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             groups["Smart Home"]["Home Assistant"]["description"],
             "Smart Home & Automations • Luna",
         )
-        storage = groups["Saturn"]
+        storage = groups["Saturn (MBK)"]
         # Larger cards lead: TrueNAS adds pool rows to its widget.
         self.assertEqual(
             list(storage), ["TrueNAS", "Beszel", "Cloudflare", "Tailscale"]
@@ -123,7 +123,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])
-        node = groups["Taco"]
+        node = groups["Taco (MBK)"]
         self.assertEqual(list(node), ["Beszel", "Tailscale"])
         self.assertEqual(node["Beszel"]["widget"]["systemId"], "mbk-taco")
         self.assertEqual(
@@ -159,7 +159,15 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         ]
         self.assertEqual(
             server_groups,
-            ["Luna", "NanoKVM", "Saturn", "SLZB-06M", "Sol", "Taco", "Neptune"],
+            [
+                "Luna (MBK)",
+                "NanoKVM (MBK)",
+                "Saturn (MBK)",
+                "SLZB-06M (MBK)",
+                "Sol (MBK)",
+                "Taco (MBK)",
+                "Neptune (SYD)",
+            ],
         )
         for group in ["Infrastructure", "Operations", "Smart Home"]:
             self.assertEqual(layout["Home"]["tab"], "Home")

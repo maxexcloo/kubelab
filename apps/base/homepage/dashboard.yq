@@ -67,4 +67,7 @@ group_by(.tab) |
 map(.[0].tab as $tab | {($tab): (group_by(.group) |
   (if $tab == "Servers" then sort_by($host_sites[.[0].group], (.[0].group | downcase))
   else map(select(.[0].group == "Overview")) + map(select(.[0].group != "Overview")) end) |
-  map({(.[0].group): map(.name as $name | del(.name, .group, .tab) | {($name): .})}))})
+  map(.[0].group as $group |
+    (if $tab == "Servers" then $group + " (" + ($host_sites[$group] | upcase) + ")"
+    else $group end) as $label |
+    {($label): map(.name as $name | del(.name, .group, .tab) | {($name): .})}))})
