@@ -113,20 +113,22 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
             for name, cards in self.groups().items()
         }
         for label, endpoint in [
-            ("First", "first.lab.example.net:9090"),
-            ("Second", "renamed.lab.example.net:9443"),
+            ("First (LAB)", "first.lab.example.net:9090"),
+            ("Second (LAB)", "renamed.lab.example.net:9443"),
         ]:
             panel = groups[label]["Example Console"]
             self.assertEqual(panel["href"], f"https://{endpoint}")
             self.assertEqual(panel["description"], "Host Administration")
             self.assertEqual(panel["icon"], "example-console")
-        self.assertEqual(groups["First"]["Beszel"]["icon"], "sh-beszel")
-        self.assertEqual(groups["First"]["Beszel"]["description"], "System Monitoring")
+        self.assertEqual(groups["First (LAB)"]["Beszel"]["icon"], "sh-beszel")
+        self.assertEqual(
+            groups["First (LAB)"]["Beszel"]["description"], "System Monitoring"
+        )
         self.assertEqual(
             groups["Infrastructure"]["Netboot"]["href"],
             "http://storage.mbk.example.net:31010",
         )
-        self.assertEqual(groups["Saturn"]["TrueNAS"]["widget"]["type"], "truenas")
+        self.assertEqual(groups["Saturn (MBK)"]["TrueNAS"]["widget"]["type"], "truenas")
 
 
 if __name__ == "__main__":
