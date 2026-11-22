@@ -11,10 +11,16 @@ components:
   - ../../components/default-deny
   - ../../components/oauth2-proxy
   - ../../components/private-dns
+  - ../../../platform/backups/credentials
+  - ../../../platform/backups/files
 patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
+  - path: backup.yaml
+    target:
+      kind: CronJob
+      name: state-backup
 replacements:
   - source:
       kind: HelmRelease
