@@ -8,49 +8,57 @@
       "type": "appliance",
       "fqdn": "luna.mbk.example.net",
       "network": "mbk",
-      "location": "mbk-luna"
+      "location": "mbk-luna",
+      "name": "Luna"
     },
     "nanokvm": {
       "type": "appliance",
       "fqdn": "nanokvm.mbk.example.net",
       "network": "mbk",
-      "location": "mbk-nanokvm"
+      "location": "mbk-nanokvm",
+      "name": "NanoKVM"
     },
     "saturn": {
       "type": "storage",
       "fqdn": "storage.mbk.example.net",
       "network": "mbk",
-      "location": "mbk-storage"
+      "location": "mbk-storage",
+      "name": "Saturn"
     },
     "slzb-06m": {
       "type": "appliance",
       "fqdn": "slzb-06m.mbk.example.net",
       "network": "mbk",
-      "location": "mbk-slzb-06m"
+      "location": "mbk-slzb-06m",
+      "name": "SLZB-06M"
     },
     "sol": {
       "type": "router",
       "fqdn": "sol.mbk.example.net",
       "network": "mbk",
-      "location": "mbk-sol"
+      "location": "mbk-sol",
+      "name": "Sol"
     },
     "taco": {
       "type": "vm",
       "fqdn": "taco.mbk.example.net",
       "network": "mbk",
-      "location": "mbk-taco"
+      "location": "mbk-taco",
+      "name": "Taco"
     },
     "venus": {
       "type": "server",
       "fqdn": "venus.mbk.example.net",
       "network": "mbk",
-      "location": "mbk-venus"
+      "location": "mbk-venus",
+      "name": "Venus"
     },
     "neptune": {
       "type": "vm",
       "fqdn": "neptune.syd.example.net",
       "network": "syd",
-      "location": "syd-neptune"
+      "location": "syd-neptune",
+      "name": "Neptune"
     }
   },
   "providers": {
