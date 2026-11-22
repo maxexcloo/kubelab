@@ -1,0 +1,7 @@
+apiVersion: automation.excloo.dev/v1alpha1
+kind: ResendKey
+metadata:
+  name: alertmanager-resend
+  namespace: observability
+spec:
+  item: Kubelab Alertmanager
