@@ -151,9 +151,9 @@ class BifrostRoutingTests(unittest.TestCase):
         cloud = studio["spec"]["values"]["controllers"]["main"]["containers"]["main"][
             "env"
         ]["STUDIO_ASSISTANT_CLOUD_MODEL"]
-        # Studio selects the uncensored counterpart of an auto model.
+        # Studio selects the extended counterpart of an auto model.
         self.assertIn(
-            cloud.removeprefix("cloud/").replace("auto", "uncensored"), aliases["cloud"]
+            cloud.removeprefix("cloud/").replace("auto", "extended"), aliases["cloud"]
         )
         for model in aliases["cloud"]:
             with self.subTest(model=model):

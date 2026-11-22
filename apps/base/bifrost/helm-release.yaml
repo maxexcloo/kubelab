@@ -214,7 +214,7 @@ spec:
           existingSecret: bifrost
           isEnabled: false
         # Each cloud/ alias serves one model, falling back in order to the same model
-        # elsewhere. The uncensored aliases name the model they abliterate.
+        # elsewhere.
         routingRules:
           - id: cloud-deepseek-flash
             name: Cloud DeepSeek Flash
@@ -235,9 +235,9 @@ spec:
               - provider: deploy
                 model: deepseek-ai/deepseek-v4.1-flash-1017
                 weight: 1.0
-          - id: cloud-deepseek-flash-uncensored
-            name: Cloud DeepSeek Flash Uncensored
-            cel_expression: "provider == 'cloud' && model in ['uncensored', 'deepseek-flash-uncensored']"
+          - id: cloud-deepseek-flash-extended
+            name: Cloud DeepSeek Flash Extended
+            cel_expression: "provider == 'cloud' && model in ['extended', 'deepseek-flash-extended']"
             enabled: true
             fallbacks:
               - model: abliterated-model-large-flash
@@ -280,9 +280,9 @@ spec:
               - provider: deploy
                 model: zai-org/glm-5.3-flash
                 weight: 1.0
-          - id: cloud-glm-flash-uncensored
-            name: Cloud GLM Flash Uncensored
-            cel_expression: "provider == 'cloud' && model == 'glm-flash-uncensored'"
+          - id: cloud-glm-flash-extended
+            name: Cloud GLM Flash Extended
+            cel_expression: "provider == 'cloud' && model == 'glm-flash-extended'"
             enabled: true
             priority: 4
             scope: global
@@ -290,9 +290,9 @@ spec:
               - provider: refuseless
                 model: glm-5.3-flash-abliterated
                 weight: 1.0
-          - id: cloud-glm-uncensored
-            name: Cloud GLM Uncensored
-            cel_expression: "provider == 'cloud' && model == 'glm-uncensored'"
+          - id: cloud-glm-extended
+            name: Cloud GLM Extended
+            cel_expression: "provider == 'cloud' && model == 'glm-extended'"
             enabled: true
             fallbacks:
               - model: abliterated-model-large-v2

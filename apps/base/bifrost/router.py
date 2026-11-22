@@ -16,19 +16,19 @@ ALIASES = {
     "cloud": (
         "auto",
         "deepseek-flash",
-        "deepseek-flash-uncensored",
+        "deepseek-flash-extended",
+        "extended",
         "glm",
         "glm-flash",
-        "glm-flash-uncensored",
-        "glm-uncensored",
+        "glm-flash-extended",
+        "glm-extended",
         "mimo",
         "mimo-flash",
-        "uncensored",
     ),
     "local": ("auto",),
 }
 # local/auto's Qwen text models, best first: two cards, two cards, one card.
-AUTO = ("qwen3.8-flash-next", "qwen3.8-27b-uncensored", "qwen3.8-27b-iq4r")
+AUTO = ("qwen3.8-flash-next", "qwen3.8-27b-extended", "qwen3.8-27b-iq4r")
 HOP_HEADERS = {
     "connection",
     "content-length",

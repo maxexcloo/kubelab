@@ -136,6 +136,17 @@ models:
     tp: 2
     max-model-len: 20480
     tp-wire: wht6
+  qwen3.8-27b-extended:
+    lora-dir: ""
+    model: /models/radiance/.v2/qwen3.8-27b-uncensored-iq8r.rad
+    aliases: [chat/qwen3.8-27b-extended]
+    tp: 2
+    kv-cache-dtype: i8
+    max-model-len: 262144
+    max-num-seqs: 8
+    mixed-step-target-ms: 150
+    prefix-cache-mib: 8192
+    reasoning-effort-map: high=xhigh
   qwen3.8-27b-iq4r:
     lora-dir: ""
     model: /models/radiance/qwen3.8-27b-uncensored-iq4r-v4.rad
@@ -146,17 +157,6 @@ models:
     max-num-seqs: 8
     mixed-step-target-ms: 150
     prefix-cache-mib: 4096
-    reasoning-effort-map: high=xhigh
-  qwen3.8-27b-uncensored:
-    lora-dir: ""
-    model: /models/radiance/.v2/qwen3.8-27b-uncensored-iq8r.rad
-    aliases: [chat/qwen3.8-27b-uncensored]
-    tp: 2
-    kv-cache-dtype: i8
-    max-model-len: 262144
-    max-num-seqs: 8
-    mixed-step-target-ms: 150
-    prefix-cache-mib: 8192
     reasoning-effort-map: high=xhigh
   # Its experts do not fit the cards: the hottest stay there and the rest stream from host memory.
   qwen3.8-flash-next:
