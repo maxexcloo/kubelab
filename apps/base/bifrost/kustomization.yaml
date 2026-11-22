@@ -73,5 +73,12 @@ components:
   - ../../components/oauth2-proxy-config
   - ../../components/private-dns
   - ../../components/default-deny
+  - ../../../platform/backups/credentials
+  - ../../../platform/backups/files
+patches:
+  - path: backup.yaml
+    target:
+      kind: CronJob
+      name: state-backup
 transformers:
   - ../../transformers/cluster-scoped
