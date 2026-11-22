@@ -13,7 +13,35 @@ resources:
   - route.yaml
   - source.yaml
   - storage.yaml
+configMapGenerator:
+  - name: database-check
+    files:
+      - ../../components/database-readiness/wait-for-database.sh
+configurations:
+  - name-reference.yaml
 replacements:
+  - source:
+      kind: Cluster
+      fieldPath: spec.imageName
+      options:
+        delimiter: ":"
+        index: 0
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.server.controllers.main.initContainers.wait-for-database.image.repository
+  - source:
+      kind: Cluster
+      fieldPath: spec.imageName
+      options:
+        delimiter: ":"
+        index: 1
+    targets:
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.server.controllers.main.initContainers.wait-for-database.image.tag
   # The chart source lives in the namespace the release references.
   - source:
       kind: HelmRelease

@@ -15,6 +15,7 @@ components:
   - ../../components/application
   - ../../components/default-deny
   - ../../components/database-colocation
+  - ../../components/database-readiness
   - ../../../platform/backups/credentials
   - ../../components/private-dns-control-d-only
 configurations:

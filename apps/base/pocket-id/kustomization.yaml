@@ -12,14 +12,9 @@ components:
   - ../../components/application
   - ../../components/default-deny
   - ../../components/database-colocation
+  - ../../components/database-readiness
   - ../../../platform/backups/credentials
   - ../../components/private-dns-control-d-only
-configMapGenerator:
-  - name: pocket-id-database-check
-    files:
-      - wait-for-database.sh
-configurations:
-  - name-reference.yaml
 patches:
   - path: database.yaml
     target:
@@ -28,28 +23,6 @@ patches:
     target:
       kind: HelmRelease
 replacements:
-  - source:
-      kind: Cluster
-      fieldPath: spec.imageName
-      options:
-        delimiter: ":"
-        index: 0
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.initContainers.wait-for-database.image.repository
-  - source:
-      kind: Cluster
-      fieldPath: spec.imageName
-      options:
-        delimiter: ":"
-        index: 1
-    targets:
-      - select:
-          kind: HelmRelease
-        fieldPaths:
-          - spec.values.controllers.main.initContainers.wait-for-database.image.tag
   - source:
       kind: HelmRelease
       fieldPath: spec.values.route.public.hostnames.0
