@@ -42,7 +42,16 @@ spec:
                 key: BIFROST_OWNER_API_KEY
                 name: bifrost
           - name: NODE_OPTIONS
-            value: --require /patches/tool-history.cjs
+            value: --require /patches/tool-history.cjs --require /patches/studio-attachments.cjs
+          - &studioMcpKey
+            name: STUDIO_MCP_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: STUDIO_MCP_API_KEY
+                name: librechat
+          - &studioMcpUrl
+            name: STUDIO_MCP_URL
+            value: http://studio.studio.svc.cluster.local:8787/mcp
         existingSecretName: librechat
     image:
       pullPolicy: IfNotPresent
@@ -60,13 +69,8 @@ spec:
         env:
           - name: STUDIO_CHAT_IMAGES_DIR
             value: /images
-          - name: STUDIO_MCP_API_KEY
-            valueFrom:
-              secretKeyRef:
-                key: STUDIO_MCP_API_KEY
-                name: librechat
-          - name: STUDIO_MCP_URL
-            value: http://studio.studio.svc.cluster.local:8787/mcp
+          - *studioMcpKey
+          - *studioMcpUrl
         resources:
           limits:
             memory: 128Mi
