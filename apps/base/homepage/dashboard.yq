@@ -1,4 +1,4 @@
-[load(strenv(HOMELAB_INVENTORY)).machines[] | select(.type != null) | .location] as $host_groups |
+[load(strenv(HOMELAB_INVENTORY)).machines[] | select(.type != null) | .name] as $host_groups |
 (map(.cluster) | unique) as $cluster_names |
 map(
   ([. + {"clusterView": false}] +
