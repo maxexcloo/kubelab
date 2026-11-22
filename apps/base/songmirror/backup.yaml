@@ -3,4 +3,4 @@ kind: CronJob
 metadata:
   name: state-backup
 spec:
-  schedule: 36 3 * * *
+  schedule: 51 3 * * *

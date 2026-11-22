@@ -10,17 +10,11 @@ resources:
 components:
   - ../../components/application
   - ../../components/default-deny
-  - ../../../platform/backups/credentials
-  - ../../../platform/backups/files
   - ../../components/private-dns
 patches:
   - path: helm-release.yaml
     target:
       kind: HelmRelease
-  - path: backup.yaml
-    target:
-      kind: CronJob
-      name: state-backup
 replacements:
   - source:
       kind: HelmRelease

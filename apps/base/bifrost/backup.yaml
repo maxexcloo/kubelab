@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: state-backup
+spec:
+  schedule: 36 3 * * *
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            fsGroup: 1000
+            runAsGroup: 1000
+            runAsUser: 1000
