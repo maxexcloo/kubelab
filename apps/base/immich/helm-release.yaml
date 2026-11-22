@@ -74,7 +74,7 @@ spec:
       configurationKind: Secret
       persistence:
         library:
-          existingClaim: library
+          existingClaim: &library-claim library
     machine-learning:
       controllers:
         main:
@@ -98,6 +98,28 @@ spec:
     server:
       controllers:
         main:
+          initContainers:
+            wait-for-database:
+              command:
+                - sh
+                - /checks/wait-for-database.sh
+              env:
+                PGHOST: "{{ .Release.Name }}-database-rw"
+              image:
+                repository: image.invalid
+                tag: tag
+              resources:
+                limits:
+                  memory: 64Mi
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
           containers:
             main:
               env:
@@ -129,20 +151,47 @@ spec:
         cli:
           enabled: true
           type: emptyDir
-          globalMounts:
-            - path: /.config
+          advancedMounts:
+            main:
+              main:
+                - path: /.config
+        config:
+          name: "{{ .Release.Name }}-immich-config"
+          type: secret
+          advancedMounts:
+            main:
+              main:
+                - path: /config
+        data:
+          existingClaim: *library-claim
+          advancedMounts:
+            main:
+              main:
+                - path: /data
+        database-check:
+          name: database-check
+          type: configMap
+          advancedMounts:
+            main:
+              wait-for-database:
+                - path: /checks
+                  readOnly: true
         icloud-photos:
           enabled: true
           existingClaim: icloud-photos
           type: persistentVolumeClaim
-          globalMounts:
-            - path: /icloud-photos
-              readOnly: true
+          advancedMounts:
+            main:
+              main:
+                - path: /icloud-photos
+                  readOnly: true
         temporary:
           enabled: true
           type: emptyDir
-          globalMounts:
-            - path: /tmp
+          advancedMounts:
+            main:
+              main:
+                - path: /tmp
     valkey:
       enabled: true
       controllers:

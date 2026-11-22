@@ -1,0 +1,33 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: application
+spec:
+  values:
+    controllers:
+      main:
+        initContainers:
+          wait-for-database:
+            command:
+              - sh
+              - /checks/wait-for-database.sh
+            env:
+              PGHOST: "{{ .Release.Name }}-database-rw"
+            image:
+              repository: image.invalid
+              tag: tag
+            resources:
+              limits:
+                memory: 64Mi
+              requests:
+                cpu: 10m
+                memory: 32Mi
+    persistence:
+      database-check:
+        name: database-check
+        type: configMap
+        advancedMounts:
+          main:
+            wait-for-database:
+              - path: /checks
+                readOnly: true
