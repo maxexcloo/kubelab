@@ -208,7 +208,11 @@ modelSpecs:
       preset:
         endpoint: Local
         model: local/auto
-        promptPrefix: &honest If a tool isn't available or a call fails, say so; never claim actions you didn't take with a tool.
+        promptPrefix: &honest >-
+          Report unavailable tools and failed calls honestly.
+          Studio Generate uses images attached to the current message automatically.
+          If the user asks to ignore the attachments, pass an empty reference_asset_ids array.
+          Search uploads or offer an upload link only when no image is attached to this message.
     - name: local-gemma-4-31b-heretic
       label: Gemma 4 31B Heretic
       description: Gemma 4 31B with refusals removed, at 4 bits on one card. 169k context.
