@@ -125,7 +125,7 @@ function installStudioAttachments({ requests, MCPManager, getFiles, endpoint, ke
     if (
       !turn ||
       call.serverName !== "studio" ||
-      call.toolName !== "generate" ||
+      (call.toolName !== "generate" && call.toolName !== "studio-generate") ||
       (source !== "yaml" && source !== "config") ||
       (Array.isArray(call.toolArguments?.reference_asset_ids) &&
         !call.toolArguments.reference_asset_ids.length)
