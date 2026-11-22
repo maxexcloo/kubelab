@@ -91,6 +91,7 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
                 "type": "server",
                 "network": "lab",
                 "location": "lab-" + hostname,
+                "name": name.title(),
                 "fqdn": hostname + ".lab.example.net",
             }
             inventory["services"][name + "/management"] = {
@@ -111,23 +112,21 @@ class HomepageDashboardTests(HomepageDashboardFixture, unittest.TestCase):
             name: {key: value for card in cards for key, value in card.items()}
             for name, cards in self.groups().items()
         }
-        for host, endpoint in [
-            ("first", "first.lab.example.net:9090"),
-            ("renamed", "renamed.lab.example.net:9443"),
+        for label, endpoint in [
+            ("First", "first.lab.example.net:9090"),
+            ("Second", "renamed.lab.example.net:9443"),
         ]:
-            panel = groups[f"lab-{host}"]["Example Console"]
+            panel = groups[label]["Example Console"]
             self.assertEqual(panel["href"], f"https://{endpoint}")
             self.assertEqual(panel["description"], "Host Administration")
             self.assertEqual(panel["icon"], "example-console")
-        self.assertEqual(groups["lab-first"]["Beszel"]["icon"], "sh-beszel")
-        self.assertEqual(
-            groups["lab-first"]["Beszel"]["description"], "System Monitoring"
-        )
+        self.assertEqual(groups["First"]["Beszel"]["icon"], "sh-beszel")
+        self.assertEqual(groups["First"]["Beszel"]["description"], "System Monitoring")
         self.assertEqual(
             groups["Infrastructure"]["Netboot"]["href"],
             "http://storage.mbk.example.net:31010",
         )
-        self.assertEqual(groups["mbk-storage"]["TrueNAS"]["widget"]["type"], "truenas")
+        self.assertEqual(groups["Saturn"]["TrueNAS"]["widget"]["type"], "truenas")
 
 
 if __name__ == "__main__":

@@ -13,7 +13,6 @@ load(strenv(INFRASTRUCTURE)) as $infra |
     "key": $key, "network": $machine.network,
     "machine": ($machine + {"services": ($inventory.services | to_entries |
       map(select(.value.machine == $key) | .key |= sub("^[^/]+/"; "")) | from_entries)}),
-    "group": $machine.location,
     "reference": ("homelab://" + $machine.network + "/" + $key + "/management")
   }
 ] as $hosts |
@@ -37,14 +36,14 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
     (.href | sub("^homelab://"; "") | split("/")) as $reference |
     $host_index[$reference[0]][$reference[1]] as $host |
     with(select(.group != "Servers");
-      .description = (.description + " • " + $host.group)) |
-    with(select(.group == "Servers"); .group = $host.group))]) as $existing |
+      .description = (.description + " • " + $host.machine.name)) |
+    with(select(.group == "Servers"); .group = $host.machine.name))]) as $existing |
 # Grouped services own their management cards; other hosts get their own.
 [$hosts[] | select(.machine.type != null and .machine.services.management != null) |
   select(.reference as $reference | $existing | any_c(.href == $reference) | not) |
   .machine.services.management as $panel |
   {
-    "name": ($panel.name // .group), "group": .group,
+    "name": ($panel.name // .machine.name), "group": .machine.name,
     "description": $panel.description,
     "icon": $panel.icon,
     "href": .reference, "siteMonitor": ($panel.siteMonitor // .reference)
@@ -61,18 +60,18 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
 [$hosts[] | select(.machine.type != null) | . as $host |
   (([.machine] | map(select(.beszel == true)) |
    map(with(select($beszel == null); error("Beszel monitoring needs exactly one Beszel route")) | $beszel + {
-    "href": ($beszel.href + "/system/" + $host.group),
-    "widget": ($beszel.widget + {"systemId": $host.group, "fields": ["cpu", "memory", "status", "updated"]})
+    "href": ($beszel.href + "/system/" + $host.machine.location),
+    "widget": ($beszel.widget + {"systemId": $host.machine.location, "fields": ["cpu", "memory", "status", "updated"]})
   })) +
   ([$infra.tailscale[$host.key]] | map(select(. != null and $tailscale.widget != null)) | map(. as $device | $tailscale + {
     "href": ("https://login.tailscale.com/admin/machines/" + $device),
     "widget": ($tailscale.widget + {"deviceid": $device})
-  }))) | .[] | . + {"group": $host.group}
+  }))) | .[] | . + {"group": $host.machine.name}
 ] as $monitoring |
 [($infra.cloudflare.tunnels // {}) | to_entries[] | select(.value != null and $cloudflare.widget != null) |
   .key as $name | ($hosts | map(select(.key == $name)) | .[0]) as $host |
   select($host == null or $host.machine.type != null) |
-  $cloudflare + {"group": ($host.group // $name),
+  $cloudflare + {"group": ($host.machine.name // $name),
    "href": ("https://one.dash.cloudflare.com/" + $infra.cloudflare.account_id + "/networks/connectors/cloudflare-tunnels/cfd_tunnel/" + .value),
    "widget": ($cloudflare.widget + {"accountid": $infra.cloudflare.account_id, "tunnelid": .value})}
 ] as $tunnels |

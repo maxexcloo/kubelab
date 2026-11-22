@@ -27,6 +27,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             "cluster": "mbk",
             "network": "mbk",
             "location": "mbk-taco",
+            "name": "Taco",
             "fqdn": "taco.mbk.example.net",
             "type": "vm",
         }
@@ -95,22 +96,22 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             name: {key: value for card in cards for key, value in card.items()}
             for name, cards in self.groups().items()
         }
-        self.assertNotIn("mbk-personal", groups)
+        self.assertNotIn("Personal", groups)
         self.assertIn("Netboot", groups["Infrastructure"])
         self.assertIn("ESPHome", groups["Smart Home"])
         self.assertIn("Home Assistant", groups["Smart Home"])
         self.assertNotIn("widget", groups["Smart Home"]["Home Assistant"])
         self.assertEqual(
             groups["Overview"]["Home Assistant"]["widget"],
-            groups["mbk-luna"]["Home Assistant"]["widget"],
+            groups["Luna"]["Home Assistant"]["widget"],
         )
         # Taller cards end the Overview grid: TrueNAS adds pool rows to its widget.
         self.assertEqual(list(groups["Overview"])[-1], "TrueNAS")
         self.assertEqual(
             groups["Smart Home"]["Home Assistant"]["description"],
-            "Smart Home & Automations • mbk-luna",
+            "Smart Home & Automations • Luna",
         )
-        storage = groups["mbk-storage"]
+        storage = groups["Saturn"]
         # Larger cards lead: TrueNAS adds pool rows to its widget.
         self.assertEqual(
             list(storage), ["TrueNAS", "Beszel", "Cloudflare", "Tailscale"]
@@ -121,7 +122,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(storage["TrueNAS"]["widget"]["type"], "truenas")
         self.assertTrue(storage["TrueNAS"]["widget"]["enablePools"])
         self.assertNotIn("widgets", storage["TrueNAS"])
-        node = groups["mbk-taco"]
+        node = groups["Taco"]
         self.assertEqual(list(node), ["Beszel", "Tailscale"])
         self.assertEqual(node["Beszel"]["widget"]["systemId"], "mbk-taco")
         self.assertEqual(
@@ -151,7 +152,7 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertEqual(node["Beszel"]["weight"], -1)
         self.assertEqual(node["Beszel"]["icon"], "sh-beszel")
         layout = read_yaml(self.output / "settings.yaml")["layout"]
-        for group in ["mbk-storage", "mbk-taco"]:
+        for group in ["Saturn", "Taco"]:
             self.assertEqual(layout["Servers"]["tab"], "Servers")
             self.assertIn(group, layout["Servers"])
         for group in ["Infrastructure", "Operations", "Smart Home"]:
