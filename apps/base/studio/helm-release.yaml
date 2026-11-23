@@ -48,7 +48,7 @@ spec:
               # Settings › Workers benchmarks Radiance's text model with this image, taking its
               # key from the radiance Secret in its namespace (apps/base/radiance).
               # renovate: datasource=docker depName=ghcr.io/maxexcloo/betterbench
-              STUDIO_BENCHMARK_IMAGE: ghcr.io/maxexcloo/betterbench:v0.6.1-291
+              STUDIO_BENCHMARK_IMAGE: ghcr.io/maxexcloo/betterbench:v0.6.1-308
               STUDIO_BENCHMARK_SECRET: radiance
               # The navigation's Chat item opens LibreChat (apps/base/librechat/route.yaml).
               STUDIO_CHAT_URL: https://chat.excloo.com
