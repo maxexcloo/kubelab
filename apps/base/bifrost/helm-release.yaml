@@ -436,6 +436,9 @@ spec:
               - *deepseek
               - *deploy
               - *local
+              - provider: openai
+                allowed_models: ["*"]
+                key_ids: ["*"]
               - *opencode-go
               - *opencode-zen
               # Its direct OpenRouter endpoint has its own credential.
@@ -709,6 +712,11 @@ spec:
           network_config:
             allow_private_network: true
             base_url: http://127.0.0.1:8090/local
+        openai:
+          keys:
+            - name: openai
+              models: ["*"]
+              value: env.OPENAI_API_KEY
         opencode-go:
           keys:
             - name: opencode-go-1
