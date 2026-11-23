@@ -27,7 +27,6 @@ spec:
                 memory: 32Mi
           oauth2-proxy:
             env:
-              OAUTH2_PROXY_REDIRECT_URL: https://app.invalid/oauth2/callback
               UPSTREAM_AUTHORIZATION:
                 valueFrom:
                   secretKeyRef:
@@ -73,8 +72,7 @@ spec:
         parentRefs:
           - name: private
             namespace: networking
-        # The proxy injects the management key, so client APIs, which carry their own
-        # keys, and the health check reach the app directly.
+        # API clients supply their own keys. The proxy injects the management key for browser sessions.
         rules:
           - backendRefs:
               - identifier: main
@@ -95,6 +93,14 @@ spec:
               - path:
                   type: PathPrefix
                   value: /v1beta
+              - method: GET
+                path:
+                  type: Exact
+                  value: /v0/management/auth-files
+              - method: POST
+                path:
+                  type: Exact
+                  value: /v0/management/api-call
           - backendRefs:
               - identifier: main
                 port: 4180

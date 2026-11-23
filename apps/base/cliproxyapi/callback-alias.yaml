@@ -1,0 +1,16 @@
+apiVersion: builtin
+kind: ReplacementTransformer
+metadata:
+  name: cliproxyapi-callback-alias
+replacements:
+  - source:
+      kind: HelmRelease
+      fieldPath: spec.values.route.private.hostnames.1
+    targets:
+      - select:
+          kind: PocketIDClient
+        fieldPaths:
+          - spec.client.callbackURLs.1
+        options:
+          delimiter: /
+          index: 2
