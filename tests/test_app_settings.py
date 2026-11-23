@@ -169,6 +169,27 @@ class BifrostRoutingTests(unittest.TestCase):
                 ]
                 self.assertEqual(len(matched), 1)
 
+    def test_cloud_routes_are_allowed_by_client_keys(self):
+        for key in self.governance["virtualKeys"]:
+            grants = {
+                entry["provider"]: entry for entry in key.get("provider_configs", [])
+            }
+            if "cloud" not in grants:
+                continue
+            for rule in self.governance["routingRules"]:
+                if not rule["enabled"]:
+                    continue
+                for target in rule["targets"] + rule.get("fallbacks", []):
+                    provider, model = target["provider"], target["model"]
+                    with self.subTest(
+                        key=key["id"], rule=rule["id"], provider=provider, model=model
+                    ):
+                        grant = grants[provider]
+                        self.assertTrue(
+                            "*" in grant["allowed_models"]
+                            or model in grant["allowed_models"]
+                        )
+
     def test_local_contexts_follow_radiance_max_model_len(self):
         """LibreChat cannot learn a local context from Bifrost or a cold Radiance model."""
         radiance = read_yaml(ROOT / "apps/base/radiance/radiance.yaml")["models"]
