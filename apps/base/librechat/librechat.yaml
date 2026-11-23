@@ -49,10 +49,8 @@ endpoints:
       - tools
       - web_search
   custom:
-    # Every section reaches its provider through Bifrost, which lists that provider's models
-    # for x-bf-model-provider. Cloud serves the cloud/ aliases and Local the local/ ones;
-    # the rest are direct providers, named after the upstream they front, so Anthropic,
-    # Google, OpenAI and xAI are CLIProxyAPI's channels there.
+    # Bifrost lists models for x-bf-model-provider. Cloud and Local serve the alias
+    # groups, and Claude, Gemini, GPT and Grok use CLIProxyAPI through Bifrost.
     - &defaults
       name: Cloud
       apiKey: ${BIFROST_API_KEY}
@@ -148,10 +146,8 @@ endpoints:
         x-bf-model-provider: cliproxy-grok
     - <<: *provider
       name: OpenRouter
-      # Native: OpenRouter's own key and endpoint, not Bifrost. LibreChat needs
-      # OPENROUTER_KEY for this and no OPENROUTER_API_KEY, which would reroute its
-      # built-in OpenAI endpoint too. fetch stays off because the catalogue is
-      # already listed per provider through Bifrost.
+      # OPENROUTER_KEY keeps this endpoint independent of LibreChat's OpenAI
+      # endpoint. List only OpenRouter's auto model.
       apiKey: ${OPENROUTER_KEY}
       baseURL: https://openrouter.ai/api/v1
       models:

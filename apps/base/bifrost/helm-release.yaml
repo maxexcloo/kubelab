@@ -364,63 +364,116 @@ spec:
             mcp_configs: *agent-mcp
             # Agents reach the models themselves; cloud/auto is for chat.
             provider_configs: &agent-models
-              - provider: abliteration
+              - &abliteration
+                provider: abliteration
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: cliproxy-anthropic
+              - &cliproxy-anthropic
+                provider: cliproxy-anthropic
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: cliproxy-google
+              - &cliproxy-google
+                provider: cliproxy-google
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: cliproxy-grok
+              - &cliproxy-grok
+                provider: cliproxy-grok
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: cloud
+              - &cloud
+                provider: cloud
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: deepseek
+              - &deepseek
+                provider: deepseek
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: deploy
+              - &deploy
+                provider: deploy
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: local
+              - &local
+                provider: local
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: opencode-go
+              - &opencode-go
+                provider: opencode-go
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: opencode-zen
+              - &opencode-zen
+                provider: opencode-zen
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: openrouter
+              - &openrouter
+                provider: openrouter
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: refuseless
+              - &refuseless
+                provider: refuseless
                 allowed_models: ["*"]
                 key_ids: ["*"]
-              - provider: xiaomi
+              - &xiaomi
+                provider: xiaomi
                 allowed_models: ["*"]
                 key_ids: ["*"]
           # LibreChat offers a section per provider.
           - id: librechat
             name: LibreChat
-            allow_all_providers: true
             value: env.VIRTUAL_KEY_LIBRECHAT
             # Studio trusts the forwarded user headers, so only LibreChat may call it.
             mcp_configs:
               - mcp_client_name: studio
                 tools_to_execute: ["*"]
             provider_configs:
-              - provider: local
+              - *abliteration
+              - *cliproxy-anthropic
+              - *cliproxy-google
+              - *cliproxy-grok
+              - provider: cliproxy-openai
                 allowed_models: ["*"]
                 key_ids: ["*"]
+              - *cloud
+              - *deepseek
+              - *deploy
+              - *local
+              - *opencode-go
+              - *opencode-zen
+              # Its direct OpenRouter endpoint has its own credential.
+              - <<: *openrouter
+                allowed_models:
+                  [
+                    deepseek/deepseek-v4.1-flash-1017,
+                    xiaomi/mimo-v2.6-flash,
+                    xiaomi/mimo-v2.6-pro,
+                    z-ai/glm-5.3,
+                    z-ai/glm-5.3-flash,
+                  ]
+              - *refuseless
+              - *xiaomi
           - id: opencode
             name: OpenCode
             value: env.VIRTUAL_KEY_OPENCODE
             mcp_configs: *agent-mcp
-            provider_configs: *agent-models
+            # Native logins cover these upstreams. Keep the models cloud routes require.
+            provider_configs:
+              - *abliteration
+              - *cliproxy-anthropic
+              - *cliproxy-google
+              - *cliproxy-grok
+              - *cloud
+              - <<: *deepseek
+                allowed_models: [deepseek-flash]
+              - *deploy
+              - *local
+              - <<: *opencode-go
+                allowed_models:
+                  [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash, mimo-v2.6-flash, mimo-v2.6-pro]
+              - <<: *opencode-zen
+                allowed_models: [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash]
+              - *openrouter
+              - *refuseless
+              - <<: *xiaomi
+                allowed_models: [mimo-v2.6-flash, mimo-v2.6-pro]
           # The owner's personal key for LibreChat's restricted MCP servers.
           - id: owner
             name: Owner
