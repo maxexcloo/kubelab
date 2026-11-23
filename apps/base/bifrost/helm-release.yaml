@@ -363,7 +363,7 @@ spec:
             value: env.VIRTUAL_KEY_DSH
             mcp_configs: *agent-mcp
             # Agents reach the models themselves; cloud/auto is for chat.
-            provider_configs: &agent-models
+            provider_configs:
               - &abliteration
                 provider: abliteration
                 allowed_models: ["*"]
@@ -439,7 +439,8 @@ spec:
               - *opencode-go
               - *opencode-zen
               # Its direct OpenRouter endpoint has its own credential.
-              - <<: *openrouter
+              - &cloud-openrouter
+                <<: *openrouter
                 allowed_models:
                   [
                     deepseek/deepseek-v4.1-flash-1017,
@@ -454,8 +455,8 @@ spec:
             name: OpenCode
             value: env.VIRTUAL_KEY_OPENCODE
             mcp_configs: *agent-mcp
-            # Native logins cover these upstreams. Keep the models cloud routes require.
-            provider_configs:
+            # The desktop pickers omit these upstreams. Keep the models cloud routes require.
+            provider_configs: &desktop-models
               - *abliteration
               - *cliproxy-anthropic
               - *cliproxy-google
@@ -470,7 +471,7 @@ spec:
                   [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash, mimo-v2.6-flash, mimo-v2.6-pro]
               - <<: *opencode-zen
                 allowed_models: [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash]
-              - *openrouter
+              - *cloud-openrouter
               - *refuseless
               - <<: *xiaomi
                 allowed_models: [mimo-v2.6-flash, mimo-v2.6-pro]
@@ -484,7 +485,7 @@ spec:
             name: Pi
             value: env.VIRTUAL_KEY_PI
             mcp_configs: *agent-mcp
-            provider_configs: *agent-models
+            provider_configs: *desktop-models
           - id: studio
             name: Studio
             value: env.VIRTUAL_KEY_STUDIO
