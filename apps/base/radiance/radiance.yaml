@@ -117,7 +117,6 @@ models:
     model: /models/radiance/.v2/noctq-v4-iq8r.rad
     tp: 2
     max-model-len: 20480
-    tp-wire: wht6
   qwen-image-2.1-iq8r:
     model: /models/radiance/.v2/qwen-image-2.1-iq8r.rad
     tp: 1
@@ -126,7 +125,6 @@ models:
     model: /models/radiance/.v2/qwen-image-2.1-iq8r.rad
     tp: 2
     max-model-len: 20480
-    tp-wire: wht6
   qwen-image-2.1-turbo-iq8r:
     model: /models/radiance/.v2/qwen-image-2.1-turbo-iq8r.rad
     tp: 1
@@ -135,7 +133,6 @@ models:
     model: /models/radiance/.v2/qwen-image-2.1-turbo-iq8r.rad
     tp: 2
     max-model-len: 20480
-    tp-wire: wht6
   qwen3.8-27b-iq4r:
     lora-dir: ""
     model: /models/radiance/qwen3.8-27b-uncensored-iq4r-v4.rad
