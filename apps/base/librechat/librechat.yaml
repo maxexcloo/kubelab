@@ -144,7 +144,7 @@ endpoints:
       name: Grok
       headers:
         x-bf-model-provider: cliproxy-grok
-    - <<: *provider
+    - <<: *defaults
       name: OpenRouter
       # OPENROUTER_KEY keeps this endpoint independent of LibreChat's OpenAI
       # endpoint. List only OpenRouter's auto model.
