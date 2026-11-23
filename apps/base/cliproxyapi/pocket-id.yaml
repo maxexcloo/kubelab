@@ -6,6 +6,7 @@ spec:
   client:
     callbackURLs:
       - https://app.invalid/oauth2/callback
+      - https://app.invalid/oauth2/callback
     description: Subscription Proxy
     id: cliproxyapi
     launchURL: https://app.invalid/management.html
