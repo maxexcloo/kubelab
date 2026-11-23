@@ -440,7 +440,14 @@ spec:
               - *opencode-zen
               # Its direct OpenRouter endpoint has its own credential.
               - <<: *openrouter
-                allowed_models: [deepseek/deepseek-v4.1-flash-1017, xiaomi/mimo-v2.6-flash, xiaomi/mimo-v2.6-pro, z-ai/glm-5.3, z-ai/glm-5.3-flash]
+                allowed_models:
+                  [
+                    deepseek/deepseek-v4.1-flash-1017,
+                    xiaomi/mimo-v2.6-flash,
+                    xiaomi/mimo-v2.6-pro,
+                    z-ai/glm-5.3,
+                    z-ai/glm-5.3-flash,
+                  ]
               - *refuseless
               - *xiaomi
           - id: opencode
@@ -459,7 +466,8 @@ spec:
               - *deploy
               - *local
               - <<: *opencode-go
-                allowed_models: [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash, mimo-v2.6-flash, mimo-v2.6-pro]
+                allowed_models:
+                  [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash, mimo-v2.6-flash, mimo-v2.6-pro]
               - <<: *opencode-zen
                 allowed_models: [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash]
               - *openrouter
