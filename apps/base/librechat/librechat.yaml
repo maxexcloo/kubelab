@@ -141,6 +141,10 @@ endpoints:
       headers:
         x-bf-model-provider: cliproxy-openai
     - <<: *provider
+      name: OpenAI API
+      headers:
+        x-bf-model-provider: openai
+    - <<: *provider
       name: Grok
       headers:
         x-bf-model-provider: cliproxy-grok
