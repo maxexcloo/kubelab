@@ -41,11 +41,6 @@ spec:
                 send_resolved: true
                 smarthost: smtp.resend.com:587
                 to: ${owner_email}
-            pushover_configs:
-              - priority: "0"
-                send_resolved: true
-                token_file: /etc/vm/secrets/alertmanager-pushover/app-token
-                user_key_file: /etc/vm/secrets/alertmanager-pushover/user-key
       enabled: true
       spec:
         nodeSelector:
@@ -53,15 +48,6 @@ spec:
         secrets:
           - alertmanager-resend
         selectAllByDefault: false
-        volumeMounts:
-          - name: pushover
-            mountPath: /etc/vm/secrets/alertmanager-pushover
-            readOnly: true
-        volumes:
-          - name: pushover
-            secret:
-              optional: true
-              secretName: alertmanager-pushover
     coreDns:
       enabled: true
     defaultDashboards:
