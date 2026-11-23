@@ -2,33 +2,56 @@
   (
     select(.kind == "HTTPRoute") |
     {
-      "cluster": strenv(CLUSTER),
       "annotations": (.metadata.annotations // {}),
       "hostnames": (.spec.hostnames // []),
-      "labels": (.metadata.labels // {}),
       "namespace": .metadata.namespace,
       "parentRefs": ((.spec.parentRefs // []) | map(.name)),
+      "publicAccess": (.metadata.labels."gateway.excloo.dev/public-access" // ""),
       "source": ("HTTPRoute/" + .metadata.namespace + "/" + .metadata.name)
     }
   ),
   (
     select(.kind == "HelmRelease") |
     .metadata as $metadata |
-    (.spec.releaseName // $metadata.name) as $releaseName |
     (.spec.values.route // {} | to_entries[]) |
     select(.value.enabled != false) |
     {
-      "cluster": strenv(CLUSTER),
       "annotations": (.value.annotations // {}),
       "hostnames": (.value.hostnames // []),
-      "labels": (.value.labels // {} | with_entries(
-        with(select(.value == "{{ .Release.Name }}"); .value = $releaseName))),
       "namespace": $metadata.namespace,
       "parentRefs": ((.value.parentRefs // []) | map(.name)),
+      "publicAccess": (.value.labels."gateway.excloo.dev/public-access" // ""),
       "source": (
         "HelmRelease/" + $metadata.namespace + "/" + $metadata.name +
         "/route/" + .key
       )
     }
   )
-)
+) |
+select(
+  strenv(ALL_ROUTES) == "true" or
+  .annotations."monitoring.excloo.dev/enabled" == "true"
+) |
+{
+  "alerts": (.annotations."monitoring.excloo.dev/alerts" // "true"),
+  "cluster": strenv(CLUSTER),
+  "cloudflareProxied": (.annotations."external-dns.alpha.kubernetes.io/cloudflare-proxied" // ""),
+  "description": (.annotations."gethomepage.dev/description" // ""),
+  "group": (.annotations."gethomepage.dev/group" // "Services"),
+  "headers": ((.annotations."monitoring.excloo.dev/headers" // "{}") | from_json),
+  "hostnames": .hostnames,
+  "href": (.annotations."gethomepage.dev/href" // ""),
+  "icon": (.annotations."gethomepage.dev/icon" // ""),
+  "monitor": (
+    .annotations."monitoring.excloo.dev/url" //
+    ("https://" + (.hostnames[0] // "") + (.annotations."monitoring.excloo.dev/path" // ""))
+  ),
+  "monitoringEnabled": (.annotations."monitoring.excloo.dev/enabled" == "true"),
+  "name": (.annotations."monitoring.excloo.dev/name" // .annotations."gethomepage.dev/name" // (.source | split("/") | .[2])),
+  "namespace": .namespace,
+  "parentRefs": .parentRefs,
+  "publicAccess": .publicAccess,
+  "source": .source,
+  "type": "route"
+} |
+select(.source != null)
