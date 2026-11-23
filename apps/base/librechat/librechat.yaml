@@ -210,9 +210,9 @@ modelSpecs:
         model: local/auto
         promptPrefix: &honest >-
           Report unavailable tools and failed calls honestly.
-          Studio Generate uses images attached to the current message automatically.
-          If the user asks to ignore the attachments, pass an empty reference_asset_ids array.
-          Search uploads or offer an upload link only when no image is attached to this message.
+          Studio Generate uses images attached to the current message, and keeps using them for later requests in this chat until other references are named.
+          If the user asks to drop or ignore the references, pass an empty reference_asset_ids array.
+          Search uploads or offer an upload link only when no image is attached and none is in use.
     - name: local-gemma-4-31b-heretic
       label: Gemma 4 31B Heretic
       description: Gemma 4 31B with refusals removed, at 4 bits on one card. 169k context.
