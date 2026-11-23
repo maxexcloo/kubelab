@@ -51,6 +51,7 @@ spec:
               STUDIO_BENCHMARK_IMAGE: ghcr.io/maxexcloo/betterbench:v0.6.1-308
               STUDIO_BENCHMARK_SECRET: radiance
               # The navigation's Chat item opens LibreChat (apps/base/librechat/route.yaml).
+              STUDIO_CARD_IMAGES: "1"
               STUDIO_CHAT_URL: https://chat.excloo.com
               # Grok media goes straight to CLIProxyAPI with Studio's key (external-secrets.yaml).
               STUDIO_CLIPROXYAPI_URL: http://cliproxyapi.cliproxyapi.svc.cluster.local:8317
