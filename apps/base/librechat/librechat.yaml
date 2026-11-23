@@ -211,7 +211,7 @@ modelSpecs:
           Search uploads or offer an upload link only when no image is attached and none is in use.
     - name: local-gemma-4-31b-heretic
       label: Gemma 4 31B Heretic
-      description: Gemma 4 31B with refusals removed, at 4 bits on one card. 169k context.
+      description: Runs on one GPU at 4-bit precision, with refusals removed.
       group: Local
       mcpServers: *studio
       preset:
@@ -220,7 +220,7 @@ modelSpecs:
         promptPrefix: *honest
     - name: local-gemma-4-31b-heretic-i8g
       label: Gemma 4 31B Heretic I8G
-      description: Gemma 4 31B with refusals removed, at 8 bits on both cards. 262k context.
+      description: Runs on both GPUs at 8-bit precision, with refusals removed.
       group: Local
       mcpServers: *studio
       preset:
@@ -229,7 +229,7 @@ modelSpecs:
         promptPrefix: *honest
     - name: local-qwen3.8-27b-iq4r
       label: Qwen3.8 27B Uncensored IQ4R
-      description: Qwen3.8 27B with refusals removed, at 4 bits on one card. 262k context.
+      description: Runs on one GPU at 4-bit precision.
       group: Local
       mcpServers: *studio
       preset:
@@ -238,7 +238,7 @@ modelSpecs:
         promptPrefix: *honest
     - name: local-qwen3.8-27b-uncensored
       label: Qwen3.8 27B Uncensored
-      description: Qwen3.8 27B with refusals removed, at 8 bits on both cards. 262k context.
+      description: Runs on both GPUs at 8-bit precision.
       group: Local
       mcpServers: *studio
       preset:
@@ -247,7 +247,7 @@ modelSpecs:
         promptPrefix: *honest
     - name: local-qwen3.8-flash-next
       label: Qwen3.8 Flash Next Uncensored
-      description: A mixture of experts with refusals removed, across both cards and part streamed from host memory. 200k context; the slowest to load.
+      description: Runs across both GPUs and partly from host memory. Slowest to load.
       group: Local
       mcpServers: *studio
       preset:
