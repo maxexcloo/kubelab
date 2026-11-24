@@ -1,0 +1,12 @@
+# GPU images take many GiB to pull before each upgrade (../prepull).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: _
+spec:
+  timeout: 30m
+  # Keep retrying, so an upgrade blocked while the GPU node is off resumes once it
+  # returns. Workers hold no data, so rolling back between attempts is harmless.
+  upgrade:
+    remediation:
+      retries: -1

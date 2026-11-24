@@ -11,6 +11,7 @@ resources:
 components:
   - ../../components/application
   - ../../components/default-deny
+  - ../../components/prepull
   - ../../components/private-dns-control-d-only
 patches:
   - path: helm-release.yaml

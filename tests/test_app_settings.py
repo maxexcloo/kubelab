@@ -115,6 +115,9 @@ class AppSettingsTests(unittest.TestCase):
                 else:
                     continue
                 for name, probe in probes:
+                    # Studio's deploys serve again as soon as it listens, not on the next 10 s check.
+                    if (resource["metadata"]["name"], name) == ("studio", "startup"):
+                        continue
                     with self.subTest(
                         cluster=cluster, app=resource["metadata"]["name"], probe=name
                     ):

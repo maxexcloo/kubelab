@@ -79,15 +79,20 @@ spec:
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
-            image:
+            image: &image
               repository: ghcr.io/maxexcloo/studio
               tag: 2026.11.24.29
             probes:
               liveness:
                 path: /api/ping
-              readiness: &ready
-                path: /api/ready
-              startup: *ready
+              readiness:
+                path: &ready /api/ready
+              # Checked every second, so a deploy serves again as soon as Studio listens.
+              startup:
+                path: *ready
+                spec:
+                  failureThreshold: 300
+                  periodSeconds: 1
             resources:
               limits:
                 memory: 4Gi
@@ -97,6 +102,16 @@ spec:
         defaultContainerOptions:
           securityContext:
             runAsNonRoot: true
+      # Studio's volume holds it to the storage node (storage.yaml).
+      prepull:
+        serviceAccount:
+          name: default
+        containers:
+          main:
+            image: *image
+        pod:
+          nodeSelector:
+            kubernetes.io/hostname: ${storage_node}
     defaultPodOptions:
       # kubectl exec and logs reach Studio, not the ctrld sidecar listed before it.
       annotations:
