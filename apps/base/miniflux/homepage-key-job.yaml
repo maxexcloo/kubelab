@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: miniflux-homepage-key
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  schedule: "*/15 * * * *"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 120
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: miniflux-homepage-key
+        spec:
+          restartPolicy: Never
+          serviceAccountName: miniflux-homepage-key
+          containers:
+            - name: publisher
+              image: docker.io/alpine/k8s:1.37.2
+              command: [sh, /scripts/publish_homepage_key.sh]
+              env:
+                - name: ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: ADMIN_PASSWORD
+                      name: miniflux
+                - name: ADMIN_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: ADMIN_USERNAME
+                      name: miniflux
+              resources:
+                limits:
+                  memory: 128Mi
+                requests:
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsGroup: 65532
+                runAsNonRoot: true
+                runAsUser: 65532
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+                - name: temporary
+                  mountPath: /tmp
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - name: script
+              configMap:
+                name: miniflux-homepage-key
+            - name: temporary
+              emptyDir: {}
