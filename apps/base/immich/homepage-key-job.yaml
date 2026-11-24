@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: immich-homepage-key
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  schedule: "*/15 * * * *"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 120
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: immich-homepage-key
+        spec:
+          restartPolicy: Never
+          serviceAccountName: immich-homepage-key
+          containers:
+            - name: publisher
+              image: docker.io/alpine/k8s:1.37.2
+              command: [sh, /scripts/publish_homepage_key.sh]
+              env:
+                - name: HOMEPAGE_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: token
+                      name: immich-homepage-key-existing
+                      optional: true
+                - name: IMMICH_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: immich-config
+                - name: IMMICH_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: username
+                      name: immich-config
+              resources:
+                limits:
+                  memory: 128Mi
+                requests:
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsGroup: 65532
+                runAsNonRoot: true
+                runAsUser: 65532
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+                - name: temporary
+                  mountPath: /tmp
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - name: script
+              configMap:
+                name: immich-homepage-key-script
+            - name: temporary
+              emptyDir: {}

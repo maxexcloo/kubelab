@@ -5,6 +5,9 @@ metadata:
 spec:
   ingress:
     - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: immich-homepage-key
         # The Immich MCP server calls the API.
         - namespaceSelector:
             matchLabels:
