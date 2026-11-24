@@ -81,7 +81,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image: &image
               repository: ghcr.io/maxexcloo/studio
-              tag: 2026.11.24.35
+              tag: 2026.11.24.36
             probes:
               liveness:
                 path: /api/ping
