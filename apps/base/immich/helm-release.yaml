@@ -128,6 +128,8 @@ spec:
                 DB_PORT: "5432"
                 DB_SSL_MODE: require
                 DB_VECTOR_EXTENSION: vectorchord
+                # The metrics exporter rejects every request when it binds to the default "::".
+                IMMICH_HOST: 0.0.0.0
                 IMMICH_TELEMETRY_INCLUDE: all
                 DB_PASSWORD:
                   valueFrom:
