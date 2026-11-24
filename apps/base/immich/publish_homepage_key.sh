@@ -14,7 +14,10 @@ scoped_key() {
   status=$(printf 'header = "x-api-key: %s"\n' "$1" |
     immich --config - --output /tmp/key.json --write-out '%{http_code}' "$base/api-keys/me") || exit 1
   case "$status" in
-    200) jq -e --arg permission "$permission" '.permissions == [$permission]' /tmp/key.json >/dev/null ;;
+    200)
+      permissions=$(jq -ec '.permissions | arrays' /tmp/key.json) || exit 1
+      [ "$permissions" = "[\"$permission\"]" ]
+      ;;
     401 | 403) return 1 ;;
     *) printf 'Immich key check returned HTTP %s\n' "$status" >&2; exit 1 ;;
   esac
@@ -24,7 +27,13 @@ session_request() {
   printf 'header = "Authorization: Bearer %s"\n' "$session" | immich --config - --fail "$@"
 }
 
-if scoped_key "${PUBLISHED_TOKEN-}"; then
+kube() {
+  kubectl --kubeconfig /dev/null --cache-dir /tmp/kubectl --request-timeout 15s "$@"
+}
+
+staged_secret=$(kube get secret immich-homepage-key -o json)
+staged_token=$(printf '%s' "$staged_secret" | jq -r '.data.token // "" | @base64d')
+if scoped_key "$staged_token"; then
   exit 0
 fi
 
@@ -59,5 +68,4 @@ printf 'header = "x-api-key: %s"\n' "$token" |
   immich --config - --fail --output /dev/null "$base/server/statistics"
 patch=$(printf '%s' "$token" | jq -Rs '{stringData: {token: .}}')
 printf '%s' "$patch" |
-  kubectl --kubeconfig /dev/null --cache-dir /tmp/kubectl --request-timeout 15s \
-    patch secret immich-homepage-key --type merge --patch-file /dev/stdin
+  kube patch secret immich-homepage-key --type merge --patch-file /dev/stdin

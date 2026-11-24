@@ -39,12 +39,6 @@ spec:
                     secretKeyRef:
                       key: username
                       name: immich-config
-                - name: PUBLISHED_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      key: token
-                      name: immich-homepage-key
-                      optional: true
               resources:
                 limits:
                   memory: 128Mi
