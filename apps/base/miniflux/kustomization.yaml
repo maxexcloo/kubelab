@@ -39,6 +39,6 @@ transformers:
   - ../../transformers/pocket-id-icon-private
   - ../../transformers/route-private
 configMapGenerator:
-  - name: miniflux-homepage-key
+  - name: miniflux-homepage-key-script
     files:
       - publish_homepage_key.sh
