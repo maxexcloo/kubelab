@@ -16,6 +16,7 @@ resources:
   - route.yaml
   - source.yaml
   - storage.yaml
+  - vm-service-scrape.yaml
 configMapGenerator:
   - name: database-check
     files:

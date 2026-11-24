@@ -128,6 +128,7 @@ spec:
                 DB_PORT: "5432"
                 DB_SSL_MODE: require
                 DB_VECTOR_EXTENSION: vectorchord
+                IMMICH_TELEMETRY_INCLUDE: all
                 DB_PASSWORD:
                   valueFrom:
                     secretKeyRef:
@@ -192,6 +193,18 @@ spec:
             main:
               main:
                 - path: /tmp
+      # The chart's metrics switch also renders a Prometheus Operator ServiceMonitor, so expose the ports here.
+      service:
+        main:
+          ports:
+            metrics-api:
+              enabled: true
+              port: 8081
+              targetPort: 8081
+            metrics-ms:
+              enabled: true
+              port: 8082
+              targetPort: 8082
     valkey:
       enabled: true
       controllers:
