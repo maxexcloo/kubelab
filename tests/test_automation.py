@@ -39,6 +39,37 @@ def evaluate(expression, data):
     return json.loads(result.stdout)
 
 
+class HomepageKeyPublisherTests(unittest.TestCase):
+    def test_publishers_can_patch_the_secret_selected_by_external_secrets(self):
+        for cluster in CLUSTERS:
+            resources = repository_resources(f"apps/overlays/{cluster}")
+            roles = {
+                (
+                    resource["metadata"]["namespace"],
+                    resource["metadata"]["name"],
+                ): resource["rules"]
+                for resource in resources
+                if resource["kind"] == "Role"
+            }
+            for resource in resources:
+                namespace = resource["metadata"].get("namespace")
+                name = resource["metadata"]["name"]
+                if resource["kind"] != "PushSecret" or not name.endswith(
+                    "-homepage-key"
+                ):
+                    continue
+                secret = resource["spec"]["selector"]["secret"]["name"]
+                with self.subTest(cluster=cluster, namespace=namespace, name=name):
+                    self.assertTrue(
+                        any(
+                            "secrets" in rule["resources"]
+                            and "patch" in rule["verbs"]
+                            and rule.get("resourceNames") == [secret]
+                            for rule in roles[namespace, name]
+                        )
+                    )
+
+
 class PocketIDClientTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
