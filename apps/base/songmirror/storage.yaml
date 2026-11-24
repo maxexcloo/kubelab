@@ -17,22 +17,6 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: music
-  annotations:
-    groupPattern: "568"
-    permPattern: "0700"
-    userPattern: "568"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 50Gi
-  storageClassName: local-path
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
   name: library
 spec:
   accessModes:
