@@ -116,6 +116,12 @@ replacements:
         options:
           delimiter: /
           index: 2
+      - select:
+          kind: HelmRelease
+          name: studio
+          namespace: studio
+        fieldPaths:
+          - spec.values.defaultPodOptions.hostAliases.0.hostnames.0
   - source:
       kind: HelmRelease
       name: bookorbit
