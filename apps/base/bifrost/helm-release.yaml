@@ -416,6 +416,12 @@ spec:
                 provider: xiaomi
                 allowed_models: ["*"]
                 key_ids: ["*"]
+          - id: karakeep
+            name: Karakeep
+            value: env.VIRTUAL_KEY_KARAKEEP
+            provider_configs:
+              - <<: *openrouter
+                allowed_models: [openrouter/auto]
           # LibreChat offers a section per provider.
           - id: librechat
             name: LibreChat
