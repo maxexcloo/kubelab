@@ -26,5 +26,5 @@ fi
 
 patch=$(printf '%s' "$token" | jq -Rs '{stringData: {token: .}}')
 printf '%s' "$patch" |
-  kubectl --kubeconfig /dev/null --cache-dir /tmp/miniflux-homepage-key --namespace "$POD_NAMESPACE" \
+  kubectl --kubeconfig /dev/null --cache-dir /tmp/kubectl \
     patch secret miniflux-homepage-key --type merge --patch-file /dev/stdin

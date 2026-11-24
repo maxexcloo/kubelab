@@ -33,10 +33,6 @@ spec:
                     secretKeyRef:
                       key: ADMIN_USERNAME
                       name: miniflux
-                - name: POD_NAMESPACE
-                  valueFrom:
-                    fieldRef:
-                      fieldPath: metadata.namespace
               resources:
                 limits:
                   memory: 128Mi
