@@ -81,7 +81,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image: &image
               repository: ghcr.io/maxexcloo/studio
-              tag: 2026.11.24.33
+              tag: 2026.11.24.34
             probes:
               liveness:
                 path: /api/ping
@@ -125,6 +125,12 @@ spec:
         nameservers:
           - 127.0.0.1
           - ${dns_service_ip}
+      # Redlib's public host challenges server-side fetches, so Studio reaches it through the
+      # private gateway.
+      hostAliases:
+        - hostnames:
+            - redlib.invalid
+          ip: ${tailscale_ingress_target}
       # Studio drains in-flight requests for up to 30 s on SIGTERM (backend/shutdown.js); leave it room.
       terminationGracePeriodSeconds: 45
       # Files on the TrueNAS datasets belong to the image's node user.
