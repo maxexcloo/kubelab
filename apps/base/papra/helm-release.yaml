@@ -12,6 +12,7 @@ spec:
               AI_DEFAULT_MODEL: openrouter://openrouter/auto
               AI_IS_ENABLED: "true"
               APP_BASE_URL: https://app.invalid
+              AUTH_PROVIDERS_EMAIL_IS_ENABLED: "false"
               AUTO_TAGGING_ENABLED: "true"
               DATABASE_URL: file:/app/app-data/db/db.sqlite
               DOCUMENT_STORAGE_DRIVER: filesystem
