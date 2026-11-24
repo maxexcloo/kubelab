@@ -10,8 +10,6 @@ configMapGenerator:
   - name: trcc
     files:
       - trcc.json
-configurations:
-  - name-reference.yaml
 patches:
   - path: helm-release.yaml
     target:

@@ -4,6 +4,8 @@ resources:
   - helm-release.yaml
 components:
   - ../../../platform/components/app-template
+configurations:
+  - name-reference.yaml
 # Name the release and its chart resources after the app's Namespace.
 replacements:
   - source:

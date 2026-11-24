@@ -12,8 +12,6 @@ components:
   - ../../components/default-deny
   - ../../../platform/backups/credentials
   - ../../../platform/backups/files
-configurations:
-  - name-reference.yaml
 configMapGenerator:
   - name: actual-up-config
     files:
