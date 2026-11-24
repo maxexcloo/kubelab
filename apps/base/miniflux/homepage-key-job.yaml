@@ -33,8 +33,6 @@ spec:
                     secretKeyRef:
                       key: ADMIN_USERNAME
                       name: miniflux
-                - name: HOME
-                  value: /tmp
                 - name: POD_NAMESPACE
                   valueFrom:
                     fieldRef:
