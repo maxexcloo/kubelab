@@ -29,3 +29,39 @@ spec:
     requests:
       storage: 50Gi
   storageClassName: local-path
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: library
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Ti
+  storageClassName: ""
+  volumeName: songmirror-library
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: songmirror-library
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Ti
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  hostPath:
+    path: ${dataset_root}/truenas/music/SongMirror
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - ${storage_node}
