@@ -33,8 +33,6 @@ spec:
               requests:
                 cpu: 50m
                 memory: 256Mi
-            securityContext:
-              readOnlyRootFilesystem: false
     persistence:
       bookdrop:
         existingClaim: bookdrop

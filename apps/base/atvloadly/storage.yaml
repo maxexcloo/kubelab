@@ -4,6 +4,7 @@ metadata:
   name: atvloadly-local
 provisioner: cluster.local/local-path-provisioner
 allowVolumeExpansion: true
+# Keeps device pairing data if the claim is deleted.
 reclaimPolicy: Retain
 volumeBindingMode: WaitForFirstConsumer
 ---

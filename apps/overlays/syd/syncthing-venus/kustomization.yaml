@@ -3,7 +3,13 @@ kind: Kustomization
 namespace: syncthing-venus
 components:
   - ../../../base/syncthing
+  - ../../../../platform/backups/credentials
+  - ../../../../platform/backups/files
 patches:
+  - path: backup.yaml
+    target:
+      kind: CronJob
+      name: state-backup
   - path: helm-release.yaml
     target:
       kind: HelmRelease
