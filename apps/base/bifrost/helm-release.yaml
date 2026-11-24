@@ -419,7 +419,7 @@ spec:
           - id: karakeep
             name: Karakeep
             value: env.VIRTUAL_KEY_KARAKEEP
-            provider_configs:
+            provider_configs: &openrouter-auto
               - <<: *openrouter
                 allowed_models: [openrouter/auto]
           # LibreChat offers a section per provider.
@@ -447,12 +447,11 @@ spec:
                 key_ids: ["*"]
               - *opencode-go
               - *opencode-zen
-              # Its direct OpenRouter endpoint has its own credential.
-              - &cloud-openrouter
-                <<: *openrouter
+              - <<: *openrouter
                 allowed_models:
                   [
                     deepseek/deepseek-v4.1-flash-1017,
+                    openrouter/auto,
                     xiaomi/mimo-v2.6-flash,
                     xiaomi/mimo-v2.6-pro,
                     z-ai/glm-5.3,
@@ -480,7 +479,16 @@ spec:
                   [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash, mimo-v2.6-flash, mimo-v2.6-pro]
               - <<: *opencode-zen
                 allowed_models: [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash]
-              - *cloud-openrouter
+              - &cloud-openrouter
+                <<: *openrouter
+                allowed_models:
+                  [
+                    deepseek/deepseek-v4.1-flash-1017,
+                    xiaomi/mimo-v2.6-flash,
+                    xiaomi/mimo-v2.6-pro,
+                    z-ai/glm-5.3,
+                    z-ai/glm-5.3-flash,
+                  ]
               - *refuseless
               - <<: *xiaomi
                 allowed_models: [mimo-v2.6-flash, mimo-v2.6-pro]
@@ -490,6 +498,10 @@ spec:
             allow_all_providers: true
             value: env.VIRTUAL_KEY_OWNER
             mcp_configs: *agent-mcp
+          - id: papra
+            name: Papra
+            value: env.VIRTUAL_KEY_PAPRA
+            provider_configs: *openrouter-auto
           - id: pi
             name: Pi
             value: env.VIRTUAL_KEY_PI

@@ -9,7 +9,7 @@ spec:
         containers:
           main:
             env:
-              AI_DEFAULT_MODEL: openrouter://openrouter/auto
+              AI_DEFAULT_MODEL: openai://openrouter/openrouter/auto
               AI_IS_ENABLED: "true"
               APP_BASE_URL: https://app.invalid
               AUTH_PROVIDERS_EMAIL_IS_ENABLED: "false"
@@ -25,6 +25,7 @@ spec:
               INGESTION_FOLDER_POST_PROCESSING_MOVE_FOLDER_PATH: /app/ingestion/ingestion-done
               INGESTION_FOLDER_ROOT_PATH: /app/ingestion
               IS_FREE_PLAN_UNLIMITED: "true"
+              OPENAI_BASE_URL: http://bifrost.bifrost.svc.cluster.local:8080/openai/v1
               PORT: "21221"
               PROCESS_MODE: all
               TZ: ${time_zone}
