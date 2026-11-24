@@ -7,10 +7,28 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
+              kubernetes.io/metadata.name: karakeep
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/controller: karakeep
+        - namespaceSelector:
+            matchLabels:
               kubernetes.io/metadata.name: librechat
           podSelector:
             matchLabels:
               app.kubernetes.io/name: librechat
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: papra
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/controller: papra
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: reactive-resume
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/controller: reactive-resume
         # Studio writes prompts and chats with its own virtual key.
         - namespaceSelector:
             matchLabels:

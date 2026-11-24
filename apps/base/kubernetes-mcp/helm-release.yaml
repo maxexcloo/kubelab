@@ -19,9 +19,14 @@ spec:
       version: v0.1.3
     ingress:
       enabled: false
+    nodeSelector:
+      kubernetes.io/hostname: ${storage_node}
     rbac:
       extraClusterRoleBindings:
         - name: view
           roleRef:
             external: true
             name: view
+    resources:
+      limits:
+        cpu: null

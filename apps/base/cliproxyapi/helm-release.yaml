@@ -15,7 +15,7 @@ spec:
               tag: v8.1.2
             probes:
               liveness: &health
-                path: /
+                path: /healthz
                 port: 8317
               readiness: *health
               startup: *health
