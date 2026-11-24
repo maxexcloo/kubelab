@@ -1,0 +1,37 @@
+apiVersion: notification.toolkit.fluxcd.io/v1
+kind: Provider
+metadata:
+  name: alertmanager
+  namespace: flux-system
+spec:
+  type: alertmanager
+  address: http://vmalertmanager-victoria-metrics-k8s-stack.observability.svc:9093/api/v2/alerts/
+---
+apiVersion: notification.toolkit.fluxcd.io/v1
+kind: Alert
+metadata:
+  name: alertmanager
+  namespace: flux-system
+spec:
+  eventSeverity: error
+  eventSources:
+    - kind: GitRepository
+      name: "*"
+      namespace: "*"
+    - kind: HelmChart
+      name: "*"
+      namespace: "*"
+    - kind: HelmRelease
+      name: "*"
+      namespace: "*"
+    - kind: HelmRepository
+      name: "*"
+      namespace: "*"
+    - kind: Kustomization
+      name: "*"
+      namespace: "*"
+    - kind: OCIRepository
+      name: "*"
+      namespace: "*"
+  providerRef:
+    name: alertmanager

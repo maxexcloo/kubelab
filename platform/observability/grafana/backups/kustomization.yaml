@@ -3,8 +3,8 @@ kind: Kustomization
 resources:
   - namespace.yaml
 components:
-  - ../../../../../platform/backups/credentials
-  - ../../../../../platform/backups/files
+  - ../../../backups/credentials
+  - ../../../backups/files
 patches:
   # Grafana's names differ from the namespace the files component derives them from.
   - target:

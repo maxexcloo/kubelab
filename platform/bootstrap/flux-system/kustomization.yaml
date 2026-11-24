@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - gotk-components.yaml
   - gotk-source.yaml
+  - notifications.yaml
 patches:
   - patch: |-
       apiVersion: apps/v1

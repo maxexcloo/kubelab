@@ -85,9 +85,9 @@ spec:
               - alert: FileBackupOverdue
                 expr: |
                   time() - (
-                    kube_cronjob_status_last_successful_time{cronjob=~"state-backup|redlib-multi-backup"}
+                    kube_cronjob_status_last_successful_time{cronjob=~".+-backup"}
                     or on (cluster, namespace, cronjob)
-                    kube_cronjob_created{cronjob=~"state-backup|redlib-multi-backup"}
+                    kube_cronjob_created{cronjob=~".+-backup"}
                   ) > 30 * 3600
                 for: 5m
                 annotations:

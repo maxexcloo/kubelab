@@ -9,6 +9,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
+  - vm-service-scrape.yaml
 components:
   - ../../../platform/databases/postgres-minimal
   - ../../components/application

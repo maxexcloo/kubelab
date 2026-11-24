@@ -18,6 +18,9 @@ spec:
               EMAILS_VERIFIED: "true"
               FILE_BACKEND: database
               GEOLITE_DB_PATH: /tmp/GeoLite2-City.mmdb
+              # The Prometheus exporter listens on localhost:9464 unless told otherwise.
+              OTEL_EXPORTER_PROMETHEUS_HOST: 0.0.0.0
+              OTEL_METRICS_EXPORTER: prometheus
               REQUIRE_USER_EMAIL: "true"
               SMTP_FROM: pocket-id@${mail_domain}
               SMTP_HOST: smtp.resend.com
@@ -91,3 +94,5 @@ spec:
         ports:
           http:
             port: 1411
+          metrics:
+            port: 9464
