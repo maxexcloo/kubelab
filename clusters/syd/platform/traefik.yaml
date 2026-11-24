@@ -41,7 +41,7 @@ spec:
           spec:
             externalTrafficPolicy: Local
             externalIPs:
-              - 10.20.0.4
+              - ${public_node_private_ipv4}
             internalTrafficPolicy: Local
             type: ClusterIP
         private:
