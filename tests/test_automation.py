@@ -40,16 +40,16 @@ def evaluate(expression, data):
 
 
 class HomepageKeyPublisherTests(unittest.TestCase):
-    def test_publishers_can_patch_the_secret_selected_by_external_secrets(self):
+    def test_publishers_can_patch_and_retain_their_source_secrets(self):
         for cluster in CLUSTERS:
             resources = repository_resources(f"apps/overlays/{cluster}")
-            roles = {
+            by_identity = {
                 (
-                    resource["metadata"]["namespace"],
+                    resource["kind"],
+                    resource["metadata"].get("namespace"),
                     resource["metadata"]["name"],
-                ): resource["rules"]
+                ): resource
                 for resource in resources
-                if resource["kind"] == "Role"
             }
             for resource in resources:
                 namespace = resource["metadata"].get("namespace")
@@ -60,12 +60,19 @@ class HomepageKeyPublisherTests(unittest.TestCase):
                     continue
                 secret = resource["spec"]["selector"]["secret"]["name"]
                 with self.subTest(cluster=cluster, namespace=namespace, name=name):
+                    staging = by_identity["Secret", namespace, secret]
+                    self.assertEqual(
+                        staging["metadata"]["annotations"].get(
+                            "kustomize.toolkit.fluxcd.io/ssa"
+                        ),
+                        "IfNotPresent",
+                    )
                     self.assertTrue(
                         any(
                             "secrets" in rule["resources"]
                             and "patch" in rule["verbs"]
                             and rule.get("resourceNames") == [secret]
-                            for rule in roles[namespace, name]
+                            for rule in by_identity["Role", namespace, name]["rules"]
                         )
                     )
 
