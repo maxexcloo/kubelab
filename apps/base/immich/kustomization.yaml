@@ -20,7 +20,7 @@ configMapGenerator:
   - name: database-check
     files:
       - ../../components/database-readiness/wait-for-database.sh
-  - name: immich-homepage-key
+  - name: immich-homepage-key-script
     files:
       - publish_homepage_key.sh
 configurations:

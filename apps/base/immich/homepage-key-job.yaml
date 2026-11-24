@@ -64,6 +64,6 @@ spec:
           volumes:
             - name: script
               configMap:
-                name: immich-homepage-key
+                name: immich-homepage-key-script
             - name: temporary
               emptyDir: {}
