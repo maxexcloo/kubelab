@@ -48,6 +48,15 @@ spec:
       ports:
         - port: 4180
         - port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmagent
+      ports:
+        - port: 4180
   podSelector:
     matchLabels:
       app.kubernetes.io/name: bifrost
