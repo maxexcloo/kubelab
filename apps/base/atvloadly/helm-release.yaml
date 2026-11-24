@@ -33,7 +33,7 @@ spec:
               readiness: *health
               startup:
                 <<: *health
-                spec: { <<: *health-spec, failureThreshold: 30 }
+                spec: { <<: *health-spec, failureThreshold: 300, periodSeconds: 1 }
             resources:
               limits:
                 memory: 512Mi

@@ -87,12 +87,8 @@ spec:
                 path: /api/ping
               readiness:
                 path: &ready /api/ready
-              # Checked every second, so a deploy serves again as soon as Studio listens.
               startup:
                 path: *ready
-                spec:
-                  failureThreshold: 300
-                  periodSeconds: 1
             resources:
               limits:
                 memory: 4Gi
