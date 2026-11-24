@@ -58,6 +58,6 @@ spec:
           volumes:
             - name: script
               configMap:
-                name: miniflux-homepage-key
+                name: miniflux-homepage-key-script
             - name: temporary
               emptyDir: {}
