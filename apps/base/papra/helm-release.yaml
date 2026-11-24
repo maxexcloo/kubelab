@@ -17,6 +17,8 @@ spec:
               DATABASE_URL: file:/app/app-data/db/db.sqlite
               DOCUMENT_STORAGE_DRIVER: filesystem
               DOCUMENT_STORAGE_FILESYSTEM_ROOT: /app/app-data/documents
+              EMAILS_DRIVER: resend
+              EMAILS_FROM_ADDRESS: Papra <papra@${mail_domain}>
               HOME: /tmp
               INGESTION_FOLDER_ERROR_FOLDER_PATH: /app/ingestion/ingestion-error
               INGESTION_FOLDER_IS_ENABLED: "true"
