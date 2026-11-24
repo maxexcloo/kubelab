@@ -3,7 +3,6 @@ kind: PersistentVolumeClaim
 metadata:
   name: data
   annotations:
-    kustomize.toolkit.fluxcd.io/prune: disabled
     groupPattern: "1000"
     permPattern: "0700"
     userPattern: "1000"
