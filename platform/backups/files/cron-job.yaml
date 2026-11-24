@@ -64,6 +64,10 @@ spec:
                   value: /tmp
                 - name: CLUSTER
                   value: ${cluster_name}
+                - name: BACKUP_BUCKET
+                  value: ${backup_bucket}
+                - name: BACKUP_ENDPOINT
+                  value: ${backup_endpoint}
               envFrom:
                 - secretRef:
                     name: backup-credentials
