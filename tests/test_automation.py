@@ -39,6 +39,44 @@ def evaluate(expression, data):
     return json.loads(result.stdout)
 
 
+class HomepageKeyPublisherTests(unittest.TestCase):
+    def test_publishers_can_patch_and_retain_their_source_secrets(self):
+        for cluster in CLUSTERS:
+            resources = repository_resources(f"apps/overlays/{cluster}")
+            by_identity = {
+                (
+                    resource["kind"],
+                    resource["metadata"].get("namespace"),
+                    resource["metadata"]["name"],
+                ): resource
+                for resource in resources
+            }
+            for resource in resources:
+                namespace = resource["metadata"].get("namespace")
+                name = resource["metadata"]["name"]
+                if resource["kind"] != "PushSecret" or not name.endswith(
+                    "-homepage-key"
+                ):
+                    continue
+                secret = resource["spec"]["selector"]["secret"]["name"]
+                with self.subTest(cluster=cluster, namespace=namespace, name=name):
+                    staging = by_identity["Secret", namespace, secret]
+                    self.assertEqual(
+                        staging["metadata"]["annotations"].get(
+                            "kustomize.toolkit.fluxcd.io/ssa"
+                        ),
+                        "IfNotPresent",
+                    )
+                    self.assertTrue(
+                        any(
+                            "secrets" in rule["resources"]
+                            and "patch" in rule["verbs"]
+                            and rule.get("resourceNames") == [secret]
+                            for rule in by_identity["Role", namespace, name]["rules"]
+                        )
+                    )
+
+
 class PocketIDClientTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

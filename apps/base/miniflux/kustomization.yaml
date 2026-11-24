@@ -3,6 +3,9 @@ kind: Kustomization
 namespace: miniflux
 resources:
   - external-secrets.yaml
+  - homepage-key-job.yaml
+  - homepage-key-rbac.yaml
+  - homepage-key-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
@@ -35,3 +38,7 @@ replacements:
 transformers:
   - ../../transformers/pocket-id-icon-private
   - ../../transformers/route-private
+configMapGenerator:
+  - name: miniflux-homepage-key-script
+    files:
+      - publish_homepage_key.sh

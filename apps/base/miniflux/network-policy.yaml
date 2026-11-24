@@ -13,6 +13,12 @@ spec:
               app.kubernetes.io/name: traefik
       ports:
         - port: 8080
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: miniflux-homepage-key
+      ports:
+        - port: 8080
   podSelector:
     matchLabels:
       app.kubernetes.io/name: miniflux

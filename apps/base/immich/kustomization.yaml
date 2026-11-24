@@ -6,6 +6,9 @@ resources:
   - database-extension.yaml
   - external-secrets.yaml
   - helm-release.yaml
+  - homepage-key-job.yaml
+  - homepage-key-rbac.yaml
+  - homepage-key-secrets.yaml
   - namespace.yaml
   - network-policy.yaml
   - pocket-id.yaml
@@ -17,6 +20,9 @@ configMapGenerator:
   - name: database-check
     files:
       - ../../components/database-readiness/wait-for-database.sh
+  - name: immich-homepage-key-script
+    files:
+      - publish_homepage_key.sh
 configurations:
   - name-reference.yaml
 replacements:
