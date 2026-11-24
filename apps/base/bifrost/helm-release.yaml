@@ -79,7 +79,8 @@ spec:
               - ALL
         startupProbe:
           <<: *proxy-probe
-          failureThreshold: 30
+          failureThreshold: 300
+          periodSeconds: 1
         volumeMounts:
           - name: oauth2-proxy
             mountPath: /config
@@ -121,7 +122,8 @@ spec:
               - ALL
         startupProbe:
           <<: *router-probe
-          failureThreshold: 30
+          failureThreshold: 300
+          periodSeconds: 1
         volumeMounts:
           - name: router
             mountPath: /app
@@ -190,8 +192,8 @@ spec:
       httpGet:
         path: /health
         port: http
-      failureThreshold: 30
-      periodSeconds: 10
+      failureThreshold: 300
+      periodSeconds: 1
       timeoutSeconds: 5
     bifrost:
       # Pruning needs config.json mode: each section the file declares becomes

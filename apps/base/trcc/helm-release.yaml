@@ -31,9 +31,9 @@ spec:
                     command:
                       - trcc
                       - daemon-status
-                  periodSeconds: 10
+                  periodSeconds: 1
                   timeoutSeconds: 5
-                  failureThreshold: 30
+                  failureThreshold: 300
             resources:
               requests:
                 cpu: 10m

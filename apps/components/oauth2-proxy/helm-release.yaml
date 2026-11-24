@@ -35,7 +35,8 @@ spec:
               startup:
                 <<: *health
                 spec:
-                  failureThreshold: 30
+                  failureThreshold: 300
+                  periodSeconds: 1
                   timeoutSeconds: 5
             resources:
               limits:

@@ -158,8 +158,8 @@ spec:
       readinessProbe:
         periodSeconds: 10
       startupProbe:
-        failureThreshold: 30
-        periodSeconds: 10
+        failureThreshold: 300
+        periodSeconds: 1
     mongodb:
       enabled: true
       fullnameOverride: mongodb
@@ -188,8 +188,8 @@ spec:
           memory: 256Mi
       startupProbe:
         enabled: true
-        failureThreshold: 30
-        periodSeconds: 10
+        failureThreshold: 300
+        periodSeconds: 1
         timeoutSeconds: 5
       # Standalone MongoDB must release its local data files before replacement.
       updateStrategy:
