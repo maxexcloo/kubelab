@@ -59,4 +59,5 @@ printf 'header = "x-api-key: %s"\n' "$token" |
   immich --config - --fail --output /dev/null "$base/server/statistics"
 patch=$(printf '%s' "$token" | jq -Rs '{stringData: {token: .}}')
 printf '%s' "$patch" |
-  kubectl --namespace "$POD_NAMESPACE" --request-timeout 15s patch secret immich-homepage-key --type merge --patch-file /dev/stdin
+  kubectl --kubeconfig /dev/null --cache-dir /tmp/kubectl --request-timeout 15s \
+    patch secret immich-homepage-key --type merge --patch-file /dev/stdin

@@ -23,8 +23,6 @@ spec:
               image: docker.io/alpine/k8s:1.37.2
               command: [sh, /scripts/publish_homepage_key.sh]
               env:
-                - name: HOME
-                  value: /tmp
                 - name: HOMEPAGE_TOKEN
                   valueFrom:
                     secretKeyRef:
@@ -41,10 +39,6 @@ spec:
                     secretKeyRef:
                       key: username
                       name: immich-config
-                - name: POD_NAMESPACE
-                  valueFrom:
-                    fieldRef:
-                      fieldPath: metadata.namespace
                 - name: PUBLISHED_TOKEN
                   valueFrom:
                     secretKeyRef:
