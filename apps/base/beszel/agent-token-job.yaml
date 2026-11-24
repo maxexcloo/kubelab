@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: beszel-agent-token
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  schedule: "*/15 * * * *"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 120
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: beszel-agent-token
+        spec:
+          restartPolicy: Never
+          serviceAccountName: beszel-agent-token
+          containers:
+            - name: publisher
+              image: docker.io/alpine/k8s:1.37.2
+              command: [sh, /scripts/publish_agent_token.sh]
+              env:
+                - name: USER_EMAIL
+                  valueFrom:
+                    secretKeyRef:
+                      key: USER_EMAIL
+                      name: beszel
+                - name: USER_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: USER_PASSWORD
+                      name: beszel
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+              resources:
+                limits:
+                  memory: 128Mi
+                requests:
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsGroup: 65532
+                runAsNonRoot: true
+                runAsUser: 65532
+                capabilities:
+                  drop: [ALL]
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+                - name: temporary
+                  mountPath: /tmp
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - name: script
+              configMap:
+                name: beszel-agent-token
+            - name: temporary
+              emptyDir: {}

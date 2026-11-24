@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: beszel-agent-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: beszel-agent-token
+rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    resourceNames: [beszel-agent-token]
+    verbs: [get, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: beszel-agent-token
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: beszel-agent-token
+subjects:
+  - kind: ServiceAccount
+    name: beszel-agent-token
