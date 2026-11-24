@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: openspeedtest
       version: 0.1.2
-      # This chart hardcodes probes rather than exposing their timing in values.
+  # This chart hardcodes probes rather than exposing their timing in values.
   values:
     image:
       pullPolicy: IfNotPresent
