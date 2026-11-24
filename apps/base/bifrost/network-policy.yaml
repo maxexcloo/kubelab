@@ -23,6 +23,12 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/controller: papra
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: reactive-resume
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/controller: reactive-resume
         # Studio writes prompts and chats with its own virtual key.
         - namespaceSelector:
             matchLabels:

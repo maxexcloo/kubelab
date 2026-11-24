@@ -507,6 +507,10 @@ spec:
             value: env.VIRTUAL_KEY_PI
             mcp_configs: *agent-mcp
             provider_configs: *desktop-models
+          - id: reactive-resume
+            name: Reactive Resume
+            value: env.VIRTUAL_KEY_REACTIVE_RESUME
+            provider_configs: *openrouter-auto
           - id: studio
             name: Studio
             value: env.VIRTUAL_KEY_STUDIO
