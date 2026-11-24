@@ -79,7 +79,7 @@ spec:
               - path: /deno-image
                 readOnly: true
       music:
-        existingClaim: music
+        existingClaim: library
         type: persistentVolumeClaim
         advancedMounts:
           main:
