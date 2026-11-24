@@ -81,6 +81,7 @@ spec:
               - --model-library
             env:
               HF_HOME: /tmp/huggingface
+              RADIANCE_IMAGE_MODELS: /radiance-image
               STUDIO_MODEL_LIBRARY_DIR: /models
               STUDIO_WORKER_TOKEN:
                 valueFrom:
@@ -166,8 +167,9 @@ spec:
               # The worker's built-in storage endpoint remains available for local operations.
               - path: /root/ComfyUI/models
                 subPath: comfyui
-              # Writable here too: Library › Convert to Radiance installs .rad packages here.
-              - path: /models/radiance-image
+              - &radiance-image
+                path: /models/radiance-image
+                readOnly: true
                 subPath: radiance
               # Radiance H3 video profiles load their .rad packages from here.
               - &radiance-video
@@ -179,14 +181,15 @@ spec:
               - path: /root/ComfyUI/models
                 readOnly: true
                 subPath: comfyui
-              - path: /models/radiance-image
-                readOnly: true
-                subPath: radiance
+              - *radiance-image
               - *radiance-video
           model-library:
             main:
               - path: /models
                 subPath: comfyui
+              # Library › Convert to Radiance installs .rad packages here.
+              - path: /radiance-image
+                subPath: radiance
       secondary-data:
         hostPath: ${dataset_root}/ai/comfyui-video/data
         hostPathType: Directory
