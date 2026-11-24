@@ -57,7 +57,7 @@ spec:
               - --window-size=1440,900
             image:
               repository: ghcr.io/karakeep-app/karakeep-chrome
-              tag: 157.0.8103.78-r1
+              tag: 158.0.8127.88-r1
             probes:
               readiness:
                 enabled: true
