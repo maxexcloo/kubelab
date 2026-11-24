@@ -55,6 +55,8 @@ replacements:
     targets:
       - select:
           kind: ExternalSecret
+        reject:
+          - name: backup-credentials
         fieldPaths:
           - spec.data.*.remoteRef.key
       - select:
