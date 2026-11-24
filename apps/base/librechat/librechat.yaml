@@ -150,13 +150,10 @@ endpoints:
         x-bf-model-provider: cliproxy-grok
     - <<: *defaults
       name: OpenRouter
-      # OPENROUTER_KEY keeps this endpoint independent of LibreChat's OpenAI
-      # endpoint. List only OpenRouter's auto model.
-      apiKey: ${OPENROUTER_KEY}
-      baseURL: https://openrouter.ai/api/v1
+      # List only OpenRouter's auto model.
       models:
         default:
-          - openrouter/auto
+          - openrouter/openrouter/auto
         fetch: false
       # OpenRouter models use varied stop tokens; dropping it avoids 422s.
       dropParams:
