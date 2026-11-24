@@ -4,6 +4,7 @@ kind: Service
 metadata:
   name: bifrost-oauth2-proxy
   labels:
+    app.kubernetes.io/component: oauth2-proxy
     app.kubernetes.io/name: bifrost
 spec:
   ports:
