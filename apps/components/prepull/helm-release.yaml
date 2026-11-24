@@ -24,3 +24,9 @@ spec:
               requests:
                 cpu: 10m
                 memory: 16Mi
+            # Restricted namespaces admit only hardened containers.
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
