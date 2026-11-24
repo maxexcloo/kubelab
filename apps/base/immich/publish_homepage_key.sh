@@ -28,7 +28,7 @@ session_request() {
 }
 
 kube() {
-  kubectl --kubeconfig /dev/null --cache-dir /tmp/kubectl --request-timeout 15s "$@"
+  kubectl --kubeconfig /dev/null --cache-dir /tmp/kubectl "$@"
 }
 
 staged_secret=$(kube get secret immich-homepage-key -o json)
