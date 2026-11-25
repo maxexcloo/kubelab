@@ -61,7 +61,7 @@ class HomepageSourcesTests(HomepageDashboardFixture, unittest.TestCase):
         self.assertNotIn("Local", self.services())
 
     def test_required_inputs_fail_without_publishing(self):
-        for name in ("HOMELAB_INFRASTRUCTURE_FILE", "KUBECTL"):
+        for name in ("HOMELAB_DIRECTORY", "HOMELAB_INFRASTRUCTURE_FILE", "KUBECTL"):
             with self.subTest(name=name):
                 result = self.render(**{name: ""})
                 self.assertNotEqual(result.returncode, 0)
@@ -79,16 +79,7 @@ class HomepageSourcesTests(HomepageDashboardFixture, unittest.TestCase):
             }
 
         before = files()
-        download = self.remote / "inventory.example.net_inventory.json"
-        shutil.copyfile(HOMELAB / "inventory.json", download)
-        remote = {
-            "HOMELAB_DIRECTORY": "",
-            "HOMELAB_INVENTORY_URL": "https://inventory.example.net/inventory.json",
-        }
-        self.assertEqual(self.render(**remote).returncode, 0)
-        self.assertEqual(before, files())
-        download.unlink()
-        self.assertNotEqual(self.render(**remote).returncode, 0)
+        self.assertEqual(self.render().returncode, 0)
         self.assertEqual(before, files())
         valid_routes = self.routes.read_text()
         for routes in ("[broken json", '{"items": []}'):
@@ -98,7 +89,11 @@ class HomepageSourcesTests(HomepageDashboardFixture, unittest.TestCase):
         self.routes.write_text(valid_routes)
         homelab = self.directory / "homelab"
         shutil.copytree(HOMELAB, homelab)
-        (homelab / "inventory.json").write_text("{broken json")
+        inventory = homelab / "inventory.json"
+        inventory.unlink()
+        self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
+        self.assertEqual(before, files())
+        inventory.write_text("{broken json")
         self.assertNotEqual(self.render(HOMELAB_DIRECTORY=str(homelab)).returncode, 0)
         self.assertEqual(before, files())
 

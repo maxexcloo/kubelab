@@ -80,7 +80,7 @@ spec:
               - /output
               - /publish
             env:
-              HOMELAB_INVENTORY_URL: https://raw.githubusercontent.com/maxexcloo/homelab/refs/heads/main/inventory.json
+              HOMELAB_DIRECTORY: /homelab
               HOMELAB_INFRASTRUCTURE_FILE: /infrastructure/inventory.json
               HOMEPAGE_CLUSTER: ${cluster_name}
               HOMEPAGE_REVALIDATE_URL: http://127.0.0.1:3000/api/revalidate
@@ -176,6 +176,14 @@ spec:
           homepage:
             endpoints:
               - path: /infrastructure
+                readOnly: true
+      inventory:
+        name: homepage-inventory
+        type: configMap
+        advancedMounts:
+          homepage:
+            endpoints:
+              - path: /homelab
                 readOnly: true
       published-routes:
         type: emptyDir
