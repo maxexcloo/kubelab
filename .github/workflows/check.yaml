@@ -8,6 +8,7 @@ on:
       - main
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -33,6 +34,28 @@ jobs:
       - name: Render Homepage Services From Homelab
         run: mise run check:homelab
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: monitoring
+        name: Compare Monitoring Inventory
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # A cancelled or failed push may contain changes that Flylab has yet to receive.
+          previous_revision=$(gh run list --workflow check.yaml --branch main --event push --status success --limit 1 --json headSha --jq '.[0].headSha // ""')
+          if [[ -n "$previous_revision" ]]; then
+            inventory_directory=$(mktemp -d)
+            trap 'rm -rf -- "$inventory_directory"' EXIT
+            mkdir "$inventory_directory/previous"
+            git fetch --quiet --depth=1 origin "$previous_revision"
+            git archive FETCH_HEAD | tar -x -C "$inventory_directory/previous"
+            (cd "$inventory_directory/previous" && scripts/render_service_inventory.sh) | jq -Sc . > "$inventory_directory/previous.json"
+            scripts/render_service_inventory.sh | jq -Sc . > "$inventory_directory/current.json"
+            if cmp -s "$inventory_directory/previous.json" "$inventory_directory/current.json"; then
+              exit 0
+            fi
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - if: steps.monitoring.outputs.changed == 'true'
         name: Refresh External Monitoring
         env:
           GH_TOKEN: ${{ secrets.FLYLAB_DISPATCH_TOKEN }}
