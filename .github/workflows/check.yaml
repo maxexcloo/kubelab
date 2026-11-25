@@ -48,7 +48,8 @@ jobs:
             mkdir "$inventory_directory/previous"
             git fetch --quiet --depth=1 origin "$previous_revision"
             git archive FETCH_HEAD | tar -x -C "$inventory_directory/previous"
-            (cd "$inventory_directory/previous" && scripts/render_service_inventory.sh) | jq -Sc . > "$inventory_directory/previous.json"
+            mise exec -- env -C "$inventory_directory/previous" |
+              jq -Sc . > "$inventory_directory/previous.json"
             scripts/render_service_inventory.sh | jq -Sc . > "$inventory_directory/current.json"
             if cmp -s "$inventory_directory/previous.json" "$inventory_directory/current.json"; then
               exit 0
