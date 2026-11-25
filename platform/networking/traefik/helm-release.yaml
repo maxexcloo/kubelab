@@ -6,15 +6,10 @@ metadata:
 spec:
   interval: 30m
   releaseName: traefik
-  chart:
-    spec:
-      chart: traefik
-      interval: 24h
-      sourceRef:
-        kind: HelmRepository
-        name: traefik
-        namespace: flux-system
-      version: 42.4.3
+  chartRef:
+    kind: OCIRepository
+    name: traefik
+    namespace: flux-system
   install:
     crds: CreateReplace
   upgrade:
