@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+: "${HOMELAB_DIRECTORY:?HOMELAB_DIRECTORY is required}"
 : "${HOMEPAGE_CLUSTER:?HOMEPAGE_CLUSTER is required}"
 : "${KUBECTL:?KUBECTL is required}"
 export HOMEPAGE_CLUSTER
@@ -33,11 +34,8 @@ script_directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 temporary_directory=$(mktemp -d)
 trap 'rm -fr "$temporary_directory"' EXIT
 
-HOMELAB_INVENTORY=${HOMELAB_DIRECTORY:+$HOMELAB_DIRECTORY/inventory.json}
-if [ -z "$HOMELAB_INVENTORY" ]; then
-  HOMELAB_INVENTORY="$temporary_directory/inventory.json"
-  wget -O "$HOMELAB_INVENTORY" -q -T 30 "${HOMELAB_INVENTORY_URL:?HOMELAB_INVENTORY_URL is required}"
-fi
+HOMELAB_INVENTORY="$temporary_directory/homelab.json"
+cp "$HOMELAB_DIRECTORY/inventory.json" "$HOMELAB_INVENTORY"
 export HOMELAB_INVENTORY
 
 "$KUBECTL" get httproutes --all-namespaces --output json > "$temporary_directory/httproutes.json"

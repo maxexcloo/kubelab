@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - rbac.yaml
+  - reconciliation.yaml
 components:
   - ../../../platform/components/app-template
   - ../../components/private-dns
