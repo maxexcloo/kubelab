@@ -43,14 +43,12 @@ spec:
                 name: bifrost
           - name: NODE_OPTIONS
             value: --require /patches/tool-history.cjs --require /patches/studio-attachments.cjs
-          - &studioMcpKey
-            name: STUDIO_MCP_API_KEY
+          - name: STUDIO_MCP_API_KEY
             valueFrom:
               secretKeyRef:
                 key: STUDIO_MCP_API_KEY
                 name: librechat
-          - &studioMcpUrl
-            name: STUDIO_MCP_URL
+          - name: STUDIO_MCP_URL
             value: http://studio.studio.svc.cluster.local:8787/mcp
         existingSecretName: librechat
     image:
@@ -58,37 +56,6 @@ spec:
       tag: v0.8.8
     ingress:
       enabled: false
-    # Studio saves each image a person attaches in chat as their Upload.
-    initContainers:
-      studio-chat-uploads:
-        image: ghcr.io/maxexcloo/studio:2026.11.23.13
-        restartPolicy: Always
-        command:
-          - node
-          - backend/chat-uploads.js
-        env:
-          - name: STUDIO_CHAT_IMAGES_DIR
-            value: /images
-          - *studioMcpKey
-          - *studioMcpUrl
-        resources:
-          limits:
-            memory: 128Mi
-          requests:
-            cpu: 10m
-            memory: 48Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1000
-        volumeMounts:
-          - name: data
-            mountPath: /images
-            readOnly: true
     librechat:
       adminPanelUrl: https://librechat-admin.invalid
       configEnv:

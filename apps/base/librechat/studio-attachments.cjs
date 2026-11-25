@@ -122,13 +122,18 @@ function installStudioAttachments({ requests, MCPManager, getFiles, endpoint, ke
   MCPManager.prototype.callTool = async function (call) {
     const turn = turns.get(call.requestScopedConnections);
     const source = call.serverConfig?.source;
+    if (!turn || call.serverName !== "studio" || (source !== "yaml" && source !== "config"))
+      return callTool.call(this, call);
+
+    const tool = call.toolName.replace(/^studio-/, "");
+    const generate = tool === "generate";
+    // Studio's chat instructions look up a named attachment in Uploads before generating.
+    const findUploads = tool === "search" && call.toolArguments?.uploads === true;
     if (
-      !turn ||
-      call.serverName !== "studio" ||
-      (call.toolName !== "generate" && call.toolName !== "studio-generate") ||
-      (source !== "yaml" && source !== "config") ||
-      (Array.isArray(call.toolArguments?.reference_asset_ids) &&
-        !call.toolArguments.reference_asset_ids.length)
+      !findUploads &&
+      (!generate ||
+        (Array.isArray(call.toolArguments?.reference_asset_ids) &&
+          !call.toolArguments.reference_asset_ids.length))
     )
       return callTool.call(this, call);
 
@@ -144,7 +149,7 @@ function installStudioAttachments({ requests, MCPManager, getFiles, endpoint, ke
       signal?.throwIfAborted();
       throw new Error(fileUnreadable);
     }
-    if (!assets.length) return callTool.call(this, call);
+    if (!generate || !assets.length) return callTool.call(this, call);
     return callTool.call(this, {
       ...call,
       toolArguments: { ...call.toolArguments, reference_asset_ids: assets },
