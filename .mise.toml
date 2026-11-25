@@ -78,8 +78,8 @@ trap 'rm -fr -- "$temporary_directory"' EXIT
 inventory=${HOMELAB_DIRECTORY:+$HOMELAB_DIRECTORY/inventory.json}
 if [ -z "$inventory" ]; then
   inventory="$temporary_directory/inventory.json"
-  inventory_url=$(yq -er '.spec.values.controllers.homepage.initContainers.endpoints.env.HOMELAB_INVENTORY_URL' apps/base/homepage/helm-release.yaml)
-  curl -fsSL "$inventory_url" -o "$inventory"
+  kubectl kustomize apps/base/homepage/inventory > "$temporary_directory/configmap.yaml"
+  yq -er '.data."inventory.json"' "$temporary_directory/configmap.yaml" > "$inventory"
 fi
 HOMELAB_INFRASTRUCTURE_FILE=tests/fixtures/homepage/infrastructure.json \
   HOMEPAGE_BESZEL_ROUTES=tests/fixtures/homepage/beszel-routes.json \
