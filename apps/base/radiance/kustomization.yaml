@@ -35,6 +35,12 @@ replacements:
         options:
           delimiter: /
           index: 2
+      - select:
+          kind: HelmRelease
+        fieldPaths:
+          - spec.values.controllers.main.annotations.[studio.excloo.dev/dashboard-host]
+        options:
+          create: true
 transformers:
   - ../../transformers/cluster-scoped
   - ../../transformers/pocket-id-icon-private
