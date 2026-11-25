@@ -56,8 +56,10 @@ application upgrades don't need it.
 ## Updates & Recovery
 
 Restore PostgreSQL through the CloudNativePG Barman plugin, and app state through
-Restic, into fresh volumes before switching the workload over. Dedicated TrueNAS
-app datasets, bulk media and caches aren't backed up.
+Restic, into fresh volumes before switching the workload over. If Saturn is
+unavailable, recover the S3 backup dataset and any app datasets the workload
+needs from Pluto's ZFS replicas. Saturn's replication excludes the AI, games
+and Time Machine datasets.
 
 Check upstream migration requirements before upgrading; rolling back an image
 doesn't undo a database migration.
