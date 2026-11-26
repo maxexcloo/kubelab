@@ -21,6 +21,8 @@ ALIASES = {
         "glm-flash",
         "glm-flash-uncensored",
         "glm-uncensored",
+        "kimi",
+        "kimi-uncensored",
         "mimo",
         "mimo-flash",
         "uncensored",
