@@ -307,6 +307,31 @@ spec:
               - provider: refuseless
                 model: glm-5.3-abliterated
                 weight: 1.0
+          - id: cloud-kimi
+            name: Cloud Kimi
+            cel_expression: "provider == 'cloud' && model == 'kimi'"
+            enabled: true
+            fallbacks:
+              - model: kimi-k3.1-pro
+                provider: opencode-zen
+              - model: moonshotai/kimi-k3.1-pro
+                provider: openrouter
+            priority: 6
+            scope: global
+            targets:
+              - provider: opencode-go
+                model: kimi-k3.1-pro
+                weight: 1.0
+          - id: cloud-kimi-uncensored
+            name: Cloud Kimi Uncensored
+            cel_expression: "provider == 'cloud' && model == 'kimi-uncensored'"
+            enabled: true
+            priority: 7
+            scope: global
+            targets:
+              - provider: refuseless
+                model: kimi-k3.1-pro-abliterated
+                weight: 1.0
           - id: cloud-mimo
             name: Cloud MiMo
             cel_expression: "provider == 'cloud' && model == 'mimo'"
@@ -316,7 +341,7 @@ spec:
                 provider: opencode-go
               - model: xiaomi/mimo-v2.6-pro
                 provider: openrouter
-            priority: 6
+            priority: 8
             scope: global
             targets:
               - provider: xiaomi
@@ -331,7 +356,7 @@ spec:
                 provider: opencode-go
               - model: xiaomi/mimo-v2.6-flash
                 provider: openrouter
-            priority: 7
+            priority: 9
             scope: global
             targets:
               - provider: xiaomi
@@ -455,6 +480,7 @@ spec:
                 allowed_models:
                   [
                     deepseek/deepseek-v4.1-flash-1017,
+                    moonshotai/kimi-k3.1-pro,
                     openrouter/auto,
                     xiaomi/mimo-v2.6-flash,
                     xiaomi/mimo-v2.6-pro,
@@ -480,14 +506,22 @@ spec:
               - *local
               - <<: *opencode-go
                 allowed_models:
-                  [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash, mimo-v2.6-flash, mimo-v2.6-pro]
+                  [
+                    deepseek-v4.1-flash,
+                    glm-5.3,
+                    glm-5.3-flash,
+                    kimi-k3.1-pro,
+                    mimo-v2.6-flash,
+                    mimo-v2.6-pro,
+                  ]
               - <<: *opencode-zen
-                allowed_models: [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash]
+                allowed_models: [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash, kimi-k3.1-pro]
               - &cloud-openrouter
                 <<: *openrouter
                 allowed_models:
                   [
                     deepseek/deepseek-v4.1-flash-1017,
+                    moonshotai/kimi-k3.1-pro,
                     xiaomi/mimo-v2.6-flash,
                     xiaomi/mimo-v2.6-pro,
                     z-ai/glm-5.3,
