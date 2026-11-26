@@ -246,6 +246,8 @@ spec:
             fallbacks:
               - model: abliterated-model-large-flash
                 provider: abliteration
+              - model: deepseek/deepseek-v4.1-flash-abliterated
+                provider: allmodels
             priority: 1
             scope: global
             targets:
@@ -288,6 +290,9 @@ spec:
             name: Cloud GLM Flash Uncensored
             cel_expression: "provider == 'cloud' && model == 'glm-flash-uncensored'"
             enabled: true
+            fallbacks:
+              - model: z-ai/glm-5.3-flash-abliterated
+                provider: allmodels
             priority: 4
             scope: global
             targets:
@@ -301,6 +306,8 @@ spec:
             fallbacks:
               - model: abliterated-model-large-v2
                 provider: abliteration
+              - model: z-ai/glm-5.3-abliterated
+                provider: allmodels
             priority: 5
             scope: global
             targets:
@@ -326,6 +333,9 @@ spec:
             name: Cloud Kimi Uncensored
             cel_expression: "provider == 'cloud' && model == 'kimi-uncensored'"
             enabled: true
+            fallbacks:
+              - model: moonshotai/kimi-k3.1-pro-abliterated
+                provider: allmodels
             priority: 7
             scope: global
             targets:
@@ -397,6 +407,10 @@ spec:
                 provider: abliteration
                 allowed_models: ["*"]
                 key_ids: ["*"]
+              - &allmodels
+                provider: allmodels
+                allowed_models: ["*"]
+                key_ids: ["*"]
               - &cliproxy-anthropic
                 provider: cliproxy-anthropic
                 allowed_models: ["*"]
@@ -461,6 +475,7 @@ spec:
                 tools_to_execute: ["*"]
             provider_configs:
               - *abliteration
+              - *allmodels
               - *cliproxy-anthropic
               - *cliproxy-google
               - *cliproxy-grok
@@ -496,6 +511,7 @@ spec:
             # The desktop pickers omit these upstreams. Keep the models cloud routes require.
             provider_configs: &desktop-models
               - *abliteration
+              - *allmodels
               - *cliproxy-anthropic
               - *cliproxy-google
               - *cliproxy-grok
@@ -555,6 +571,9 @@ spec:
             # The cloud rules' targets and fallbacks need their own provider too.
             provider_configs:
               - provider: abliteration
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: allmodels
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: cloud
@@ -694,6 +713,15 @@ spec:
               value: env.ABLITERATION_API_KEY
           network_config:
             base_url: https://api.abliteration.ai
+        allmodels:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: allmodels
+              models: ["*"]
+              value: env.ALLMODELS_API_KEY
+          network_config:
+            base_url: https://api.allmodels.io/oai
         # CLIProxyAPI merges every upstream's model names into one list, so each
         # provider shares its endpoint and key but lists a single prefix.
         cliproxy-anthropic:
