@@ -66,10 +66,12 @@ map(with(select(.widget != null); .widget = {"url": .href} + .widget)) |
     "href": ($beszel.href + "/system/" + $host.machine.location),
     "widget": ($beszel.widget + {"systemId": $host.machine.location, "fields": ["cpu", "memory", "status", "updated"]})
   })) +
-  ([$infra.tailscale[$host.key]] | map(select(. != null and $tailscale.widget != null)) | map(. as $device | $tailscale + {
-    "href": ("https://login.tailscale.com/admin/machines/" + $device),
-    "widget": ($tailscale.widget + {"deviceid": $device})
-  }))) | .[] | . + {"group": $host.machine.name}
+  ([$infra.tailscale[$host.key]] | map(select(. != null and $tailscale.widget != null)) |
+    map((if tag == "!!map" then . else {"id": .} end) | select((.id // "") != "") | . as $device | $tailscale + {
+      "href": (if ($device.ipv4 // "") != "" then "https://login.tailscale.com/admin/machines/" + $device.ipv4
+        else "https://login.tailscale.com/admin/machines" end),
+      "widget": ($tailscale.widget + {"deviceid": $device.id})
+    }))) | .[] | . + {"group": $host.machine.name}
 ] as $monitoring |
 [($infra.cloudflare.tunnels // {}) | to_entries[] | select(.value != null and $cloudflare.widget != null) |
   .key as $name | ($hosts | map(select(.key == $name)) | .[0]) as $host |
