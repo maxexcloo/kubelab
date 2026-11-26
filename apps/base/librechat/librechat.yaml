@@ -131,6 +131,10 @@ endpoints:
           - "*"
         fetch: true
     - <<: *provider
+      name: AllModels
+      headers:
+        x-bf-model-provider: allmodels
+    - <<: *provider
       name: Claude
       headers:
         x-bf-model-provider: cliproxy-anthropic
