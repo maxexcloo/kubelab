@@ -14,7 +14,7 @@ spec:
         kind: HelmRepository
         name: victoria-metrics
         namespace: flux-system
-      version: 0.99.0
+      version: 0.99.1
   dependsOn:
     - name: external-secrets
       namespace: external-secrets
@@ -120,7 +120,7 @@ spec:
       automountServiceAccountToken: false
       enabled: true
       plugins:
-        - victoriametrics-logs-datasource@0.34.0@https://github.com/VictoriaMetrics/victorialogs-datasource/releases/download/v0.34.0/victoriametrics-logs-datasource-v0.34.0.zip
+        - victoriametrics-logs-datasource@0.35.0@https://github.com/VictoriaMetrics/victorialogs-datasource/releases/download/v0.35.0/victoriametrics-logs-datasource-v0.35.0.zip
       admin:
         existingSecret: grafana
         passwordKey: password
