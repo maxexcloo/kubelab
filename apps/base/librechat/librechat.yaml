@@ -103,6 +103,10 @@ endpoints:
           prompt: 0
           completion: 0
           context: 262144
+        local/inkling-2-mini:
+          prompt: 0
+          completion: 0
+          context: 200000
         local/qwen3.8-27b-iq4r:
           prompt: 0
           completion: 0
@@ -233,6 +237,15 @@ modelSpecs:
       preset:
         endpoint: Local
         model: local/gemma-4-31b-heretic-i8g
+        promptPrefix: *honest
+    - name: local-inkling-2-mini
+      label: Inkling 2 Mini
+      description: Runs on both GPUs at 4-bit precision, with vision.
+      group: Local
+      mcpServers: *studio
+      preset:
+        endpoint: Local
+        model: local/inkling-2-mini
         promptPrefix: *honest
     - name: local-qwen3.8-27b-iq4r
       label: Qwen3.8 27B Uncensored IQ4R
