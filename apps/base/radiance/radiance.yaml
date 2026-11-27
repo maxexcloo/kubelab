@@ -79,6 +79,20 @@ models:
     max-num-seqs: 2
     num-speculative-tokens: 3
     vision-tower-placement: ram
+  inkling-2-mini:
+    lora-dir: ""
+    model: /models/radiance/inkling-2-mini-iq4r-v4.rad
+    aliases: [chat/inkling-2-mini]
+    tp: 2
+    draft-window: adaptive
+    kv-cache-dtype: i8
+    # The container declares no training context; 200000 is what it was converted for.
+    max-model-len: 200000
+    max-num-seqs: 8
+    mixed-step-target-ms: 150
+    num-speculative-tokens: 7
+    prefix-cache-mib: 4096
+    vision-tower-placement: ram
   krea-2-turbo-iq8r:
     model: /models/radiance/.v2/krea-2-turbo-iq8r.rad
     tp: 1
@@ -149,10 +163,14 @@ models:
     model: /models/radiance/.v2/qwen3.8-27b-uncensored-iq8r.rad
     aliases: [chat/qwen3.8-27b-uncensored]
     tp: 2
+    # An 11-node DFlash2 draft tree, short block from 6 streams: measured +14% at one stream,
+    # +8% at four and level at eight against the default chain of 7.
+    draft-short-from: 6
     kv-cache-dtype: i8
     max-model-len: 262144
     max-num-seqs: 8
     mixed-step-target-ms: 150
+    num-speculative-tokens: 11
     prefix-cache-mib: 8192
     reasoning-effort-map: high=xhigh
   # Its experts do not fit the cards: the hottest stay there and the rest stream from host memory.
