@@ -78,8 +78,8 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
                     },
                     "tailscale": {
                         "saturn": "storage-device",
-                        "taco": "node-device",
-                        "personal": "personal-device",
+                        "taco": {"id": "node-device", "ipv4": "100.64.0.10"},
+                        "personal": {"id": "personal-device", "ipv4": "100.64.0.11"},
                     },
                 }
             )
@@ -140,8 +140,13 @@ class HomepageNodesTests(HomepageDashboardFixture, unittest.TestCase):
             node["Tailscale"]["widget"]["key"], "{{HOMEPAGE_VAR_TAILSCALE_API_TOKEN}}"
         )
         self.assertEqual(
+            storage["Tailscale"]["href"],
+            "https://login.tailscale.com/admin/machines",
+        )
+        self.assertEqual(storage["Tailscale"]["widget"]["deviceid"], "storage-device")
+        self.assertEqual(
             node["Tailscale"]["href"],
-            "https://login.tailscale.com/admin/machines/node-device",
+            "https://login.tailscale.com/admin/machines/100.64.0.10",
         )
         self.assertEqual(
             node["Beszel"]["widget"]["password"], "{{HOMEPAGE_VAR_BESZEL_PASSWORD}}"

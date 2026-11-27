@@ -2,7 +2,7 @@
 flux2 = "latest"
 kubeconform = "latest"
 # Follows the cluster Kubernetes version in Homelab.
-kubectl = "1.37.2"
+kubectl = "1.37.3"
 
 # Bootstrap
 [tasks.bootstrap]

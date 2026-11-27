@@ -13,7 +13,7 @@ spec:
         kind: HelmRepository
         name: bifrost
         namespace: flux-system
-      version: 2.1.49
+      version: 2.1.50
   values:
     fullnameOverride: bifrost
     envFrom:
@@ -246,6 +246,8 @@ spec:
             fallbacks:
               - model: abliterated-model-large-flash
                 provider: abliteration
+              - model: deepseek/deepseek-v4.1-flash-abliterated
+                provider: allmodels
             priority: 1
             scope: global
             targets:
@@ -288,6 +290,9 @@ spec:
             name: Cloud GLM Flash Uncensored
             cel_expression: "provider == 'cloud' && model == 'glm-flash-uncensored'"
             enabled: true
+            fallbacks:
+              - model: z-ai/glm-5.3-flash-abliterated
+                provider: allmodels
             priority: 4
             scope: global
             targets:
@@ -301,11 +306,41 @@ spec:
             fallbacks:
               - model: abliterated-model-large-v2
                 provider: abliteration
+              - model: z-ai/glm-5.3-abliterated
+                provider: allmodels
             priority: 5
             scope: global
             targets:
               - provider: refuseless
                 model: glm-5.3-abliterated
+                weight: 1.0
+          - id: cloud-kimi
+            name: Cloud Kimi
+            cel_expression: "provider == 'cloud' && model == 'kimi'"
+            enabled: true
+            fallbacks:
+              - model: kimi-k3.1-pro
+                provider: opencode-zen
+              - model: moonshotai/kimi-k3.1-pro
+                provider: openrouter
+            priority: 6
+            scope: global
+            targets:
+              - provider: opencode-go
+                model: kimi-k3.1-pro
+                weight: 1.0
+          - id: cloud-kimi-uncensored
+            name: Cloud Kimi Uncensored
+            cel_expression: "provider == 'cloud' && model == 'kimi-uncensored'"
+            enabled: true
+            fallbacks:
+              - model: moonshotai/kimi-k3.1-pro-abliterated
+                provider: allmodels
+            priority: 7
+            scope: global
+            targets:
+              - provider: refuseless
+                model: kimi-k3.1-pro-abliterated
                 weight: 1.0
           - id: cloud-mimo
             name: Cloud MiMo
@@ -316,7 +351,7 @@ spec:
                 provider: opencode-go
               - model: xiaomi/mimo-v2.6-pro
                 provider: openrouter
-            priority: 6
+            priority: 8
             scope: global
             targets:
               - provider: xiaomi
@@ -331,7 +366,7 @@ spec:
                 provider: opencode-go
               - model: xiaomi/mimo-v2.6-flash
                 provider: openrouter
-            priority: 7
+            priority: 9
             scope: global
             targets:
               - provider: xiaomi
@@ -370,6 +405,10 @@ spec:
             provider_configs:
               - &abliteration
                 provider: abliteration
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - &allmodels
+                provider: allmodels
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - &cliproxy-anthropic
@@ -436,6 +475,7 @@ spec:
                 tools_to_execute: ["*"]
             provider_configs:
               - *abliteration
+              - *allmodels
               - *cliproxy-anthropic
               - *cliproxy-google
               - *cliproxy-grok
@@ -455,6 +495,7 @@ spec:
                 allowed_models:
                   [
                     deepseek/deepseek-v4.1-flash-1017,
+                    moonshotai/kimi-k3.1-pro,
                     openrouter/auto,
                     xiaomi/mimo-v2.6-flash,
                     xiaomi/mimo-v2.6-pro,
@@ -470,6 +511,7 @@ spec:
             # The desktop pickers omit these upstreams. Keep the models cloud routes require.
             provider_configs: &desktop-models
               - *abliteration
+              - *allmodels
               - *cliproxy-anthropic
               - *cliproxy-google
               - *cliproxy-grok
@@ -480,14 +522,22 @@ spec:
               - *local
               - <<: *opencode-go
                 allowed_models:
-                  [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash, mimo-v2.6-flash, mimo-v2.6-pro]
+                  [
+                    deepseek-v4.1-flash,
+                    glm-5.3,
+                    glm-5.3-flash,
+                    kimi-k3.1-pro,
+                    mimo-v2.6-flash,
+                    mimo-v2.6-pro,
+                  ]
               - <<: *opencode-zen
-                allowed_models: [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash]
+                allowed_models: [deepseek-v4.1-flash, glm-5.3, glm-5.3-flash, kimi-k3.1-pro]
               - &cloud-openrouter
                 <<: *openrouter
                 allowed_models:
                   [
                     deepseek/deepseek-v4.1-flash-1017,
+                    moonshotai/kimi-k3.1-pro,
                     xiaomi/mimo-v2.6-flash,
                     xiaomi/mimo-v2.6-pro,
                     z-ai/glm-5.3,
@@ -521,6 +571,9 @@ spec:
             # The cloud rules' targets and fallbacks need their own provider too.
             provider_configs:
               - provider: abliteration
+                allowed_models: ["*"]
+                key_ids: ["*"]
+              - provider: allmodels
                 allowed_models: ["*"]
                 key_ids: ["*"]
               - provider: cloud
@@ -660,6 +713,15 @@ spec:
               value: env.ABLITERATION_API_KEY
           network_config:
             base_url: https://api.abliteration.ai
+        allmodels:
+          custom_provider_config:
+            base_provider_type: openai
+          keys:
+            - name: allmodels
+              models: ["*"]
+              value: env.ALLMODELS_API_KEY
+          network_config:
+            base_url: https://api.allmodels.io/oai
         # CLIProxyAPI merges every upstream's model names into one list, so each
         # provider shares its endpoint and key but lists a single prefix.
         cliproxy-anthropic:

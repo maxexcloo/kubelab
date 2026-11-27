@@ -64,6 +64,8 @@ endpoints:
           - cloud/glm-flash
           - cloud/glm-flash-uncensored
           - cloud/glm-uncensored
+          - cloud/kimi
+          - cloud/kimi-uncensored
           - cloud/mimo
           - cloud/mimo-flash
           - cloud/uncensored
@@ -128,6 +130,10 @@ endpoints:
         default:
           - "*"
         fetch: true
+    - <<: *provider
+      name: AllModels
+      headers:
+        x-bf-model-provider: allmodels
     - <<: *provider
       name: Claude
       headers:
@@ -310,6 +316,22 @@ modelSpecs:
       preset:
         endpoint: Cloud
         model: cloud/glm-uncensored
+        promptPrefix: *honest
+    - name: cloud-kimi
+      label: Kimi
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/kimi
+        promptPrefix: *honest
+    - name: cloud-kimi-uncensored
+      label: Kimi Uncensored
+      group: Cloud
+      mcpServers: *studio
+      preset:
+        endpoint: Cloud
+        model: cloud/kimi-uncensored
         promptPrefix: *honest
     - name: cloud-mimo
       label: MiMo
