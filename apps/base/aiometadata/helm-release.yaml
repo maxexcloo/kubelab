@@ -24,7 +24,7 @@ spec:
                   name: "{{ .Release.Name }}"
             image:
               repository: ghcr.io/cedya77/aiometadata
-              tag: 4.1.0
+              tag: 4.2.1
             probes:
               liveness: &health
                 path: /health/live
